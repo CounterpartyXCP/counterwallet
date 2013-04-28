@@ -1,0 +1,25 @@
+body {
+position: relative;
+padding-top: 80px;
+}
+
+input[disabled],select[disabled],textarea[disabled],input[readonly],select[readonly],textarea[readonly]{background-color:#eeeeee;border-color:#ddd; cursor: auto;}
+
+#qr {
+    width: 185px;
+    height: 185px;
+    display: inline-block;
+}
+
+#qr_addr {
+    position: relative;
+    z-index: 1;
+}
+
+legend {
+    margin-bottom: 0px;
+}
+
+.form-hide {
+    display: none;
+}
