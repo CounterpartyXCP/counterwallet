@@ -1,1 +1,252 @@
-<h1>Still OK.</h1>
+<!DOCTYPE html> 
+<html lang="en"> 
+<head>
+    <meta charset="utf-8">
+    <title>InvisiWallet - Secure Bitcoin Wallet</title> 
+    <meta content="width=device-width, initial-scale=1.0" name="viewport">
+    <meta content="bitcoin address generator" name="description">
+    <meta content="brainwallet" name="author">
+    <link href="css/default.css" rel="stylesheet">
+    
+    <!-- The following external libraries are safe guarded by the invisiwallet watchdog -->
+    <link href="https://netdna.bootstrapcdn.com/twitter-bootstrap/2.3.1/css/bootstrap-combined.min.css" rel="stylesheet">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.0.0/jquery.min.js"></script>
+    <script src="https://netdna.bootstrapcdn.com/twitter-bootstrap/2.3.1/js/bootstrap.min.js"></script>
+    <script src="https://raw.github.com/bitcoinjs/bitcoinjs-lib/master/build/bitcoinjs-min.js"></script>
+    <!-- End of safe guarded libraries. -->
+    
+    <script src="extjs/qrcode.js"></script> 
+    <!--<script src="js/rfc1751.js"></script>  --> 
+    <!--<script src="js/mnemonic.js"></script> 
+    <script src="js/armory.js"></script> 
+    <script src="js/electrum.js"></script>--> 
+    <script src="js/tx.js"></script> 
+    <!--<script src="js/bitcoinsig.js"></script> --> 
+    <script src="js/invisiwallet.js"></script> 
+    <!--<script src="js/brainwallet.js"></script>-->
+    <link href="favicon.ico" rel="shortcut icon">
+</head>
+<body>
+<div class="navbar navbar-fixed-top"> 
+    <div class="navbar-inner"> 
+        <div class="container"> 
+            <a class="btn btn-navbar" data-target=".nav-collapse" data-toggle="collapse"> 
+            <span class="icon-bar"></span> <span class="icon-bar"></span> 
+            <span class="icon-bar"></span> </a> <a class="brand" href="/">InvisiWallet</a> 
+            <div class="nav-collapse"> 
+                <ul class="nav">
+                    <li class="active">
+                    <a data-toggle="tab" href="#generator">Generator</a></li> 
+                    <li><a data-toggle="tab" href="#chains" id="tab-chains">About Us</a></li> 
+                    <li>
+                    <a data-toggle="tab" href="#tx" id="tab-tx">Support</a></li> 
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="container"> 
+
+<!-- Logon Page -->
+
+      <div id="logon" class="tab-pane fade in active" >
+        <!--[if lt IE 7]>
+            <p class="chromeframe">You are using an <strong>outdated</strong> browser. Please <a href="http://browsehappy.com/">upgrade your browser</a> or <a href="http://www.google.com/chromeframe/?redirect=true">activate Google Chrome Frame</a> to improve your experience.</p>
+        <![endif]-->
+
+        <form>
+            <input id="password" value="ian sent it not me" class="input-medium search-query" type="password" />
+            <input id="open-sesame" class="btn disabled" type="submit"  value="Open Wallet" />
+            <p>
+              <span class="label label-important">Password Strength </span>
+              <span id="digits" class="label">Includes digits</span>
+              <span id="special-char" class="label">Special Characters</span>
+              <span id="upper-lower" class="label">Upper and Lowercase</span>
+              <span id="count" class="label">At least 10 characters</span>
+            </p>
+        </form>
+        
+      </div>   
+
+<!-- My Addresses -->
+
+    <div id="site" class="tab-pane fade in ">
+      <div class="row">
+        <div class="span3">
+          <ul class="nav nav-list">
+            <li class="nav-header">Wallet Options</li>
+            <li class="active"><a href="#" id="your-addresses-nav"><i class="icon-align-justify"></i>Your Addresses</a></li>
+            <li><a href="#" id="make-payment-nav"><i class="icon-share"></i>Make a Payment</a></li>
+          </ul>
+        </div>
+        <div id="your-addresses" class="span9">
+          <h4>Your Bitcoin Addresses</h4>
+          <table class="table table-bordered table-striped">
+          <thead>
+          <tr>
+            <th>Public Address</th>
+            <th>Balance</th>
+            <th>Actions</th>
+          </tr>
+          </thead>
+          <tr>
+            <td><code id="address0"></code></td>
+            <td><span><strong id="balance0">&nbsp;</strong></span></td>
+            <td><i class="icon-qrcode"></i></td>
+          </tr>
+          <tr>
+            <td><code id="address1"></code></td>
+            <td><span><strong id="balance1">&nbsp;</strong></span></td>
+            <td>&nbsp;</td>
+          </tr>
+          <tr>
+            <td><code id="address2"></code></td>
+            <td><span><strong id="balance2">&nbsp;</strong></span></td>
+            <td>&nbsp;</td>
+          </tr>
+          <tr>
+            <td><code id="address3"></code></td>
+            <td><span><strong id="balance3">&nbsp;</strong></span></td>
+            <td>&nbsp;</td>
+          </tr>
+          <tr>
+            <td><code id="address4"></code></td>
+            <td><span><strong id="balance4">&nbsp;</strong></span></td>
+            <td>&nbsp;</td>
+          </tr>
+          <tr>
+            <td><code id="address5"></code></td>
+            <td><span><strong id="balance5">&nbsp;</strong></span></td>
+            <td>&nbsp;</td>
+          </tr>
+          <tr>
+            <td><code id="address6"></code></td>
+            <td><span><strong id="balance6">&nbsp;</strong></span></td>
+            <td>&nbsp;</td>
+          </tr>
+          <tr>
+            <td><code id="address7"></code></td>
+            <td><span><strong id="balance7">&nbsp;</strong></span></td>
+            <td>&nbsp;</td>
+          </tr>
+          <tr>
+            <td><code id="address8"></code></td>
+            <td><span><strong id="balance8">&nbsp;</strong></span></td>
+            <td>&nbsp;</td>
+          </tr>
+          <tr>
+            <td><code id="address9"></code></td>
+            <td><span><strong id="balance9">&nbsp;</strong></span></td>
+            <td>&nbsp;</td>
+          </tr>
+          </table>
+        </div> 
+        
+        <div class="span9" id="tx"> 
+            <h4>Make a Payment</h4>
+            <form action="/" class="form-vertical" method="get">
+            <fieldset> 
+                <div class="control-group form-hide"> 
+                    <label class="control-label" for="txSec">Private Key</label> 
+                    <div class="controls"> 
+                        <input class="span5" id="txSec" type="text"> 
+                        <span class="help-inline errormsg"></span> 
+                    </div>
+                </div>
+                <div class="control-group"> 
+                    <label class="control-label" for="txDropAddr">Source Address</label> 
+                    <div class="controls"> 
+                        <select class="span4" id="txDropAddr"> 
+                        </select>
+                        <div class="input-prepend"> <span class="add-on">BTC</span><input class="span2" id="txBalance" readonly type="text"> 
+                        </div>
+                        <!--<button class="btn" id="txDropGetUnspent" title="Reload" type="button"><i class="icon-repeat"></i></button> 
+                        <button class="btn" data-target="#txUnspentForm" data-toggle="collapse" id="txToggle" type="button">Edit Inputs</button>-->
+                    </div>
+                </div>
+                <div class="control-group txCC"> 
+                    <label class="control-label" for="txDest">Destination Address</label> 
+                    <div class="controls"> 
+                        <input class="span4" id="txDest" class="txDest" type="text" placeholder="E.g. 1BountYypWttTvAJcMJVvSRDfX3TJ182To" autocomplete="off"> 
+
+                        <div class="input-prepend"> 
+                          <span class="add-on">BTC</span>
+                          <input class="span2" id="txValue" placeholder="E.g. 0.01" type="text" autocomplete="off"> 
+                        </div>
+                        <span class="help-inline errormsg">
+                            <button class="btn input-up" style="margin-bottom: 10px" id="txAddDest" type="button">+</button> 
+                            <button class="btn input-up" style="margin-bottom: 10px" id="txRemoveDest" type="button" disabled>&ndash;</button> 
+                        </span> 
+                    </div>
+                </div>
+                <div class="control-group"> 
+                    <label class="control-label" for="txFee">Fee (Includes Miners Fee)</label> 
+                    <div class="controls"> 
+                        <div class="input-prepend"><span class="add-on">BTC</span><input readonly class="span2" id="txFee" type="text" value="0.0005"></div>
+                    </div>
+                </div>
+                <div class="control-group"> 
+                    <label class="control-label" for="txFee">You can check the payment before it is sent to the network.</label> 
+                    <div class="controls"> 
+                        <button class="btn" disabled style="margin-bottom: 10px" id="txSend" type="button">Verify and Send</button>
+                    </div>
+                </div>
+            </fieldset>
+            </form>
+            <div id="verifyModal" class="modal hide">
+              <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                <h6>Send payment of <span id="verifyAmountTitle">0.005</span> BTC from <span id="verifySource">1BountYypWttTvAJcMJVvSRDfX3TJ182</span></h6>
+              </div>
+              <div id="verifyBody" class="modal-body">
+                <table class="table table-bordered">
+                  <thead id="verifyTable">
+                  <tr>
+                    <th>Destination Address</th>
+                    <th>Amount</th>
+                  </tr>
+                  </thead>
+                  <tr>
+                    <td><small><span class="label">A miners fee of 0.0005 BTC will be charged.</span></small></td>
+                    <td><small><span><strong>0.0005</strong></span></small></td>
+                  </tr>
+                  <tfoot>
+                  <tr>
+                    <td><strong>Total</strong></td>
+                    <td><strong id="verifyTotal">50.05</strong> BTC</td>
+                  </tr>
+                  </tfoot>
+                </table>
+                <div class="control-group"> 
+                    <label class="control-label" for="txJSON">JSON Transaction</label> 
+                    <div class="controls"> 
+                        <textarea class="span5" id="txJSON" rows="4"></textarea>
+                    </div>
+                </div>
+                <div class="control-group"> 
+                    <label class="control-label" for="txHex">Raw Transaction</label> 
+                    <div class="controls"> 
+                        <textarea class="span5" id="txHex" rows="4"></textarea>
+                    </div>
+                </div>
+              </div>
+              <div class="modal-footer">
+                <a href="#" data-dismiss="modal" class="btn">Cancel</a>
+                <a href="#" id="sendPayment" data-dismiss="modal" class="btn btn-primary">Send Payment</a>
+              </div>
+            </div>
+        </div>
+        
+      </div> 
+    </div>           
+
+    <footer> 
+
+    <p>&copy; 2012&#150;2013 InvisiWallet<span class="pull-right"><small>Powered by 
+    <a href="http://pages.github.com">GitHub Pages</a> | 
+    <a href="https://github.com/brainwallet/invisiwallet.github.com">View Source Code</a> 
+    </small></span></p> 
+    </footer> 
+</div>
+</body>
+</html> 
