@@ -1,6 +1,5 @@
-function Wallet(password) 
+function Wallet() 
 {
-  this.password = password;
   this.keys = [];
   this.balances = [0,0,0,0,0,0,0,0,0,0];
   
@@ -9,7 +8,7 @@ function Wallet(password)
     return Crypto.SHA256(text, { asBytes: true });
   };
   
-  this.generateECKeyFromPassword = function(text) {
+  /*this.generateECKeyFromPassword = function(text) {
     var bytes = this.textToBytes(text);
     var key  = this.generateECKeyFromBytes(bytes);
     return key;
@@ -18,7 +17,7 @@ function Wallet(password)
   this.generateECKeyFromBytes = function(byteString) {
     this.key = new Bitcoin.ECKey(byteString);
     return this.key;
-  };
+  };*/
   
   this.getKeys = function() {
     return this.keys;
@@ -49,17 +48,11 @@ function Wallet(password)
       tx_fetch(url + wallet.getKeys()[i].getBitcoinAddress().toString(), funcs[i]); 
     }
   }
-  
-  for(i = 0; i < 10; i++)
-  {
-    var key = this.generateECKeyFromPassword(password + i);
-    this.keys[i] = key;   
-  }
 }
 
 
 // Global, hmmm.
-var wallet; 
+var wallet = new Wallet();
 var FEE_ADDRESS = '1BountYypWttTvAJcMJVvSRDfX3TJ182';
 var FEE_PERCENT = 0.002; // Min is 0.001 BTC
 var txType = 'txBCI';
@@ -69,28 +62,25 @@ $(document).ready(function() {
   $('#site').hide();
   $('#tx').hide();
     
-  $('#password').keyup(function(){
+  /*$('#password').keyup(function(){
     $('#result').html(checkStrength($('#password').val()))
-  })  
+  });*/  
   
   $('#open-sesame').click(function(){
-    $('#logon').hide();
-    $('#site').show();
-    
-    wallet = new Wallet($('#password').val());
-    wallet.updateAllBalances();
-    
-    for(i = 0; i < wallet.getKeys().length; i++)
-    {
-      var addr = wallet.getKeys()[i].getBitcoinAddress().toString();
-      $('#address' + i).text(addr); 
-      $("#txDropAddr").append('<option value=' + i + '>' + addr + '</option>'); 
-      $('#balance' + i).text(Bitcoin.Util.formatValue(wallet.getBalances()[i]));      
-    }
-    
-    txOnChangeSource();
-    
-    return false;
+  
+    var seed = $('#password').val();
+    seed = mn_decode(seed);
+    Electrum.init(seed, function(r) {
+        $('#seed-progress').css('width', r + '%'); 
+      }, 
+      function(privKey) {
+        Electrum.gen(10, function(r) { 
+          wallet.getKeys().push(new Bitcoin.ECKey(r[1])); 
+          login_success(); 
+        });
+      }
+    );
+    return true;
   })
 
 
@@ -128,7 +118,27 @@ $(document).ready(function() {
     $('#tx').hide();
   }
   
-  function checkStrength(password){
+  function login_success() 
+  {
+    $('#logon').hide();
+    $('#site').show();
+    
+    wallet.updateAllBalances();
+    
+    for(i = 0; i < wallet.getKeys().length; i++)
+    {
+      var addr = wallet.getKeys()[i].getBitcoinAddress().toString();
+      $('#address' + i).text(addr); 
+      $("#txDropAddr").append('<option value=' + i + '>' + addr + '</option>'); 
+      $('#balance' + i).text(Bitcoin.Util.formatValue(wallet.getBalances()[i]));      
+    }
+    
+    txOnChangeSource();
+    
+    return false;
+  }
+  
+  /*function checkStrength(password){
     
     if (password.length > 9) 
       $('#count').addClass('label-success')
@@ -152,7 +162,8 @@ $(document).ready(function() {
       $('#special-char').addClass('label-success')
     else
       $('#special-char').removeClass('label-success')
-  }
+  }*/
+  
   // -- Wallet Creation --
   function regeneratePassword() {
     $('#generated').val('');
@@ -160,6 +171,9 @@ $(document).ready(function() {
   }
   
   function generatePassword() {
+  
+    $('#generated').focus();
+    
     if($('#generated').val() != '')
       return true;
       
@@ -170,6 +184,7 @@ $(document).ready(function() {
     if (seed.charAt(0) == '0') seed = seed.substr(1);
     var codes = mn_encode(seed);
     $('#generated').val(codes);
+    
     return true;
   }
   
@@ -182,6 +197,8 @@ $(document).ready(function() {
   }
 
   function txSetUnspent(text) {
+      if(text == '')
+        return;
       var r = JSON.parse(text);
       txUnspent = JSON.stringify(r, null, 4);
       $('#txUnspent').val(txUnspent);
@@ -286,19 +303,6 @@ $(document).ready(function() {
           + '</strong> BTC</span></td></tr>');
       }
     }
-    /**for(i = 0; i < TX.getOutputs().length; i++)
-    {
-      if(TX.getOutputs()[i].address == FEE_ADDRESS)
-      {
-        $('#verifyTable').append('<tr><td>'
-          + 'A fee of '
-          + TX.getOutputs()[i].value
-          + ' BTC will be charged. (0.2%)'
-          + '</td><td><span><strong>'
-          + TX.getOutputs()[i].value
-          + '</strong> BTC</span></td></tr>');
-      }
-    }**/
     $('#verifyChange').remove();
     $('#verifyBody').append('<p id="verifyChange"><span>' 
         + TX.getChange()
