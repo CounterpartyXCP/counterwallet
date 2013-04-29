@@ -28,3 +28,9 @@ legend {
     width: 50%;
     margin: 0 auto;
 }
+
+/* Footer */
+footer p {
+    margin: 0 auto;
+}
+
