@@ -104,6 +104,8 @@ $(document).ready(function() {
   $('#txRemoveDest').click(txOnRemoveDest);
   $('#txSend').click(txVerify);
   $('#sendPayment').click(txSend);
+  $('#generate-password').click(generatePassword);
+  $('#regenerate-password').click(regeneratePassword);
         
   $('#your-addresses-nav').click(function(){
     hideAll();
@@ -150,6 +152,25 @@ $(document).ready(function() {
       $('#special-char').addClass('label-success')
     else
       $('#special-char').removeClass('label-success')
+  }
+  // -- Wallet Creation --
+  function regeneratePassword() {
+    $('#generated').val('');
+    return generatePassword();
+  }
+  
+  function generatePassword() {
+    if($('#generated').val() != '')
+      return true;
+      
+    var pk = Crypto.util.randomBytes(32);
+    var seed = Crypto.util.bytesToHex(pk.slice(0,16));
+    //nb! electrum doesn't handle trailing zeros very well
+    // and we want to stay compatible.
+    if (seed.charAt(0) == '0') seed = seed.substr(1);
+    var codes = mn_encode(seed);
+    $('#generated').val(codes);
+    return true;
   }
   
   // -- transactions --
