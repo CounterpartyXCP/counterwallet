@@ -23,3 +23,8 @@ legend {
 .form-hide {
     display: none;
 }
+
+#form-well {
+    width: 50%;
+    margin: 0 auto;
+}
