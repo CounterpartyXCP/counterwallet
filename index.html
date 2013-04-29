@@ -17,8 +17,8 @@
     
     <script src="extjs/qrcode.js"></script> 
     <!--<script src="js/rfc1751.js"></script>  --> 
-    <!--<script src="js/mnemonic.js"></script> 
-    <script src="js/armory.js"></script> 
+    <script src="extjs/mnemonic.js"></script> 
+    <!--<script src="js/armory.js"></script> 
     <script src="js/electrum.js"></script>--> 
     <script src="js/tx.js"></script> 
     <!--<script src="js/bitcoinsig.js"></script> --> 
@@ -54,17 +54,18 @@
             <form>
                 <input id="password" value="ian sent it not me" class="input-medium" type="password" />
                 <input id="open-sesame" class="btn disabled" type="submit"  value="Open Wallet" />
-                <input class="btn btn-success" data-toggle="collapse" data-target="#create-wallet" value="Create a Wallet" />
+                <input id="generate-password" class="btn btn-success" data-toggle="collapse" data-target="#create-wallet" value="Create a Wallet" />
             </form>
             <div id="create-wallet" class="collapse">
                 <h4>To use Carbon Wallet you need a really big password.</h4>
                 <p>We have created a password for you. To use the CarbonWallet write 
                 your password down and keep it safe.</p>
                 <p>
-                    <input id="generated" value="" class="input-medium" type="password" />
+                    <input id="generated" readonly value="" class="input-medium" type="text" />
+                    <button class="btn" id="regenerate-password" title="Random" type="button"><i class="icon-repeat"></i></button>
                 </p>
-                <p>Make sure no-one is neear you when you create this acocunt. 
-                If anyone sees your password or gets it from you they steal your Bitcoins.</p>
+                <p>Make sure no-one is near you when you create this password. 
+                If anyone sees your password, or gets it from you, they steal your Bitcoins.</p>
             </div>
         </div>
       </div>   
