@@ -18,8 +18,8 @@
     <script src="extjs/qrcode.js"></script> 
     <!--<script src="js/rfc1751.js"></script>  --> 
     <script src="extjs/mnemonic.js"></script> 
-    <!--<script src="js/armory.js"></script> 
-    <script src="js/electrum.js"></script>--> 
+    <!--<script src="js/armory.js"></script> -->
+    <script src="extjs/electrum.js"></script> 
     <script src="js/tx.js"></script> 
     <!--<script src="js/bitcoinsig.js"></script> --> 
     <script src="js/invisiwallet.js"></script> 
@@ -52,10 +52,15 @@
       <div id="logon" class="tab-pane fade in active" >
         <div class="well" id="form-well">
             <form>
-                <input id="password" value="ian sent it not me" class="input-medium" type="password" />
-                <input id="open-sesame" class="btn disabled" type="submit"  value="Open Wallet" />
-                <input id="generate-password" class="btn btn-success" data-toggle="collapse" data-target="#create-wallet" value="Create a Wallet" />
+                <input id="password" placeholder="Please enter your passphrase." value="" class="input-medium" type="password" />
+                <input id="open-sesame" data-toggle="collapse" data-target="#create-keys" class="btn disabled" value="Open Wallet" />
+                <input id="generate-password" class="btn btn-success" data-toggle="collapse" data-target="#create-wallet" value="Create a new wallet" />
             </form>
+            <div id="create-keys" class="collapse">
+              <div class="progress">
+                <div class="bar" id="seed-progress" style="width: 0%;"></div>
+              </div>
+            </div>
             <div id="create-wallet" class="collapse">
                 <h4>To use Carbon Wallet you need a really big password.</h4>
                 <p>We have created a password for you. To use the CarbonWallet write 
