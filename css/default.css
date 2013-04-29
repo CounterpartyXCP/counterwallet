@@ -24,14 +24,32 @@ legend {
     display: none;
 }
 
+/* Front page password form */
+
 #form-well {
     width: 600px;
     margin: 0 auto;
     padding-bottom: 0px;
 }
 
+#form-well input {
+    margin-bottom: 0;
+}
+
 #form-well input[type='text'] {
     width: 520px;
+}
+
+#form-well input[type='password'] {
+    width: 320px;
+}
+
+#form-well .btn-success {
+  width: 125px;
+}
+
+#open-sesame {
+  width: 80px;
 }
 
 /* Footer */
