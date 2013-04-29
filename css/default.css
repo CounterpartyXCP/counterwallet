@@ -25,8 +25,13 @@ legend {
 }
 
 #form-well {
-    width: 50%;
+    width: 600px;
     margin: 0 auto;
+    padding-bottom: 0px;
+}
+
+#form-well input[type='text'] {
+    width: 520px;
 }
 
 /* Footer */
