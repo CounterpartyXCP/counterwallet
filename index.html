@@ -52,7 +52,7 @@
       <div id="logon" class="tab-pane fade in active" >
         <div class="well" id="form-well">
             <form>
-                <input id="password" placeholder="Please enter your passphrase." value="" class="input-medium" type="password" />
+                <input id="password" placeholder="Enter your 12 word passphrase." value="" class="input-medium" type="password" />
                 <input id="open-sesame" disabled data-toggle="collapse" data-target="#create-keys" class="btn disabled" value="Open Wallet" />
                 <input id="generate-password" class="btn btn-success" data-toggle="collapse" data-target="#create-wallet" value="Create a new wallet" />
             </form>
@@ -67,7 +67,7 @@
                 your password down and keep it safe.</p>
                 <p>
                     <input id="generated" readonly value="" class="input-medium" type="text" />
-                    <button class="btn" id="regenerate-password" title="Random" type="button"><i class="icon-repeat"></i></button>
+                    <button class="btn" id="regenerate-password" data-toggle="tooltip" title="Click to generate another random passphrase." title="Random" type="button"><i class="icon-repeat"></i></button>
                 </p>
                 <p>Make sure no-one is near you when you create this password. 
                 If anyone sees your password, or gets it from you, they steal your Bitcoins.</p>
