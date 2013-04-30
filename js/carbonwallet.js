@@ -8,17 +8,6 @@ function Wallet()
     return Crypto.SHA256(text, { asBytes: true });
   };
   
-  /*this.generateECKeyFromPassword = function(text) {
-    var bytes = this.textToBytes(text);
-    var key  = this.generateECKeyFromBytes(bytes);
-    return key;
-  };
-  
-  this.generateECKeyFromBytes = function(byteString) {
-    this.key = new Bitcoin.ECKey(byteString);
-    return this.key;
-  };*/
-  
   this.getKeys = function() {
     return this.keys;
   };
@@ -162,7 +151,8 @@ $(document).ready(function() {
     if($('#generated').val() != '')
       return true;
       
-    var pk = Crypto.util.randomBytes(32);
+    var pk = new Array(32);
+    rng_get_bytes(pk);
     var seed = Crypto.util.bytesToHex(pk.slice(0,16));
     //nb! electrum doesn't handle trailing zeros very well
     // and we want to stay compatible.
