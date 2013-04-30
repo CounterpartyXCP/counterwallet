@@ -1,6 +1,5 @@
 body {
-position: relative;
-padding-top: 80px;
+  position: relative;
 }
 
 input[disabled],select[disabled],textarea[disabled],input[readonly],select[readonly],textarea[readonly]{background-color:#eeeeee;border-color:#ddd; cursor: auto;}
@@ -24,7 +23,28 @@ legend {
     display: none;
 }
 
+#site {
+  padding-top: 70px;
+}
+
 /* Front page password form */
+
+#header {
+  background: #0F141C url('../images/header-bg.jpg') no-repeat;
+  padding-top: 70px;
+}
+
+#logon h1 {
+  font-size: 2em;
+  text-align: center;
+  color: white;
+}
+
+#logon h2 {
+  font-size: 1.5em;
+  text-align: center;
+  color: white;
+}
 
 #form-well {
     width: 600px;
