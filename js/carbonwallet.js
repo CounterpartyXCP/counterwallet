@@ -48,6 +48,7 @@ $(document).ready(function() {
 
   $('#site').hide();
   $('#tx').hide();
+  $('#logout-menu').hide();
   
   $('#open-sesame').click(function(){
   
@@ -85,7 +86,7 @@ $(document).ready(function() {
   $('#regenerate-password').click(regeneratePassword);
   $('#regenerate-password').tooltip();
         
-  $('#your-addresses-nav').click(function(){
+  $('#your-addresses-nav, #home').click(function(){
     hideAll();
     $('#your-addresses').show();
     $('#your-addresses-nav').parent().addClass('active');
@@ -96,6 +97,18 @@ $(document).ready(function() {
     hideAll();
     $('#tx').show();
     $('#make-payment-nav').parent().addClass('active');
+    return false;
+  });
+
+  $('#logout').click(function(){
+    $('#password').val('');
+    $('#site').hide();
+    $('#create-keys').collapse('hide');
+    $('#create-wallet').collapse('hide');
+    $('#logout-menu').hide();
+    wallet = new Wallet();
+    checkValidPassword();
+    $('#logon').show();
     return false;
   });
   
@@ -110,6 +123,7 @@ $(document).ready(function() {
   {
     $('#logon').hide();
     $('#site').show();
+    $('#logout-menu').show();
     
     wallet.updateAllBalances();
     
@@ -137,6 +151,11 @@ $(document).ready(function() {
     {
       $('#open-sesame').addClass('btn-primary');
       $('#open-sesame').removeAttr('disabled');
+    }
+    else
+    {
+      $('#open-sesame').removeClass('btn-primary');
+      $('#open-sesame').addAttr('disabled');
     }
   }
   
