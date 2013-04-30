@@ -55,15 +55,17 @@ $(document).ready(function() {
     seed = mn_decode(seed);
     Electrum.init(seed, function(r) {
         if(r % 20 == 0)
-          $('#seed-progress').css('width', r + '%'); 
+          $('#seed-progress').css('width', (r + 19) + '%'); 
       }, 
       function(privKey) {
         Electrum.gen(10, function(r) { 
           wallet.getKeys().push(new Bitcoin.ECKey(r[1])); 
-          login_success(); 
+          if(wallet.getKeys().length == 10)
+            login_success(); 
         });
       }
     );
+        
     return true;
   })
 
@@ -268,8 +270,7 @@ $(document).ready(function() {
     $('#verifyTable').find("tr:gt(0)").remove();
     for(i = 0; i < TX.getOutputs().length; i++)
     {
-      if(TX.getOutputs()[i].address != FEE_ADDRESS && 
-        TX.getOutputs()[i].address != TX.getAddress())
+      if(TX.getOutputs()[i].address != TX.getAddress())
       {
         $('#verifyTable').append('<tr><td><span class="label label-info">'
           + TX.getOutputs()[i].address
