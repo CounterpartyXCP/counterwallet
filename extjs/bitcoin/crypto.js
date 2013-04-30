@@ -14,7 +14,7 @@ var Crypto = window.Crypto = {};
 // Crypto utilities
 var util = Crypto.util = {
 
-  // Bit-wise rotate left
+	// Bit-wise rotate left
 	rotl: function (n, b) {
 		return (n << b) | (n >>> (32 - b));
 	},
@@ -41,11 +41,12 @@ var util = Crypto.util = {
 	},
 
 	// Generate an array of any length of random bytes
-	randomBytes: function (n) {
+  // Remove this because Math.random is not crypto secure
+	/*randomBytesOld: function (n) {
 		for (var bytes = []; n > 0; n--)
 			bytes.push(Math.floor(Math.random() * 256));
 		return bytes;
-	},
+	},*/
 
 	// Convert a byte array to big-endian 32-bit words
 	bytesToWords: function (bytes) {
