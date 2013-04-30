@@ -67,7 +67,7 @@ var TX = new function () {
         try {
             var res = tx_parseBCI(text, address);
         } catch(err) {
-            var res = parseTxs(text, address);
+            var res = { "balance":"0" };
         }
 
         balance = res.balance;
