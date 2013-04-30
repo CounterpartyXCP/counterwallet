@@ -30,7 +30,7 @@ legend {
 /* Front page password form */
 
 #header {
-  background: #0F141C url('../images/header-bg.jpg') no-repeat;
+  background: #0F141C url('/images/header-bg.jpg') no-repeat;
   padding-top: 70px;
 }
 
