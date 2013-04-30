@@ -7,15 +7,35 @@
     <meta content="Deterministic Bitcoin Wallet" name="description">
     <meta content="carbonwallet" name="author">
     <link href="css/default.css" rel="stylesheet">
-    <!-- The following external libraries need to be downloaded here. -->
     <link href="https://netdna.bootstrapcdn.com/twitter-bootstrap/2.3.1/css/bootstrap-combined.min.css" rel="stylesheet">
+    
+    <!-- The following libraries will be held on github soon. -->
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.0.0/jquery.min.js"></script>
     <script src="https://netdna.bootstrapcdn.com/twitter-bootstrap/2.3.1/js/bootstrap.min.js"></script>
-    <script src="https://raw.github.com/bitcoinjs/bitcoinjs-lib/master/build/bitcoinjs-min.js"></script>
-    <!-- End of safe guarded libraries. -->
+    
+    <!-- The following libraries are required for bitcon addresses and signing. -->
+    <script src="extjs/bitcoin/crypto.js"></script> 
+    <script src="extjs/bitcoin/sha256.js"></script> 
+    <script src="extjs/bitcoin/ripemd160.js"></script> 
+    <script src="extjs/bitcoin/jsbn.js"></script> 
+    <script src="extjs/bitcoin/jsbn2.js"></script> 
+    <script src="extjs/bitcoin/bitcoin.js"></script> 
+    <script src="extjs/bitcoin/util.js"></script> 
+    <script src="extjs/bitcoin/ec.js"></script> 
+    <script src="extjs/bitcoin/sec.js"></script> 
+    <script src="extjs/bitcoin/prng4.js"></script> 
+    <script src="extjs/bitcoin/rng.js"></script> 
+    <script src="extjs/bitcoin/ecdsa.js"></script> 
+    <script src="extjs/bitcoin/eckey.js"></script> 
+    <script src="extjs/bitcoin/base58.js"></script> 
+    <script src="extjs/bitcoin/address.js"></script> 
+    
+    <!-- Other external libraries. -->
     <script src="extjs/qrcode.js"></script> 
     <script src="extjs/mnemonic.js"></script> 
     <script src="extjs/electrum.js"></script> 
+    
+    <!-- JavaScript created specifically for CarbonWallet. -->
     <script src="js/tx.js"></script> 
     <script src="js/invisiwallet.js"></script> 
     <link href="favicon.ico" rel="shortcut icon">
