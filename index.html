@@ -97,6 +97,98 @@
           </div>
           <h2>We don't store your Bitcoins locally or on our servers.</h2>
         </div>
+        
+        <div class="container">
+          <h3 class="sales-title">Why should I use CarbonWallet ?</h3>
+          <div class="row">
+            <div class="span4">
+              <h4>We are determined.</h4>
+              <p>Actually we are a deterministic wallet (https://en.bitcoin.it/wiki/Deterministic_wallet). 
+              This means your bitcoin addresses are generated from your passphrase. 
+              Your passphrase is turned into a number which is then turned into Bitcoin keys. 
+              Your passphrase is also your backup. Simple.</p>
+            </div>
+            <div class="span4">
+              <h4>We are a zero footprint wallet.</h4>
+              <p>We don't store your Bitcoins locally or on our servers, only in your computer memory (RAM). 
+              No trace is left on your PC once you logout of your session. 
+              Thiefs have fewer angles of attack with CarbonWallet. Secure.</p>
+            </div>
+            <div class="span4">
+              <h4>Carbon wallet can get cold.</h4>
+              <p>Need to store large sums of Bitcoins ? CarbonWallet supports Cold Storage)
+              https://en.bitcoin.it/wiki/Cold_storage, 
+              You can use CarbonWallet completely offline on a computer you know is clean and safe.  
+              (coming soon)</p>
+            </div>
+          </div>
+          
+          <h3 class="sales-title">We will do everything we can to protect your money.</h3>
+          <h4 class="sales-title">However you also need to take responsibility and follow these rules.</h4>
+          <div class="row">
+            <div class="span4">
+              <h4>1. Never give out your passphrase.</h4>
+              <p>There are several ways thiefs will try and get your passphrase. 
+              These attacks apply to all Bitcoin wallets so read up and be safe.
+
+a. Phishing (http://en.wikipedia.org/wiki/Phishing) Always make sure you are on the carbonwallet.com address and never click links in emails.
+b. Social engineering http://en.wikipedia.org/wiki/Social_engineering_(security)
+c. Keyloggers http://en.wikipedia.org/wiki/Keystroke_logging
+d. Malware. http://en.wikipedia.org/wiki/Malware</p>
+            </div>
+            <div class="span4">
+              <h4>2. Create three passphrases.</h4>
+              <p>Think about passphrases the way you keep money in real life. 
+
+a. A day to day passphrase. You could store a small amount of Bitocins here a bit like have a few notes in your wallet or purse. Write the passphrase down and carry it in your wallet.
+
+b. As a bank account. A passphrase that you only use in a safe environment, i.e. a computer with good virus protection that you are prety confident hasn't malware. Hold moderate amonts of Bitccins here.
+
+c. Your savings. A a passphrase you created as cold storage. Be very careful about bringing this passphrase online.</p>
+            </div>
+            <div class="span4">
+              <h4>3. Never lose your passphrases.</h4>
+              <p>Without the passhrases your coins are gone. Without the passhrase your coins are gone. 
+              Seriously, there is no way in this universe to retrieve CarbonWallet wallets 
+              without the passphrase. Here are several ways you can secure your passphrases. 
+
+a. Write it down, keep it somewhere safe. This is probably the easist method, and the most secure. Write it, stick it in an envelope and hide it.
+
+b. Encrypt it, and store it on dropbox.
+
+c. Both a and b.</p>
+            </div>
+            
+          </div>
+          
+          <h3 class="sales-title">How does this work ? get all technical on me.</h3>
+          <div class="row">
+            <div class="span4">
+              <h4>We are using 128bit passphrases.</h4>
+              <p>According to "how big is your stack" The passphrases would take 5.00 hundred trillion 
+              trillion trillion trillion trillion trillion trillion trillion 
+              centuries under a massive cracking scenario. We generate a random passphrase from the 
+              following  using the . Converts between 4-byte aligned strings and a human-readable
+              sequence of words. Uses 1626 common words taken from wikipedia article:
+              http://en.wiktionary.org/wiki/Wiktionary:Frequency_lists/Contemporary_poetry
+              Our passphrases are compatible with the Elektrum Bitcoin client.</p>
+            </div>
+            <div class="span4">
+              <h4>We generate bitcoin addresses deterministically.</h4>
+              <p>
+                The passphrase is tunred into a 128bit key which is then stretched into 10 bitcoin addresses. 
+                There is no limit but for now 10 per passphrase should be adequate.</p>
+            </div>
+            <div class="span4">
+              <h4>CarbonWallet is public domain.</h4>
+              <p>
+              All source code is available on guthub and the site is a github page. 
+              All commits and changes are open for peer review and the site is deployed 
+              directly from the repository.</p>
+            </div>
+          </div>
+        </div>
+        
       </div>
     <!-- My Addresses -->
     <div class="container">
@@ -267,7 +359,7 @@
         </div>
       </div>
     </div>
-    <footer class="navbar navbar-fixed-bottom">
+    <footer>
       <p>CarbonWallet &copy; 2013</p>
       <p><small>Powered by 
         <a href="http://pages.github.com">GitHub Pages</a> | 
