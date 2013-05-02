@@ -27,19 +27,23 @@ if(rng_pool == null) {
   rng_pool = new Array();
   rng_pptr = 0;
   var t;
-  if(navigator.appName == "Netscape" && navigator.appVersion < "5" && window.crypto) {
-    // Extract entropy (256 bits) from NS4 RNG if available
-    var z = window.crypto.random(32);
-    for(t = 0; t < z.length; ++t)
-      rng_pool[rng_pptr++] = z.charCodeAt(t) & 255;
+  
+  // We use window.crypto.getRandomValues when available.
+  if(window.crypto && window.crypto.getRandomValues && typeof Int32Array != 'undefined') {
+    var a = new Int32Array(32);
+    window.crypto.getRandomValues(a);
+    for(t = 0; t < a.length; ++t)
+      rng_seed_int(a[t]);
+  } 
+  else 
+  {
+    while(rng_pptr < rng_psize) {  // extract some randomness from Math.random()
+      t = Math.floor(65536 * Math.random());
+      rng_pool[rng_pptr++] = t >>> 8;
+      rng_pool[rng_pptr++] = t & 255;
+    }
   }
-  // TODO implement this https://developer.mozilla.org/en/docs/DOM/window.crypto.getRandomValues
-  // for seeding too.
-  while(rng_pptr < rng_psize) {  // extract some randomness from Math.random()
-    t = Math.floor(65536 * Math.random());
-    rng_pool[rng_pptr++] = t >>> 8;
-    rng_pool[rng_pptr++] = t & 255;
-  }
+  
   rng_pptr = 0;
   rng_seed_time();
   //rng_seed_int(window.screenX);
