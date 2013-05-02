@@ -30,17 +30,22 @@ legend {
 /* Front page password form */
 
 #header {
-  background: #0F141C url('/images/header-bg.jpg') no-repeat;
+  background: #0F141C url('../images/header-bg.jpg') no-repeat;
   padding-top: 70px;
 }
 
-#logon h1 {
+.sales-title {
+  text-align: center;
+  margin-bottom: 40px;
+}
+
+#header h1 {
   font-size: 2em;
   text-align: center;
   color: white;
 }
 
-#logon h2 {
+#header h2 {
   font-size: 1.5em;
   text-align: center;
   color: white;
