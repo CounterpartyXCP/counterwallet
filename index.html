@@ -6,12 +6,10 @@
     <meta content="width=device-width, initial-scale=1.0" name="viewport">
     <meta content="Deterministic Bitcoin Wallet" name="description">
     <meta content="carbonwallet" name="author">
+    
+    <!-- Style sheets -->
     <link href="css/default.css" rel="stylesheet">
     <link href="https://netdna.bootstrapcdn.com/twitter-bootstrap/2.3.1/css/bootstrap-combined.min.css" rel="stylesheet">
-    
-    <!-- The following libraries will be held on github soon. -->
-    <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.0.0/jquery.min.js"></script>
-    <script src="https://netdna.bootstrapcdn.com/twitter-bootstrap/2.3.1/js/bootstrap.min.js"></script>
     
     <!-- The following libraries are required for bitcon addresses and signing. -->
     <script src="extjs/bitcoin/crypto.js"></script> 
@@ -32,6 +30,13 @@
     <script src="extjs/bitcoin/opcode.js"></script> 
     <script src="extjs/bitcoin/script.js"></script> 
     <script src="extjs/bitcoin/transaction.js"></script> 
+    
+    <!-- JQuery and bootstrap. -->
+    <script src="extjs/jquery-2.0.0.js"></script> 
+    <script src="extjs/bootstrap-collapse.js"></script> 
+    <script src="extjs/bootstrap-transition.js"></script> 
+    <script src="extjs/bootstrap-modal.js"></script> 
+    <script src="extjs/bootstrap-tooltip.js"></script> 
     
     <!-- Other external libraries. -->
     <script src="extjs/qrcode.js"></script> 
@@ -157,31 +162,40 @@
               </p>
             </div>
             <div class="span4">
-              <h4>Create three passphrases.</h4>
-              <p>Think about passphrases the way you keep money in real life. 
+              <h4>Create multiple passphrases.</h4>
+              <p>Think about passphrases the way you keep money in real life, 
+              not all in one place. For example.</p>
 
-a. A day to day passphrase. You could store a small amount of Bitocins here a bit like have a few notes in your wallet or purse. Write the passphrase down and carry it in your wallet.
+              <ul>
+                <li><span class="label label-info">A day to day passphrase</span>. You could store a small amount of 
+                Bitcoins here a bit like have a few notes in your wallet or purse. 
+                Write the passphrase down and carry it in your wallet.</li>
 
-b. As a bank account. A passphrase that you only use in a safe environment, i.e. a computer with good virus protection that you are prety confident hasn't malware. Hold moderate amonts of Bitccins here.
+                <li><span class="label label-info">A Bank account style passphrase</span>. One that you only use in a safe environment, 
+                i.e. a computer with good virus protection that you are 
+                prety confident hasn't malware. Hold moderate amonts of Bitcoins here.</li>
 
-c. Your savings. A a passphrase you created as cold storage. Be very careful about bringing this passphrase online.</p>
+                <li><span class="label label-info">A savings passphrase</span>. A a passphrase you created as cold storage. 
+                Be very careful when you use this password.</li>
+              </ul>
             </div>
             <div class="span4">
               <h4>Never lose your passphrases.</h4>
-              <p>Without the passhrases your coins are gone. Without the passhrase your coins are gone. 
-              Seriously, there is no way in this universe to retrieve CarbonWallet wallets 
-              without the passphrase. Here are several ways you can secure your passphrases. 
-
-a. Write it down, keep it somewhere safe. This is probably the easist method, and the most secure. Write it, stick it in an envelope and hide it.
-
-b. Encrypt it, and store it on dropbox.
-
-c. Both a and b.</p>
+              <p><span class="label label-important">Without the passhrases your coins are gone</span>. 
+              There is no way in this universe to retrieve CarbonWallet wallets 
+              without the passphrase.</p> 
+              <p>The best way to keep a passphrase safe is to do the following. </p> 
+              
+              <ul>
+                <li>Write it down</li>
+                <li>keep it somewhere safe.</li> 
+              </ul>
+              <p><img src="http://placehold.it/140x100" class="img-polaroid"></p>
             </div>
             
           </div>
           
-          <h3 class="sales-title">How does this work ? get all technical on me.</h3>
+          <h3 class="sales-title">Technical Details.</h3>
           <div class="row">
             <div class="span4">
               <h4>We are using 128bit passphrases.</h4>
