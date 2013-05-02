@@ -74,7 +74,7 @@
             <form>
               <input id="password" placeholder="Enter your 12 word passphrase." value="" class="input-medium" type="password" />
               <input id="open-sesame" disabled data-toggle="collapse" data-target="#create-keys" class="btn disabled" value="Open Wallet" />
-              <input id="generate-password" class="btn btn-success" data-toggle="collapse" data-target="#create-wallet" value="Create a new wallet" />
+              <input id="generate-password" class="btn btn-success" data-toggle="collapse" data-target="#create-wallet" value="Start a new wallet" />
             </form>
             <div id="create-keys" class="collapse">
               <div class="progress">
@@ -103,41 +103,61 @@
           <div class="row">
             <div class="span4">
               <h4>We are determined.</h4>
-              <p>Actually we are a deterministic wallet (https://en.bitcoin.it/wiki/Deterministic_wallet). 
-              This means your bitcoin addresses are generated from your passphrase. 
+              <p>CarbonWallet is a <a href="https://en.bitcoin.it/wiki/Deterministic_wallet">deterministic wallet</a>. 
               Your passphrase is turned into a number which is then turned into Bitcoin keys. 
-              Your passphrase is also your backup. Simple.</p>
+              Your passphrase is also your backup.</p> 
+              <p>
+              Conveniently, you can also use your CarbonWallet passphrase with the 
+              <a href="http://electrum.org/">Elektrum bitcoin client</a>.</p>
             </div>
             <div class="span4">
               <h4>We are a zero footprint wallet.</h4>
-              <p>We don't store your Bitcoins locally or on our servers, only in your computer memory (RAM). 
-              No trace is left on your PC once you logout of your session. 
-              Thiefs have fewer angles of attack with CarbonWallet. Secure.</p>
+              <p>
+                We don't store your Bitcoins locally or on our servers, only in your computer memory (RAM). 
+                No trace is left on your PC once you logout of your session.</p> 
+              <p> 
+              Thiefs have fewer angles of attack with CarbonWallet.
+              </p>
             </div>
             <div class="span4">
-              <h4>Carbon wallet can get cold.</h4>
-              <p>Need to store large sums of Bitcoins ? CarbonWallet supports Cold Storage)
-              https://en.bitcoin.it/wiki/Cold_storage, 
+              <h4>CarbonWallet can get cold.</h4>
+              <p>Need to store large sums of Bitcoins ? CarbonWallet supports 
+              <a href="https://en.bitcoin.it/wiki/Cold_storage">Cold Storage</a>.</p> 
+              <p>  
               You can use CarbonWallet completely offline on a computer you know is clean and safe.  
               (coming soon)</p>
             </div>
           </div>
           
-          <h3 class="sales-title">We will do everything we can to protect your money.</h3>
-          <h4 class="sales-title">However you also need to take responsibility and follow these rules.</h4>
+          <h3 class="sales-title">We will do everything we can to protect your Bitcoins.</h3>
+          <h4 class="sales-title">However you also need to take responsibility and follow these guidelines.</h4>
           <div class="row">
             <div class="span4">
-              <h4>1. Never give out your passphrase.</h4>
+              <h4>Never give out your passphrase.</h4>
               <p>There are several ways thiefs will try and get your passphrase. 
               These attacks apply to all Bitcoin wallets so read up and be safe.
-
-a. Phishing (http://en.wikipedia.org/wiki/Phishing) Always make sure you are on the carbonwallet.com address and never click links in emails.
-b. Social engineering http://en.wikipedia.org/wiki/Social_engineering_(security)
-c. Keyloggers http://en.wikipedia.org/wiki/Keystroke_logging
-d. Malware. http://en.wikipedia.org/wiki/Malware</p>
+                <ol>
+                  <li>
+                    <a href="http://en.wikipedia.org/wiki/Phishing">Phishing</a>
+                    Always make sure you are on the carbonwallet.com address and never click links in emails.
+                  </li>
+                  <li>
+                    <a href="http://en.wikipedia.org/wiki/Social_engineering_(security)">Social engineering</a>
+                    Always make sure you are on the carbonwallet.com address and never click links in emails.
+                  </li>
+                  <li>
+                    <a href="http://en.wikipedia.org/wiki/Keystroke_logging">Keyloggers</a>
+                    Always make sure you are on the carbonwallet.com address and never click links in emails.
+                  </li>
+                  <li>
+                    <a href="http://en.wikipedia.org/wiki/Malware">Malware</a>
+                    Always make sure you are on the carbonwallet.com address and never click links in emails.
+                  </li>
+                </ol>
+              </p>
             </div>
             <div class="span4">
-              <h4>2. Create three passphrases.</h4>
+              <h4>Create three passphrases.</h4>
               <p>Think about passphrases the way you keep money in real life. 
 
 a. A day to day passphrase. You could store a small amount of Bitocins here a bit like have a few notes in your wallet or purse. Write the passphrase down and carry it in your wallet.
@@ -147,7 +167,7 @@ b. As a bank account. A passphrase that you only use in a safe environment, i.e.
 c. Your savings. A a passphrase you created as cold storage. Be very careful about bringing this passphrase online.</p>
             </div>
             <div class="span4">
-              <h4>3. Never lose your passphrases.</h4>
+              <h4>Never lose your passphrases.</h4>
               <p>Without the passhrases your coins are gone. Without the passhrase your coins are gone. 
               Seriously, there is no way in this universe to retrieve CarbonWallet wallets 
               without the passphrase. Here are several ways you can secure your passphrases. 
