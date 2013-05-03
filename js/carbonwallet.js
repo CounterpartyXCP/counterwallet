@@ -43,6 +43,7 @@ function Wallet()
 // Global, hmmm.
 var wallet = new Wallet();
 var txType = 'txBCI';
+var timeout;
 
 $(document).ready(function() {
 
@@ -75,6 +76,8 @@ $(document).ready(function() {
   $('#txDropAddr').change(txOnChangeSource);
   $('#txValue').change(txOnChangeDest);
   $('#txDest').change(txOnChangeDest);
+  $('#txDest').keypress(verifySoon);
+  $('#txValue').keypress(verifySoon);
   
   $('#password').keyup(checkValidPassword);
 
@@ -111,6 +114,15 @@ $(document).ready(function() {
     $('#logon').show();
     return false;
   });
+  
+  function verifySoon() {
+    if(timeout) 
+    {
+        clearTimeout(timeout);
+        timeout = null;
+    }
+    timeout = setTimeout(txOnChangeDest, 1000);
+  }
   
   function hideAll()
   {
