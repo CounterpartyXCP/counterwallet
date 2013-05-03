@@ -7,7 +7,7 @@ http://CarbonWallet.com
 
 Features:
 
-- Deterministic.
+- Deterministic wallet addresses.
 - Anonymous.
-- Compatible with Elektrum.
-- RFC 1751 JavaScript implementation
+- Runs in the browser
+- Keys created in memory.
