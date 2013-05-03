@@ -126,6 +126,7 @@ $(document).ready(function() {
     $('#logout-menu').show();
     
     wallet.updateAllBalances();
+    $("#txDropAddr").find("option").remove();
     
     for(i = 0; i < wallet.getKeys().length; i++)
     {
@@ -155,7 +156,7 @@ $(document).ready(function() {
     else
     {
       $('#open-sesame').removeClass('btn-primary');
-      $('#open-sesame').addAttr('disabled');
+      $('#open-sesame').attr('disabled', 'disabled');
     }
   }
   
