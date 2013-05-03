@@ -50,6 +50,7 @@ legend {
   font-size: 2em;
   text-align: center;
   color: white;
+  text-shadow: -1px -1px 2px #000;
 }
 
 #header h2 {
@@ -57,6 +58,7 @@ legend {
   text-align: center;
   color: white;
   padding-bottom: 20px;
+  text-shadow: -1px -1px 2px #000;
 }
 
 #form-well {
