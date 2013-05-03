@@ -60,7 +60,6 @@
               <li class="active">
                 <a data-toggle="tab" id="home" href="#home">Home</a>
               </li>
-              <li><a data-toggle="tab" href="#chains" id="tab-chains">About Us</a></li>
             </ul>
             <ul class="nav pull-right">
               <li id="logout-menu">
@@ -87,16 +86,16 @@
               </div>
             </div>
             <div id="create-wallet" class="collapse">
-              <h4>To use Carbon Wallet you need a really big password.</h4>
-              <p>We have created a password for you. To use the CarbonWallet write 
-                your password down and keep it safe.
+              <h4>To use Carbon Wallet you need a passphrase.</h4>
+              <p>We have created a password for you. To use CarbonWallet write 
+                your passphrase down and keep it safe.
               </p>
               <p>
                 <input id="generated" readonly value="" class="input-medium" type="text" />
                 <button class="btn" id="regenerate-password" data-toggle="tooltip" title="Click to generate another random passphrase." title="Random" type="button"><i class="icon-repeat"></i></button>
               </p>
-              <p>Make sure no-one is near you when you create this password. 
-                If anyone sees your password, or gets it from you, they can steal your Bitcoins.
+              <p>Make sure no-one is near you when you create this passphrase. 
+                If anyone sees your passphrase, or gets it from you, they can steal your Bitcoins.
               </p>
             </div>
           </div>
@@ -108,12 +107,11 @@
           <div class="row">
             <div class="span4">
               <h4>We are determined.</h4>
-              <p>CarbonWallet is a <a href="https://en.bitcoin.it/wiki/Deterministic_wallet">deterministic wallet</a>. 
+              <p>CarbonWallet is an online <a href="https://en.bitcoin.it/wiki/Deterministic_wallet">deterministic wallet</a>. 
               Your passphrase is turned into a number which is then turned into Bitcoin keys. 
-              Your passphrase is also your backup.</p> 
-              <p>
-              Conveniently, you can also use your CarbonWallet passphrase with the 
-              <a href="http://electrum.org/">Elektrum bitcoin client</a>.</p>
+              Your passphrase is also your backup. </p>
+              
+              <p>All this happens in your browser not on our servers.</p> 
             </div>
             <div class="span4">
               <h4>We are a zero footprint wallet.</h4>
@@ -125,12 +123,13 @@
               </p>
             </div>
             <div class="span4">
-              <h4>CarbonWallet can get cold.</h4>
+              <h4>We support online or cold storage.</h4>
               <p>Need to store large sums of Bitcoins ? CarbonWallet supports 
               <a href="https://en.bitcoin.it/wiki/Cold_storage">Cold Storage</a>.</p> 
               <p>  
-              You can use CarbonWallet completely offline on a computer you know is clean and safe.  
-              (coming soon)</p>
+              You can use CarbonWallet online or offline on a computer you know is clean and safe. 
+              <a href="https://github.com/carbonwallet/carbonwallet.github.io/archive/master.zip">Download CarbonWallet</a>
+              </p>
             </div>
           </div>
           
@@ -181,44 +180,50 @@
             </div>
             <div class="span4">
               <h4>Never lose your passphrases.</h4>
-              <p><span class="label label-important">Without the passhrases your coins are gone</span>. 
+              <p><span class="label label-important">Without the passphrase your coins are gone</span>. 
               There is no way in this universe to retrieve CarbonWallet wallets 
               without the passphrase.</p> 
-              <p>The best way to keep a passphrase safe is to do the following. </p> 
+              <p>The best way to keep a passphrases safe is to do the following. </p> 
               
               <ul>
-                <li>Write it down</li>
-                <li>keep it somewhere safe.</li> 
+                <li>Write them down</li>
+                <li>keep them somewhere safe.</li> 
               </ul>
               <p><img src="http://placehold.it/140x100" class="img-polaroid"></p>
             </div>
             
           </div>
           
-          <h3 class="sales-title">Technical Details.</h3>
+          <h3 class="sales-title">More Technical Details.</h3>
           <div class="row">
             <div class="span4">
               <h4>We are using 128bit passphrases.</h4>
-              <p>According to "how big is your stack" The passphrases would take 5.00 hundred trillion 
+              <p>According to "<a href="http://www.grc.com/haystack.htm">how big is your haystack?</a>" Our passphrases would take 
+              <em>5 hundred trillion 
               trillion trillion trillion trillion trillion trillion trillion 
-              centuries under a massive cracking scenario. We generate a random passphrase from the 
-              following  using the . Converts between 4-byte aligned strings and a human-readable
-              sequence of words. Uses 1626 common words taken from wikipedia article:
-              http://en.wiktionary.org/wiki/Wiktionary:Frequency_lists/Contemporary_poetry
-              Our passphrases are compatible with the Elektrum Bitcoin client.</p>
+              centuries</em> to break under a massive cracking scenario. </p>
+              <p>We are using 
+              <a href="https://developer.mozilla.org/en/docs/DOM/window.crypto.getRandomValues">
+              window.crypto.getRandomValues</a> whenever available for cryptographically random values.</p>
+              <p>Our passphrases are compatible with the <a href="http://electrum.org/">Elektrum Bitcoin client</a>.</p>
             </div>
             <div class="span4">
               <h4>We generate bitcoin addresses deterministically.</h4>
               <p>
-                The passphrase is tunred into a 128bit key which is then stretched into 10 bitcoin addresses. 
+                Your passphrase is turned into a 128bit key which is then stretched into 10 bitcoin addresses. 
                 There is no limit but for now 10 per passphrase should be adequate.</p>
+                
+              <p>Determined Bitcoin addresses mean no need for a remote server to hold keys and no need
+              to store keys on a local hard drive.</p>
             </div>
             <div class="span4">
-              <h4>CarbonWallet is public domain.</h4>
+              <h4>CarbonWallet is open and public domain.</h4>
               <p>
-              All source code is available on guthub and the site is a github page. 
-              All commits and changes are open for peer review and the site is deployed 
+              All source code is available on Github and the site is a Github page. </p>
+              <p>All commits and changes are open for peer review and the site is deployed 
               directly from the repository.</p>
+              <p><strong>Extra security through open source code.</strong></p>
+              <p>All JavaScript is unminimized for easier inspection.</p>
             </div>
           </div>
         </div>
@@ -394,7 +399,7 @@
       </div>
     </div>
     <footer>
-      <p>CarbonWallet &copy; 2013</p>
+      <p><strong>CarbonWallet &copy; 2013</strong></p>
       <p><small>Powered by 
         <a href="http://pages.github.com">GitHub Pages</a> | 
         <a href="https://github.com/carbonwallet/carbonwallet.github.io">View Source Code</a> 
