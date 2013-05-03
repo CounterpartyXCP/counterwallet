@@ -11,7 +11,8 @@
     
     <!-- Style sheets -->
     <link href="css/default.css" rel="stylesheet">
-    <link href="https://netdna.bootstrapcdn.com/twitter-bootstrap/2.3.1/css/bootstrap-combined.min.css" rel="stylesheet">
+    <link href="https://netdna.bootstrapcdn.com/twitter-bootstrap/2.3.1/css/bootstrap-combined.no-icons.min.css" rel="stylesheet">
+    <link href="https://netdna.bootstrapcdn.com/font-awesome/3.0.2/css/font-awesome.css" rel="stylesheet">
     
     <!-- The following libraries are required for bitcon addresses and signing. -->
     <script src="extjs/bitcoin/crypto.js"></script> 
@@ -56,7 +57,9 @@
         <div class="container">
           <a class="btn btn-navbar" data-target=".nav-collapse" data-toggle="collapse"> 
           <span class="icon-bar"></span> <span class="icon-bar"></span> 
-          <span class="icon-bar"></span> </a> <a class="brand" href="/">CarbonWallet</a> 
+          <span class="icon-bar"></span> 
+          </a> 
+          <a class="brand" href="/"><i class="icon-money"></i> CarbonWallet</a> 
           <div class="nav-collapse">
             <ul class="nav">
               <li class="active">
@@ -99,6 +102,8 @@
               <p>Make sure no-one is near you when you use this passphrase. 
                 If anyone sees your passphrase, or gets it from you, they can steal your Bitcoins.
               </p>
+              <p><span class="label label-info">We use Passphrases because they are much more 
+              secure than passwords.</span></p>
             </div>
           </div>
           <h2>We don't store your Bitcoins locally or on our servers.</h2>
@@ -108,7 +113,7 @@
           <h3 class="sales-title">Why should I use CarbonWallet ?</h3>
           <div class="row">
             <div class="span4">
-              <h4>We are determined.</h4>
+              <h4><i class="icon-ok-sign"></i> We are determined.</h4>
               <p>CarbonWallet is an online <a href="https://en.bitcoin.it/wiki/Deterministic_wallet">deterministic wallet</a>. 
               Your passphrase is turned into a number which is then turned into Bitcoin Addresses. 
               </p>
@@ -116,7 +121,7 @@
               <p>Your passphrase is your wallet access and wallet backup.</p> 
             </div>
             <div class="span4">
-              <h4>We are a zero footprint wallet.</h4>
+              <h4><i class="icon-ok-sign"></i> We are a zero footprint wallet.</h4>
               <p>
                 We don't store your Bitcoins locally or on our servers, only in your browser memory. 
                 No trace is left on your device once you logout of your session.</p> 
@@ -125,11 +130,12 @@
               </p>
             </div>
             <div class="span4">
-              <h4>We support online or cold storage.</h4>
+              <h4><i class="icon-ok-sign"></i> We support online or cold storage.</h4>
               <p>Need to store large sums of Bitcoins ? CarbonWallet supports 
               <a href="https://en.bitcoin.it/wiki/Cold_storage">Cold Storage</a>.</p> 
               <p>  
               You can use CarbonWallet online or offline on a computer you know is clean and safe. 
+              <i class="icon-download"></i> 
               <a href="https://github.com/carbonwallet/carbonwallet.github.io/archive/master.zip">Download CarbonWallet</a>
               </p>
             </div>
@@ -139,7 +145,7 @@
           <h4 class="sales-subtitle">However you also need to take responsibility and follow these guidelines.</h4>
           <div class="row">
             <div class="span4">
-              <h4>Never give out your passphrase.</h4>
+              <h4><i class="icon-ban-circle"></i> Never give out your passphrase.</h4>
               <p>There are several ways thiefs will try and get your passphrase. 
               These attacks apply to all Bitcoin wallets so read up and be safe.
               </p>
@@ -160,7 +166,7 @@
               </ol>
             </div>
             <div class="span4">
-              <h4>Consider multiple passphrases.</h4>
+              <h4><i class="icon-ban-circle"></i> Consider multiple passphrases.</h4>
               <p>Think about passphrases the way you keep money in real life, 
               not all in one place. For example.</p>
 
@@ -178,7 +184,7 @@
               </ul>
             </div>
             <div class="span4">
-              <h4>Never lose your passphrases.</h4>
+              <h4><i class="icon-ban-circle"></i> Never lose your passphrases.</h4>
               <p><span class="label label-important">Without the passphrase your coins are gone</span>. 
               There is no way to retrieve CarbonWallet wallets 
               without the passphrase.</p> 
@@ -196,7 +202,7 @@
           <h3 class="sales-title">More Technical Details.</h3>
           <div class="row">
             <div class="span4">
-              <h4>We are using 128bit passphrases.</h4>
+              <h4><i class="icon-key"></i> We are using 128bit passphrases.</h4>
               <p>According to "<a href="http://www.grc.com/haystack.htm">how big is your haystack?</a>" Our passphrases would take 
               <em>5 hundred trillion 
               trillion trillion trillion trillion trillion trillion trillion 
@@ -209,7 +215,7 @@
               and <a href="http://brainwallet.org/#chains">Brainwallet.org</a>.</p>
             </div>
             <div class="span4">
-              <h4>We generate bitcoin addresses deterministically.</h4>
+              <h4><i class="icon-random"></i> We generate bitcoin addresses deterministically.</h4>
               <p>
                 Your passphrase is turned into a 128bit key which is then stretched into 10 bitcoin addresses. 
                 There is no limit but for now 10 per passphrase should be adequate.</p>
@@ -218,7 +224,7 @@
               to store keys on a local hard drive.</p>
             </div>
             <div class="span4">
-              <h4>CarbonWallet is open and public domain.</h4>
+              <h4><i class="icon-user"></i> CarbonWallet is open and public domain.</h4>
               <p>
               All source code is available on Github and the site is a Github page. </p>
               <p>All commits and changes are open for peer review and the site is deployed 
