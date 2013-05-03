@@ -373,7 +373,7 @@
                     </tr>
                   </thead>
                   <tr>
-                    <td><small><span class="label">A miners fee of 0.0005 BTC will be charged.</span></small></td>
+                    <td><small><span class="label">A miners fee of 0.0005 BTC will be added.</span></small></td>
                     <td><small><span><strong>0.0005</strong></span></small></td>
                   </tr>
                   <tfoot>
@@ -383,22 +383,28 @@
                     </tr>
                   </tfoot>
                 </table>
-                <div class="control-group">
-                  <label class="control-label" for="txJSON">JSON Transaction</label> 
-                  <div class="controls"> 
-                    <textarea class="span5" id="txJSON" rows="4"></textarea>
+                <p id="tx-toggle" >
+                  <a data-toggle="collapse" 
+                  data-target="#advanced-details">Show/Hide Transaction Details (Advanced users)</a>
+                </p>
+                <div id="advanced-details" class="collapse">
+                  <div class="control-group">
+                    <label class="control-label" for="txJSON">JSON Transaction</label> 
+                    <div class="controls"> 
+                      <textarea class="span5" id="txJSON" rows="4"></textarea>
+                    </div>
                   </div>
-                </div>
-                <div class="control-group">
-                  <label class="control-label" for="txHex">Raw Transaction</label> 
-                  <div class="controls"> 
-                    <textarea class="span5" id="txHex" rows="4"></textarea>
+                  <div class="control-group">
+                    <label class="control-label" for="txHex">Raw Transaction</label> 
+                    <div class="controls"> 
+                      <textarea class="span5" id="txHex" rows="4"></textarea>
+                    </div>
                   </div>
                 </div>
               </div>
               <div class="modal-footer">
                 <a href="#" data-dismiss="modal" class="btn">Cancel</a>
-                <a href="#" id="sendPayment" data-dismiss="modal" class="btn btn-primary">Send Payment</a>
+                <button id="sendPayment" data-dismiss="modal" class="btn btn-primary">Send Payment</button>
               </div>
             </div>
           </div>
