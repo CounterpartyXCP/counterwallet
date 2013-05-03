@@ -244,6 +244,16 @@ $(document).ready(function() {
         valid = false;
         break;
       }  
+      else 
+      {
+        try {
+          parseBase58Check(res[i].dest);
+        }
+        catch (e) {
+          valid = false;
+          break;
+        }
+      }
     }
     
     if(valid)
@@ -278,6 +288,8 @@ $(document).ready(function() {
 
   function txSent(text) {
       alert(text ? text : 'No response!');
+      
+      wallet.updateAllBalances();
   }
   
   function txVerify() {
@@ -300,7 +312,7 @@ $(document).ready(function() {
       }
     }
     $('#verifyChange').remove();
-    $('#verifyBody').append('<p id="verifyChange"><span>' 
+    $('#tx-toggle').prepend('<p id="verifyChange"><span>' 
         + TX.getChange()
         + '</span> BTC will be returned to the sending address as change</p>');
   
@@ -319,11 +331,10 @@ $(document).ready(function() {
 
       url = 'http://blockchain.info/pushtx';
       postdata = 'tx=' + tx;
-      url = prompt(r + 'Send transaction:', url);
       if (url != null && url != "") {
           tx_fetch(url, txSent, txSent, postdata);
       }
-      return false;
+      return true;
   }
   
 
