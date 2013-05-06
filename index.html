@@ -10,9 +10,10 @@
     <!-- If I have seen further it is by standing on the shoulders of giants. -->
     
     <!-- Style sheets -->
+    <link href="css/bootstrap-combined.no-icons.min.css" rel="stylesheet">
+    <link href="css/font-awesome.css" rel="stylesheet">
     <link href="css/default.css" rel="stylesheet">
-    <link href="https://netdna.bootstrapcdn.com/twitter-bootstrap/2.3.1/css/bootstrap-combined.no-icons.min.css" rel="stylesheet">
-    <link href="https://netdna.bootstrapcdn.com/font-awesome/3.0.2/css/font-awesome.css" rel="stylesheet">
+    <link href="css/packaged-app.css" rel="stylesheet">
     
     <!-- The following libraries are required for bitcon addresses and signing. -->
     <script src="extjs/bitcoin/crypto.js"></script> 
@@ -363,6 +364,7 @@
                 </div>
               </fieldset>
             </form>
+
             <div id="verifyModal" class="modal hide">
               <div class="modal-header">
                 <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
@@ -411,6 +413,20 @@
                 <button id="sendPayment" data-dismiss="modal" class="btn btn-primary">Send Payment</button>
               </div>
             </div>
+
+            <div id="alertModal" class="modal hide">
+                <div class="modal-header">
+                  <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                  <h3>Response</h3>
+                </div>
+                <div class="modal-body">
+                  <p id="alertModalText"></p>
+                </div>
+                <div class="modal-footer">
+                  <a href="#" data-dismiss="modal" class="btn">Close</a>
+                </div>
+            </div>
+
           </div>
         </div>
       </div>

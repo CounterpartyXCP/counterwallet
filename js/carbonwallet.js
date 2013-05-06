@@ -114,6 +114,11 @@ $(document).ready(function() {
     $('#logon').show();
     return false;
   });
+
+  function alertModal(text) {
+    $('#alertModalText').text(text || 'Nevermind');
+    $('#alertModal').modal();
+  }
   
   function verifySoon() {
     if(timeout) 
@@ -299,7 +304,7 @@ $(document).ready(function() {
   }
 
   function txSent(text) {
-      alert(text ? text : 'No response!');
+      alertModal(text ? text : 'No response!');
       
       wallet.updateAllBalances();
   }
