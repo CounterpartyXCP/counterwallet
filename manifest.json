@@ -1,7 +1,7 @@
 {
   "name": "Carbon Wallet",
   "description": "JavaScript-based offline bitcoin wallet",
-  "version": "0.1",
+  "version": "0.1.1",
   "app": {
     "background": {
       "scripts": ["js/background.js"]
