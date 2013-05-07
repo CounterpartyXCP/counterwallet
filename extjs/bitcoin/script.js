@@ -1,10 +1,11 @@
 (function () {
   var Opcode = Bitcoin.Opcode;
+  var OP = Opcode.map;
 
   // Make opcodes available as pseudo-constants
-  for (var i in Opcode.map) {
-    eval("var " + i + " = " + Opcode.map[i] + ";");
-  }
+  //for (var i in Opcode.map) {
+  //  eval("var " + i + " = " + Opcode.map[i] + ";");
+  //}
 
   var Script = Bitcoin.Script = function (data) {
     if (!data) {
@@ -55,16 +56,16 @@
       }
 
       var len;
-      if (opcode > 0 && opcode < OP_PUSHDATA1) {
+      if (opcode > 0 && opcode < OP.OP_PUSHDATA1) {
         // Read some bytes of data, opcode value is the length of data
         readChunk(opcode);
-      } else if (opcode == OP_PUSHDATA1) {
+      } else if (opcode == OP.OP_PUSHDATA1) {
         len = this.buffer[i++];
         readChunk(len);
-      } else if (opcode == OP_PUSHDATA2) {
+      } else if (opcode == OP.OP_PUSHDATA2) {
         len = (this.buffer[i++] << 8) | this.buffer[i++];
         readChunk(len);
-      } else if (opcode == OP_PUSHDATA4) {
+      } else if (opcode == OP.OP_PUSHDATA4) {
         len = (this.buffer[i++] << 24) |
           (this.buffer[i++] << 16) |
           (this.buffer[i++] << 8) |
@@ -85,29 +86,29 @@
    * Currently supported are:
    * Address:
    *   Paying to a Bitcoin address which is the hash of a pubkey.
-   *   OP_DUP OP_HASH160 [pubKeyHash] OP_EQUALVERIFY OP_CHECKSIG
+   *   OP.OP_DUP OP.OP_HASH160 [pubKeyHash] OP.OP_EQUALVERIFY OP.OP_CHECKSIG
    *
    * Pubkey:
    *   Paying to a public key directly.
-   *   [pubKey] OP_CHECKSIG
+   *   [pubKey] OP.OP_CHECKSIG
    * 
    * Strange:
    *   Any other script (no template matched).
    */
   Script.prototype.getOutType = function () {
 
-  if (this.chunks[this.chunks.length-1] == OP_CHECKMULTISIG && this.chunks[this.chunks.length-2] <= 3) {
+  if (this.chunks[this.chunks.length-1] == OP.OP_CHECKMULTISIG && this.chunks[this.chunks.length-2] <= 3) {
     // Transfer to M-OF-N
     return 'Multisig';
   } else if (this.chunks.length == 5 &&
-    this.chunks[0] == OP_DUP &&
-    this.chunks[1] == OP_HASH160 &&
-    this.chunks[3] == OP_EQUALVERIFY &&
-    this.chunks[4] == OP_CHECKSIG) {
+    this.chunks[0] == OP.OP_DUP &&
+    this.chunks[1] == OP.OP_HASH160 &&
+    this.chunks[3] == OP.OP_EQUALVERIFY &&
+    this.chunks[4] == OP.OP_CHECKSIG) {
     // Transfer to Bitcoin address
     return 'Address';
   } else if (this.chunks.length == 2 &&
-         this.chunks[1] == OP_CHECKSIG) {
+         this.chunks[1] == OP.OP_CHECKSIG) {
     // Transfer to IP address
     return 'Pubkey';
   } else {
@@ -252,17 +253,17 @@
    */
   Script.prototype.writeBytes = function (data)
   {
-    if (data.length < OP_PUSHDATA1) {
+    if (data.length < OP.OP_PUSHDATA1) {
       this.buffer.push(data.length);
     } else if (data.length <= 0xff) {
-      this.buffer.push(OP_PUSHDATA1);
+      this.buffer.push(OP.OP_PUSHDATA1);
       this.buffer.push(data.length);
     } else if (data.length <= 0xffff) {
-      this.buffer.push(OP_PUSHDATA2);
+      this.buffer.push(OP.OP_PUSHDATA2);
       this.buffer.push(data.length & 0xff);
       this.buffer.push((data.length >>> 8) & 0xff);
     } else {
-      this.buffer.push(OP_PUSHDATA4);
+      this.buffer.push(OP.OP_PUSHDATA4);
       this.buffer.push(data.length & 0xff);
       this.buffer.push((data.length >>> 8) & 0xff);
       this.buffer.push((data.length >>> 16) & 0xff);
@@ -278,11 +279,11 @@
   Script.createOutputScript = function (address)
   {
     var script = new Script();
-    script.writeOp(OP_DUP);
-    script.writeOp(OP_HASH160);
+    script.writeOp(OP.OP_DUP);
+    script.writeOp(OP.OP_HASH160);
     script.writeBytes(address.hash);
-    script.writeOp(OP_EQUALVERIFY);
-    script.writeOp(OP_CHECKSIG);
+    script.writeOp(OP.OP_EQUALVERIFY);
+    script.writeOp(OP.OP_CHECKSIG);
     return script;
   };
   
@@ -303,7 +304,7 @@
       for (var i = 1; i < this.chunks.length-2; ++i) {
         addresses.push(new Address(Util.sha256ripe160(this.chunks[i])));
       }
-      return this.chunks[0] - OP_1 + 1;
+      return this.chunks[0] - OP.OP_1 + 1;
     default:
       throw new Error("Encountered non-standard scriptPubKey");
     }
@@ -316,15 +317,15 @@
   {
     var script = new Bitcoin.Script();
     
-    script.writeOp(OP_1 + m - 1);
+    script.writeOp(OP.OP_1 + m - 1);
     
     for (var i = 0; i < pubkeys.length; ++i) {
       script.writeBytes(pubkeys[i]);
     }
     
-    script.writeOp(OP_1 + pubkeys.length - 1);
+    script.writeOp(OP.OP_1 + pubkeys.length - 1);
 
-    script.writeOp(OP_CHECKMULTISIG);
+    script.writeOp(OP.OP_CHECKMULTISIG);
 
     return script;
   };
