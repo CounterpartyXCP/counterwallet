@@ -150,12 +150,22 @@ $(document).ready(function() {
       var addr = wallet.getKeys()[i].getBitcoinAddress().toString();
       $('#address' + i).text(addr); 
       $("#txDropAddr").append('<option value=' + i + '>' + addr + '</option>'); 
-      $('#balance' + i).text(Bitcoin.Util.formatValue(wallet.getBalances()[i]));      
+      $('#balance' + i).text(Bitcoin.Util.formatValue(wallet.getBalances()[i])); 
+      var qrcode = makeQRCode(addr);
+      $('#qrcode' + i).popover({ title: 'QRCode', html: true, content: qrcode, placement: 'bottom' });
     }
     
     txOnChangeSource();
     
     return false;
+  }
+  
+  function makeQRCode(addr) {
+    var qr = qrcode(3, 'M');
+    addr = addr.replace(/^[\s\u3000]+|[\s\u3000]+$/g, '');
+    qr.addData(addr);
+    qr.make();
+    return qr.createImgTag(4);
   }
   
   function checkValidPassword(){
