@@ -1,48 +1,4 @@
-function Wallet() 
-{
-  this.keys = [];
-  this.balances = [0,0,0,0,0,0,0,0,0,0];
-  
-  // Methods
-  this.textToBytes = function(text) {
-    return Crypto.SHA256(text, { asBytes: true });
-  };
-  
-  this.getKeys = function() {
-    return this.keys;
-  };
-  
-  this.getBalances = function() {
-    return this.balances;
-  }
-  
-  this.createBalanceFunction = function(i) {
-      return function(text) { 
-        wallet.getBalances()[i] = parseInt(text);
-        
-        // TODO, disconnect GUI code from backend.
-        $('#balance' + i).text(
-          Bitcoin.Util.formatValue(wallet.getBalances()[i]));           
-      };
-  }
-  
-  this.updateAllBalances = function() {
-    
-    url = 'http://blockchain.info/q/addressbalance/';
-    var funcs = [];
-    
-    for(i = 0; i < wallet.getKeys().length; i++)
-    {
-      funcs[i] = this.createBalanceFunction(i);
-      tx_fetch(url + wallet.getKeys()[i].getBitcoinAddress().toString(), funcs[i]); 
-    }
-  }
-}
-
-
 // Global, hmmm.
-var wallet = new Wallet();
-var txType = 'txBCI';
 var timeout;
 
 $(document).ready(function() {
@@ -61,8 +17,8 @@ $(document).ready(function() {
       }, 
       function(privKey) {
         Electrum.gen(10, function(r) { 
-          wallet.getKeys().push(new Bitcoin.ECKey(r[1])); 
-          if(wallet.getKeys().length == 10)
+          WALLET.getKeys().push(new Bitcoin.ECKey(r[1])); 
+          if(WALLET.getKeys().length == 10)
             login_success(); 
         });
       }
@@ -107,9 +63,8 @@ $(document).ready(function() {
     $('#password').val('');
     $('#site').hide();
     $('#create-keys').collapse('hide');
-    $('#create-wallet').collapse('hide');
+    $('#create-WALLET').collapse('hide');
     $('#logout-menu').hide();
-    wallet = new Wallet();
     checkValidPassword();
     $('#logon').show();
     return false;
@@ -142,15 +97,15 @@ $(document).ready(function() {
     $('#site').show();
     $('#logout-menu').show();
     
-    wallet.updateAllBalances();
+    WALLET.updateAllBalances();
     $("#txDropAddr").find("option").remove();
     
-    for(i = 0; i < wallet.getKeys().length; i++)
+    for(i = 0; i < WALLET.getKeys().length; i++)
     {
-      var addr = wallet.getKeys()[i].getBitcoinAddress().toString();
+      var addr = WALLET.getKeys()[i].getBitcoinAddress().toString();
       $('#address' + i).text(addr); 
       $("#txDropAddr").append('<option value=' + i + '>' + addr + '</option>'); 
-      $('#balance' + i).text(Bitcoin.Util.formatValue(wallet.getBalances()[i])); 
+      $('#balance' + i).text(Bitcoin.Util.formatValue(WALLET.getBalances()[i])); 
       var qrcode = makeQRCode(addr);
       $('#qrcode' + i).popover({ title: 'QRCode', html: true, content: qrcode, placement: 'bottom' });
     }
@@ -187,7 +142,7 @@ $(document).ready(function() {
     }
   }
   
-  // -- Wallet Creation --
+  // -- WALLET Creation --
   function regeneratePassword() {
     $('#generated').val('');
     return generatePassword();
@@ -216,7 +171,7 @@ $(document).ready(function() {
 
   function txOnChangeSource() {
     var i = $('#txDropAddr option:selected').prop('index');
-    $('#txSec').val(wallet.getKeys()[i].getExportedPrivateKey());
+    $('#txSec').val(WALLET.getKeys()[i].getExportedPrivateKey());
     txDropGetUnspent();
   }
 
@@ -247,16 +202,10 @@ $(document).ready(function() {
   }
 
   function txDropGetUnspent() {
-      var addr = wallet.getKeys()[$('#txDropAddr').val()].getBitcoinAddress().toString();
+      var addr = WALLET.getKeys()[$('#txDropAddr').val()].getBitcoinAddress().toString();
 
-      var url = (txType == 'txBCI') ? 'http://blockchain.info/unspent?address=' + addr :
-          'http://blockexplorer.com/q/mytransactions/' + addr;
-
-      //url = prompt('Download transaction history:', url);
-      if (url != null && url != "") {
-          $('#txUnspent').val('');
-          tx_fetch(url, txParseUnspent);
-      }
+      $('#txUnspent').val('');
+      BLOCKCHAIN.getUnspentOutputs(addr, txParseUnspent);
   }
 
   function txOnChangeDest() {
@@ -316,7 +265,7 @@ $(document).ready(function() {
   function txSent(text) {
       alertModal(text ? text : 'No response!');
       
-      wallet.updateAllBalances();
+      WALLET.updateAllBalances();
   }
   
   function txVerify() {
@@ -355,12 +304,8 @@ $(document).ready(function() {
           r += 'Warning! Source address does not match private key.\n\n';
 
       var tx = $('#txHex').val();
-
-      url = 'http://blockchain.info/pushtx';
-      postdata = 'tx=' + tx;
-      if (url != null && url != "") {
-          tx_fetch(url, txSent, txSent, postdata);
-      }
+      
+      BLOCKCHAIN.sendTX(tx, txSent);
       return true;
   }
   
