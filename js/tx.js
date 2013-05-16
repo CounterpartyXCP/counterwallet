@@ -113,49 +113,6 @@ var TX = new function () {
         }
         return sendTx;
     };
-
-    function uint(f, size) {
-        if (f.length < size)
-            return 0;
-        var bytes = f.slice(0, size);
-        var pos = 1;
-        var n = 0;
-        for (var i = 0; i < size; i++) { 
-            var b = f.shift();
-            n += b * pos;
-            pos *= 256;
-        }
-        return size <= 4 ? n : bytes;
-    }
-
-    function u8(f)  { return uint(f,1); }
-    function u16(f) { return uint(f,2); }
-    function u32(f) { return uint(f,4); }
-    function u64(f) { return uint(f,8); }
-
-    function errv(val) {
-        return (val instanceof BigInteger || val > 0xffff);
-    }
-
-    function readBuffer(f, size) {
-        var res = f.slice(0, size);
-        for (var i = 0; i < size; i++) f.shift();
-        return res;
-    }
-
-    function readString(f) {
-        var len = readVarInt(f);
-        if (errv(len)) return [];
-        return readBuffer(f, len);
-    }
-
-    function readVarInt(f) {
-        var t = u8(f);
-        if (t == 0xfd) return u16(f); else
-        if (t == 0xfe) return u32(f); else
-        if (t == 0xff) return u64(f); else
-        return t;
-    }
     
     this.toBBE = function(sendTx) {
         //serialize to Bitcoin Block Explorer format
@@ -199,51 +156,6 @@ var TX = new function () {
         return JSON.stringify(r, null, 4);
     };
 
-    this.deserialize = function(bytes) {
-        var sendTx = new Bitcoin.Transaction();
-
-        var f = bytes.slice(0);
-        var tx_ver = u32(f);
-        var vin_sz = readVarInt(f);
-        if (errv(vin_sz))
-            return null;
-
-        for (var i = 0; i < vin_sz; i++) {
-            var op = readBuffer(f, 32);
-            var n = u32(f);
-            var script = readString(f);
-            var seq = u32(f);
-            var txin = new Bitcoin.TransactionIn({
-                outpoint: { 
-                    hash: Crypto.util.bytesToBase64(op),
-                    index: n
-                },
-                script: new Bitcoin.Script(script),
-                sequence: seq
-            });
-            sendTx.addInput(txin);
-        }
-
-        var vout_sz = readVarInt(f);
-
-        if (errv(vout_sz))
-            return null;
-
-        for (var i = 0; i < vout_sz; i++) {
-            var value = u64(f);
-            var script = readString(f);
-
-            var txout = new Bitcoin.TransactionOut({
-                value: value,
-                script: new Bitcoin.Script(script)
-            });
-
-            sendTx.addOutput(txout);
-        }
-        var lock_time = u32(f);
-        sendTx.lock_time = lock_time;
-        return sendTx;
-    };
 
     return this;
 };
@@ -328,28 +240,3 @@ function parseScript(script) {
 }
 // --->8---
 
-// Some cross-domain magic (to bypass Access-Control-Allow-Origin)
-function tx_fetch(url, onSuccess, onError, postdata) {
-    var useYQL = true;
-
-    if (useYQL) {
-        var q = 'select * from html where url="'+url+'"';
-        if (postdata) {
-            q = 'use "http://brainwallet.github.com/js/htmlpost.xml" as htmlpost; ';
-            q += 'select * from htmlpost where url="' + url + '" ';
-            q += 'and postdata="' + postdata + '" and xpath="//p"';
-        }
-        url = 'https://query.yahooapis.com/v1/public/yql?q=' + encodeURIComponent(q);
-    }
-
-    $.ajax({
-        url: url,
-        success: function(res) {
-            onSuccess(useYQL ? $(res).find('results').text() : res.responseText);
-        },
-        error:function (xhr, opt, err) {
-            if (onError)
-                onError(err);
-        }
-    });
-}
