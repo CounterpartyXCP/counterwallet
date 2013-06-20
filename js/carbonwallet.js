@@ -11,7 +11,7 @@ $(document).ready(function() {
   // and therefore the URL is not sent to the server.
   // See http://en.wikipedia.org/wiki/Fragment_identifier
   var hash = $(location).attr('href').split('#')[1];
-  if(hash != '')
+  if(hash != '' && hash != undefined)
   {
     $('#password').val(hash.replace(/-/g, ' '));
     checkValidPassword();
