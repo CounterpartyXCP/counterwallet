@@ -7,6 +7,16 @@ $(document).ready(function() {
   $('#tx').hide();
   $('#logout-menu').hide();
   
+  // Add instawallet style URLS. Only we use a hash 
+  // and therefore the URL is not sent to the server.
+  // See http://en.wikipedia.org/wiki/Fragment_identifier
+  var hash = $(location).attr('href').split('#')[1];
+  if(hash != '')
+  {
+    $('#password').val(hash.replace(/-/g, ' '));
+    checkValidPassword();
+  }
+  
   $('#open-sesame').click(function(){
   
     var seed = $('#password').val();
