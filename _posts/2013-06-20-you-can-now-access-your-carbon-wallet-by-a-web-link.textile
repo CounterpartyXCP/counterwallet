@@ -1,12 +1,12 @@
 ---
 layout: post
-title: We've added safe instawallet style URLs.
+title: You can now access your carbon wallet by a web link.
 updated: 20 Jun, 2013
 ---
 
 We've now added instawallet style URL's to CarbonWallet, so you can now open a wallet as easy as.
 
-@http://carbonwallet.com/#tell-thick-yeah-friend-mock-paint-curse-emotion-silent-salty-flood-gentle@
+"http://carbonwallet.com/#tell-thick-yeah-friend-mock-paint-curse-emotion-silent-salty-flood-gentle":http://carbonwallet.com/#tell-thick-yeah-friend-mock-paint-curse-emotion-silent-salty-flood-gentle
 
 Sorry, there's no money in that wallet.
 
@@ -17,3 +17,5 @@ This would also work with your electrum passphrase, just prepend your passphrase
 @http://carbonwallet.com/#@
 
 And convert all the spaces to minus signs (-).
+
+Enjoy, The CarbonWallet team.
