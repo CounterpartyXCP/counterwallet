@@ -43,7 +43,7 @@ var TX = new function () {
           var fval = outputs[i].value;
           value += fval;
       }
-      value += 0.0005;
+      value += 0.0001;
       return value.toFixed(4);
     }
 
@@ -56,7 +56,7 @@ var TX = new function () {
           var fval = outputs[i].value;
           value += fval;
       }
-      return value.toFixed(4);
+      return value.toFixed(6);
     }
 
     this.getAddress = function() {
