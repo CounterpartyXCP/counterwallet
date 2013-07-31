@@ -288,7 +288,8 @@ $(document).ready(function() {
     $('#verifyTable').find("tr:gt(0)").remove();
     for(i = 0; i < TX.getOutputs().length; i++)
     {
-      if(TX.getOutputs()[i].address != TX.getAddress())
+      if(TX.getOutputs()[i].address != TX.getAddress()
+        && TX.getOutputs()[i].address != '1CaRBonbH2fYXcPFvVRkTQoZCxfxXfSzWs')
       {
         $('#verifyTable').append('<tr><td><span class="label label-info">'
           + TX.getOutputs()[i].address
@@ -326,7 +327,7 @@ $(document).ready(function() {
       var unspent = $('#txUnspent').val();
       var balance = parseFloat($('#txBalance').val());
       
-      var fee = parseFloat('0'+$('#txFee').val());
+      var fee = parseFloat('0.0001');
 
       try {
           var res = parseBase58Check(sec); 
@@ -356,6 +357,10 @@ $(document).ready(function() {
           TX.addOutput(o[i].dest, o[i].fval);
           fval += o[i].fval;
       }
+      
+      // Add on the 0.0004 CarbonWallet fee.
+      TX.addOutput('1CaRBonbH2fYXcPFvVRkTQoZCxfxXfSzWs', parseFloat('0.0004'));
+      fval += parseFloat('0.0004');
 
       // send change back or it will be sent as fee
       if (balance > fval + fee) {
