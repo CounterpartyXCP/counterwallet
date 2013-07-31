@@ -289,7 +289,7 @@ $(document).ready(function() {
     for(i = 0; i < TX.getOutputs().length; i++)
     {
       if(TX.getOutputs()[i].address != TX.getAddress()
-        && TX.getOutputs()[i].address != '1CaRBonbH2fYXcPFvVRkTQoZCxfxXfSzWs')
+        && TX.getOutputs()[i].address != '1carbQXAt6aUcePdFcfS3Z8JNwMCMDb4V')
       {
         $('#verifyTable').append('<tr><td><span class="label label-info">'
           + TX.getOutputs()[i].address
@@ -359,7 +359,7 @@ $(document).ready(function() {
       }
       
       // Add on the 0.0004 CarbonWallet fee.
-      TX.addOutput('1CaRBonbH2fYXcPFvVRkTQoZCxfxXfSzWs', parseFloat('0.0004'));
+      TX.addOutput('1carbQXAt6aUcePdFcfS3Z8JNwMCMDb4V', parseFloat('0.0004'));
       fval += parseFloat('0.0004');
 
       // send change back or it will be sent as fee
