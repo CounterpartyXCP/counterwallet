@@ -23,3 +23,7 @@ without having to go through the Chrome Web store:
 - Click "Load unpacked extension"
 - Navigate to the carbonwallet.github.io directory and click OK
 - Carbon Wallet will now appear as an option in your App list in Chrome
+
+### Licence
+
+http://opensource.org/licenses/CDDL-1.0
