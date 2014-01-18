@@ -52,86 +52,66 @@
     <link href="favicon.png" rel="icon" type="image/png">
   </head>
   <body>
-    <div class="navbar navbar-fixed-top navbar-default">
-      <div class="container">
-        <div class="container"><div class="navbar-header"><a class="navbar-brand" href="/">Counterwallet</a></div>
-          <div class="navbar-collapse">
-            <ul class="nav navbar-nav">
-              <li class="active">
-                <a id="home" href="#">Home</a>
-              </li>
-              <li>
-                <a id="help" href="help.html">Help</a>
-              </li>
-            </ul>
-            <ul class="nav pull-right navbar-nav">
-              <li id="logout-menu">
-                <a id="logout" href="#">Logout</a>
-              </li>
-            </ul>
-          </div>
-        </div>
-      </div>
-    </div>    
-    <!-- Home Page -->
+    <div id="wrap">
+      
+      <!-- Logged out page -->
       <div id="logon">
-        <div id="header">
-          <h1>Welcome to Your Secure Counterparty Web Wallet</h1>
-          <h2 style="font-size: 1.5em; text-align: center; padding: 0;color: #333;">Trade derivatives, place bets, issue stocks or assets, and more.</h2>
-          <div id="form-well" style="margin-top:30px">
+        <h1 style="font-size: 2em; text-align: center">Welcome to Your Secure Counterparty Web Wallet</h1>
+        <h2 style="font-size: 1.5em; text-align: center; padding-bottom: 5px; color: #333">Trade derivatives, place bets, issue stocks or assets, and more.</h2>
+        <div id="form-well" style="margin-top:40px">
+          <div class="panel panel-default">
+            <div class="panel-heading">
+              <h3 class="panel-title"><b>Log Into Your Wallet</b></h3>
+            </div>
+            <div class="panel-body">
+              <form class="form-inline" role="form">
+                <input id="password" placeholder="Enter your Counterwallet 12 word passphrase." value="" class="form-control" type="password">
+                <div class="pull-right">
+                  <button type="button" id="open-sesame" disabled="" data-toggle="collapse" data-target="#create-keys" class="btn btn-default">Open Wallet</button>
+                </div>
+                
+              </form>
+              <div id="create-keys" class="collapse">
+                <div class="progress" style="margin-top:15px;">
+                  <div class="progress-bar" id="seed-progress" style="width: 0%;"></div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div id="pre-create-wallet" style="text-align:center">
+            <p style="font-size:1.7em">or&nbsp;              
+            <button type="button" id="generate-password" class="btn btn-success btn-lg">Create a new wallet</button>
+            </p>
+          </div>
+          <div id="create-wallet" style="display:none">
+            <br/>
             <div class="panel panel-default">
               <div class="panel-heading">
-                <h3 class="panel-title">Log into your wallet</h3>
+                <h3 class="panel-title">To use Counterwallet you need a passphrase.</h3>
               </div>
               <div class="panel-body">
+                <p>We have created a passphrase for you in the box below.</p>
                 <form class="form-inline" role="form">
-                  <input id="password" placeholder="Enter your Counterwallet 12 word passphrase." value="" class="form-control" type="password">
+                  <input id="generated" readonly="" value="" class="input-medium form-control" type="text">
                   <div class="pull-right">
-                    <button type="button" id="open-sesame" disabled="" data-toggle="collapse" data-target="#create-keys" class="btn btn-default">Open Wallet</button>
+                    <button class="btn btn-default" id="regenerate-password" data-toggle="tooltip" title="Click to generate another random passphrase." type="button"><i class="icon-repeat"></i></button>
                   </div>
-                  
                 </form>
-                <div id="create-keys" class="collapse">
-                  <div class="progress">
-                    <div class="progress-bar" id="seed-progress" style="width: 0%;"></div>
-                  </div>
+                <div class="alert alert-danger" style="margin-top:15px;">
+                  <p style="font-weight:bold;text-align:center;font-size:1.3em">Write your passphrase down and keep it safe.</p>
+                  <p style="font-weight:bold;text-decoration:underline;text-align:center;font-size:1.2em">
+                    If you loose this passphrase, you will loose access to your wallet.
+                  </p>
+                  <p style="font-weight:bold;text-decoration:underline;text-align:center;font-size:1.2em">
+                    If someone gets your passphrase, they can gain access to your wallet.
+                  </p>
+                </div>
+                <p>To log into your wallet, input your passphase in the wallet login textbox above, and press the "Open Wallet" button.</p>
                 </div>
               </div>
-            </div>
-            <div id="pre-create-wallet" style="text-align:center">
-              <p style="font-size:1.7em">or</p>              
-              <button type="button" id="generate-password" class="btn btn-success btn-lg">Create a new wallet</button>
-            </div>
-            <div id="create-wallet" style="display:none">
-              <br/>
-              <div class="panel panel-default">
-                <div class="panel-heading">
-                  <h3 class="panel-title">To use Counterwallet you need a passphrase.</h3>
-                </div>
-                <div class="panel-body">
-                  <p>We have created a passphrase for you in the box below.</p>
-                  <form class="form-inline" role="form">
-                    <input id="generated" readonly="" value="" class="input-medium form-control" type="text">
-                    <button class="btn btn-default" id="regenerate-password" data-toggle="tooltip" title="Click to generate another random passphrase." type="button"><i class="icon-repeat"></i></button>
-                  </form>
-                  <div class="alert alert-danger" style="margin-top:15px;">
-                    <p style="font-weight:bold;text-align:center;font-size:1.3em">Write your passphrase down and keep it safe.</p>
-                    <p style="font-weight:bold;text-decoration:underline;text-align:center;font-size:1.2em">
-                      If you loose this passphrase, you will loose access to your wallet.
-                    </p>
-                    <p style="font-weight:bold;text-decoration:underline;text-align:center;font-size:1.2em">
-                      If someone gets your passphrase, they can gain access to your wallet.
-                    </p>
-                  </div>
-                  <p>To log into your wallet, input your passphase in the wallet login textbox above, and press the "Open Wallet" button.</p>
-                  </div>
-                </div>
-              </div>              
-            </div>
-          </div>
-        </div>
-        <br/><br/>
-        <div id="extra-info" class="container" style="background-color:#DEDEDE;border:1px solid #CCC">
+            </div>              
+        </div> <!-- form-well -->
+        <div id="extra-info" class="container">
           <h3 class="sales-title">Why should I use Counterwallet?</h3>
           <h4 class="sales-subtitle">We're a very secure online wallet with a goal of supporting all Counterparty functionality.</h4>
           <h4 class="sales-subtitle">Create and access your wallet with a single passphrase, with no funds stored locally or on our servers.</h4>
@@ -166,18 +146,38 @@
           </div>
         </div>
       </div>
-    <!-- My Addresses -->
-    <div class="container">
-      <div id="site" class="tab-pane fade in ">
-        <div class="row">
-          <div class="col-sm-3 col-md-3">
-            <ul class="nav nav-list">
-              <li class="nav-header">Wallet Options</li>
-              <li class="active"><a href="#" id="your-addresses-nav"><i class="icon-align-justify"></i>Your Addresses</a></li>
-              <li><a href="#" id="make-payment-nav"><i class="icon-share"></i>Make a Payment</a></li>
-            </ul>
+      
+      <!-- Logged in site -->
+      <div id="site" class="container" style="display: none;">
+        <!-- Navbar -->
+        <div class="navbar navbar-fixed-top navbar-default nav-tabs" role="navigation">
+          <div class="container">
+            <div class="navbar-header">
+              <a class="navbar-brand" href="#home">Counterwallet</a>
+            </div>
+            <div class="navbar-collapse">
+              <ul id="menubar" class="nav navbar-nav">
+                <li class="active"><a href="#home" data-toggle="tab">Home</a></li>
+                <li><a href="#send" data-toggle="tab">Send Funds</a></li>
+                <li class="dropdown">
+                  <a href="#" class="dropdown-toggle" data-toggle="dropdown">Trading <b class="caret"></b></a>
+                  <ul class="dropdown-menu">
+                    <li><a href="#trading-markets" data-toggle="tab">Markets</a></li>
+                    <li><a href="#trading-buysell" data-toggle="tab">Buy/Sell</a></li>
+                    <li><a href="#trading-history" data-toggle="tab">History</a></li>
+                  </ul>
+                </li>
+                <li id="logout-menu">
+                  <a id="logout" href="#">Logout</a>
+                </li>
+              </ul>
+            </div>
           </div>
-          <div id="your-addresses" class="col-sm-9 col-md-9">
+        </div> <!--Navbar-->    
+        
+        <!-- LOGGED IN HOME TAB (VIEW ADDRESSES/ASSETS) -->
+        <div id="tabcontent" class="tab-content">
+          <div class="tab-pane fade in active" id="home">
             <h4>Your Bitcoin Addresses</h4>
             <table class="table table-bordered table-striped">
               <thead>
@@ -239,7 +239,9 @@
               </tr>
             </tbody></table>
           </div>
-          <div class="col-sm-9 col-md-9" id="tx">
+          
+          <!-- SEND FUNDS/ASSETS -->
+          <div class="tab-pane fade" id="send">
             <h4>Make a Payment</h4>
             <form action="/" class="form-vertical" method="get">
               <fieldset>
@@ -289,7 +291,6 @@
                 </div>
               </fieldset>
             </form>
-
             <div id="verifyModal" class="modal hide">
               <div class="modal-header">
                 <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
@@ -337,7 +338,6 @@
                 <button id="sendPayment" data-dismiss="modal" class="btn btn-primary">Send Payment</button>
               </div>
             </div>
-
             <div id="alertModal" class="modal hide">
                 <div class="modal-header">
                   <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
@@ -350,15 +350,16 @@
                   <a href="#" data-dismiss="modal" class="btn btn-default">Close</a>
                 </div>
             </div>
-
           </div>
-        </div>
+          
+        </div> <!-- all tabcontent -->
+      </div> <!-- logged in site -->
+    </div> <!-- main wrap div -->
+
+    <!-- FOOTER -->
+    <div id="footer">
+      <div class="container">
+        <p><small>Counterwallet © 2014, Counterparty Team -- <a href="https://github.com/xnova/counterwallet">View Source Code</a></small></p>
       </div>
     </div>
-    <footer>
-      <p><small>Counterwallet © 2014, Counterparty Team -- <a href="https://github.com/xnova/counterwallet">View Source Code</a> 
-        </small>
-      </p>
-    </footer>
-  
 </body></html>

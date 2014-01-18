@@ -1,8 +1,84 @@
-body {
-  position: relative;
+/* 
+ * Primary
+ */
+html, body {
+  height: 100%; /* The html and body elements cannot have any padding or margin for sticky footer. */
 }
 
-input[disabled],select[disabled],textarea[disabled],input[readonly],select[readonly],textarea[readonly]{background-color:#eeeeee;border-color:#ddd; cursor: auto;}
+#wrap { /* Wrapper for page content to push down footer */
+  min-height: 100%;
+  height: auto;
+  margin: 0 auto -35px; /* Negative indent footer by its height */
+  padding: 0 0 35px; /* Pad bottom by footer height */
+}
+
+#footer {
+  height: 35px; /* Set the fixed height of the footer here */
+  /*background-color: #f5f5f5;*/
+  padding-top: 6px;
+  text-align:center;
+}
+
+input[disabled],select[disabled],textarea[disabled],input[readonly],select[readonly],textarea[readonly]{
+  background-color:#eeeeee;
+  border-color:#ddd; cursor: auto;
+}
+
+
+/* 
+ * Logon page specific
+ */
+#logon {
+  padding-top: 120px;
+}
+
+.sales-title {
+  text-align: center;
+  margin-top: 20px;
+  margin-bottom: 20px;
+}
+.sales-subtitle {
+  text-align: center;
+  margin-bottom: 14px
+  margin-top: -10px;
+  color: #666;
+}
+
+#form-well {
+    width: 650px;
+    margin: 0 auto;
+    padding-bottom: 0px;
+}
+
+#password {
+    width: 480px;
+}
+
+#generated {
+    width: 570px;
+    cursor: text;
+}
+
+#form-well .btn-success {
+  width: 250px;
+}
+
+#open-sesame {
+  width: 120px;
+}
+
+#extra-info {
+  background-color:#EEE;
+  border:1px solid #CCC;
+  margin-top: 80px;  
+}
+
+/* 
+ * Logged in site specific
+ */
+#site {
+  padding-top: 70px;
+}
 
 #qr {
     width: 185px;
@@ -23,67 +99,3 @@ legend {
     display: none;
 }
 
-#site {
-  padding-top: 70px;
-}
-
-/* Front page password form */
-
-#header {
-  padding-top: 120px;
-}
-
-.sales-title {
-  text-align: center;
-  margin-top: 20px;
-  margin-bottom: 20px;
-}
-.sales-subtitle {
-  text-align: center;
-  margin-bottom: 14px
-  margin-top: -10px;
-  color: #666;
-}
-
-#header h1 {
-  font-size: 2em;
-  text-align: center;
-}
-
-#header h2 {
-  font-size: 1.5em;
-  text-align: center;
-  padding-bottom: 5px;
-}
-
-#form-well {
-    width: 650px;
-    margin: 0 auto;
-    padding-bottom: 0px;
-}
-
-#form-well input {
-    margin-bottom: 0;
-}
-
-#form-well input[type='text'] {
-    width: 570px;
-}
-
-#form-well input[type='password'] {
-    width: 470px;
-}
-
-#form-well .btn-success {
-  width: 250px;
-}
-
-#open-sesame {
-  width: 120px;
-}
-
-/* Footer */
-footer p {
-  margin-top:15px;
-  text-align: center;
-}
