@@ -159,12 +159,14 @@ $(document).ready(function() {
   }
   
   function generatePassword() {
-  
+    $('#pre-create-wallet').hide();
+    $('#create-wallet').show();    
+
     $('#generated').focus();
     
     if($('#generated').val() != '')
       return true;
-      
+
     var pk = new Array(32);
     rng_get_bytes(pk);
     var seed = Crypto.util.bytesToHex(pk.slice(0,16));
@@ -358,7 +360,7 @@ $(document).ready(function() {
           fval += o[i].fval;
       }
       
-      // Add on the 0.0004 CarbonWallet fee.
+      // Add on the 0.0004 Counterwallet fee.
       TX.addOutput('1carbQXAt6aUcePdFcfS3Z8JNwMCMDb4V', parseFloat('0.0004'));
       fval += parseFloat('0.0004');
 

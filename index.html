@@ -1,16 +1,15 @@
-<!DOCTYPE html> 
-<html lang="en">
-  <head>
+<!doctype html>
+<html lang="en"><head>
     <meta charset="utf-8">
-    <title>CarbonWallet - Secure Deterministic Bitcoin Wallet</title>
+    <title>Counterwallet - Secure Deterministic Wallet for Counterparty</title>
     <meta content="width=device-width, initial-scale=1.0" name="viewport">
-    <meta content="Deterministic Bitcoin Wallet" name="description">
-    <meta content="carbonwallet" name="author">
+    <meta content="Counterparty Wallet" name="description">
+    <meta content="counterwallet" name="author">
     
     <!-- If I have seen further it is by standing on the shoulders of giants. -->
     
     <!-- Style sheets -->
-    <link href="css/bootstrap-combined.no-icons.min.css" rel="stylesheet">
+    <link href="//netdna.bootstrapcdn.com/bootstrap/3.0.3/css/bootstrap.min.css" rel="stylesheet">
     <link href="css/font-awesome.css" rel="stylesheet">
     <link href="css/default.css" rel="stylesheet">
     <link href="css/packaged-app.css" rel="stylesheet">
@@ -35,45 +34,37 @@
     <script src="extjs/bitcoin/script.js"></script> 
     <script src="extjs/bitcoin/transaction.js"></script> 
     
-    <!-- JQuery and bootstrap. -->
-    <script src="extjs/jquery-1.9.1.js"></script> 
-    <script src="extjs/bootstrap-collapse.js"></script> 
-    <script src="extjs/bootstrap-transition.js"></script> 
-    <script src="extjs/bootstrap-modal.js"></script> 
-    <script src="extjs/bootstrap-tooltip.js"></script> 
-    <script src="extjs/bootstrap-popover.js"></script> 
+    <!-- JQuery and Twitter Bootstrap. -->
+    <script src="//code.jquery.com/jquery-1.10.1.min.js"></script>
+    <script src="//code.jquery.com/jquery-migrate-1.2.1.min.js"></script>
+    <script src="//netdna.bootstrapcdn.com/bootstrap/3.0.3/js/bootstrap.min.js"></script>
     
     <!-- Other external libraries. -->
     <script src="extjs/qrcode.js"></script> 
     <script src="extjs/mnemonic.js"></script> 
     <script src="extjs/electrum.js"></script> 
     
-    <!-- JavaScript created specifically for CarbonWallet. -->
+    <!-- JavaScript created specifically for Counterwallet. -->
     <script src="js/tx.js"></script> 
     <script src="js/blockchain.js"></script> 
     <script src="js/wallet.js"></script> 
-    <script src="js/carbonwallet.js"></script> 
+    <script src="js/counterwallet.js"></script> 
     <link href="favicon.png" rel="icon" type="image/png">
   </head>
   <body>
-    <div class="navbar navbar-fixed-top">
-      <div class="navbar-inner">
-        <div class="container">
-          <a class="btn btn-navbar" data-target=".nav-collapse" data-toggle="collapse"> 
-          <span class="icon-bar"></span> <span class="icon-bar"></span> 
-          <span class="icon-bar"></span> 
-          </a> 
-          <a class="brand" href="/"><i class="icon-money"></i> CarbonWallet</a> 
-          <div class="nav-collapse">
-            <ul class="nav">
+    <div class="navbar navbar-fixed-top navbar-default">
+      <div class="container">
+        <div class="container"><div class="navbar-header"><a class="navbar-brand" href="/">Counterwallet</a></div>
+          <div class="navbar-collapse">
+            <ul class="nav navbar-nav">
               <li class="active">
                 <a id="home" href="#">Home</a>
               </li>
               <li>
-                <a id="blog" href="/blog.html">Blog</a>
+                <a id="help" href="help.html">Help</a>
               </li>
             </ul>
-            <ul class="nav pull-right">
+            <ul class="nav pull-right navbar-nav">
               <li id="logout-menu">
                 <a id="logout" href="#">Logout</a>
               </li>
@@ -81,183 +72,112 @@
           </div>
         </div>
       </div>
-    </div>
+    </div>    
     <!-- Home Page -->
       <div id="logon">
         <div id="header">
-          <h1>It's time to get serious about online Bitcoin wallets.</h1>
-          <div class="well" id="form-well">
-            <form>
-              <input id="password" placeholder="Enter your CarbonWallet 12 word passphrase." value="" class="input-medium" type="password" />
-              <input id="open-sesame" disabled data-toggle="collapse" data-target="#create-keys" class="btn disabled" value="Open Wallet" />
-              <input id="generate-password" class="btn btn-success" data-toggle="collapse" data-target="#create-wallet" value="Start a new wallet" />
-            </form>
-            <div id="create-keys" class="collapse">
-              <div class="progress">
-                <div class="bar" id="seed-progress" style="width: 0%;"></div>
+          <h1>Welcome to Your Secure Counterparty Web Wallet</h1>
+          <h2 style="font-size: 1.5em; text-align: center; padding: 0;color: #333;">Trade derivatives, place bets, issue stocks or assets, and more.</h2>
+          <div id="form-well" style="margin-top:30px">
+            <div class="panel panel-default">
+              <div class="panel-heading">
+                <h3 class="panel-title">Log into your wallet</h3>
+              </div>
+              <div class="panel-body">
+                <form class="form-inline" role="form">
+                  <input id="password" placeholder="Enter your Counterwallet 12 word passphrase." value="" class="form-control" type="password">
+                  <div class="pull-right">
+                    <button type="button" id="open-sesame" disabled="" data-toggle="collapse" data-target="#create-keys" class="btn btn-default">Open Wallet</button>
+                  </div>
+                  
+                </form>
+                <div id="create-keys" class="collapse">
+                  <div class="progress">
+                    <div class="progress-bar" id="seed-progress" style="width: 0%;"></div>
+                  </div>
+                </div>
               </div>
             </div>
-            <div id="create-wallet" class="collapse">
-              <h4>To use CarbonWallet you need a passphrase.</h4>
-              <p>We have created a passphrase for you in the box below. Write 
-                your passphrase down and keep it safe.
-              </p>
-              <p>
-                <input id="generated" readonly value="" class="input-medium" type="text" />
-                <button class="btn" id="regenerate-password" data-toggle="tooltip" title="Click to generate another random passphrase." type="button"><i class="icon-repeat"></i></button>
-              </p>
-              <p>Make sure no-one is near you when you use this passphrase. 
-                If anyone sees your passphrase, or gets it from you, they can steal your Bitcoins.
-              </p>
-              <p><span class="label label-info">We use Passphrases because they are much more 
-              secure than passwords.</span></p>
+            <div id="pre-create-wallet" style="text-align:center">
+              <p style="font-size:1.7em">or</p>              
+              <button type="button" id="generate-password" class="btn btn-success btn-lg">Create a new wallet</button>
+            </div>
+            <div id="create-wallet" style="display:none">
+              <br/>
+              <div class="panel panel-default">
+                <div class="panel-heading">
+                  <h3 class="panel-title">To use Counterwallet you need a passphrase.</h3>
+                </div>
+                <div class="panel-body">
+                  <p>We have created a passphrase for you in the box below.</p>
+                  <form class="form-inline" role="form">
+                    <input id="generated" readonly="" value="" class="input-medium form-control" type="text">
+                    <button class="btn btn-default" id="regenerate-password" data-toggle="tooltip" title="Click to generate another random passphrase." type="button"><i class="icon-repeat"></i></button>
+                  </form>
+                  <div class="alert alert-danger" style="margin-top:15px;">
+                    <p style="font-weight:bold;text-align:center;font-size:1.3em">Write your passphrase down and keep it safe.</p>
+                    <p style="font-weight:bold;text-decoration:underline;text-align:center;font-size:1.2em">
+                      If you loose this passphrase, you will loose access to your wallet.
+                    </p>
+                    <p style="font-weight:bold;text-decoration:underline;text-align:center;font-size:1.2em">
+                      If someone gets your passphrase, they can gain access to your wallet.
+                    </p>
+                  </div>
+                  <p>To log into your wallet, input your passphase in the wallet login textbox above, and press the "Open Wallet" button.</p>
+                  </div>
+                </div>
+              </div>              
             </div>
           </div>
-          <h2>We don't store your Bitcoins locally or on our servers.</h2>
         </div>
-        
-        <div class="container">
-          <h3 class="sales-title">Why should I use CarbonWallet ?</h3>
-          <h4 class="sales-subtitle">We're a very secure online wallet with low payment fees (0.0005 BTC). Read on...</h4>
+        <br/><br/>
+        <div id="extra-info" class="container" style="background-color:#DEDEDE;border:1px solid #CCC">
+          <h3 class="sales-title">Why should I use Counterwallet?</h3>
+          <h4 class="sales-subtitle">We're a very secure online wallet with a goal of supporting all Counterparty functionality.</h4>
+          <h4 class="sales-subtitle">Create and access your wallet with a single passphrase, with no funds stored locally or on our servers.</h4>
           <div class="row">
-            <div class="span4">
+            <div class="col-sm-4 col-md-4">
               <h4><i class="icon-ok-sign"></i> We are determined.</h4>
-              <p>CarbonWallet is an online <a href="https://en.bitcoin.it/wiki/Deterministic_wallet">deterministic wallet</a>. 
+              <p>Counterwallet is an online <a href="https://en.bitcoin.it/wiki/Deterministic_wallet">deterministic wallet</a>. 
               Your passphrase is turned into a number which is then turned into Bitcoin Addresses. 
               </p>
               
               <p>Your passphrase is your wallet access and wallet backup.</p> 
             </div>
-            <div class="span4">
+            <div class="col-sm-4 col-md-4">
               <h4><i class="icon-ok-sign"></i> We are a zero footprint wallet.</h4>
               <p>
                 We don't store your Bitcoins locally or on our servers, only in your browser memory. 
                 No trace is left on your device once you logout of your session.</p> 
               <p> 
-              Thiefs have fewer angles of attack with CarbonWallet.
+              Theives have fewer angles of attack with Counterwallet.
               </p>
             </div>
-            <div class="span4">
+            <div class="col-sm-4 col-md-4">
               <h4><i class="icon-ok-sign"></i> We support online or cold storage.</h4>
-              <p>Need to store large sums of Bitcoins ? CarbonWallet supports 
+              <p>Need to store large sums of Bitcoins ? Counterwallet supports 
               <a href="https://en.bitcoin.it/wiki/Cold_storage">Cold Storage</a>.</p> 
               <p>  
-              You can use CarbonWallet online or offline on a computer you know is clean and safe. 
+              You can use Counterwallet online or offline on a computer you know is clean and safe.<br/> 
               <i class="icon-download"></i> 
-              <a href="https://github.com/carbonwallet/carbonwallet.github.io/archive/master.zip">Download CarbonWallet</a>
+              <a href="https://github.com/xnova/counterwallet/archive/master.zip">Download Counterwallet</a>
               </p>
-            </div>
-          </div>
-          
-          <hr />
-          <h3 class="sales-title">We will do everything we can to protect your Bitcoins.</h3>
-          <h4 class="sales-subtitle">However you also need to take responsibility and follow these guidelines.</h4>
-          <div class="row">
-            <div class="span4">
-              <h4><i class="icon-ban-circle"></i> Never give out your passphrase.</h4>
-              <p>There are several ways thiefs will try and get your passphrase. 
-              These attacks apply to all Bitcoin wallets so read up and be safe.
-              </p>
-              <ol>
-                <li>
-                  <a href="http://en.wikipedia.org/wiki/Phishing">Phishing</a>
-                  Always make sure you are on the carbonwallet.com address and never click links in emails.
-                </li>
-                <li>
-                  <a href="http://en.wikipedia.org/wiki/Social_engineering_(security)">Social engineering</a>
-                  Be very careful about what you install on the devices you own.
-                </li>
-                <li>
-                  Watch out for <a href="http://en.wikipedia.org/wiki/Malware">Malware</a>
-                  including <a href="http://en.wikipedia.org/wiki/Keystroke_logging">Keyloggers</a>
-                  or malicious software often disguised as a genuine piece of software.
-                </li>
-              </ol>
-            </div>
-            <div class="span4">
-              <h4><i class="icon-ban-circle"></i> Consider multiple passphrases.</h4>
-              <p>Think about passphrases the way you keep money in real life, 
-              not all in one place. For example.</p>
-
-              <ul>
-                <li><span class="label label-info">A day to day passphrase</span>. 
-                You could store a small amount of 
-                Bitcoins here so you don't lose all your Bitcoins if it is compromised. 
-                Write the passphrase down and carry it in your wallet.</li>
-
-                <li><span class="label label-info">A Bank account style passphrase</span>. One that you only use in a safe environment, 
-                i.e. a computer with good virus protection. Hold moderate amounts of Bitcoins here.</li>
-
-                <li><span class="label label-info">A savings passphrase</span>. A passphrase you created in cold storage. 
-                Be very careful when you use this password.</li>
-              </ul>
-            </div>
-            <div class="span4">
-              <h4><i class="icon-ban-circle"></i> Never lose your passphrases.</h4>
-              <p><span class="label label-important">Without the passphrase your coins are gone</span>. 
-              There is no way to retrieve CarbonWallet wallets 
-              without the passphrase.</p> 
-              <p>The best way to keep passphrases safe is... </p> 
-              
-              <ul>
-                <li>Write them down</li>
-                <li>keep them somewhere secure.</li> 
-              </ul>
-              <p><img src="images/written.jpg" alt="Write it down." class="img-polaroid"></p>
-            </div>
-            
-          </div>
-          
-          <hr />
-          <h3 class="sales-title">More Technical Details.</h3>
-          <h4 class="sales-subtitle">We are using the latest in open repositories and best practices to stay secure.</h4>
-          <div class="row">
-            <div class="span4">
-              <h4><i class="icon-key"></i> We are using 128bit passphrases.</h4>
-              <p>According to "<a href="http://www.grc.com/haystack.htm">how big is your haystack?</a>" Our passphrases would take 
-              <em>trillions of 
-               centuries</em> to break under a massive cracking scenario. </p>
-              <p>We are using 
-              <a href="https://developer.mozilla.org/en/docs/DOM/window.crypto.getRandomValues">
-              window.crypto.getRandomValues</a> whenever available for cryptographically random values.</p>
-              <p>Our passphrases are compatible with the 
-              <a href="http://electrum.org/">Electrum Bitcoin client</a>
-              and <a href="http://brainwallet.org/#chains">Brainwallet.org</a>.</p>
-            </div>
-            <div class="span4">
-              <h4><i class="icon-random"></i> We generate bitcoin addresses deterministically.</h4>
-              <p>
-                Your passphrase is turned into a 128bit key which is then stretched into 10 bitcoin addresses. 
-                There is no limit but for now 10 per passphrase should be adequate.</p>
-                
-              <p>Determined Bitcoin addresses mean no need for a remote server to hold keys and no need
-              to store keys on a local hard drive.</p>
-            </div>
-            <div class="span4">
-              <h4><i class="icon-user"></i> CarbonWallet is open and public domain.</h4>
-              <p>
-              All source code is available on Github and the site is a Github page. </p>
-              <p>All commits and changes are open for peer review and the site is deployed 
-              directly from the repository.</p>
-              <p><strong>Extra security through open source code.</strong></p>
-              <p>All JavaScript is unminimized for easier inspection.</p>
             </div>
           </div>
         </div>
-        
       </div>
     <!-- My Addresses -->
     <div class="container">
       <div id="site" class="tab-pane fade in ">
         <div class="row">
-          <div class="span3">
+          <div class="col-sm-3 col-md-3">
             <ul class="nav nav-list">
               <li class="nav-header">Wallet Options</li>
               <li class="active"><a href="#" id="your-addresses-nav"><i class="icon-align-justify"></i>Your Addresses</a></li>
               <li><a href="#" id="make-payment-nav"><i class="icon-share"></i>Make a Payment</a></li>
             </ul>
           </div>
-          <div id="your-addresses" class="span9">
+          <div id="your-addresses" class="col-sm-9 col-md-9">
             <h4>Your Bitcoin Addresses</h4>
             <table class="table table-bordered table-striped">
               <thead>
@@ -267,7 +187,7 @@
                   <th>Actions</th>
                 </tr>
               </thead>
-              <tr>
+              <tbody><tr>
                 <td><code id="address0"></code></td>
                 <td><span><strong id="balance0">&nbsp;</strong></span></td>
                 <td><i id="qrcode0" class="icon-qrcode"></i></td>
@@ -317,54 +237,54 @@
                 <td><span><strong id="balance9">&nbsp;</strong></span></td>
                 <td><i id="qrcode9" class="icon-qrcode"></i></td>
               </tr>
-            </table>
+            </tbody></table>
           </div>
-          <div class="span9" id="tx">
+          <div class="col-sm-9 col-md-9" id="tx">
             <h4>Make a Payment</h4>
             <form action="/" class="form-vertical" method="get">
               <fieldset>
-                <div class="control-group form-hide">
+                <div class="form-hide form-group">
                   <label class="control-label" for="txSec">Private Key</label> 
                   <div class="controls"> 
-                    <input class="span5" id="txSec" type="text"> 
-                    <span class="help-inline errormsg"></span> 
+                    <input class="span5 form-control" id="txSec" type="text"> 
+                    <span class="errormsg help-block"></span> 
                   </div>
                 </div>
-                <div class="control-group">
+                <div class="form-group">
                   <label class="control-label" for="txDropAddr">Source Address</label> 
                   <div class="controls">
                     <select class="span4" id="txDropAddr"> 
                     </select>
-                    <div class="input-prepend"> <span class="add-on">BTC</span><input class="span2" id="txBalance" readonly type="text"> 
+                    <div class="input-prepend"> <span class="add-on">BTC</span><input class="span2 form-control" id="txBalance" readonly="" type="text"> 
                     </div>
                     <!--<button class="btn" id="txDropGetUnspent" title="Reload" type="button"><i class="icon-repeat"></i></button> 
                       <button class="btn" data-target="#txUnspentForm" data-toggle="collapse" id="txToggle" type="button">Edit Inputs</button>-->
                   </div>
                 </div>
-                <div class="control-group txCC">
+                <div class="txCC form-group">
                   <label class="control-label" for="txDest">Destination Address</label> 
                   <div class="controls">
-                    <input id="txDest" class="span4 txDest" type="text" placeholder="E.g. 1BountYypWttTvAJcMJVvSRDfX3TJ182To" autocomplete="off"> 
+                    <input id="txDest" class="span4 txDest form-control" type="text" placeholder="E.g. 1BountYypWttTvAJcMJVvSRDfX3TJ182To" autocomplete="off"> 
                     <div class="input-prepend"> 
                       <span class="add-on">BTC</span>
-                      <input class="span2" id="txValue" placeholder="E.g. 0.01" type="text" autocomplete="off"> 
+                      <input class="span2 form-control" id="txValue" placeholder="E.g. 0.01" type="text" autocomplete="off"> 
                     </div>
-                    <span class="help-inline errormsg">
-                    <button class="btn input-up" style="margin-bottom: 10px" id="txAddDest" type="button">+</button> 
-                    <button class="btn input-up" style="margin-bottom: 10px" id="txRemoveDest" type="button" disabled>&ndash;</button> 
+                    <span class="errormsg help-block">
+                    <button class="btn input-up btn-default" style="margin-bottom: 10px" id="txAddDest" type="button">+</button> 
+                    <button class="btn input-up btn-default" style="margin-bottom: 10px" id="txRemoveDest" type="button" disabled="">–</button> 
                     </span> 
                   </div>
                 </div>
-                <div class="control-group">
+                <div class="form-group">
                   <label class="control-label" for="txFee">Fee (Includes Miners Fee)</label> 
                   <div class="controls">
-                    <div class="input-prepend"><span class="add-on">BTC</span><input readonly class="span2" id="txFee" type="text" value="0.0005"></div>
+                    <div class="input-prepend"><span class="add-on">BTC</span><input readonly="" class="span2 form-control" id="txFee" type="text" value="0.0005"></div>
                   </div>
                 </div>
-                <div class="control-group">
+                <div class="form-group">
                   <label class="control-label" for="txFee">You can check the payment before it is sent to the network.</label> 
                   <div class="controls"> 
-                    <button class="btn" disabled style="margin-bottom: 10px" id="txSend" type="button">Verify and Send</button>
+                    <button class="btn btn-default" disabled="" style="margin-bottom: 10px" id="txSend" type="button">Verify and Send</button>
                   </div>
                 </div>
               </fieldset>
@@ -372,7 +292,7 @@
 
             <div id="verifyModal" class="modal hide">
               <div class="modal-header">
-                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
                 <h6>Send payment of <span id="verifyAmountTitle">0.005</span> BTC from <span id="verifySource">1BountYypWttTvAJcMJVvSRDfX3TJ182</span></h6>
               </div>
               <div id="verifyBody" class="modal-body">
@@ -383,29 +303,28 @@
                       <th>Amount</th>
                     </tr>
                   </thead>
-                  <tr>
-                    <td><small><span class="label">A fee of 0.0005 BTC will be added.</span></small></td>
+                  <tbody><tr>
+                    <td><small><span class="label label-default">A fee of 0.0005 BTC will be added.</span></small></td>
                     <td><small><span><strong>0.0005</strong></span></small></td>
                   </tr>
-                  <tfoot>
+                  </tbody><tfoot>
                     <tr>
                       <td><strong>Total</strong></td>
                       <td><strong id="verifyTotal">50.05</strong> BTC</td>
                     </tr>
                   </tfoot>
                 </table>
-                <p id="tx-toggle" >
-                  <a data-toggle="collapse" 
-                  data-target="#advanced-details">Show/Hide Transaction Details (Advanced users)</a>
+                <p id="tx-toggle">
+                  <a data-toggle="collapse" data-target="#advanced-details">Show/Hide Transaction Details (Advanced users)</a>
                 </p>
                 <div id="advanced-details" class="collapse">
-                  <div class="control-group">
+                  <div class="form-group">
                     <label class="control-label" for="txJSON">JSON Transaction</label> 
                     <div class="controls"> 
                       <textarea class="span5" id="txJSON" rows="4"></textarea>
                     </div>
                   </div>
-                  <div class="control-group">
+                  <div class="form-group">
                     <label class="control-label" for="txHex">Raw Transaction</label> 
                     <div class="controls"> 
                       <textarea class="span5" id="txHex" rows="4"></textarea>
@@ -414,21 +333,21 @@
                 </div>
               </div>
               <div class="modal-footer">
-                <a href="#" data-dismiss="modal" class="btn">Cancel</a>
+                <a href="#" data-dismiss="modal" class="btn btn-default">Cancel</a>
                 <button id="sendPayment" data-dismiss="modal" class="btn btn-primary">Send Payment</button>
               </div>
             </div>
 
             <div id="alertModal" class="modal hide">
                 <div class="modal-header">
-                  <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                  <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
                   <h3>Response</h3>
                 </div>
                 <div class="modal-body">
                   <p id="alertModalText"></p>
                 </div>
                 <div class="modal-footer">
-                  <a href="#" data-dismiss="modal" class="btn">Close</a>
+                  <a href="#" data-dismiss="modal" class="btn btn-default">Close</a>
                 </div>
             </div>
 
@@ -437,12 +356,9 @@
       </div>
     </div>
     <footer>
-      <p><i class="icon-money"></i> <strong>CarbonWallet &copy; 2013</strong></p>
-      <p><small>Powered by 
-        <a href="http://pages.github.com">GitHub Pages</a> | 
-        <a href="https://github.com/carbonwallet/carbonwallet.github.io">View Source Code</a> 
+      <p><small>Counterwallet © 2014, Counterparty Team -- <a href="https://github.com/xnova/counterwallet">View Source Code</a> 
         </small>
       </p>
     </footer>
-  </body>
-</html>
+  
+</body></html>

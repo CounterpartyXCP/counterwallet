@@ -1,0 +1,135 @@
+<!doctype html>
+<html lang="en"><head>
+    <meta charset="utf-8">
+    <title>Counterwallet - More Info</title>
+    <meta content="width=device-width, initial-scale=1.0" name="viewport">
+    
+    <!-- Style sheets -->
+    <link href="//netdna.bootstrapcdn.com/bootstrap/3.0.3/css/bootstrap.min.css" rel="stylesheet">
+    <link href="css/font-awesome.css" rel="stylesheet">
+    <link href="css/default.css" rel="stylesheet">
+    <link href="css/packaged-app.css" rel="stylesheet">
+    
+    <link href="favicon.png" rel="icon" type="image/png">
+  </head>
+  <body>
+    <div class="navbar navbar-fixed-top navbar-default">
+      <div class="container">
+        <div class="container"><div class="navbar-header"><a class="navbar-brand" href="/"><i class="icon-money"></i> Counterwallet</a></div>
+          <div class="navbar-collapse">
+            <ul class="nav navbar-nav">
+              <li>
+                <a id="home" href="index.html">Home</a>
+              </li>
+              <li class="active">
+                <a id="help" href="#">Help</a>
+              </li>
+            </ul>
+            <ul class="nav pull-right navbar-nav">
+              <li id="logout-menu">
+                <a id="logout" href="#">Logout</a>
+              </li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>    
+    <div id="content" style="margin-top: 60px">
+        <div class="container">
+          <h3 class="sales-title">We will do everything we can to protect your Bitcoins.</h3>
+          <h4 class="sales-subtitle">However you also need to take responsibility and follow these guidelines.</h4>
+          <div class="row">
+            <div class="col-sm-4 col-md-4">
+              <h4><i class="icon-ban-circle"></i> Never give out your passphrase.</h4>
+              <p>There are several ways thiefs will try and get your passphrase. 
+              These attacks apply to all Bitcoin wallets so read up and be safe.
+              </p>
+              <ol>
+                <li>
+                  <a href="http://en.wikipedia.org/wiki/Phishing">Phishing</a>
+                  Always make sure you are on the counterwallet.com address and never click links in emails.
+                </li>
+                <li>
+                  <a href="http://en.wikipedia.org/wiki/Social_engineering_(security)">Social engineering</a>
+                  Be very careful about what you install on the devices you own.
+                </li>
+                <li>
+                  Watch out for <a href="http://en.wikipedia.org/wiki/Malware">Malware</a>
+                  including <a href="http://en.wikipedia.org/wiki/Keystroke_logging">Keyloggers</a>
+                  or malicious software often disguised as a genuine piece of software.
+                </li>
+              </ol>
+            </div>
+            <div class="col-sm-4 col-md-4">
+              <h4><i class="icon-ban-circle"></i> Consider multiple passphrases.</h4>
+              <p>Think about passphrases the way you keep money in real life, 
+              not all in one place. For example.</p>
+
+              <ul>
+                <li><span class="label label-info">A day to day passphrase</span>. 
+                You could store a small amount of 
+                Bitcoins here so you don't lose all your Bitcoins if it is compromised. 
+                Write the passphrase down and carry it in your wallet.</li>
+
+                <li><span class="label label-info">A Bank account style passphrase</span>. One that you only use in a safe environment, 
+                i.e. a computer with good virus protection. Hold moderate amounts of Bitcoins here.</li>
+
+                <li><span class="label label-info">A savings passphrase</span>. A passphrase you created in cold storage. 
+                Be very careful when you use this password.</li>
+              </ul>
+            </div>
+            <div class="col-sm-4 col-md-4">
+              <h4><i class="icon-ban-circle"></i> Never lose your passphrases.</h4>
+              <p><span class="label label-important">Without the passphrase your coins are gone</span>. 
+              There is no way to retrieve Counterwallet wallets 
+              without the passphrase.</p> 
+              <p>The best way to keep passphrases safe is... </p> 
+              
+              <ul>
+                <li>Write them down</li>
+                <li>keep them somewhere secure.</li> 
+              </ul>
+              <p><img src="images/written.jpg" alt="Write it down." class="img-polaroid"></p>
+            </div>
+            
+          </div>
+          
+          <hr>
+          <h3 class="sales-title">More Technical Details.</h3>
+          <h4 class="sales-subtitle">We are using the latest in open repositories and best practices to stay secure.</h4>
+          <div class="row">
+            <div class="col-sm-4 col-md-4">
+              <h4><i class="icon-key"></i> We are using 128bit passphrases.</h4>
+              <p>According to "<a href="http://www.grc.com/haystack.htm">how big is your haystack?</a>" Our passphrases would take 
+              <em>trillions of 
+               centuries</em> to break under a massive cracking scenario. </p>
+              <p>We are using 
+              <a href="https://developer.mozilla.org/en/docs/DOM/window.crypto.getRandomValues">
+              window.crypto.getRandomValues</a> whenever available for cryptographically random values.</p>
+              <p>Our passphrases are compatible with the 
+              <a href="http://electrum.org/">Electrum Bitcoin client</a>
+              and <a href="http://brainwallet.org/#chains">Brainwallet.org</a>.</p>
+            </div>
+            <div class="col-sm-4 col-md-4">
+              <h4><i class="icon-random"></i> We generate bitcoin addresses deterministically.</h4>
+              <p>
+                Your passphrase is turned into a 128bit key which is then stretched into 10 bitcoin addresses. 
+                There is no limit but for now 10 per passphrase should be adequate.</p>
+                
+              <p>Determined Bitcoin addresses mean no need for a remote server to hold keys and no need
+              to store keys on a local hard drive.</p>
+            </div>
+            <div class="col-sm-4 col-md-4">
+              <h4><i class="icon-user"></i> Counterwallet is open and public domain.</h4>
+              <p>
+              All source code is available on Github and the site is a Github page. </p>
+              <p>All commits and changes are open for peer review and the site is deployed 
+              directly from the repository.</p>
+              <p><strong>Extra security through open source code.</strong></p>
+              <p>All JavaScript is unminimized for easier inspection.</p>
+            </div>
+          </div>
+        </div>
+    </div>
+  </body>
+</html>

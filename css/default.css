@@ -30,18 +30,17 @@ legend {
 /* Front page password form */
 
 #header {
-  background: #0F141C url('../images/header-bg.jpg') no-repeat;
-  padding-top: 70px;
+  padding-top: 120px;
 }
 
 .sales-title {
   text-align: center;
-  margin-top: 50px;
+  margin-top: 20px;
   margin-bottom: 20px;
 }
 .sales-subtitle {
   text-align: center;
-  margin-bottom: 30px;
+  margin-bottom: 14px
   margin-top: -10px;
   color: #666;
 }
@@ -49,20 +48,16 @@ legend {
 #header h1 {
   font-size: 2em;
   text-align: center;
-  color: white;
-  text-shadow: -1px -1px 2px #000;
 }
 
 #header h2 {
   font-size: 1.5em;
   text-align: center;
-  color: white;
-  padding-bottom: 20px;
-  text-shadow: -1px -1px 2px #000;
+  padding-bottom: 5px;
 }
 
 #form-well {
-    width: 600px;
+    width: 650px;
     margin: 0 auto;
     padding-bottom: 0px;
 }
@@ -72,23 +67,23 @@ legend {
 }
 
 #form-well input[type='text'] {
-    width: 520px;
+    width: 570px;
 }
 
 #form-well input[type='password'] {
-    width: 320px;
+    width: 470px;
 }
 
 #form-well .btn-success {
-  width: 125px;
+  width: 250px;
 }
 
 #open-sesame {
-  width: 80px;
+  width: 120px;
 }
 
 /* Footer */
 footer p {
-    text-align: center;
+  margin-top:15px;
+  text-align: center;
 }
-
