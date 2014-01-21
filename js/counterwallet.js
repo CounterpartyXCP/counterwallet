@@ -1,6 +1,32 @@
 // Global, hmmm.
 var timeout;
 
+function fetchData(url, onSuccess, onError, postdata) {
+  // Some cross-domain magic (to bypass Access-Control-Allow-Origin)
+  var useYQL = true;
+
+  if (useYQL) {
+      var q = 'select * from html where url="'+url+'"';
+      if (postdata) {
+          q = 'use "http://brainwallet.github.com/js/htmlpost.xml" as htmlpost; ';
+          q += 'select * from htmlpost where url="' + url + '" ';
+          q += 'and postdata="' + postdata + '" and xpath="//p"';
+      }
+      url = 'https://query.yahooapis.com/v1/public/yql?q=' + encodeURIComponent(q);
+  }
+
+  $.ajax({
+      url: url,
+      success: function(res) {
+          onSuccess(useYQL ? $(res).find('results').text() : res.responseText);
+      },
+      error:function (xhr, opt, err) {
+          if (onError)
+              onError(err);
+      }
+  });
+}
+
 function alertModal(text) {
   $('#alertModalText').text(text || 'Nevermind');
   $('#alertModal').modal();
@@ -26,7 +52,7 @@ function login_success()
 {
   $('#logon').hide();
   $('#site').show();
-  WALLET.updateAllBalances();
+  WALLET.updateAll();
   $("#txDropAddr").find("option").remove();
   
   for(i = 0; i < WALLET.getKeys().length; i++)
@@ -53,7 +79,7 @@ function makeQRCode(addr) {
 }
 
 function checkValidPassword(){
-  var password = $('#password').val()
+  var password = $('#password').val();
   var valid = true;
   
   if(password.split(' ').length != 12)
@@ -136,7 +162,7 @@ function txDropGetUnspent() {
     var addr = WALLET.getKeys()[$('#txDropAddr').val()].getBitcoinAddress().toString();
 
     $('#txUnspent').val('');
-    BLOCKCHAIN.getUnspentOutputs(addr, txParseUnspent);
+    BLOCKCHAIN.getUnspentBTCOutputs(addr, txParseUnspent);
 }
 
 function txOnChangeDest() {
@@ -348,11 +374,11 @@ $(document).ready(function() {
     Electrum.init(seed, function(r) {
         if(r % 20 == 0)
           $('#seed-progress').css('width', (r + 19) + '%'); 
-      }, 
+      },
       function(privKey) {
-        Electrum.gen(10, function(r) { 
-          WALLET.getKeys().push(new Bitcoin.ECKey(r[1])); 
-          if(WALLET.getKeys().length == 10)
+        Electrum.gen(WALLET.NUMADDRESSES, function(r) { 
+          WALLET.addKey(new Bitcoin.ECKey(r[1])); //blank label for now (we'll get it from the server) 
+          if(WALLET.getKeys().length == WALLET.NUMADDRESSES)
             login_success(); 
         });
       }
