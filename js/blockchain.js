@@ -1,6 +1,5 @@
 // Here we hold all the interactions with the blockchain.
-var BLOCKCHAIN = new function () {
-  
+var BLOCKCHAIN = new function () {  
   this.retrieveBTCBalance = function(address, callback) {
     url = 'http://blockchain.info/q/addressbalance/';
     fetchData(url + address, callback);
