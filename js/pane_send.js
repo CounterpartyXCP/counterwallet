@@ -1,5 +1,5 @@
 
-function init_pane_send() {
+function pane_send_init() {
   //Called during document.ready
   $('#txDropGetUnspent').click(txDropGetUnspent);
   $('#txDropAddr').change(txOnChangeSource);
@@ -11,6 +11,15 @@ function init_pane_send() {
   $('#txRemoveDest').click(txOnRemoveDest);
   $('#txSend').click(txVerify);
   $('#sendPayment').click(txSend);
+}
+
+function verifySoon() {
+  if(timeout) 
+  {
+      clearTimeout(timeout);
+      timeout = null;
+  }
+  timeout = setTimeout(txOnChangeDest, 1000);
 }
 
 function txOnChangeSource() {

@@ -1,10 +1,16 @@
 
 function onCredit(address, asset, amount, balance) {
   $.jqlog.log("event: onCredit", {'address': address, 'asset': asset, 'amount': amount, 'balance': balance});
+  
+  //Might be one of our addresses. Update balance if it is...
+  WALLET.updateBalance(address, asset, balance);
 }
 
 function onDebit(address, asset, amount, balance) {
   $.jqlog.log("event: onDebit", {'address': address, 'asset': asset, 'amount': amount, 'balance': balance});
+
+  //Might be one of our addresses. Update balance if it is...
+  WALLET.updateBalance(address, asset, balance);
 }
 
 function initDataFeed() {
@@ -13,12 +19,13 @@ function initDataFeed() {
   var socket = io(url[0]);
   
   socket.on('connect', function() {
-    console.log('socket.io: Connected to server ' + url);
+    $.jqlog.log('socket.io: Connected to server ' + url);
   });
   socket.on('disconnect', function() {
-    console.log('The client has disconnected from server ' + url);
+    $.jqlog.log('The client has disconnected from server ' + url);
   });
   socket.on('message', function(rawmsg) {
+    $.jqlog.log('socket.io: GOT MESSAGE: ' + rawmsg);
     var msg = $.parseJSON(rawmsg);
     
     if(msg._TYPE == 'credit') {

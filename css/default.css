@@ -26,54 +26,6 @@ input[disabled],select[disabled],textarea[disabled],input[readonly],select[reado
 
 
 /* 
- * Logon page specific
- */
-#logon {
-  padding-top: 120px;
-}
-
-.sales-title {
-  text-align: center;
-  margin-top: 20px;
-  margin-bottom: 20px;
-}
-.sales-subtitle {
-  text-align: center;
-  margin-bottom: 14px
-  margin-top: -10px;
-  color: #666;
-}
-
-#form-well {
-    width: 650px;
-    margin: 0 auto;
-    padding-bottom: 0px;
-}
-
-#password {
-    width: 480px;
-}
-
-#generated {
-    width: 570px;
-    cursor: text;
-}
-
-#form-well .btn-success {
-  width: 250px;
-}
-
-#open-sesame {
-  width: 120px;
-}
-
-#extra-info {
-  background-color:#EEE;
-  border:1px solid #CCC;
-  margin-top: 80px;  
-}
-
-/* 
  * Logged in site specific
  */
 #site {
@@ -99,3 +51,13 @@ legend {
     display: none;
 }
 
+/* Balances pane */
+#balances_container .panel-heading {
+  padding: 5px 15px;  
+}
+
+#balances_container .header-address {
+  margin-right: 20px;
+  font-size:13px;
+  margin-top: 9px;
+}
