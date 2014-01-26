@@ -27,6 +27,7 @@ function LogonViewModel() {
   
   self.openWallet = function() {
     //User is logging in...
+    self.walletGenProgressVal(0); //reset so the progress bar hides again...
     
     //Initialize the socket.io data feed
     initDataFeed();
@@ -44,11 +45,11 @@ function LogonViewModel() {
           'num_addresses_used': WALLET.DEFAULT_NUMADDRESSES,
           'address_aliases': {}
         };
-        PREFERENCES = prefs; //setting the global preferences object to this default
   
         //store the preferences on the server for future use
         makeJSONAPICall("counterwalletd", "store_preferences", [WALLET.id, prefs]);
       }
+      PREFERENCES = prefs;
       
       //generate the appropriate number of addresses
       var seed = mn_decode(self.enteredPassphrase());
@@ -63,8 +64,8 @@ function LogonViewModel() {
               "My Address #" + (WALLET.addresses().length + 1).toString()
             );
             
-            $.jqlog.log("WALLET.addresses().length: " + WALLET.addresses().length);
-            $.jqlog.log("PREFERENCES.num_addresses_used: " + PREFERENCES.num_addresses_used);
+            //$.jqlog.log("WALLET.addresses().length: " + WALLET.addresses().length);
+            //$.jqlog.log("PREFERENCES.num_addresses_used: " + PREFERENCES.num_addresses_used);
             if(WALLET.addresses().length == PREFERENCES.num_addresses_used) {
               $('#logon').hide();
               $('#site').show();

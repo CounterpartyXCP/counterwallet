@@ -1,9 +1,9 @@
 /* clearfix */
-.isotope:before,
+/*.isotope:before,
 .isotope:after {
   content: " ";
   display: table;
-}
+}*/
 
 .asset-item {
   position: relative;
@@ -11,10 +11,9 @@
   min-width: 100px;
   height: 100px;
   margin: 5px;
-  padding: 10px;
-  
+  padding: 12px 8px 8px 8px;
   border-style:solid;
-  border-width:5px;  
+  border-width:3px;  
   border-radius: 3px;  
 }
 
@@ -24,20 +23,18 @@
 }
 
 .asset-item .name {
-  position: absolute;
-  left: 10px;
-  top: 0px;
   font-size: 38px;
   font-weight: bold;
   color: white;
 }
 
 .asset-item .balance {
-  position: absolute;
-  right: 10px;
-  bottom: 5px;
+  position: relative;
+  bottom: -5px;
+  /*right: -5px;*/
   letter-spacing: 0;
-  font-size: 12px;
+  font-size: 15px;
+  font-weight: bold;
 }
 
 .asset-item.btc          { color: #a94442; background-color: #f2dede; border-color: #ebccd1; }

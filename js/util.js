@@ -4,12 +4,6 @@ function assert(condition, message) {
     }
 }
 
-function showAlertModal(text, title) {
-  $('#alertModalText').text(text || 'TEXT NOT SET');
-  $('#alertModalTitle').text(title || 'Error');
-  $('#alertModal').modal();
-}
-
 function _defaultErrorHandler(endpoint, x, exception, errorThrown) {
     var message;
     var statusErrorMap = {
@@ -25,18 +19,18 @@ function _defaultErrorHandler(endpoint, x, exception, errorThrown) {
                               message="Unknow Error \n.";
                           }
     } else if(exception=='parsererror'){
-        message="Error.\nParsing JSON Request failed.";
+        message = "Error.\nParsing JSON Request failed.";
     } else if(exception=='timeout'){
-        message="Request Time out.";
+        message = "Request Time out.";
     } else if(exception=='abort'){
-        message="Request was aborted by the server";
+        message = "Request was aborted by the server";
     } else if(exception.match("^JSON\-RPC Error:")) {
-        message=exception;
+        message = exception;
     } else {
-        message="Unknown Error.";
+        message = "Unknown Error.";
     }
     
-    showAlertModal("Error making request to " + endpoint + ": " + message);
+    bootbox.alert("Error making request to " + endpoint + ": " + message);
 }  
 
 function fetchData(url, onSuccess, onError, postdata, extraAJAXOpts, useYQL, _url_n) {
@@ -75,10 +69,14 @@ function fetchData(url, onSuccess, onError, postdata, extraAJAXOpts, useYQL, _ur
             if(res.substring) res = $.parseJSON(res); 
             //^ ghetto hack...sometimes jquery does not parse the JSON response  
 
-            if(res && 'result' in res) {
+            if(res && res['result']) {
               onSuccess(res['result']);
             } else {
-              onError(null, "JSON-RPC Error: " + res['error'], null);
+              onError(null, "JSON-RPC Error: "
+                + "<p><b>Type:</b> " + res['error']['message'] + "</p>"
+                + "<p><b>Code:</b> " + res['error']['code'] + "</p>"
+                + "<p><b>Message:</b> " + res['error']['data']['message'] + "</p>"
+                /*+ "<p><b>RAW:</b> " + JSON.stringify(res) + "</p>"*/, null);
             }
           } else {
             onSuccess(useYQL ? $(res).find('results').text() : res.responseText);
@@ -106,12 +104,11 @@ function fetchData(url, onSuccess, onError, postdata, extraAJAXOpts, useYQL, _ur
 
 function makeJSONAPICall(dest, method, params, onSuccess, onError) {
   if(typeof(onError)==='undefined')
-    onError = function(x, textStatus, errorThrown) { return _defaultErrorHandler(dest + ":" + method, x, textStatus, errorThrown) };
+    onError = function(x, textStatus, errorThrown) { return _defaultErrorHandler(method + "@" + dest, x, textStatus, errorThrown) };
   if(dest != "counterwalletd" && dest != "counterpartyd") { alert("Invalid dest!"); }
-  var urls = counterpartyd_api_urls;
   if(typeof(onError)==='undefined') onError = alertModal; //just default to popping up a modal with the error for now...
   
-  urls = counterwalletd_api_urls;
+  var urls = counterwalletd_api_urls;
   
   //make JSON API call to counterwalletd
   if(dest == "counterwalletd") {
@@ -145,11 +142,24 @@ function makeQRCode(addr) {
   return qr.createImgTag(4);
 }
 
+function toFixed(value, precision) {
+  //output a floating point at a given max precision (http://stackoverflow.com/a/661757)
+  var power = Math.pow(10, precision || 0);
+  return String(Math.round(value * power) / power);
+}
+
+function numberWithCommas(x) {
+  //print a number with commas, as appropriate (http://stackoverflow.com/a/2901298)
+  var parts = x.toString().split(".");
+  parts[0] = parts[0].replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+  return parts.join(".");
+}
 
 /* Knockout bindings */
 ko.bindingHandlers.isotope = {
     init: function (element, valueAccessor, allBindingsAccessor, viewModel, bindingContext) {
-
+      //HACK: isotope is initialized in getBalances
+     
     },
     update: function (element, valueAccessor, allBindingsAccessor, viewModel, bindingContext) {
         var $el = $(element),
@@ -159,13 +169,11 @@ ko.bindingHandlers.isotope = {
             $el.isotope('reLayout');
         } else {
             $el.isotope({
-                itemSelector: value.itemSelector,
-                layoutMode: 'fitRows'
+                itemSelector: value.itemSelector
             });
         }
     }
 };
-
 
 ko.bindingHandlers.showModal = {
     init: function (element, valueAccessor) {

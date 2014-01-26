@@ -1,9 +1,15 @@
 var timeout; // Global, hmmm.
 var PREFERENCES = {}; //set when logging in
 
+/*
+ * Primary site init (thanks to knockout.js, this is where all the "magic" does NOT happen :)
+ */
 $(document).ready(function() {
   //Set up logging (jqlog)
   $.jqlog.enabled(true);
+  
+  //Set up form validation
+  $("input,select,textarea").not("[type=submit]").jqBootstrapValidation();
   
   //Reject cruddy old browsers
   $.reject({  
@@ -44,6 +50,10 @@ $(document).ready(function() {
     $('#site').hide();
     LOGON_VIEW_MODEL.enteredPassphrase('');
     LOGON_VIEW_MODEL.generatedPassphrase('');
+    
+    //Clear addresses (this will stop BTC balance refresh as well)
+    WALLET.removeAddresses();
+    
     $('#logon').show();
     return false;
   });

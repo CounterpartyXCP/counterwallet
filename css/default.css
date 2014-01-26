@@ -52,11 +52,30 @@ legend {
 }
 
 /* Balances pane */
-#balances_container .panel-heading {
-  padding: 5px 15px;  
+#balancesContainer .panel-body {
+  padding: 2px;
 }
 
-#balances_container .header-address {
+#balancesContainer .panel-heading {
+  padding: 5px 15px;
+}
+
+/*#balancesContainer .panel-heading .editable-click,
+#balancesContainer .panel-heading a.editable-click,
+#balancesContainer .panel-heading a.editable-click:hover {
+  border-color: white !important;
+}*/
+
+.panel-default>.panel-heading {
+  background-color: #ddd;
+  border-color: #ccc;
+}
+
+#balancesContainer .panel-title {
+  margin-top: 6px;  
+}
+
+#balancesContainer .header-address {
   margin-right: 20px;
   font-size:13px;
   margin-top: 9px;

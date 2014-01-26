@@ -5,13 +5,13 @@ function WalletViewModel() {
   self.DEFAULT_NUMADDRESSES = 5; //default number of addresses to generate
   
   self.id = null; //set when logging in
-  self.addresses = ko.observableArray(); //Address objects (pane_balances) -- populated at login
+  self.addresses = ko.observableArray(); //AddressViewModel objects -- populated at login
   
   self.addKey = function(key, defaultLabel) {
     //adds a key to the wallet, making a new address object on the wallet in the process
     //(assets must still be added to this address, with updateBalances() or other means...)
-    
-    //derive the address from the key
+
+    //derive an address from the key
     var address = key.getBitcoinAddress().toString();
     
     //see if there's a label already for this address that's stored in PREFERENCES, and use that if so
@@ -29,6 +29,13 @@ function WalletViewModel() {
     } else { //just update the label, since it already exists
       match.label = label; //modify existing
     }
+  }
+  
+  self.getAddressObj = function(address) {
+    //given an address string, return a reference to the cooresponding AddressViewModel object
+    return ko.utils.arrayFirst(this.addresses(), function(a) {
+      return a.ADDRESS == address;
+    });    
   }
   
   self.updateBalance = function(address, asset, balance) {
@@ -65,6 +72,19 @@ function WalletViewModel() {
       }
     );
   }
+  
+  self.removeKeys = function() {
+    //removes all keys (addresses) from the wallet. Normally called when logging out
+    
+    //stop BTC balance timer on each address
+    ko.utils.arrayForEach(this.addresses(), function(a) {
+        a.doBTCBalanceRefresh = false;
+    });    
+    
+    //clear addresses
+    self.addresses([]);
+  } 
+  
   
   /////////////////////////
   //BTC-related
