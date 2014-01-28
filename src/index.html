@@ -22,8 +22,11 @@
     <link href="css/components/asset.css" rel="stylesheet">
     
     <!-- bitcoinjs-lib: The following library is required for bitcon addresses and signing. -->
-    <script src="extjs/bitcoinjs.min.js"></script> 
+    <!--<script src="extjs/bitcoinjs.min.js"></script>-->
+    <!--<script src="http://brainwallet.org/js/bitcoinjs-min.js"></script>-->
+    <script src="//www.bitgo.com/bitcoinjs-lib.min.js"></script>
     <script src="extjs/bitcoinjs-tx.js"></script> 
+    <script src="extjs/sjcl.min.js"></script> 
 
     <!-- JQuery -->
     <script src="//code.jquery.com/jquery-1.10.1.min.js"></script>
@@ -242,13 +245,13 @@
                       </div>
                       <div class="form-group">
                         <label for="assetName">Asset Name</label>
-                        <input name="assetName" data-bind="value: name" type="text" class="form-control" placeholder="Enter a web link to the asset"
+                        <input name="assetName" data-bind="value: name" type="text" class="form-control"
                                data-validation-regex-regex="[A-Z]+" minlength="4" maxlength="24" data-validation-regex-message="Must be between 4-24 uppercase letters only (A-Z)" required>
                         <p class="help-block">The asset's trading symbol (also known as the Asset ID).</p>
                       </div>
                       <div class="form-group">
                         <label for="assetLink">Descriptive Link</label>
-                        <input name="assetLink" data-bind="value: url" type="url" class="form-control" placeholder="Link to info on the asset" maxlength="50">
+                        <input name="assetLink" data-bind="value: url" type="url" class="form-control" maxlength="50">
                         <p class="help-block">An optional URL that provides more information on the asset.</p>
                       </div>
                       <div class="form-group">

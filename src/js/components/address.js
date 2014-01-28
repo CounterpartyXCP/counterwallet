@@ -44,10 +44,10 @@ function AddressViewModel(key, address, initialLabel) {
               return a.ASSET == 'BTC';
         });
         btcAsset.balance(parseInt(data));
-        setInterval(self.refreshBTCBalance, 60000 * 5); //every 5 minutes
+        setInterval(function() { self.refreshBTCBalance(false) }, 60000 * 5); //every 5 minutes
       });
     } else { //skip the balance check on the first call (since we just got it earlier when building the wallet)
-      setInterval(self.refreshBTCBalance, 60000 * 5); //every 5 minutes
+      setInterval(function() { self.refreshBTCBalance(false) }, 60000 * 5); //every 5 minutes
     }
   }
   //set up a timer to refresh BTC balances every 5 minutes (as these are the only balance that will not
@@ -73,6 +73,7 @@ function AddressViewModel(key, address, initialLabel) {
         self.assets.push(new AssetViewModel(self.ADDRESS, asset, result['divisible'], isMine, balance)); //add new
       });
     } else {
+      $.jqlog.log("Updating balance for asset " + asset + " @ " + self.ADDRESS + " from " + match.balance() + " to " + balance);
       match.balance(balance); //modify existing
     }
   }

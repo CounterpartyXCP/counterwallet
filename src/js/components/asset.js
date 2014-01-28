@@ -34,30 +34,18 @@ function CreateAssetModalViewModel() {
   self.submitForm = function() {
     $('#createAssetModal form').submit();
   }
-  
+
   self.createAsset = function() {
     //For now, use counterpartyd to compose the issuance. In the future, make it ourselves with a counterparty JS lib
     makeJSONAPICall("counterpartyd", "do_issuance",
       [self.address(), self.quantity(), self.name(), self.divisible(),
        null, WALLET.getAddressObj(self.address()).PUBKEY],
       function(unsigned_tx_hex) {
-        //sign and broadcast the tx
-        //unsigned_tx_hex;
-        var bytes = Crypto.util.hexToBytes(unsigned_tx_hex);
-        var sendTx = TX.deserialize(bytes);
-        
-        //take back to JSON??
-        var text = TX.toBBE(sendTx);
-        bootbox.alert("tx text: " + text);
-        
-        //sign transaction
-        
-        //sendTx = TX.resign(sendTx);
-        
+        WALLET.signAndBroadcastTx(self.address(), unsigned_tx_hex);
         
         //tell the user about the result
-        /*bootbox.alert("Your asset seemed to be created successfully. It will automatically appear under the \
-        appropriate address once the network has confirmed it, and your account will be deducted by 5 XCP.");*/
+        bootbox.alert("Your asset seemed to be created successfully. It will automatically appear under the \
+        appropriate address once the network has confirmed it, and your account will be deducted by 5 XCP.");
       }
     );
     
