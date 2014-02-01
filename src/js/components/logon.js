@@ -67,8 +67,7 @@ function LogonViewModel() {
             //$.jqlog.log("WALLET.addresses().length: " + WALLET.addresses().length);
             //$.jqlog.log("PREFERENCES.num_addresses_used: " + PREFERENCES.num_addresses_used);
             if(WALLET.addresses().length == PREFERENCES.num_addresses_used) {
-              $('#logon').hide();
-              $('#site').show();
+              loadURL("xcp/pages/balances.html", container);
               WALLET.updateBalances(); //Update the wallet balances
               return;
             }

@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html lang="en-us">
+  <head>
+    <meta charset="utf-8">
+    <title>Counterwallet</title>
+    <meta content="Counterparty Wallet" name="description">
+    <meta content="Counterparty Developers" name="author">
+
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+
+    <!-- Basic Styles -->
+    <link rel="stylesheet" type="text/css" media="screen" href="css/bootstrap.min.css">
+    <link rel="stylesheet" type="text/css" media="screen" href="css/font-awesome.min.css">
+    <!-- SmartAdmin Styles : Please note (smartadmin-production.css) was created using LESS variables -->
+    <link rel="stylesheet" type="text/css" media="screen" href="css/smartadmin-production.css">
+    <link rel="stylesheet" type="text/css" media="screen" href="css/smartadmin-skins.css">
+    <!-- Enabled SmartAdmin plugin styles -->
+    <!-- Counterwallet plugin styles -->
+    <link rel="stylesheet" href="xcp/extcss/jquery.reject.css">
+    <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/x-editable/1.5.0/bootstrap3-editable/css/bootstrap-editable.css" />
+    <!-- Counterwallet custom styles -->
+    <link rel="stylesheet" type="text/css" media="screen" href="xcp/css/default.css">
+    <link rel="stylesheet" href="xcp/css/components/logon.css">
+    <link rel="stylesheet" href="xcp/css/components/asset.css">
+    <link rel="stylesheet" href="xcp/css/packaged-app.css">
+
+    <!-- FAVICONS -->
+    <link rel="shortcut icon" href="xcp/images/favicon.png" type="image/png">
+    <link rel="icon" href="xcp/images/favicon.png" type="image/png">
+
+    <!-- GOOGLE FONT -->
+    <link rel="stylesheet" href="//fonts.googleapis.com/css?family=Open+Sans:400italic,700italic,300,400,700">
+  </head>
+  <body class="">
+    <!-- possible classes: minified, fixed-ribbon, fixed-header, fixed-width-->
+
+    <!-- HEADER -->
+    <header id="header">
+      <div id="logo-group">
+        <span id="logo"> <img src="xcp/images/logo.png" alt="Counterwallet"> </span>
+
+        <div id="activityBox">
+          <span id="activity" class="activity-dropdown"> <i class="fa fa-user"></i><b data-bind="text: activityCount" class="badge"></b></span>
+          <!-- for now, when clicked this will reset to 0 ...could take this into knockout in the future... -->
+  
+          <!-- AJAX-DROPDOWN : control this dropdown height, look and feel from the LESS variable file -->
+          <div class="ajax-dropdown">
+            <div class="ajax-notifications custom-scroll"> <!-- notification content -->
+              <ul data-bind="foreach: notifications" class="notification-body">
+                <li>
+                  <span class="padding-10">
+                    <em data-bind="css: { bg-color-blueLight: type() == 'user', bg-color-blueLight: type() == 'alert', bg-color-blueLight: type() == 'recved-funds'}" class="badge padding-5 no-border-radius pull-left margin-right-5">
+                      <i data-bind="css: { fa-user: type() == 'user', fa-exclamation-circle: type() == 'alert', fa-share: type() == 'recved-funds'}" class="fa fa-user fa-fw fa-2x"></i>
+                    </em>
+                    <span>
+                       <span data-bind="text: message"></span>
+                       <br>
+                       <span class="pull-right font-xs text-muted"><i data-bind="timeago: when"></i></span>
+                    </span>
+                  </span>
+                </li>
+              </ul>              
+            </div> <!-- end notification content -->
+            <span data-bind="text: lastUpdatedDisplayed"></span> <!-- footer -->
+          </div> <!-- .ajax-dropdown -->
+        </div> <!-- activityBox -->
+      </div> <!-- logo-group -->
+
+      <!-- pulled right: nav area -->
+      <div class="pull-right">
+
+        <!-- collapse menu button -->
+        <div id="hide-menu" class="btn-header pull-right">
+          <span> <a href="javascript:void(0);" title="Collapse Menu"><i class="fa fa-reorder"></i></a> </span>
+        </div>
+        <!-- end collapse menu -->
+
+        <!-- logout button -->
+        <div id="logout" class="btn-header transparent pull-right">
+          <span> <a href="xcp/pages/logon.html" title="Sign Out"><i class="fa fa-sign-out"></i></a> </span>
+        </div>
+        <!-- end logout button -->
+
+        <!-- search mobile button (this is hidden till mobile view port) -->
+        <div id="search-mobile" class="btn-header transparent pull-right">
+          <span> <a href="javascript:void(0)" title="Search"><i class="fa fa-search"></i></a> </span>
+        </div>
+        <!-- end search mobile button -->
+
+      </div>
+      <!-- end pulled right: nav area -->
+
+    </header>
+    <!-- END HEADER -->
+
+    <!-- Left panel : Navigation area -->
+    <!-- Note: This width of the aside area can be adjusted through LESS variables -->
+    <aside id="left-panel">
+      <!-- NAVIGATION : This navigation is also responsive
+
+      To make this navigation dynamic please make sure to link the node
+      (the reference to the nav > ul) after page load. Or the navigation
+      will not initialize.
+      -->
+      <nav>
+        <!-- NOTE: Notice the gaps after each icon usage <i></i>..
+        Please note that these links work a bit different than
+        traditional href="" links. See documentation for details.
+        -->
+
+        <ul>
+          <li class="">
+            <a href="xcp/pages/balances.html" title="Balances"><i class="fa fa-lg fa-fw fa-money"></i> <span class="menu-item-parent">Balances</span></a>
+          </li>
+          <li>
+            <a href="xcp/pages/send.html"><i class="fa fa-lg fa-fw fa-mail-forward"></i> <span class="menu-item-parent">Send</span></a>
+          </li>
+          <li>
+            <a href="#"><i class="fa fa-lg fa-fw fa-bar-chart-o"></i> <span class="menu-item-parent">Trading</span></a>
+            <ul>
+              <li>
+                <a href="xcp/pages/dex.html">Buy/Sell</a>
+              </li>
+              <li>
+                <a href="xcp/pages/dex_history.html">History</a>
+              </li>
+            </ul>
+          </li>
+        </ul>
+      </nav>
+      <span class="minifyme"> <i class="fa fa-arrow-circle-left hit"></i> </span>
+
+    </aside>
+    <!-- END NAVIGATION -->
+
+    <!-- MAIN PANEL -->
+    <div id="main" role="main">
+
+      <!-- RIBBON -->
+      <div id="ribbon">
+
+        <span class="ribbon-button-alignment"> <span id="refresh" class="btn btn-ribbon" data-title="refresh"  rel="tooltip" data-placement="bottom" data-original-title="<i class='text-warning fa fa-warning'></i> Warning! This will reset all your widget settings." data-html="true"><i class="fa fa-refresh"></i></span> </span>
+
+        <!-- breadcrumb -->
+        <ol class="breadcrumb"> 
+          <!-- This is auto generated -->
+        </ol>
+        <!-- end breadcrumb -->
+
+      </div>
+      <!-- END RIBBON -->
+
+      <!-- MAIN CONTENT -->
+      <div id="content" class="coverAll" data-bind="css: { coverAll: !WALLET.id() }">
+      </div>
+      <!-- END MAIN CONTENT -->
+
+    </div>
+    <!-- END MAIN PANEL -->
+
+    <!--================================================== -->
+
+    <!-- Link to Google CDN's jQuery + jQueryUI; fall back to local -->
+    <script src="//ajax.googleapis.com/ajax/libs/jquery/2.0.2/jquery.min.js"></script>
+    <script>
+      if (!window.jQuery) {
+        document.write('<script src="js/libs/jquery-2.0.2.min.js"><\/script>');
+      }
+    </script>
+
+    <script src="//ajax.googleapis.com/ajax/libs/jqueryui/1.10.3/jquery-ui.min.js"></script>
+    <script>
+      if (!window.jQuery.ui) {
+        document.write('<script src="js/libs/jquery-ui-1.10.3.min.js"><\/script>');
+      }
+    </script>
+
+    <!-- SmartAdmin JS includes -->
+    <script src="js/bootstrap/bootstrap.min.js"></script> <!-- BOOTSTRAP JS -->
+    <script src="js/notification/SmartNotification.min.js"></script> <!-- CUSTOM NOTIFICATION -->
+    <script src="js/smartwidgets/jarvis.widget.min.js"></script> <!-- JARVIS WIDGETS -->
+    <script src="js/plugin/easy-pie-chart/jquery.easy-pie-chart.min.js"></script> <!-- EASY PIE CHARTS -->
+    <script src="js/plugin/sparkline/jquery.sparkline.min.js"></script> <!-- SPARKLINES -->
+    <script src="js/plugin/jquery-validate/jquery.validate.min.js"></script> <!-- JQUERY VALIDATE -->
+    <script src="js/plugin/masked-input/jquery.maskedinput.min.js"></script> <!-- JQUERY MASKED INPUT -->
+    <script src="js/plugin/select2/select2.min.js"></script> <!-- JQUERY SELECT2 INPUT -->
+    <script src="js/plugin/bootstrap-slider/bootstrap-slider.min.js"></script> <!-- JQUERY UI + Bootstrap Slider -->
+    <script src="js/plugin/msie-fix/jquery.mb.browser.min.js"></script> <!-- browser msie issue fix -->
+    <script src="js/plugin/smartclick/smartclick.js"></script> <!-- SmartClick: For mobile devices -->
+
+    <!-- COUNTERWALLET SPECIFIC JS INCLUDES -->    
+    <!-- bitcoinjs-lib: The following library is required for bitcon addresses and signing. -->
+    <script src="xcp/extjs/bitcoinjs-lib.min.js"></script>
+    <script src="xcp/extjs/bitcoinjs-tx.js"></script> 
+    <script src="xcp/extjs/sjcl.min.js"></script> 
+    <!-- JQuery extras -->
+    <script src="xcp/extjs/jquery.jqlog.js"></script>
+    <script src="xcp/extjs/jquery.reject.js"></script>
+    <script src="xcp/extjs/jquery.timeago.js"></script>
+    <!-- Bootstrap -->
+    <script src="//cdnjs.cloudflare.com/ajax/libs/x-editable/1.5.0/bootstrap3-editable/js/bootstrap-editable.min.js"></script>
+    <!--<script src="xcp/extjs/jqBootstrapValidation.js"></script>-->
+    <script src="xcp/extjs/bootbox.js"></script>
+    <!-- socket.io -->
+    <script src="//cdnjs.cloudflare.com/ajax/libs/socket.io/0.9.16/socket.io.min.js"></script>
+    <!-- knockout.js -->
+    <!--<script src="http://knockoutjs.com/downloads/knockout-3.0.0.js"></script>-->
+    <script src="http://knockoutjs.com/downloads/knockout-3.0.0.debug.js"></script>
+    <script src="xcp/extjs/knockout-bootstrap.js"></script>
+    <script src="xcp/extjs/knockout.x-editable.js"></script>
+
+    <!-- Other external libraries. -->
+    <script src="xcp/extjs/struct.js"></script>    
+    <script src="xcp/extjs/qrcode.js"></script> 
+    <script src="xcp/extjs/mnemonic.js"></script> 
+    <script src="xcp/extjs/electrum.js"></script> 
+    
+    <!-- MAIN APP JS FILE -->
+    <script src="xcp/js/smartadmin.app.js"></script>
+
+    <!-- JavaScript created specifically for Counterwallet. -->
+    <script src="xcp/js/config.js"></script> 
+    <script src="xcp/js/util.js"></script> 
+    <script src="xcp/js/datafeed.js"></script> 
+    <script src="xcp/js/counterwallet.js"></script> 
+    <script src="xcp/js/components/wallet.js"></script> <!-- inits WALLET object but doesn't bind it to anything -->
+    <script src="xcp/js/components/activitybar.js"></script> <!-- inits ACTIVITY_FEED object and binds it to activityBox -->
+
+    <!-- Your GOOGLE ANALYTICS CODE Below -->
+    <script type="text/javascript">
+      var _gaq = _gaq || [];
+      _gaq.push(['_setAccount', 'UA-47404711-2']);
+      _gaq.push(['_trackPageview']);
+    
+      (function() {
+        var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+        ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+        var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+      })();
+    
+    </script>
+
+  </body>
+
+</html>

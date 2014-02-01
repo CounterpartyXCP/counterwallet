@@ -3,6 +3,8 @@
  */
 #logon {
   padding-top: 120px;
+  position: relative;
+  z-index: 11; /* higher than the white cover div zindex of 10 */
 }
 
 .sales-title {

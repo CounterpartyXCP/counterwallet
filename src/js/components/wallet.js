@@ -4,7 +4,7 @@ function WalletViewModel() {
   var self = this;
   self.DEFAULT_NUMADDRESSES = 5; //default number of addresses to generate
   
-  self.id = null; //set when logging in
+  self.id = ko.observableArray(null); //set when logging in
   self.addresses = ko.observableArray(); //AddressViewModel objects -- populated at login
   
   self.addKey = function(key, defaultLabel) {
@@ -144,9 +144,3 @@ function WalletViewModel() {
 }
 
 var WALLET = new WalletViewModel();
-
-$(document).ready(function() {
-  $.jqlog.enabled(true);
-  ko.applyBindings(WALLET, document.getElementById("balancesContainer"));
-});
-

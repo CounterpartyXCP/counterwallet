@@ -13,6 +13,7 @@ import urllib
 import zipfile
 import platform
 import tempfile
+import glob
 import subprocess
 import stat
 
@@ -30,7 +31,7 @@ def runcmd(command, abort_on_failure=True):
 
 def link_or_copy(is_cdn_build, src, dest):
     if is_cdn_build:
-        runcmd("cp -a %s %s" % (src, dest))
+        runcmd("cp -af %s %s" % (src, dest))
     else:
         runcmd("ln -sf %s %s" % (src, dest))
 
@@ -47,7 +48,7 @@ def main():
     mode = None
     for o, a in opts:
         if o in ("--cdn-build",):
-            is_cdn_build = True
+            is_cdn_build = True #copy files instead of linking to them
         elif o in ("-h", "--help"):
             usage()
             sys.exit()
@@ -61,21 +62,33 @@ def main():
     runcmd("sudo apt-get -y install wget unzip")
     
     #fetch admin template we use and unpack
-    runcmd("rm -rf %s" % os.path.join(base_path, "build"))
-    runcmd("rm -rf /tmp/ && wget -O /tmp/template.zip %s && unzip -d /tmp /tmp/template.zip" % ADMIN_TEMPLATE_URL)
+    runcmd("rm -rf %s" % os.path.join(base_path, "build")) #remove existing build
+    runcmd("rm -rf /tmp/template.zip /tmp/SmartAdmin_1.2") #just in case...
+    runcmd("wget -O /tmp/template.zip %s && unzip -d /tmp /tmp/template.zip" % ADMIN_TEMPLATE_URL)
     runcmd("mv /tmp/SmartAdmin_1.2/build %s" % os.path.join(base_path, "build"))
-    runcmd("rm -rf /tmp/SmartAdmin_1.2")
+    runcmd("rm -rf /tmp/template.zip /tmp/SmartAdmin_1.2")
     
     #remove the stuff we don't need from the build
-    runcmd("rm -rf %s/ajax %s/goodies %s/HTML_version %s/php %s/*.php %s/*.html" % (
-        base_path, base_path, base_path, base_path, base_path, base_path))
+    to_remove = [
+        "%s/build/ajax" % base_path,
+        "%s/build/goodies" % base_path,
+        "%s/build/HTML_version" % base_path,
+        "%s/build/php" % base_path,
+        "%s/build/*.php" % base_path,
+        "%s/build/*.html" % base_path,
+        "%s/build/js/demo.js" % base_path,
+        "%s/build/css/demo.css" % base_path,
+        "%s/build/css/invoice.css" % base_path,
+        "%s/build/css/lockscreen.css" % base_path,
+        "%s/build/css/your_style.css" % base_path,
+    ]
+    runcmd("rm -rf %s" % ' '.join(to_remove))
     
     #link/copy in the base counterwallet src dir into the build
     link_or_copy(is_cdn_build, os.path.join(base_path, "src"), os.path.join(base_path, "build", "xcp"))
     #replace the things that need to be replaced in the build
-    #build/index.html
-    #build/login.html
-    #build/js/app.js
+    link_or_copy(is_cdn_build, os.path.join(base_path, "src", "pages", "index.html"), os.path.join(base_path, "build", "index.html"))
+    
     
 
 if __name__ == "__main__":

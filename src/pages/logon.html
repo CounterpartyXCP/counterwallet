@@ -1,0 +1,93 @@
+    <!-- Logged out page -->
+    <div id="logon" style="z-index:11;position:relative;">
+      <h1 style="font-size: 2em; text-align: center">Welcome to Your Secure Counterparty Web Wallet</h1>
+      <h2 style="font-size: 1.5em; text-align: center; padding-bottom: 5px; color: #333">Trade derivatives, place bets, issue stocks or assets, and more.</h2>
+      <div id="form-well" style="margin-top:40px">
+        <div class="panel panel-info">
+          <div class="panel-heading">
+            <h3 class="panel-title"><b>Log Into Your Wallet</b></h3>
+          </div>
+          <div class="panel-body">
+            <form class="form-inline" role="form">
+              <input id="password" data-bind="value: enteredPassphrase, valueUpdate:'afterkeydown'" placeholder="Enter your Counterwallet 12 word passphrase." class="form-control" type="password">
+              <div class="pull-right">
+                <button id="open-sesame" data-bind="click: openWallet, enable: isPassphraseValid(), css: { 'btn-primary': isPassphraseValid() }" type="button" class="btn btn-default">Open Wallet</button>
+              </div>
+            </form>
+            <div data-bind="visible: walletGenProgressVal() > 0" class="progress progress-striped active" style="margin-top:15px;margin-bottom:0">
+              <div class="progress-bar"  role="progressbar" data-bind="style: { width: walletGenProgressWidth() }">
+              </div>
+            </div>              
+          </div>
+        </div>
+        <div data-bind="visible: generatedPassphrase().length == 0" style="text-align:center">
+          <p style="font-size:1.7em">or&nbsp;              
+          <button data-bind="click: generatePassphrase" type="button" class="btn btn-success btn-lg">Create a new wallet</button>
+          </p>
+        </div>
+        <div data-bind="visible: generatedPassphrase()">
+          <br/>
+          <div class="panel panel-warning">
+            <div class="panel-heading">
+              <h3 class="panel-title"><b>To use Counterwallet you need a 12 word passphrase</b></h3>
+            </div>
+            <div class="panel-body">
+              <p>We have created a passphrase for you in the box below.</p>
+              <form class="form-inline" role="form">
+                <input id="generated" readonly="readonly" data-bind="value: generatedPassphrase" class="input-medium form-control" type="text">
+                <div class="pull-right">
+                  <button data-bind="click: generatePassphrase, tooltip: {title: 'Click to generate another random passphrase.'}" class="btn btn-default" type="button"><i class="fa fa-repeat"></i></button>
+                </div>
+              </form>
+              <div class="alert alert-danger" style="margin-top:15px;">
+                <p style="font-weight:bold;text-align:center;font-size:1.3em">Write your passphrase down and keep it safe.</p>
+                <p style="font-weight:bold;text-decoration:underline;text-align:center;font-size:1.2em">
+                  If you loose this passphrase, you will loose access to your wallet.
+                </p>
+                <p style="font-weight:bold;text-decoration:underline;text-align:center;font-size:1.2em">
+                  If someone gets your passphrase, they can gain access to your wallet.
+                </p>
+              </div>
+              <p>To log into your wallet, input your passphase in the wallet login textbox above, and press the "Open Wallet" button.</p>
+              </div>
+            </div>
+          </div>              
+      </div> <!-- form-well -->
+      <div id="extra-info" class="container">
+        <h3 class="sales-title">Why should I use Counterwallet?</h3>
+        <h4 class="sales-subtitle">We're a very secure online wallet with a goal of supporting all Counterparty functionality.</h4>
+        <h4 class="sales-subtitle">Create and access your wallet with a single passphrase, with no funds stored locally or on our servers.</h4>
+        <div class="row">
+          <div class="col-sm-4 col-md-4">
+            <h4><i class="icon-ok-sign"></i> Secure and predictable.</h4>
+            <p>Counterwallet is an online <a href="https://en.bitcoin.it/wiki/Deterministic_wallet">deterministic wallet</a>. 
+            Your passphrase is turned into a number which is then turned into Bitcoin Addresses. 
+            </p>
+            
+            <p>Your passphrase is your wallet access and wallet backup.</p> 
+          </div>
+          <div class="col-sm-4 col-md-4">
+            <h4><i class="icon-ok-sign"></i> We are a zero footprint wallet.</h4>
+            <p>
+              We don't store your Bitcoins locally or on our servers, only in your browser memory. 
+              No trace is left on your device once you logout of your session.</p> 
+            <p> 
+            Theives have fewer angles of attack with Counterwallet.
+            </p>
+          </div>
+          <div class="col-sm-4 col-md-4">
+            <h4><i class="icon-ok-sign"></i> We support online or cold storage.</h4>
+            <p>Need to store large sums of Bitcoins ? Counterwallet supports 
+            <a href="https://en.bitcoin.it/wiki/Cold_storage">Cold Storage</a>.</p> 
+            <p>  
+            You can use Counterwallet online or offline on a computer you know is clean and safe.<br/> 
+            <i class="icon-download"></i> 
+            <a href="https://github.com/xnova/counterwallet/archive/master.zip">Download Counterwallet</a>
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script src="xcp/js/components/logon.js"></script>
+

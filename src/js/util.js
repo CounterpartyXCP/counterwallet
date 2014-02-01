@@ -122,11 +122,13 @@ function makeJSONAPICall(dest, method, params, onSuccess, onError) {
     //make JSON API call to counterwalletd, which will proxy it to counterpartyd
     fetchData(urls, onSuccess, onError,
       JSON.stringify({
-        "jsonrpc": "2.0", "id": 0, "method": "proxy_to_counterpartyd",
+        "jsonrpc": "2.0", "id": 0,
+        "method": "proxy_to_counterpartyd",
         "params": {"method": method, "params": params }
       }),
-      { contentType: 'application/json; charset=utf-8',
-        dataType:"json",
+      {
+        contentType: 'application/json; charset=utf-8',
+        dataType:"json"
       }
     );
   } else {
@@ -176,18 +178,44 @@ ko.bindingHandlers.isotope = {
 };
 
 ko.bindingHandlers.showModal = {
-    init: function (element, valueAccessor) {
-    },
-    update: function (element, valueAccessor) {
-        var value = valueAccessor();
-        if (ko.utils.unwrapObservable(value)) {
-            $(element).modal('show');
-                                // this is to focus input field inside dialog
-            $("input", element).focus();
-        }
-        else {
-            $(element).modal('hide');
-        }
+  init: function (element, valueAccessor) {
+  },
+  update: function (element, valueAccessor) {
+    var value = valueAccessor();
+    if (ko.utils.unwrapObservable(value)) {
+      $(element).modal('show');
+                          // this is to focus input field inside dialog
+      $("input", element).focus();
     }
+    else {
+      $(element).modal('hide');
+    }
+  }
 };
-    
+
+ko.bindingHandlers.timeago = {
+  //http://stackoverflow.com/a/11270500
+  update: function(element, valueAccessor) {
+    var value = ko.utils.unwrapObservable(valueAccessor());
+    var $this = $(element);
+
+    // Set the title attribute to the new value = timestamp
+    $this.attr('title', value);
+
+    // If timeago has already been applied to this node, don't reapply it -
+    // since timeago isn't really flexible (it doesn't provide a public
+    // remove() or refresh() method) we need to do everything by ourselves.
+    if ($this.data('timeago')) {
+      var datetime = $.timeago.datetime($this);
+      var distance = (new Date().getTime() - datetime.getTime());
+      var inWords = $.timeago.inWords(distance);
+
+      // Update cache and displayed text..
+      $this.data('timeago', { 'datetime': datetime });
+      $this.text(inWords);
+    } else {
+      // timeago hasn't been applied to this node -> we should do that now
+      $this.timeago();
+    }
+  }
+};

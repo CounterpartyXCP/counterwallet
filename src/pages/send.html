@@ -1,0 +1,98 @@
+<div id="send">
+  <h4>Make a Payment</h4>
+  <form action="/" class="form-vertical" method="get">
+    <fieldset>
+      <div class="form-hide form-group">
+        <label class="control-label" for="txSec">Private Key</label> 
+        <div class="controls"> 
+          <input class="span5 form-control" id="txSec" type="text"> 
+          <span class="errormsg help-block"></span> 
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="control-label" for="txDropAddr">Source Address</label> 
+        <div class="controls">
+          <select class="span4" id="txDropAddr"> 
+          </select>
+          <div class="input-prepend"> <span class="add-on">BTC</span><input class="span2 form-control" id="txBalance" readonly="" type="text"> 
+          </div>
+          <!--<button class="btn" id="txDropGetUnspent" title="Reload" type="button"><i class="icon-repeat"></i></button> 
+            <button class="btn" data-target="#txUnspentForm" data-toggle="collapse" id="txToggle" type="button">Edit Inputs</button>-->
+        </div>
+      </div>
+      <div class="txCC form-group">
+        <label class="control-label" for="txDest">Destination Address</label> 
+        <div class="controls">
+          <input id="txDest" class="span4 txDest form-control" type="text" placeholder="E.g. 1BountYypWttTvAJcMJVvSRDfX3TJ182To" autocomplete="off"> 
+          <div class="input-prepend"> 
+            <span class="add-on">BTC</span>
+            <input class="span2 form-control" id="txValue" placeholder="E.g. 0.01" type="text" autocomplete="off"> 
+          </div>
+          <span class="errormsg help-block">
+          <button class="btn input-up btn-default" style="margin-bottom: 10px" id="txAddDest" type="button">+</button> 
+          <button class="btn input-up btn-default" style="margin-bottom: 10px" id="txRemoveDest" type="button" disabled="">–</button> 
+          </span> 
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="control-label" for="txFee">Fee (Includes Miners Fee)</label> 
+        <div class="controls">
+          <div class="input-prepend"><span class="add-on">BTC</span><input readonly="" class="span2 form-control" id="txFee" type="text" value="0.0005"></div>
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="control-label" for="txFee">You can check the payment before it is sent to the network.</label> 
+        <div class="controls"> 
+          <button class="btn btn-default" disabled="" style="margin-bottom: 10px" id="txSend" type="button">Verify and Send</button>
+        </div>
+      </div>
+    </fieldset>
+  </form>
+  <div id="verifyModal" class="modal hide">
+    <div class="modal-header">
+      <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+      <h6>Send payment of <span id="verifyAmountTitle">0.005</span> BTC from <span id="verifySource">1BountYypWttTvAJcMJVvSRDfX3TJ182</span></h6>
+    </div>
+    <div id="verifyBody" class="modal-body">
+      <table class="table table-bordered">
+        <thead id="verifyTable">
+          <tr>
+            <th>Destination Address</th>
+            <th>Amount</th>
+          </tr>
+        </thead>
+        <tbody><tr>
+          <td><small><span class="label label-default">A fee of 0.0005 BTC will be added.</span></small></td>
+          <td><small><span><strong>0.0005</strong></span></small></td>
+        </tr>
+        </tbody><tfoot>
+          <tr>
+            <td><strong>Total</strong></td>
+            <td><strong id="verifyTotal">50.05</strong> BTC</td>
+          </tr>
+        </tfoot>
+      </table>
+      <p id="tx-toggle">
+        <a data-toggle="collapse" data-target="#advanced-details">Show/Hide Transaction Details (Advanced users)</a>
+      </p>
+      <div id="advanced-details" class="collapse">
+        <div class="form-group">
+          <label class="control-label" for="txJSON">JSON Transaction</label> 
+          <div class="controls"> 
+            <textarea class="span5" id="txJSON" rows="4"></textarea>
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="control-label" for="txHex">Raw Transaction</label> 
+          <div class="controls"> 
+            <textarea class="span5" id="txHex" rows="4"></textarea>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <a href="#" data-dismiss="modal" class="btn btn-default">Cancel</a>
+      <button id="sendPayment" data-dismiss="modal" class="btn btn-primary">Send Payment</button>
+    </div>
+  </div>
+</div>
