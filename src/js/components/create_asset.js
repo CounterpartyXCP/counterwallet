@@ -1,19 +1,3 @@
-function AssetViewModel(address, asset, divisible, isMine, initialBalance) {
-  //An address has 2 or more assets (BTC, XCP, and any others)
-  var self = this;
-  self.ADDRESS = address; //will not change
-  self.ASSET = asset; //assetID, will not change
-  self.isMine = ko.observable(isMine); //null for BTC and XCP, true for self assets, false for others assets
-  self.DIVISIBLE = divisible;
-  self.balance = ko.observable(initialBalance);
-  
-  self.displayedBalance = ko.computed(function() {
-    return "Bal: " + numberWithCommas(self.DIVISIBLE ? toFixed(self.balance() / 100000000, 8) : self.balance()).toString(); 
-  }, self);
-  
-}
-
-
 function CreateAssetModalViewModel() {
   var self = this;
   self.shown = ko.observable(false);
@@ -70,5 +54,4 @@ $(document).ready(function() {
   $.jqlog.enabled(true);
   ko.applyBindings(CREATE_ASSET_MODAL, document.getElementById("createAssetModal"));
 });
-
 

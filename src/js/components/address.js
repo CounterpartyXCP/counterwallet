@@ -1,3 +1,147 @@
+function AssetViewModel(address, asset, divisible, isMine, isLocked, initialBalance) {
+  //An address has 2 or more assets (BTC, XCP, and any others)
+  var self = this;
+  self.ADDRESS = address; //will not change
+  self.ASSET = asset; //assetID, will not change
+  self.isMine = ko.observable(isMine); //null for BTC and XCP, true for self assets, false for others assets
+  self.isLocked = ko.observable(isLocked);
+  self.DIVISIBLE = divisible;
+  self.balance = ko.observable(initialBalance);
+  
+  self.displayedBalance = ko.computed(function() {
+    return "Bal: " + numberWithCommas(self.DIVISIBLE ? toFixed(self.balance() / 100000000, 8) : self.balance()).toString(); 
+  }, self);
+  
+  self.sendTo = function () {
+    if(!self.balance()) { bootbox.alert("You have no balance of this asset to send."); return; }
+
+    //pop up the send to window with the address and asset pre-populated
+    bootbox.alert("Functionality not yet implemented.");
+  };
+  
+  self.issueAdditional = function () {
+    if(!self.isMine()) { bootbox.alert("Cannot issue existing quanity of an asset that is not yours."); return; }
+    if(self.isLocked()) { bootbox.alert("Cannot issue existing quanity of a locked asset."); return; }
+    
+    bootbox.dialog({
+      message: "How many more quantity of this asset would you like to issue? <i>(For divisible assets, state \
+       the amount as a whole or floating point number, not in satoshis -- e.g. '732.45')</i><br/><br/> \
+       <b style='color:red'>Please NOTE that this action is irreversable</b><br/><br/> \
+       <input type='text' id='addtl_issue' class='bootbox-input bootbox-input-text form-control'></input>",
+      title: "Confirm Additional Issuance",
+      buttons: {
+        success: {
+          label: "Cancel",
+          className: "btn-default",
+          callback: function() {
+            //modal will disappear
+          }
+        },
+        danger: {
+          label: "Issue additional quantity",
+          className: "btn-danger",
+          callback: function() {
+            var addtl_issuance = $('#addtl_issue').val();
+            //validate the entered data as a whole or floating point number
+            if(!isNumber(addtl_issuance)) {
+              return bootbox.alert("Invalid data entered: Must be numeric.");
+            }
+             
+            //do the transfer (zero quantity issuance to the specified address)
+            addtl_issuance = parseFloat(addtl_issuance);
+            makeJSONAPICall("counterpartyd", "do_issuance",
+              [self.address(), addtl_issuance, self.name(), self.divisible(),
+               null, WALLET.getAddressObj(self.address()).PUBKEY],
+              function(unsigned_tx_hex) {
+                WALLET.signAndBroadcastTx(self.address(), unsigned_tx_hex);
+                bootbox.alert("Your asset has been transferred to <b>" + address + "</b>. It may take a bit for this to reflect.");
+            });
+          }
+        },
+      }
+    });    
+  };
+  
+  self.transfer = function () {
+    if(!self.isMine()) { bootbox.alert("Cannot transfer an asset that is not yours."); return; }
+    
+    bootbox.dialog({
+      message: "Enter the bitcoin address you would like to perminently transfer <u>ALL</u> shares of this \
+       asset to.<br/><br/><b style='color:red'>Please NOTE that this action is irreversable</b><br/><br/> \
+       <input type='text' id='transfer_address' class='bootbox-input bootbox-input-text form-control'></input>",
+      title: "Confirm Transfer Request",
+      buttons: {
+        success: {
+          label: "Cancel",
+          className: "btn-default",
+          callback: function() {
+            //modal will disappear
+          }
+        },
+        danger: {
+          label: "Transfer this asset",
+          className: "btn-danger",
+          callback: function() {
+            var address = $('#transfer_address').val();
+            try {
+              Bitcoin.Address(address);
+            } catch (err) {
+              return bootbox.alert("Invalid bitcoin address entered.");
+            }
+            
+            //do the transfer (zero quantity issuance to the specified address)
+            makeJSONAPICall("counterpartyd", "do_issuance",
+              [self.address(), 0, self.name(), self.divisible(),
+               address, WALLET.getAddressObj(self.address()).PUBKEY],
+              function(unsigned_tx_hex) {
+                WALLET.signAndBroadcastTx(self.address(), unsigned_tx_hex);
+                bootbox.alert("Your asset has been transferred to <b>" + address + "</b>. It may take a bit for this to reflect.");
+            });
+          }
+        },
+      }
+    });    
+  };
+
+  self.lock = function () {
+    if(self.isLocked()) { bootbox.alert("This asset is already locked."); return; }
+    if(!self.isMine()) { bootbox.alert("Cannot lock an asset that is not yours."); return; }
+    
+    bootbox.dialog({
+      message: "By locking your asset, you will not be able to issue more of it in the future.<br/><br/> \
+        <b style='color:red'>Please NOTE that this action is irreversable!</b>",
+      title: "Are you sure?",
+      buttons: {
+        success: {
+          label: "Cancel",
+          className: "btn-default",
+          callback: function() {
+            //modal will disappear
+          }
+        },
+        danger: {
+          label: "Lock this asset",
+          className: "btn-danger",
+          callback: function() {
+            //issue 0 to lock the asset
+            makeJSONAPICall("counterpartyd", "do_issuance",
+              [self.address(), 0, self.name(), self.divisible(),
+               null, WALLET.getAddressObj(self.address()).PUBKEY],
+              function(unsigned_tx_hex) {
+                WALLET.signAndBroadcastTx(self.address(), unsigned_tx_hex);
+                bootbox.alert("Your asset has been locked. It may take a bit for this to reflect.");
+            });
+          }
+        },
+      }
+    });    
+  };
+
+  self.changeDescription = function () {
+    bootbox.alert("Functionality not yet implemented.");
+  };
+}
+
 function AddressViewModel(key, address, initialLabel) {
   //An address on a wallet
   var self = this;
@@ -70,7 +214,7 @@ function AddressViewModel(key, address, initialLabel) {
       //Before we push, look up the asset to see if the issuer matches this address
       makeJSONAPICall("counterpartyd", "get_asset_info", [asset], function(result) {
         var isMine = result['owner'] == self.ADDRESS; //default to false on error or when we can't find the asset too
-        self.assets.push(new AssetViewModel(self.ADDRESS, asset, result['divisible'], isMine, balance)); //add new
+        self.assets.push(new AssetViewModel(self.ADDRESS, asset, result['divisible'], isMine, result['locked'], balance)); //add new
       });
     } else {
       $.jqlog.log("Updating balance for asset " + asset + " @ " + self.ADDRESS + " from " + match.balance() + " to " + balance);
@@ -83,7 +227,7 @@ function AddressViewModel(key, address, initialLabel) {
   self.changeLabel = function(params) {
     PREFERENCES.address_aliases[self.ADDRESS] = params.value;
     //update the preferences on the server 
-    makeJSONAPICall("counterwalletd", "store_preferences", [WALLET.id, PREFERENCES], function(data) {
+    makeJSONAPICall("counterwalletd", "store_preferences", [WALLET.identifier(), PREFERENCES], function(data) {
       self.label = params.value; //update was a success
     });
   }

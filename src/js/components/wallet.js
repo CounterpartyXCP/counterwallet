@@ -4,7 +4,7 @@ function WalletViewModel() {
   var self = this;
   self.DEFAULT_NUMADDRESSES = 5; //default number of addresses to generate
   
-  self.id = ko.observableArray(null); //set when logging in
+  self.identifier = ko.observable(null); //set when logging in
   self.addresses = ko.observableArray(); //AddressViewModel objects -- populated at login
   
   self.addKey = function(key, defaultLabel) {

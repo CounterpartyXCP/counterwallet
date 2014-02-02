@@ -88,6 +88,8 @@ def main():
     link_or_copy(is_cdn_build, os.path.join(base_path, "src"), os.path.join(base_path, "build", "xcp"))
     #replace the things that need to be replaced in the build
     link_or_copy(is_cdn_build, os.path.join(base_path, "src", "pages", "index.html"), os.path.join(base_path, "build", "index.html"))
+    #x-editable's clear.png so we don't get a 404...
+    link_or_copy(is_cdn_build, os.path.join(base_path, "src", "images", "clear.png"), os.path.join(base_path, "build", "img", "clear.png"))
     
     
 

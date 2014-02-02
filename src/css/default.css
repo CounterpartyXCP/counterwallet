@@ -1,50 +1,6 @@
 /* 
- * Primary
- */
-div.coverAll {
-  /* covers the page before the user is logged in */
-  /* http://stackoverflow.com/questions/2852276/make-div-overlay-entire-page-not-just-viewport */
-  opacity:    0.5; 
-  background: #000; 
-  width:      100%;
-  height:     100%; 
-  z-index:    10;
-  top:        0; 
-  left:       0; 
-  position:   fixed; 
-}
-
-html, body {
-  height: 100%; /* The html and body elements cannot have any padding or margin for sticky footer. */
-}
-
-#wrap { /* Wrapper for page content to push down footer */
-  min-height: 100%;
-  height: auto;
-  margin: 0 auto -35px; /* Negative indent footer by its height */
-  padding: 0 0 35px; /* Pad bottom by footer height */
-}
-
-#footer {
-  height: 35px; /* Set the fixed height of the footer here */
-  /*background-color: #f5f5f5;*/
-  padding-top: 6px;
-  text-align:center;
-}
-
-input[disabled],select[disabled],textarea[disabled],input[readonly],select[readonly],textarea[readonly]{
-  background-color:#eeeeee;
-  border-color:#ddd; cursor: auto;
-}
-
-
-/* 
  * Logged in site specific
  */
-#site {
-  padding-top: 70px;
-}
-
 #qr {
     width: 185px;
     height: 185px;
@@ -56,40 +12,3 @@ input[disabled],select[disabled],textarea[disabled],input[readonly],select[reado
     z-index: 1;
 }
 
-legend {
-    margin-bottom: 0px;
-}
-
-.form-hide {
-    display: none;
-}
-
-/* Balances pane */
-#balancesContainer .panel-body {
-  padding: 2px;
-}
-
-#balancesContainer .panel-heading {
-  padding: 5px 15px;
-}
-
-/*#balancesContainer .panel-heading .editable-click,
-#balancesContainer .panel-heading a.editable-click,
-#balancesContainer .panel-heading a.editable-click:hover {
-  border-color: white !important;
-}*/
-
-.panel-default>.panel-heading {
-  background-color: #ddd;
-  border-color: #ccc;
-}
-
-#balancesContainer .panel-title {
-  margin-top: 6px;  
-}
-
-#balancesContainer .header-address {
-  margin-right: 20px;
-  font-size:13px;
-  margin-top: 9px;
-}

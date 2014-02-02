@@ -33,12 +33,12 @@ function LogonViewModel() {
     initDataFeed();
     
     //generate the wallet ID from the seed
-    WALLET.id = Crypto.util.bytesToBase64(Crypto.SHA256(Crypto.SHA256(self.enteredPassphrase(),
-      {asBytes: true}), {asBytes: true}));
-    $.jqlog.log("Wallet ID: " + WALLET.id);
+    WALLET.identifier(Crypto.util.bytesToBase64(Crypto.SHA256(Crypto.SHA256(self.enteredPassphrase(),
+      {asBytes: true}), {asBytes: true})));
+    $.jqlog.log("Wallet ID: " + WALLET.identifier());
   
     //Grab preferences
-    makeJSONAPICall("counterwalletd", "get_preferences", [WALLET.id], function(prefs) {
+    makeJSONAPICall("counterwalletd", "get_preferences", [WALLET.identifier()], function(prefs) {
       if($.isEmptyObject(prefs)) {
         //no stored preferences, go with the default
         prefs = {
@@ -47,7 +47,7 @@ function LogonViewModel() {
         };
   
         //store the preferences on the server for future use
-        makeJSONAPICall("counterwalletd", "store_preferences", [WALLET.id, prefs]);
+        makeJSONAPICall("counterwalletd", "store_preferences", [WALLET.identifier(), prefs]);
       }
       PREFERENCES = prefs;
       
@@ -67,8 +67,16 @@ function LogonViewModel() {
             //$.jqlog.log("WALLET.addresses().length: " + WALLET.addresses().length);
             //$.jqlog.log("PREFERENCES.num_addresses_used: " + PREFERENCES.num_addresses_used);
             if(WALLET.addresses().length == PREFERENCES.num_addresses_used) {
-              loadURL("xcp/pages/balances.html", container);
-              WALLET.updateBalances(); //Update the wallet balances
+              
+              /* hide the login div and show the other divs */
+              $('#logon').hide();
+              $('#header').show();
+              $('#left-panel').show();
+              $('#main').show();
+              
+              //next, load the balances screen
+              window.location.hash = 'xcp/pages/balances.html';
+
               return;
             }
           });

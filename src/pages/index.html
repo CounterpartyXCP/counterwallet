@@ -17,7 +17,6 @@
     <!-- Enabled SmartAdmin plugin styles -->
     <!-- Counterwallet plugin styles -->
     <link rel="stylesheet" href="xcp/extcss/jquery.reject.css">
-    <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/x-editable/1.5.0/bootstrap3-editable/css/bootstrap-editable.css" />
     <!-- Counterwallet custom styles -->
     <link rel="stylesheet" type="text/css" media="screen" href="xcp/css/default.css">
     <link rel="stylesheet" href="xcp/css/components/logon.css">
@@ -35,12 +34,12 @@
     <!-- possible classes: minified, fixed-ribbon, fixed-header, fixed-width-->
 
     <!-- HEADER -->
-    <header id="header">
+    <header id="header" style="display:none">
       <div id="logo-group">
         <span id="logo"> <img src="xcp/images/logo.png" alt="Counterwallet"> </span>
 
         <div id="activityBox">
-          <span id="activity" class="activity-dropdown"> <i class="fa fa-user"></i><b data-bind="text: activityCount" class="badge"></b></span>
+          <span id="activity" class="activity-dropdown"> <i class="fa fa-user"></i><b data-bind="blah: console.log($data), text: activityCount" class="badge"></b></span>
           <!-- for now, when clicked this will reset to 0 ...could take this into knockout in the future... -->
   
           <!-- AJAX-DROPDOWN : control this dropdown height, look and feel from the LESS variable file -->
@@ -95,7 +94,7 @@
 
     <!-- Left panel : Navigation area -->
     <!-- Note: This width of the aside area can be adjusted through LESS variables -->
-    <aside id="left-panel">
+    <aside id="left-panel"  style="display:none">
       <!-- NAVIGATION : This navigation is also responsive
 
       To make this navigation dynamic please make sure to link the node
@@ -110,7 +109,7 @@
 
         <ul>
           <li class="">
-            <a href="xcp/pages/balances.html" title="Balances"><i class="fa fa-lg fa-fw fa-money"></i> <span class="menu-item-parent">Balances</span></a>
+            <a href="xcp/pages/balances.html" title="Balances"><i class="fa fa-lg fa-fw fa-btc"></i> <span class="menu-item-parent">Balances</span></a>
           </li>
           <li>
             <a href="xcp/pages/send.html"><i class="fa fa-lg fa-fw fa-mail-forward"></i> <span class="menu-item-parent">Send</span></a>
@@ -134,7 +133,7 @@
     <!-- END NAVIGATION -->
 
     <!-- MAIN PANEL -->
-    <div id="main" role="main">
+    <div id="main" role="main" style="display:none">
 
       <!-- RIBBON -->
       <div id="ribbon">
@@ -151,15 +150,100 @@
       <!-- END RIBBON -->
 
       <!-- MAIN CONTENT -->
-      <div id="content" class="coverAll" data-bind="css: { coverAll: !WALLET.id() }">
-      </div>
+      <div id="content"></div>
       <!-- END MAIN CONTENT -->
 
     </div>
     <!-- END MAIN PANEL -->
+    
+    <!-- Logged out cover div -->
+    <div id="logon">
+      <h1 style="font-size: 3em; text-align: center">Welcome to Your Secure Web Wallet</h1>
+      <h2 style="font-size: 2em; text-align: center; padding-bottom: 5px; color: #333">Powered by Counterparty</h2>
+      <div id="form-well" style="margin-top:40px">
+        <div class="panel panel-info">
+          <div class="panel-heading">
+            <h3 class="panel-title"><b>Log Into Your Wallet</b></h3>
+          </div>
+          <div class="panel-body">
+            <form class="form-inline" role="form">
+              <input id="password" data-bind="value: enteredPassphrase, valueUpdate:'afterkeydown'" placeholder="Enter your Counterwallet 12 word passphrase." class="form-control pull-left" type="password">
+              <div class="pull-right">
+                <button id="open-sesame" data-bind="click: openWallet, enable: isPassphraseValid(), css: { 'btn-primary': isPassphraseValid() }" type="button" class="btn btn-default" disabled>Open Wallet</button>
+              </div>
+            </form>
+            <div class="clearfix"></div>
+            <div data-bind="visible: walletGenProgressVal() > 0" class="progress progress-striped active" style="margin-top:15px;margin-bottom:0;display:none">
+              <div class="progress-bar"  role="progressbar" data-bind="style: { width: walletGenProgressWidth() }">
+              </div>
+            </div>              
+          </div>
+        </div>
+        <div data-bind="visible: generatedPassphrase().length == 0" style="text-align:center;display:block">
+          <p style="font-size:1.7em">or&nbsp;              
+          <button data-bind="click: generatePassphrase" type="button" class="btn btn-success btn-lg">Create a new wallet</button>
+          </p>
+        </div>
+        <div data-bind="visible: generatedPassphrase()" style="display:none">
+          <br/>
+          <div class="panel panel-warning">
+            <div class="panel-heading">
+              <h3 class="panel-title"><b>To use Counterwallet you need a 12 word passphrase</b></h3>
+            </div>
+            <div class="panel-body">
+              <p>We have created a passphrase for you in the box below.</p>
+              <form class="form-inline" role="form">
+                <input id="generated" readonly="readonly" data-bind="value: generatedPassphrase" class="input-medium form-control" type="text">
+                <div class="pull-right">
+                  <button data-bind="click: generatePassphrase, tooltip: {title: 'Click to generate another random passphrase.'}" class="btn btn-default" type="button"><i class="fa fa-repeat"></i></button>
+                </div>
+              </form>
+              <div class="alert alert-danger" style="margin-top:15px;">
+                <p style="font-weight:bold;text-align:center;font-size:1.3em">Write your passphrase down and keep it safe.</p>
+                <p style="font-weight:bold;text-decoration:underline;text-align:center;font-size:1.2em">
+                  If you loose this passphrase, you will loose access to your wallet.
+                </p>
+                <p style="font-weight:bold;text-decoration:underline;text-align:center;font-size:1.2em">
+                  If someone gets your passphrase, they can gain access to your wallet.
+                </p>
+              </div>
+              <p>To log into your wallet, input your passphase in the wallet login textbox above, and press the "Open Wallet" button.</p>
+              </div>
+            </div>
+          </div>              
+      </div> <!-- form-well -->
+      <div id="extra-info" class="container">
+        <h3 class="sales-title">Why should I use Counterwallet?</h3>
+        <h4 class="sales-subtitle">We're a very secure online wallet with a goal of supporting all Counterparty functionality.</h4>
+        <h4 class="sales-subtitle">Create and access your wallet with a single passphrase, with no funds stored locally or on our servers.</h4>
+        <div class="row" style="margin-top:25px">
+          <div class="col-sm-4 col-md-4">
+            <h4 style="margin-bottom:10px"><i class="fa fa-lock"></i> Secure and predictable.</h4>
+            <p>Counterwallet is an online <a href="https://en.bitcoin.it/wiki/Deterministic_wallet">deterministic wallet</a>. 
+            Your passphrase is turned into a number which is then turned into Bitcoin Addresses. 
+            </p>
+            
+            <p>Your passphrase is your wallet access and wallet backup.</p> 
+          </div>
+          <div class="col-sm-4 col-md-4">
+            <h4 style="margin-bottom:10px"><i class="fa fa-circle-o"></i> We are a zero footprint wallet.</h4>
+            <p>
+              We don't store your Bitcoins locally or on our servers, only in your browser memory. 
+              No trace is left on your device once you logout of your session.</p> 
+            <p> 
+            Theives have fewer angles of attack with Counterwallet.
+            </p>
+          </div>
+          <div class="col-sm-4 col-md-4">
+            <h4 style="margin-bottom:10px"><i class="fa fa-bolt"></i> No backups required. Use from anywhere.</h4>
+            <p>Because your wallet is your passphase, you don't have to worry about encrypying or backing up any files.</p>
+            <p>You can use Counterwallet from any secure, trusted PC with internet access.</p> 
+          </div>
+        </div>
+      </div>
+    </div> <!-- END logged out cover div -->
 
     <!--================================================== -->
-
     <!-- Link to Google CDN's jQuery + jQueryUI; fall back to local -->
     <script src="//ajax.googleapis.com/ajax/libs/jquery/2.0.2/jquery.min.js"></script>
     <script>
@@ -167,7 +251,6 @@
         document.write('<script src="js/libs/jquery-2.0.2.min.js"><\/script>');
       }
     </script>
-
     <script src="//ajax.googleapis.com/ajax/libs/jqueryui/1.10.3/jquery-ui.min.js"></script>
     <script>
       if (!window.jQuery.ui) {
@@ -187,10 +270,11 @@
     <script src="js/plugin/bootstrap-slider/bootstrap-slider.min.js"></script> <!-- JQUERY UI + Bootstrap Slider -->
     <script src="js/plugin/msie-fix/jquery.mb.browser.min.js"></script> <!-- browser msie issue fix -->
     <script src="js/plugin/smartclick/smartclick.js"></script> <!-- SmartClick: For mobile devices -->
+    <script src="js/plugin/x-editable/x-editable.min.js"></script> <!-- SmartClick: For mobile devices -->
 
     <!-- COUNTERWALLET SPECIFIC JS INCLUDES -->    
     <!-- bitcoinjs-lib: The following library is required for bitcon addresses and signing. -->
-    <script src="xcp/extjs/bitcoinjs-lib.min.js"></script>
+    <script src="xcp/extjs/bitcoinjs-lib.orig.min.js"></script>
     <script src="xcp/extjs/bitcoinjs-tx.js"></script> 
     <script src="xcp/extjs/sjcl.min.js"></script> 
     <!-- JQuery extras -->
@@ -198,33 +282,34 @@
     <script src="xcp/extjs/jquery.reject.js"></script>
     <script src="xcp/extjs/jquery.timeago.js"></script>
     <!-- Bootstrap -->
-    <script src="//cdnjs.cloudflare.com/ajax/libs/x-editable/1.5.0/bootstrap3-editable/js/bootstrap-editable.min.js"></script>
     <!--<script src="xcp/extjs/jqBootstrapValidation.js"></script>-->
     <script src="xcp/extjs/bootbox.js"></script>
     <!-- socket.io -->
     <script src="//cdnjs.cloudflare.com/ajax/libs/socket.io/0.9.16/socket.io.min.js"></script>
     <!-- knockout.js -->
-    <!--<script src="http://knockoutjs.com/downloads/knockout-3.0.0.js"></script>-->
     <script src="http://knockoutjs.com/downloads/knockout-3.0.0.debug.js"></script>
+    <!--<script src="http://knockoutjs.com/downloads/knockout-3.0.0.js"></script>-->
     <script src="xcp/extjs/knockout-bootstrap.js"></script>
     <script src="xcp/extjs/knockout.x-editable.js"></script>
 
     <!-- Other external libraries. -->
-    <script src="xcp/extjs/struct.js"></script>    
     <script src="xcp/extjs/qrcode.js"></script> 
     <script src="xcp/extjs/mnemonic.js"></script> 
     <script src="xcp/extjs/electrum.js"></script> 
     
-    <!-- MAIN APP JS FILE -->
-    <script src="xcp/js/smartadmin.app.js"></script>
-
     <!-- JavaScript created specifically for Counterwallet. -->
     <script src="xcp/js/config.js"></script> 
     <script src="xcp/js/util.js"></script> 
     <script src="xcp/js/datafeed.js"></script> 
-    <script src="xcp/js/counterwallet.js"></script> 
     <script src="xcp/js/components/wallet.js"></script> <!-- inits WALLET object but doesn't bind it to anything -->
-    <script src="xcp/js/components/activitybar.js"></script> <!-- inits ACTIVITY_FEED object and binds it to activityBox -->
+    <script src="xcp/js/components/address.js"></script>
+    <script src="xcp/js/components/logon.js"></script> 
+    <script src="xcp/js/components/activityfeed.js"></script> <!-- inits ACTIVITY_FEED object and binds it to activityBox -->
+    <script src="xcp/js/counterwallet.js"></script> 
+
+    <!-- custom app.js --> 
+    <script src="xcp/js/smartadmin.app.js"></script>
+    <!-- ^ unfortunately we have to mod the file itself, instead of dynamically override :( -->
 
     <!-- Your GOOGLE ANALYTICS CODE Below -->
     <script type="text/javascript">
@@ -239,7 +324,6 @@
       })();
     
     </script>
-
   </body>
 
 </html>

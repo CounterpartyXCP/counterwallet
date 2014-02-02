@@ -1,9 +1,9 @@
-/* clearfix */
-/*.isotope:before,
-.isotope:after {
-  content: " ";
-  display: table;
-}*/
+
+div#balancesContainer div[role=content] { padding: 5px; }
+
+div#balancesContainer div.popover { width: 300px; }
+
+div#balancesContainer div.popover h3.popover-title { color: black; }
 
 .asset-item {
   position: relative;
@@ -39,5 +39,5 @@
 
 .asset-item.btc          { color: #a94442; background-color: #f2dede; border-color: #ebccd1; }
 .asset-item.xcp          { color: #3c763d; background-color: #dff0d8; border-color: #d6e9c6; }
-.asset-item.myasset     { color: #8a6d3b; background-color: #fcf8e3; border-color: #faebcc; }
+.asset-item.myasset     { color: #8a6d3b; background-color: #faebcc; border-color: #f4dbab; }
 .asset-item.othersasset { color: #31708f; background-color: #d9edf7; border-color: #bce8f1; }

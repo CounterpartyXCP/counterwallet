@@ -35,43 +35,43 @@ function initDataFeed() {
     WALLET.updateBalance(data['address'], data['asset'], data['balance']);
   });
 
-  socket.on('new_bet', function (data) {
-    $.jqlog.log("event:new_bet: " + JSON.stringify(data));
+  socket.on('bet', function (data) {
+    $.jqlog.log("event:bet: " + JSON.stringify(data));
   });
 
-  socket.on('new_broadcast', function (data) {
-    $.jqlog.log("event:new_broadcast: " + JSON.stringify(data));
+  socket.on('broadcast', function (data) {
+    $.jqlog.log("event:broadcast: " + JSON.stringify(data));
   });
 
-  socket.on('new_btcpay', function (data) {
-    $.jqlog.log("event:new_btcpay: " + JSON.stringify(data));
+  socket.on('btcpay', function (data) {
+    $.jqlog.log("event:btcpay: " + JSON.stringify(data));
   });
 
-  socket.on('new_burn', function (data) {
-    $.jqlog.log("event:new_burn: " + JSON.stringify(data));
+  socket.on('burn', function (data) {
+    $.jqlog.log("event:burn: " + JSON.stringify(data));
   });
 
-  socket.on('new_cancel', function (data) {
-    $.jqlog.log("event:new_cancel: " + JSON.stringify(data));
+  socket.on('cancel', function (data) {
+    $.jqlog.log("event:cancel: " + JSON.stringify(data));
   });
 
-  socket.on('new_dividend', function (data) {
-    $.jqlog.log("event:new_dividend: " + JSON.stringify(data));
+  socket.on('dividend', function (data) {
+    $.jqlog.log("event:dividend: " + JSON.stringify(data));
   });
 
-  socket.on('new_issuance', function (data) {
-    $.jqlog.log("event:new_issuance: " + JSON.stringify(data));
+  socket.on('issuance', function (data) {
+    $.jqlog.log("event:issuance: " + JSON.stringify(data));
     //See if the issuer matches any of our addresses
     var address = WALLET.getAddressObj(data['issuer']);
     if(!address) return;
     address.assets.push(new AssetViewModel(address.ADDRESS, data['asset'], data['divisible'], true, data['amount']));
   });
 
-  socket.on('new_order', function (data) {
-    $.jqlog.log("event:new_order: " + JSON.stringify(data));
+  socket.on('order', function (data) {
+    $.jqlog.log("event:order: " + JSON.stringify(data));
   });
 
-  socket.on('new_send', function (data) {
-    $.jqlog.log("event:new_send: " + JSON.stringify(data));
+  socket.on('send', function (data) {
+    $.jqlog.log("event:send: " + JSON.stringify(data));
   });
 }
