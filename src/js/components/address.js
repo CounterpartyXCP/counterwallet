@@ -155,8 +155,8 @@ function AddressViewModel(key, address, initialLabel) {
   
   self.label = ko.observable(initialLabel);
   self.assets = ko.observableArray([
-    new AssetViewModel(address, "BTC", true, null, 0), //will be updated with data loaded from blockchain
-    new AssetViewModel(address, "XCP", true, null, 0)  //will be updated with data loaded from counterpartyd
+    new AssetViewModel(address, "BTC", true, null, false, 0), //will be updated with data loaded from blockchain
+    new AssetViewModel(address, "XCP", true, null, false, 0)  //will be updated with data loaded from counterpartyd
   ]);
   self.assetFilter = ko.observable('');
   self.filteredAssets = ko.computed(function(){

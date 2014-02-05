@@ -1,7 +1,7 @@
 
 function initDataFeed() {
   //set up a connection to the server event feed via socket.io and handle messages
-  var url = counterwalletd_socketio_urls[0]; //temp
+  var url = counterwalletd_feed_urls[0];
   var socket = io.connect(url);
   
   socket.on('connect', function() {

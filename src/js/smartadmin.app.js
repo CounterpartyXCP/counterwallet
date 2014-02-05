@@ -227,12 +227,7 @@ $(document).ready(function() {
 	 */
 	function logout() {
 	  //COUNTERWALLET: START MOD
-    WALLET.identifier(null); //will restore the white overlay on the page
-    LOGON_VIEW_MODEL.enteredPassphrase('');
-    LOGON_VIEW_MODEL.generatedPassphrase('');
-    WALLET.removeAddresses(); //Clear addresses (this will stop BTC balance refresh as well)
-    
-    window.location.hash = '';
+	  location.reload(false); //this will take care of everything for us :)
     //COUNTERWALLET: END MOD
 	}
 
@@ -377,10 +372,23 @@ function nav_page_height() {
 	if (setHeight > windowHeight) {// if content height exceedes actual window height and menuHeight
 		$.left_panel.css('min-height', setHeight + 'px');
 		$.root_.css('min-height', setHeight + $.navbar_height + 'px');
-
+    
+    //COUNTERWALLETD: START MOD
+    $('#chatPane').css('min-height', setHeight + 'px');
+    $('#chatPane').css('min-height', windowHeight + 'px');
+    $('#chatContentDiv').css('min-height', (windowHeight - 50 - 40) + 'px');
+    //$('#chatContentInnerDiv').slimScroll({ height: (setHeight - 50 - 32) + 'px' });
+    $('#chatContentInnerDiv').slimScroll({ height: 'auto' });
+    //COUNTERWALLETD: END MOD
 	} else {
 		$.left_panel.css('min-height', windowHeight + 'px');
 		$.root_.css('min-height', windowHeight + 'px');
+		//COUNTERWALLETD: START MOD
+		$('#chatPane').css('min-height', windowHeight + 'px');
+		$('#chatContentDiv').css('min-height', (windowHeight - 50 - 40) + 'px');
+    //$('#chatContentInnerDiv').slimScroll({ height: (windowHeight - 50 - 32) + 'px' });
+    $('#chatContentInnerDiv').slimScroll({ height: 'auto' });
+		//COUNTERWALLETD: END MOD
 	}
 }
 
@@ -1165,7 +1173,14 @@ function checkURL() {
 
 	container = $('#content');
 	// Do this if url exists (for page refresh, etc...)
-	if (url) {
+
+  //COUNTERWALLET: START MOD
+  //console.log("HERE, url: " + url);
+  //console.log("HERE, login pane hidden?: " + $('#logon').is(':hidden'));
+  //if (url) {
+  if (url && $('#logon').is(':hidden')) {
+  //COUNTERWALLET: END MOD
+
 		// remove all active class
 		$('nav li.active').removeClass("active");
 		// match the url and add the active class

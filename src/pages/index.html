@@ -125,6 +125,9 @@
               </li>
             </ul>
           </li>
+          <li>
+            <a href="#" id="chatLink"><i class="fa fa-lg fa-fw fa-comments-o"></i><span class="menu-item-parent">Show Chat</span></a>
+          </li>
         </ul>
       </nav>
       <span class="minifyme"> <i class="fa fa-arrow-circle-left hit"></i> </span>
@@ -133,7 +136,7 @@
     <!-- END NAVIGATION -->
 
     <!-- MAIN PANEL -->
-    <div id="main" role="main" style="display:none">
+    <div id="main" role="main" style="display:none;">
 
       <!-- RIBBON -->
       <div id="ribbon">
@@ -152,10 +155,26 @@
       <!-- MAIN CONTENT -->
       <div id="content"></div>
       <!-- END MAIN CONTENT -->
-
     </div>
     <!-- END MAIN PANEL -->
-    
+
+    <div id="chatPane" style="display:none">
+      <h2 data-bind="html: headerText"></h2>
+      <div id="chatContentDiv">
+        <div id="chatContentInnerDiv" data-bind="foreach: lines">
+          <p class="chatMessage" data-bind="html: lineText"></p>
+        </div>
+      </div>
+      <div id="chatControlDiv" class="row">
+        <div class="input-group">
+          <span class="input-group-btn">
+            <button id="chatSendButton" data-bind="click: sendLine" class="btn btn-default" type="button">Send</button>
+          </span>
+          <input id="chatTextBox" type="text" class="form-control">
+        </div><!-- /input-group -->
+      </div><!-- /.row -->        
+    </div>    
+
     <!-- Logged out cover div -->
     <div id="logon">
       <h1 style="font-size: 3em; text-align: center">Welcome to Your Secure Web Wallet</h1>
@@ -281,11 +300,12 @@
     <script src="xcp/extjs/jquery.jqlog.js"></script>
     <script src="xcp/extjs/jquery.reject.js"></script>
     <script src="xcp/extjs/jquery.timeago.js"></script>
+    <script src="xcp/extjs/jquery.slimscroll.js"></script>
     <!-- Bootstrap -->
     <!--<script src="xcp/extjs/jqBootstrapValidation.js"></script>-->
     <script src="xcp/extjs/bootbox.js"></script>
     <!-- socket.io -->
-    <script src="//cdnjs.cloudflare.com/ajax/libs/socket.io/0.9.16/socket.io.min.js"></script>
+    <script src="xcp/extjs/socket.io.min.js"></script>
     <!-- knockout.js -->
     <script src="http://knockoutjs.com/downloads/knockout-3.0.0.debug.js"></script>
     <!--<script src="http://knockoutjs.com/downloads/knockout-3.0.0.js"></script>-->
@@ -298,13 +318,13 @@
     <script src="xcp/extjs/electrum.js"></script> 
     
     <!-- JavaScript created specifically for Counterwallet. -->
-    <script src="xcp/js/config.js"></script> 
     <script src="xcp/js/util.js"></script> 
     <script src="xcp/js/datafeed.js"></script> 
     <script src="xcp/js/components/wallet.js"></script> <!-- inits WALLET object but doesn't bind it to anything -->
     <script src="xcp/js/components/address.js"></script>
     <script src="xcp/js/components/logon.js"></script> 
     <script src="xcp/js/components/activityfeed.js"></script> <!-- inits ACTIVITY_FEED object and binds it to activityBox -->
+    <script src="xcp/js/components/chatfeed.js"></script> 
     <script src="xcp/js/counterwallet.js"></script> 
 
     <!-- custom app.js --> 

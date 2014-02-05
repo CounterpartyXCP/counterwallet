@@ -69,7 +69,7 @@ function fetchData(url, onSuccess, onError, postdata, extraAJAXOpts, useYQL, _ur
             if(res.substring) res = $.parseJSON(res); 
             //^ ghetto hack...sometimes jquery does not parse the JSON response  
 
-            if(res && res['result']) {
+            if(res && res.hasOwnProperty('result')) {
               onSuccess(res['result']);
             } else {
               onError(null, "JSON-RPC Error: "
@@ -108,11 +108,9 @@ function makeJSONAPICall(dest, method, params, onSuccess, onError) {
   if(dest != "counterwalletd" && dest != "counterpartyd") { alert("Invalid dest!"); }
   if(typeof(onError)==='undefined') onError = alertModal; //just default to popping up a modal with the error for now...
   
-  var urls = counterwalletd_api_urls;
-  
   //make JSON API call to counterwalletd
   if(dest == "counterwalletd") {
-    fetchData(urls, onSuccess, onError,
+    fetchData(counterwalletd_api_urls, onSuccess, onError,
       JSON.stringify({"jsonrpc": "2.0", "id": 0, "method": method, "params": params}),
       { contentType: 'application/json; charset=utf-8',
         dataType:"json",
@@ -120,7 +118,7 @@ function makeJSONAPICall(dest, method, params, onSuccess, onError) {
     );
   } else if(dest == "counterpartyd") {
     //make JSON API call to counterwalletd, which will proxy it to counterpartyd
-    fetchData(urls, onSuccess, onError,
+    fetchData(counterwalletd_api_urls, onSuccess, onError,
       JSON.stringify({
         "jsonrpc": "2.0", "id": 0,
         "method": "proxy_to_counterpartyd",
@@ -179,65 +177,25 @@ function selectText(element) {
     }
 }
 
-/* Knockout bindings */
-ko.bindingHandlers.isotope = {
-    init: function (element, valueAccessor, allBindingsAccessor, viewModel, bindingContext) {
-      //HACK: isotope is initialized in getBalances
-     
-    },
-    update: function (element, valueAccessor, allBindingsAccessor, viewModel, bindingContext) {
-        var $el = $(element),
-            value = ko.utils.unwrapObservable(valueAccessor());
+function shuffle(array) {
+  //http://stackoverflow.com/a/2450976
+  var currentIndex = array.length
+    , temporaryValue
+    , randomIndex
+    ;
 
-        if ($el.hasClass('isotope')) {
-            $el.isotope('reLayout');
-        } else {
-            $el.isotope({
-                itemSelector: value.itemSelector
-            });
-        }
-    }
-};
+  // While there remain elements to shuffle...
+  while (0 !== currentIndex) {
 
-ko.bindingHandlers.showModal = {
-  init: function (element, valueAccessor) {
-  },
-  update: function (element, valueAccessor) {
-    var value = valueAccessor();
-    if (ko.utils.unwrapObservable(value)) {
-      $(element).modal('show');
-                          // this is to focus input field inside dialog
-      $("input", element).focus();
-    }
-    else {
-      $(element).modal('hide');
-    }
+    // Pick a remaining element...
+    randomIndex = Math.floor(Math.random() * currentIndex);
+    currentIndex -= 1;
+
+    // And swap it with the current element.
+    temporaryValue = array[currentIndex];
+    array[currentIndex] = array[randomIndex];
+    array[randomIndex] = temporaryValue;
   }
-};
 
-ko.bindingHandlers.timeago = {
-  //http://stackoverflow.com/a/11270500
-  update: function(element, valueAccessor) {
-    var value = ko.utils.unwrapObservable(valueAccessor());
-    var $this = $(element);
-
-    // Set the title attribute to the new value = timestamp
-    $this.attr('title', value);
-
-    // If timeago has already been applied to this node, don't reapply it -
-    // since timeago isn't really flexible (it doesn't provide a public
-    // remove() or refresh() method) we need to do everything by ourselves.
-    if ($this.data('timeago')) {
-      var datetime = $.timeago.datetime($this);
-      var distance = (new Date().getTime() - datetime.getTime());
-      var inWords = $.timeago.inWords(distance);
-
-      // Update cache and displayed text..
-      $this.data('timeago', { 'datetime': datetime });
-      $this.text(inWords);
-    } else {
-      // timeago hasn't been applied to this node -> we should do that now
-      $this.timeago();
-    }
-  }
-};
+  return array;
+}
