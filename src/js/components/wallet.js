@@ -3,6 +3,7 @@ function WalletViewModel() {
   //The user's wallet
   var self = this;
   self.DEFAULT_NUMADDRESSES = 5; //default number of addresses to generate
+  self.ELECTRUM_PRIV_KEY = null; //the master private key from electrum (from which the address priv keys are derived)
   
   self.identifier = ko.observable(null); //set when logging in
   self.addresses = ko.observableArray(); //AddressViewModel objects -- populated at login
@@ -13,6 +14,9 @@ function WalletViewModel() {
 
     //derive an address from the key
     var address = key.getBitcoinAddress().toString();
+    
+    //Make sure this address doesn't already exist in the wallet (sanity check)
+    assert(!self.getAddressObj(address), "Cannot addKey: address already exists in wallet!");
     
     //see if there's a label already for this address that's stored in PREFERENCES, and use that if so
     var label = defaultLabel || '';
@@ -64,7 +68,7 @@ function WalletViewModel() {
     ko.utils.arrayForEach(self.addresses(), function(address) {
       filters.push({'field': 'address', 'op': '==', 'value': address.ADDRESS});
     });
-    makeJSONAPICall("counterpartyd", "get_balances", {"filters": filters, "filterop": "or"},
+    failoverAPI("get_balances", {"filters": filters, "filterop": "or"},
       function(response) {
         $.jqlog.log("Got initial balances: " + JSON.stringify(response));
         for(var i=0;i<response.length;i++) {
@@ -121,7 +125,9 @@ function WalletViewModel() {
     var signed_tx_hex = Crypto.util.bytesToHex(sendTx.serialize());
     $.jqlog.log("RAW SIGNED JSON: " + TX.toBBE(sendTx));
     $.jqlog.log("RAW SIGNED HEX: " + signed_tx_hex);
-    self.sendTX(signed_tx_hex);
+    self.sendTX(signed_tx_hex, function(endpoint, data) {
+      $.jqlog.log("Transaction send finished.");
+    });
   }
   
   self.retrieveBTCBalance = function(address, callback) {

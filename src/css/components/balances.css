@@ -1,4 +1,6 @@
 
+button#createNewAddress { margin: 12px; }
+
 div#balancesContainer div[role=content] { padding: 5px; }
 
 div#balancesContainer div.popover { width: 300px; }

@@ -64,7 +64,13 @@ function initDataFeed() {
     //See if the issuer matches any of our addresses
     var address = WALLET.getAddressObj(data['issuer']);
     if(!address) return;
-    address.assets.push(new AssetViewModel(address.ADDRESS, data['asset'], data['divisible'], true, data['amount']));
+    
+    //get info on the asset to determine if it's locked or not
+    failoverAPI("get_asset_info", [data['asset']], function(result) {
+      assert(result['owner'] == address);
+      address.assets.push(new AssetViewModel(self.ADDRESS, data['asset'], data['divisible'], true, result['locked'], data['amount'],
+        data['description'], data['callable'], data['call_date'], data['call_price'])); //add new
+    });
   });
 
   socket.on('order', function (data) {

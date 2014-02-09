@@ -1,9 +1,12 @@
 <div class="row">
   <div class="col-xs-12 col-sm-7 col-md-7 col-lg-4">
     <h1 class="page-title txt-color-blueDark">
-      <i class="fa fa-btc fa-fw "></i> 
+      <i class="fa fa-user fa-fw "></i> 
         My Account Balances 
     </h1>
+  </div>
+  <div class="pull-right">
+      <button id="createNewAddress" type="button" class="btn btn-primary">Create New Address</button>
   </div>
 </div>
 
@@ -19,7 +22,6 @@
               <div class="btn-group">
                 <button class="btn dropdown-toggle btn-xs btn-primary" data-toggle="dropdown"><i class="fa fa-bars"></i> Address Actions <i class="fa fa-caret-down"></i></button>                
                 <ul class="dropdown-menu pull-right">
-                  <li><a data-bind="click: sendFrom" href="#">Send From</a></li>
                   <li><a data-bind="click: showQRCode" href="#">Show QR Code</a></li>
                   <li><a data-bind="click: createAssetIn" href="#">Create Asset</a></li>
                   <li class="divider"></li><li class="dropdown-header">Sort by...</li>
@@ -41,7 +43,7 @@
                 <div class="btn-group" style="display: inline-block; float: right; width: 30px; height: 32px; line-height: 32px; position: relative; margin-left: 10px; "> <!-- asset level action button -->
                   <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown"><span class="caret"></span></button>
                   <ul class="dropdown-menu" role="menu">
-                    <li><a data-bind="click: sendTo" href="#">Send to...</a></li>
+                    <li><a data-bind="click: send" href="#">Send</a></li>
                     <li data-bind="visible: isMine() && !isLocked()"><a data-bind="click: issueAdditional" href="#">Issue Additional</a></li>
                     <li data-bind="visible: isMine()"><a data-bind="click: transfer" href="#">Transfer Ownership</a></li>
                     <li data-bind="visible: isMine() && !isLocked()"><a data-bind="click: lock" href="#">Lock Asset Ownership</a></li>
@@ -60,47 +62,91 @@
   </section> <!-- end widget grid -->
 </div>
   
-<!-- modal for send asset -->
+<!-- modal for create asset -->
 <div data-bind="showModal: shown", id="createAssetModal" class="modal fade" data-backdrop="static" data-keyboard="false" tabindex="-1" role="dialog" aria-labelledby="createAssetModal" aria-hidden="true">
   <div class="modal-dialog">
     <div class="modal-content">
       <div class="modal-header">
         <button type="button" data-bind="click: hide" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
-        <h4 class="modal-title">Issue an Asset</h4>
+        <h4 class="modal-title">Create (Issue) an Asset</h4>
       </div>
-      <div class="modal-body">
+      <div class="modal-body no-padding">
         <p>Please note that a <b>5 XCP fee</b> will be deducted from your balance upon successful creation of an asset.</p>
-        <form role="form" data-bind="submit: createAsset">
-          <div class="form-group">
-            <label for="assetAddress">Issue on Address</label>
-            <input name="assetAddress" data-bind="value: address" type="text" class="form-control" readonly="readonly">
-            <p class="help-block">The address the asset will be created on.</p>
-          </div>
-          <div class="form-group">
-            <label for="assetName">Asset Name</label>
-            <input name="assetName" data-bind="value: name" type="text" class="form-control"
-                   data-validation-regex-regex="[A-Z]+" minlength="4" maxlength="24" data-validation-regex-message="Must be between 4-24 uppercase letters only (A-Z)" required>
-            <p class="help-block">The asset's trading symbol (also known as the Asset ID).</p>
-          </div>
-          <div class="form-group">
-            <label for="assetLink">Descriptive Link</label>
-            <input name="assetLink" data-bind="value: url" type="url" class="form-control" maxlength="50">
-            <p class="help-block">An optional URL that provides more information on the asset.</p>
-          </div>
-          <div class="form-group">
-            <label for="assetQuantity">Quantity to Create</label>
-            <input name="assetQuantity"  data-bind="value: quantity" type="text" class="form-control"
-                   data-validation-regex-regex="[0-9]*\.?[0-9]{0,8}" data-validation-regex-message="Must be a valid number" required/>                        
-            <p class="help-block">How many of the units of the asset to issue (can be increased later).</p>
-            <!-- todo, validation currently doesn't differenciate between divisible (FP allowed) and indivisible -->
-          <div class="checkbox">
-            <label>
-              <input name="assetDivisible" type="checkbox" data-bind="checked: divisible"> Divisible asset?
-            </label>
-            <p class="help-block">Divisble assets can be subdivided into decimal places.</p>
-          </div>
-          </div>
-        </form>                    
+        
+        <form class="smart-form" data-bind="submit: createAsset"><fieldset>
+          <section><div class="row">
+            <label class="label col col-2">For Address</label>
+            <div class="col col-10">
+                <label class="input"><i class="icon-append fa fa-user"></i>
+                    <input name="assetAddress" data-bind="value: address" type="text" readonly="readonly"/>
+                </label>
+                <div class="note">The address the asset will be created on.</div>
+            </div>
+          </div></section>
+          <section><div class="row">
+            <label class="label col col-2">Asset Name</label>
+            <div class="col col-10">
+                <label class="input">
+                    <input name="assetName" data-bind="value: name" type="text"/>
+                </label>
+                <div class="note">The asset's trading symbol (also known as the Asset ID).</div>
+            </div>
+          </div></section>
+          <section><div class="row">
+            <label class="label col col-2">Description</label>
+            <div class="col col-10">
+                <label class="input">
+                    <input name="assetDescription" data-bind="value: description"/>
+                </label>
+                <div class="note">Optional text that provides more information on the asset.</div>
+            </div>
+          </div></section>
+          <section><div class="row">
+            <label class="label col col-2">Quantity</label>
+            <div class="col col-10">
+                <label class="input">
+                    <input name="assetQuantity"  data-bind="value: quantity" type="text"/>                        
+                </label>
+                <div class="note">How many of the units of the asset to issue (can be increased later).</div>
+            </div>
+          </div></section>
+          <section><div class="row">
+            <div class="col col-2"></div>
+            <div class="col col-10">
+              <label class="checkbox">
+                <input name="assetDivisible" type="checkbox" data-bind="checked: divisible">
+                <i></i>Divisible asset?
+              </label>
+              <div class="note">Divisble assets can be subdivided into decimal places.</div>
+          </div></section>
+          <section><div class="row">
+            <div class="col col-2"></div>
+            <div class="col col-10">
+              <label class="checkbox">
+                <input name="assetCallable" type="checkbox" data-bind="checked: callable">
+                <i></i>Callable asset?
+              </label>
+              <div class="note">Callable assets may be called back at a specific date for a specific strike price.</div>
+          </div></section>
+          <section data-bind="visible: callable"><div class="row">                
+            <label class="label col col-2">Call Date</label>
+            <div class="col col-10">
+                <label class="input">
+                    <input name="assetCallDate" type="text" data-bind="datetimepicker:callDate"/>
+                </label>
+                <div class="note">The date and time after which the owner of the asset may choose to call it back.</div>
+            </div>
+          </div></section>
+          <section data-bind="visible: callable"><div class="row">                
+            <label class="label col col-2">Call Price</label>
+            <div class="col col-10">
+                <label class="input">
+                    <input name="assetQuantity" type="text" data-bind="value: callPrice"/>
+                </label>
+                <div class="note">The price that the owner of the asset may call it back for.</div>
+            </div>
+          </div></section>
+        </fieldset></form>                    
       </div>
       <div class="modal-footer">
         <button type="button" data-bind="click: submitForm" class="btn btn-primary">Create Asset</button>
@@ -111,6 +157,7 @@
 </div><!-- /.modal -->
 
 <script src="xcp/js/components/create_asset.js"></script>
+<script src="xcp/js/components/balances.js"></script>
 
 <script type="text/javascript">
   //Bind the WALLET object to balancesContainer

@@ -1,4 +1,4 @@
-function AssetViewModel(address, asset, divisible, isMine, isLocked, initialBalance) {
+function AssetViewModel(address, asset, divisible, isMine, isLocked, initialBalance, description, callable, callDate, callPrice) {
   //An address has 2 or more assets (BTC, XCP, and any others)
   var self = this;
   self.ADDRESS = address; //will not change
@@ -7,12 +7,16 @@ function AssetViewModel(address, asset, divisible, isMine, isLocked, initialBala
   self.isLocked = ko.observable(isLocked);
   self.DIVISIBLE = divisible;
   self.balance = ko.observable(initialBalance);
+  self.description = ko.observable(description);
+  self.CALLABLE = callable;
+  self.CALLDATE = callDate;
+  self.CALLPRICE = callPrice;
   
   self.displayedBalance = ko.computed(function() {
     return "Bal: " + numberWithCommas(self.DIVISIBLE ? toFixed(self.balance() / 100000000, 8) : self.balance()).toString(); 
   }, self);
   
-  self.sendTo = function () {
+  self.send = function () {
     if(!self.balance()) { bootbox.alert("You have no balance of this asset to send."); return; }
 
     //pop up the send to window with the address and asset pre-populated
@@ -44,14 +48,16 @@ function AssetViewModel(address, asset, divisible, isMine, isLocked, initialBala
             var addtl_issuance = $('#addtl_issue').val();
             //validate the entered data as a whole or floating point number
             if(!isNumber(addtl_issuance)) {
-              return bootbox.alert("Invalid data entered: Must be numeric.");
+              bootbox.alert("Invalid data entered: Must be numeric.");
+              return false;
             }
              
             //do the transfer (zero quantity issuance to the specified address)
             addtl_issuance = parseFloat(addtl_issuance);
-            makeJSONAPICall("counterpartyd", "do_issuance",
-              [self.address(), addtl_issuance, self.name(), self.divisible(),
-               null, WALLET.getAddressObj(self.address()).PUBKEY],
+            
+            multiAPIConsensus("do_issuance",
+              [self.address(), addtl_issuance, self.name(), self.DIVISIBLE,
+               self.description(), self.CALLABLE, self.CALLDATE, self.CALLPRICE, null, WALLET.getAddressObj(self.address()).PUBKEY],
               function(unsigned_tx_hex) {
                 WALLET.signAndBroadcastTx(self.address(), unsigned_tx_hex);
                 bootbox.alert("Your asset has been transferred to <b>" + address + "</b>. It may take a bit for this to reflect.");
@@ -90,9 +96,9 @@ function AssetViewModel(address, asset, divisible, isMine, isLocked, initialBala
             }
             
             //do the transfer (zero quantity issuance to the specified address)
-            makeJSONAPICall("counterpartyd", "do_issuance",
-              [self.address(), 0, self.name(), self.divisible(),
-               address, WALLET.getAddressObj(self.address()).PUBKEY],
+            multiAPIConsensus("do_issuance",
+              [self.address(), 0, self.name(), self.DIVISIBLE,
+               self.description(), self.CALLABLE, self.CALLDATE, self.CALLPRICE, address, WALLET.getAddressObj(self.address()).PUBKEY],
               function(unsigned_tx_hex) {
                 WALLET.signAndBroadcastTx(self.address(), unsigned_tx_hex);
                 bootbox.alert("Your asset has been transferred to <b>" + address + "</b>. It may take a bit for this to reflect.");
@@ -124,9 +130,9 @@ function AssetViewModel(address, asset, divisible, isMine, isLocked, initialBala
           className: "btn-danger",
           callback: function() {
             //issue 0 to lock the asset
-            makeJSONAPICall("counterpartyd", "do_issuance",
-              [self.address(), 0, self.name(), self.divisible(),
-               null, WALLET.getAddressObj(self.address()).PUBKEY],
+            multiAPIConsensus("do_issuance",
+              [self.address(), 0, self.name(), self.DIVISIBLE,
+               self.description(), self.CALLABLE, self.CALLDATE, self.CALLPRICE, null, WALLET.getAddressObj(self.address()).PUBKEY],
               function(unsigned_tx_hex) {
                 WALLET.signAndBroadcastTx(self.address(), unsigned_tx_hex);
                 bootbox.alert("Your asset has been locked. It may take a bit for this to reflect.");
@@ -138,7 +144,41 @@ function AssetViewModel(address, asset, divisible, isMine, isLocked, initialBala
   };
 
   self.changeDescription = function () {
-    bootbox.alert("Functionality not yet implemented.");
+    bootbox.dialog({
+      message: "Enter the new description for this asset:<br/><br/> \
+       <input type='text' id='asset_new_description' class='bootbox-input bootbox-input-text form-control'></input>",
+      title: "Enter New Description",
+      buttons: {
+        success: {
+          label: "Cancel",
+          className: "btn-default",
+          callback: function() {
+            //modal will disappear
+          }
+        },
+        danger: {
+          label: "Change Description",
+          className: "btn-primary",
+          callback: function() {
+            var newDescription = $('#asset_new_description').val();
+            
+            if(byteCount(newDescription) > 52) {
+              bootbox.alert("Entered description is more than 52 bytes long. Please try again.");
+              return false;
+            }
+            
+            //do the transfer (zero quantity issuance to the specified address)
+            multiAPIConsensus("do_issuance",
+              [self.address(), 0, self.name(), self.DIVISIBLE,
+               newDescription, self.CALLABLE, self.CALLDATE, self.CALLPRICE, address, WALLET.getAddressObj(self.address()).PUBKEY],
+              function(unsigned_tx_hex) {
+                WALLET.signAndBroadcastTx(self.address(), unsigned_tx_hex);
+                bootbox.alert("Your asset has been transferred to <b>" + address + "</b>. It may take a bit for this to reflect.");
+            });
+          }
+        },
+      }
+    });    
   };
 }
 
@@ -155,9 +195,10 @@ function AddressViewModel(key, address, initialLabel) {
   
   self.label = ko.observable(initialLabel);
   self.assets = ko.observableArray([
-    new AssetViewModel(address, "BTC", true, null, false, 0), //will be updated with data loaded from blockchain
-    new AssetViewModel(address, "XCP", true, null, false, 0)  //will be updated with data loaded from counterpartyd
+    new AssetViewModel(address, "BTC", true, null, false, 0, '', false, null, null), //will be updated with data loaded from blockchain
+    new AssetViewModel(address, "XCP", true, null, false, 0, '', false, null, null)  //will be updated with data loaded from counterpartyd
   ]);
+  
   self.assetFilter = ko.observable('');
   self.filteredAssets = ko.computed(function(){
     if(self.assetFilter() == '') { //show all
@@ -182,7 +223,7 @@ function AddressViewModel(key, address, initialLabel) {
        return; //stop refreshing
        
     if(!firstCall) {
-      WALLET.retrieveBTCBalance(self.ADDRESS, function(data) {
+      WALLET.retrieveBTCBalance(self.ADDRESS, function(endpoint, data) {
         //Find the BTC asset and update
         var btcAsset = ko.utils.arrayFirst(self.assets(), function(a) {
               return a.ASSET == 'BTC';
@@ -212,9 +253,10 @@ function AddressViewModel(key, address, initialLabel) {
       assert(asset != 'BTC' && asset != 'XCP', "Trying to dynamically add BTC or XCP");
       
       //Before we push, look up the asset to see if the issuer matches this address
-      makeJSONAPICall("counterpartyd", "get_asset_info", [asset], function(result) {
+      failoverAPI("get_asset_info", [asset], function(result) {
         var isMine = result['owner'] == self.ADDRESS; //default to false on error or when we can't find the asset too
-        self.assets.push(new AssetViewModel(self.ADDRESS, asset, result['divisible'], isMine, result['locked'], balance)); //add new
+        self.assets.push(new AssetViewModel(self.ADDRESS, asset, result['divisible'], isMine, result['locked'], balance,
+          result['description'], result['callable'], result['call_date'], result['call_price'])); //add new
       });
     } else {
       $.jqlog.log("Updating balance for asset " + asset + " @ " + self.ADDRESS + " from " + match.balance() + " to " + balance);
@@ -227,16 +269,11 @@ function AddressViewModel(key, address, initialLabel) {
   self.changeLabel = function(params) {
     PREFERENCES.address_aliases[self.ADDRESS] = params.value;
     //update the preferences on the server 
-    makeJSONAPICall("counterwalletd", "store_preferences", [WALLET.identifier(), PREFERENCES], function(data) {
+    multiAPI("store_preferences", [WALLET.identifier(), PREFERENCES], function(data) {
       self.label = params.value; //update was a success
     });
   }
   
-  self.sendFrom = function() {
-    //Send from this address (go to the send pane with this address pre-entered)
-    alert("sendFrom Todo");
-  }
-
   self.showQRCode = function() {
     //Show the QR code for this address
     var qrcode = makeQRCode(self.ADDRESS);

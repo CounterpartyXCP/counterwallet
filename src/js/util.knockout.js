@@ -60,3 +60,17 @@ ko.bindingHandlers.timeago = {
     }
   }
 };
+
+
+ko.bindingHandlers.datetimepicker = {
+  init: function (element, valueAccessor, allBindingsAccessor) {
+    $(element).datetimepicker().on("changeDate", function (ev) {
+        var observable = valueAccessor();
+        observable(ev.date);
+    });
+  },
+  update: function (element, valueAccessor) {
+    var value = ko.utils.unwrapObservable(valueAccessor());
+    $(element).datetimepicker("setValue", value);
+  }
+};

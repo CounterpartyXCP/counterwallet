@@ -72,7 +72,7 @@ var Electrum = new function () {
             }
         }
     }
-
+    
     function calcAddr() {
         var change = (counter == range);
         var r = electrum_extend_chain(pubKey, privKey, change ? 0 : counter, change, true);

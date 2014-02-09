@@ -1210,7 +1210,9 @@ function loadURL(url, container) {
 		type : "GET",
 		url : url,
 		dataType : 'html',
-		cache : true, // (warning: this will cause a timestamp and will call the request twice)
+		//COUNTERWALLET: START MOD
+		cache : !IS_DEV, // (warning: IF true, this will cause a timestamp and will call the request twice)
+		//COUNTERWALLET: END MOD
 		beforeSend : function() {
 			// cog placed
 			container.html('<h1><i class="fa fa-cog fa-spin"></i> Loading...</h1>');

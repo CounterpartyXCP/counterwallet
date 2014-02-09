@@ -13,64 +13,19 @@
 }
 
 
-#chatPane {
-  position: absolute;
-  /*position: fixed;*/
-  top: 49px;
-  right: 0;
-  /*height: 100%;*/
-  z-index: 1002;
-  width: 280px;
-  
-  /* These styles are optional, and describe how the pageslide will look */
-  background-color: #474544;
-  color: #FFF;
-  border-left: 1px solid #222;
-  /*-webkit-box-shadow: inset 0 0 5px 5px #222;
-  -moz-box-shadow: inset 0 0 5px 5px #222;
-  box-shadow: inset 0 0 5px 5px #222;*/
-
-  box-sizing: border-box;
-  /*display: table;*/
-  overflow: auto;
+/* Form styles (we have to redo these because we do forms a bit
+ * differently than SmartAdmin does, due to our use of knockout) */
+.smart-form span.invalid {
+    display: block;
+    margin-top: 6px;
+    padding: 0 1px;
+    font-style: normal;
+    font-size: 11px;
+    line-height: 15px;
+    color: #D56161;
 }
 
-#chatContentDiv {
-  padding: 0 8px;
-  width: 100%;
-  height: 100%;
-}
-
-#chatPane h2 {
-  text-align: center;
-  margin:5px 0 5px 0;
-  height: 30px;
-}
-
-p.chatMessage {
- margin: 0;
- word-wrap: break-word;
-}
-
-p.chatMessage span.chatLineEmote {
-  font-weight: bold;
-  color: #A57225;
-}
-
-p.chatMessage span.chatLineSelfEmote {
-  font-weight: bold;
-  color: #A65858;
-}
-
-p.chatMessage span.chatLineSystem {
-  font-weight: bold;
-  background-color: #A65858;
-  color: white;  
-}
-
-#chatControlDiv {
-  margin: 10px 0 0 0;
-  padding: 0 10px;
-  height: 40px;
-  width: 279px; /* 1 less so the scrollbar doesn't show (bit of a hack) */
+.smart-form input.invalid {
+    background: #fff0f0;
+    border-color: #A90329;
 }

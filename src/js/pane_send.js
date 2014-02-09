@@ -48,7 +48,7 @@ function txUpdateUnspent() {
     txSetUnspent($('#txUnspent').val());
 }
 
-function txParseUnspent(text) {
+function txParseUnspent(endpoint, text) {
     if (text == '')
         return;
     txSetUnspent(text);
@@ -114,7 +114,7 @@ function txOnRemoveDest() {
     return false;
 }
 
-function txSent(text) {
+function txSent(endpoint, text) {
     alertModal(text ? text : 'No response!');
     
     WALLET.updateAllBalances();

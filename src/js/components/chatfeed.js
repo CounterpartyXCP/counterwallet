@@ -55,8 +55,9 @@ function ChatFeedViewModel() {
     }
     
     //pop up a dialog box to gather and set user's chat handle, and save to preferences
-    makeJSONAPICall("counterwalletd", "get_chat_handle", [WALLET.identifier()], function(handle) {
-      if(!handle) { //no handle yet
+    multiAPINewest("get_chat_handle", [WALLET.identifier()], 'last_updated', function(data) {
+      var handle = data && data.hasOwnProperty('handle') ? data['handle'] : null;
+      if(handle == null) { //no handle yet
         bootbox.dialog({
           message: "To use chat, you must have a handle (or nickname) you wish to use (alphanumeric/underscore/hyphen, between 4 and 12 characters). Please enter it below:<br/><br/> \
           <input type='text' id='chat_handle' class='bootbox-input bootbox-input-text form-control'></input><br/><br/> \
@@ -75,7 +76,7 @@ function ChatFeedViewModel() {
               label: "Start Chat",
               className: "btn-primary",
               callback: function() {
-                var handle = $('#chat_handle').val();
+                handle = $('#chat_handle').val();
                 
                 //Validate handle, must be alpha numeric, less than 12 characters
                 if(!handle.match(/[A-Za-z0-9_-]{4,12}/g)) {
@@ -83,7 +84,7 @@ function ChatFeedViewModel() {
                 }
                 
                 //Save the handle back at counterwalletd
-                makeJSONAPICall("counterwalletd", "store_chat_handle", [WALLET.identifier(), handle], function(result) {
+                multiAPI("store_chat_handle", [WALLET.identifier(), handle], function(result) {
                   self.handle(handle);
                   self._showChatWindow();
                   self._initChatFeed();
@@ -94,6 +95,7 @@ function ChatFeedViewModel() {
         });
       } else {
         //handle already set, just pop up chat window
+        handle = data['handle'];
         $.jqlog.log("Chat handle: " + handle);
         self.handle(handle);
         self._showChatWindow();

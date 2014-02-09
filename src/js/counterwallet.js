@@ -1,10 +1,16 @@
 var PREFERENCES = {}; //set when logging in
-var counterwalletd_urls = null;
+var MAX_ADDRESSES = 20; //totall arbitrary :)
 
-if(document.URL.indexOf("counterwallet.com") >= 0) { //Production setup
+var MAX_INT = Math.pow(2, 63) - 1;
+var UNIT = 100000000; //# satoshis in whole
+
+var counterwalletd_urls = null;
+var IS_DEV = document.URL.indexOf("counterwallet.com") < 0;
+
+if(!IS_DEV) { //Production setup
   counterwalletd_urls = [
-    {'api': "http://192.99.18.61:4100/jsonrpc/", 'feed': "http://192.99.18.61:4101/", 'chat': "http://192.99.18.61:4102/"},
-    {'api': "http://37.187.134.92:4100/jsonrpc/", 'feed': "http://37.187.134.92:4101/", 'chat': "http://37.187.134.92:4102/"}
+    {'api': "https://cw01.counterparty.co/_/api/", 'feed': "https://cw01.counterparty.co/_/feed/", 'chat': "https://cw01.counterparty.co/_/chat/"},
+    {'api': "https://cw02.counterparty.co/_/api/", 'feed': "https://cw02.counterparty.co/_/feed/", 'chat': "https://cw02.counterparty.co/_/chat/"}
   ];
 } else { //Development setup
   counterwalletd_urls = [
@@ -42,4 +48,12 @@ $(document).ready(function() {
     imagePath: './xcp/images/jquery.reject/', // Path where images are located    
   }); // Customized Text
 });
+
+//Knockout validation defaults (https://github.com/ericmbarnard/Knockout-Validation/wiki/Configuration)
+ko.validation.init({
+  decorateElement: true,
+  errorMessageClass: 'invalid',
+  errorElementClass: 'invalid'
+});
+
 

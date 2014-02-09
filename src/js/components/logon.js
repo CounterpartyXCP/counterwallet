@@ -1,5 +1,6 @@
-//JS used when the user is not yet logged on
+
 function LogonViewModel() {
+  //JS used when the user is not yet logged on
   var self = this;
 
   self.enteredPassphrase = ko.observable('');
@@ -38,16 +39,19 @@ function LogonViewModel() {
     $.jqlog.log("Wallet ID: " + WALLET.identifier());
   
     //Grab preferences
-    makeJSONAPICall("counterwalletd", "get_preferences", [WALLET.identifier()], function(prefs) {
-      if($.isEmptyObject(prefs)) {
-        //no stored preferences, go with the default
+    multiAPINewest("get_preferences", [WALLET.identifier()], 'last_updated', function(data) {
+      var prefs = data && data.hasOwnProperty('preferences') ? data['preferences'] : null;
+      if(prefs == null) {
+        $.jqlog.log("Stored preferences NOT found on server(s). Creating new...");
+        
+        //no stored preferences on any server(s) in the federation, go with the default...
         prefs = {
           'num_addresses_used': WALLET.DEFAULT_NUMADDRESSES,
           'address_aliases': {}
         };
   
-        //store the preferences on the server for future use
-        makeJSONAPICall("counterwalletd", "store_preferences", [WALLET.identifier(), prefs]);
+        //store the preferences on the server(s) for future use
+        multiAPI("store_preferences", [WALLET.identifier(), prefs]);
       }
       PREFERENCES = prefs;
       
@@ -58,14 +62,16 @@ function LogonViewModel() {
             self.walletGenProgressVal(r + 19);
         },
         function(privKey) {
-          Electrum.gen(PREFERENCES.num_addresses_used, function(r) { 
+          WALLET.ELECTRUM_PRIV_KEY = privKey;
+          
+          Electrum.gen(PREFERENCES['num_addresses_used'], function(r) { 
             WALLET.addKey(
               new Bitcoin.ECKey(r[1]),
               "My Address #" + (WALLET.addresses().length + 1).toString()
             );
             
-            //$.jqlog.log("WALLET.addresses().length: " + WALLET.addresses().length);
-            //$.jqlog.log("PREFERENCES.num_addresses_used: " + PREFERENCES.num_addresses_used);
+            $.jqlog.log("WALLET.addresses().length: " + WALLET.addresses().length);
+            $.jqlog.log("PREFERENCES.num_addresses_used: " + PREFERENCES.num_addresses_used);
             if(WALLET.addresses().length == PREFERENCES.num_addresses_used) {
               
               /* hide the login div and show the other divs */
