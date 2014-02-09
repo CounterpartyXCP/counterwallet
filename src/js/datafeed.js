@@ -66,10 +66,9 @@ function initDataFeed() {
     if(!address) return;
     
     //get info on the asset to determine if it's locked or not
-    failoverAPI("get_asset_info", [data['asset']], function(result) {
-      assert(result['owner'] == address);
-      address.assets.push(new AssetViewModel(self.ADDRESS, data['asset'], data['divisible'], true, result['locked'], data['amount'],
-        data['description'], data['callable'], data['call_date'], data['call_price'])); //add new
+    failoverAPI("get_asset_info", [data['asset']], function(endpoint, data) {
+      assert(data['owner'] == address.ADDRESS);
+      address.addOrUpdateAsset(data['asset'], data['amount']);
     });
   });
 

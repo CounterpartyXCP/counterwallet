@@ -1,11 +1,12 @@
-function _describeError(jqXHR, textStatus, errorThrown) {
+function describeError(jqXHR, textStatus, errorThrown) {
     var message;
     var statusErrorMap = {
         '400' : "Server understood the request but request content was invalid.",
         '401' : "Unauthorised access.",
         '403' : "Forbidden resouce can't be accessed",
         '500' : "Internal Server Error.",
-        '503' : "Service Unavailable"
+        '503' : "Service Unavailable",
+        '525' : "The server is not fully caught up to the blockchain. Please logout try later." //custom
     };
     if (jqXHR && jqXHR.status) {
         message =statusErrorMap[jqXHR.status];
@@ -26,7 +27,7 @@ function _describeError(jqXHR, textStatus, errorThrown) {
 } 
 
 function _defaultErrorHandler(endpoint, jqXHR, textStatus, errorThrown) {
-  var message = _describeError(jqXHR, textStatus, errorThrown);
+  var message = describeError(jqXHR, textStatus, errorThrown);
   bootbox.alert("Error making request to " + endpoint + ": " + message);
 }
 
@@ -36,7 +37,7 @@ function fetchData(url, onSuccess, onError, postdata, extraAJAXOpts, useYQL, _ur
     -url: The URL to request. May be a single URL, or a list of URLs. If a list of URLs is specified,
      then we attempt the request across the given list of URLs (in order) until we get a success result.
     -onSuccess: A success callback that is passed (endpoint, data), with data being the raw data passed back
-    -onError: An error callback that passes the parameters (jqXHR, textStatus, errorThrown). If multiple
+    -onError: An error callback that passes the parameters (endpoint, jqXHR, textStatus, errorThrown). If multiple
      URLs were specified, this callback is triggered after the failure for the last URL (i.e. where the
      list is exhausted and we give up)
    */
@@ -58,17 +59,17 @@ function fetchData(url, onSuccess, onError, postdata, extraAJAXOpts, useYQL, _ur
       url = 'https://query.yahooapis.com/v1/public/yql?q=' + encodeURIComponent(q);
   }
   
-  //if passed a list of urls for url, then keep trying until we find one that works
+  //if passed a list of urls for url, then keep trying (via recursion) until we find one that works
   var u = url;
   if (url instanceof Array) {
-    u = url[_url_n];
+    u = url[_url_n]; // u = url to attempt this time
   }
   
   var ajaxOpts = {
       type: (useYQL || !postdata) ? "GET" : "POST",
       data: (useYQL || !postdata) ? "" : postdata,
       //dataType: dataType, 
-      url: url,
+      url: u,
       success: function(res) {
         if(onSuccess) {
           if(extraAJAXOpts && extraAJAXOpts['dataType'] == 'json') {
@@ -76,16 +77,16 @@ function fetchData(url, onSuccess, onError, postdata, extraAJAXOpts, useYQL, _ur
             //^ ghetto hack...sometimes jquery does not parse the JSON response  
 
             if(res && res.hasOwnProperty('result')) {
-              onSuccess(url, res['result']);
+              onSuccess(u, res['result']);
             } else {
-              onError(null, "JSON-RPC Error: "
+              onError(u, null, "JSON-RPC Error: "
                 + "<p><b>Type:</b> " + res['error']['message'] + "</p>"
                 + "<p><b>Code:</b> " + res['error']['code'] + "</p>"
                 + "<p><b>Message:</b> " + res['error']['data']['message'] + "</p>"
                 /*+ "<p><b>RAW:</b> " + JSON.stringify(res) + "</p>"*/, "jsonrpc");
             }
           } else {
-            onSuccess(url, useYQL ? $(res).find('results').text() : res.responseText);
+            onSuccess(u, useYQL ? $(res).find('results').text() : res.responseText);
           }
         }
       },
@@ -93,11 +94,13 @@ function fetchData(url, onSuccess, onError, postdata, extraAJAXOpts, useYQL, _ur
         if (url instanceof Array) {
           if(url.length <= _url_n + 1) {
             //no more urls to hit...finally call error callback (if there is one)
-            if (onError) return onError(jqXHR, opt, err);
+            if (onError) return onError(u, jqXHR, opt, err);
           } else {
             //try the next URL
             return fetchData(url, onSuccess, onError, postdata, extraAJAXOpts, useYQL, _url_n + 1);
           }
+        } else {
+          if (onError) return onError(u, jqXHR, opt, err);
         }
       }
   }
@@ -113,13 +116,15 @@ function _makeJSONAPICall(destType, endpoints, method, params, onSuccess, onErro
     -endpoints: The specific API endpoint URL string to make the API request to.
      If a list of endpoint URLs are specified instead of a single URL, then we attempt the request
      across the given list of endpoints (in order) until we get a success result.
-    -onSuccess: A success callback that takes the raw data as its only parameter
-    -onError: An error callback that passes the parameters (jqXHR, textStatus, errorThrown). If multiple
+    -onSuccess: A success callback that is passed (endpoint, data)
+    -onError: An error callback that passes the parameters (endpoint, jqXHR, textStatus, errorThrown). If multiple
      URLs were specified, this callback is triggered after the failure for the last URL (i.e. where the
      list is exhausted and we give up).
    */
   if(typeof(onError)==='undefined')
-    onError = function(endpoint, jqXHR, textStatus, errorThrown) { return _defaultErrorHandler(method + "@" + destType, jqXHR, textStatus, errorThrown) };
+    onError = function(endpoint, jqXHR, textStatus, errorThrown) {
+      return _defaultErrorHandler(method + "@" + destType, jqXHR, textStatus, errorThrown)
+    };
   
   //make JSON API call to counterwalletd
   if(destType == "counterwalletd") {
@@ -148,7 +153,7 @@ function _makeJSONAPICall(destType, endpoints, method, params, onSuccess, onErro
 function _getDestTypeFromMethod(method) {
   //based on the method, determine the endpoints list to use
   var destType = "counterpartyd";
-  if(['get_chat_handle', 'store_chat_handle', 'get_preferences', 'store_preferences'].indexOf(method) >= 0) {
+  if(['is_ready', 'get_chat_handle', 'store_chat_handle', 'get_preferences', 'store_preferences'].indexOf(method) >= 0) {
     destType = "counterwalletd";
   }
   return destType;
@@ -177,9 +182,25 @@ function _multiAPIPrimative(method, params, onFinished) {
     function(endpoint, jqXHR, textStatus, errorThrown) { //error callback
       gatheredResults.push({'success': false, 'endpoint': endpoint, 'jqXHR': jqXHR, 'textStatus': textStatus, 'errorThrown': errorThrown});
       
-      if(gatheredResults.length == counterwalletd_api_urls.length) {
-        onFinished(gatheredResults);
+      //525 DETECTION (needed here and in failoverAPI() as failoverAPI() doesn't use this primative)
+      if(method != "is_ready" && gatheredResults.length == counterwalletd_api_urls.length) {
+        //detect a special case of all servers returning code 525, which would mean counterpartyd had a reorg and/or we are upgrading
+        var allNotCaughtUp = true;
+        for(var j=0;j < gatheredResults.length; j++) {
+          if(!gatheredResults['jqXHR'] || gatheredResults['jqXHR'].status != '525') {
+            allNotCaughtUp = false;
+            break;
+          }
+        }
+        if(allNotCaughtUp) {
+          alert("The server(s) are currently updating and/or not caught up to the blockchain. Logging you out. Please try logging in again later.")
+          location.reload(false); //log the user out to avoid ruckus
+          return;
+        }
       }
+        
+      //otherwise, respond as normal
+      onFinished(gatheredResults);  
     });
   }
 }
@@ -196,34 +217,49 @@ function _multiAPIPrimative(method, params, onFinished) {
 function failoverAPI(method, params, onSuccess, onError) {
   /*Make an API call to one or more servers, proceeding sequentially until a success result is returned.
     
-    -onSuccess: Called when the first server returns success, and passed the result data
+    -onSuccess: Called when the first server returns success, and passed the result data as (endpoint, data)
+    (where endpoint is the first host that returned success)
     -onError (optional): Called when all servers return error and/or are not available. Passed the last
-     non-null error result from a server, passing the parameters (jqXHR, textStatus, errorThrown). If not specified,
+     non-null error result from a server, passing the parameters (endpoint, jqXHR, textStatus, errorThrown). If not specified,
      will log and display a general error message.
   */
   if(typeof(onError)==='undefined') {
-    onError = function(jqXHR, textStatus, errorThrown) {
-      var message = _describeError(jqXHR, textStatus, errorThrown);
+    onError = function(endpoint, jqXHR, textStatus, errorThrown) {
+      var message = describeError(jqXHR, textStatus, errorThrown);
       bootbox.alert("failoverAPI: Call failed (failed over across all servers). Method: " + method + "; Last error: " + message);
     };
   }
+  //525 DETECTION (needed here and in _multiAPIPrimative) - wrap onError (so that this works even for user supplied onError)
+  onErrorOverride = function(endpoint, jqXHR, textStatus, errorThrown) {
+    //detect a special case of all servers returning code 525, which would mean counterpartyd had a reorg and/or we are upgrading
+    //TODO: this is not perfect in this failover case now because we only see the LAST error. We are currently assuming
+    // that if a) the LAST server returned a 525, and b) all servers are erroring out or down, that all servers are
+    // probably returning 525s or updating (or messed up somehow) and we should just log the client out to be safe about it.
+    // This is probably a good choice for now... 
+    if(jqXHR || jqXHR.status == '525') {
+      alert("The server(s) are currently updating and/or not caught up to the blockchain. Logging you out. Please try logging in again later. (e:failoverAPI)")
+      location.reload(false); //log the user out to avoid ruckus
+      return;
+    }
+    return onError(endpoint, jqXHR, textStatus, errorThrown);
+  }
 
   var destType = _getDestTypeFromMethod(method);
-  _makeJSONAPICall(destType, counterwalletd_api_urls, method, params, onSuccess, onError);
+  _makeJSONAPICall(destType, counterwalletd_api_urls, method, params, onSuccess, onErrorOverride);
 }
   
 function multiAPI(method, params, onSuccess, onError) {
   /*Make an API call across all endpoints, trying to get at least 1 success result.
   
     -onSuccess: Success callback (requires that at least 1 server in the set returned success). Returns the data
-     returned from the server in the list with the first successful call of the set.
+     returned from the server to successfully return, as (endpoint, data).
     -onError (optional): Error callback. Called when no servers return success. Returns the error from the last server
-     that the call was attempted on, passing the parameters (jqXHR, textStatus, errorThrown). If undefined, will log
+     that the call was attempted on, passing the parameters (endpoint, jqXHR, textStatus, errorThrown). If undefined, will log
      to console stating data differences, and pop up error dialog stating that action failed.
   */
   if(typeof(onError)==='undefined') {
-    onError = function(jqXHR, textStatus, errorThrown) {
-      var message = _describeError(jqXHR, textStatus, errorThrown);
+    onError = function(endpoint, jqXHR, textStatus, errorThrown) {
+      var message = describeError(jqXHR, textStatus, errorThrown);
       bootbox.alert("multiAPI: Parallel call failed (no server returned success). Method: " + method + "; Last error: " + message);
     };
   }
@@ -232,12 +268,12 @@ function multiAPI(method, params, onSuccess, onError) {
     //look for the first success and use that...
     for(var i=0; i < results.length; i++) {
       if(results[i]['success']) {
-        return onSuccess ? onSuccess(results[i]['data']) : true;
+        return onSuccess ? onSuccess(results[i]['endpoint'], results[i]['data']) : true;
       }
     }
     
     //if here, no servers returned success...
-    return onError(results[i-1]['jqXHR'], results[i-1]['textStatus'], results[i-1]['errorThrown']);
+    return onError(results[i-1]['endpoint'], results[i-1]['jqXHR'], results[i-1]['textStatus'], results[i-1]['errorThrown']);
   });
 }
 
@@ -246,12 +282,12 @@ function multiAPIConsensus(method, params, onSuccess, onConsensusError, onSysErr
     passed to the onSuccess callback.
     
     -onSuccess: Success callback (requires that at least 1 server in the set returned success, and
-     all successes had data result match up exactly). Args passed are (numTotalEndpoints, numConsensusEndpoints, data)
+     all successes had data result match up exactly). Args passed are (data, numTotalEndpoints, numConsensusEndpoints)
     -onConsensusError (optional): Error callback. Called if consensus failed. Returns the error data, taking the parameters
-     (jqXHR, textStatus, errorThrow) for the last server that the call was attempted on. If undefined, will log to
+     (unmatchingResultsList) (which is a list of the raw unmatching results). If undefined, will log to
      console stating data differences, and pop up error dialog stating that action failed.
     -onSysError (optional): System error callback. Called if all systems were down or returned error. Returns
-     the error from the last server that the call was attempted on, passing the parameters (jqXHR, textStatus, errorThrown).
+     the error from the last server that the call was attempted on, passing the parameters (endpoint, jqXHR, textStatus, errorThrown).
   */
   if(typeof(onConsensusError)==='undefined') {
     onConsensusError = function(unmatchingResultsList) {
@@ -259,8 +295,8 @@ function multiAPIConsensus(method, params, onSuccess, onConsensusError, onSysErr
     };
   }
   if(typeof(onSysError)==='undefined') {
-    onSysError = function(jqXHR, textStatus, errorThrown) {
-      var message = _describeError(jqXHR, textStatus, errorThrown);
+    onSysError = function(endpoint, jqXHR, textStatus, errorThrown) {
+      var message = describeError(endpoint, jqXHR, textStatus, errorThrown);
       bootbox.alert("multiAPIConsensus: Parallel call failed (no server returned success). Method: " + method + "; Last error: " + message);
     };
   }
@@ -275,7 +311,7 @@ function multiAPIConsensus(method, params, onSuccess, onConsensusError, onSysErr
     }
     
     if(!successResults.length) { //no successful results
-      return onSysError(results[i-1]['jqXHR'], results[i-1]['textStatus'], results[i-1]['errorThrown']);
+      return onSysError(results[i-1]['endpoint'], results[i-1]['jqXHR'], results[i-1]['textStatus'], results[i-1]['errorThrown']);
     }
     
     var consensusResult = null;
@@ -289,7 +325,7 @@ function multiAPIConsensus(method, params, onSuccess, onConsensusError, onSysErr
     
     //if here, all is well
     if(onSuccess) {
-      onSuccess(counterwalletd_api_urls.length, successResults.length, successResults[successResults.length-1]);
+      onSuccess(successResults[successResults.length-1], counterwalletd_api_urls.length, successResults.length);
     } 
   });
 }
@@ -299,16 +335,16 @@ function multiAPINewest(method, params, newestField, onSuccess, onError) {
 
     -newestField: the name of the dict field in the result dict that should be compaired (via regular JS comparison
      operators -- so something like an integer, float, etc)
-    -onSuccess: A callback triggered and passed the newest data result from one of the servers (i.e. the results passed
-      have the highest value of the newestField property). Note that if at least one server returned a non-error, but
+    -onSuccess: A callback triggered and passed the newest data result from one of the servers as (endpoint, data). The results passed
+      have the highest value of the newestField property. Note that if at least one server returned a non-error, but
       ALL servers returned data that was missing the newestField (or at the newestField set to None or blank), then 
-      onSuccess IS called, but it is passed null
+      onSuccess IS called, but it is passed (null, null)
     -onError: if ALL servers returned error and we had no successful calls. Returns
-     the error from the last server that the call was attempted on, passing the parameters (jqXHR, textStatus, errorThrown).
+     the error from the last server that the call was attempted on, passing the parameters (endpoint, jqXHR, textStatus, errorThrown).
   */
   if(typeof(onError)==='undefined') {
-    onError = function(jqXHR, textStatus, errorThrown) {
-      var message = _describeError(jqXHR, textStatus, errorThrown);
+    onError = function(endpoint, jqXHR, textStatus, errorThrown) {
+      var message = describeError(jqXHR, textStatus, errorThrown);
       bootbox.alert("multiAPINewest: Parallel call failed (no server returned success). Method: " + method + "; Last error: " + message);
     };
   }
@@ -323,7 +359,7 @@ function multiAPINewest(method, params, newestField, onSuccess, onError) {
     }
 
     if(!successResults.length) { //no successful results
-      return onError(results[i-1]['jqXHR'], results[i-1]['textStatus'], results[i-1]['errorThrown']);
+      return onError(results[i-1]['endpoint'], results[i-1]['jqXHR'], results[i-1]['textStatus'], results[i-1]['errorThrown']);
     }
     
     //grab the newest result
@@ -338,9 +374,9 @@ function multiAPINewest(method, params, newestField, onSuccess, onError) {
     }
     
     if(onSuccess && newest != null) {
-      onSuccess(successResults[newest]);
+      onSuccess(endpoint, successResults[newest]);
     } else if(onSuccess && newest == null) {
-      onSuccess(null); //at least one server returned a non-error, but the data was empty
+      onSuccess(null, null); //at least one server returned a non-error, but the data was empty
     }
   });
 }

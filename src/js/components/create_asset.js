@@ -8,6 +8,7 @@ ko.validation.rules['assetNameIsTaken'] = {
       function(endpoint, data) { return data ? callback(false) : callback(true) }); //empty list -> true (valid = true)  
   }
 };
+ko.validation.registerExtenders();
 
 function CreateAssetModalViewModel() {
   var self = this;
@@ -98,8 +99,9 @@ function CreateAssetModalViewModel() {
       return false;
     }
     
-    if(   (self.divisible() && self.quantity() * UNIT > MAX_INT)
-       || (!self.divisible() && self.quantity() > MAX_INT)) {
+    var rawQuantity = self.divisible() ? Math.round(self.quantity().parseFloat() * UNIT) : self.quantity().parseInt();
+    
+    if(rawQuantity > MAX_INT) {
       bootbox.alert("The quantity desired to be issued for this asset is too high.");
       return false;
     }
@@ -108,6 +110,10 @@ function CreateAssetModalViewModel() {
       bootbox.alert("Call date cannot be in the past.");
       return false;
     }
+    
+    //convert callDate + callPrice
+    var rawCallDate = self.callDate() ? self.callDate().getTime() / 1000 : null; //epoch time
+    var rawCallPrice = self.divisible() ? Math.round(self.callPrice().parseFloat() * UNIT) : self.callPrice().parseInt();
 
     if(  self.callable()
       && (   (self.divisible() && self.quantity() * UNIT > MAX_INT)
@@ -118,10 +124,10 @@ function CreateAssetModalViewModel() {
     }
     
     multiAPIConsensus("do_issuance",
-      [self.address(), self.divisible() ? self.quantity() * UNIT : self.quantity(), self.name(), self.divisible(),
-       self.description(), self.callable(), self.callDate(), self.callPrice(), null, WALLET.getAddressObj(self.address()).PUBKEY],
-      function(unsigned_tx_hex) {
-        WALLET.signAndBroadcastTx(self.address(), unsigned_tx_hex);
+      [self.address(), rawQuantity, self.name(), self.divisible(),
+       self.description(), self.callable(), rawCallDate, rawCallPrice, null, WALLET.getAddressObj(self.address()).PUBKEY],
+      function(unsignedTXHex, numTotalEndpoints, numConsensusEndpoints) {
+        WALLET.signAndBroadcastTx(self.address(), unsignedTXHex);
         
         //tell the user about the result
         bootbox.alert("Your asset seemed to be created successfully. It will automatically appear under the \
@@ -143,19 +149,6 @@ function CreateAssetModalViewModel() {
     self.shown(false);
   }  
 }
-
-/*function CreateAssetModalViewModel() {
-  var self = this;
-  self.dialog = ko.validatedObservable(new CreateAssetDialogViewModel(this));
-  
-  self.show = function(address, resetForm) {
-    return self.dialog().show(address, resetForm);
-  }
-
-  self.hide = function() {
-    return self.dialog().hide();
-  }
-}*/
 
 var CREATE_ASSET_MODAL = new CreateAssetModalViewModel();
 

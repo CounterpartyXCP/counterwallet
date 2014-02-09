@@ -41,7 +41,7 @@ $('#createNewAddress').click(function() {
           //update PREFS and push
           PREFERENCES['num_addresses_used'] += 1;
           PREFERENCES['address_aliases'][r[0]] = label;
-          multiAPI("store_preferences", [WALLET.identifier(), PREFERENCES], function(data) {
+          multiAPI("store_preferences", [WALLET.identifier(), PREFERENCES], function(endpoint, data) {
               //reload page to reflect the addition
               $('#content').load("xcp/pages/balances.html");
               //^ don't use loadURL here as it won't do a full reload and re-render the new widget

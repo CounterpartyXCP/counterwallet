@@ -69,10 +69,10 @@ function WalletViewModel() {
       filters.push({'field': 'address', 'op': '==', 'value': address.ADDRESS});
     });
     failoverAPI("get_balances", {"filters": filters, "filterop": "or"},
-      function(response) {
-        $.jqlog.log("Got initial balances: " + JSON.stringify(response));
-        for(var i=0;i<response.length;i++) {
-          self.updateBalance(response[i]['address'], response[i]['asset'], response[i]['amount']);  
+      function(endpoint, data) {
+        $.jqlog.log("Got initial balances: " + JSON.stringify(data));
+        for(var i=0;i<data.length;i++) {
+          self.updateBalance(data[i]['address'], data[i]['asset'], data[i]['amount']);  
         }
       }
     );
