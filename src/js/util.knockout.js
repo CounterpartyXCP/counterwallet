@@ -87,3 +87,36 @@ ko.bindingHandlers.datetimepicker = {
     }
   }
 };
+
+
+
+/* 
+ * Shared knockout Validation custom rules
+ */
+ko.validation.rules['isValidBitcoinAddress'] = {
+    validator: function (val, otherVal) {
+        try {
+          Bitcoin.Address(val);
+          return true;
+        } catch (err) {
+          return false;
+        }
+    },
+    message: 'This field must be a valid bitcoin address.'
+};
+ko.validation.rules['isValidQtyForDivisibility'] = {
+    validator: function (val, self) {
+      if(self.divisible() === false && numberHasDecimalPlace(parseFloat(val))) {
+        return false;
+      }
+      return true;
+    },
+    message: 'The amount must be a whole number, since this is a non-divisible asset.'
+};
+ko.validation.rules['isNotSameBitcoinAddress'] = {
+    validator: function (val, self) {
+      return val != self.address();
+    },
+    message: 'Destination address cannot be equal to the source address.'
+};
+ko.validation.registerExtenders();

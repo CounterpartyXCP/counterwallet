@@ -1,29 +1,3 @@
-ko.validation.rules['isValidBitcoinAddress'] = {
-    validator: function (val, otherVal) {
-        try {
-          Bitcoin.Address(val);
-          return true;
-        } catch (err) {
-          return false;
-        }
-    },
-    message: 'This field must be a valid bitcoin address.'
-};
-ko.validation.rules['isNotSameBitcoinAddress'] = {
-    validator: function (val, self) {
-      return val != self.address();
-    },
-    message: 'Destination address cannot be equal to the sending address.'
-};
-ko.validation.rules['isValidSendAmountForDivisibility'] = {
-    validator: function (val, self) {
-      if(self.divisible() === false && numberHasDecimalPlace(val)) {
-        return false;
-      }
-      return true;
-    },
-    message: 'The amount must be a whole number, since this is a non-divisible asset.'
-};
 ko.validation.rules['isValidSendAmountForBalance'] = {
     validator: function (val, self) {
       if((self.divisible() ? self.balance() / UNIT : self.balance()) - parseFloat(val) < 0) {
@@ -38,9 +12,9 @@ ko.validation.registerExtenders();
 function SendModalViewModel() {
   var self = this;
   self.shown = ko.observable(false);
-  self.address = ko.observable();
+  self.address = ko.observable(null);
   self.asset = ko.observable();
-  self.balance = ko.observable();
+  self.balance = ko.observable(null);
   self.divisible = ko.observable();
   
   self.destAddress = ko.observable().extend({
@@ -54,29 +28,29 @@ function SendModalViewModel() {
       message: 'Must be a valid number',
       params: '^[0-9]*\.?[0-9]{0,8}$' //not perfect ... additional checking required
     },
-    isValidSendAmountForDivisibility: self,
+    isValidQtyForDivisibility: self,
     isValidSendAmountForBalance: self
   });
   
-  self.sendIntroSummary = ko.computed(function() {
-    return "Fill out the form to send <b>" + self.asset() + "</b> from your address <b>" + self.address() + "</b> to the address you enter below.<br/><br/>"
-     + "You have up to <b>" + (self.divisible() ? self.balance() / UNIT : self.balance()) + " " + self.asset() + "</b> available to send from this address.";
+  self.displayedBalance = ko.computed(function() {
+    if(self.address() === null || self.balance() === null) return null;
+    return numberWithCommas(self.divisible() ? toFixed(self.balance() / UNIT, 8) : self.balance());
   }, self);
   
-  self.sendRemainingSummary = ko.computed(function() {
-    if(!isNumber(self.quantity())) return '';
+  self.displayedBalRemaining = ko.computed(function() {
+    if(!isNumber(self.quantity())) return null;
     var balRemaining = (self.divisible() ? self.balance() / UNIT : self.balance()) - parseFloat(self.quantity());
-    if(balRemaining < 0) return '';
-    return "<b>After sending, you will have <span style='color:green'>" + balRemaining + "</span> " + self.asset() + " remaining at this address.</b>";
+    if(numberHasDecimalPlace(balRemaining)) balRemaining = toFixed(balRemaining, 8);
+    if(balRemaining < 0) return null;
+    return numberWithCommas(balRemaining);
   }, self);
-  
   
   self.validationModel = ko.validatedObservable({
-      destAddress: self.destAddress,
-      quantity: self.quantity
+    destAddress: self.destAddress,
+    quantity: self.quantity
   });  
-
-  self.resetForm = function(address) {
+  
+  self.resetForm = function() {
     self.destAddress('');
     self.quantity();
     self.validationModel.errors.showAllMessages(false);
@@ -91,7 +65,7 @@ function SendModalViewModel() {
     $('#sendModal form').submit();
   }
 
-  self.sendFunds = function() {
+  self.doAction = function() {
     var quantity = parseFloat(self.quantity());
     var rawQuantity = self.divisible() ? Math.round(quantity * UNIT) : parseInt(quantity);
 
@@ -101,8 +75,7 @@ function SendModalViewModel() {
        unsigned: WALLET.getAddressObj(self.address()).PUBKEY},
       function(unsignedTXHex, numTotalEndpoints, numConsensusEndpoints) {
         console.log("GOT RAW HEX: " + unsignedTXHex);
-        //WALLET.signAndBroadcastTx(self.address(), unsignedTXHex);
-        
+        WALLET.signAndBroadcastTx(self.address(), unsignedTXHex);
         bootbox.alert("Your send seemed to be success. It will take effect as soon as the network has processed it.");
       }
     );
@@ -112,13 +85,11 @@ function SendModalViewModel() {
   
   self.show = function(fromAddress, asset, balance, isDivisible, resetForm) {
     if(typeof(resetForm)==='undefined') resetForm = true;
-    
+    if(resetForm) self.resetForm();
     self.address(fromAddress);
     self.asset(asset);
     self.balance(balance);
     self.divisible(isDivisible);
-    
-    if(resetForm) self.resetForm();
     self.shown(true);
   }  
 

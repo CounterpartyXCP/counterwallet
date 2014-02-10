@@ -105,7 +105,7 @@ function WalletViewModel() {
     var bytes = Crypto.util.hexToBytes(unsigned_tx_hex);
     var sendTx = TX.deserialize(bytes);
     $.jqlog.log("RAW UNSIGNED JSON: " + TX.toBBE(sendTx));
-    
+
     //Sign the output
     var hashType = 1;
     var key = WALLET.getAddressObj(address).KEY;
@@ -125,6 +125,12 @@ function WalletViewModel() {
     var signed_tx_hex = Crypto.util.bytesToHex(sendTx.serialize());
     $.jqlog.log("RAW SIGNED JSON: " + TX.toBBE(sendTx));
     $.jqlog.log("RAW SIGNED HEX: " + signed_tx_hex);
+    
+    if(IS_DEV) {
+      $.jqlog.log("SKIPPING SEND AS IS_DEV == 1");
+      return;
+    }
+    
     self.sendTX(signed_tx_hex, function(data) {
       $.jqlog.log("Transaction send finished.");
     });

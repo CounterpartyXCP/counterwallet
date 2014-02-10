@@ -52,7 +52,7 @@
                 </div>
                 <h3 class="name pull-left" style="position: relative; top: -10px;" data-bind="text: ASSET"></h3>
                 <div class="clearfix"></div>
-                <p class="balance" data-bind="text: displayedBalance"></p>
+                <p class="balance">Bal: <span data-bind="text: displayedBalance"></span></p>
               </div>
             </div> <!-- end widget content body -->
           </div> <!-- end widget div -->
@@ -62,6 +62,52 @@
   </section> <!-- end widget grid -->
 </div>
   
+<!-- modal for send -->
+<div data-bind="showModal: shown" id="sendModal" class="modal fade" data-backdrop="static" data-keyboard="false" tabindex="-1" role="dialog" aria-labelledby="sendModal" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" data-bind="click: hide" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+        <h4 class="modal-title">Send Funds</h4>
+      </div>
+      <div class="modal-body no-padding">
+        <p class="formIntro">Fill out the form to send <b data-bind="text: asset"></b> from your address <b data-bind="text: address"></b>
+        to the address you enter below.<br/><br/>
+        You have up to <b><span data-bind="displayedBalance"></span> <span data-bind="text: asset"></span></b> available to send from this address.
+        </p>
+        
+        <form class="smart-form" data-bind="submit: doAction"><fieldset>
+          <section><div class="row">
+            <label class="label col col-2">Send To</label>
+            <div class="col col-10">
+                <label class="input"><i class="icon-append fa fa-user"></i>
+                    <input name="destAddress" data-bind="value: destAddress" type="text"/>
+                </label>
+                <div class="note">The address you will be sending to.</div>
+            </div>
+          </div></section>
+          <section><div class="row">
+            <label class="label col col-2">Send Amount</label>
+            <div class="col col-6">
+                <label class="input"><i class="icon-append fa fa-share"></i>
+                    <input name="quantity" data-bind="value: quantity, valueUpdate : 'afterkeydown'" type="text"/>
+                </label>
+                <div class="note">The quantity to send.</div>
+            </div>
+          </div></section>
+        </fieldset></form>
+      </div>
+      <div class="modal-footer">
+        <p data-bind="visible: displayedBalRemaining" style="font-weight: bold">
+            After sending, you will have <span data-bind="text: displayedBalRemaining" style='color:green'></span>
+            <span data-bind="text: asset"></span> remaining at this address (minus fees).</p>
+        <button type="button" class="btn btn-default" data-bind="click: hide">Cancel</button>
+        <button type="button" data-bind="click: submitForm" class="btn btn-primary">Send</button>
+      </div>
+    </div><!-- /.modal-content -->
+  </div><!-- /.modal-dialog -->
+</div><!-- /.modal -->
+
 <!-- modal for create asset -->
 <div data-bind="showModal: shown" id="createAssetModal" class="modal fade" data-backdrop="static" data-keyboard="false" tabindex="-1" role="dialog" aria-labelledby="createAssetModal" aria-hidden="true">
   <div class="modal-dialog">
@@ -73,7 +119,7 @@
       <div class="modal-body no-padding">
         <p class="formIntro">Please note that a <b>5 XCP fee</b> will be deducted from your balance upon successful creation.</p>
         
-        <form class="smart-form" data-bind="submit: createAsset"><fieldset>
+        <form class="smart-form" data-bind="submit: doAction"><fieldset>
           <section><div class="row">
             <label class="label col col-2">For Address</label>
             <div class="col col-10">
@@ -156,50 +202,104 @@
   </div><!-- /.modal-dialog -->
 </div><!-- /.modal -->
 
-<!-- modal for send -->
-<div data-bind="showModal: shown" id="sendModal" class="modal fade" data-backdrop="static" data-keyboard="false" tabindex="-1" role="dialog" aria-labelledby="sendModal" aria-hidden="true">
+<!-- modal for asset issue additional -->
+<div data-bind="showModal: shown" id="issueAdditionalAssetModal" class="modal fade" data-backdrop="static" data-keyboard="false" tabindex="-1" role="dialog" aria-labelledby="issueAdditionalAssetModal" aria-hidden="true">
   <div class="modal-dialog">
     <div class="modal-content">
       <div class="modal-header">
         <button type="button" data-bind="click: hide" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
-        <h4 class="modal-title">Send Funds</h4>
+        <h4 class="modal-title">Issue Additional Asset Quantity</h4>
       </div>
       <div class="modal-body no-padding">
-        <p data-bind="html: sendIntroSummary" class="formIntro"></p>
+        <p class="formIntro">How many more quantity of this asset would you like to issue? <i>(For divisible assets, state
+       the amount as a whole or floating point number, not in satoshis -- e.g. '732.45')</i><br/><br/>
+       <span data-bind="visible: displayedTotalIssued !== null">There is currently quantity <b style="color: green" data-bind="text: displayedTotalIssued"></b> of this asset issued.<br/><br/></span>
+       <b style='color:red'>Please NOTE that this action is irreversable!</b></p>
         
-        <form class="smart-form" data-bind="submit: sendFunds"><fieldset>
+        <form class="smart-form" data-bind="submit: doAction"><fieldset>
           <section><div class="row">
-            <label class="label col col-2">Send To</label>
+            <label class="label col col-2">Additional Qty</label>
             <div class="col col-10">
-                <label class="input"><i class="icon-append fa fa-user"></i>
-                    <input name="destAddress" data-bind="value: destAddress" type="text"/>
+                <label class="input"><i class="icon-append fa fa-plus"></i>
+                    <input name="additionalIssue" data-bind="value: additionalIssue" type="text"/>
                 </label>
-                <div class="note">The address you will be sending to.</div>
-            </div>
-          </div></section>
-          <section><div class="row">
-            <label class="label col col-2">Send Amount</label>
-            <div class="col col-6">
-                <label class="input"><i class="icon-append fa fa-share"></i>
-                    <input name="quantity" data-bind="value: quantity, valueUpdate : 'afterkeydown'" type="text"/>
-                </label>
-                <div class="note">The quantity to send.</div>
             </div>
           </div></section>
         </fieldset></form>
       </div>
       <div class="modal-footer">
-        <p data-bind="html: sendRemainingSummary"></p>
         <button type="button" class="btn btn-default" data-bind="click: hide">Cancel</button>
-        <button type="button" data-bind="click: submitForm" class="btn btn-primary">Send</button>
+        <button type="button" data-bind="click: submitForm" class="btn btn-warning">Issue Additional</button>
       </div>
     </div><!-- /.modal-content -->
   </div><!-- /.modal-dialog -->
 </div><!-- /.modal -->
 
-<script src="xcp/js/components/send.js"></script>
+<!-- modal for asset transfer -->
+<div data-bind="showModal: shown" id="transferAssetModal" class="modal fade" data-backdrop="static" data-keyboard="false" tabindex="-1" role="dialog" aria-labelledby="transferAssetModal" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" data-bind="click: hide" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+        <h4 class="modal-title">Transfer Asset</h4>
+      </div>
+      <div class="modal-body no-padding">
+        <p class="formIntro">Enter the bitcoin address you would like to perminently transfer <u>ALL</u> shares of this asset to.
+            <br/><br/><b style='color:red'>Please NOTE that this action is irreversable!</b></p>
+        
+        <form class="smart-form" data-bind="submit: doAction"><fieldset>
+          <section><div class="row">
+            <label class="label col col-2">Transfer To</label>
+            <div class="col col-10">
+                <label class="input"><i class="icon-append fa fa-share"></i>
+                    <input name="destAddress" data-bind="value: destAddress" type="text"/>
+                </label>
+            </div>
+          </div></section>
+        </fieldset></form>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-default" data-bind="click: hide">Cancel</button>
+        <button type="button" data-bind="click: submitForm" class="btn btn-danger">Transfer</button>
+      </div>
+    </div><!-- /.modal-content -->
+  </div><!-- /.modal-dialog -->
+</div><!-- /.modal -->
+
+<!-- modal for asset change description -->
+<div data-bind="showModal: shown" id="changeAssetDescriptionModal" class="modal fade" data-backdrop="static" data-keyboard="false" tabindex="-1" role="dialog" aria-labelledby="changeAssetDescriptionModal" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" data-bind="click: hide" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+        <h4 class="modal-title">Change Asset Description</h4>
+      </div>
+      <div class="modal-body no-padding">
+        <p class="formIntro">Enter the new description for this asset:</p>
+        
+        <form class="smart-form" data-bind="submit: doAction"><fieldset>
+          <section><div class="row">
+            <label class="label col col-2">Description</label>
+            <div class="col col-10">
+                <label class="input"><i class="icon-append fa fa-info"></i>
+                    <input name="newDescription" data-bind="value: newDescription" type="text"/>
+                </label>
+            </div>
+          </div></section>
+        </fieldset></form>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-default" data-bind="click: hide">Cancel</button>
+        <button type="button" data-bind="click: submitForm" class="btn btn-warning">Change Description</button>
+      </div>
+    </div><!-- /.modal-content -->
+  </div><!-- /.modal-dialog -->
+</div><!-- /.modal -->
+
+
 <script src="xcp/js/components/balances.js"></script>
-<script src="xcp/js/components/create_asset.js"></script>
+<script src="xcp/js/components/send_modal.js"></script>
+<script src="xcp/js/components/asset_modals.js"></script>
 
 <script type="text/javascript">
   //Bind the WALLET object to balancesContainer

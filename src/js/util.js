@@ -15,7 +15,8 @@ function makeQRCode(addr) {
 function toFixed(value, precision) {
   //output a floating point at a given max precision (http://stackoverflow.com/a/661757)
   var power = Math.pow(10, precision || 0);
-  return String(Math.round(value * power) / power);
+  return Math.round(value * power) / power;
+  //return String(Math.round(value * power) / power);
 }
 
 function numberWithCommas(x) {
