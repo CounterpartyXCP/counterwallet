@@ -125,26 +125,27 @@ function WalletViewModel() {
     var signed_tx_hex = Crypto.util.bytesToHex(sendTx.serialize());
     $.jqlog.log("RAW SIGNED JSON: " + TX.toBBE(sendTx));
     $.jqlog.log("RAW SIGNED HEX: " + signed_tx_hex);
-    self.sendTX(signed_tx_hex, function(endpoint, data) {
+    self.sendTX(signed_tx_hex, function(data) {
       $.jqlog.log("Transaction send finished.");
     });
   }
   
   self.retrieveBTCBalance = function(address, callback) {
     url = 'http://blockchain.info/q/addressbalance/';
-    fetchData(url + address, callback, null, null, {}, true);
+    fetchData(url + address, function(endpoint, data) { return callback(data) }, null, null, {}, true);
   }
   
   self.getUnspentBTCOutputs = function(address, callback) {
     var url = 'http://blockchain.info/unspent?address=' + address;
-    fetchData(url, callback, null, null, {}, true);
+    fetchData(url, function(endpoint, data) { return callback(data) }, null, null, {}, true);
   }
   
   self.sendTX = function(tx, callback) {
     url = 'http://blockchain.info/pushtx';
     postdata = 'tx=' + tx;
     if (url != null && url != "") {
-        fetchData(url, callback, callback, postdata, {}, true);
+        fetchData(url, function(endpoint, data) { return callback(data) },
+          function(endpoint, data) { return callback(data) }, postdata, {}, true);
     }
   }
 }

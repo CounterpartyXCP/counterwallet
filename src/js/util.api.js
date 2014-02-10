@@ -16,8 +16,8 @@ function describeError(jqXHR, textStatus, errorThrown) {
       message = "Request Time out.";
     } else if(textStatus=='abort') {
       message = "Request was aborted by the server";
-    } else if(textStatus.match("^JSON\-RPC Error:")) {
-    //} else if(errorThrown == "jsonrpc") {
+    //} else if(textStatus.match("^JSON\-RPC Error:")) {
+    } else if(errorThrown == "jsonrpc") {
       message = textStatus;
     } else {
       message = "Unknown Error.";
@@ -296,7 +296,7 @@ function multiAPIConsensus(method, params, onSuccess, onConsensusError, onSysErr
   }
   if(typeof(onSysError)==='undefined') {
     onSysError = function(endpoint, jqXHR, textStatus, errorThrown) {
-      var message = describeError(endpoint, jqXHR, textStatus, errorThrown);
+      var message = describeError(jqXHR, textStatus, errorThrown);
       bootbox.alert("multiAPIConsensus: Parallel call failed (no server returned success). Method: " + method + "; Last error: " + message);
     };
   }
@@ -354,7 +354,7 @@ function multiAPINewest(method, params, newestField, onSuccess, onError) {
     var i = 0;
     for(i=0; i < results.length; i++) {
       if(results[i]['success']) {
-        successResults.push(results[i]['data']);
+        successResults.push(results[i]);
       }
     }
 
@@ -365,16 +365,16 @@ function multiAPINewest(method, params, newestField, onSuccess, onError) {
     //grab the newest result
     var newest = null;
     for(i=0; i < successResults.length; i++) {
-      if(   successResults[i]
-         && successResults[i].hasOwnProperty(newestField)
-         && successResults[i][newestField]
-         && (newest == null || successResults[i][newestField] > successResults[newest][newestField])) {
+      if(   successResults[i]['data']
+         && successResults[i]['data'].hasOwnProperty(newestField)
+         && successResults[i]['data'][newestField]
+         && (newest == null || successResults[i]['data'][newestField] > successResults[newest]['data'][newestField])) {
         newest = i;
       }
     }
     
     if(onSuccess && newest != null) {
-      onSuccess(endpoint, successResults[newest]);
+      onSuccess(successResults[newest]['endpoint'], successResults[newest]['data']);
     } else if(onSuccess && newest == null) {
       onSuccess(null, null); //at least one server returned a non-error, but the data was empty
     }

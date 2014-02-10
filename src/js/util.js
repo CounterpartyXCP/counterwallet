@@ -26,6 +26,7 @@ function numberWithCommas(x) {
 }
 
 function isNumber(n) {
+  //http://stackoverflow.com/a/1830844
   return !isNaN(parseFloat(n)) && isFinite(n);
 }
 

@@ -12,16 +12,14 @@ function AssetViewModel(props) {
   self.CALLABLE = props['callable'] || false;
   self.CALLDATE = props['callDate'] || null;
   self.CALLPRICE = props['callPrice'] || null;
-
+  
   self.displayedBalance = ko.computed(function() {
     return "Bal: " + numberWithCommas(self.DIVISIBLE ? toFixed(self.balance() / UNIT, 8) : self.balance()).toString(); 
   }, self);
   
   self.send = function () {
-    if(!self.balance()) { bootbox.alert("You have no balance of this asset to send."); return; }
-
-    //pop up the send to window with the address and asset pre-populated
-    bootbox.alert("Functionality not yet implemented.");
+    if(!self.balance()) { bootbox.alert("You have no available <b>" + self.ASSET + "</b> at address <b>" + self.ADDRESS + "</b> to send."); return; }
+    SEND_MODAL.show(self.ADDRESS, self.ASSET, self.balance(), self.DIVISIBLE);
   };
   
   self.issueAdditional = function () {
@@ -55,7 +53,7 @@ function AssetViewModel(props) {
             }
             
             addtlIssuance = parseFloat(addtlIssuance);
-            var rawAddtlIssuance = self.DIVISIBLE ? Math.round(addtlIssuance * UNIT) : addtlIssuance;
+            var rawAddtlIssuance = self.DIVISIBLE ? Math.round(addtlIssuance * UNIT) : parseInt(addtlIssuance);
 
             if(!self.DIVISIBLE && numberHasDecimalPlace(addtlIssuance)) {
               bootbox.alert("Non-divisible assets may not have a quantity with a decimal place.");
@@ -247,7 +245,7 @@ function AddressViewModel(key, address, initialLabel) {
        return; //stop refreshing
        
     if(!firstCall) {
-      WALLET.retrieveBTCBalance(self.ADDRESS, function(endpoint, data) {
+      WALLET.retrieveBTCBalance(self.ADDRESS, function(data) {
         //Find the BTC asset and update
         var btcAsset = ko.utils.arrayFirst(self.assets(), function(a) {
               return a.ASSET == 'BTC';
@@ -269,7 +267,14 @@ function AddressViewModel(key, address, initialLabel) {
   };
   
   self.addOrUpdateAsset = function(asset, balance) {
-    assert(asset != 'BTC' && asset != 'XCP', "Trying to dynamically add BTC or XCP");
+    if(asset == 'BTC' || asset == 'XCP') { //special case update
+      var match = ko.utils.arrayFirst(self.assets(), function(item) {
+          return item.ASSET === asset;
+      });
+      assert(match); //was created when the address viewmodel was initialized...
+      match.balance(balance);
+      return;
+    }
     
     failoverAPI("get_asset_info", [asset], function(endpoint, assetInfo) {
       var isMine = assetInfo['owner'] == self.ADDRESS; //default to false on error or when we can't find the asset too

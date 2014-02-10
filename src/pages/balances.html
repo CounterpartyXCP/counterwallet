@@ -63,7 +63,7 @@
 </div>
   
 <!-- modal for create asset -->
-<div data-bind="showModal: shown", id="createAssetModal" class="modal fade" data-backdrop="static" data-keyboard="false" tabindex="-1" role="dialog" aria-labelledby="createAssetModal" aria-hidden="true">
+<div data-bind="showModal: shown" id="createAssetModal" class="modal fade" data-backdrop="static" data-keyboard="false" tabindex="-1" role="dialog" aria-labelledby="createAssetModal" aria-hidden="true">
   <div class="modal-dialog">
     <div class="modal-content">
       <div class="modal-header">
@@ -71,7 +71,7 @@
         <h4 class="modal-title">Create (Issue) an Asset</h4>
       </div>
       <div class="modal-body no-padding">
-        <p>Please note that a <b>5 XCP fee</b> will be deducted from your balance upon successful creation of an asset.</p>
+        <p class="formIntro">Please note that a <b>5 XCP fee</b> will be deducted from your balance upon successful creation.</p>
         
         <form class="smart-form" data-bind="submit: createAsset"><fieldset>
           <section><div class="row">
@@ -141,7 +141,7 @@
             <label class="label col col-2">Call Price</label>
             <div class="col col-10">
                 <label class="input">
-                    <input name="assetQuantity" type="text" data-bind="value: callPrice"/>
+                    <input name="assetCallPrice" type="text" data-bind="value: callPrice"/>
                 </label>
                 <div class="note">The price that the owner of the asset may call it back for.</div>
             </div>
@@ -149,15 +149,57 @@
         </fieldset></form>                    
       </div>
       <div class="modal-footer">
-        <button type="button" data-bind="click: submitForm" class="btn btn-primary">Create Asset</button>
         <button type="button" class="btn btn-default" data-bind="click: hide">Cancel</button>
+        <button type="button" data-bind="click: submitForm" class="btn btn-primary">Create Asset</button>
       </div>
     </div><!-- /.modal-content -->
   </div><!-- /.modal-dialog -->
 </div><!-- /.modal -->
 
-<script src="xcp/js/components/create_asset.js"></script>
+<!-- modal for send -->
+<div data-bind="showModal: shown" id="sendModal" class="modal fade" data-backdrop="static" data-keyboard="false" tabindex="-1" role="dialog" aria-labelledby="sendModal" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" data-bind="click: hide" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+        <h4 class="modal-title">Send Funds</h4>
+      </div>
+      <div class="modal-body no-padding">
+        <p data-bind="html: sendIntroSummary" class="formIntro"></p>
+        
+        <form class="smart-form" data-bind="submit: sendFunds"><fieldset>
+          <section><div class="row">
+            <label class="label col col-2">Send To</label>
+            <div class="col col-10">
+                <label class="input"><i class="icon-append fa fa-user"></i>
+                    <input name="destAddress" data-bind="value: destAddress" type="text"/>
+                </label>
+                <div class="note">The address you will be sending to.</div>
+            </div>
+          </div></section>
+          <section><div class="row">
+            <label class="label col col-2">Send Amount</label>
+            <div class="col col-6">
+                <label class="input"><i class="icon-append fa fa-share"></i>
+                    <input name="quantity" data-bind="value: quantity, valueUpdate : 'afterkeydown'" type="text"/>
+                </label>
+                <div class="note">The quantity to send.</div>
+            </div>
+          </div></section>
+        </fieldset></form>
+      </div>
+      <div class="modal-footer">
+        <p data-bind="html: sendRemainingSummary"></p>
+        <button type="button" class="btn btn-default" data-bind="click: hide">Cancel</button>
+        <button type="button" data-bind="click: submitForm" class="btn btn-primary">Send</button>
+      </div>
+    </div><!-- /.modal-content -->
+  </div><!-- /.modal-dialog -->
+</div><!-- /.modal -->
+
+<script src="xcp/js/components/send.js"></script>
 <script src="xcp/js/components/balances.js"></script>
+<script src="xcp/js/components/create_asset.js"></script>
 
 <script type="text/javascript">
   //Bind the WALLET object to balancesContainer

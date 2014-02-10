@@ -2,11 +2,28 @@ ko.validation.rules['assetNameIsTaken'] = {
   async: true,
   message: 'Asset name is already taken',
   validator: function (val, otherVal, callback) {
-    console.log("Assetname is taken: " + val);
     failoverAPI("get_issuances",
       {'filters': {'field': 'asset', 'op': '==', 'value': val}},
-      function(endpoint, data) { return data ? callback(false) : callback(true) }); //empty list -> true (valid = true)  
+      function(endpoint, data) {
+        return data.length ? callback(false) : callback(true) //empty list -> true (valid = true)
+      }
+    );   
   }
+};
+ko.validation.rules['isValidQtyForDivisibility'] = {
+    validator: function (val, self) {
+      if(self.divisible() === false && numberHasDecimalPlace(parseFloat(val))) {
+        return false;
+      }
+      return true;
+    },
+    message: 'The amount must be a whole number, since this is a non-divisible asset.'
+};
+ko.validation.rules['isValidAssetDescription'] = {
+    validator: function (val, self) {
+      return byteCount(val) <= 52;
+    },
+    message: 'Asset description is more than 52 bytes long.'
 };
 ko.validation.registerExtenders();
 
@@ -17,14 +34,14 @@ function CreateAssetModalViewModel() {
   self.name = ko.observable('').extend({
     required: true,
     pattern: {
-      message: 'Must be between 4-24 uppercase letters only (A-Z)',
-      params: '^[A-Z]{4,24}$'
+      message: 'Must be between 4-24 uppercase letters only (A-Z) & cannot start with the letter A.',
+      params: '^[B-Z][A-Z]{3,23}$'
     },
     assetNameIsTaken: self
   });
   self.description = ko.observable('').extend({
     required: false,
-    maxLength: 52 //the real test is 52 BYTES long, not characters long...we do this prelim check for user friendlyness in the form
+    isValidAssetDescription: self
   });
   self.divisible = ko.observable(true);
   self.quantity = ko.observable().extend({
@@ -32,10 +49,14 @@ function CreateAssetModalViewModel() {
     pattern: {
       message: 'Must be a valid number',
       params: '^[0-9]*\.?[0-9]{0,8}$' //not perfect ... will convert divisible assets to satoshi before sending to API
-    }
+    },
+    isValidQtyForDivisibility: self
   });
   self.callable = ko.observable(false);
-  self.callDate = ko.observable().extend({
+  self.callDate = ko.observable(new Date(new Date().getTime() + 30*24*60*60*1000)).extend({
+    //^ default to current date + 30 days for now (also serves to hide a bug with the required
+    // field validation not working if this field is empty). This is temporary...
+    date: true,
     required: {
       message: "Call date is required if the asset is callable",
       onlyIf: function () { return (self.callable() === true); }
@@ -49,7 +70,8 @@ function CreateAssetModalViewModel() {
     pattern: {
       message: 'Must be a valid number',
       params: '^[0-9]*\.?[0-9]{0,8}$'
-    }
+    },
+    isValidQtyForDivisibility: self
   });
   
   self.validationModel = ko.validatedObservable({
@@ -71,10 +93,12 @@ function CreateAssetModalViewModel() {
   
   self.submitForm = function() {
     console.log("Submitform called");
+    console.log(self.callDate());
     if(self.name.isValidating()) {
       setTimeout(function() { //wait a bit and call again
         self.submitForm();
       }, 50);
+      return;
     }
     
     if (!self.validationModel.isValid()) {
@@ -88,18 +112,8 @@ function CreateAssetModalViewModel() {
   }
 
   self.createAsset = function() {
-    //For now, use counterpartyd to compose the issuance. In the future, make it ourselves with a counterparty JS lib
-    if(byteCount(newDescription) > 52) {
-      bootbox.alert("Entered description is more than 52 bytes long. Please try again.");
-      return false;
-    }
-    
-    if(!self.divisible() && numberHasDecimalPlace(self.quantity())) {
-      bootbox.alert("Non-divisible assets may not have a quantity with a decimal place.");
-      return false;
-    }
-    
-    var rawQuantity = self.divisible() ? Math.round(self.quantity().parseFloat() * UNIT) : self.quantity().parseInt();
+    var quantity = parseFloat(self.quantity());
+    var rawQuantity = self.divisible() ? Math.round(quantity * UNIT) : parseInt(quantity);
     
     if(rawQuantity > MAX_INT) {
       bootbox.alert("The quantity desired to be issued for this asset is too high.");
@@ -113,21 +127,21 @@ function CreateAssetModalViewModel() {
     
     //convert callDate + callPrice
     var rawCallDate = self.callDate() ? self.callDate().getTime() / 1000 : null; //epoch time
-    var rawCallPrice = self.divisible() ? Math.round(self.callPrice().parseFloat() * UNIT) : self.callPrice().parseInt();
+    var rawCallPrice = self.divisible() ? Math.round(parseFloat(self.callPrice()) * UNIT) : parseInt(self.callPrice());
 
-    if(  self.callable()
-      && (   (self.divisible() && self.quantity() * UNIT > MAX_INT)
-          || (!self.divisible() && self.quantity() > MAX_INT))
-      ) {
+    if(self.callable() && rawQuantity + rawCallPrice > MAX_INT) {
       bootbox.alert("The call price for this asset is too high.");
       return false;
     }
     
     multiAPIConsensus("do_issuance",
-      [self.address(), rawQuantity, self.name(), self.divisible(),
-       self.description(), self.callable(), rawCallDate, rawCallPrice, null, WALLET.getAddressObj(self.address()).PUBKEY],
+      {source: self.address(), quantity: rawQuantity, asset: self.name(), divisible: self.divisible(),
+       description: self.description(), callable: self.callable, call_date: rawCallDate,
+       call_price: rawCallPrice, transfer_destination: null,
+       unsigned: WALLET.getAddressObj(self.address()).PUBKEY},
       function(unsignedTXHex, numTotalEndpoints, numConsensusEndpoints) {
-        WALLET.signAndBroadcastTx(self.address(), unsignedTXHex);
+        console.log("GOT RAW HEX: " + unsignedTXHex);
+        //WALLET.signAndBroadcastTx(self.address(), unsignedTXHex);
         
         //tell the user about the result
         bootbox.alert("Your asset seemed to be created successfully. It will automatically appear under the \

@@ -29,3 +29,11 @@
     background: #fff0f0;
     border-color: #A90329;
 }
+
+.smart-form input[readonly="readonly"] {
+    background: #eee;
+}
+
+p.formIntro {
+    margin: 15px 0 0 15px;
+}
