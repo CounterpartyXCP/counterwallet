@@ -52,7 +52,7 @@ function SendModalViewModel() {
   
   self.resetForm = function() {
     self.destAddress('');
-    self.quantity();
+    self.quantity(null);
     self.validationModel.errors.showAllMessages(false);
   }
   
@@ -101,6 +101,5 @@ function SendModalViewModel() {
 var SEND_MODAL = new SendModalViewModel();
 
 $(document).ready(function() {
-  $.jqlog.enabled(true);
   ko.applyBindingsWithValidation(SEND_MODAL, document.getElementById("sendModal"));
 });

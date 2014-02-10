@@ -77,7 +77,7 @@ function CreateAssetModalViewModel() {
     self.name('');
     self.description('');
     self.divisible(true);
-    self.quantity();
+    self.quantity(null);
     self.validationModel.errors.showAllMessages(false);
   }
   
@@ -192,7 +192,7 @@ function IssueAdditionalAssetModalViewModel() {
   });
 
   self.resetForm = function() {
-    self.additionalIssue('');
+    self.additionalIssue(null);
     self.validationModel.errors.showAllMessages(false);
   }
   
@@ -365,7 +365,6 @@ var TRANSFER_ASSET_MODAL = new TransferAssetModalViewModel();
 var CHANGE_ASSET_DESCRIPTION_MODAL = new ChangeAssetDescriptionModalViewModel();
 
 $(document).ready(function() {
-  $.jqlog.enabled(true);
   ko.applyBindingsWithValidation(CREATE_ASSET_MODAL, document.getElementById("createAssetModal"));
   ko.applyBindingsWithValidation(ISSUE_ADDITIONAL_ASSET_MODAL, document.getElementById("issueAdditionalAssetModal"));
   ko.applyBindingsWithValidation(TRANSFER_ASSET_MODAL, document.getElementById("transferAssetModal"));
