@@ -103,6 +103,5 @@ function LogonViewModel() {
 LOGON_VIEW_MODEL = new LogonViewModel();
 
 $(document).ready(function() {
-  $.jqlog.enabled(true);
   ko.applyBindings(LOGON_VIEW_MODEL, document.getElementById("logon"));
 });

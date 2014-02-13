@@ -1,0 +1,139 @@
+<div class="row">
+  <div class="col-xs-12 col-sm-7 col-md-7 col-lg-4">
+    <h1 class="page-title txt-color-blueDark">
+      <i class="fa fa-user fa-fw "></i> 
+        Account History 
+    </h1>
+  </div>
+</div>
+
+<section id="widget-grid" class=""> <!-- widget grid -->
+  <div class="row"> <!-- row -->
+    <article class="col-xs-12 col-sm-12 col-md-12 col-lg-12"> <!-- NEW WIDGET START -->
+      <!-- Widget ID (each widget will need unique ID)-->
+      <div class="jarviswidget" id="wid-id-balHistory" data-widget-editbutton="false" data-widget-deletebutton="false">
+          <header>
+            <span class="widget-icon"> <i class="fa fa-bar-chart-o"></i> </span>
+            <h2>Balance History</h2>
+          </header>
+          <div> <!-- widget div-->
+            <div class="widget-body no-padding"> <!-- widget content -->
+              <div class="widget-body-toolbar">
+                <form class="smart-form" data-bind="submit: doAction"><fieldset>
+                  <section><div class="row">
+                    <label class="label col col-2">Select Asset</label>
+                    <div class="col col-10">
+                        <label class="select">
+                        <select class="input-lg" data-bind="options: availableAssets, value: selectedAsset, event: { change: assetChanged }">
+                        </select> <i></i> </label>
+                    </div>
+                  </div></section>
+                </fieldset></form>
+              </div>
+              <div id="balanceHistory" class="chart has-legend"></div>
+            </div> <!-- end widget content -->
+          </div> <!-- end widget div -->
+      </div> <!-- end widget -->
+    </article> <!-- WIDGET END -->
+  </div> <!-- end row -->
+    
+    
+  <div class="row"> <!-- row -->
+    <article class="col-xs-12 col-sm-12 col-md-12 col-lg-12"> <!-- NEW WIDGET START -->
+      <div class="jarviswidget" id="wid-id-txnHistory" data-widget-editbutton="false" data-widget-deletebutton="false">
+        <header>
+            <span class="widget-icon"> <i class="fa fa-table"></i> </span>
+            <h2>Recent Transactions</h2>
+        </header>
+        <div> <!-- widget div-->
+            <div class="widget-body no-padding"> <!-- widget content -->
+                <div class="widget-body-toolbar">
+                  <form class="smart-form" data-bind="submit: doAction"><fieldset>
+                    <section><div class="row">
+                      <label class="label col col-2">Select Address</label>
+                      <div class="col col-10">
+                          <label class="select">
+                          <select class="input-lg" data-bind="options: availableAddresses, optionText: 'LABEL', value: selectedAddress, event: { change: addressChanged }">
+                          </select> <i></i> </label>
+                      </div>
+                    </div></section>
+                  </fieldset></form>
+                </div>
+                <table id="txnHistory" class="table table-striped table-bordered table-hover">
+                    <thead>
+                        <tr>
+                            <th>Tx</th>
+                            <th>Block</th>
+                            <th>BlockTime</th>
+                            <th>Source</th>
+                            <th>TxType</th>
+                            <th>Description</th>
+                            <!--<th>BTCAmount</th>
+                            <th>Fee</th>-->
+                        </tr>
+                    </thead>
+                    <tbody data-bind="forEach: transactions">
+                        <tr>
+                            <td><a target="_blank" data-bind="text: txIndex, attr: { href: 'http://blockscan.com/tx.aspx?q=' + txIndex }"></a></td> <!-- link to TX at blockscan -->
+                            <td><a target="_blank" data-bind="text: blockIndex, attr: { href: 'https://blockchain.info/block-index/' + blockIndex }"></a></td> <!-- link to block tx at blockchain.info) -->
+                            <td data-bind="text: dispBlocktime"></td> <!-- datetime formatted string -->
+                            <td><a target="_blank" data-bind="text: source, attr: { href: 'http://blockscan.com/address.aspx?q=' + source }"></a></td> <!-- link to source addr at blockscan -->
+                            <td><i data-bind="css: rawTxType"></i><span data-bind="text: txType"></span></td> 
+                            <td data-bind="html: dispDescription"></td>
+                            <!--<td data-bind="html: btcAmount"></td>
+                            <td data-bind="html: fee"></td>-->
+                        </tr>
+                    </tbody>
+                </table>
+            </div> <!-- end widget content -->
+        </div> <!-- end widget div -->
+      </div> <!-- end widget -->
+    </article> <!-- WIDGET END -->
+  </div> <!-- end row -->
+</section>
+
+<script src="xcp/js/components/history.js"></script>
+
+<script type="text/javascript">
+  var BALANCE_HISTORY = new BalanceHistoryViewModel();
+  var TXN_HISTORY = new TransactionHistoryViewModel();
+  
+  $(document).ready(function() {
+    ko.applyBindings(TXN_HISTORY, document.getElementById("wid-id-txnHistory"));
+    ko.applyBindings(BALANCE_HISTORY, document.getElementById("wid-id-balHistory"));
+  });
+
+  pageSetUp(); //init smartadmin featureset
+
+  /*
+   * FLOT (charts)
+   */  
+  loadScript("js/plugin/flot/jquery.flot.cust.js", loadFlotResize);
+  function loadFlotResize() { loadScript("js/plugin/flot/jquery.flot.resize.js", loadFlotFillbetween); }
+  function loadFlotFillbetween() { loadScript("js/plugin/flot/jquery.flot.fillbetween.js", loadFlotOrderBar); }
+  function loadFlotOrderBar() { loadScript("js/plugin/flot/jquery.flot.orderBar.js", loadFlotPie); }   
+  function loadFlotPie() { loadScript("js/plugin/flot/jquery.flot.pie.js", loadFlotToolTip); }
+  function loadFlotToolTip() { loadScript("js/plugin/flot/jquery.flot.tooltip.js", BALANCE_HISTORY.init); }
+
+  /*
+   * DATAGRID
+   */
+  loadDataTableScripts();
+  function loadDataTableScripts() {
+    loadScript("js/plugin/datatables/jquery.dataTables-cust.min.js", dt_2);
+    function dt_2() { loadScript("js/plugin/datatables/ColReorder.min.js", dt_3); }
+    function dt_3() { loadScript("js/plugin/datatables/FixedColumns.min.js", dt_4); }
+    function dt_4() { loadScript("js/plugin/datatables/ColVis.min.js", dt_5); }
+    function dt_5() { loadScript("js/plugin/datatables/ZeroClipboard.js", dt_6); }
+    function dt_6() { loadScript("js/plugin/datatables/media/js/TableTools.min.js", dt_7); }
+    function dt_7() { loadScript("js/plugin/datatables/DT_bootstrap.js", runDataTables);  }
+  }
+  function runDataTables() {
+    $('#txnHistory').dataTable({
+      "sPaginationType" : "bootstrap_full"
+    });
+    
+    TXN_HISTORY.init();
+  }
+</script>
+

@@ -31,6 +31,5 @@ function ActivityFeedViewModel(initialActivityCount) {
 var ACTIVITY_FEED = new ActivityFeedViewModel();
 
 $(document).ready(function() {
-  $.jqlog.enabled(true);
   ko.applyBindings(ACTIVITY_FEED, document.getElementById("activityBox"));
 });

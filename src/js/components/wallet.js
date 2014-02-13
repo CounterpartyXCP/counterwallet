@@ -35,6 +35,20 @@ function WalletViewModel() {
     }
   }
   
+  self.getAddressesList = function(withLabel) {
+    if(typeof(withLabel)==='undefined') withLabel = false;
+    var addresses = [];
+    
+    ko.utils.arrayForEach(self.addresses(), function(address) {
+      if(withLabel) {
+        addresses.push([address.ADDRESS, address.label()]);
+      } else {
+        addresses.push(address.ADDRESS);
+      }
+    });
+    return addresses;
+  }
+  
   self.getAddressObj = function(address) {
     //given an address string, return a reference to the cooresponding AddressViewModel object
     return ko.utils.arrayFirst(this.addresses(), function(a) {

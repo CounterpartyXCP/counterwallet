@@ -1,11 +1,12 @@
 var PREFERENCES = {}; //set when logging in
-var MAX_ADDRESSES = 20; //totall arbitrary :)
+var LAST_MESSAGEIDX_RECEIVED = 0; //last message received from the data feed (socket.io) -- used to detect gaps
 
+var MAX_ADDRESSES = 20; //totall arbitrary :)
 var MAX_INT = Math.pow(2, 63) - 1;
 var UNIT = 100000000; //# satoshis in whole
+var IS_DEV = document.URL.indexOf("counterwallet.com") < 0;
 
 var counterwalletd_urls = null;
-var IS_DEV = document.URL.indexOf("counterwallet.com") < 0;
 
 if(!IS_DEV) { //Production setup
   counterwalletd_urls = [

@@ -335,7 +335,6 @@
 <script type="text/javascript">
   //Bind the WALLET object to balancesContainer
   $(document).ready(function() {
-    $.jqlog.enabled(true);
     ko.applyBindings(WALLET, document.getElementById("balancesContainer"));
     WALLET.updateBalances(); //Update the wallet balances
   });

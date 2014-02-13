@@ -153,7 +153,8 @@ function _makeJSONAPICall(destType, endpoints, method, params, onSuccess, onErro
 function _getDestTypeFromMethod(method) {
   //based on the method, determine the endpoints list to use
   var destType = "counterpartyd";
-  if(['is_ready', 'get_chat_handle', 'store_chat_handle', 'get_preferences', 'store_preferences'].indexOf(method) >= 0) {
+  if(['is_ready', 'get_chat_handle', 'store_chat_handle', 'get_preferences', 'store_preferences',
+      'get_raw_transactions', 'get_market_history', 'get_order_book', 'get_balance_history', 'get_owned_assets'].indexOf(method) >= 0) {
     destType = "counterwalletd";
   }
   return destType;
