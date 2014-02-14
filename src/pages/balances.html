@@ -48,11 +48,15 @@
                     <li data-bind="visible: isMine()"><a data-bind="click: transfer" href="#">Transfer Ownership</a></li>
                     <li data-bind="visible: isMine() && !isLocked()"><a data-bind="click: lock" href="#">Lock Asset Ownership</a></li>
                     <li data-bind="visible: isMine()"><a data-bind="click: changeDescription" href="#">Change Asset Description</a></li>
+                    <li data-bind="visible: isMine()"><a data-bind="click: payDividend" href="#">Pay Dividend</a></li>
                   </ul>
                 </div>
                 <h3 class="name pull-left" style="position: relative; top: -10px;" data-bind="text: ASSET"></h3>
                 <div class="clearfix"></div>
-                <p class="balance">Bal: <span data-bind="text: displayedBalance"></span></p>
+                <p class="balance">
+                    <span data-bind="visible: isMine()">Issued: <span data-bind="text: displayedTotalIssued"></span></span><br/>
+                    Bal: <span data-bind="text: displayedBalance"></span></p>
+                <span data-bind="visible: isLocked()" style="position:absolute;bottom:2px;right:10px"><i class="icon-append fa fa-lock"></i></span>
               </div>
             </div> <!-- end widget content body -->
           </div> <!-- end widget div -->
@@ -79,7 +83,7 @@
             <label class="label col col-2">Description</label>
             <div class="col col-10">
                 <label class="input"><i class="icon-append fa fa-info"></i>
-                    <input name="description" data-bind="value: description" type="text"/>
+                    <input name="description" data-bind="value: description, valueUpdate: 'afterkeydown'" type="text"/>
                 </label>
             </div>
           </div></section>
@@ -112,7 +116,7 @@
             <label class="label col col-2">Send To</label>
             <div class="col col-10">
                 <label class="input"><i class="icon-append fa fa-user"></i>
-                    <input name="destAddress" data-bind="value: destAddress" type="text"/>
+                    <input name="destAddress" data-bind="value: destAddress, valueUpdate:['afterkeydown','propertychange','input']" type="text"/>
                 </label>
                 <div class="note">The address you will be sending to.</div>
             </div>
@@ -121,7 +125,7 @@
             <label class="label col col-2">Send Amount</label>
             <div class="col col-6">
                 <label class="input"><i class="icon-append fa fa-share"></i>
-                    <input name="quantity" data-bind="value: quantity, valueUpdate : 'afterkeydown'" type="text"/>
+                    <input name="quantity" data-bind="value: quantity, valueUpdate: 'afterkeydown'" type="text"/>
                 </label>
                 <div class="note">The quantity to send.</div>
             </div>
@@ -164,7 +168,7 @@
             <label class="label col col-2">Asset Name</label>
             <div class="col col-10">
                 <label class="input">
-                    <input name="assetName" data-bind="value: name" type="text"/>
+                    <input name="assetName" data-bind="value: name, valueUpdate : 'afterkeydown'" type="text"/>
                 </label>
                 <div class="note">The asset's trading symbol (also known as the Asset ID).</div>
             </div>
@@ -173,7 +177,7 @@
             <label class="label col col-2">Description</label>
             <div class="col col-10">
                 <label class="input">
-                    <input name="assetDescription" data-bind="value: description"/>
+                    <input name="assetDescription" data-bind="value: description, valueUpdate: 'afterkeydown'"/>
                 </label>
                 <div class="note">Optional text that provides more information on the asset.</div>
             </div>
@@ -182,7 +186,7 @@
             <label class="label col col-2">Quantity</label>
             <div class="col col-10">
                 <label class="input">
-                    <input name="assetQuantity"  data-bind="value: quantity" type="text"/>                        
+                    <input name="assetQuantity"  data-bind="value: quantity, valueUpdate: 'afterkeydown'" type="text"/>                        
                 </label>
                 <div class="note">How many of the units of the asset to issue (can be increased later).</div>
             </div>
@@ -209,7 +213,7 @@
             <label class="label col col-2">Call Date</label>
             <div class="col col-10">
                 <label class="input">
-                    <input name="assetCallDate" type="text" data-bind="datetimepicker:callDate"/>
+                    <input name="assetCallDate" type="text" data-bind="datetimepicker: callDate"/>
                 </label>
                 <div class="note">The date and time after which the owner of the asset may choose to call it back.</div>
             </div>
@@ -218,7 +222,7 @@
             <label class="label col col-2">Call Price</label>
             <div class="col col-10">
                 <label class="input">
-                    <input name="assetCallPrice" type="text" data-bind="value: callPrice"/>
+                    <input name="assetCallPrice" type="text" data-bind="value: callPrice, valueUpdate: 'afterkeydown'"/>
                 </label>
                 <div class="note">The price that the owner of the asset may call it back for.</div>
             </div>
@@ -252,7 +256,7 @@
             <label class="label col col-2">Additional Qty</label>
             <div class="col col-10">
                 <label class="input"><i class="icon-append fa fa-plus"></i>
-                    <input name="additionalIssue" data-bind="value: additionalIssue" type="text"/>
+                    <input name="additionalIssue" data-bind="value: additionalIssue, valueUpdate: 'afterkeydown'" type="text"/>
                 </label>
             </div>
           </div></section>
@@ -283,7 +287,7 @@
             <label class="label col col-2">Transfer To</label>
             <div class="col col-10">
                 <label class="input"><i class="icon-append fa fa-share"></i>
-                    <input name="destAddress" data-bind="value: destAddress" type="text"/>
+                    <input name="destAddress" data-bind="value: destAddress, valueUpdate: ['afterkeydown','propertychange','input']" type="text"/>
                 </label>
             </div>
           </div></section>
@@ -313,7 +317,7 @@
             <label class="label col col-2">Description</label>
             <div class="col col-10">
                 <label class="input"><i class="icon-append fa fa-info"></i>
-                    <input name="newDescription" data-bind="value: newDescription" type="text"/>
+                    <input name="newDescription" data-bind="value: newDescription, valueUpdate: 'afterkeydown'" type="text"/>
                 </label>
             </div>
           </div></section>
@@ -322,6 +326,44 @@
       <div class="modal-footer">
         <button type="button" class="btn btn-default" data-bind="click: hide">Cancel</button>
         <button type="button" data-bind="click: submitForm" class="btn btn-warning">Change Description</button>
+      </div>
+    </div><!-- /.modal-content -->
+  </div><!-- /.modal-dialog -->
+</div><!-- /.modal -->
+
+<!-- modal for pay dividend -->
+<div data-bind="showModal: shown" id="payDividendModal" class="modal fade" data-backdrop="static" data-keyboard="false" tabindex="-1" role="dialog" aria-labelledby="payDividendModal" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" data-bind="click: hide" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+        <h4 class="modal-title">Pay Dividend on <span data-bind="text: assetName"></span></h4>
+      </div>
+      <div class="modal-body no-padding">
+        <p class="formIntro">How many XCP per share of this unit would you like to pay to asset holders as a dividend?
+        <i>(Note that the full balance of XCP paid out must be present at this same address.)</i><br/><br/>
+       <span data-bind="visible: displayedAddressXCPBalance !== null">This address has a balance of
+           <b style="color: green" data-bind="text: displayedAddressXCPBalance"></b> XCP that can be paid as a dividend.<br/><br/></span>
+       <b style='color:red'>Please NOTE that this action is irreversable!</b></p>
+        
+        <form class="smart-form" data-bind="submit: doAction"><fieldset>
+          <section><div class="row">
+            <label class="label col col-2">XCP per Unit</label>
+            <div class="col col-10">
+                <label class="input"><i class="icon-append fa fa-plus"></i>
+                    <input name="qtyPerUnit" data-bind="value: qtyPerUnit, valueUpdate : 'afterkeydown'" type="text"/>
+                </label>
+            </div>
+          </div></section>
+        </fieldset></form>
+      </div>
+      <div class="modal-footer">
+        <span data-bind="visible: displayedXCPBalRemainingPostPay() >= 0">
+            After dividend payment this address will have a remaining balance of
+            <b style="color: #a4781b" data-bind="text: displayedXCPBalRemainingPostPay"></b> XCP.<br/><br/>
+        </span>
+        <button type="button" class="btn btn-default" data-bind="click: hide">Cancel</button>
+        <button type="button" data-bind="click: submitForm" class="btn btn-warning">Pay Dividend</button>
       </div>
     </div><!-- /.modal-content -->
   </div><!-- /.modal-dialog -->

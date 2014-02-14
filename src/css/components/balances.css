@@ -32,12 +32,22 @@ div#balancesContainer div.popover h3.popover-title { color: black; }
 
 .asset-item .balance {
   position: relative;
-  bottom: -5px;
-  /*right: -5px;*/
+  /*bottom: -5px;*/
   letter-spacing: 0;
   font-size: 15px;
   font-weight: bold;
+  
+  bottom: 12px;
+  line-height: 18px;
 }
+
+/*.asset-item .issued {
+  position: relative;
+  bottom: 10px;
+  letter-spacing: 0;
+  font-size: 15px;
+  font-weight: bold;
+}*/
 
 .asset-item.btc          { color: #a94442; background-color: #f2dede; border-color: #ebccd1; }
 .asset-item.xcp          { color: #3c763d; background-color: #dff0d8; border-color: #d6e9c6; }

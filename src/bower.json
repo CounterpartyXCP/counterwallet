@@ -1,0 +1,6 @@
+{
+  "name": "counterwallet",
+  "dependencies": {
+    "jqBootstrapValidation": ">= 2.0.0-alpha"
+  }
+}

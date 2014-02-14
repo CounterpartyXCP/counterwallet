@@ -184,7 +184,7 @@ function IssueAdditionalAssetModalViewModel() {
   
   self.rawAdditionalIssue = ko.computed(function() {
     if(!self.asset() || !isNumber(self.additionalIssue())) return null;
-    return (self.asset().divisible() ? parseFloat(self.additionalIssue()) * UNIT : parseInt(self.additionalIssue()))
+    return (self.asset().DIVISIBLE ? parseFloat(self.additionalIssue()) * UNIT : parseInt(self.additionalIssue()))
   }, self);
 
   self.validationModel = ko.validatedObservable({
@@ -208,14 +208,15 @@ function IssueAdditionalAssetModalViewModel() {
   self.doAction = function() {
     //do the additional issuance (specify non-zero quantity, no transfer destination)
     multiAPIConsensus("do_issuance",
-      {source: self.address(), quantity: self.rawAdditionalIssue(), asset: self.asset().name(), divisible: self.asset().DIVISIBLE,
+      {source: self.address(), quantity: self.rawAdditionalIssue(), asset: self.asset().ASSET, divisible: self.asset().DIVISIBLE,
        description: self.asset().description(), callable: self.asset().CALLABLE, call_date: self.asset().CALLDATE,
        call_price: self.asset().CALLPRICE, transfer_destination: null,
        unsigned: WALLET.getAddressObj(self.address()).PUBKEY},
       function(unsignedTXHex, numTotalEndpoints, numConsensusEndpoints) {
         WALLET.signAndBroadcastTx(self.address(), unsignedTXHex);
         self.shown(false);
-        bootbox.alert("You have issued " + self.additionalIssue().toString() + " additional quantity on your asset " + self.asset().name() + ". It may take a bit for this to reflect.");
+        bootbox.alert("You have issued <b>" + self.additionalIssue().toString() + "</b> additional quantity on your asset <b>"
+          + self.asset().ASSET + "</b>. It may take a bit for this to reflect.");
     });
   }
   
@@ -223,7 +224,7 @@ function IssueAdditionalAssetModalViewModel() {
     if(typeof(resetForm)==='undefined') resetForm = true;
     if(resetForm) self.resetForm();
     self.address(address);
-    self.divisible(divisible)
+    self.divisible(divisible);
     self.asset(asset);
     self.shown(true);
   }  
@@ -267,14 +268,14 @@ function TransferAssetModalViewModel() {
   self.doAction = function() {
     //do the transfer (zero quantity issuance to the specified address)
     multiAPIConsensus("do_issuance",
-      {source: self.address(), quantity: 0, asset: self.asset().name(), divisible: self.asset().DIVISIBLE,
+      {source: self.address(), quantity: 0, asset: self.asset().ASSET, divisible: self.asset().DIVISIBLE,
        description: self.asset().description(), callable: self.asset().CALLABLE, call_date: self.asset().CALLDATE,
        call_price: self.asset().CALLPRICE, transfer_destination: self.destAddress(),
        unsigned: WALLET.getAddressObj(self.address()).PUBKEY},
       function(unsignedTXHex, numTotalEndpoints, numConsensusEndpoints) {
         WALLET.signAndBroadcastTx(self.address(), unsignedTXHex);
         self.shown(false);
-        bootbox.alert("Your asset has been transferred to <b>" + address + "</b>. It may take a bit for this to reflect.");
+        bootbox.alert("<b>" + self.asset().ASSET + "</b> has been transferred to <b>" + self.destAddress() + "</b>. It may take a bit for this to reflect.");
     });
   }
   
@@ -334,7 +335,7 @@ function ChangeAssetDescriptionModalViewModel() {
     bootbox.alert("IMPLEMENTATION NOT FINISHED");
     //TODO: THIS IS INCOMPLETE ... we need semantics figured out for how to just change asset desc
     multiAPIConsensus("do_issuance",
-      {source: self.address(), quantity: null, asset: self.asset().name(), divisible: self.asset().DIVISIBLE,
+      {source: self.address(), quantity: null, asset: self.asset().ASSET, divisible: self.asset().DIVISIBLE,
        description: self.newDescription(), callable: self.asset().CALLABLE, call_date: self.asset().CALLDATE,
        call_price: self.asset().CALLPRICE, transfer_destination: null,
        unsigned: WALLET.getAddressObj(self.address()).PUBKEY},
@@ -359,14 +360,106 @@ function ChangeAssetDescriptionModalViewModel() {
 }
 
 
+ko.validation.rules['dividendDoesNotExceedXCPBalance'] = {
+    validator: function (val, self) {
+      if(!isNumber(val)) return null;
+      return val * self.asset().normalizedTotalIssued() <= WALLET.getBalance(self.address(), "XCP");
+    },
+    message: 'The total dividend would exceed this address\' XCP balance.'
+};
+ko.validation.registerExtenders();
+
+function PayDividendModalViewModel() {
+  var self = this;
+  self.shown = ko.observable(false);
+  self.address = ko.observable(''); // SOURCE address (supplied)
+  self.asset = ko.observable();
+  
+  self.qtyPerUnit = ko.observable('').extend({
+    required: true,
+    pattern: {
+      message: 'Must be a valid number',
+      params: '^[0-9]*\.?[0-9]{0,8}$' //not perfect ... will convert divisible assets to satoshi before sending to API
+    },
+    dividendDoesNotExceedXCPBalance: self
+  });
+  
+  self.assetName = ko.computed(function() {
+    if(!self.asset()) return null;
+    return self.asset().ASSET;
+  }, self);
+  
+  self.displayedAddressXCPBalance = ko.computed(function() {
+    return WALLET.getBalance(self.address(), "XCP"); //normalized
+  }, self);
+
+  self.displayedTotalPay = ko.computed(function() {
+    if(!self.asset()) return null;
+    return self.qtyPerUnit() * self.asset().normalizedTotalIssued();
+  }, self);
+
+  self.displayedXCPBalRemainingPostPay = ko.computed(function() {
+    if(!self.asset()) return null;
+    return toFixed(self.displayedAddressXCPBalance() - self.displayedTotalPay(), 8);
+  }, self);
+  
+  self.validationModel = ko.validatedObservable({
+    qtyPerUnit: self.qtyPerUnit
+  });
+
+  self.resetForm = function() {
+    self.qtyPerUnit(null);
+    self.validationModel.errors.showAllMessages(false);
+  }
+  
+  self.submitForm = function() {
+    if (!self.validationModel.isValid()) {
+      self.validationModel.errors.showAllMessages();
+      return false;
+    }    
+    console.log("Submitting form...");
+    $('#payDividendModal form').submit();
+  }
+
+  self.doAction = function() {
+    //do the additional issuance (specify non-zero quantity, no transfer destination)
+    multiAPIConsensus("do_dividend",
+      {source: self.address(), quantity_per_unit: self.qtyPerUnit() * UNIT,
+       share_asset: self.asset().ASSET, 
+       unsigned: WALLET.getAddressObj(self.address()).PUBKEY},
+      function(unsignedTXHex, numTotalEndpoints, numConsensusEndpoints) {
+        WALLET.signAndBroadcastTx(self.address(), unsignedTXHex);
+        self.shown(false);
+        bootbox.alert("You have paid a dividend of <b>" + self.qtyPerUnit().toString()
+          + " XCP</b> per outstanding unit to holders of asset <b>" + self.asset().ASSET
+          + "</b>. It may take a bit for this to reflect.");
+    });
+  }
+  
+  self.show = function(address, asset, resetForm) {
+    if(typeof(resetForm)==='undefined') resetForm = true;
+    if(resetForm) self.resetForm();
+    self.address(address);
+    self.asset(asset);
+    self.shown(true);
+  }  
+
+  self.hide = function() {
+    self.shown(false);
+  }  
+}
+
+
 var CREATE_ASSET_MODAL = new CreateAssetModalViewModel();
 var ISSUE_ADDITIONAL_ASSET_MODAL = new IssueAdditionalAssetModalViewModel();
 var TRANSFER_ASSET_MODAL = new TransferAssetModalViewModel();
 var CHANGE_ASSET_DESCRIPTION_MODAL = new ChangeAssetDescriptionModalViewModel();
+var PAY_DIVIDEND_MODAL = new PayDividendModalViewModel();
 
 $(document).ready(function() {
   ko.applyBindingsWithValidation(CREATE_ASSET_MODAL, document.getElementById("createAssetModal"));
   ko.applyBindingsWithValidation(ISSUE_ADDITIONAL_ASSET_MODAL, document.getElementById("issueAdditionalAssetModal"));
   ko.applyBindingsWithValidation(TRANSFER_ASSET_MODAL, document.getElementById("transferAssetModal"));
   ko.applyBindingsWithValidation(CHANGE_ASSET_DESCRIPTION_MODAL, document.getElementById("changeAssetDescriptionModal"));
+  ko.applyBindingsWithValidation(PAY_DIVIDEND_MODAL, document.getElementById("payDividendModal"));
 });

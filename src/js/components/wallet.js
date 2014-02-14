@@ -51,21 +51,26 @@ function WalletViewModel() {
   
   self.getAddressObj = function(address) {
     //given an address string, return a reference to the cooresponding AddressViewModel object
-    return ko.utils.arrayFirst(this.addresses(), function(a) {
+    return ko.utils.arrayFirst(self.addresses(), function(a) {
       return a.ADDRESS == address;
     });
   }
   
+  self.getBalance = function(address, asset, normalized) {
+    if(typeof(normalized)==='undefined') normalized = true;
+    var addressObj = self.getAddressObj(address);
+    if(!addressObj) return false;
+    var assetObj = addressObj.getAssetObj(asset);
+    if(!assetObj) return false;
+    return normalized ? assetObj.normalizedBalance() : assetObj.balance();
+  }
+
   self.updateBalance = function(address, asset, balance) {
     //Update a balance for a specific asset on a specific address
-    var match = ko.utils.arrayFirst(self.addresses(), function(item) {
-        return item.ADDRESS === address;
-    });
-    if (!match) {
-      return false;
-    } else {
-      match.addOrUpdateAsset(asset, balance);
-    }
+    var addressObj = self.getAddressObj(address);
+    if(!addressObj) return false;
+    addressObj.addOrUpdateAsset(asset, balance);
+    return true;
   }
   
   self.updateBalances = function() {

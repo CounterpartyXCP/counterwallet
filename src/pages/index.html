@@ -283,16 +283,19 @@
     <script src="js/bootstrap/bootstrap.min.js"></script> <!-- BOOTSTRAP JS -->
     <script src="js/notification/SmartNotification.min.js"></script> <!-- CUSTOM NOTIFICATION -->
     <script src="js/smartwidgets/jarvis.widget.min.js"></script> <!-- JARVIS WIDGETS -->
-    <script src="js/plugin/easy-pie-chart/jquery.easy-pie-chart.min.js"></script> <!-- EASY PIE CHARTS -->
-    <script src="js/plugin/sparkline/jquery.sparkline.min.js"></script> <!-- SPARKLINES -->
     <script src="js/plugin/jquery-form/jquery-form.min.js"></script> <!-- JQUERY FORM -->
     <script src="js/plugin/jquery-validate/jquery.validate.min.js"></script> <!-- JQUERY VALIDATE -->
-    <script src="js/plugin/masked-input/jquery.maskedinput.min.js"></script> <!-- JQUERY MASKED INPUT -->
     <script src="js/plugin/select2/select2.min.js"></script> <!-- JQUERY SELECT2 INPUT -->
-    <script src="js/plugin/bootstrap-slider/bootstrap-slider.min.js"></script> <!-- JQUERY UI + Bootstrap Slider -->
     <script src="js/plugin/msie-fix/jquery.mb.browser.min.js"></script> <!-- browser msie issue fix -->
     <script src="js/plugin/smartclick/smartclick.js"></script> <!-- SmartClick: For mobile devices -->
     <script src="js/plugin/x-editable/x-editable.min.js"></script> <!-- SmartClick: For mobile devices -->
+    <!--<script src="js/plugin/bootstrap-slider/bootstrap-slider.min.js"></script>--> <!-- JQUERY UI + Bootstrap Slider -->
+    <!--<script src="js/plugin/easy-pie-chart/jquery.easy-pie-chart.min.js"></script>--> <!-- EASY PIE CHARTS -->
+    <!--<script src="js/plugin/sparkline/jquery.sparkline.min.js"></script>--> <!-- SPARKLINES -->
+    <!--<script src="js/plugin/masked-input/jquery.maskedinput.min.js"></script>--> <!-- JQUERY MASKED INPUT -->
+    <!-- datatables -->
+    <script src="js/plugin/datatables/jquery.dataTables-cust.min.js"></script>
+    <script src="js/plugin/datatables/DT_bootstrap.js"></script>
 
     <!-- COUNTERWALLET SPECIFIC JS INCLUDES -->    
     <!-- bitcoinjs-lib: The following library is required for bitcon addresses and signing. -->
@@ -318,6 +321,8 @@
     <script src="xcp/extjs/knockout-bootstrap.js"></script>
     <script src="xcp/extjs/knockout.x-editable.js"></script>
     <script src="xcp/extjs/knockout.validation.js"></script>
+    <!-- highstock (which also includes highcharts) (minified)-->
+    <script src="http://code.highcharts.com/stock/highstock.js"></script>
 
     <!-- Other external libraries. -->
     <script src="xcp/extjs/qrcode.js"></script> 
@@ -340,18 +345,19 @@
     <script src="xcp/js/smartadmin.app.js"></script>
     <!-- ^ unfortunately we have to mod the file itself, instead of dynamically override :( -->
 
-    <!-- Your GOOGLE ANALYTICS CODE Below -->
+    <!-- Google analytics (production only) -->
     <script type="text/javascript">
-      var _gaq = _gaq || [];
-      _gaq.push(['_setAccount', 'UA-47404711-2']);
-      _gaq.push(['_trackPageview']);
-    
-      (function() {
-        var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
-        ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
-        var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
-      })();
-    
+      if(!IS_DEV) {
+        var _gaq = _gaq || [];
+        _gaq.push(['_setAccount', 'UA-47404711-2']);
+        _gaq.push(['_trackPageview']);
+        
+        (function() {
+          var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+          ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+          var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+        })();
+      }
     </script>
   </body>
 

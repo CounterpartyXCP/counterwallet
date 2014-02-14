@@ -59,7 +59,7 @@ def main():
     logging.info("Building counterwallet for %s distribution..." % ("local server" if not is_cdn_build else "CDN"))
     
     #install required deps
-    runcmd("sudo apt-get -y install wget unzip")
+    runcmd("sudo apt-get -y install wget unzip npm")
     
     #fetch admin template we use and unpack
     runcmd("rm -rf %s" % os.path.join(base_path, "build")) #remove existing build
@@ -90,6 +90,12 @@ def main():
     link_or_copy(is_cdn_build, os.path.join(base_path, "src", "pages", "index.html"), os.path.join(base_path, "build", "index.html"))
     #x-editable's clear.png so we don't get a 404...
     link_or_copy(is_cdn_build, os.path.join(base_path, "src", "images", "clear.png"), os.path.join(base_path, "build", "img", "clear.png"))
+    
+    runcmd("sudo npm install -g bower")
+    #TODO: move to bower and grunt-useman for a) auto installation of the javascript dependencies in
+    # extjs (we can't do much about the smartadmin ones), and b) automatic gathering/minification of js and css resources
+    # and c) replacement of the <script> and <stylesheet> tag templates as necessary to switch between debug and minified builds
+    # (or, we just link to the same js/css files, and the files contain either full or minified content...either approach works) 
     
     
 

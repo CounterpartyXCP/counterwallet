@@ -237,7 +237,7 @@ function failoverAPI(method, params, onSuccess, onError) {
     // that if a) the LAST server returned a 525, and b) all servers are erroring out or down, that all servers are
     // probably returning 525s or updating (or messed up somehow) and we should just log the client out to be safe about it.
     // This is probably a good choice for now... 
-    if(jqXHR || jqXHR.status == '525') {
+    if(jqXHR && jqXHR.status == '525') {
       alert("The server(s) are currently updating and/or not caught up to the blockchain. Logging you out. Please try logging in again later. (e:failoverAPI)")
       location.reload(false); //log the user out to avoid ruckus
       return;

@@ -19,7 +19,7 @@
           <div> <!-- widget div-->
             <div class="widget-body no-padding"> <!-- widget content -->
               <div class="widget-body-toolbar">
-                <form class="smart-form" data-bind="submit: doAction"><fieldset>
+                <form class="smart-form"><fieldset>
                   <section><div class="row">
                     <label class="label col col-2">Select Asset</label>
                     <div class="col col-10">
@@ -30,7 +30,7 @@
                   </div></section>
                 </fieldset></form>
               </div>
-              <div id="balanceHistory" class="chart has-legend"></div>
+              <div id="balanceHistory"></div>
             </div> <!-- end widget content -->
           </div> <!-- end widget div -->
       </div> <!-- end widget -->
@@ -43,17 +43,17 @@
       <div class="jarviswidget" id="wid-id-txnHistory" data-widget-editbutton="false" data-widget-deletebutton="false">
         <header>
             <span class="widget-icon"> <i class="fa fa-table"></i> </span>
-            <h2>Recent Transactions</h2>
+            <h2>Recent Transactions for <span data-bind="text: selectedAddress"></span></h2>
         </header>
         <div> <!-- widget div-->
             <div class="widget-body no-padding"> <!-- widget content -->
                 <div class="widget-body-toolbar">
-                  <form class="smart-form" data-bind="submit: doAction"><fieldset>
+                  <form class="smart-form"><fieldset>
                     <section><div class="row">
                       <label class="label col col-2">Select Address</label>
                       <div class="col col-10">
                           <label class="select">
-                          <select class="input-lg" data-bind="options: availableAddresses, optionText: 'LABEL', value: selectedAddress, event: { change: addressChanged }">
+                          <select class="input-lg" data-bind="options: availableAddresses, optionsText: 'LABEL', value: selectedAddress, event: { change: addressChanged }">
                           </select> <i></i> </label>
                       </div>
                     </div></section>
@@ -72,7 +72,7 @@
                             <th>Fee</th>-->
                         </tr>
                     </thead>
-                    <tbody data-bind="forEach: transactions">
+                    <tbody data-bind="foreach: transactions">
                         <tr>
                             <td><a target="_blank" data-bind="text: txIndex, attr: { href: 'http://blockscan.com/tx.aspx?q=' + txIndex }"></a></td> <!-- link to TX at blockscan -->
                             <td><a target="_blank" data-bind="text: blockIndex, attr: { href: 'https://blockchain.info/block-index/' + blockIndex }"></a></td> <!-- link to block tx at blockchain.info) -->
@@ -95,45 +95,5 @@
 <script src="xcp/js/components/history.js"></script>
 
 <script type="text/javascript">
-  var BALANCE_HISTORY = new BalanceHistoryViewModel();
-  var TXN_HISTORY = new TransactionHistoryViewModel();
-  
-  $(document).ready(function() {
-    ko.applyBindings(TXN_HISTORY, document.getElementById("wid-id-txnHistory"));
-    ko.applyBindings(BALANCE_HISTORY, document.getElementById("wid-id-balHistory"));
-  });
-
   pageSetUp(); //init smartadmin featureset
-
-  /*
-   * FLOT (charts)
-   */  
-  loadScript("js/plugin/flot/jquery.flot.cust.js", loadFlotResize);
-  function loadFlotResize() { loadScript("js/plugin/flot/jquery.flot.resize.js", loadFlotFillbetween); }
-  function loadFlotFillbetween() { loadScript("js/plugin/flot/jquery.flot.fillbetween.js", loadFlotOrderBar); }
-  function loadFlotOrderBar() { loadScript("js/plugin/flot/jquery.flot.orderBar.js", loadFlotPie); }   
-  function loadFlotPie() { loadScript("js/plugin/flot/jquery.flot.pie.js", loadFlotToolTip); }
-  function loadFlotToolTip() { loadScript("js/plugin/flot/jquery.flot.tooltip.js", BALANCE_HISTORY.init); }
-
-  /*
-   * DATAGRID
-   */
-  loadDataTableScripts();
-  function loadDataTableScripts() {
-    loadScript("js/plugin/datatables/jquery.dataTables-cust.min.js", dt_2);
-    function dt_2() { loadScript("js/plugin/datatables/ColReorder.min.js", dt_3); }
-    function dt_3() { loadScript("js/plugin/datatables/FixedColumns.min.js", dt_4); }
-    function dt_4() { loadScript("js/plugin/datatables/ColVis.min.js", dt_5); }
-    function dt_5() { loadScript("js/plugin/datatables/ZeroClipboard.js", dt_6); }
-    function dt_6() { loadScript("js/plugin/datatables/media/js/TableTools.min.js", dt_7); }
-    function dt_7() { loadScript("js/plugin/datatables/DT_bootstrap.js", runDataTables);  }
-  }
-  function runDataTables() {
-    $('#txnHistory').dataTable({
-      "sPaginationType" : "bootstrap_full"
-    });
-    
-    TXN_HISTORY.init();
-  }
 </script>
-

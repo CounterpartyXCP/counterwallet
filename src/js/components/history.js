@@ -1,108 +1,66 @@
 function BalanceHistoryViewModel() {
   //An address on a wallet
   var self = this;
-  self.KEY = key; //  key : the ECKeyObj (eckey.js)
   self.selectedAsset = ko.observable('');
   self.availableAssets = ko.observableArray(["XCP", "BTC"]);
+  self.graphData = null;
   
   self.init = function() {
     //contact server for list of all assets at the addresses we have
     failoverAPI("get_owned_assets", { addresses: WALLET.getAddressesList() }, function(data) {
-      for(var i = 0; i< data.length; i++) {
+      for(var i = 0; i < data.length; i++) {
         self.availableAssets.push(data[i]); //asset ID (e.g. "FOOBAR")  
       }
     });
     //select the first asset by default (XCP)
-    self.selectedAsset(self.availableAssets[0]);
+    self.selectedAsset(self.availableAssets()[0]);
     //trigger initial data display
-    self.getAddressBalancesForAsset();
+    self.assetChanged();
   }
   
   self.assetChanged = function() {
-    self.getAddressBalancesForAsset(self.selectedAsset());
-  }
-  
-  self.getAddressBalancesForAsset = function() {
     //contact server for balances across all addresses in our wallet that have this asset
-    self.selectedAsset()
-  }
-  
-  self.renderAddressBalancesForAsset = function() {
-    /* chart colors default */
-    var $chrt_border_color = "#efefef";
-    var $chrt_grid_color = "#DDD"
-    var $chrt_main = "#E24913";         /* red       */
-    var $chrt_second = "#6595b4";       /* blue      */
-    var $chrt_third = "#FF9F01";        /* orange    */
-    var $chrt_fourth = "#7e9d3a";       /* green     */
-    var $chrt_fifth = "#BD362F";        /* dark red  */
-    var $chrt_mono = "#000";
+    failoverAPI("get_balance_history", {asset: self.selectedAsset(), addresses: WALLET.getAddressesList(), }, function(data) {
+      self.graphData = data;
       
-    function generateBalanceHistoryChart() {
-      //var pageviews = [[1, 75], [3, 87], [4, 93], [5, 127], [6, 116], [7, 137], [8, 135], [9, 130], [10, 167], [11, 169], [12, 179], [13, 185], [14, 176], [15, 180], [16, 174], [17, 193], [18, 186], [19, 177], [20, 153], [21, 149], [22, 130], [23, 100], [24, 50]];
-      //var visitors = [[1, 65], [3, 50], [4, 73], [5, 100], [6, 95], [7, 103], [8, 111], [9, 97], [10, 125], [11, 100], [12, 95], [13, 141], [14, 126], [15, 131], [16, 146], [17, 158], [18, 160], [19, 151], [20, 125], [21, 110], [22, 100], [23, 85], [24, 37]];
-      //console.log(pageviews)
-      var plot = $.plot($("#balanceHistory"),
-        /*[{
-          data : BALANCE_HISTORY,
-          label : "Your pageviews"
-        }, {
-          data : visitors,
-          label : "Site visitors"
-        }]*/
-        BALANCE_HISTORY.getDataSeriesForSelectedAddr(),
-        {
-          series : {
-              lines : {
-                  show : true,
-                  lineWidth : 1,
-                  fill : true,
-                  fillColor : {
-                      colors : [{
-                          opacity : 0.1
-                      }, {
-                          opacity : 0.15
-                      }]
-                  }
+      $('#balanceHistory').highcharts({
+          chart: {
+              type: 'line',
+              zoomType: 'x',
+              spacingRight: 20
+          },      
+          title: {
+              text: 'Balances for Asset ' + self.selectedAsset(),
+              x: -20 //center
+          },
+          xAxis: {
+              type: 'datetime',
+              maxZoom: 10 * 24 * 3600000, // ten days
+              title: {
+                text: null
               },
-              points : {
-                  show : true
+              dateTimeLabelFormats: { // don't display the dummy year
+                month: '%e. %b',
+                year: '%b'
+              }            
+          },
+          yAxis: {
+              title: {
+                  text: 'Balance'
               },
-              shadowSize : 0
+              plotLines: [{
+                  value: 0,
+                  width: 1,
+                  color: '#808080'
+              }]
           },
-          xaxis : {
-              mode : "time",
-              tickLength : 10
+          tooltip: {
+              shared: true,
+              valueSuffix: self.selectedAsset()
           },
-  
-          yaxes : [{
-              min : 20,
-              tickLength : 5
-          }],
-          grid : {
-              hoverable : true,
-              clickable : true,
-              tickColor : $chrt_border_color,
-              borderWidth : 0,
-              borderColor : $chrt_border_color,
-          },
-          tooltip : true,
-          tooltipOpts : {
-              content : "%s for <b>%x:00 hrs</b> was %y",
-              dateFormat : "%y-%0m-%0d",
-              defaultTheme : false
-          },
-          colors : [$chrt_main, $chrt_second],
-          xaxis : {
-              ticks : 15,
-              tickDecimals : 2
-          },
-          yaxis : {
-              ticks : 15,
-              tickDecimals : 0
-          }
-      });
-    }
+          series: self.graphData
+      });    
+    });
   }
 }
 
@@ -124,14 +82,14 @@ var ENTITY_NAMES = {
   'bet_expirations': 'Bet Expired',
   'order_expirations': 'Order Expired',
   'bet_match_expirations': 'Bet Match Exp',
-  'order_match_expirations': 'Order Match Exp',
+  'order_match_expirations': 'Order Match Exp'
 };
 
 var BET_TYPES = {
   0: "Bullish CFD",
   1: "Bearish CFD",
   2: "Equal",
-  3: "Not Equal",
+  3: "Not Equal"
 };
 
 function TransactionHistoryItemViewModel(data) {
@@ -175,7 +133,7 @@ function TransactionHistoryItemViewModel(data) {
       } else if(self.data['amount'] == 0) {
         desc = "Asset " + self.data['asset'] + " locked against additional issuance";
       } else {
-        desc = (self.data['divisible'] ? self.data['quantity'] / UNIT : self.data['quantity']) + " qty of asset " + self.data['asset'] + " issued";
+        desc = (self.data['divisible'] ? self.data['quantity'] / UNIT : self.data['quantity']).toString() + " qty of asset " + self.data['asset'] + " issued";
       }
     } else if(self.rawTxType == 'broadcasts') {
       desc = "Text: " + self.data['text'] + "<br/>Value: " + self.data['value'];
@@ -192,23 +150,24 @@ function TransactionHistoryItemViewModel(data) {
     } else if(self.rawTxType == 'callbacks') {
       desc = self.data['fraction'] + " called back for asset " + self.data['asset'];
     } else if(self.rawTxType == 'bet_expirations') {
-      desc = "Bet " self.data['bet_index'] + " expired";
+      desc = "Bet " + self.data['bet_index'] + " expired";
     } else if(self.rawTxType == 'order_expirations') {
-      desc = "Order " self.data['order_index'] + " expired";
+      desc = "Order " + self.data['order_index'] + " expired";
     } else if(self.rawTxType == 'bet_match_expirations') {
-      desc = "Bet Match " self.data['bet_match_id'] + " expired";
+      desc = "Bet Match " + self.data['bet_match_id'] + " expired";
     } else if(self.rawTxType == 'order_match_expirations') {
-      desc = "Order Match " self.data['order_match_id'] + " expired";
+      desc = "Order Match " + self.data['order_match_id'] + " expired";
     } else {
       desc = "UNKNOWN TRANSACTION TYPE";
     }
     return desc;
+    
   };
 }
 
 var AddressInDropdownItemModel = function(address, label) {
   this.ADDRESS = address;
-  this.LABEL = address + "(" + label + ")";
+  this.LABEL = address + " (" + label + ")";
 };
     
 function TransactionHistoryViewModel() {
@@ -226,24 +185,32 @@ function TransactionHistoryViewModel() {
     //select the first address by default
     self.selectedAddress(self.availableAddresses[0]);
     //trigger initial data display
-    self.getTxnsForAddress();
+    self.addressChanged();
   }
   
   self.addressChanged = function() {
-    self.getTxnsForAddress(self.selectedAddress().ADDRESS);
-  }
-
-  self.getTxnsForAddress = function(address) {
-    var address = WALLET.getAddressObj(address);
-    assert(address);
-    
     self.transactions([]); //clear
-    failoverAPI("get_raw_transactions", {address: address}, function(data) {
+    failoverAPI("get_raw_transactions", {address: self.selectedAddress().ADDRESS}, function(data) {
       for(var i = 0; i< data.length; i++) {
         self.transactions.push(new TransactionHistoryItemViewModel(data));  
       }
-      self.displayedAddress(address.ADDRESS);
+      
+      $('#txnHistory').dataTable({
+        "sPaginationType" : "bootstrap_full"
+      });
     });
   } 
 }
+
+
+var BALANCE_HISTORY = new BalanceHistoryViewModel();
+var TXN_HISTORY = new TransactionHistoryViewModel();
+
+$(document).ready(function() {
+  ko.applyBindings(TXN_HISTORY, document.getElementById("wid-id-txnHistory"));
+  ko.applyBindings(BALANCE_HISTORY, document.getElementById("wid-id-balHistory"));
+
+  //BALANCE_HISTORY.init();
+  TXN_HISTORY.init();
+});
 
