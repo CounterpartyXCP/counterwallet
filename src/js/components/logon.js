@@ -28,7 +28,7 @@ function LogonViewModel() {
   
   self.openWallet = function() {
     //Start with a gate check to make sure at least one of the servers is ready and caught up before we try to log in
-    multiAPI("is_ready", [], function(endpoint, is_ready) {
+    multiAPI("is_ready", [], function(is_ready, endpoint) {
       assert(is_ready); //otherwise we should have gotten a 525 error
 
       //User is logging in...
@@ -43,7 +43,7 @@ function LogonViewModel() {
       $.jqlog.log("Wallet ID: " + WALLET.identifier());
     
       //Grab preferences
-      multiAPINewest("get_preferences", [WALLET.identifier()], 'last_updated', function(endpoint, data) {
+      multiAPINewest("get_preferences", [WALLET.identifier()], 'last_updated', function(data) {
         var prefs = data && data.hasOwnProperty('preferences') ? data['preferences'] : null;
         if(prefs == null) {
           $.jqlog.log("Stored preferences NOT found on server(s). Creating new...");
@@ -93,7 +93,7 @@ function LogonViewModel() {
         );
       });
     },
-    function(endpoint, jqXHR, textStatus, errorThrown) {
+    function(jqXHR, textStatus, errorThrown, endpoint) {
       var message = describeError(jqXHR, textStatus, errorThrown);
       bootbox.alert("No counterparty servers are currently available. Please try again later. ERROR: " + message);
     });

@@ -32,14 +32,13 @@
     <!-- GOOGLE FONT -->
     <link rel="stylesheet" href="//fonts.googleapis.com/css?family=Open+Sans:400italic,700italic,300,400,700">
   </head>
-  <body class="">
+  <body class="smart-style-2">
     <!-- possible classes: minified, fixed-ribbon, fixed-header, fixed-width-->
 
     <!-- HEADER -->
     <header id="header" style="display:none">
       <div id="logo-group">
-        <span id="logo"> <img src="xcp/images/logo.png" alt="Counterwallet"> </span>
-
+        <span id="logo"><span class="logoText">Counterwallet</span></span>
         <div id="activityBox">
           <span id="activity" class="activity-dropdown"> <i class="fa fa-user"></i><b data-bind="blah: console.log($data), text: activityCount" class="badge"></b></span>
           <!-- for now, when clicked this will reset to 0 ...could take this into knockout in the future... -->
@@ -116,19 +115,17 @@
           <li class="">
             <a href="xcp/pages/history.html" title="History"><i class="fa fa-lg fa-fw fa-sort-amount-asc"></i> <span class="menu-item-parent">History</span></a>
           </li>
-          <li>
-            <a href="#"><i class="fa fa-lg fa-fw fa-bar-chart-o"></i> <span class="menu-item-parent">Trading</span></a>
-            <ul>
-              <li>
-                <a href="xcp/pages/dex.html">Buy/Sell</a>
-              </li>
-              <li>
-                <a href="xcp/pages/dex_history.html">History</a>
-              </li>
-            </ul>
+          <li class="">
+            <a href="xcp/pages/simplebuysell.html" title="Simple Buy&Sell"><i class="fa fa-lg fa-fw fa-exchange"></i> <span class="menu-item-parent">Simple Buy&Sell</span></a>
+          </li>
+          <li class="">
+            <a href="xcp/pages/trading.html" title="Trading"><i class="fa fa-lg fa-fw fa-bar-chart-o"></i> <span class="menu-item-parent">Trading</span></a>
           </li>
           <li>
             <a href="#" id="chatLink"><i class="fa fa-lg fa-fw fa-comments-o"></i><span class="menu-item-parent">Show Chat</span></a>
+          </li>
+          <li class="">
+            <a href="https://forums.counterparty.co/index.php/board,2.0.html" target="_blank" title="Support Forums"><i class="fa fa-lg fa-fw fa-question"></i> <span class="menu-item-parent">Support Forums</span></a>
           </li>
         </ul>
       </nav>
@@ -295,6 +292,11 @@
     <!--<script src="js/plugin/masked-input/jquery.maskedinput.min.js"></script>--> <!-- JQUERY MASKED INPUT -->
     <!-- datatables -->
     <script src="js/plugin/datatables/jquery.dataTables-cust.min.js"></script>
+    <script src="js/plugin/datatables/ColReorder.min.js"></script>
+    <script src="js/plugin/datatables/FixedColumns.min.js"></script>
+    <script src="js/plugin/datatables/ColVis.min.js"></script>
+    <script src="js/plugin/datatables/ZeroClipboard.js"></script>
+    <script src="js/plugin/datatables/media/js/TableTools.min.js"></script>
     <script src="js/plugin/datatables/DT_bootstrap.js"></script>
 
     <!-- COUNTERWALLET SPECIFIC JS INCLUDES -->    

@@ -168,7 +168,7 @@ function AddressViewModel(key, address, initialLabel) {
       return;
     }
     
-    failoverAPI("get_asset_info", [asset], function(endpoint, assetInfo) {
+    failoverAPI("get_asset_info", [asset], function(assetInfo, endpoint) {
       var isMine = assetInfo['owner'] == self.ADDRESS; //default to false on error or when we can't find the asset too
       var match = ko.utils.arrayFirst(self.assets(), function(item) {
           return item.ASSET === asset;
@@ -197,7 +197,7 @@ function AddressViewModel(key, address, initialLabel) {
   self.changeLabel = function(params) {
     PREFERENCES.address_aliases[self.ADDRESS] = params.value;
     //update the preferences on the server 
-    multiAPI("store_preferences", [WALLET.identifier(), PREFERENCES], function(endpoint, data) {
+    multiAPI("store_preferences", [WALLET.identifier(), PREFERENCES], function(data, endpoint) {
       self.label(params.value); //update was a success
     });
   }

@@ -55,7 +55,7 @@ function ChatFeedViewModel() {
     }
     
     //pop up a dialog box to gather and set user's chat handle, and save to preferences
-    multiAPINewest("get_chat_handle", [WALLET.identifier()], 'last_updated', function(endpoint, data) {
+    multiAPINewest("get_chat_handle", [WALLET.identifier()], 'last_updated', function(data, endpoint) {
       var handle = data && data.hasOwnProperty('handle') ? data['handle'] : null;
       if(handle == null) { //no handle yet
         bootbox.dialog({
@@ -84,7 +84,7 @@ function ChatFeedViewModel() {
                 }
                 
                 //Save the handle back at counterwalletd
-                multiAPI("store_chat_handle", [WALLET.identifier(), handle], function(endpoint, data) {
+                multiAPI("store_chat_handle", [WALLET.identifier(), handle], function(data, endpoint) {
                   self.handle(handle);
                   self._showChatWindow();
                   self._initChatFeed();

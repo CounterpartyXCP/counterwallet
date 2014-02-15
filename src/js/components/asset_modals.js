@@ -4,7 +4,7 @@ ko.validation.rules['assetNameIsTaken'] = {
   validator: function (val, otherVal, callback) {
     failoverAPI("get_issuances",
       {'filters': {'field': 'asset', 'op': '==', 'value': val}},
-      function(endpoint, data) {
+      function(data, endpoint) {
         return data.length ? callback(false) : callback(true) //empty list -> true (valid = true)
       }
     );   

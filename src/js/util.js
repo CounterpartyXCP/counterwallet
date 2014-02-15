@@ -40,6 +40,19 @@ function byteCount(s) {
   return encodeURI(s).split(/%..|./).length - 1;
 }
 
+if (!Array.prototype.last){
+    Array.prototype.last = function(){
+        return this[this.length - 1];
+    };
+};
+
+if (typeof String.prototype.startsWith != 'function') {
+  // see below for better implementation!
+  String.prototype.startsWith = function (str){
+    return this.indexOf(str) == 0;
+  };
+}
+
 function selectText(element) {
     var doc = document
         , text = doc.getElementById(element)

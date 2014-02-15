@@ -6,18 +6,19 @@
   /*height: 100%;*/
   z-index: 1002;
   width: 280px;
-  
-  /* These styles are optional, and describe how the pageslide will look */
-  background-color: #474544;
-  color: #FFF;
-  border-left: 1px solid #222;
-  /*-webkit-box-shadow: inset 0 0 5px 5px #222;
-  -moz-box-shadow: inset 0 0 5px 5px #222;
-  box-shadow: inset 0 0 5px 5px #222;*/
-
   box-sizing: border-box;
-  /*display: table;*/
   overflow: auto;
+  border-style: solid;
+  border-width: 0 0 1px 1px;
+  
+  /* Style for default theme */
+  /*background-color: #474544;
+  color: #FFF;*/
+  /*border-color: #222;*/
+  /* For ultralight theme */
+  background: linear-gradient(to right,#F7F7F7 99%,#CACACA 100%);
+  color: #202427;
+  border-color: rgb(148, 152, 160);
 }
 
 #chatContentDiv {
@@ -30,6 +31,7 @@
   text-align: center;
   margin:5px 0 5px 0;
   height: 30px;
+  color: #69737A;
 }
 
 p.chatMessage {
@@ -39,12 +41,12 @@ p.chatMessage {
 
 p.chatMessage span.chatLineEmote {
   font-weight: bold;
-  color: #A57225;
+  color: #2C3742;
 }
 
 p.chatMessage span.chatLineSelfEmote {
   font-weight: bold;
-  color: #A65858;
+  color: #A57225;
 }
 
 p.chatMessage span.chatLineSystem {

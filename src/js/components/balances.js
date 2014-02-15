@@ -45,7 +45,7 @@ function CreateNewAddressModalViewModel() {
     //update PREFS and push
     PREFERENCES['num_addresses_used'] += 1;
     PREFERENCES['address_aliases'][r[0]] = self.description();
-    multiAPI("store_preferences", [WALLET.identifier(), PREFERENCES], function(endpoint, data) {
+    multiAPI("store_preferences", [WALLET.identifier(), PREFERENCES], function(data, endpoint) {
       self.shown(false);
       //reload page to reflect the addition
       $('#content').load("xcp/pages/balances.html");

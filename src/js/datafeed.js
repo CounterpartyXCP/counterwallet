@@ -84,7 +84,7 @@ function initDataFeed() {
     if(!address) return;
     
     //get info on the asset to determine if it's locked or not
-    failoverAPI("get_asset_info", [data['asset']], function(endpoint, data) {
+    failoverAPI("get_asset_info", [data['asset']], function(data, endpoint) {
       assert(data['owner'] == address.ADDRESS);
       address.addOrUpdateAsset(data['asset'], data['amount']);
     });

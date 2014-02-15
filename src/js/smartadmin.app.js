@@ -1343,3 +1343,87 @@ $('body').on('click', function(e) {
 		}
 	});
 }); 
+
+
+//COUNTERWALLET: START MOD
+//THIS FUNCTION MOVED OVER FROM datatables.html, and changed the selectors to use classes (e.g. table.dt_basic) instead of IDs (#dt_basic)
+function runDataTables(destroyOption) {
+  /*
+   * BASIC
+   */
+  $('table.dt_basic').dataTable({
+    "sPaginationType" : "bootstrap_full"
+  });
+
+  /* END BASIC */
+
+  /* Add the events etc before DataTables hides a column */
+  $("table.datatable_fixed_column thead input").keyup(function() {
+    oTable.fnFilter(this.value, oTable.oApi._fnVisibleToColumnIndex(oTable.fnSettings(), $("thead input").index(this)));
+  });
+
+  $("table.datatable_fixed_column thead input").each(function(i) {
+    this.initVal = this.value;
+  });
+  $("table.datatable_fixed_column thead input").focus(function() {
+    if (this.className == "search_init") {
+      this.className = "";
+      this.value = "";
+    }
+  });
+  $("table.datatable_fixed_column thead input").blur(function(i) {
+    if (this.value == "") {
+      this.className = "search_init";
+      this.value = this.initVal;
+    }
+  });   
+  
+
+  var oTable = $('table.datatable_fixed_column').dataTable({
+    "bDestroy": destroyOption,
+    "sDom" : "<'dt-top-row'><'dt-wrapper't><'dt-row dt-bottom-row'<'row'<'col-sm-6'i><'col-sm-6 text-right'p>>",
+    //"sDom" : "t<'row dt-wrapper'<'col-sm-6'i><'dt-row dt-bottom-row'<'row'<'col-sm-6'i><'col-sm-6 text-right'>>",
+    "oLanguage" : {
+      "sSearch" : "Search all columns:"
+    },
+    "bSortCellsTop" : true
+  });   
+  
+
+
+  /*
+   * COL ORDER
+   */
+  $('table.datatable_col_reorder').dataTable({
+    "bDestroy": destroyOption,
+    "sPaginationType" : "bootstrap",
+    "sDom" : "R<'dt-top-row'Clf>r<'dt-wrapper't><'dt-row dt-bottom-row'<'row'<'col-sm-6'i><'col-sm-6 text-right'p>>",
+    "fnInitComplete" : function(oSettings, json) {
+      $('.ColVis_Button').addClass('btn btn-default btn-sm').html('Columns <i class="icon-arrow-down"></i>');
+    }
+  });
+  
+  /* END COL ORDER */
+
+  /* TABLE TOOLS */
+  $('table.datatable_tabletools').dataTable({
+    "bDestroy": destroyOption,
+    "sDom" : "<'dt-top-row'Tlf>r<'dt-wrapper't><'dt-row dt-bottom-row'<'row'<'col-sm-6'i><'col-sm-6 text-right'p>>",
+    "oTableTools" : {
+      "aButtons" : ["copy", "print", {
+        "sExtends" : "collection",
+        "sButtonText" : 'Save <span class="caret" />',
+        "aButtons" : ["csv", "xls", "pdf"]
+      }],
+      "sSwfPath" : "js/plugin/datatables/media/swf/copy_csv_xls_pdf.swf"
+    },
+    "fnInitComplete" : function(oSettings, json) {
+      $(this).closest('#dt_table_tools_wrapper').find('.DTTT.btn-group').addClass('table_tools_group').children('a.btn').each(function() {
+        $(this).addClass('btn-sm btn-default');
+      });
+    }
+  });
+  
+  /* END TABLE TOOLS */
+}
+//COUNTERWALLET: END MOD

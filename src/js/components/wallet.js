@@ -88,7 +88,7 @@ function WalletViewModel() {
       filters.push({'field': 'address', 'op': '==', 'value': address.ADDRESS});
     });
     failoverAPI("get_balances", {"filters": filters, "filterop": "or"},
-      function(endpoint, data) {
+      function(data, endpoint) {
         $.jqlog.log("Got initial balances: " + JSON.stringify(data));
         for(var i=0;i<data.length;i++) {
           self.updateBalance(data[i]['address'], data[i]['asset'], data[i]['amount']);  
@@ -157,20 +157,20 @@ function WalletViewModel() {
   
   self.retrieveBTCBalance = function(address, callback) {
     url = 'http://blockchain.info/q/addressbalance/';
-    fetchData(url + address, function(endpoint, data) { return callback(data) }, null, null, {}, true);
+    fetchData(url + address, function(data, endpoint) { return callback(data) }, null, null, {}, true);
   }
   
   self.getUnspentBTCOutputs = function(address, callback) {
     var url = 'http://blockchain.info/unspent?address=' + address;
-    fetchData(url, function(endpoint, data) { return callback(data) }, null, null, {}, true);
+    fetchData(url, function(data, endpoint) { return callback(data) }, null, null, {}, true);
   }
   
   self.sendTX = function(tx, callback) {
     url = 'http://blockchain.info/pushtx';
     postdata = 'tx=' + tx;
     if (url != null && url != "") {
-        fetchData(url, function(endpoint, data) { return callback(data) },
-          function(endpoint, data) { return callback(data) }, postdata, {}, true);
+        fetchData(url, function(data, endpoint) { return callback(data) },
+          function(data, endpoint) { return callback(data) }, postdata, {}, true);
     }
   }
 }

@@ -14,7 +14,7 @@
   <section id="widget-grid" class=""> <!-- widget grid -->
     <div id="balancesContainer" data-bind="foreach: addresses" class="row"> <!-- one row per widget in this case -->
       <article class="col-xs-12 col-sm-12 col-md-12 col-lg-12"> <!-- widget START -->
-        <div class="jarviswidget" data-bind="attr: {'id': 'address-wid-' + $data.ADDRESS}" data-widget-deletebutton="false" data-widget-editbutton="false">
+        <div class="jarviswidget jarviswidget-color-blueLight" data-bind="attr: {'id': 'address-wid-' + $data.ADDRESS}" data-widget-deletebutton="false" data-widget-editbutton="false">
           <header>
             <span class="widget-icon"> <i class="fa fa-bars"></i> </span>
             <h2 class="jarviswidget-ctrls"><a href="#" data-bind="editable: label, editableOptions: { type: 'text', url: changeLabel, placement: 'bottom', title: 'Enter a new nickname for this address' }" style="text-decoration:underline"></a></h2>
