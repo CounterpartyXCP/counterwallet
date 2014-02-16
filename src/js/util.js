@@ -20,6 +20,7 @@ function toFixed(value, precision) {
 }
 
 function numberWithCommas(x) {
+  if(x === undefined || x === null) return x;
   //print a number with commas, as appropriate (http://stackoverflow.com/a/2901298)
   var parts = x.toString().split(".");
   parts[0] = parts[0].replace(/\B(?=(\d{3})+(?!\d))/g, ",");

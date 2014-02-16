@@ -120,3 +120,31 @@ ko.validation.rules['isNotSameBitcoinAddress'] = {
     message: 'Destination address cannot be equal to the source address.'
 };
 ko.validation.registerExtenders();
+
+
+//Bootstrap 3 button toggle group handler: http://stackoverflow.com/a/20080917 (with FIX)
+ko.bindingHandlers.btnGroupChecked = {
+  init: function (element, valueAccessor, allBindingsAccessor,
+  viewModel, bindingContext) {
+    var value = valueAccessor();
+    var newValueAccessor = function () {
+        return {
+            change: function () {
+              if($(element).is(":disabled")) return;
+              value(element.value);
+            }
+        }
+    };
+    ko.bindingHandlers.event.init(element, newValueAccessor,
+    allBindingsAccessor, viewModel, bindingContext);
+  },
+  update: function (element, valueAccessor, allBindingsAccessor,
+  viewModel, bindingContext) {
+    if ($(element).val() == ko.unwrap(valueAccessor()) && !$(element).is(":disabled") ) {
+      //$(element).closest('.btn').button('toggle');
+      $(element).addClass('active');
+    } else {
+      $(element).removeClass('active');
+    }
+  }
+}

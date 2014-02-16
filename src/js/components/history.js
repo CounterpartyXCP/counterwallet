@@ -276,7 +276,8 @@ function TransactionHistoryViewModel() {
       self.availableAddresses.push(new AddressInDropdownItemModel(addresses[i][0], addresses[i][1]));
     }
     self.availableAddresses.sort(function(left, right) {
-      return left.LABEL == right.LABEL ? 0 : (left.LABEL < right.LABEL ? -1 : 1) });
+      return left.LABEL == right.LABEL ? 0 : (left.LABEL < right.LABEL ? -1 : 1)
+    });
     //the first address will be automatically selected by default
     //addressChanged will naturally trigger on load
   }

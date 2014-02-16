@@ -1,0 +1,235 @@
+<div class="row">
+  <div class="col-xs-12 col-sm-7 col-md-7 col-lg-4">
+    <h1 class="page-title txt-color-blueDark">
+      <i class="fa fa-exchange fa-fw "></i> 
+        Simple Buy &amp; Sell 
+    </h1>
+  </div>
+</div>
+
+<section id="simpleBuySellGrid" class=""> <!-- widget grid -->
+  <div class="row"> <!-- row -->
+    <article class="col-xs-12 col-sm-12 col-md-12 col-lg-12"> <!-- NEW WIDGET START -->
+      <!-- Widget ID (each widget will need unique ID)-->
+      <div class="jarviswidget jarviswidget-color-blueLight" id="wid-id-balHistory" data-widget-editbutton="false" data-widget-deletebutton="false">
+          <header>
+            <span class="widget-icon"> <i class="fa fa-rocket"></i> </span>
+            <h2>Buy &amp; Sell Wizard</h2>
+          </header>
+          <div> <!-- widget div-->
+            <div class="widget-body"> <!-- widget content -->
+                <div class="row">
+                    <form id="wizard-1">
+                        <div id="simpleBuySellWizard" class="col-sm-12" data-bind="validationOptions: { insertMessages: false }">
+                            <div class="form-bootstrapWizard">
+                                <ul class="bootstrapWizard form-wizard">
+                                    <li class="active" data-target="#step1">
+                                        <a href="#tab1" data-toggle="tab"> <span class="step">1</span> <span class="title">Select Assets</span> </a>
+                                    </li>
+                                    <li data-target="#step2">
+                                        <a href="#tab2" data-toggle="tab"> <span class="step">2</span> <span class="title">Select Amounts</span> </a>
+                                    </li>
+                                    <li data-target="#step3">
+                                        <a href="#tab3" data-toggle="tab"> <span class="step">3</span> <span class="title">Confirm</span> </a>
+                                    </li>
+                                </ul>
+                                <div class="clearfix"></div>
+                            </div>
+                            <div class="tab-content">
+                                <div class="tab-pane active" id="tab1">
+                                    <br>
+                                    <h3><strong>Step 1 </strong> - Select Assets</h3>
+                                    <div class="row">
+                                        <div class="col-sm-2"><span>I want to buy</span></div>
+                                        <div class="col-sm-2">
+                                            <div class="btn-group" data-toggle="buttons">
+                                              <label class="radioBtn btn btn-lg" data-bind="css: { 'btn-success': selectedBuyAsset() == 'XCP' }">
+                                                <input type="radio" name="buyAsset" id="buyXCP" value="XCP" data-bind="btnGroupChecked: selectedBuyAsset">XCP</label>
+                                                <!-- , attr: {disabled: selectedSellAsset() == 'XCP' ? 'disabled' : null }" -->
+                                              <label class="radioBtn btn btn-lg" data-bind="css: { 'btn-success': selectedBuyAsset() == 'BTC' }">
+                                                <input type="radio" name="buyAsset" id="buyBTC" value="BTC" data-bind="btnGroupChecked: selectedBuyAsset">BTC</label>
+                                              <label class="radioBtn btn btn-lg" data-bind="css: { 'btn-success': selectedBuyAsset() == 'Other' }">
+                                                <input type="radio" name="buyAsset" id="buyOther" value="Other" data-bind="btnGroupChecked: selectedBuyAsset">Other Asset</label>
+                                            </div>
+                                            <span class="invalid" data-bind="validationMessage: selectedBuyAsset"></span>
+                                        </div>
+                                        <div class="col-sm-8">
+                                            <div class="input-group" data-bind="visible: selectedBuyAsset() == 'Other'">
+                                                <span class="input-group-addon"><i class="fa fa-tags fa-lg fa-fw"></i></span>
+                                                <input id="otherBuyAssetName" class="form-control input-lg" type="text"
+                                                 placeholder="Enter asset name" style="width: 350px;"
+                                                 data-bind="value: selectedBuyAssetOther"/>
+                                            </div>
+                                            <span class="invalid" data-bind="validationMessage: selectedBuyAssetOther"></span>
+                                        </div>
+                                    </div>
+                                    <div class="row">
+                                        <div class="col-sm-2"><span>in exchange for</span></div>
+                                        <div class="col-sm-2">
+                                            <div class="btn-group" data-toggle="buttons">
+                                              <label class="radioBtn btn btn-lg" data-bind="css: { 'btn-primary': selectedSellAsset() == 'XCP' }">
+                                                <input type="radio" name="sellAsset" id="sellXCP" value="XCP" data-bind="btnGroupChecked: selectedSellAsset">XCP</label>
+                                              <label class="radioBtn btn btn-lg" data-bind="css: { 'btn-primary': selectedSellAsset() == 'BTC' }">
+                                                <input type="radio" name="sellAsset" id="sellBTC" value="BTC" data-bind="btnGroupChecked: selectedSellAsset">BTC</label>
+                                              <label class="radioBtn btn btn-lg" data-bind="css: { 'btn-primary': selectedSellAsset() == 'Other' }">
+                                                <input type="radio" name="sellAsset" id="sellOther" value="Other" data-bind="btnGroupChecked: selectedSellAsset">Other Asset</label>
+                                            </div>
+                                            <span class="invalid" data-bind="validationMessage: selectedSellAsset"></span>
+                                        </div>
+                                        <div class="col-sm-8">
+                                            <div class="input-group" data-bind="visible: selectedSellAsset() == 'Other'">
+                                                <select class="form-control input-lg" style="width: 405px;"
+                                                    data-bind="options: myAssets, optionsCaption: 'Choose...', value: selectedSellAssetOther">
+                                                </select>
+                                                <span class="invalid" data-bind="validationMessage: selectedSellAssetOther"></span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="row">
+                                        <div class="col-sm-2"><span>from my address</span></div>
+                                        <div class="col-sm-10">
+                                            <select class="form-control input-lg" style="max-width: 800px;"
+                                                data-bind="options: availableAddressesWithBalance, optionsText: 'LABEL', optionsCaption: 'Choose...', value: selectedAddress">
+                                            </select>
+                                            <span class="invalid" data-bind="validationMessage: selectedAddress"></span>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="tab-pane" id="tab2">
+                                    <h3><strong>Step 2</strong> - Select Amounts (<b><span data-bind="text: dispAssetPair"></span></b>)</h3>
+                                    
+                                    <div data-bind="visible: currentTab() == 2 && currentMarketUnitPrice()">
+                                        <div class="row">
+                                            <div class="col-sm-12">
+                                                You have <b><span class="sellColor" data-bind="text: totalBalanceAvailForSale"></span>
+                                                <span class="sellColor" data-bind="text: sellAsset"></span></b> at the selected address.
+                                                At the current market rate of <b><span data-bind="text: currentMarketUnitPrice"></span>
+                                                <span data-bind="text: quoteAsset"></span> per each <span data-bind="text: baseAsset"></span></b>,
+                                                you can afford up to <b><span class="buyColor" data-bind="text: numberWithCommas(maxAfford())"></span> <span class="buyColor" data-bind="text: buyAsset"></span>.</b>
+                                            </div>
+                                        </div>
+                                        <div class="row">
+                                            <div class="col-sm-2"><span>I want to buy</span></div>
+                                            <div class="col-sm-10">
+                                                <div class="input-group">
+                                                    <span class="input-group-addon"><i class="fa fa-arrow-circle-o-down fa-lg fa-fw"></i></span>
+                                                    <input class="form-control input-lg" type="text" style="max-width: 300px"
+                                                     data-bind="value: selectedBuyAmount, attr: {placeholder: 'Quantity ' + buyAsset()}, valueUpdate: 'afterkeydown'" />
+                                                </div>
+                                                <span class="invalid" data-bind="validationMessage: selectedBuyAmount"></span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div data-bind="visible: currentTab() == 2 && (currentMarketUnitPrice() == null || overrideMarketPrice())">
+                                        <div class="row" data-bind="visible: currentTab() == 2 && currentMarketUnitPrice() == null">
+                                            <div class="col-sm-12">
+                                                <span class="errorRed">There is currently insufficient data to determine a fair market price for your purchase.</span>
+                                            </div>
+                                        </div>
+                                        <div class="row">
+                                            <div class="col-sm-2"><span>I want to buy</span></div>
+                                            <div class="col-sm-10">
+                                                <div class="input-group">
+                                                    <span class="input-group-addon"><i class="fa fa-arrow-circle-o-down fa-lg fa-fw"></i></span>
+                                                    <input class="form-control input-lg" type="text"
+                                                        data-bind="value: selectedBuyAmount, attr: {placeholder: 'Quantity ' + buyAsset()}, valueUpdate: 'afterkeydown'"
+                                                        style="max-width: 300px;" />
+                                                </div>
+                                                <b><span data-bind="text: buyAsset" style="font-size: 1.4em;"></span></b>
+                                                <span class="invalid" data-bind="validationMessage: selectedBuyAmount"></span>
+                                            </div>
+                                        </div>
+                                        <div class="row">
+                                            <div class="col-sm-2"><span>in exchange for</span></div>
+                                            <div class="col-sm-10">
+                                                <div class="input-group">
+                                                    <span class="input-group-addon"><i class="fa fa-arrow-circle-o-up fa-lg fa-fw"></i></span>
+                                                    <input class="form-control input-lg" type="text"
+                                                        data-bind="value: selectedSellAmountCustom, attr: {placeholder: 'Quantity ' + sellAsset()}, valueUpdate: 'afterkeydown'"
+                                                        style="max-width: 300px;" />
+                                                </div>
+                                                <b><span data-bind="text: sellAsset" style="font-size: 1.4em;"></span></b>
+                                                <span class="invalid" data-bind="validationMessage: selectedSellAmountCustom"></span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="row" data-bind="visible: currentTab() == 2 && unitPrice() && selectedBuyAmount()">
+                                        <div class="col-sm-12">
+                                            <span data-bind="visible: currentMarketUnitPrice() && !overrideMarketPrice()">At the market rate,</span>
+                                            <span data-bind="visible: currentMarketUnitPrice() == null || overrideMarketPrice()">At the specified price of <b><span data-bind="text: numberWithCommas(unitPrice())"></span>
+                                                <span data-bind="text: quoteAsset"></span> per each <span data-bind="text: baseAsset"></span></b>,</span>
+                                            your purchase of <b><span class="buyColor" data-bind="text: numberWithCommas(selectedBuyAmount())"></span> <span class="buyColor" data-bind="text: buyAsset"></span></b>
+                                            will cost you <b><span class="sellColor" data-bind="text: numberWithCommas(selectedSellAmount())"></span> <span class="sellColor" data-bind="text: sellAsset"></span>.</b>
+                                        </div>
+                                    </div>
+                                    <div class="row" data-bind="visible: currentTab() == 2 && sellAmountRemainingAfterSale() != null && sellAmountRemainingAfterSale() >= 0">
+                                        <div class="col-sm-12">
+                                            After the sale, you will have <b><span data-bind="text: sellAmountRemainingAfterSale()"></span>
+                                            <span data-bind="text: sellAsset"></span></b> remaining at
+                                            address <span data-bind="text: dispSelectedAddress()"></span>.
+                                        </div>
+                                    </div>
+                                    <div class="row" data-bind="visible: currentTab() == 2 && sellAmountRemainingAfterSale() < 0">
+                                        <div class="col-sm-12">
+                                            <span class="errorRedColor">Your purchase would exceed your available balance
+                                            by <b><span data-bind="text: numberWithCommas(Math.abs(sellAmountRemainingAfterSale()))"></span>
+                                            <span data-bind="text: sellAsset"></span></b>.</span>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="tab-pane" id="tab3">
+                                    <h3><strong>Step 3</strong> - Confirm Your Order</h3>
+                                    TODO
+                                </div>
+    
+                                <div class="form-actions">
+                                    <div class="row">
+                                        <div class="col-sm-12">
+                                            <ul class="pager wizard no-margin">
+                                                <li class="previous disabled">
+                                                    <a href="javascript:void(0);" class="btn btn-lg btn-default"> Previous </a>
+                                                </li>
+                                                <li class="next">
+                                                    <a href="javascript:void(0);" class="btn btn-lg txt-color-darken"> Next </a>
+                                                </li>
+                                                <li class="next finish" style="display:none;">
+                                                    <a href="javascript:void(0);" class="btn btn-lg btn-success">Confirm &amp; Place Order</a>
+                                                </li>
+                                            </ul>
+                                        </div>
+                                    </div>
+                                </div>
+    
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div> <!-- end widget content -->
+          </div> <!-- end widget div -->
+      </div> <!-- end widget -->
+    </article> <!-- WIDGET END -->
+  </div> <!-- end row -->
+
+  <div data-bind="visible: showPriceChart" class="row"> <!-- row -->
+    <article class="col-xs-12 col-sm-12 col-md-12 col-lg-12"> <!-- NEW WIDGET START -->
+      <div class="jarviswidget jarviswidget-color-blueLight" id="wid-id-priceChart" data-widget-editbutton="false" data-widget-deletebutton="false">
+        <header>
+            <span class="widget-icon"> <i class="fa fa-table"></i> </span>
+            <h2>Price History for <span data-bind="text: dispAssetPair"></span></h2>
+        </header>
+        <div> <!-- widget div-->
+            <div class="widget-body no-padding"> <!-- widget content -->
+                <div id="priceHistory"></div>
+            </div> <!-- end widget content -->
+        </div> <!-- end widget div -->
+      </div> <!-- end widget -->
+    </article> <!-- WIDGET END -->
+  </div> <!-- end row -->
+  
+</section>
+
+<script src="xcp/js/components/simplebuysell.js"></script>
+
+<script type="text/javascript">
+  pageSetUp(); //init smartadmin featureset
+</script>

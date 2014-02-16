@@ -18,18 +18,30 @@ function ActivityFeedViewModel(initialActivityCount) {
   
   //An address has 2 or more assets (BTC, XCP, and any others)
   var self = this;
-  self.activityCount = ko.observable(initialActivityCount); //will not change
   self.notifications = ko.observableArray([]);
-  
+  self.pendingTrades = ko.observableArray([]);
   self.lastUpdated = ko.observable(new Date());
-  self.lastUpdatedDisplayed = ko.computed(function() {
+
+  self.unackedActivityCount = ko.observable(0);
+
+  self.activityCount = ko.computed(function() {
+    return self.notifications().length + self.pendingTrades().length; 
+  }, self);
+  self.dispLastUpdated = ko.computed(function() {
     return "Last Updated: " + self.lastUpdated().toTimeString(); 
   }, self);
   
+  self.addNotification = function() {
+    self.unackedActivityCount(self.unackedActivityCount() + 1);
+  }
+
+  self.addPendingTrade = function() {
+    self.unackedActivityCount(self.unackedActivityCount() + 1);
+  }
 }
 
 var ACTIVITY_FEED = new ActivityFeedViewModel();
 
 $(document).ready(function() {
-  ko.applyBindings(ACTIVITY_FEED, document.getElementById("activityBox"));
+  ko.applyBindings(ACTIVITY_FEED, document.getElementById("header"));
 });

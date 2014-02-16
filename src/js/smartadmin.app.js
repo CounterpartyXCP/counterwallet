@@ -128,7 +128,10 @@ $(document).ready(function() {
 
 		if ($this.find('.badge').hasClass('bg-color-red')) {
 			$this.find('.badge').removeClassPrefix('bg-color-');
-			$this.find('.badge').text("0");
+			//COUNTERWALLET: START MOD
+			ACTIVITY_FEED.unackedActivityCount(0);
+			//$this.find('.badge').text("0");
+			//COUNTERWALLET: END MOD
 			// console.log("Ajax call for activity")
 		}
 
@@ -140,8 +143,15 @@ $(document).ready(function() {
 			$this.removeClass('active')
 		}
 
-		var mytest = $this.next('.ajax-dropdown').find('.btn-group > .active > input').attr('id');
-		//console.log(mytest)
+		//COUNTERWALLET: START MOD
+    //var mytest = $this.next('.ajax-dropdown').find('.btn-group > .active > input').attr('id');
+    //console.log(mytest)
+		var activeNotoPage = $this.next('.ajax-dropdown').find('.btn-group > .active > input').attr('id');
+		if(!activeNotoPage) {
+		  //make the first page active
+		  $this.next('.ajax-dropdown').find('.btn').first()[0].click();
+		}
+		//COUNTERWALLET: END MOD
 
 		e.preventDefault();
 	});

@@ -44,3 +44,66 @@ span.logoText {
     position: relative;
     bottom: 4px;
 }
+
+#logo img {
+    width: auto;
+    height: auto;
+    position: relative;
+    bottom: 8px;    
+}
+
+#logo {
+    width: 195px; /* + 20px */
+}
+#logo span.logoText {
+    padding-left: 4px;
+}
+
+#logo-group span#activity {
+    position:relative;
+    left: 20px; /* + 20px */
+}
+.ajax-dropdown {
+    left: 36px; /* + 20px */
+}
+#header>:first-child {
+    width: 260px; /* + 20px */
+}
+
+
+#simpleBuySellWizard div.tab-content {
+    font-size: 19px;
+}
+
+#simpleBuySellWizard div.row {
+    padding: 0 0 30px 5px;
+}
+
+#simpleBuySellWizard .radioBtn {
+    border: 1px solid #555;
+}
+
+#simpleBuySellWizard span.invalid {
+    display: block;
+    margin-top: 6px;
+    padding: 0 1px;
+    font-style: normal;
+    font-size: 14px;
+    color: #D56161;
+}
+
+#simpleBuySellWizard div.form-bootstrapWizard {
+    padding-bottom: 20px;
+}
+
+#simpleBuySellWizard .errorRedColor {
+    color: #D56161;
+}
+
+#simpleBuySellWizard .buyColor {
+    color: #78973B;    
+}
+
+#simpleBuySellWizard .sellColor {
+    color: #2F7DBE;    
+}

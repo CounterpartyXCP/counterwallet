@@ -181,7 +181,6 @@ function IssueAdditionalAssetModalViewModel() {
     return self.asset().displayedTotalIssued();
   }, self);
   
-  
   self.rawAdditionalIssue = ko.computed(function() {
     if(!self.asset() || !isNumber(self.additionalIssue())) return null;
     return (self.asset().DIVISIBLE ? parseFloat(self.additionalIssue()) * UNIT : parseInt(self.additionalIssue()))

@@ -1,0 +1,14 @@
+<ul data-bind="foreach: notifications" class="notification-body">
+    <li>
+      <span class="padding-10">
+        <em data-bind="css: { bg-color-blueLight: type() == 'user', bg-color-blueLight: type() == 'alert', bg-color-blueLight: type() == 'recved-funds'}" class="badge padding-5 no-border-radius pull-left margin-right-5">
+          <i data-bind="css: { fa-user: type() == 'user', fa-exclamation-circle: type() == 'alert', fa-share: type() == 'recved-funds'}" class="fa fa-user fa-fw fa-2x"></i>
+        </em>
+        <span>
+           <span data-bind="text: message"></span>
+           <br>
+           <span class="pull-right font-xs text-muted"><i data-bind="timeago: when"></i></span>
+        </span>
+      </span>
+    </li>
+</ul>              
