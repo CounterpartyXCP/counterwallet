@@ -4,9 +4,15 @@ function WalletViewModel() {
   var self = this;
   self.DEFAULT_NUMADDRESSES = 5; //default number of addresses to generate
   self.ELECTRUM_PRIV_KEY = null; //the master private key from electrum (from which the address priv keys are derived)
+  self.autoRefreshBTCBalances = true; //auto refresh BTC balances every 5 minutes
   
   self.identifier = ko.observable(null); //set when logging in
   self.addresses = ko.observableArray(); //AddressViewModel objects -- populated at login
+  
+  self.initBTCBalanceAutoRefresh = function() {
+    assert(self.autoRefreshBTCBalances, "initBTCBalanceAutoRefresh called but autoRefreshBTCBalances != true");
+    setInterval(function() { self.refreshBTCBalances(true) }, 60000 * 5); //every 5 minutes
+  }
   
   self.addKey = function(key, defaultLabel) {
     //adds a key to the wallet, making a new address object on the wallet in the process
@@ -73,14 +79,12 @@ function WalletViewModel() {
     return true;
   }
   
-  self.updateBalances = function() {
+  self.updateBalances = function(isAtLogon) {
     //updates all balances for all addesses, creating the asset objects on the address if need be
-    ko.utils.arrayForEach(self.addresses(), function(address) {
-      //update all BTC balances
-      self.retrieveBTCBalance(address.ADDRESS, function(data) {
-        address.addOrUpdateAsset("BTC", parseInt(data));
-      });
-    });
+    if(typeof(isAtLogon)==='undefined') isAtLogon = false; //this field should only be used during login
+    
+    self.refreshBTCBalances(isAtLogon);
+    //^ if isAtLogon is true, we will start a recurring get BTC balances timer chain 
 
     //update all counterparty XCP/asset balances
     var filters = [];
@@ -97,6 +101,26 @@ function WalletViewModel() {
     );
   }
   
+  self.refreshBTCBalances = function(isRecurring) {
+    if(typeof(isRecurring)==='undefined') isRecurring = false; //this field should only be used by initBTCBalanceAutoRefresh
+    //^ if isRecurring is set to true, we will update BTC balances every 5 min as long as self.autoRefreshBTCBalances == true
+    
+    //update all BTC balances
+    self.retrieveBTCBalances(self.getAddressesList(), function(data) {
+      for(var i=0; i < data.length; i++) {
+        self.updateBalance(data[i]['address'], "BTC", data[i]['balance']);  
+      }
+      
+      if(isRecurring && self.autoRefreshBTCBalances) {
+        setInterval(function() {
+          if(self.autoRefreshBTCBalances) {
+            self.refreshBTCBalances(true);
+          }
+        }, 60000 * 5);
+      }
+    });
+  }
+
   self.removeKeys = function() {
     //removes all keys (addresses) from the wallet. Normally called when logging out
     //stop BTC balance timer on each address
@@ -153,22 +177,43 @@ function WalletViewModel() {
   }
   
   self.retrieveBTCBalance = function(address, callback) {
-    url = 'http://blockchain.info/q/addressbalance/';
-    fetchData(url + address, function(data, endpoint) { return callback(data) }, null, null, {}, true);
+    //If you are requesting more than one balance, use retrieveBTCBalances instead
+    $.get('http://blockchain.info/q/addressbalance/' + address,
+      {cors: 'true'}, callback).error(defaultErrorHandler);
+  }
+
+  self.retrieveBTCBalances = function(addresses, callback) {
+    //addresses is a list of one or more bitcoin addresses
+    $.getJSON('https://blockchain.info/multiaddr',
+      {cors: 'true', active: addresses.join('|')},
+      function(data) {
+        var balances = [];
+        for(var i=0; i<data['addresses'].length; i++) {
+          balances.push({
+            'address': data['addresses'][i]['address'],
+            'balance': parseInt(data['addresses'][i]['final_balance'])
+          }); 
+        }
+        return callback(balances);
+      }
+    ).error(defaultErrorHandler);
   }
   
   self.getUnspentBTCOutputs = function(address, callback) {
-    var url = 'http://blockchain.info/unspent?address=' + address;
-    fetchData(url, function(data, endpoint) { return callback(data) }, null, null, {}, true);
+    $.getJSON('http://blockchain.info/unspent',
+      {cors: 'true', address: address}, callback).error(defaultErrorHandler);
   }
   
   self.sendTX = function(tx, callback) {
-    url = 'http://blockchain.info/pushtx';
-    postdata = 'tx=' + tx;
-    if (url != null && url != "") {
-        fetchData(url, function(data, endpoint) { return callback(data) },
-          function(data, endpoint) { return callback(data) }, postdata, {}, true);
-    }
+    var postdata = 'tx=' + tx;
+    
+    //use Yahoo Query Language (YQL) to get around cross-domain issues
+    /*var q = 'use "http://brainwallet.github.com/js/htmlpost.xml" as htmlpost; ';
+    q += 'select * from htmlpost where url="' + url + '" ';
+    q += 'and postdata="' + postdata + '" and xpath="//p"';
+    $.queryYQL(q, callback).error(defaultErrorHandler);*/
+   
+    $.post('http://blockchain.info/pushtx', postdata, callback).error(defaultErrorHandler);
   }
   
   self.assetsToAssetPair = function(asset1, asset2) {

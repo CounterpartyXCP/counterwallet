@@ -369,17 +369,22 @@
   </div><!-- /.modal-dialog -->
 </div><!-- /.modal -->
 
-
-<script src="xcp/js/components/balances.js"></script>
-<script src="xcp/js/components/send_modal.js"></script>
-<script src="xcp/js/components/asset_modals.js"></script>
-
 <script type="text/javascript">
+  pageSetUp(); //init smartadmin featureset
+
+  loadBalanceScripts();
+  function loadBalanceScripts() {
+    loadScript("xcp/js/components/balances.js", b_2);
+    function b_2() {
+        loadScript("xcp/js/components/send_modal.js", b_3);
+    }
+    function b_3() {
+        loadScript("xcp/js/components/asset_modals.js", null);
+    }
+  }
+
   //Bind the WALLET object to balancesContainer
   $(document).ready(function() {
     ko.applyBindings(WALLET, document.getElementById("balancesContainer"));
-    WALLET.updateBalances(); //Update the wallet balances
   });
-
-  pageSetUp(); //init smartadmin featureset
 </script>

@@ -98,7 +98,6 @@ function AddressViewModel(key, address, initialLabel) {
   
   self.lastSort = '';
   self.lastSortDirection = '';
-  self.doBalanceRefresh = true;
   
   self.label = ko.observable(initialLabel);
   self.assets = ko.observableArray([
@@ -125,28 +124,6 @@ function AddressViewModel(key, address, initialLabel) {
     }
   }, self);
   
-  self.refreshBTCBalance = function(firstCall) {
-    if(!self.doBTCBalanceRefresh)
-       return; //stop refreshing
-       
-    if(!firstCall) {
-      WALLET.retrieveBTCBalance(self.ADDRESS, function(data) {
-        //Find the BTC asset and update
-        var btcAsset = ko.utils.arrayFirst(self.assets(), function(a) {
-              return a.ASSET == 'BTC';
-        });
-        btcAsset.balance(parseInt(data));
-        setInterval(function() { self.refreshBTCBalance(false) }, 60000 * 5); //every 5 minutes
-      });
-    } else { //skip the balance check on the first call (since we just got it earlier when building the wallet)
-      setInterval(function() { self.refreshBTCBalance(false) }, 60000 * 5); //every 5 minutes
-    }
-  }
-  //set up a timer to refresh BTC balances every 5 minutes (as these are the only balance that will not
-  // come in on the socket.io feed)
-  $.jqlog.log("Setting up BTC balance refresh timer for " + self.ADDRESS);
-  self.refreshBTCBalance(true);
-    
   self.getIsotopeOptions = function () {
     return { layoutMode: 'masonry' };
   };

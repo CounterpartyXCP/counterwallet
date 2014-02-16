@@ -84,6 +84,9 @@ function LogonViewModel() {
                 $('#left-panel').show();
                 $('#main').show();
                 
+                //Update the wallet balances (isAtLogon = true)
+                WALLET.updateBalances(true);
+                
                 //next, load the balances screen
                 window.location.hash = 'xcp/pages/balances.html';
                 return;

@@ -1,3 +1,10 @@
+//Inlude a .url param in every jqXHR object -- http://stackoverflow.com/a/11980396
+$.ajaxSetup({
+    beforeSend: function(jqXHR, settings) {
+        jqXHR.url = settings.url;
+    }
+});
+
 function describeError(jqXHR, textStatus, errorThrown) {
     var message;
     var statusErrorMap = {
@@ -28,12 +35,13 @@ function describeError(jqXHR, textStatus, errorThrown) {
     return message;
 } 
 
-function _defaultErrorHandler(jqXHR, textStatus, errorThrown, endpoint) {
+function defaultErrorHandler(jqXHR, textStatus, errorThrown, endpoint) {
+  if(typeof(endpoint)==='undefined') endpoint = jqXHR.url;
   var message = describeError(jqXHR, textStatus, errorThrown);
   bootbox.alert("Error making request to " + endpoint + ": " + message);
 }
 
-function fetchData(url, onSuccess, onError, postdata, extraAJAXOpts, useYQL, _url_n) {
+function _fetchData(url, onSuccess, onError, postdata, extraAJAXOpts, _url_n) {
   /*Makes a simple AJAX request to the specified URL.
     
     -url: The URL to request. May be a single URL, or a list of URLs. If a list of URLs is specified,
@@ -43,40 +51,29 @@ function fetchData(url, onSuccess, onError, postdata, extraAJAXOpts, useYQL, _ur
      URLs were specified, this callback is triggered after the failure for the last URL (i.e. where the
      list is exhausted and we give up)
    */
+  var u = null;
   if(typeof(onError)==='undefined' || onError == "default")
-    onError = function(jqXHR, textStatus, errorThrown) { return _defaultErrorHandler(jqXHR, textStatus, errorThrown, url) };
+    onError = function(jqXHR, textStatus, errorThrown) { return defaultErrorHandler(jqXHR, textStatus, errorThrown, u) };
   if(typeof(postdata)==='undefined') postdata = null;
   if(typeof(extraAJAXOpts)==='undefined') extraAJAXOpts = {};
-  if(typeof(useYQL)==='undefined') useYQL = false;
   if(typeof(_url_n)==='undefined') _url_n = 0;
 
-  if (useYQL) {
-      // Some cross-domain magic (to bypass Access-Control-Allow-Origin)
-      var q = 'select * from html where url="'+url+'"';
-      if (postdata) {
-          q = 'use "http://brainwallet.github.com/js/htmlpost.xml" as htmlpost; ';
-          q += 'select * from htmlpost where url="' + url + '" ';
-          q += 'and postdata="' + postdata + '" and xpath="//p"';
-      }
-      url = 'https://query.yahooapis.com/v1/public/yql?q=' + encodeURIComponent(q);
-  }
-  
   //if passed a list of urls for url, then keep trying (via recursion) until we find one that works
-  var u = url;
+  u = url;
   if (url instanceof Array) {
     u = url[_url_n]; // u = url to attempt this time
   }
   
   var ajaxOpts = {
-      type: (useYQL || !postdata) ? "GET" : "POST",
-      data: (useYQL || !postdata) ? "" : postdata,
+      type: !postdata ? "GET" : "POST",
+      data: !postdata ? "" : postdata,
       //dataType: dataType, 
       url: u,
       success: function(res) {
         if(onSuccess) {
           if(extraAJAXOpts && extraAJAXOpts['dataType'] == 'json') {
             if(res.substring) res = $.parseJSON(res); 
-            //^ ghetto hack...sometimes jquery does not parse the JSON response  
+            //^ ghetto hack...sometimes jquery does not parse the JSON response (??)  
 
             if(res && res.hasOwnProperty('result')) {
               onSuccess(res['result'], u);
@@ -88,7 +85,7 @@ function fetchData(url, onSuccess, onError, postdata, extraAJAXOpts, useYQL, _ur
                 /*+ "<p><b>RAW:</b> " + JSON.stringify(res) + "</p>"*/, "jsonrpc", u);
             }
           } else {
-            onSuccess(useYQL ? $(res).find('results').text() : res.responseText, u);
+            onSuccess(res.responseText, u);
           }
         }
       },
@@ -99,7 +96,7 @@ function fetchData(url, onSuccess, onError, postdata, extraAJAXOpts, useYQL, _ur
             if (onError) return onError(jqXHR, opt, err, u);
           } else {
             //try the next URL
-            return fetchData(url, onSuccess, onError, postdata, extraAJAXOpts, useYQL, _url_n + 1);
+            return _fetchData(url, onSuccess, onError, postdata, extraAJAXOpts, _url_n + 1);
           }
         } else {
           if (onError) return onError(jqXHR, opt, err, u);
@@ -125,12 +122,12 @@ function _makeJSONAPICall(destType, endpoints, method, params, onSuccess, onErro
    */
   if(typeof(onError)==='undefined')
     onError = function(jqXHR, textStatus, errorThrown, endpoint) {
-      return _defaultErrorHandler(jqXHR, textStatus, errorThrown, method + "@" + destType)
+      return defaultErrorHandler(jqXHR, textStatus, errorThrown, method + "@" + destType)
     };
   
   //make JSON API call to counterwalletd
   if(destType == "counterwalletd") {
-    fetchData(endpoints, onSuccess, onError,
+    _fetchData(endpoints, onSuccess, onError,
       JSON.stringify({"jsonrpc": "2.0", "id": 0, "method": method, "params": params}),
       { contentType: 'application/json; charset=utf-8',
         dataType:"json",
@@ -138,7 +135,7 @@ function _makeJSONAPICall(destType, endpoints, method, params, onSuccess, onErro
     );
   } else if(destType == "counterpartyd") {
     //make JSON API call to counterwalletd, which will proxy it to counterpartyd
-    fetchData(endpoints, onSuccess, onError,
+    _fetchData(endpoints, onSuccess, onError,
       JSON.stringify({
         "jsonrpc": "2.0", "id": 0,
         "method": "proxy_to_counterpartyd",

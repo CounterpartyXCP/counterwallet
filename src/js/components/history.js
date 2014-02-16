@@ -33,36 +33,36 @@ function BalanceHistoryViewModel() {
       
       for(var i=0; i < addresses.length; i++) {
         //since we don't track BTC balances, we need to go to blockchain.info for that
-        fetchData("http://blockchain.info/charts/balance?format=json&address=" + addresses[i],
-        function(data, endpoint) {
-          var address = /address%3D([A-Za-z0-9]+)%22/g.exec(endpoint)[1];
+        //$.getJSON("http://blockchain.info/charts/balance", {format: 'json', address: addresses[i], cors: 'true'}, function(data, textStatus, jqXHR) {
+        var q = 'select * from html where url="http://blockchain.info/charts/balance?format=json&address='+addresses[i]+'"';
+        $.queryYQL(q, function(data, textStatus, jqXHR) {
+          var address = /address%3D([A-Za-z0-9]+)%22/g.exec(jqXHR.url)[1];
           var decodedData = null;
-          data = data.trim(); //json output is padded (probably because we pass it through yahoo...)
-          
-          if(!data.startsWith('{"values"')) {
+
+          //decodedData = data['values'];
+          //YQL
+          try {
+            decodedData = $.parseJSON(data['query']['results']['body']['p'].trim())['values'];
+          } catch(err) {
             decodedData = [];
-          } else {
-            try {
-              decodedData = $.parseJSON(data)['values'];
-            } catch(err) {
-              decodedData = [];
-            }
           }
-          $.jqlog.log( "Got blockchain.info Balance Data for address " + address + ": " + decodedData);
+          //End YQL
+          
+          //$.jqlog.log( "Got blockchain.info Balance Data for address " + address + ": " + decodedData);
           var addressName = PREFERENCES['address_aliases'][address] ? "<b>" + PREFERENCES['address_aliases'][address] + "</b> (" + address + ")" : address; 
           self.graphData.push({'name': addressName, 'data': decodedData});
           if(self.graphData.length == addresses.length) {
             self.doChart();
           }
-        }, function(jqXHR, textStatus, errorThrown, endpoint) {
-          var address = /address%3D([A-Za-z0-9]+)%22/g.exec(endpoint)[1];
+        }).error(function(jqXHR, textStatus, errorThrown) {
+          var address = /address%3D([A-Za-z0-9]+)%22/g.exec(jqXHR.url)[1];
           $.jqlog.log( "Could not get BTC balance from blockchain for address " + address + ": " + errorThrown);
           var addressName = PREFERENCES['address_aliases'][address] ? "<b>" + PREFERENCES['address_aliases'][address] + "</b> (" + address + ")" : address; 
           self.graphData.push({'name': addressName, 'data': []});
           if(self.graphData.length == addresses.length) {
             self.doChart();
           }
-        }, null, {}, true);
+        });
       }
     } else {
       //contact server for balances across all addresses in our wallet that have this asset
