@@ -33,6 +33,9 @@ function LogonViewModel() {
 
       //User is logging in...
       self.walletGenProgressVal(0); //reset so the progress bar hides again...
+      $('#newAccountInfoPane').animate({opacity:0}); //fade out the new account pane if visible
+      $('#createNewAcctBtnPane').animate({opacity:0}); //fade out the new account button pane if visible
+      $('#extra-info').animate({opacity:0});
       
       //Initialize the socket.io data feed
       initDataFeed();

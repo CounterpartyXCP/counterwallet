@@ -7,7 +7,7 @@
   </div>
 </div>
 
-<section id="simpleBuySellGrid" class=""> <!-- widget grid -->
+<section id="widget-grid" class="simpleBuySellGrid"> <!-- widget grid -->
   <div class="row"> <!-- row -->
     <article class="col-xs-12 col-sm-12 col-md-12 col-lg-12"> <!-- NEW WIDGET START -->
       <!-- Widget ID (each widget will need unique ID)-->
@@ -39,9 +39,9 @@
                                 <div class="tab-pane active" id="tab1">
                                     <br>
                                     <h3><strong>Step 1 </strong> - Select Assets</h3>
-                                    <div class="row">
-                                        <div class="col-sm-2"><span>I want to buy</span></div>
-                                        <div class="col-sm-2">
+                                    <div class="row" style="max-width: 1000px;">
+                                        <div class="col-sm-2"><span>I want to buy:</span></div>
+                                        <div class="col-sm-4">
                                             <div class="btn-group" data-toggle="buttons">
                                               <label class="radioBtn btn btn-lg" data-bind="css: { 'btn-success': selectedBuyAsset() == 'XCP' }">
                                                 <input type="radio" name="buyAsset" id="buyXCP" value="XCP" data-bind="btnGroupChecked: selectedBuyAsset">XCP</label>
@@ -53,8 +53,8 @@
                                             </div>
                                             <span class="invalid" data-bind="validationMessage: selectedBuyAsset"></span>
                                         </div>
-                                        <div class="col-sm-8">
-                                            <div class="input-group" data-bind="visible: selectedBuyAsset() == 'Other'">
+                                        <div class="col-sm-6">
+                                            <div class="input-group" data-bind="fadeVisible: selectedBuyAsset() == 'Other'">
                                                 <span class="input-group-addon"><i class="fa fa-tags fa-lg fa-fw"></i></span>
                                                 <input id="otherBuyAssetName" class="form-control input-lg" type="text"
                                                  placeholder="Enter asset name" style="width: 350px;"
@@ -63,9 +63,9 @@
                                             <span class="invalid" data-bind="validationMessage: selectedBuyAssetOther"></span>
                                         </div>
                                     </div>
-                                    <div class="row">
-                                        <div class="col-sm-2"><span>in exchange for</span></div>
-                                        <div class="col-sm-2">
+                                    <div class="row" style="max-width: 1000px;">
+                                        <div class="col-sm-2"><span>In exchange for:</span></div>
+                                        <div class="col-sm-4">
                                             <div class="btn-group" data-toggle="buttons">
                                               <label class="radioBtn btn btn-lg" data-bind="css: { 'btn-primary': selectedSellAsset() == 'XCP' }">
                                                 <input type="radio" name="sellAsset" id="sellXCP" value="XCP" data-bind="btnGroupChecked: selectedSellAsset">XCP</label>
@@ -76,8 +76,8 @@
                                             </div>
                                             <span class="invalid" data-bind="validationMessage: selectedSellAsset"></span>
                                         </div>
-                                        <div class="col-sm-8">
-                                            <div class="input-group" data-bind="visible: selectedSellAsset() == 'Other'">
+                                        <div class="col-sm-6">
+                                            <div class="input-group" data-bind="fadeVisible: selectedSellAsset() == 'Other'">
                                                 <select class="form-control input-lg" style="width: 405px;"
                                                     data-bind="options: myAssets, optionsCaption: 'Choose...', value: selectedSellAssetOther">
                                                 </select>
@@ -85,12 +85,10 @@
                                             </div>
                                         </div>
                                     </div>
-                                    <div class="row">
-                                        <div class="col-sm-2"><span>from my address</span></div>
+                                    <div class="row" style="min-width:300px;max-width: 1000px;">
+                                        <div class="col-sm-2"><span>From address:</span></div>
                                         <div class="col-sm-10">
-                                            <select class="form-control input-lg" style="max-width: 800px;"
-                                                data-bind="options: availableAddressesWithBalance, optionsText: 'LABEL', optionsCaption: 'Choose...', value: selectedAddress">
-                                            </select>
+                                            <select data-bind="options: availableAddressesWithBalance, optionsText: 'SELECT_LABEL', select2: {  minimumResultsForSearch: -1, containerCssClass: 'addressSelect', escapeMarkup: function(m) { return m; } }, value: selectedAddress" data-placeholder="Enter address"></select>
                                             <span class="invalid" data-bind="validationMessage: selectedAddress"></span>
                                         </div>
                                     </div>
@@ -98,7 +96,7 @@
                                 <div class="tab-pane" id="tab2">
                                     <h3><strong>Step 2</strong> - Select Amounts (<b><span data-bind="text: dispAssetPair"></span></b>)</h3>
                                     
-                                    <div data-bind="visible: currentTab() == 2 && currentMarketUnitPrice()">
+                                    <div data-bind="visible: currentTab() == 2 && currentMarketUnitPrice()" style="display:none">
                                         <div class="row">
                                             <div class="col-sm-12">
                                                 You have <b><span class="sellColor" data-bind="text: totalBalanceAvailForSale"></span>
@@ -108,9 +106,9 @@
                                                 you can afford up to <b><span class="buyColor" data-bind="text: numberWithCommas(maxAfford())"></span> <span class="buyColor" data-bind="text: buyAsset"></span>.</b>
                                             </div>
                                         </div>
-                                        <div class="row">
-                                            <div class="col-sm-2"><span>I want to buy</span></div>
-                                            <div class="col-sm-10">
+                                        <div class="row" style="max-width: 1000px;">
+                                            <div class="col-sm-4">Quantity <b class="buyColor"><span data-bind="text: buyAsset"></span></b> to buy:</div>
+                                            <div class="col-sm-8">
                                                 <div class="input-group">
                                                     <span class="input-group-addon"><i class="fa fa-arrow-circle-o-down fa-lg fa-fw"></i></span>
                                                     <input class="form-control input-lg" type="text" style="max-width: 300px"
@@ -120,66 +118,94 @@
                                             </div>
                                         </div>
                                     </div>
-                                    <div data-bind="visible: currentTab() == 2 && (currentMarketUnitPrice() == null || overrideMarketPrice())">
-                                        <div class="row" data-bind="visible: currentTab() == 2 && currentMarketUnitPrice() == null">
+                                    <div data-bind="visible: currentTab() == 2 && (currentMarketUnitPrice() == null || overrideMarketPrice())" style="display:none">
+                                        <div class="row" data-bind="fadeVisible: currentTab() == 2 && currentMarketUnitPrice() == null">
                                             <div class="col-sm-12">
                                                 <span class="errorRed">There is currently insufficient data to determine a fair market price for your purchase.</span>
                                             </div>
                                         </div>
-                                        <div class="row">
-                                            <div class="col-sm-2"><span>I want to buy</span></div>
-                                            <div class="col-sm-10">
+                                        <div class="row" style="max-width: 1000px;">
+                                            <div class="col-sm-4">Quantity <b class="buyColor"><span data-bind="text: buyAsset"></span></b> to buy:</div>
+                                            <div class="col-sm-8">
                                                 <div class="input-group">
                                                     <span class="input-group-addon"><i class="fa fa-arrow-circle-o-down fa-lg fa-fw"></i></span>
                                                     <input class="form-control input-lg" type="text"
                                                         data-bind="value: selectedBuyAmount, attr: {placeholder: 'Quantity ' + buyAsset()}, valueUpdate: 'afterkeydown'"
                                                         style="max-width: 300px;" />
                                                 </div>
-                                                <b><span data-bind="text: buyAsset" style="font-size: 1.4em;"></span></b>
                                                 <span class="invalid" data-bind="validationMessage: selectedBuyAmount"></span>
                                             </div>
                                         </div>
-                                        <div class="row">
-                                            <div class="col-sm-2"><span>in exchange for</span></div>
-                                            <div class="col-sm-10">
+                                        <div class="row" style="max-width: 1000px;">
+                                            <div class="col-sm-4">Quantity <b class="sellColor"><span data-bind="text: sellAsset"></span></b> to sell:</div>
+                                            <div class="col-sm-8">
                                                 <div class="input-group">
                                                     <span class="input-group-addon"><i class="fa fa-arrow-circle-o-up fa-lg fa-fw"></i></span>
                                                     <input class="form-control input-lg" type="text"
                                                         data-bind="value: selectedSellAmountCustom, attr: {placeholder: 'Quantity ' + sellAsset()}, valueUpdate: 'afterkeydown'"
                                                         style="max-width: 300px;" />
                                                 </div>
-                                                <b><span data-bind="text: sellAsset" style="font-size: 1.4em;"></span></b>
                                                 <span class="invalid" data-bind="validationMessage: selectedSellAmountCustom"></span>
                                             </div>
                                         </div>
                                     </div>
-                                    <div class="row" data-bind="visible: currentTab() == 2 && unitPrice() && selectedBuyAmount()">
+                                    <div class="row" data-bind="fadeVisibleInOnly: currentTab() == 2 && unitPrice() && selectedBuyAmount()">
                                         <div class="col-sm-12">
-                                            <span data-bind="visible: currentMarketUnitPrice() && !overrideMarketPrice()">At the market rate,</span>
-                                            <span data-bind="visible: currentMarketUnitPrice() == null || overrideMarketPrice()">At the specified price of <b><span data-bind="text: numberWithCommas(unitPrice())"></span>
-                                                <span data-bind="text: quoteAsset"></span> per each <span data-bind="text: baseAsset"></span></b>,</span>
-                                            your purchase of <b><span class="buyColor" data-bind="text: numberWithCommas(selectedBuyAmount())"></span> <span class="buyColor" data-bind="text: buyAsset"></span></b>
-                                            will cost you <b><span class="sellColor" data-bind="text: numberWithCommas(selectedSellAmount())"></span> <span class="sellColor" data-bind="text: sellAsset"></span>.</b>
+                                            <span data-bind="fadeVisible: currentMarketUnitPrice() && !overrideMarketPrice()">At the market rate,
+                                                your purchase of <b><span class="buyColor" data-bind="text: numberWithCommas(selectedBuyAmount())"></span>
+                                                <span class="buyColor" data-bind="text: buyAsset"></span></b>
+                                                will cost you <b><span class="sellColor" data-bind="text: numberWithCommas(selectedSellAmountAtMarket())"></span>
+                                                <span class="sellColor" data-bind="text: sellAsset"></span>.</b>
+                                            </span>
+                                            <span data-bind="fadeVisible: (currentMarketUnitPrice() == null || overrideMarketPrice()) && (selectedSellAmountCustom() && selectedSellAmountCustom() > 0) ">
+                                                The effective unit price of your <b><span data-bind="text: dispAssetPair"></span></b> order is
+                                                <b><span data-bind="text: unitPrice"></span></b>
+                                                (i.e. <span data-bind="text: numberWithCommas(unitPrice())"></span>
+                                                <span data-bind="text: quoteAsset"></span> per each <span data-bind="text: baseAsset"></span>).
+                                            </span>
                                         </div>
                                     </div>
-                                    <div class="row" data-bind="visible: currentTab() == 2 && sellAmountRemainingAfterSale() != null && sellAmountRemainingAfterSale() >= 0">
+                                    <div class="row">
                                         <div class="col-sm-12">
-                                            After the sale, you will have <b><span data-bind="text: sellAmountRemainingAfterSale()"></span>
-                                            <span data-bind="text: sellAsset"></span></b> remaining at
-                                            address <span data-bind="text: dispSelectedAddress()"></span>.
-                                        </div>
-                                    </div>
-                                    <div class="row" data-bind="visible: currentTab() == 2 && sellAmountRemainingAfterSale() < 0">
-                                        <div class="col-sm-12">
-                                            <span class="errorRedColor">Your purchase would exceed your available balance
-                                            by <b><span data-bind="text: numberWithCommas(Math.abs(sellAmountRemainingAfterSale()))"></span>
-                                            <span data-bind="text: sellAsset"></span></b>.</span>
+                                            <span data-bind="fadeVisibleInOnly: currentTab() == 2 && sellAmountRemainingAfterSale() != null && sellAmountRemainingAfterSale() >= 0">
+                                                After the sale, you will have <b><span class="sellColor" data-bind="text: sellAmountRemainingAfterSale()"></span>
+                                                <span class="sellColor" data-bind="text: sellAsset"></span></b> remaining at
+                                                address <span data-bind="text: dispSelectedAddress()"></span>.
+                                            </span>
+                                            <span data-bind="fadeVisibleInOnly: currentTab() == 2 && sellAmountRemainingAfterSale() < 0">
+                                                <span class="errorRedColor">Your purchase would exceed your available balance
+                                                by <b><span data-bind="text: numberWithCommas(Math.abs(sellAmountRemainingAfterSale()))"></span>
+                                                <span data-bind="text: sellAsset"></span></b>.</span>
+                                            </span>
                                         </div>
                                     </div>
                                 </div>
                                 <div class="tab-pane" id="tab3">
                                     <h3><strong>Step 3</strong> - Confirm Your Order</h3>
-                                    TODO
+                                    <table class="table table-bordered" style="max-width: 800px;">​
+                                        <thead></thead>
+                                        <tbody>
+                                            <tr>
+                                                <td>Buy</td>
+                                                <td><b><span class="buyColor" data-bind="text: numberWithCommas(selectedBuyAmount())"></span>&nbsp;
+                                                    <span class="buyColor" data-bind="text: buyAsset"></span></b></td>
+                                            </tr>
+                                            <tr>
+                                                <td>Sell</td>
+                                                <td><b><span class="sellColor" data-bind="text: numberWithCommas(selectedSellAmount())"></span>&nbsp;
+                                                    <span class="sellColor" data-bind="text: sellAsset"></span></b></td>
+                                            </tr>
+                                            <tr>
+                                                <td>Unit Price</td>
+                                                <td><b><span data-bind="text: unitPrice()"></span>&nbsp;
+                                                    <span data-bind="text: quoteAsset"></span> per each <span data-bind="text: baseAsset"></span></b>
+                                                </td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                    After the sale, you will have <b><span class="sellColor" data-bind="text: sellAmountRemainingAfterSale()"></span>
+                                    <span class="sellColor" data-bind="text: sellAsset"></span></b> remaining at
+                                    your address <b><span data-bind="text: dispSelectedAddressWithLabel"></span></b>.                                    
                                 </div>
     
                                 <div class="form-actions">
@@ -210,7 +236,7 @@
     </article> <!-- WIDGET END -->
   </div> <!-- end row -->
 
-  <div data-bind="visible: showPriceChart" class="row"> <!-- row -->
+  <div data-bind="fadeVisible: showPriceChart" class="row"> <!-- row -->
     <article class="col-xs-12 col-sm-12 col-md-12 col-lg-12"> <!-- NEW WIDGET START -->
       <div class="jarviswidget jarviswidget-color-blueLight" id="wid-id-priceChart" data-widget-editbutton="false" data-widget-deletebutton="false">
         <header>
@@ -219,16 +245,15 @@
         </header>
         <div> <!-- widget div-->
             <div class="widget-body no-padding"> <!-- widget content -->
-                <div id="priceHistory"></div>
+                <div id="priceHistory" style="height: 500px; min-width: 500px"></div>
             </div> <!-- end widget content -->
         </div> <!-- end widget div -->
       </div> <!-- end widget -->
     </article> <!-- WIDGET END -->
   </div> <!-- end row -->
-  
 </section>
 
 <script type="text/javascript">
-  pageSetUp(); //init smartadmin featureset
   loadScript("xcp/js/components/simplebuysell.js", function() {});
+  pageSetUp(); //init smartadmin featureset
 </script>

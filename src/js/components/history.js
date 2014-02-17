@@ -68,8 +68,7 @@ function BalanceHistoryViewModel() {
       //contact server for balances across all addresses in our wallet that have this asset
       failoverAPI("get_balance_history", {asset: self.selectedAsset(), addresses: WALLET.getAddressesList(), }, function(data, endpoint) {
         for(var i=0; i < data.length; i++) {
-          data[i]['name'] = PREFERENCES['address_aliases'][data[i]['name']] 
-            ? "<b>" + PREFERENCES['address_aliases'][data[i]['name']] + "</b> (" + data[i]['name'] + ")" : data[i]['name'];
+          data[i]['name'] = PREFERENCES['address_aliases'][data[i]['name']] || data[i]['name'];
         }
         self.graphData = data;
         self.doChart();
@@ -179,7 +178,9 @@ function TransactionHistoryItemViewModel(data) {
   self.blockTime = self.data['_block_time'];
   self.rawTxType = self.data['_entity'];
   self.source = self.data['source'] || self.data['address'] || self.data['issuer'] || '';
-  self.destination = self.data['source'];
+  self.dispSource = function() {
+    return PREFERENCES['address_aliases'][self.source] || self.source;
+  }
   //self.btcAmount = TODO
   //self.fee = TODO
   
@@ -200,7 +201,7 @@ function TransactionHistoryItemViewModel(data) {
     } else if(self.rawTxType == 'sends') {
       desc = "Send of " + numberWithCommas(self.data['_divisible'] ? self.data['amount'] / UNIT : self.data['amount']) + " " + self.data['asset']
         + " to <a href=\"http://blockscan.com/address.aspx?q=" + self.data['destination'] + "\" target=\"blank\">"
-        + self.data['destination'] + "</a>"; 
+        + (PREFERENCES['address_aliases'][self.data['destination']] || self.data['destination']) + "</a>"; 
     } else if(self.rawTxType == 'orders') {
       desc = "Sell " + numberWithCommas(self.data['_give_divisible'] ? self.data['give_amount'] / UNIT : self.data['give_amount'])
         + " " + self.data['give_asset'] + " for "
@@ -217,21 +218,25 @@ function TransactionHistoryItemViewModel(data) {
       desc = "Payment for Order tx <a href=\"http://blockscan.com/order.aspx?q=" + self.txIndex + "\" target=\"blank\">" + self.txIndex + "</a>";
     } else if(self.rawTxType == 'issuances') {
       if(self.data['transfer']) {
-        desc = "Asset " + self.data['asset'] + " transferred to " + self.data['transfer'];
+        desc = "Asset " + self.data['asset'] + " transferred to "
+          + (PREFERENCES['address_aliases'][self.data['transfer']] || self.data['transfer']);
       } else if(self.data['amount'] == 0) {
         desc = "Asset " + self.data['asset'] + " locked against additional issuance";
       } else {
-        desc = "Quantity " + numberWithCommas(self.data['divisible'] ? self.data['amount'] / UNIT : self.data['amount']) + " of asset " + self.data['asset'] + " issued";
+        desc = "Quantity " + numberWithCommas(self.data['divisible'] ? self.data['amount'] / UNIT : self.data['amount'])
+          + " of asset " + self.data['asset'] + " issued";
       }
     } else if(self.rawTxType == 'broadcasts') {
       desc = "Text: " + self.data['text'] + "<br/>Value: " + self.data['value'];
     } else if(self.rawTxType == 'bets') {
-      desc = BET_TYPES[self.data['bet_type']] + " bet on feed " + self.data['feed_address'] + "<br/>"
+      desc = BET_TYPES[self.data['bet_type']] + " bet on feed @ "
+        + (PREFERENCES['address_aliases'][self.data['feed_address']] || self.data['feed_address']) + "<br/>"
         + "Odds: " + self.data['odds'] + ", Wager: "
         + numberWithCommas(self.data['wager_amount'] / UNIT) + " XCP, Counterwager: "
         + numberWithCommas(self.data['counterwager_amount'] / UNIT) + " XCP";  
     } else if(self.rawTxType == 'bet_matches') {
-      desc = "For feed " + self.data['feed_address'] + ", " + self.data['tx0_address'] + " bet "
+      desc = "For feed " + (PREFERENCES['address_aliases'][self.data['feed_address']] || self.data['feed_address'])
+        + ", " + self.data['tx0_address'] + " bet "
         + numberWithCommas(self.data['forward_amount'] / UNIT) + " XCP"
         + self.data['tx1_address'] + " bet "
         + numberWithCommas(self.data['backward_amount'] / UNIT) + " XCP";

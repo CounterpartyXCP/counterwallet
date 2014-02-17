@@ -1,8 +1,29 @@
 var AddressInDropdownItemModel = function(address, label, asset, balance) {
   this.ADDRESS = address;
-  this.LABEL = label + " (" + address + ") -- " + asset + " bal: " + balance;
+  this.LABEL = label;
+  this.SELECT_LABEL = label ? 
+      ("<b>" + label + "</b><br/>" + address + "<br/>" + asset + " Bal: " + balance)
+    : (address + "<br/>" + asset + " Bal: " + balance);
 };
 
+ko.validation.rules['isValidQtyForBuyAssetDivisibility'] = {
+    validator: function (val, self) {
+      if(!self.buyAssetIsDivisible() && numberHasDecimalPlace(parseFloat(val))) {
+        return false;
+      }
+      return true;
+    },
+    message: 'The amount must be a whole number, since this is a non-divisible asset.'
+};
+ko.validation.rules['isValidQtyForSellAssetDivisibility'] = {
+    validator: function (val, self) {
+      if(!self.sellAssetIsDivisible() && numberHasDecimalPlace(parseFloat(val))) {
+        return false;
+      }
+      return true;
+    },
+    message: 'The amount must be a whole number, since this is a non-divisible asset.'
+};
 ko.validation.rules['doesNotMatchSelectedBuyAsset'] = {
   validator: function (asset, self) {
     console.log("doesNotMatchSelectedBuyAsset: " + asset);
@@ -16,7 +37,7 @@ ko.validation.rules['doesNotMatchSelectedBuyAsset'] = {
   },
   message: 'You cannot buy and sell the same asset.'
 };
-ko.validation.rules['isExistingAssetName'] = {
+ko.validation.rules['isExistingBuyAssetName'] = {
   validator: function (asset, self) {
     if(self.selectedBuyAsset() != "Other") return true; //this validator doesn't apply
     if(asset == 'XCP' || asset == 'BTC') return false; //shouldn't be in this list
@@ -27,27 +48,47 @@ ko.validation.rules['isExistingAssetName'] = {
   },
   message: 'The asset specified does not exist.'
 };
+ko.validation.rules['isExistingSellAssetName'] = {
+  validator: function (asset, self) {
+    if(self.selectedSellAsset() != "Other") return true; //this validator doesn't apply
+    if(asset == 'XCP' || asset == 'BTC') return false; //shouldn't be in this list
+    var match = ko.utils.arrayFirst(self.allAssets(), function(item) {
+      return item == asset;
+    });
+    return match;
+  },
+  message: 'The asset specified does not exist.'
+};
 ko.validation.rules['addressHasSellAssetBalance'] = {
   validator: function (address, self) {
-    if(!address) return false;
+    if(!address) return true; //leave it alone for blank addresses
     return WALLET.getBalance(address.ADDRESS, self.sellAsset());
   },
-  message: 'You have no available balance for the sell asset at this address'
+  message: 'You have no available balance for the sell asset at this address.'
 };
-ko.validation.rules['isValidBuyAmount'] = {
-  validator: function (buyAmount, self) {
-    if(!buyAmount == null || buyAmount == '') return false;
-    return buyAmount > 0;
+ko.validation.rules['isValidBuyOrSellAmount'] = {
+  validator: function (amount, self) {
+    if(!amount == null || amount == '') return false;
+    return amount > 0;
   },
   message: 'Must be greater than 0'
 };
 ko.validation.rules['coorespondingSellAmountDoesNotExceedBalance'] = {
   //For the amount the user wants to buy
   validator: function (buyAmount, self) {
-    if(!self.selectedAddress() || buyAmount == null || buyAmount == '' || self.selectedSellAmount() == null) return false;
+    if(self.selectedSellAmount() == null) return true; //don't complain yet until the user fills something in
+    if(self.selectedSellAmountCustom()) return true; //this field is not used for custom orders (we do validation on the customBuy field instead)
+    if(!self.selectedAddress() || buyAmount == null || buyAmount == '') return false;
     return self.selectedSellAmount() <= self.totalBalanceAvailForSale();
   },
-  message: 'This would exceed your balance of what you\'re offering in exchange'
+  message: 'You are trying to buy more than you can afford.'
+};
+ko.validation.rules['customSellAmountDoesNotExceedBalance'] = {
+  validator: function (amount, self) {
+    if(self.selectedSellAmountCustom() == null) return true; //don't complain yet until the user fills something in
+    return amount <= WALLET.getBalance(self.selectedAddress().ADDRESS, self.sellAsset());
+  },
+  message: 'You have no available balance for the sell asset at this address.'
 };
 ko.validation.registerExtenders();
 
@@ -72,7 +113,7 @@ function SimpleBuySellWizardViewModel() {
       message: "Asset required.",
       onlyIf: function () { return (self.selectedBuyAsset() == 'Other'); }
     },
-    isExistingAssetName: self
+    isExistingBuyAssetName: self
   });
   self.selectedSellAsset = ko.observable('').extend({
     required: true,
@@ -84,7 +125,7 @@ function SimpleBuySellWizardViewModel() {
       message: "Asset required.",
       onlyIf: function () { return (self.selectedSellAsset() == 'Other'); }
     },
-    isExistingAssetName: self
+    isExistingSellAssetName: self
   });
   self.buyAsset = ko.computed(function() {
     if(self.selectedBuyAsset() == 'Other') return self.selectedBuyAssetOther();
@@ -94,6 +135,13 @@ function SimpleBuySellWizardViewModel() {
     if(self.selectedSellAsset() == 'Other') return self.selectedSellAssetOther();
     return self.selectedSellAsset();
   }, self);
+
+  self.sellAssetIsDivisible = ko.computed(function() {
+    if(!self.sellAsset() || !self.selectedAddress()) return null;
+    return WALLET.getAddressObj(self.selectedAddress().ADDRESS).getAssetObj(self.sellAsset()).DIVISIBLE;
+  }, self);
+  self.buyAssetIsDivisible = ko.observable(); //set during change of selectedBuyAsset
+
   self.selectedAddress = ko.observable('').extend({
     required: {
       message: "This field is required.",
@@ -104,6 +152,11 @@ function SimpleBuySellWizardViewModel() {
   self.dispSelectedAddress = ko.computed(function() {
     if(!self.selectedAddress()) return null;
     return self.selectedAddress().ADDRESS;
+  }, self);
+  self.dispSelectedAddressWithLabel = ko.computed(function() {
+    if(!self.selectedAddress()) return null;
+    var address = self.selectedAddress();
+    return address.LABEL ? address.LABEL + " (" + address.ADDRESS + ")" : address.ADDRESS;
   }, self);
   
   self.availableAddressesWithBalance = ko.computed(function() { //stores AddressInDropdownModel objects
@@ -119,7 +172,7 @@ function SimpleBuySellWizardViewModel() {
       } 
     }
     addressesWithBalance.sort(function(left, right) {
-      return left.LABEL == right.LABEL ? 0 : (left.LABEL < right.LABEL ? -1 : 1)
+      return left.SELECT_LABEL == right.SELECT_LABEL ? 0 : (left.SELECT_LABEL < right.SELECT_LABEL ? -1 : 1)
     });
     return addressesWithBalance;
   }, self);
@@ -160,20 +213,23 @@ function SimpleBuySellWizardViewModel() {
   //WIZARD TAB 2
   self.selectedBuyAmount = ko.observable().extend({
     required: true,
-    isValidBuyAmount: self,
-    coorespondingSellAmountDoesNotExceedBalance: self
+    isValidBuyOrSellAmount: self,
+    coorespondingSellAmountDoesNotExceedBalance: self,
+    isValidQtyForBuyAssetDivisibility: self
   });
   self.currentMarketUnitPrice = ko.observable();
   // ^ quote / base (per 1 base unit). May be null if there is no established market rate
   self.selectedSellAmountCustom = ko.observable().extend({
      //only set if there is no market data, or market data is overridden
     required: {
-      message: "An amount is required.",
+      message: "This field is required.",
       onlyIf: function () { return (self.currentMarketUnitPrice() === null); }
-    }
+    },
+    isValidBuyOrSellAmount: self,
+    isValidQtyForSellAssetDivisibility: self
   });
   self.selectedSellAmountAtMarket = ko.computed(function() {
-    if(!self.selectedBuyAmount() || !self.currentMarketUnitPrice()) return null;
+    if(!self.assetPair() || !self.selectedBuyAmount() || !self.currentMarketUnitPrice()) return null;
     if(self.assetPair()[0] == self.buyAsset()) //buy asset is the base
       return toFixed(self.selectedBuyAmount() * self.currentMarketUnitPrice(), 8);
     else { // sell asset is the base
@@ -185,7 +241,7 @@ function SimpleBuySellWizardViewModel() {
     return(self.selectedSellAmountCustom() || self.selectedSellAmountAtMarket());
   }, self);
   self.unitPriceCustom = ko.computed(function() {
-    if(!self.selectedSellAmountCustom()) return null;
+    if(!self.assetPair() || !self.selectedSellAmountCustom()) return null;
     //^ only valid when the market unit price doesn't exist or is overridden
     if(self.assetPair()[0] == self.buyAsset()) //buy asset is the base
       return toFixed(self.selectedSellAmountCustom() / self.selectedBuyAmount(), 8);
@@ -247,6 +303,13 @@ function SimpleBuySellWizardViewModel() {
       }
     });
     
+    self.buyAsset.subscribe(function(newValue) {
+      if(!newValue) return;
+      failoverAPI("get_asset_info", [newValue], function(assetInfo, endpoint) {
+        self.buyAssetIsDivisible(assetInfo['divisible']);
+      });    
+    });  
+
     //RELEASE the WIZARD (Ydkokw2Y-rc)
     $('#simpleBuySellWizard').bootstrapWizard({
       tabClass: 'form-wizard',
@@ -254,27 +317,40 @@ function SimpleBuySellWizardViewModel() {
         return false; //tab click disabled
       },
       onTabShow: function(tab, navigation, index) {
-        console.log("onTabShow: " + index);
         var total = navigation.find('li').length;
         var current = index + 1;
-        
-        self.currentTab(current);
+        console.log("onTabShow: " + current);
         
         if(current == 1) { //going BACK to tab 1
           self.showPriceChart(false);
+          
+          //reset the fields on tab 2
+          self.selectedBuyAmount(null);
+          self.selectedSellAmountCustom(null);
+          self.currentMarketUnitPrice(null);
+          self.currentTab(current);
         } else if(current == 2) {
           assert(self.assetPair(), "Asset pair is not set");
+          self.selectedBuyAmount.isModified(false);
+          self.selectedSellAmountCustom.isModified(false);
           
           //get the market price (if available) for display
           failoverAPI("get_market_price", [self.buyAsset(), self.sellAsset()], function(data, endpoint) {
-            self.currentMarketUnitPrice(data); //may end up being null
+            self.currentMarketUnitPrice(data || null); //may end up being null
+            self.currentTab(current); //set this here so we don't get a flash with content before we load the market price data
           });
           
           //now that an asset pair is picked, we can show a price chart for that pair
           failoverAPI("get_market_history", [self.buyAsset(), self.sellAsset()], function(data, endpoint) {
-            self.showPriceChart(true);
-            self.doChart($('#priceHistory'), data);
+            if(data.length) {
+              self.showPriceChart(true);
+              self.doChart($('#priceHistory'), data);
+            } else {
+              self.showPriceChart(false);
+            }
           });
+        } else {
+          self.currentTab(current);
         }
         
         //If it's the first tab, disable the previous button
@@ -308,14 +384,17 @@ function SimpleBuySellWizardViewModel() {
           }
         } else if(index == 3) {
           //user has confirmed -- submit the order to the server
+          var buyAmount = self.buyAssetIsDivisible() ? parseInt(parseFloat(self.selectedBuyAmount()) * UNIT) : parseInt(self.selectedBuyAmount());
+          var sellAmount = self.sellAssetIsDivisible() ? parseInt(parseFloat(self.selectedSellAmount()) * UNIT) : parseInt(self.selectedSellAmount());
+
           multiAPIConsensus("do_order",
-            {source: self.selectedAddress(),
-             give_quantity: self.selectedSellAmount(), give_asset: self.sellAsset(),
-             get_quantity: self.selectedBuyAmount(), get_asset: self.buyAsset(),
+            {source: self.selectedAddress().ADDRESS,
+             give_quantity: sellAmount, give_asset: self.sellAsset(),
+             get_quantity: buyAmount, get_asset: self.buyAsset(),
              expiration: 10, /* go with the default fee required and provided */ 
-             unsigned: WALLET.getAddressObj(self.address()).PUBKEY},
+             unsigned: WALLET.getAddressObj(self.selectedAddress().ADDRESS).PUBKEY},
             function(unsignedTXHex, numTotalEndpoints, numConsensusEndpoints) {
-              WALLET.signAndBroadcastTx(self.address(), unsignedTXHex);
+              WALLET.signAndBroadcastTx(self.selectedAddress().ADDRESS, unsignedTXHex);
               bootbox.alert("Your order for <b>" + self.selectedBuyAmount() + " " + self.selectedBuyAsset() + "</b> has been placed."
                + " You will be notified when it fills.");
               checkURL(); //reset the form and take the user back to the first tab by just refreshing the page
@@ -325,13 +404,12 @@ function SimpleBuySellWizardViewModel() {
     });
   }
   
-  self.doChart = function(graph, data) {
+  self.doChart = function(chartDiv, data) {
     // split the data set into ohlc and volume
     var ohlc = [];
     var volume = [];
-    var dataLength = data.length;
-      
-    for(var i = 0; i < dataLength; i++) {
+    
+    for(var i = 0; i < data.length; i++) {
       ohlc.push([
         data[i][0], // the date
         data[i][1], // open
@@ -339,7 +417,6 @@ function SimpleBuySellWizardViewModel() {
         data[i][3], // low
         data[i][4]  // close
       ]);
-      
       volume.push([
         data[i][0], // the date
         data[i][5]  // the volume
@@ -355,15 +432,14 @@ function SimpleBuySellWizardViewModel() {
       [1, 2, 3, 4, 6]
     ]];
         
-    graph.highcharts('StockChart', {
+    //graph.highcharts('StockChart', {
+    chartDiv.highcharts('StockChart', {
         rangeSelector: {
             selected: 1
         },
-
         title: {
             text: self.dispAssetPair()
         },
-
         yAxis: [{
             title: {
                 text: 'Price'
@@ -379,7 +455,6 @@ function SimpleBuySellWizardViewModel() {
             offset: 0,
             lineWidth: 2
         }],
-        
         series: [{
             type: 'candlestick',
             name: self.dispAssetPair(),
@@ -395,7 +470,10 @@ function SimpleBuySellWizardViewModel() {
             dataGrouping: {
               units: groupingUnits
             }
-        }]
+        }],
+        credits: {
+          enabled: false
+        }
     });
   }
 }
@@ -404,6 +482,8 @@ function SimpleBuySellWizardViewModel() {
 var SIMPLE_BUY_SELL = new SimpleBuySellWizardViewModel();
 
 $(document).ready(function() {
-  ko.applyBindings(SIMPLE_BUY_SELL, document.getElementById("simpleBuySellGrid"));
+  ko.applyBindings(SIMPLE_BUY_SELL, document.getElementsByClassName("simpleBuySellGrid")[0]);
   SIMPLE_BUY_SELL.init();
 });
+
+

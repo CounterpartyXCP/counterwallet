@@ -107,3 +107,10 @@ span.logoText {
 #simpleBuySellWizard .sellColor {
     color: #2F7DBE;    
 }
+
+#simpleBuySellWizard .addressSelect {
+  min-width: 500px;
+  /*min-height: 150px;
+  max-height: 150px;
+  overflow-y: auto;*/
+}

@@ -304,10 +304,20 @@ $(document).ready(function() {
 
 			var elem = $(this);
 			elems = elems.add(elem);
-			$.data(this, str_data, {
-				w : elem.width(),
-				h : elem.height()
-			});
+      //COUNTERWALLETD: START MOD (so that this plays nicely with highstock lib)			
+			try {
+        $.data(this, str_data, {
+          w : elem.width(),
+          h : elem.height()
+        });
+			} catch(err) {
+        $.data(this, str_data, {
+          w : $(elem[0].container).width(),
+          h : $(elem[0].container).height()
+        });
+			}
+			//COUNTERWALLETD: END MOD
+			
 			if (elems.length === 1) {
 				loopy();
 			}
@@ -1082,34 +1092,31 @@ window.loadGoogleMaps = function() {
  * loadScript("js/my_lovely_script.js", myPrettyCode);
  */
 
-var jsArray = {};
-
+//COUNTERWALLET: START MOD
 function loadScript(scriptName, callback) {
+  var scriptID = "script_" + Crypto.SHA256(scriptName);
+  if($("#" + scriptID).length == 0 || IS_DEV) {
+    //script doesn't exist, or it does and we're in dev mode (which means we should reinit the script to catch code changes)
+    if(IS_DEV) {
+      $("#" + scriptID).remove();
+    }
+    var body = document.getElementsByTagName('body')[0];
+    var script = document.createElement('script');
+    script.id = scriptID;
+    script.type = 'text/javascript';
+    script.src = scriptName + (IS_DEV ? ('?_=' + Math.floor((Math.random()*1000000)+1).toString()) : '');
+    
+    // then bind the event to the callback function
+    // there are several events for cross browser compatibility
+    script.onload = callback;
 
-	if (!jsArray[scriptName]) {
-		jsArray[scriptName] = true;
-
-		// adding the script tag to the head as suggested before
-		var body = document.getElementsByTagName('body')[0];
-		var script = document.createElement('script');
-		script.type = 'text/javascript';
-		script.src = scriptName;
-
-		// then bind the event to the callback function
-		// there are several events for cross browser compatibility
-		//script.onreadystatechange = callback;
-		script.onload = callback;
-
-		// fire the loading
-		body.appendChild(script);
-
-	} else if (callback) {// changed else to else if(callback)
-		//console.log("JS file already added!");
-		//execute function
-		callback();
-	}
-
+    // fire the loading
+    body.appendChild(script);
+  } else if (callback) {// changed else to else if(callback)
+    callback();
+  }
 }
+//COUNTERWALLET: END MOD
 
 /* ~ END: LOAD SCRIPTS */
 

@@ -106,7 +106,7 @@ ko.validation.rules['isValidBitcoinAddress'] = {
 };
 ko.validation.rules['isValidQtyForDivisibility'] = {
     validator: function (val, self) {
-      if(self.divisible() === false && numberHasDecimalPlace(parseFloat(val))) {
+      if(!self.divisible() && numberHasDecimalPlace(parseFloat(val))) {
         return false;
       }
       return true;
@@ -148,3 +148,65 @@ ko.bindingHandlers.btnGroupChecked = {
     }
   }
 }
+
+ko.bindingHandlers.select2 = {
+    init: function(element, valueAccessor, allBindingsAccessor) {
+        var obj = valueAccessor(),
+            allBindings = allBindingsAccessor(),
+            lookupKey = allBindings.lookupKey;
+        $(element).select2(obj);
+        if (lookupKey) {
+            var value = ko.utils.unwrapObservable(allBindings.value);
+            $(element).select2('data', ko.utils.arrayFirst(obj.data.results, function(item) {
+                return item[lookupKey] === value;
+            }));
+        }
+
+        ko.utils.domNodeDisposal.addDisposeCallback(element, function() {
+            $(element).select2('destroy');
+        });
+    },
+    update: function(element) {
+        $(element).trigger('change');
+    }
+};
+
+ko.bindingHandlers.fadeVisible = {
+    init: function(element, valueAccessor) {
+        // Initially set the element to be instantly visible/hidden depending on the value
+        var value = valueAccessor();
+        $(element).toggle(ko.unwrap(value)); // Use "unwrapObservable" so we can handle values that may or may not be observable
+    },
+    update: function(element, valueAccessor) {
+        // Whenever the value subsequently changes, slowly fade the element in or out
+        var value = valueAccessor();
+        ko.unwrap(value) ? $(element).fadeIn() : $(element).fadeOut();
+    }
+};
+
+ko.bindingHandlers.fadeVisibleInOnly = {
+    init: function(element, valueAccessor) {
+        // Initially set the element to be instantly visible/hidden depending on the value
+        var value = valueAccessor();
+        $(element).toggle(ko.unwrap(value)); // Use "unwrapObservable" so we can handle values that may or may not be observable
+    },
+    update: function(element, valueAccessor) {
+        // Whenever the value subsequently changes, slowly fade the element in or out
+        var value = valueAccessor();
+        ko.unwrap(value) ? $(element).fadeIn() : $(element).hide();
+    }
+};
+
+/*ko.bindingHandlers.fadeVisibleInOnlyKeepLayout = {
+    init: function(element, valueAccessor) {
+        // Initially set the element to be instantly visible/hidden depending on the value
+        var value = valueAccessor();
+        $(element).toggle(ko.unwrap(value)); // Use "unwrapObservable" so we can handle values that may or may not be observable
+    },
+    update: function(element, valueAccessor) {
+        // Whenever the value subsequently changes, slowly fade the element in or out
+        var value = valueAccessor();
+        ko.unwrap(value) ? $(element).animate({opacity:1}) : $(element).show().css({opacity:0});
+        //ko.unwrap(value) ? $(element).animate({opacity:100}) : $(element).show().animate({opacity:0});
+    }
+};*/

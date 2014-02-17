@@ -108,7 +108,7 @@
       <div class="modal-body no-padding">
         <p class="formIntro">Fill out the form to send <b data-bind="text: asset"></b> from your address <b data-bind="text: address"></b>
         to the address you enter below.<br/><br/>
-        You have up to <b><span data-bind="displayedBalance"></span> <span data-bind="text: asset"></span></b> available to send from this address.
+        You have up to <b><span data-bind="text: displayedBalance"></span> <span data-bind="text: asset"></span></b> available to send from this address.
         </p>
         
         <form class="smart-form" data-bind="submit: doAction"><fieldset>
@@ -118,7 +118,6 @@
                 <label class="input"><i class="icon-append fa fa-user"></i>
                     <input name="destAddress" data-bind="value: destAddress, valueUpdate:['afterkeydown','propertychange','input']" type="text"/>
                 </label>
-                <div class="note">The address you will be sending to.</div>
             </div>
           </div></section>
           <section><div class="row">
@@ -127,13 +126,12 @@
                 <label class="input"><i class="icon-append fa fa-share"></i>
                     <input name="quantity" data-bind="value: quantity, valueUpdate: 'afterkeydown'" type="text"/>
                 </label>
-                <div class="note">The quantity to send.</div>
             </div>
           </div></section>
         </fieldset></form>
       </div>
       <div class="modal-footer">
-        <p data-bind="visible: displayedBalRemaining" style="font-weight: bold">
+        <p data-bind="fadeVisibleInOnly: displayedBalRemaining" style="font-weight: bold">
             After sending, you will have <span data-bind="text: displayedBalRemaining" style='color:green'></span>
             <span data-bind="text: asset"></span> remaining at this address (minus fees).</p>
         <button type="button" class="btn btn-default" data-bind="click: hide">Cancel</button>
@@ -209,7 +207,7 @@
               </label>
               <div class="note">Callable assets may be called back at a specific date for a specific strike price.</div>
           </div></section>
-          <section data-bind="visible: callable"><div class="row">                
+          <section data-bind="fadeVisibleInOnly: callable"><div class="row">                
             <label class="label col col-2">Call Date</label>
             <div class="col col-10">
                 <label class="input">
@@ -218,7 +216,7 @@
                 <div class="note">The date and time after which the owner of the asset may choose to call it back.</div>
             </div>
           </div></section>
-          <section data-bind="visible: callable"><div class="row">                
+          <section data-bind="fadeVisibleInOnly: callable"><div class="row">                
             <label class="label col col-2">Call Price</label>
             <div class="col col-10">
                 <label class="input">
@@ -248,7 +246,7 @@
       <div class="modal-body no-padding">
         <p class="formIntro">How many more quantity of this asset would you like to issue? <i>(For divisible assets, state
        the amount as a whole or floating point number, not in satoshis -- e.g. '732.45')</i><br/><br/>
-       <span data-bind="visible: displayedTotalIssued !== null">There is currently quantity <b style="color: green" data-bind="text: displayedTotalIssued"></b> of this asset issued.<br/><br/></span>
+       There is currently quantity <b style="color: green" data-bind="text: displayedTotalIssued"></b> of this asset issued.<br/><br/>
        <b style='color:red'>Please NOTE that this action is irreversable!</b></p>
         
         <form class="smart-form" data-bind="submit: doAction"><fieldset>
@@ -342,7 +340,7 @@
       <div class="modal-body no-padding">
         <p class="formIntro">How many XCP per share of this unit would you like to pay to asset holders as a dividend?
         <i>(Note that the full balance of XCP paid out must be present at this same address.)</i><br/><br/>
-       <span data-bind="visible: displayedAddressXCPBalance !== null">This address has a balance of
+       <span data-bind="fadeVisible: displayedAddressXCPBalance !== null">This address has a balance of
            <b style="color: green" data-bind="text: displayedAddressXCPBalance"></b> XCP that can be paid as a dividend.<br/><br/></span>
        <b style='color:red'>Please NOTE that this action is irreversable!</b></p>
         
@@ -358,7 +356,7 @@
         </fieldset></form>
       </div>
       <div class="modal-footer">
-        <span data-bind="visible: displayedXCPBalRemainingPostPay() >= 0">
+        <span data-bind="fadeVisibleInOnly: qtyPerUnit() && displayedXCPBalRemainingPostPay() >= 0">
             After dividend payment this address will have a remaining balance of
             <b style="color: #a4781b" data-bind="text: displayedXCPBalRemainingPostPay"></b> XCP.<br/><br/>
         </span>

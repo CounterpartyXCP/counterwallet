@@ -112,7 +112,7 @@ function WalletViewModel() {
       }
       
       if(isRecurring && self.autoRefreshBTCBalances) {
-        setInterval(function() {
+        setTimeout(function() {
           if(self.autoRefreshBTCBalances) {
             self.refreshBTCBalances(true);
           }
