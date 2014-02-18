@@ -657,7 +657,6 @@ function BuySellWizardViewModel() {
   self.dataTableResponsive = function(e) {
     // Responsive design for our data tables and more on this page
     var newWindowWidth = $(window).width();
-    
     if(self._lastWindowWidth && newWindowWidth == self._lastWindowWidth) return;
     self._lastWindowWidth = newWindowWidth;
     
@@ -691,7 +690,10 @@ $(document).ready(function() {
   ko.applyBindings(BUY_SELL, document.getElementsByClassName("buySellGrid")[0]);
   BUY_SELL.init();
   
-  $(window).bind("resize", BUY_SELL.dataTableResponsive);
+  $(window).resize(BUY_SELL.dataTableResponsive);
+  $(window).on('hashchange', function() {
+    $(window).off("resize", BUY_SELL.dataTableResponsive);
+  });
 });
 
 

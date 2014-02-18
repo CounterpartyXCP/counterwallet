@@ -344,5 +344,8 @@ $(document).ready(function() {
   TXN_HISTORY.init();
   
   $(window).bind("resize", TXN_HISTORY.dataTableResponsive);
+  $(window).on('hashchange', function() {
+    $(window).off("resize", TXN_HISTORY.dataTableResponsive);
+  });
 });
 

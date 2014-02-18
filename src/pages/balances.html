@@ -10,8 +10,7 @@
   </div>
 </div>
 
-<div id="balances">
-  <section id="widget-grid" class=""> <!-- widget grid -->
+<section id="widget-grid"> <!-- widget grid -->
     <div id="balancesContainer" data-bind="foreach: addresses" class="row"> <!-- one row per widget in this case -->
       <article class="col-xs-12 col-sm-12 col-md-12 col-lg-12"> <!-- widget START -->
         <div class="jarviswidget jarviswidget-color-blueLight" data-bind="attr: {'id': 'address-wid-' + $data.ADDRESS}" data-widget-deletebutton="false" data-widget-editbutton="false">
@@ -63,8 +62,7 @@
         </div> <!-- end widget -->
       </article> <!-- WIDGET END -->
     </div> <!-- balances container, foreach: address -->
-  </section> <!-- end widget grid -->
-</div>
+</section> <!-- end widget grid -->
   
 <!-- modal for new address -->
 <div data-bind="showModal: shown" id="createNewAddressModal" class="modal fade" data-keyboard="false" tabindex="-1" role="dialog" aria-labelledby="createNewAddressModal" aria-hidden="true">
@@ -108,7 +106,7 @@
       <div class="modal-body no-padding">
         <p class="formIntro">Send <b data-bind="text: asset"></b> from your address <b data-bind="text: address"></b>
         to the address you enter below.<br/><br/>
-        You have up to <b><span class="sellColor" data-bind="text: numberWithCommas(normalizedBalance())"></span> <span class="sellColor" data-bind="text: asset"></span></b>
+        You have <b><span class="sellColor" data-bind="text: numberWithCommas(normalizedBalance())"></span> <span class="sellColor" data-bind="text: asset"></span></b>
         available to send from this address.
         </p>
         
@@ -123,7 +121,7 @@
           </div></section>
           <section><div class="row">
             <label class="label col col-2">Send Amount</label>
-            <div class="col col-6">
+            <div class="col col-10">
                 <label class="input" style="display: inline-block;">
                     <i class="icon-append fa fa-share"></i>
                     <input name="quantity" data-bind="value: quantity, valueUpdate: 'afterkeydown', attr: {placeholder: 'Enter quantity'}" type="text"/>
@@ -384,8 +382,9 @@
     }
   }
 
-  //Bind the WALLET object to balancesContainer
+  //Bind the WALLET object to balancesGrid
   $(document).ready(function() {
+    console.log("BINDING");
     ko.applyBindings(WALLET, document.getElementById("balancesContainer"));
   });
 </script>
