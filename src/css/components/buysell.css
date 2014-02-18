@@ -1,0 +1,50 @@
+#buySellWizard div.tab-content {
+    font-size: 19px;
+}
+
+#buySellWizard div.row {
+    padding: 0 0 20px 5px;
+}
+
+#buySellWizard .radioBtn {
+    border: 1px solid #555;
+}
+
+#buySellWizard span.invalid {
+    display: block;
+    margin-top: 6px;
+    padding: 0 1px;
+    font-style: normal;
+    font-size: 14px;
+    color: #D56161;
+}
+
+#buySellWizard div.form-bootstrapWizard {
+    padding-bottom: 60px;
+}
+
+#buySellWizard .errorRedColor {
+    color: #D56161;
+}
+
+#buySellWizard .addressSelect {
+    min-width: 500px;
+}
+
+#buySellWizard div.row:last-child {
+    padding: 0;
+}
+
+table#orderBook {
+    height: 500px;
+}
+
+table#orderBook td {
+    text-align: right;
+}
+
+table#orderBook td.median {
+    border-color: #9cb4c5;
+    color: #346597;
+    background: #d6dde7;
+}

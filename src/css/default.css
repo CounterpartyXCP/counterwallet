@@ -12,6 +12,14 @@
     z-index: 1;
 }
 
+.buyColor {
+    color: #78973B;    
+}
+
+.sellColor {
+    color: #2F7DBE;    
+}
+
 
 /* Form styles (we have to redo these because we do forms a bit
  * differently than SmartAdmin does, due to our use of knockout) */
@@ -38,6 +46,7 @@ p.formIntro {
     margin: 15px 0 0 15px;
 }
 
+/* LOGO AND ACTIVITY LOG INTERFACE MODIFICATIONS */
 span.logoText {
     font-size: 1.6em;
     color: white;
@@ -64,53 +73,27 @@ span.logoText {
     left: 20px; /* + 20px */
 }
 .ajax-dropdown {
-    left: 36px; /* + 20px */
+    left: 56px; /* + 20px */
 }
 #header>:first-child {
     width: 260px; /* + 20px */
 }
 
-
-#simpleBuySellWizard div.tab-content {
-    font-size: 19px;
+/* LEFT AND CONTENT PANEL INTERFACE MODIFICATIONS
+ * (the goal is to make the interface a bit more compact)
+ */
+.smart-style-2 #left-panel {
+    padding: 15px 5px;
 }
 
-#simpleBuySellWizard div.row {
-    padding: 0 0 30px 5px;
+aside {
+    width: 180px;
 }
 
-#simpleBuySellWizard .radioBtn {
-    border: 1px solid #555;
+.fixed-ribbon #content {
+    padding-top: 10px;
 }
 
-#simpleBuySellWizard span.invalid {
-    display: block;
-    margin-top: 6px;
-    padding: 0 1px;
-    font-style: normal;
-    font-size: 14px;
-    color: #D56161;
-}
-
-#simpleBuySellWizard div.form-bootstrapWizard {
-    padding-bottom: 20px;
-}
-
-#simpleBuySellWizard .errorRedColor {
-    color: #D56161;
-}
-
-#simpleBuySellWizard .buyColor {
-    color: #78973B;    
-}
-
-#simpleBuySellWizard .sellColor {
-    color: #2F7DBE;    
-}
-
-#simpleBuySellWizard .addressSelect {
-  min-width: 500px;
-  /*min-height: 150px;
-  max-height: 150px;
-  overflow-y: auto;*/
+#main {
+    margin-left: 180px;
 }

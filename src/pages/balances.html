@@ -55,7 +55,7 @@
                 <div class="clearfix"></div>
                 <p class="balance">
                     <span data-bind="visible: isMine()">Issued: <span data-bind="text: displayedTotalIssued"></span></span><br/>
-                    Bal: <span data-bind="text: displayedBalance"></span></p>
+                    Bal: <span data-bind="text: numberWithCommas(normalizedBalance())"></span></p>
                 <span data-bind="visible: isLocked()" style="position:absolute;bottom:2px;right:10px"><i class="icon-append fa fa-lock"></i></span>
               </div>
             </div> <!-- end widget content body -->
@@ -106,9 +106,10 @@
         <h4 class="modal-title">Send Funds</h4>
       </div>
       <div class="modal-body no-padding">
-        <p class="formIntro">Fill out the form to send <b data-bind="text: asset"></b> from your address <b data-bind="text: address"></b>
+        <p class="formIntro">Send <b data-bind="text: asset"></b> from your address <b data-bind="text: address"></b>
         to the address you enter below.<br/><br/>
-        You have up to <b><span data-bind="text: displayedBalance"></span> <span data-bind="text: asset"></span></b> available to send from this address.
+        You have up to <b><span class="sellColor" data-bind="text: numberWithCommas(normalizedBalance())"></span> <span class="sellColor" data-bind="text: asset"></span></b>
+        available to send from this address.
         </p>
         
         <form class="smart-form" data-bind="submit: doAction"><fieldset>
@@ -116,24 +117,26 @@
             <label class="label col col-2">Send To</label>
             <div class="col col-10">
                 <label class="input"><i class="icon-append fa fa-user"></i>
-                    <input name="destAddress" data-bind="value: destAddress, valueUpdate:['afterkeydown','propertychange','input']" type="text"/>
+                    <input name="destAddress" data-bind="value: destAddress, valueUpdate:['afterkeydown','propertychange','input'], attr: {placeholder: 'Enter Bitcoin address'}" type="text"/>
                 </label>
             </div>
           </div></section>
           <section><div class="row">
             <label class="label col col-2">Send Amount</label>
             <div class="col col-6">
-                <label class="input"><i class="icon-append fa fa-share"></i>
-                    <input name="quantity" data-bind="value: quantity, valueUpdate: 'afterkeydown'" type="text"/>
+                <label class="input" style="display: inline-block;">
+                    <i class="icon-append fa fa-share"></i>
+                    <input name="quantity" data-bind="value: quantity, valueUpdate: 'afterkeydown', attr: {placeholder: 'Enter quantity'}" type="text"/>
                 </label>
+                <span>&nbsp;&nbsp;<span style="font-weight: bold" data-bind="text: asset"></span></span>
             </div>
           </div></section>
+        <p data-bind="fadeVisibleInOnly: numberWithCommas(normalizedBalRemaining())" style="font-weight: bold">
+            After sending, you will have <span class="sellColor" data-bind="text: numberWithCommas(normalizedBalRemaining())"></span>
+            <span class="sellColor" data-bind="text: asset"></span> remaining at this address (minus fees).</p>
         </fieldset></form>
       </div>
       <div class="modal-footer">
-        <p data-bind="fadeVisibleInOnly: displayedBalRemaining" style="font-weight: bold">
-            After sending, you will have <span data-bind="text: displayedBalRemaining" style='color:green'></span>
-            <span data-bind="text: asset"></span> remaining at this address (minus fees).</p>
         <button type="button" class="btn btn-default" data-bind="click: hide">Cancel</button>
         <button type="button" data-bind="click: submitForm" class="btn btn-primary">Send</button>
       </div>

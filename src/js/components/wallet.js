@@ -2,7 +2,7 @@
 function WalletViewModel() {
   //The user's wallet
   var self = this;
-  self.DEFAULT_NUMADDRESSES = 5; //default number of addresses to generate
+  self.DEFAULT_NUMADDRESSES = 3; //default number of addresses to generate
   self.ELECTRUM_PRIV_KEY = null; //the master private key from electrum (from which the address priv keys are derived)
   self.autoRefreshBTCBalances = true; //auto refresh BTC balances every 5 minutes
   

@@ -14,7 +14,7 @@ function AssetViewModel(props) {
   self.CALLPRICE = props['callPrice'] || null;
   
   self.normalizedBalance = ko.computed(function() {
-    return self.DIVISIBLE ? toFixed(self.balance() / UNIT, 8) : self.balance(); 
+    return self.DIVISIBLE ? Decimal.round(new Decimal(self.balance()).div(UNIT), 8).toFloat() : self.balance(); 
   }, self);
 
   self.displayedBalance = ko.computed(function() {
@@ -22,11 +22,11 @@ function AssetViewModel(props) {
   }, self);
   
   self.normalizedTotalIssued = ko.computed(function() {
-    return self.DIVISIBLE ? toFixed(self.totalIssued() / UNIT, 8) : self.totalIssued(); 
+    return self.DIVISIBLE ? Decimal.round(new Decimal(self.totalIssued()).div(UNIT), 8).toFloat() : self.totalIssued(); 
   }, self);
 
   self.displayedTotalIssued = ko.computed(function() {
-    return numberWithCommas(self.normalizedTotalIssued()).toString(); 
+    return numberWithCommas(self.normalizedTotalIssued()); 
   }, self);
   
   self.send = function () {

@@ -12,13 +12,6 @@ function makeQRCode(addr) {
   return qr.createImgTag(4);
 }
 
-function toFixed(value, precision) {
-  //output a floating point at a given max precision (http://stackoverflow.com/a/661757)
-  var power = Math.pow(10, precision || 0);
-  return Math.round(value * power) / power;
-  //return String(Math.round(value * power) / power);
-}
-
 function numberWithCommas(x) {
   if(x === undefined || x === null) return x;
   //print a number with commas, as appropriate (http://stackoverflow.com/a/2901298)

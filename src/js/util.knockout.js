@@ -171,6 +171,15 @@ ko.bindingHandlers.select2 = {
     }
 };
 
+ko.bindingHandlers.sparkline = {
+  update: function (element, valueAccessor, allBindingsAccessor, viewModel)
+  {
+    var value = ko.utils.unwrapObservable(valueAccessor());
+    var options = allBindingsAccessor().sparklineOptions || {};
+    $(element).sparkline(value, options);
+  }
+};
+
 ko.bindingHandlers.fadeVisible = {
     init: function(element, valueAccessor) {
         // Initially set the element to be instantly visible/hidden depending on the value

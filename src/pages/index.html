@@ -23,6 +23,7 @@
     <link rel="stylesheet" href="xcp/css/components/logon.css">
     <link rel="stylesheet" href="xcp/css/components/chatfeed.css">
     <link rel="stylesheet" href="xcp/css/components/balances.css">
+    <link rel="stylesheet" href="xcp/css/components/buysell.css">
     <link rel="stylesheet" href="xcp/css/packaged-app.css">
 
     <!-- FAVICONS -->
@@ -32,7 +33,7 @@
     <!-- GOOGLE FONT -->
     <link rel="stylesheet" href="//fonts.googleapis.com/css?family=Open+Sans:400italic,700italic,300,400,700">
   </head>
-  <body class="fixed-navigation smart-style-2">
+  <body class="fixed-header fixed-ribbon fixed-navigation smart-style-2">
     <!-- possible classes: minified, fixed-ribbon, fixed-header, fixed-width-->
 
     <!-- HEADER -->
@@ -98,18 +99,11 @@
     <!-- Left panel : Navigation area -->
     <!-- Note: This width of the aside area can be adjusted through LESS variables -->
     <aside id="left-panel"  style="display:none">
-      <!-- NAVIGATION : This navigation is also responsive
-
-      To make this navigation dynamic please make sure to link the node
-      (the reference to the nav > ul) after page load. Or the navigation
-      will not initialize.
-      -->
       <nav>
         <!-- NOTE: Notice the gaps after each icon usage <i></i>..
         Please note that these links work a bit different than
         traditional href="" links. See documentation for details.
         -->
-
         <ul>
           <li class="">
             <a href="xcp/pages/balances.html"><i class="fa fa-lg fa-fw fa-user"></i> <span class="menu-item-parent">Balances &amp; Assets</span></a>
@@ -118,10 +112,7 @@
             <a href="xcp/pages/history.html"><i class="fa fa-lg fa-fw fa-sort-amount-asc"></i> <span class="menu-item-parent">History</span></a>
           </li>
           <li class="">
-            <a href="xcp/pages/simplebuysell.html"><i class="fa fa-lg fa-fw fa-exchange"></i> <span class="menu-item-parent">Simple Buy &amp; Sell</span></a>
-          </li>
-          <li class="">
-            <a href="xcp/pages/trading.html"><i class="fa fa-lg fa-fw fa-bar-chart-o"></i> <span class="menu-item-parent">Trading</span></a>
+            <a href="xcp/pages/buysell.html"><i class="fa fa-lg fa-fw fa-exchange"></i> <span class="menu-item-parent">Buy &amp; Sell</span></a>
           </li>
           <li>
             <a href="#" id="chatLink"><i class="fa fa-lg fa-fw fa-comments-o"></i><span class="menu-item-parent">Show Chat</span></a>
@@ -327,6 +318,7 @@
     <script src="xcp/extjs/qrcode.js"></script> 
     <script src="xcp/extjs/mnemonic.js"></script> 
     <script src="xcp/extjs/electrum.js"></script> 
+    <script src="xcp/extjs/decimal.js"></script> <!-- for accurate arithmetic price operations -->
     
     <!-- JavaScript created specifically for Counterwallet. -->
     <script src="xcp/js/util.js"></script> 

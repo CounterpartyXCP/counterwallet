@@ -399,7 +399,7 @@ function PayDividendModalViewModel() {
 
   self.displayedXCPBalRemainingPostPay = ko.computed(function() {
     if(!self.asset()) return null;
-    return toFixed(self.displayedAddressXCPBalance() - self.displayedTotalPay(), 8);
+    return Decimal.round(new Decimal(self.displayedAddressXCPBalance()).sub(self.displayedTotalPay()), 8).toFloat();
   }, self);
   
   self.validationModel = ko.validatedObservable({

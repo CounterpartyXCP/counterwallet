@@ -32,17 +32,17 @@ function SendModalViewModel() {
     isValidSendAmountForBalance: self
   });
   
-  self.displayedBalance = ko.computed(function() {
+  self.normalizedBalance = ko.computed(function() {
     if(self.address() === null || self.balance() === null) return null;
-    return numberWithCommas(self.divisible() ? toFixed(self.balance() / UNIT, 8) : self.balance());
+    return self.divisible() ? Decimal.round(new Decimal(self.balance()).div(UNIT), 8).toFloat() : self.balance();
   }, self);
   
-  self.displayedBalRemaining = ko.computed(function() {
+  self.normalizedBalRemaining = ko.computed(function() {
     if(!isNumber(self.quantity())) return null;
-    var balRemaining = (self.divisible() ? self.balance() / UNIT : self.balance()) - parseFloat(self.quantity());
-    if(numberHasDecimalPlace(balRemaining)) balRemaining = toFixed(balRemaining, 8);
+    var curBalance = self.divisible() ? Decimal.round(new Decimal(self.balance()).div(UNIT), 8).toFloat() : self.balance();
+    var balRemaining = Decimal.round(new Decimal(curBalance).sub(parseFloat(self.quantity()))).toFloat();
     if(balRemaining < 0) return null;
-    return numberWithCommas(balRemaining);
+    return balRemaining;
   }, self);
   
   self.validationModel = ko.validatedObservable({

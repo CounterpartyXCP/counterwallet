@@ -343,8 +343,15 @@ $(document).ready(function() {
 
 			function new_handler(e, w, h) {
 				var elem = $(this), data = $.data(this, str_data);
-				data.w = w !== undefined ? w : elem.width();
-				data.h = h !== undefined ? h : elem.height();
+				//COUNTERWALLETD: START MOD (so that this plays nicely with highstock lib)
+				try {
+          data.w = w !== undefined ? w : elem.width();
+          data.h = h !== undefined ? h : elem.height();
+				} catch(err) {
+          data.w = w !== undefined ? w : $(elem[0].container).width();
+          data.h = h !== undefined ? h : $(elem[0].container).height();
+				}
+				//COUNTERWALLETD: END MOD
 
 				old_handler.apply(this, arguments);
 			};
@@ -361,7 +368,21 @@ $(document).ready(function() {
 	function loopy() {
 		timeout_id = window[str_setTimeout](function() {
 			elems.each(function() {
-				var elem = $(this), width = elem.width(), height = elem.height(), data = $.data(this, str_data);
+			  //COUNTERWALLETD: START MOD (so that this plays nicely with highstock lib)
+        //var elem = $(this), width = elem.width(), height = elem.height(), data = $.data(this, str_data);
+        var elem = $(this);
+        var width = null;
+        var height = null;
+        try {
+          width = elem.width();
+          height = elem.height(); 
+        } catch(err) {
+          width = $(elem[0].container).width();
+          height = $(elem[0].container).height(); 
+        }
+        var data = $.data(this, str_data);
+				//COUNTERWALLETD: END MOD
+				
 				if (width !== data.w || height !== data.h) {
 					elem.trigger(str_resize, [data.w = width, data.h = height]);
 				}
@@ -1364,31 +1385,33 @@ $('body').on('click', function(e) {
 
 //COUNTERWALLET: START MOD
 //THIS FUNCTION MOVED OVER FROM datatables.html, and changed the selectors to use classes (e.g. table.dt_basic) instead of IDs (#dt_basic)
-function runDataTables(destroyOption) {
+function runDataTables(specificTableID, destroyOption) {
+  var tableSelector = specificTableID || 'table';
+  
   /*
    * BASIC
    */
-  $('table.dt_basic').dataTable({
+  $(tableSelector+'.dt_basic').dataTable({
     "sPaginationType" : "bootstrap_full"
   });
 
   /* END BASIC */
 
   /* Add the events etc before DataTables hides a column */
-  $("table.datatable_fixed_column thead input").keyup(function() {
+  $(tableSelector+".datatable_fixed_column thead input").keyup(function() {
     oTable.fnFilter(this.value, oTable.oApi._fnVisibleToColumnIndex(oTable.fnSettings(), $("thead input").index(this)));
   });
 
-  $("table.datatable_fixed_column thead input").each(function(i) {
+  $(tableSelector+".datatable_fixed_column thead input").each(function(i) {
     this.initVal = this.value;
   });
-  $("table.datatable_fixed_column thead input").focus(function() {
+  $(tableSelector+".datatable_fixed_column thead input").focus(function() {
     if (this.className == "search_init") {
       this.className = "";
       this.value = "";
     }
   });
-  $("table.datatable_fixed_column thead input").blur(function(i) {
+  $(tableSelector+".datatable_fixed_column thead input").blur(function(i) {
     if (this.value == "") {
       this.className = "search_init";
       this.value = this.initVal;
@@ -1396,7 +1419,7 @@ function runDataTables(destroyOption) {
   });   
   
 
-  var oTable = $('table.datatable_fixed_column').dataTable({
+  var oTable = $(tableSelector+'.datatable_fixed_column').dataTable({
     "bDestroy": destroyOption,
     "sDom" : "<'dt-top-row'><'dt-wrapper't><'dt-row dt-bottom-row'<'row'<'col-sm-6'i><'col-sm-6 text-right'p>>",
     //"sDom" : "t<'row dt-wrapper'<'col-sm-6'i><'dt-row dt-bottom-row'<'row'<'col-sm-6'i><'col-sm-6 text-right'>>",
@@ -1411,7 +1434,7 @@ function runDataTables(destroyOption) {
   /*
    * COL ORDER
    */
-  $('table.datatable_col_reorder').dataTable({
+  $(tableSelector+'.datatable_col_reorder').dataTable({
     "bDestroy": destroyOption,
     "sPaginationType" : "bootstrap",
     "sDom" : "R<'dt-top-row'Clf>r<'dt-wrapper't><'dt-row dt-bottom-row'<'row'<'col-sm-6'i><'col-sm-6 text-right'p>>",
@@ -1423,7 +1446,7 @@ function runDataTables(destroyOption) {
   /* END COL ORDER */
 
   /* TABLE TOOLS */
-  $('table.datatable_tabletools').dataTable({
+  $(tableSelector+'.datatable_tabletools').dataTable({
     "bDestroy": destroyOption,
     "sDom" : "<'dt-top-row'Tlf>r<'dt-wrapper't><'dt-row dt-bottom-row'<'row'<'col-sm-6'i><'col-sm-6 text-right'p>>",
     "oTableTools" : {

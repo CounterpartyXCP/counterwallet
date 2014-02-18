@@ -68,7 +68,7 @@ ko.validation.rules['addressHasSellAssetBalance'] = {
 };
 ko.validation.rules['isValidBuyOrSellAmount'] = {
   validator: function (amount, self) {
-    if(!amount == null || amount == '') return false;
+    if(amount == null || amount == '') return true; //let the required validator handle this
     return amount > 0;
   },
   message: 'Must be greater than 0'
@@ -92,16 +92,29 @@ ko.validation.rules['customSellAmountDoesNotExceedBalance'] = {
 };
 ko.validation.registerExtenders();
 
-function SimpleBuySellWizardViewModel() {
+function BuySellWizardViewModel() {
   var self = this;
+  self._lastWindowWidth = null;
   self.showPriceChart = ko.observable(false);
+  self.showTradeHistory = ko.observable(false);
+  self.showOpenOrders = ko.observable(false);
   self.currentTab = ko.observable(1);
   self.overrideMarketPrice = ko.observable(false);
 
   self.myAssets = ko.observableArray([]);
-  //^ stores a list of all assets that this user owns in one or more addresses (for choosing which asset to sell)
+  //^ a list of all assets that this user owns in one or more addresses (for choosing which asset to sell)
   self.allAssets = ko.observableArray([]);
-  //^ stores a list of all existing assets (for choosing which asset to buy)
+  //^ a list of all existing assets (for choosing which asset to buy)
+  self.tradeHistory = ko.observableArray([]);
+  //^ a list of the last X trades for the specified asset pair (once selected and tab 2 is showing)
+  self.openOrders = ko.observableArray([]);
+  //^ a list of open orders for the selected asset pair and address
+  self.currentBlockIndex = ko.observable(null);
+  self.askBook = ko.observableArray([]);
+  self.bidBook = ko.observableArray([]);
+  self.bidAskMedian = ko.observable(null);
+  self.bidDepth = ko.observable(null);
+  self.askDepth = ko.observable(null);
 
   //WIZARD TAB 1
   self.selectedBuyAsset = ko.observable('').extend({
@@ -200,9 +213,11 @@ function SimpleBuySellWizardViewModel() {
     if(!self.buyAsset() || !self.sellAsset() || !self.assetPair() || !self.selectedAddress() || !self.currentMarketUnitPrice()) return null;
     var pair = self.assetPair();
     if(self.buyAsset() == pair[0]) { //buy asset is the base asset
-      return toFixed(self.totalBalanceAvailForSale() / self.currentMarketUnitPrice(), 8);
+      //self.totalBalanceAvailForSale / self.currentMarketUnitPrice
+      return Decimal.round(new Decimal(self.totalBalanceAvailForSale()).div(self.currentMarketUnitPrice()), 8).toFloat();
     } else { //sell asset is the base asset
-      return toFixed(self.totalBalanceAvailForSale() * self.currentMarketUnitPrice(), 8);
+      //self.totalBalanceAvailForSale * self.currentMarketUnitPrice
+      return Decimal.round(new Decimal(self.totalBalanceAvailForSale()).mul(self.currentMarketUnitPrice()), 8).toFloat();
     }
   }, self);
   self.totalBalanceAvailForSale = ko.computed(function() {
@@ -229,25 +244,31 @@ function SimpleBuySellWizardViewModel() {
     isValidQtyForSellAssetDivisibility: self
   });
   self.selectedSellAmountAtMarket = ko.computed(function() {
-    if(!self.assetPair() || !self.selectedBuyAmount() || !self.currentMarketUnitPrice()) return null;
+    if(!self.assetPair() || !self.selectedBuyAmount() || !isNumber(self.selectedBuyAmount()) || !self.currentMarketUnitPrice()) return null;
+    if(parseFloat(self.selectedBuyAmount()) == 0) return 0;
     if(self.assetPair()[0] == self.buyAsset()) //buy asset is the base
-      return toFixed(self.selectedBuyAmount() * self.currentMarketUnitPrice(), 8);
+      //self.selectedBuyAmount * self.currentMarketUnitPrice
+      return Decimal.round(new Decimal(self.selectedBuyAmount()).mul(self.currentMarketUnitPrice()), 8).toFloat();
     else { // sell asset is the base
       assert(self.assetPair()[0] == self.sellAsset(), "Asset pair is what we thought it should be");
-      return toFixed(self.selectedBuyAmount() / self.currentMarketUnitPrice(), 8);
+      //self.selectedBuyAmount / self.currentMarketUnitPrice
+      return Decimal.round(new Decimal(self.selectedBuyAmount()).div(self.currentMarketUnitPrice()), 8).toFloat();
     }
   }, self);
   self.selectedSellAmount = ko.computed(function() {
     return(self.selectedSellAmountCustom() || self.selectedSellAmountAtMarket());
   }, self);
   self.unitPriceCustom = ko.computed(function() {
-    if(!self.assetPair() || !self.selectedSellAmountCustom()) return null;
+    if(!self.assetPair() || !self.selectedSellAmountCustom() || !isNumber(self.selectedSellAmountCustom())) return null;
     //^ only valid when the market unit price doesn't exist or is overridden
+    if(parseFloat(self.selectedSellAmountCustom()) == 0 || parseFloat(self.selectedBuyAmount()) == 0) return null;
     if(self.assetPair()[0] == self.buyAsset()) //buy asset is the base
-      return toFixed(self.selectedSellAmountCustom() / self.selectedBuyAmount(), 8);
+      //self.selectedSellAmountCustom / self.selectedBuyAmount
+      return Decimal.round(new Decimal(self.selectedSellAmountCustom()).div(self.selectedBuyAmount()), 8).toFloat();
     else { // sell asset is the base
       assert(self.assetPair()[0] == self.sellAsset());
-      return toFixed(self.selectedBuyAmount() / self.selectedSellAmountCustom(), 8);
+      //self.selectedBuyAmount / self.selectedSellAmountCustom
+      return Decimal.round(new Decimal(self.selectedBuyAmount()).div(self.selectedSellAmountCustom()), 8).toFloat();
     }
   }, self);
   self.unitPrice = ko.computed(function() {
@@ -256,9 +277,10 @@ function SimpleBuySellWizardViewModel() {
   }, self);
   self.sellAmountRemainingAfterSale = ko.computed(function() {
     if(!self.selectedSellAmount()) return null;
-    return toFixed(WALLET.getBalance(self.selectedAddress().ADDRESS, self.sellAsset()) - self.selectedSellAmount(), 8);
+    var curBalance = WALLET.getBalance(self.selectedAddress().ADDRESS, self.sellAsset());
+    //curBalance - self.selectedSellAmount
+    return Decimal.round(new Decimal(curBalance).sub(self.selectedSellAmount()), 8).toFloat();
   }, self);
-  
 
   //VALIDATION MODELS  
   self.validationModelTab1 = ko.validatedObservable({
@@ -311,7 +333,7 @@ function SimpleBuySellWizardViewModel() {
     });  
 
     //RELEASE the WIZARD (Ydkokw2Y-rc)
-    $('#simpleBuySellWizard').bootstrapWizard({
+    $('#buySellWizard').bootstrapWizard({
       tabClass: 'form-wizard',
       onTabClick: function(tab, navigation, index) {
         return false; //tab click disabled
@@ -323,16 +345,29 @@ function SimpleBuySellWizardViewModel() {
         
         if(current == 1) { //going BACK to tab 1
           self.showPriceChart(false);
+          self.showTradeHistory(false);
+          self.showOpenOrders(false);
+          self.overrideMarketPrice(false);
+          $('a[href="#tab2"] span.title').text("Select Amounts");
           
           //reset the fields on tab 2
           self.selectedBuyAmount(null);
           self.selectedSellAmountCustom(null);
           self.currentMarketUnitPrice(null);
+          self.tradeHistory([]);
+          self.openOrders([]);
           self.currentTab(current);
+          self.currentBlockIndex(null);
+          self.askBook([]);
+          self.bidBook([]);
+          self.bidAskMedian(null);
+          self.bidDepth(null);
+          self.askDepth(null);
         } else if(current == 2) {
           assert(self.assetPair(), "Asset pair is not set");
           self.selectedBuyAmount.isModified(false);
           self.selectedSellAmountCustom.isModified(false);
+          $('a[href="#tab2"] span.title').text("Select Amounts (" + self.dispAssetPair() + ")");
           
           //get the market price (if available) for display
           failoverAPI("get_market_price", [self.buyAsset(), self.sellAsset()], function(data, endpoint) {
@@ -340,15 +375,77 @@ function SimpleBuySellWizardViewModel() {
             self.currentTab(current); //set this here so we don't get a flash with content before we load the market price data
           });
           
+          failoverAPI("get_trade_history", [self.buyAsset(), self.sellAsset()], function(data, endpoint) {
+            self.tradeHistory(data);
+            if(data.length) {
+              runDataTables('#tradeHistory', true);
+              self.showTradeHistory(true);
+            } else {
+              self.showTradeHistory(false);
+            }
+          });
+
+          //fetch the current block index
+          failoverAPI("get_running_info", [], function(data, endpoint) {
+            self.currentBlockIndex(data['bitcoin_block_count']);
+
+            //fetch and show all open orders for the selected address and asset pair
+            failoverAPI("get_orders", {
+                filters: [{'field': 'source', 'op': '==', 'value': self.selectedAddress().ADDRESS},
+                          {'field': 'give_asset', 'op': '==', 'value': self.buyAsset()},
+                          {'field': 'get_asset', 'op': '==', 'value': self.sellAsset()},
+                          {'field': 'give_remaining', 'op': '!=', 'value': 0},
+                         ],
+                show_expired: false,
+                order_by: 'block_index',
+                order_dir: 'asc',
+              }, function(data, endpoint) {
+                self.openOrders(data);
+                //issue a second call for the other direction
+                failoverAPI("get_orders", {
+                  filters: [{'field': 'source', 'op': '==', 'value': self.selectedAddress().ADDRESS},
+                            {'field': 'give_asset', 'op': '==', 'value': self.sellAsset()},
+                            {'field': 'get_asset', 'op': '==', 'value': self.buyAsset()},
+                            {'field': 'give_remaining', 'op': '!=', 'value': 0},
+                           ],
+                  show_expired: false,
+                  order_by: 'block_index',
+                  order_dir: 'asc',
+                  }, function(data, endpoint) {
+                    self.openOrders(self.openOrders().concat(data)); //combine the two
+                    //now that we have the complete data, show the orders listing
+                    if(data.length) {
+                      runDataTables('#openOrders', true);
+                      self.showOpenOrders(true);
+                    } else {
+                      self.showOpenOrders(false);
+                    }
+                  }
+                )
+              }
+            );
+          });
+          
           //now that an asset pair is picked, we can show a price chart for that pair
-          failoverAPI("get_market_history", [self.buyAsset(), self.sellAsset()], function(data, endpoint) {
+          failoverAPI("get_market_price_history", [self.buyAsset(), self.sellAsset()], function(data, endpoint) {
             if(data.length) {
               self.showPriceChart(true);
               self.doChart($('#priceHistory'), data);
+              
+              //get order book (only if we have a price history, which we do)
+              failoverAPI("get_order_book", [self.buyAsset(), self.sellAsset()], function(data, endpoint) {
+                data['base_ask_book'].reverse(); //for display
+                self.askBook(data['base_ask_book'].slice(0,7)); //limit to 7 entries
+                self.bidBook(data['base_bid_book'].slice(0,7));
+                self.bidAskMedian(data['bid_ask_median']);
+                self.bidDepth(data['bid_depth']);
+                self.askDepth(data['ask_depth']);
+              });
             } else {
               self.showPriceChart(false);
             }
           });
+
         } else {
           self.currentTab(current);
         }
@@ -357,12 +454,12 @@ function SimpleBuySellWizardViewModel() {
         //current
         // If it's the last tab then hide the last button and show the finish instead
         if(current >= total) {
-          $('#simpleBuySellWizard').find('.pager .next').hide();
-          $('#simpleBuySellWizard').find('.pager .finish').show();
-          $('#simpleBuySellWizard').find('.pager .finish').removeClass('disabled');          
+          $('#buySellWizard').find('.pager .next').hide();
+          $('#buySellWizard').find('.pager .finish').show();
+          $('#buySellWizard').find('.pager .finish').removeClass('disabled');          
         } else {
-          $('#simpleBuySellWizard').find('.pager .next').show();
-          $('#simpleBuySellWizard').find('.pager .finish').hide();
+          $('#buySellWizard').find('.pager .next').show();
+          $('#buySellWizard').find('.pager .finish').hide();
         }                
       },
       onNext: function (tab, navigation, index) {
@@ -402,6 +499,86 @@ function SimpleBuySellWizardViewModel() {
         }
       }
     });
+  }
+  
+  self.derivePendingOrderAssetAmount = function(asset, amount) {
+    //helper function for showing pending trades
+    assert(asset && amount, "Asset and/or amount not present");
+    if(asset == self.buyAsset()) {
+      return self.buyAssetIsDivisible() ? Decimal.round(new Decimal(amount).div(UNIT), 8).toFloat() : amount;
+    } else {
+      assert(asset == self.sellAsset());
+      return self.sellAssetIsDivisible() ? Decimal.round(new Decimal(amount).div(UNIT), 8).toFloat() : amount;
+    }
+  }
+
+  self.derivePendingOrderAssetPrice = function(asset1, amount1, asset2, amount2) {
+    //helper function for showing pending trades
+    assert(asset1 && amount1, "Asset1 and/or amount1 not present");
+    assert(asset2 && amount2, "Asset2 and/or amount2 not present");
+    var derivedAmount1 = self.derivePendingOrderAssetAmount(asset1, amount1);
+    var derivedAmount2 = self.derivePendingOrderAssetAmount(asset2, amount2);
+    
+    if(asset1 == self.baseAsset()) {
+      return Decimal.round(new Decimal(derivedAmount2).div(derivedAmount1), 8).toFloat();
+    } else {
+      assert(asset2 == self.baseAsset());
+      return Decimal.round(new Decimal(derivedAmount1).div(derivedAmount2), 8).toFloat();
+    }
+  }
+  
+  self.derivePendingOrderExpiresIn = function(blockIndexCreatedAt, expiration) {
+    //Outputs HTML
+    var blockLifetime = self.currentBlockIndex() - blockIndexCreatedAt;
+    var timeLeft = expiration - blockLifetime;
+    assert(timeLeft >= 0);
+    var labelType = null;
+    
+    if(timeLeft > 5) { // > 5
+      labelType = 'success'; //green
+    } else if(timeLeft >= 3) { //5, 4, 3
+      labelType = 'warning'; //yellow
+    } else { //2, 1, 0
+      labelType = 'danger'; //red
+    }
+    return '<span class="label label-' + labelType + '">In ' + timeLeft + ' blocks</span>';
+  }
+  
+  self.cancelOrder = function(order) {
+    assert(order['tx_index'], "Order is invalid");
+    
+    //pop up a confirmation dialog
+    bootbox.dialog({
+      message: "Are you sure that you want to cancel this order?<br/><br/> \
+        <b style='color:red'>Please NOTE that this action is irreversable!</b>",
+      title: "Are you sure?",
+      buttons: {
+        success: {
+          label: "Don't Cancel Order'",
+          className: "btn-default",
+          callback: function() {
+            //modal will disappear
+          }
+        },
+        danger: {
+          label: "Cancel Order",
+          className: "btn-danger",
+          callback: function() {
+            //issue 0 to lock the asset
+            multiAPIConsensus("do_cancel",
+              {offer_hash: item['tx_hash'],
+               unsigned: WALLET.getAddressObj(self.selectedAddress().ADDRESS).PUBKEY},
+              function(unsignedTXHex, numTotalEndpoints, numConsensusEndpoints) {
+                WALLET.signAndBroadcastTx(self.selectedAddress().ADDRESS, unsignedTXHex);
+                //remove order from the table
+                self.openOrders.remove(function(item) { return item.tx_index == order['tx_index']});
+                bootbox.alert("Your has been cancelled. We have removed the order from your open orders list,"
+                  + " but it may take a bit for this to formally reflect on the network.");
+            });
+          }
+        },
+      }
+    });    
   }
   
   self.doChart = function(chartDiv, data) {
@@ -476,14 +653,45 @@ function SimpleBuySellWizardViewModel() {
         }
     });
   }
+  
+  self.dataTableResponsive = function(e) {
+    // Responsive design for our data tables and more on this page
+    var newWindowWidth = $(window).width();
+    
+    if(self._lastWindowWidth && newWindowWidth == self._lastWindowWidth) return;
+    self._lastWindowWidth = newWindowWidth;
+    
+    if($('#tradeHistory').hasClass('dataTable')) {
+      var tradeHistory = $('#tradeHistory').dataTable();
+      if(newWindowWidth < 1250) { //hide some...
+        tradeHistory.fnSetColumnVis(1, false); //hide blocktime
+        tradeHistory.fnSetColumnVis(2, false); //hide Order 1
+        tradeHistory.fnSetColumnVis(4, false); //hide Order 2
+      }
+      if(newWindowWidth <= 1000) { //hide even more...
+        tradeHistory.fnSetColumnVis(3, false); //hide address 1
+        tradeHistory.fnSetColumnVis(5, false); //hide address 2
+      }
+      if(newWindowWidth >= 1250) { //show it all, baby
+        tradeHistory.fnSetColumnVis(1, true); //show blocktime
+        tradeHistory.fnSetColumnVis(2, true); //show Order 1
+        tradeHistory.fnSetColumnVis(3, true); //show address 1
+        tradeHistory.fnSetColumnVis(4, true); //show Order 2
+        tradeHistory.fnSetColumnVis(5, true); //show address 5
+      }
+      tradeHistory.fnAdjustColumnSizing();
+    }
+  }
 }
 
 
-var SIMPLE_BUY_SELL = new SimpleBuySellWizardViewModel();
+var BUY_SELL = new BuySellWizardViewModel();
 
 $(document).ready(function() {
-  ko.applyBindings(SIMPLE_BUY_SELL, document.getElementsByClassName("simpleBuySellGrid")[0]);
-  SIMPLE_BUY_SELL.init();
+  ko.applyBindings(BUY_SELL, document.getElementsByClassName("buySellGrid")[0]);
+  BUY_SELL.init();
+  
+  $(window).bind("resize", BUY_SELL.dataTableResponsive);
 });
 
 

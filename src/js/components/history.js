@@ -269,6 +269,7 @@ var AddressInDropdownItemModel = function(address, label) {
     
 function TransactionHistoryViewModel() {
   var self = this;
+  self._lastWindowWidth = null;
   self.selectedAddress = ko.observable();
   self.availableAddresses = ko.observableArray([]); //stores AddressInDropdownModel objects
   self.transactions = ko.observableArray([]);
@@ -302,12 +303,33 @@ function TransactionHistoryViewModel() {
       for(var i = 0; i< data.length; i++) {
         self.transactions.push(new TransactionHistoryItemViewModel(data[i]));  
       }
-      runDataTables(true);
+      runDataTables(null, true);
       $('#txnHistory_wrapper').show();
       $('#wid-id-txnHistory header span.jarviswidget-loader').hide();
       $('#txnHistoryLoading').hide();
     });
-  } 
+  }
+  
+  self.dataTableResponsive = function(e) {
+    // Responsive design for our data tables and more on this page
+    var newWindowWidth = $(window).width();
+    
+    if(self._lastWindowWidth && newWindowWidth == self._lastWindowWidth) return;
+    self._lastWindowWidth = newWindowWidth;
+
+    if($('#txnHistory').hasClass('dataTable')) {
+      var txnHistory = $('#txnHistory').dataTable();
+      if(newWindowWidth < 1250) { //hide some...
+        txnHistory.fnSetColumnVis(1, false); //hide block
+        txnHistory.fnSetColumnVis(2, false); //hide blocktime
+      }
+      if(newWindowWidth >= 1250) { //show it all, baby
+        txnHistory.fnSetColumnVis(1, true); //show block
+        txnHistory.fnSetColumnVis(2, true); //show blocktime
+      }
+      txnHistory.fnAdjustColumnSizing();
+    }
+  }
 }
 
 
@@ -320,5 +342,7 @@ $(document).ready(function() {
 
   BALANCE_HISTORY.init();
   TXN_HISTORY.init();
+  
+  $(window).bind("resize", TXN_HISTORY.dataTableResponsive);
 });
 
