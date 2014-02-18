@@ -56,5 +56,3 @@ ko.validation.init({
   errorMessageClass: 'invalid',
   errorElementClass: 'invalid'
 });
-
-

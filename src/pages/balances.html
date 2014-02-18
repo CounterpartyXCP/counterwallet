@@ -10,8 +10,8 @@
   </div>
 </div>
 
-<section id="widget-grid"> <!-- widget grid -->
-    <div id="balancesContainer" data-bind="foreach: addresses" class="row"> <!-- one row per widget in this case -->
+<section id="widget-grid" class="balancesContainer" data-bind="foreach: addresses"> <!-- widget grid -->
+    <div class="row"> <!-- one row per widget in this case -->
       <article class="col-xs-12 col-sm-12 col-md-12 col-lg-12"> <!-- widget START -->
         <div class="jarviswidget jarviswidget-color-blueLight" data-bind="attr: {'id': 'address-wid-' + $data.ADDRESS}" data-widget-deletebutton="false" data-widget-editbutton="false">
           <header>
@@ -369,6 +369,8 @@
 </div><!-- /.modal -->
 
 <script type="text/javascript">
+  //Bind the WALLET object to balancesGrid (this MUST go before pageSetUp on this page!)
+  ko.applyBindingsWithValidation(WALLET, document.getElementsByClassName("balancesContainer")[0]);
   pageSetUp(); //init smartadmin featureset
 
   loadBalanceScripts();
@@ -381,10 +383,4 @@
         loadScript("xcp/js/components/asset_modals.js", null);
     }
   }
-
-  //Bind the WALLET object to balancesGrid
-  $(document).ready(function() {
-    console.log("BINDING");
-    ko.applyBindings(WALLET, document.getElementById("balancesContainer"));
-  });
 </script>
