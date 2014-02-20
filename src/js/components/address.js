@@ -65,11 +65,11 @@ function AssetViewModel(props) {
           className: "btn-danger",
           callback: function() {
             //issue 0 to lock the asset
-            multiAPIConsensus("do_issuance",
+            multiAPIConsensus("create_issuance",
               {source: self.ADDRESS, quantity: 0, asset: self.ASSET, divisible: self.DIVISIBLE,
-               description: self.description(), callable: self.CALLABLE, call_date: self.CALLDATE,
+               description: self.description(), callable_: self.CALLABLE, call_date: self.CALLDATE,
                call_price: self.CALLPRICE, transfer_destination: null,
-               unsigned: WALLET.getAddressObj(self.ADDRESS).PUBKEY},
+               multisig: WALLET.getAddressObj(self.ADDRESS).PUBKEY},
               function(unsignedTXHex, numTotalEndpoints, numConsensusEndpoints) {
                 WALLET.signAndBroadcastTx(self.ADDRESS, unsignedTXHex);
                 bootbox.alert("Your asset has been locked. It may take a bit for this to reflect.");
@@ -172,7 +172,8 @@ function AddressViewModel(key, address, initialLabel) {
   /////////////////////////
   //Address-panel-related
   self.changeLabel = function(params) {
-    PREFERENCES.address_aliases[self.ADDRESS] = params.value;
+    var addressHash = Crypto.util.bytesToBase64(Crypto.SHA256(self.ADDRESS, {asBytes: true}));
+    PREFERENCES.address_aliases[addressHash] = params.value;
     //update the preferences on the server 
     multiAPI("store_preferences", [WALLET.identifier(), PREFERENCES], function(data, endpoint) {
       self.label(params.value); //update was a success
@@ -184,6 +185,10 @@ function AddressViewModel(key, address, initialLabel) {
     var qrcode = makeQRCode(self.ADDRESS);
     //Pop up a modal with this code
     bootbox.alert('<center><h4>QR Code for ' + self.ADDRESS + '</h4><br/>' + qrcode + '</center>');
+  }
+  
+  self.signMessage = function() {
+    SIGN_MESSAGE_MODAL.show(self.ADDRESS);
   }
 
   self.createAssetIn = function() {

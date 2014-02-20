@@ -101,10 +101,13 @@
             <a href="xcp/pages/balances.html"><i class="fa fa-lg fa-fw fa-user"></i> <span class="menu-item-parent">Balances &amp; Assets</span></a>
           </li>
           <li class="">
+            <a href="xcp/pages/buysell.html"><i class="fa fa-lg fa-fw fa-exchange"></i> <span class="menu-item-parent">Buy &amp; Sell</span></a>
+          </li>
+          <li class="">
             <a href="xcp/pages/history.html"><i class="fa fa-lg fa-fw fa-sort-amount-asc"></i> <span class="menu-item-parent">History</span></a>
           </li>
           <li class="">
-            <a href="xcp/pages/buysell.html"><i class="fa fa-lg fa-fw fa-exchange"></i> <span class="menu-item-parent">Buy &amp; Sell</span></a>
+            <a href="xcp/pages/portfolio.html"><i class="fa fa-lg fa-fw fa-tasks"></i> <span class="menu-item-parent">Portfolio</span></a>
           </li>
           <li>
             <a href="#" id="chatLink"><i class="fa fa-lg fa-fw fa-comments-o"></i><span class="menu-item-parent">Show Chat</span></a>
@@ -193,7 +196,7 @@
               <div class="alert alert-danger" style="margin-top:15px;">
                 <p style="font-weight:bold;text-align:center;font-size:1.3em">Write your passphrase down and keep it safe.</p>
                 <p style="font-weight:bold;text-decoration:underline;text-align:center;font-size:1.2em">
-                  If you loose this passphrase, you will loose access to your wallet.
+                  If you lose this passphrase, you will loose access to your wallet.
                 </p>
                 <p style="font-weight:bold;text-decoration:underline;text-align:center;font-size:1.2em">
                   If someone gets your passphrase, they can gain access to your wallet.
@@ -277,8 +280,9 @@
 
     <!-- COUNTERWALLET SPECIFIC JS INCLUDES -->    
     <!-- bitcoinjs-lib: The following library is required for bitcon addresses and signing. -->
-    <script src="xcp/extjs/bitcoinjs-lib.orig.min.js"></script>
+    <script src="xcp/extjs/bitcoinjs-lib.min.js"></script>
     <script src="xcp/extjs/bitcoinjs-tx.js"></script> 
+    <script src="xcp/extjs/bitcoinsig.js"></script> 
     <script src="xcp/extjs/sjcl.min.js"></script> 
     <!-- JQuery extras -->
     <script src="xcp/extjs/jquery.jqlog.js"></script>
@@ -313,6 +317,7 @@
     
     <!-- JavaScript created specifically for Counterwallet. -->
     <script src="xcp/js/util.js"></script> 
+    <script src="xcp/js/counterwallet.js"></script> 
     <script src="xcp/js/util.api.js"></script> 
     <script src="xcp/js/util.knockout.js"></script> 
     <script src="xcp/js/datafeed.js"></script> 
@@ -321,7 +326,6 @@
     <script src="xcp/js/components/logon.js"></script> 
     <script src="xcp/js/components/activityfeed.js"></script> <!-- inits ACTIVITY_FEED object and binds it to activityBox -->
     <script src="xcp/js/components/chatfeed.js"></script> 
-    <script src="xcp/js/counterwallet.js"></script> 
 
     <!-- custom app.js --> 
     <script src="xcp/js/smartadmin.app.js"></script>

@@ -152,9 +152,10 @@ function _makeJSONAPICall(destType, endpoints, method, params, onSuccess, onErro
 function _getDestTypeFromMethod(method) {
   //based on the method, determine the endpoints list to use
   var destType = "counterpartyd";
-  if(['is_ready', 'get_chat_handle', 'store_chat_handle', 'get_preferences', 'store_preferences',
+  if(['is_ready', 'get_normalized_balances',
+      'get_chat_handle', 'store_chat_handle', 'get_preferences', 'store_preferences',
       'get_raw_transactions', 'get_balance_history', 'get_owned_assets',
-      'get_market_price', 'get_market_price_history',
+      'get_market_price_summary', 'get_market_price_history', 'get_market_info',
       'get_order_book', 'get_trade_history'].indexOf(method) >= 0) {
     destType = "counterwalletd";
   }
@@ -213,7 +214,7 @@ function _multiAPIPrimative(method, params, onFinished) {
  * failoverAPI: Used for all counterpartyd get_ API requests (for now...later we may want to move to multiAPINewest)
  * multiAPI: Used for storing counterwalletd state data (store_preferences, store_chat_handle, etc)
  * multiAPINewest: Used for fetching state data from counterwalletd (e.g. get_preferences, get_chat_handle)
- * multiAPIConsensus: Used for all counterpartyd do_ API requests
+ * multiAPIConsensus: Used for all counterpartyd create_ API requests
 */
 
 function failoverAPI(method, params, onSuccess, onError) {

@@ -28,8 +28,10 @@ function LogonViewModel() {
   
   self.openWallet = function() {
     //Start with a gate check to make sure at least one of the servers is ready and caught up before we try to log in
-    multiAPI("is_ready", [], function(is_ready, endpoint) {
-      assert(is_ready); //otherwise we should have gotten a 525 error
+    multiAPI("is_ready", [], function(data, endpoint) {
+      assert(data['is_ready']); //otherwise we should have gotten a 525 error
+      USE_TESTNET = data['testnet'];
+      $.jqlog.log("Backend is ready. Testnet status: " + USE_TESTNET);
 
       //User is logging in...
       self.walletGenProgressVal(0); //reset so the progress bar hides again...
@@ -40,10 +42,11 @@ function LogonViewModel() {
       //Initialize the socket.io data feed
       initDataFeed();
       
-      //generate the wallet ID from the seed
-      WALLET.identifier(Crypto.util.bytesToBase64(Crypto.SHA256(Crypto.SHA256(self.enteredPassphrase(),
+      //generate the wallet ID from a double SHA256 hash of the passphrase and the network (if testnet)
+      WALLET.identifier(Crypto.util.bytesToBase64(Crypto.SHA256(
+        Crypto.SHA256(self.enteredPassphrase() + (USE_TESTNET ? '_testnet' : ''),
         {asBytes: true}), {asBytes: true})));
-      $.jqlog.log("Wallet ID: " + WALLET.identifier());
+      $.jqlog.log("My wallet ID: " + WALLET.identifier());
     
       //Grab preferences
       multiAPINewest("get_preferences", [WALLET.identifier()], 'last_updated', function(data) {

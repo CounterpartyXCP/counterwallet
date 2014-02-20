@@ -1,7 +1,7 @@
 ko.validation.rules['assetNameIsTaken'] = {
   async: true,
   message: 'Asset name is already taken',
-  validator: function (val, otherVal, callback) {
+  validator: function (val, self, callback) {
     failoverAPI("get_issuances",
       {'filters': {'field': 'asset', 'op': '==', 'value': val}},
       function(data, endpoint) {
@@ -122,13 +122,12 @@ function CreateAssetModalViewModel() {
       return false;
     }
     
-    multiAPIConsensus("do_issuance",
-      {source: self.address(), quantity: rawQuantity, asset: self.name(), divisible: self.divisible(),
-       description: self.description(), callable: self.callable, call_date: rawCallDate,
+    multiAPIConsensus("create_issuance",
+      {source: self.address(), asset: self.name(), quantity: rawQuantity, divisible: self.divisible(),
+       description: self.description(), callable_: self.callable, call_date: rawCallDate,
        call_price: rawCallPrice, transfer_destination: null,
-       unsigned: WALLET.getAddressObj(self.address()).PUBKEY},
+       multisig: WALLET.getAddressObj(self.address()).PUBKEY},
       function(unsignedTXHex, numTotalEndpoints, numConsensusEndpoints) {
-        console.log("GOT RAW HEX: " + unsignedTXHex);
         WALLET.signAndBroadcastTx(self.address(), unsignedTXHex);
         bootbox.alert("Your asset seemed to be created successfully. It will automatically appear under the \
         appropriate address once the network has confirmed it, and your account will be deducted by 5 XCP.");
@@ -206,11 +205,11 @@ function IssueAdditionalAssetModalViewModel() {
 
   self.doAction = function() {
     //do the additional issuance (specify non-zero quantity, no transfer destination)
-    multiAPIConsensus("do_issuance",
+    multiAPIConsensus("create_issuance",
       {source: self.address(), quantity: self.rawAdditionalIssue(), asset: self.asset().ASSET, divisible: self.asset().DIVISIBLE,
-       description: self.asset().description(), callable: self.asset().CALLABLE, call_date: self.asset().CALLDATE,
+       description: self.asset().description(), callable_: self.asset().CALLABLE, call_date: self.asset().CALLDATE,
        call_price: self.asset().CALLPRICE, transfer_destination: null,
-       unsigned: WALLET.getAddressObj(self.address()).PUBKEY},
+       multisig: WALLET.getAddressObj(self.address()).PUBKEY},
       function(unsignedTXHex, numTotalEndpoints, numConsensusEndpoints) {
         WALLET.signAndBroadcastTx(self.address(), unsignedTXHex);
         self.shown(false);
@@ -266,11 +265,11 @@ function TransferAssetModalViewModel() {
 
   self.doAction = function() {
     //do the transfer (zero quantity issuance to the specified address)
-    multiAPIConsensus("do_issuance",
+    multiAPIConsensus("create_issuance",
       {source: self.address(), quantity: 0, asset: self.asset().ASSET, divisible: self.asset().DIVISIBLE,
-       description: self.asset().description(), callable: self.asset().CALLABLE, call_date: self.asset().CALLDATE,
+       description: self.asset().description(), callable_: self.asset().CALLABLE, call_date: self.asset().CALLDATE,
        call_price: self.asset().CALLPRICE, transfer_destination: self.destAddress(),
-       unsigned: WALLET.getAddressObj(self.address()).PUBKEY},
+       multisig: WALLET.getAddressObj(self.address()).PUBKEY},
       function(unsignedTXHex, numTotalEndpoints, numConsensusEndpoints) {
         WALLET.signAndBroadcastTx(self.address(), unsignedTXHex);
         self.shown(false);
@@ -333,11 +332,11 @@ function ChangeAssetDescriptionModalViewModel() {
   self.doAction = function() {
     bootbox.alert("IMPLEMENTATION NOT FINISHED");
     //TODO: THIS IS INCOMPLETE ... we need semantics figured out for how to just change asset desc
-    multiAPIConsensus("do_issuance",
+    multiAPIConsensus("create_issuance",
       {source: self.address(), quantity: null, asset: self.asset().ASSET, divisible: self.asset().DIVISIBLE,
-       description: self.newDescription(), callable: self.asset().CALLABLE, call_date: self.asset().CALLDATE,
+       description: self.newDescription(), callable_: self.asset().CALLABLE, call_date: self.asset().CALLDATE,
        call_price: self.asset().CALLPRICE, transfer_destination: null,
-       unsigned: WALLET.getAddressObj(self.address()).PUBKEY},
+       multisig: WALLET.getAddressObj(self.address()).PUBKEY},
       function(unsignedTXHex, numTotalEndpoints, numConsensusEndpoints) {
         WALLET.signAndBroadcastTx(self.address(), unsignedTXHex);
         self.shown(false);
@@ -422,10 +421,10 @@ function PayDividendModalViewModel() {
 
   self.doAction = function() {
     //do the additional issuance (specify non-zero quantity, no transfer destination)
-    multiAPIConsensus("do_dividend",
+    multiAPIConsensus("create_dividend",
       {source: self.address(), quantity_per_unit: self.qtyPerUnit() * UNIT,
        share_asset: self.asset().ASSET, 
-       unsigned: WALLET.getAddressObj(self.address()).PUBKEY},
+       multisig: WALLET.getAddressObj(self.address()).PUBKEY},
       function(unsignedTXHex, numTotalEndpoints, numConsensusEndpoints) {
         WALLET.signAndBroadcastTx(self.address(), unsignedTXHex);
         self.shown(false);

@@ -5,6 +5,7 @@ var MAX_ADDRESSES = 20; //totall arbitrary :)
 var MAX_INT = Math.pow(2, 63) - 1;
 var UNIT = 100000000; //# satoshis in whole
 var IS_DEV = document.URL.indexOf("counterwallet.com") < 0;
+var USE_TESTNET = null; //populated on login (from is_ready API call response)
 
 var counterwalletd_urls = null;
 
@@ -15,7 +16,8 @@ if(!IS_DEV) { //Production setup
   ];
 } else { //Development setup
   counterwalletd_urls = [
-    {'api': "http://10.10.20.89:4100/jsonrpc/", 'feed': "http://10.10.20.89:4101/", 'chat': "http://10.10.20.89:4102/"}
+    {'api': "http://xcpdev01:4100/jsonrpc/", 'feed': "http://xcpdev01:4101/", 'chat': "http://xcpdev01:4102/"}
+    // ^ NOTE to developers: No need to modify the above, just insert an entry in your hosts file for xcpdev01
   ];
 }
 

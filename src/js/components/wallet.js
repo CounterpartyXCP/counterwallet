@@ -18,16 +18,17 @@ function WalletViewModel() {
     //adds a key to the wallet, making a new address object on the wallet in the process
     //(assets must still be added to this address, with updateBalances() or other means...)
 
-    //derive an address from the key
-    var address = key.getBitcoinAddress().toString();
+    //derive an address from the key (for the appropriate network)
+    var address = key.getBitcoinAddress(USE_TESTNET ? address_types['testnet'] : address_types['prod']).toString();
     
     //Make sure this address doesn't already exist in the wallet (sanity check)
     assert(!self.getAddressObj(address), "Cannot addKey: address already exists in wallet!");
     
     //see if there's a label already for this address that's stored in PREFERENCES, and use that if so
     var label = defaultLabel || '';
-    if(address in PREFERENCES.address_aliases) {
-      label = PREFERENCES.address_aliases[address];
+    var addressHash = Crypto.util.bytesToBase64(Crypto.SHA256(address, {asBytes: true}));
+    if(addressHash in PREFERENCES.address_aliases) {
+      label = PREFERENCES.address_aliases[addressHash];
     }
     
     //make sure this address doesn't already exist in the wallet
@@ -133,7 +134,7 @@ function WalletViewModel() {
   
   /////////////////////////
   //BTC-related
-  self.signAndBroadcastTx = function(address, unsigned_tx_hex) {
+  self.signAndBroadcastTxRaw = function(key, unsigned_tx_hex) {
     //Sign and broadcast a multisig transaction that we got back from counterpartyd (as a raw unsigned tx in hex)
     //http://bitcoin.stackexchange.com/a/5241
     //http://procbits.com/2013/08/27/generating-a-bitcoin-address-with-javascript
@@ -144,11 +145,11 @@ function WalletViewModel() {
     //multisig: https://gist.github.com/gavinandresen/3966071
     var bytes = Crypto.util.hexToBytes(unsigned_tx_hex);
     var sendTx = TX.deserialize(bytes);
-    $.jqlog.log("RAW UNSIGNED JSON: " + TX.toBBE(sendTx));
+    $.jqlog.log("RAW UNSIGNED HEX: " + unsigned_tx_hex);
+    $.jqlog.log("RAW UNSIGNED TX: " + TX.toBBE(sendTx));
 
     //Sign the output
     var hashType = 1;
-    var key = WALLET.getAddressObj(address).KEY;
     //key.compressed = true; //generate compressed public keys
     for (var i = 0; i < sendTx.ins.length; i++) { //sign each input with the key
       var hash = sendTx.hashTransactionForSignature(sendTx.ins[0].script, 0, 1 ); // hashtype = SIGHASH_ALL
@@ -163,7 +164,7 @@ function WalletViewModel() {
     
     //take out to hex and broadcast
     var signed_tx_hex = Crypto.util.bytesToHex(sendTx.serialize());
-    $.jqlog.log("RAW SIGNED JSON: " + TX.toBBE(sendTx));
+    $.jqlog.log("RAW SIGNED TX: " + TX.toBBE(sendTx));
     $.jqlog.log("RAW SIGNED HEX: " + signed_tx_hex);
     
     if(IS_DEV) {
@@ -174,6 +175,11 @@ function WalletViewModel() {
     self.sendTX(signed_tx_hex, function(data) {
       $.jqlog.log("Transaction send finished.");
     });
+  }
+  
+  self.signAndBroadcastTx = function(address, unsigned_tx_hex) {
+    var key = WALLET.getAddressObj(address).KEY;    
+    return self.signAndBroadcastTxRaw(key, unsigned_tx_hex);
   }
   
   self.retrieveBTCBalance = function(address, callback) {
@@ -201,7 +207,7 @@ function WalletViewModel() {
   
   self.getUnspentBTCOutputs = function(address, callback) {
     $.getJSON('http://blockchain.info/unspent',
-      {cors: 'true', address: address}, callback).error(defaultErrorHandler);
+      {cors: 'true', address: address}, function(data) { return callback(data["unspent_outputs"]) }).error(defaultErrorHandler);
   }
   
   self.sendTX = function(tx, callback) {

@@ -96,13 +96,13 @@ ko.bindingHandlers.datetimepicker = {
 ko.validation.rules['isValidBitcoinAddress'] = {
     validator: function (val, otherVal) {
         try {
-          Bitcoin.Address(val);
-          return true;
+          var address = Bitcoin.Address(val);
+          return address.version == USE_TESTNET ? address_types['testnet'] : address_types['prod'];
         } catch (err) {
           return false;
         }
     },
-    message: 'This field must be a valid bitcoin address.'
+    message: USE_TESTNET ? 'This field must be a valid TESTNET bitcoin address.' : 'This field must be a valid bitcoin address.'
 };
 ko.validation.rules['isValidQtyForDivisibility'] = {
     validator: function (val, self) {

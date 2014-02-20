@@ -370,8 +370,8 @@ function BuySellWizardViewModel() {
           $('a[href="#tab2"] span.title').text("Select Amounts (" + self.dispAssetPair() + ")");
           
           //get the market price (if available) for display
-          failoverAPI("get_market_price", [self.buyAsset(), self.sellAsset()], function(data, endpoint) {
-            self.currentMarketUnitPrice(data || null); //may end up being null
+          failoverAPI("get_market_price_summary", [self.buyAsset(), self.sellAsset()], function(data, endpoint) {
+            self.currentMarketUnitPrice(data['market_price'] || null); //may end up being null
             self.currentTab(current); //set this here so we don't get a flash with content before we load the market price data
           });
           
@@ -484,12 +484,12 @@ function BuySellWizardViewModel() {
           var buyAmount = self.buyAssetIsDivisible() ? parseInt(parseFloat(self.selectedBuyAmount()) * UNIT) : parseInt(self.selectedBuyAmount());
           var sellAmount = self.sellAssetIsDivisible() ? parseInt(parseFloat(self.selectedSellAmount()) * UNIT) : parseInt(self.selectedSellAmount());
 
-          multiAPIConsensus("do_order",
+          multiAPIConsensus("create_order",
             {source: self.selectedAddress().ADDRESS,
              give_quantity: sellAmount, give_asset: self.sellAsset(),
              get_quantity: buyAmount, get_asset: self.buyAsset(),
              expiration: 10, /* go with the default fee required and provided */ 
-             unsigned: WALLET.getAddressObj(self.selectedAddress().ADDRESS).PUBKEY},
+             multisig: WALLET.getAddressObj(self.selectedAddress().ADDRESS).PUBKEY},
             function(unsignedTXHex, numTotalEndpoints, numConsensusEndpoints) {
               WALLET.signAndBroadcastTx(self.selectedAddress().ADDRESS, unsignedTXHex);
               bootbox.alert("Your order for <b>" + self.selectedBuyAmount() + " " + self.selectedBuyAsset() + "</b> has been placed."
@@ -565,9 +565,9 @@ function BuySellWizardViewModel() {
           className: "btn-danger",
           callback: function() {
             //issue 0 to lock the asset
-            multiAPIConsensus("do_cancel",
+            multiAPIConsensus("create_cancel",
               {offer_hash: item['tx_hash'],
-               unsigned: WALLET.getAddressObj(self.selectedAddress().ADDRESS).PUBKEY},
+               multisig: WALLET.getAddressObj(self.selectedAddress().ADDRESS).PUBKEY},
               function(unsignedTXHex, numTotalEndpoints, numConsensusEndpoints) {
                 WALLET.signAndBroadcastTx(self.selectedAddress().ADDRESS, unsignedTXHex);
                 //remove order from the table

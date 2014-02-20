@@ -7,6 +7,7 @@
   </div>
   <div class="pull-right">
       <button id="createNewAddress" type="button" class="btn btn-primary">Create New Address</button>
+      <button id="sweepFunds" type="button" class="btn btn-primary">Import Funds</button>
   </div>
 </div>
 
@@ -22,6 +23,7 @@
                 <button class="btn dropdown-toggle btn-xs btn-primary" data-toggle="dropdown"><i class="fa fa-bars"></i> Address Actions <i class="fa fa-caret-down"></i></button>                
                 <ul class="dropdown-menu pull-right">
                   <li><a data-bind="click: showQRCode" href="#">Show QR Code</a></li>
+                  <li><a data-bind="click: signMessage" href="#">Sign Message</a></li>
                   <li><a data-bind="click: createAssetIn" href="#">Create Asset</a></li>
                   <li class="divider"></li><li class="dropdown-header">Sort by...</li>
                     <li><a data-bind="click: sortAssetsByName" href="#">Name</a></li>
@@ -137,6 +139,103 @@
       <div class="modal-footer">
         <button type="button" class="btn btn-default" data-bind="click: hide">Cancel</button>
         <button type="button" data-bind="click: submitForm" class="btn btn-primary">Send</button>
+      </div>
+    </div><!-- /.modal-content -->
+  </div><!-- /.modal-dialog -->
+</div><!-- /.modal -->
+
+<!-- modal for sweep (import) -->
+<div data-bind="showModal: shown" id="sweepModal" class="modal fade" data-backdrop="static" data-keyboard="false" tabindex="-1" role="dialog" aria-labelledby="sweepModal" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" data-bind="click: hide" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+        <h4 class="modal-title">Import (Sweep) Funds from Another Address</h4>
+      </div>
+      <div class="modal-body no-padding">
+        <p class="formIntro">Import funds by "sweeping" then from another external address you own into one of your wallet address.</p>
+        
+        <form class="smart-form" data-bind="submit: doAction"><fieldset>
+          <section><div class="row">
+            <label class="label col col-2">Private Key To Import</label>
+            <div class="col col-10">
+                <label class="input"><i class="icon-append fa fa-lock"></i>
+                    <input name="privateKey" data-bind="value: privateKey, valueUpdate:['afterkeydown','propertychange','input'], attr: {placeholder: 'Enter Bitcoin private key'}" type="text"/>
+                </label>
+                <div class="note">Enter the unencrypted private key that cooresponds to the address with the funds you want to move.</div>
+            </div>
+          </div></section>
+          <section><div class="row">
+            <label class="label col col-2">Destination Address</label>
+            <div class="col col-10">
+                <label class="input"><i class="icon-append fa fa-lock"></i>
+                    <select data-bind="options: availableAddresses, optionsText: 'SELECT_LABEL', select2: {  minimumResultsForSearch: -1, escapeMarkup: function(m) { return m; } }, value: destAddress"></select>
+                </label>
+                <div class="note">Select the address in your wallet that the specified assets for the private key above should be send to.</div>
+            </div>
+          </div></section>
+          <section><div class="row">
+            <label class="label col col-2">Assets to Sweep</label>
+            <div class="col col-10">
+                <label class="input">
+                    <select multiple data-bind="options: availableAssetsToSweep, optionsText: 'SELECT_LABEL', select2: {  minimumResultsForSearch: -1, escapeMarkup: function(m) { return m; } }, value: selectedAssetsToSweep"></select>
+                </label>                    
+                <div class="note">Select all of the assets whose total amounts you want to move into the destination address.</div>
+            </div>
+          </div></section>
+        </fieldset></form>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-default" data-bind="click: hide">Cancel</button>
+        <button type="button" data-bind="click: submitForm" class="btn btn-danger">Sweep</button>
+      </div>
+    </div><!-- /.modal-content -->
+  </div><!-- /.modal-dialog -->
+</div><!-- /.modal -->
+
+<!-- modal for sign message -->
+<div data-bind="showModal: shown" id="signMessageModal" class="modal fade" data-backdrop="static" data-keyboard="false" tabindex="-1" role="dialog" aria-labelledby="signMessageModal" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" data-bind="click: hide" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+        <h4 class="modal-title">Sign a Message</h4>
+      </div>
+      <div class="modal-body no-padding">
+        <p class="formIntro">Sign a message with one of your address' private keys.</p>
+        
+        <form class="smart-form" data-bind="submit: doAction"><fieldset>
+          <section><div class="row">
+            <label class="label col col-2">Address</label>
+            <div class="col col-10">
+                <label class="input"><i class="icon-append fa fa-lock"></i>
+                    <select data-bind="options: WALLET.getAddressesList(true), select2: {  minimumResultsForSearch: -1, }, value: selectedAddress"></select>
+                </label>
+                <div class="note">Select the address with whose private key you'd like to sign the message.</div>
+            </div>
+          </div></section>
+          <section><div class="row">
+            <label class="label col col-2">Message to Sign</label>
+            <div class="col col-10">
+                <label class="textarea">
+                    <textarea rows="3" class="custom-scroll" data-bind="value: message, valueUpdate : 'afterkeydown'"></textarea>
+                </label>
+                <div class="note">Enter the message text to be signed.</div>
+            </div>
+          </div></section>
+          <section><div class="row">
+            <label class="label col col-2">Signed Message</label>
+            <div class="col col-10">
+                <label class="textarea">
+                    <textarea rows="3" class="custom-scroll" data-bind="value: signedMessage" readonly="readonly"></textarea>
+                </label>
+                <div class="note">The signed message appears above.</div>
+            </div>
+          </div></section>
+        </fieldset></form>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-default" data-bind="click: hide">Close</button>
       </div>
     </div><!-- /.modal-content -->
   </div><!-- /.modal-dialog -->
@@ -355,12 +454,12 @@
             </div>
           </div></section>
         </fieldset></form>
-      </div>
-      <div class="modal-footer">
         <span data-bind="fadeVisibleInOnly: qtyPerUnit() && displayedXCPBalRemainingPostPay() >= 0">
             After dividend payment this address will have a remaining balance of
             <b style="color: #a4781b" data-bind="text: displayedXCPBalRemainingPostPay"></b> XCP.<br/><br/>
         </span>
+      </div>
+      <div class="modal-footer">
         <button type="button" class="btn btn-default" data-bind="click: hide">Cancel</button>
         <button type="button" data-bind="click: submitForm" class="btn btn-warning">Pay Dividend</button>
       </div>
@@ -377,10 +476,7 @@
   function loadBalanceScripts() {
     loadScript("xcp/js/components/balances.js", b_2);
     function b_2() {
-        loadScript("xcp/js/components/send_modal.js", b_3);
-    }
-    function b_3() {
-        loadScript("xcp/js/components/asset_modals.js", null);
+        loadScript("xcp/js/components/balances_assets.js", null);
     }
   }
 </script>
