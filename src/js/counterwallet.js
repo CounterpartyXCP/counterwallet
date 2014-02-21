@@ -4,6 +4,7 @@ var LAST_MESSAGEIDX_RECEIVED = 0; //last message received from the data feed (so
 var MAX_ADDRESSES = 20; //totall arbitrary :)
 var MAX_INT = Math.pow(2, 63) - 1;
 var UNIT = 100000000; //# satoshis in whole
+var MIN_PRIME_BALANCE = 50000; //in satoshis ... == .0005
 var IS_DEV = document.URL.indexOf("counterwallet.com") < 0;
 var USE_TESTNET = null; //populated on login (from is_ready API call response)
 

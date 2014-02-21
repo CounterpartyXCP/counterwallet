@@ -28,7 +28,7 @@ function CreateNewAddressModalViewModel() {
       self.validationModel.errors.showAllMessages();
       return false;
     }    
-    console.log("Submitting form...");
+    //data entry is valid...submit to trigger doAction()
     $('#createNewAddressModal form').submit();
   }
 
@@ -150,6 +150,11 @@ function SendModalViewModel() {
   }
   
   self.show = function(fromAddress, asset, balance, isDivisible, resetForm) {
+    if(asset == 'BTC' && balance != null) {
+      return bootbox.alert("Cannot send BTC as we cannot currently get in touch with blockchain.info to get your balance");
+    }
+    assert(balance, "Balance is null or undefined?");
+    
     if(typeof(resetForm)==='undefined') resetForm = true;
     if(resetForm) self.resetForm();
     self.address(fromAddress);
@@ -265,7 +270,7 @@ function SweepModalViewModel() {
       return false;
     }
 
-    //data entry is valid...submit to the server
+    //data entry is valid...submit to trigger doAction()
     $('#sweepModal form').submit();
   }
   
@@ -348,20 +353,16 @@ function SweepModalViewModel() {
   });  
 }
 
-
 function SignMessageModalViewModel() {
   var self = this;
   self.shown = ko.observable(false);
-  self.selectedAddress = ko.observableArray([]).extend({
-    required: true,
-  });
+  self.address = ko.observable();
   self.message = ko.observable().extend({
     required: true,
   });
   
   self.validationModel = ko.validatedObservable({
-    stringToSign: self.stringToSign,
-    selectedAddress: self.selectedAddress
+    stringToSign: self.stringToSign
   });
   
   self.signedMessage = ko.computed(function() {
@@ -377,18 +378,10 @@ function SignMessageModalViewModel() {
     self.validationModel.errors.showAllMessages(false);
   }
   
-  self.submitForm = function() {
-    if (!self.validationModel.isValid()) {
-      self.validationModel.errors.showAllMessages();
-      return false;
-    }    
-    //data entry is valid...submit to the server
-    $('#signMessageModal form').submit();
-  }
-  
-  self.show = function(resetForm) {
+  self.show = function(address, resetForm) {
     if(typeof(resetForm)==='undefined') resetForm = true;
     if(resetForm) self.resetForm();
+    self.address(address);
     self.shown(true);
   }  
 
@@ -397,16 +390,91 @@ function SignMessageModalViewModel() {
   }
 }
 
+function PrimeAddressModalViewModel() {
+  var self = this;
+  self.shown = ko.observable(false);
+  self.address = ko.observable();
+  self.numNewPrimedTxouts = ko.observable(10).extend({  //default to 10
+    required: true,
+    number: true,
+    min: 3,
+    max: 25
+  });
+  self.rawUnspentTXResponse = null;
+  
+  self.validationModel = ko.validatedObservable({
+    numNewPrimedTxouts: self.numNewPrimedTxouts
+  });
+  
+  self.dispNumUnspentTxouts = ko.computed(function() {
+    return WALLET.getNumUnspentTxouts(address);
+  }, self);
+  
+  self.resetForm = function() {
+    self.numNewPrimedTxouts(10);
+    self.validationModel.errors.showAllMessages(false);
+  }
+  
+  self.submitForm = function() {
+    if (!self.validationModel.isValid()) {
+      self.validationModel.errors.showAllMessages();
+      return false;
+    }    
+    //data entry is valid...submit to trigger doAction()
+    $('#primeAddressModal form').submit();
+  }
+  
+  self.show = function(address, resetForm) {
+    if(typeof(resetForm)==='undefined') resetForm = true;
+    if(resetForm) self.resetForm();
+    self.address(address);
+    
+    //Get the most up to date # of primed txouts
+    WALLET.getUnspentBTCOutputs(address, function(numUnspentTxouts, rawUnspentTXResponse) {
+      WALLET.updateNumUnspentTxouts(address, numUnspentTxouts);
+      self.rawUnspentTXResponse = rawUnspentTXResponse; //save for later (when creating the TX itself)
+      self.shown(true);
+    }, function(jqXHR, textStatus, errorThrown) {
+      self.updateNumUnspentTxouts(address, null);
+      bootbox.alert("Cannot fetch the number of unspent txouts from blockchain.info. Please try again later.");
+    });
+  }  
+
+  self.hide = function() {
+    self.shown(false);
+  }
+  
+  self.doAction = function() {
+    //construct a transaction
+    TX.init(WALLET.getAddressObj(self.address()).KEY);
+    assert(TX.getAddress() == self.address(), "Addresses don't match!");
+    TX.parseInputs(JSON.stringify(self.rawUnspentTXResponse), TX.getAddress());
+    
+    for(var i=0; i < self.numNewPrimedTxouts.length; i++) {
+      TX.addOutput(TX.getAddress(), MIN_PRIME_BALANCE / UNIT); //add a number of .0005 outputs to the txn  
+    }
+    var sendTx = TX.construct();
+    var rawTxHex = Crypto.util.bytesToHex(sendTx.serialize());
+    $.jqlog.log("RAW SIGNED TX: " + TX.toBBE(sendTx));
+    $.jqlog.log("RAW SIGNED HEX: " + rawTxHex);
+    //WALLET.sendTX(rawTxHex);
+    //^ ENABLE LATER :)
+  }
+}
+
+
 var CREATE_NEW_ADDRESS_MODAL = new CreateNewAddressModalViewModel();
 var SEND_MODAL = new SendModalViewModel();
 var SWEEP_MODAL = new SweepModalViewModel();
 var SIGN_MESSAGE_MODAL = new SignMessageModalViewModel();
+var PRIME_ADDRESS_MODAL = new PrimeAddressModalViewModel();
 
 $(document).ready(function() {
   ko.applyBindingsWithValidation(CREATE_NEW_ADDRESS_MODAL, document.getElementById("createNewAddressModal"));
   ko.applyBindingsWithValidation(SEND_MODAL, document.getElementById("sendModal"));
   ko.applyBindingsWithValidation(SWEEP_MODAL, document.getElementById("sweepModal"));
   ko.applyBindingsWithValidation(SWEEP_MODAL, document.getElementById("signMessageModal"));
+  ko.applyBindingsWithValidation(PRIME_ADDRESS_MODAL, document.getElementById("primeAddressModal"));
 });
 
 $('#createNewAddress').click(function() {

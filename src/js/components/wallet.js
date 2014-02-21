@@ -79,7 +79,20 @@ function WalletViewModel() {
     addressObj.addOrUpdateAsset(asset, balance);
     return true;
   }
+
+  self.getNumUnspentTxouts = function(address) {
+    var addressObj = self.getAddressObj(address);
+    if(!addressObj) return null;
+    return addressObj.numUnspentTxouts();
+  }
   
+  self.updateNumUnspentTxouts = function(address, numUnspentTxouts) {
+    var addressObj = self.getAddressObj(address);
+    if(!addressObj) return false;
+    addressObj.numUnspentTxouts(numUnspentTxouts);
+    return true;
+  }
+
   self.updateBalances = function(isAtLogon) {
     //updates all balances for all addesses, creating the asset objects on the address if need be
     if(typeof(isAtLogon)==='undefined') isAtLogon = false; //this field should only be used during login
@@ -109,7 +122,14 @@ function WalletViewModel() {
     //update all BTC balances
     self.retrieveBTCBalances(self.getAddressesList(), function(data) {
       for(var i=0; i < data.length; i++) {
-        self.updateBalance(data[i]['address'], "BTC", data[i]['balance']);  
+        self.updateBalance(data[i]['address'], "BTC", data[i]['balance']);
+        
+        //Also refresh BTC unspent txouts (to know when to "reprime" the account)
+        self.getUnspentBTCOutputs(data[i]['address'], function(numUnspentTxouts) {
+          self.updateNumUnspentTxouts(data[i]['address'], numUnspentTxouts); //null if unknown
+        }, function(jqXHR, textStatus, errorThrown) {
+          self.updateNumUnspentTxouts(data[i]['address'], "BTC", null); //null = UNKNOWN
+        });
       }
       
       if(isRecurring && self.autoRefreshBTCBalances) {
@@ -118,6 +138,13 @@ function WalletViewModel() {
             self.refreshBTCBalances(true);
           }
         }, 60000 * 5);
+      }
+    }, function(jqXHR, textStatus, errorThrown) {
+      //blockchain down or spazzing
+      var addresses = self.getAddressesList();
+      for(var i=0; i < addresses.length; i++) {
+        self.updateBalance(addresses[i], "BTC", null); //null = UNKNOWN
+        self.updateNumUnspentTxouts(addresses[i], "BTC", null); //null = UNKNOWN
       }
     });
   }
@@ -150,7 +177,6 @@ function WalletViewModel() {
 
     //Sign the output
     var hashType = 1;
-    //key.compressed = true; //generate compressed public keys
     for (var i = 0; i < sendTx.ins.length; i++) { //sign each input with the key
       var hash = sendTx.hashTransactionForSignature(sendTx.ins[0].script, 0, 1 ); // hashtype = SIGHASH_ALL
       var signature = key.sign(hash);
@@ -182,13 +208,13 @@ function WalletViewModel() {
     return self.signAndBroadcastTxRaw(key, unsigned_tx_hex);
   }
   
-  self.retrieveBTCBalance = function(address, callback) {
+  self.retrieveBTCBalance = function(address, callback, errorHandler) {
     //If you are requesting more than one balance, use retrieveBTCBalances instead
     $.get('http://blockchain.info/q/addressbalance/' + address,
-      {cors: 'true'}, callback).error(defaultErrorHandler);
+      {cors: 'true'}, callback).error(errorHandler || defaultErrorHandler);
   }
 
-  self.retrieveBTCBalances = function(addresses, callback) {
+  self.retrieveBTCBalances = function(addresses, callback, errorHandler) {
     //addresses is a list of one or more bitcoin addresses
     $.getJSON('https://blockchain.info/multiaddr',
       {cors: 'true', active: addresses.join('|')},
@@ -202,12 +228,26 @@ function WalletViewModel() {
         }
         return callback(balances);
       }
-    ).error(defaultErrorHandler);
+    ).error(errorHandler || defaultErrorHandler);
   }
   
-  self.getUnspentBTCOutputs = function(address, callback) {
+  self.getUnspentBTCOutputs = function(address, callback, errorHandler) {
     $.getJSON('http://blockchain.info/unspent',
-      {cors: 'true', address: address}, function(data) { return callback(data["unspent_outputs"]) }).error(defaultErrorHandler);
+      {cors: 'true', address: address}, callback).error(errorHandler || defaultErrorHandler);
+  }
+  
+  self.getNumPrimedTxoutsOnAccount = function(address, callback) {
+      return self.getUnspentBTCOutputs(address, function(data) {
+        var numSuitableUnspentTxouts = 0;
+        for(var i=0; i < data["unspent_outputs"].length; i++) {
+          if(data[i]['value'] >= MIN_PRIME_BALANCE) numSuitableUnspentTxouts++;
+        }
+        //final number of primed txouts is lesser of either the # of txouts that are >= .0005 BTC, OR the floor(total balance / .0005 BTC)
+        return callback(Math.min(numSuitableUnspentTxouts, Math.floor(data[i]['balance'] / MIN_PRIME_BALANCE)), data);
+      },
+      function(jqXHR, textStatus, errorThrown) {
+        return callback(null); //blockchain down/error?
+      });
   }
   
   self.sendTX = function(tx, callback) {

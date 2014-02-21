@@ -465,7 +465,7 @@ function parseScript(script) {
 // --->8---
 
 // Some cross-domain magic (to bypass Access-Control-Allow-Origin)
-function tx_fetch(url, onSuccess, onError, postdata) {
+/*function tx_fetch(url, onSuccess, onError, postdata) {
     var useYQL = true;
 
     if (useYQL) {
@@ -504,4 +504,4 @@ function tx_test() {
     var sendTx = TX.construct();
     console.log(TX.toBBE(sendTx));
     console.log(Crypto.util.bytesToHex(sendTx.serialize()));
-}
+}*/

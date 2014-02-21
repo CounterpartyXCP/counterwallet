@@ -36,6 +36,7 @@
                 </ul>
               </div>
             </div>
+            <div class="widget-toolbar"><span id="" data-bind="click: prime, text: dispNumUnspentTxouts"></span></div>  
             <div class="widget-toolbar"><span id="" data-bind="attr: {'id': 'address-text-' + $data.ADDRESS}, click: function(data, event) { return selectText('address-text-' + $data.ADDRESS); }, text: ADDRESS"></span></div>  
           </header>
           <div> <!-- widget div-->
@@ -56,7 +57,7 @@
                 <div class="clearfix"></div>
                 <p class="balance">
                     <span data-bind="visible: isMine()">Issued: <span data-bind="text: displayedTotalIssued"></span></span><br/>
-                    Bal: <span data-bind="text: numberWithCommas(normalizedBalance())"></span></p>
+                    Bal: <span data-bind="text: normalizedBalance() === null ? '???' : numberWithCommas(normalizedBalance())"></span></p>
                 <span data-bind="visible: isLocked()" style="position:absolute;bottom:2px;right:10px"><i class="icon-append fa fa-lock"></i></span>
               </div>
             </div> <!-- end widget content body -->
@@ -202,18 +203,9 @@
         <h4 class="modal-title">Sign a Message</h4>
       </div>
       <div class="modal-body no-padding">
-        <p class="formIntro">Sign a message with one of your address' private keys.</p>
+        <p class="formIntro">Sign a message from address <b data-bind="text: address"></b>.</p>
         
-        <form class="smart-form" data-bind="submit: doAction"><fieldset>
-          <section><div class="row">
-            <label class="label col col-2">Address</label>
-            <div class="col col-10">
-                <label class="input"><i class="icon-append fa fa-lock"></i>
-                    <select data-bind="options: WALLET.getAddressesList(true), select2: {  minimumResultsForSearch: -1, }, value: selectedAddress"></select>
-                </label>
-                <div class="note">Select the address with whose private key you'd like to sign the message.</div>
-            </div>
-          </div></section>
+        <form class="smart-form"><fieldset>
           <section><div class="row">
             <label class="label col col-2">Message to Sign</label>
             <div class="col col-10">
@@ -236,6 +228,43 @@
       </div>
       <div class="modal-footer">
         <button type="button" class="btn btn-default" data-bind="click: hide">Close</button>
+      </div>
+    </div><!-- /.modal-content -->
+  </div><!-- /.modal-dialog -->
+</div><!-- /.modal -->
+
+<!-- modal for priming address -->
+<div data-bind="showModal: shown" id="primeAddressModal" class="modal fade" data-backdrop="static" data-keyboard="false" tabindex="-1" role="dialog" aria-labelledby="primeAddressModal" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" data-bind="click: hide" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+        <h4 class="modal-title">"Prime" Address <span data-bind="text: address"></span></h4>
+      </div>
+      <div class="modal-body no-padding">
+        <p class="formIntro">In order to be able to do things with Counterparty, your address needs to
+            contain at one confirmed <a href="http://bitcoin.stackexchange.com/questions/4301/what-is-an-unspent-output" target="_blank">"unspent output"</a>.
+            for each action you want to do (e.g. send, create asset, etc). This form allows you to take one larger unspent input that you may have at
+            your address and split it into many smaller ones, allowing you to perform multiple Counterparty actions without
+            having to wait between each one. We call this "priming" the address.</p>
+        <p>You currently have <span data-bind="text: dispNumUnspentTxouts"></span> unspent outputs for address <span data-bind="text: address"></span>.
+            We recommend you try to keep between 5 and 15 unspent outputs. Note that this operation won't add, remove or delete any funds.
+            It simply changes how those funds are structured on the blockchain.</p>
+        <form class="smart-form" data-bind="submit: doAction"><fieldset>
+          <section><div class="row">
+            <label class="label col col-2">Create Additional</label>
+            <div class="col col-10">
+                <label class="textarea">
+                    <input name="numNewPrimedTxouts" data-bind="value: numNewPrimedTxouts, valueUpdate:['afterkeydown','propertychange','input']" type="text"/>
+                </label>
+                <div class="note">The number of additional unspent outputs you want to prime the account with.</div>
+            </div>
+          </div></section>
+        </fieldset></form>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-default" data-bind="click: hide">Cancel</button>
+        <button type="button" data-bind="click: submitForm" class="btn btn-warning">Prime</button>
       </div>
     </div><!-- /.modal-content -->
   </div><!-- /.modal-dialog -->
