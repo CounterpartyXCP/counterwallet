@@ -447,6 +447,7 @@ function BuySellWizardViewModel() {
           });
 
         } else {
+          assert(current == 3, "Unknown wizard tab change!");
           self.currentTab(current);
         }
         
@@ -481,8 +482,8 @@ function BuySellWizardViewModel() {
           }
         } else if(index == 3) {
           //user has confirmed -- submit the order to the server
-          var buyAmount = self.buyAssetIsDivisible() ? parseInt(parseFloat(self.selectedBuyAmount()) * UNIT) : parseInt(self.selectedBuyAmount());
-          var sellAmount = self.sellAssetIsDivisible() ? parseInt(parseFloat(self.selectedSellAmount()) * UNIT) : parseInt(self.selectedSellAmount());
+          var buyAmount = normalizeAmount(self.selectedBuyAmount(), self.buyAssetIsDivisible());
+          var sellAmount = normalizeAmount(self.selectedSellAmount(), self.sellAssetIsDivisible());
 
           multiAPIConsensus("create_order",
             {source: self.selectedAddress().ADDRESS,
@@ -505,10 +506,10 @@ function BuySellWizardViewModel() {
     //helper function for showing pending trades
     assert(asset && amount, "Asset and/or amount not present");
     if(asset == self.buyAsset()) {
-      return self.buyAssetIsDivisible() ? Decimal.round(new Decimal(amount).div(UNIT), 8).toFloat() : amount;
+      return normalizeAmount(amount, self.buyAssetIsDivisible());
     } else {
       assert(asset == self.sellAsset());
-      return self.sellAssetIsDivisible() ? Decimal.round(new Decimal(amount).div(UNIT), 8).toFloat() : amount;
+      return normalizeAmount(amount, self.sellAssetIsDivisible());
     }
   }
 

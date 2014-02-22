@@ -61,6 +61,7 @@ function WalletViewModel() {
     return ko.utils.arrayFirst(self.addresses(), function(a) {
       return a.ADDRESS == address;
     });
+    return null;
   }
   
   self.getBalance = function(address, asset, normalized) {

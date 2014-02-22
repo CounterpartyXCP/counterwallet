@@ -102,12 +102,12 @@ function SendModalViewModel() {
   
   self.normalizedBalance = ko.computed(function() {
     if(self.address() === null || self.balance() === null) return null;
-    return self.divisible() ? Decimal.round(new Decimal(self.balance()).div(UNIT), 8).toFloat() : self.balance();
+    return normalizeAmount(self.balance(), self.divisible());
   }, self);
   
   self.normalizedBalRemaining = ko.computed(function() {
     if(!isNumber(self.quantity())) return null;
-    var curBalance = self.divisible() ? Decimal.round(new Decimal(self.balance()).div(UNIT), 8).toFloat() : self.balance();
+    var curBalance = normalizeAmount(self.balance(), self.divisible());
     var balRemaining = Decimal.round(new Decimal(curBalance).sub(parseFloat(self.quantity()))).toFloat();
     if(balRemaining < 0) return null;
     return balRemaining;

@@ -1,5 +1,4 @@
 var PREFERENCES = {}; //set when logging in
-var LAST_MESSAGEIDX_RECEIVED = 0; //last message received from the data feed (socket.io) -- used to detect gaps
 
 var MAX_ADDRESSES = 20; //totall arbitrary :)
 var MAX_INT = Math.pow(2, 63) - 1;
@@ -28,6 +27,77 @@ console.log("Server list: " + JSON.stringify(counterwalletd_urls));
 var counterwalletd_api_urls = jQuery.map(counterwalletd_urls, function(element) { return jQuery(element).attr('api'); });
 var counterwalletd_feed_urls = jQuery.map(counterwalletd_urls, function(element) { return jQuery(element).attr('feed'); });
 var counterwalletd_chat_urls = jQuery.map(counterwalletd_urls, function(element) { return jQuery(element).attr('chat'); });
+
+var ENTITY_NAMES = {
+  'burns': 'Burn',
+  'debits': 'Debit',
+  'credits': 'Credit',
+  'sends': 'Send',
+  'orders': 'Order',
+  'order_matches': 'Order Match',
+  'btcpays': 'BTCPay',
+  'issuances': 'Issuance',
+  'broadcasts': 'Broadcast',
+  'bets': 'Bet',
+  'bet_matches': 'Bet Match',
+  'dividends': 'Dividend',
+  'cancels': 'Cancel',
+  'callbacks': 'Callback',
+  'bet_expirations': 'Bet Expired',
+  'order_expirations': 'Order Expired',
+  'bet_match_expirations': 'Bet Match Exp',
+  'order_match_expirations': 'Order Match Exp'
+};
+
+var ENTITY_ICONS = {
+  'burns': 'fa-fire',
+  'debits': 'fa-minus',
+  'credits': 'fa-plus',
+  'sends': 'fa-share',
+  'orders': 'fa-bar-chart-o',
+  'order_matches': 'fa-exchange',
+  'btcpays': 'fa-btc',
+  'issuances': 'fa-magic',
+  'broadcasts': 'fa-rss',
+  'bets': 'fa-bullseye',
+  'bet_matches': 'fa-exchange',
+  'dividends': 'fa-ticket',
+  'cancels': 'fa-times',
+  'callbacks': 'fa-retweet',
+  'bet_expirations': 'fa-clock-o',
+  'order_expirations': 'fa-clock-o',
+  'bet_match_expirations': 'fa-clock-o',
+  'order_match_expirations': 'fa-clock-o'
+};
+
+var ENTITY_NOTO_COLORS = {
+  'burns': 'bg-color-yellow',
+  'debits': 'bg-color-red',
+  'credits': 'bg-color-green',
+  'sends': 'bg-color-orangeDark',
+  'orders': 'bg-color-blue',
+  'order_matches': 'bg-color-blueLight',
+  'btcpays': 'bg-color-orange',
+  'issuances': 'bg-color-pinkDark',
+  'broadcasts': 'bg-color-magenta',
+  'bets': 'bg-color-teal',
+  'bet_matches': 'bg-color-teal',
+  'dividends': 'bg-color-pink',
+  'cancels': 'bg-color-red',
+  'callbacks': 'bg-color-pink',
+  'bet_expirations': 'bg-color-grayDark',
+  'order_expirations': 'bg-color-grayDark',
+  'bet_match_expirations': 'bg-color-grayDark',
+  'order_match_expirations': 'bg-color-grayDark'
+};
+
+var BET_TYPES = {
+  0: "Bullish CFD",
+  1: "Bearish CFD",
+  2: "Equal",
+  3: "Not Equal"
+};
+
 
 /*
  * Primary site init (thanks to knockout.js, this is where all the "magic" does NOT happen :)

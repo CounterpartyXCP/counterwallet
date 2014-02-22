@@ -120,55 +120,6 @@ function BalanceHistoryViewModel() {
   }
 }
 
-var ENTITY_NAMES = {
-  'burns': 'Burn',
-  'debits': 'Debit',
-  'credits': 'Credit',
-  'sends': 'Send',
-  'orders': 'Order',
-  'order_matches': 'Order Match',
-  'btcpays': 'BTCPay',
-  'issuances': 'Issuance',
-  'broadcasts': 'Broadcast',
-  'bets': 'Bet',
-  'bet_matches': 'Bet Match',
-  'dividends': 'Dividend',
-  'cancels': 'Cancel',
-  'callbacks': 'Callback',
-  'bet_expirations': 'Bet Expired',
-  'order_expirations': 'Order Expired',
-  'bet_match_expirations': 'Bet Match Exp',
-  'order_match_expirations': 'Order Match Exp'
-};
-
-var ENTITY_ICONS = {
-  'burns': 'fa-fire',
-  'debits': 'fa-minus',
-  'credits': 'fa-plus',
-  'sends': 'fa-share',
-  'orders': 'fa-bar-chart-o',
-  'order_matches': 'fa-exchange',
-  'btcpays': 'fa-btc',
-  'issuances': 'fa-magic',
-  'broadcasts': 'fa-rss',
-  'bets': 'fa-bullseye',
-  'bet_matches': 'fa-exchange',
-  'dividends': 'fa-ticket',
-  'cancels': 'fa-times',
-  'callbacks': 'fa-retweet',
-  'bet_expirations': 'fa-clock-o',
-  'order_expirations': 'fa-clock-o',
-  'bet_match_expirations': 'fa-clock-o',
-  'order_match_expirations': 'fa-clock-o'
-};
-
-var BET_TYPES = {
-  0: "Bullish CFD",
-  1: "Bearish CFD",
-  2: "Equal",
-  3: "Not Equal"
-};
-
 function TransactionHistoryItemViewModel(data) {
   var self = this;
   self.data = data;

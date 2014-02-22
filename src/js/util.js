@@ -87,3 +87,7 @@ function shuffle(array) {
 
   return array;
 }
+
+function normalizeAmount(amount, divisible) {
+  return divisible ? Decimal.round(new Decimal(amount).div(UNIT), 8).toFloat() : amount;
+}

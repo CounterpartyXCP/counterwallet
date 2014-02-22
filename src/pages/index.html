@@ -41,17 +41,21 @@
         <span id="logo"><img src="xcp/images/logo-small.png" alt="" /><span class="logoText">Counterwallet</span></span>
         
         <span id="activity" class="activity-dropdown">
-            <i class="fa fa-user"></i><b data-bind="text: unackedActivityCount" class="badge"></b>
+            <i class="fa fa-user"></i><b data-bind="text: totalActivityCount" class="badge"></b>
         </span>
         <!-- AJAX-DROPDOWN : control this dropdown height, look and feel from the LESS variable file -->
         <div class="ajax-dropdown">
             <div class="btn-group btn-group-justified" data-toggle="buttons">
                 <label class="btn btn-default">
-                    <input type="radio" name="activity" id="xcp/pages/activity/notifications.html">
+                    <input type="radio" name="activity" data-bind="click: function() { unackedNotificationCount(0) }" id="xcp/pages/activity/notifications.html">
                     Notifications (<span data-bind="text: notifications().length"></span>) </label>
                 <label class="btn btn-default">
-                    <input type="radio" name="activity" id="xcp/pages/activity/pendingtrades.html">
-                    Pending Trades (<span data-bind="text: pendingTrades().length"></span>) </label>
+                    <input type="radio" name="activity" id="xcp/pages/activity/openorders.html">
+                    Open Orders (<span data-bind="text: openOrders().length"></span>) </label>
+                <label class="btn btn-default">
+                    <input type="radio" name="activity" id="xcp/pages/activity/pendingbtcpays.html">
+                    Unsettled Orders (<span data-bind="text: pendingBTCPay().length"></span>) </label>
+                    <!-- orders the user owes BTC on -->
             </div>
             
             <div class="ajax-notifications custom-scroll"> <!-- notification content -->
