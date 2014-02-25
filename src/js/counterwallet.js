@@ -23,7 +23,7 @@ if(!IS_DEV) { //Production setup
 
 //randomly shuffle the list to decide the server try order...
 counterwalletd_urls = shuffle(counterwalletd_urls);
-console.log("Server list: " + JSON.stringify(counterwalletd_urls));
+//console.log("Server list: " + JSON.stringify(counterwalletd_urls));
 var counterwalletd_api_urls = jQuery.map(counterwalletd_urls, function(element) { return jQuery(element).attr('api'); });
 var counterwalletd_feed_urls = jQuery.map(counterwalletd_urls, function(element) { return jQuery(element).attr('feed'); });
 var counterwalletd_chat_urls = jQuery.map(counterwalletd_urls, function(element) { return jQuery(element).attr('chat'); });

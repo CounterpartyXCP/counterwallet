@@ -2,16 +2,6 @@
 var LAST_MESSAGEIDX_RECEIVED = 0; //last message received from the data feed (socket.io) -- used to detect gaps
 var FAILOVER_CURRENT_IDX = 0; //last idx in the counterwalletd_feed_urls tried (used for socket.io failover)
 
-//Create a wildcard event handler: http://stackoverflow.com/a/19121009
-var original_$emit = socket.$emit;
-socket.$emit = function() {
-    var args = Array.prototype.slice.call(arguments);
-    original_$emit.apply(socket, ['*'].concat(args));
-    if(!original_$emit.apply(socket, arguments)) {
-        original_$emit.apply(socket, ['default'].concat(args));
-    }
-}
-
 function tryNextSIOServer() {
   if(FAILOVER_LAST_IDX_TRIED + 1 == counterwalletd_feed_urls.length) {
     FAILOVER_CURRENT_IDX = 0;
@@ -33,6 +23,16 @@ function initMessageFeed(url) {
     'max reconnection attempts': 4
     //'force new connection': true
   });
+
+  //Create a wildcard event handler: http://stackoverflow.com/a/19121009
+  var original_$emit = socket.$emit;
+  socket.$emit = function() {
+      var args = Array.prototype.slice.call(arguments);
+      original_$emit.apply(socket, ['*'].concat(args));
+      if(!original_$emit.apply(socket, arguments)) {
+          original_$emit.apply(socket, ['default'].concat(args));
+      }
+  }
   
   socket.on('default',function(event, data) {
       $.jqlog.log('socket.io event not trapped: ' + event + ' - data:' + JSON.stringify(data));
@@ -96,15 +96,39 @@ function handleMessage(event, data) {
         + normalizeAmount(data['burned'], true) + " BTC for " + normalizeAmount(data['earned'], true) + " XCP.");
     }
   } else if(event == "cancels") {
-    //If for an order, refresh the order book if the orders page is displayed and if the cooresponding
-    // order is for one of the assets that is being displayed
-    data['source']
-    
-    //TODO: If for a bet, do nothing for now.
-    
-    ACTIVITY_FEED.addNotification(event, "Your address .");
+    if(WALLET.getAddressObj(data['source'])) {
+      //If for an order (and we are on the DEx page), refresh the order book if the orders page is displayed
+      // and if the cooresponding order is for one of the assets that is being displayed
+      if (typeof BUY_SELL !== 'undefined') {
+        BUY_SELL.openOrders.remove(function(item) { return item.tx_index == data['offer_hash']});
+      } 
+      //Also remove the canceled order from the open orders and pending orders list (if present)
+      ACTIVITY_FEED.removeOpenOrder(data['offer_hash']);
+      ACTIVITY_FEED.removePendingBTCPayByOrderID(data['offer_hash']);
+  
+      //TODO: If for a bet, do nothing for now.
+
+      ACTIVITY_FEED.addNotification(event, "Order/Bid " + data['offer_hash'] + " for your address " + data['source'] + " was cancelled.");
+    }
   } else if(event == "callbacks") {
+    //See if any of our addresses own any of the specified asset, and if so, notify them of the callback
+    // NOTE that counterpartyd has automatically already adusted the balances of all asset holders...we just need to notify
+    var addresses = WALLET.getAddressesList();
+    for(var i=0; i < addresses.length; i++) {
+      if(WALLET.getBalance(addresses[i], data['asset'])) {
+        ACTIVITY_FEED.addNotification(event, data['asset'] + " balance adjusted on your address " + addresses[i]
+          + " due to " + (parseFloat(data['fraction']) * 100).toString() + "% callback option being exercised.");
+      }
+    }
   } else if(event == "dividends") {
+    //Similar approach as to callbacks above...
+    var addresses = WALLET.getAddressesList();
+    for(var i=0; i < addresses.length; i++) {
+      if(WALLET.getBalance(addresses[i], data['asset'])) {
+        ACTIVITY_FEED.addNotification(event, data['asset'] + " balance adjusted on your address " + addresses[i]
+          + " due to " + numberWithCommas(normalizeAmount(data['amount_per_unit'], data['_divisible'])) + " unit dividend payment.");
+      }
+    }
   } else if(event == "issuances") {
     //See if the issuer matches any of our addresses
     var address = WALLET.getAddressObj(data['issuer']);
@@ -116,16 +140,66 @@ function handleMessage(event, data) {
       address.addOrUpdateAsset(data['asset'], data['amount']);
     });
   } else if(event == "sends") {
+    if(WALLET.getAddressObj(data['source'])) { //we sent funds
+        ACTIVITY_FEED.addNotification(event, "You successfully sent <b>"
+          + numberWithCommas(normalizeAmount(data['amount'], data['_divisible'])) + " " + data['asset']
+          + "</b> from your address " + data['source'] + " to address " + data['destination']);
+    }
+    if(WALLET.getAddressObj(data['destination'])) { //we received funds
+        ACTIVITY_FEED.addNotification(event, "You successfully received <b>"
+          + numberWithCommas(normalizeAmount(data['amount'], data['_divisible'])) + " " + data['asset']
+          + "</b> from address " + data['source'] + " to your address " + data['destination']);
+    }
   } else if(event == "orders") {
+    if(WALLET.getAddressObj(data['source'])) {
+      //List the order in our open orders list (activities feed)
+      ACTIVITY_FEED.addOpenOrder(data);
+      //Also list the order on open orders if we're viewing the dex page
+      if (typeof BUY_SELL !== 'undefined') {
+        BUY_SELL.openOrders.push(order);
+      }
+      
+      //Notify the user 
+      ACTIVITY_FEED.addNotification(event, "Your order to buy " + numberWithCommas(normalizeAmount(data['get_amount'], data['_get_asset_divisible']))
+        + " " + data['get_asset'] + " in exchange for " + numberWithCommas(normalizeAmount(data['give_amount'], data['_give_asset_divisible']))
+        + " " + data['get_asset'] + " was successfully created.");
+    }
   } else if(event == "order_matches") {
+    //Determine if the match is one where one of our addresses owes BTC, and if so perform an automatic BTCPay
+    if(WALLET.getAddressObj(data['tx0_address']) && data['forward_asset'] == 'BTC') {
+      
+    }
+    if(WALLET.getAddressObj(data['tx1_address']) && data['backward_asset'] == 'BTC') {
+      
+    }
+    //If for some reason we can't perform a BTCpay, alert the user and throw the entry on the "Pending Orders" list in the activity feed
   } else if(event == "order_expirations") {
-    //HANDLE IN THE FUTURE
+    //Remove the order from the open orders list and pending orders list, if on either
+    ACTIVITY_FEED.removeOpenOrder(data['order_hash']);
+    ACTIVITY_FEED.removePendingBTCPayByOrderID(data['order_hash']);
+    //Also, notify the user of the expiration
+    if(WALLET.getAddressObj(data['source'])) {
+      ACTIVITY_FEED.addNotification(event, "Your order <b>"
+        + data['order_hash'] + " from address " + data['source'] + " has expired.");
+    }
   } else if(event == "order_match_expirations") {
-    //HANDLE IN THE FUTURE
+    //Notify the user
+    if(WALLET.getAddressObj(data['tx0_address'])) {
+      ACTIVITY_FEED.addNotification(event, "An order match between your address <b>"
+        + data['tx0_address'] + " and address <b>" + data['tx1_address'] + "</b> has expired.");
+    } 
+    if(WALLET.getAddressObj(data['tx1_address'])) {
+      ACTIVITY_FEED.addNotification(event, "An order match between your address <b>"
+        + data['tx1_address'] + " and address <b>" + data['tx0_address'] + "</b> has expired.");
+    } 
   } else if(event == "bets") {
+    //TODO
   } else if(event == "bet_matches") {
+    //TODO
   } else if(event == "bet_expirations") {
+    //TODO
   } else if(event == "bet_match_expirations") {
+    //TODO
   } else {
     $.jqlog.error("Unknown event: " + event);
   }

@@ -47,6 +47,10 @@ if (typeof String.prototype.startsWith != 'function') {
   };
 }
 
+Array.prototype.contains = function(element){
+    return this.indexOf(element) > -1;
+};
+
 function selectText(element) {
     var doc = document
         , text = doc.getElementById(element)

@@ -140,13 +140,25 @@ function ActivityFeedViewModel(initialActivityCount) {
   
   self.removePendingBTCPay = function(orderMatchID) {
     var match = ko.utils.arrayFirst(self.pendingBTCPays(), function(item) {
-        return orderMatchID == item.orderMatchID();
+      return orderMatchID == item.orderMatchID();
     });
     if (match) {
       ko.utils.arrayRemoveItem(self.pendingBTCPays, match);
     }
   }
   
+  self.removePendingBTCPayByOrderID = function(orderID) {
+    var orderID1 = null, orderID2 = null;
+    var match = ko.utils.arrayFirst(self.pendingBTCPays(), function(item) {
+      orderID1 = item.orderMatchID().substring(0, 64);
+      orderID2 = item.orderMatchID().substring(64);
+      return orderID == orderID1 || orderID == orderID2;
+    });
+    if (match) {
+      ko.utils.arrayRemoveItem(self.pendingBTCPays, match);
+    }
+  }
+
   self.addOpenOrder = function(order) {
     assert(order);
     self.openOrders.push(new OpenOrderViewModel(order));

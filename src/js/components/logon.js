@@ -26,6 +26,10 @@ function LogonViewModel() {
     self.generatedPassphrase(mn_encode(seed));
   }
   
+  self.showSecureKeyboard = function() {
+    LOGON_PASSWORD_MODAL.show(); 
+  }
+  
   self.openWallet = function() {
     //Start with a gate check to make sure at least one of the servers is ready and caught up before we try to log in
     multiAPI("is_ready", [], function(data, endpoint) {
@@ -109,8 +113,144 @@ function LogonViewModel() {
   }
 }
 
-LOGON_VIEW_MODEL = new LogonViewModel();
+ko.validation.rules['isValidPassphrasePart'] = {
+    validator: function (val, self) {
+      return mn_words.contains(val);
+    },
+    message: 'Invalid phrase word.'
+};
+ko.validation.registerExtenders();
+
+function LogonPasswordModalViewModel() {
+  var self = this;
+  self.shown = ko.observable(false);
+  self.pwPart01 = ko.observable().extend({ required: true, isValidPassphrasePart: self });
+  self.pwPart02 = ko.observable().extend({ required: true, isValidPassphrasePart: self });
+  self.pwPart03 = ko.observable().extend({ required: true, isValidPassphrasePart: self });
+  self.pwPart04 = ko.observable().extend({ required: true, isValidPassphrasePart: self });
+  self.pwPart05 = ko.observable().extend({ required: true, isValidPassphrasePart: self });
+  self.pwPart06 = ko.observable().extend({ required: true, isValidPassphrasePart: self });
+  self.pwPart07 = ko.observable().extend({ required: true, isValidPassphrasePart: self });
+  self.pwPart08 = ko.observable().extend({ required: true, isValidPassphrasePart: self });
+  self.pwPart09 = ko.observable().extend({ required: true, isValidPassphrasePart: self });
+  self.pwPart10 = ko.observable().extend({ required: true, isValidPassphrasePart: self });
+  self.pwPart11 = ko.observable().extend({ required: true, isValidPassphrasePart: self });
+  self.pwPart12 = ko.observable().extend({ required: true, isValidPassphrasePart: self });
+  
+  self.validationModel = ko.validatedObservable({
+    pwPart01: self.pwPart01,
+    pwPart02: self.pwPart02,
+    pwPart03: self.pwPart03,
+    pwPart04: self.pwPart04,
+    pwPart05: self.pwPart05,
+    pwPart06: self.pwPart06,
+    pwPart07: self.pwPart07,
+    pwPart08: self.pwPart08,
+    pwPart09: self.pwPart09,
+    pwPart10: self.pwPart10,
+    pwPart11: self.pwPart11,
+    pwPart12: self.pwPart12
+  });
+  
+  self.dispFullPassphrase = ko.computed(function() {
+    return [
+      self.pwPart01(), self.pwPart02(), self.pwPart03(), self.pwPart04(),
+      self.pwPart05(), self.pwPart06(), self.pwPart07(), self.pwPart08(),
+      self.pwPart09(), self.pwPart10(), self.pwPart11(), self.pwPart12()
+    ].join(' ');
+  }, self);
+  
+  self.resetForm = function() {
+    self.pwPart01('');
+    self.pwPart02('');
+    self.pwPart03('');
+    self.pwPart04('');
+    self.pwPart05('');
+    self.pwPart06('');
+    self.pwPart07('');
+    self.pwPart08('');
+    self.pwPart09('');
+    self.pwPart10('');
+    self.pwPart11('');
+    self.pwPart12('');
+    self.validationModel.errors.showAllMessages(false);
+  }
+  
+  self.submitForm = function() {
+    if (!self.validationModel.isValid()) {
+      self.validationModel.errors.showAllMessages();
+      return false;
+    }    
+    //data entry is valid...submit to trigger doAction()
+    $('#logonPassphaseModal form').submit();
+  }
+  
+  self.show = function(resetForm) {
+    if(typeof(resetForm)==='undefined') resetForm = true;
+    if(resetForm) self.resetForm();
+    
+    //TODO: choose a random X/Y coords for the modal
+    
+    $('#logonPassphaseModal input').click(function(e) {
+      $(e.currentTarget).val(''); //clear the field on click
+    });
+    
+    //Set up keyboard
+    $('#logonPassphaseModal input').keyboard({
+      display: {
+        'bksp'   :  "\u2190",
+        'accept' : 'Accept',
+      },
+      layout: 'custom',
+      customLayout: {
+        'default': [
+          'q w e r t y u i o p {bksp}',
+          'a s d f g h j k l',
+          ' z x c v b n m {accept}'
+        ],
+      },
+      autoAccept: true,
+      usePreview: true,
+      initialFocus : false,
+      restrictInput: true,
+      preventPaste: true
+      /*acceptValue: true,
+      validate: function(keyboard, value, isClosing) {
+        return mn_words.contains(value);
+      }*/
+    }).autocomplete({
+      source: mn_words
+    }).addAutocomplete();
+    
+    // Overrides the default autocomplete filter function to search only from the beginning of the string
+    $.ui.autocomplete.filter = function (array, term) {
+        var matcher = new RegExp("^" + $.ui.autocomplete.escapeRegex(term), "i");
+        return $.grep(array, function (value) {
+            return matcher.test(value.label || value.value || value);
+        });
+    };    
+    
+    self.shown(true);
+  }  
+
+  self.hide = function() {
+    self.shown(false);
+  }
+  
+  self.doAction = function() {
+    //simply fill in the data back into the passphrase field and close the dialog
+    $('#password').val(self.dispFullPassphrase());
+    self.resetForm(); //clear out the dialog too, for security
+    self.shown(false);
+    $('#open-sesame').click();
+  }
+}
+
+
+var LOGON_VIEW_MODEL = new LogonViewModel();
+var LOGON_PASSWORD_MODAL = new LogonPasswordModalViewModel();
 
 $(document).ready(function() {
   ko.applyBindings(LOGON_VIEW_MODEL, document.getElementById("logon"));
+  ko.applyBindingsWithValidation(LOGON_PASSWORD_MODAL, document.getElementById("logonPassphaseModal"));
 });

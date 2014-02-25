@@ -17,7 +17,9 @@
     <!-- Enabled SmartAdmin plugin styles -->
     <!-- Counterwallet plugin styles -->
     <link rel="stylesheet" href="xcp/extcss/jquery.reject.css">
+    <link rel="stylesheet" href="xcp/extcss/jquery.keyboard.css">
     <link rel="stylesheet" href="xcp/extcss/bootstrap-datetimepicker.css">
+    
     <!-- Counterwallet custom styles -->
     <link rel="stylesheet" type="text/css" media="screen" href="xcp/css/default.css">
     <link rel="stylesheet" href="xcp/css/components/logon.css">
@@ -54,7 +56,7 @@
                     Open Orders (<span data-bind="text: openOrders().length"></span>) </label>
                 <label class="btn btn-default">
                     <input type="radio" name="activity" id="xcp/pages/activity/pendingbtcpays.html">
-                    Unsettled Orders (<span data-bind="text: pendingBTCPay().length"></span>) </label>
+                    Unsettled Orders (<span data-bind="text: pendingBTCPays().length"></span>) </label>
                     <!-- orders the user owes BTC on -->
             </div>
             
@@ -169,6 +171,7 @@
               <input id="password" data-bind="value: enteredPassphrase, valueUpdate:'afterkeydown'" placeholder="Enter your Counterwallet 12 word passphrase." class="form-control pull-left" type="password">
               <div class="pull-right">
                 <button id="open-sesame" data-bind="click: openWallet, enable: isPassphraseValid(), css: { 'btn-primary': isPassphraseValid() }" type="button" class="btn btn-default" disabled>Open Wallet</button>
+                &nbsp;<button id="secureKeyboard" data-bind="click: showSecureKeyboard, enable: !isPassphraseValid(), css: { 'btn-primary': !isPassphraseValid() }" type="button" class="btn btn-default" disabled><i class="fa fa-keyboard-o"></i></button>
               </div>
             </form>
             <div class="clearfix"></div>
@@ -241,6 +244,71 @@
         </div>
       </div>
     </div> <!-- END logged out cover div -->
+    
+    <!-- modal for keyboardless passphrase entry -->
+    <div data-bind="showModal: shown" id="logonPassphaseModal" class="modal fade" data-backdrop="static" data-keyboard="false" tabindex="-1" role="dialog" aria-labelledby="logonPassphaseModal" aria-hidden="true">
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <div class="modal-header">
+            <button type="button" data-bind="click: hide" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+            <h4 class="modal-title">Secure Passphrase Entry</h4>
+          </div>
+          <div class="modal-body no-padding">
+            <p class="formIntro">Each text box below cooresponds to a word in your 12-word passphrase. To enter your
+                passphrase, click on each box and use the on-screen keyboard that appears, then press the Login button
+                when done. This approach limits the ability that malware and keyloggers have of stealing your passphrase.</p>
+            <form class="smart-form" data-bind="submit: doAction"><fieldset>
+              <section><div class="row">
+                <div class="col col-3">
+                    <input id="loginPassphrasePWPart01" class="form-control input" type="text" placeholder="Word 1" data-bind="value: pwPart01" autocomplete="on" />
+                </div>
+                <div class="col col-3">
+                    <input id="loginPassphrasePWPart02" class="form-control input" type="text" placeholder="Word 2" data-bind="value: pwPart02"/>
+                </div>
+                <div class="col col-3">
+                    <input id="loginPassphrasePWPart03" class="form-control input" type="text" placeholder="Word 3" data-bind="value: pwPart03"/>
+                </div>
+                <div class="col col-3">
+                    <input id="loginPassphrasePWPart04" class="form-control input" type="text" placeholder="Word 4" data-bind="value: pwPart04"/>
+                </div>
+              </div></section>
+              <section><div class="row">
+                <div class="col col-3">
+                    <input id="loginPassphrasePWPart05" class="form-control input" type="text" placeholder="Word 5" data-bind="value: pwPart05"/>
+                </div>
+                <div class="col col-3">
+                    <input id="loginPassphrasePWPart06" class="form-control input" type="text" placeholder="Word 6" data-bind="value: pwPart06"/>
+                </div>
+                <div class="col col-3">
+                    <input id="loginPassphrasePWPart07" class="form-control input" type="text" placeholder="Word 7" data-bind="value: pwPart07"/>
+                </div>
+                <div class="col col-3">
+                    <input id="loginPassphrasePWPart08" class="form-control input" type="text" placeholder="Word 8" data-bind="value: pwPart08"/>
+                </div>
+              </div></section>
+              <section><div class="row">
+                <div class="col col-3">
+                    <input id="loginPassphrasePWPart09" class="form-control input" type="text" placeholder="Word 9" data-bind="value: pwPart09"/>
+                </div>
+                <div class="col col-3">
+                    <input id="loginPassphrasePWPart10" class="form-control input" type="text" placeholder="Word 10" data-bind="value: pwPart10"/>
+                </div>
+                <div class="col col-3">
+                    <input id="loginPassphrasePWPart11" class="form-control input" type="text" placeholder="Word 11" data-bind="value: pwPart11"/>
+                </div>
+                <div class="col col-3">
+                    <input id="loginPassphrasePWPart12" class="form-control input" type="text" placeholder="Word 12" data-bind="value: pwPart12"/>
+                </div>
+              </div></section>
+            </fieldset></form>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-default" data-bind="click: hide">Cancel</button>
+            <button type="button" data-bind="click: submitForm" class="btn btn-primary">Login</button>
+          </div>
+        </div><!-- /.modal-content -->
+      </div><!-- /.modal-dialog -->
+    </div><!-- /.modal -->
 
     <!--================================================== -->
     <!-- Link to Google CDN's jQuery + jQueryUI; fall back to local -->
@@ -295,6 +363,8 @@
     <script src="xcp/extjs/jquery.yql.js"></script> <!-- YQL queries for calls that don't support CORS -->
     <script src="xcp/extjs/jquery.timeago.js"></script>
     <script src="xcp/extjs/jquery.slimscroll.js"></script>
+    <script src="xcp/extjs/jquery.keyboard.js"></script>
+    <script src="xcp/extjs/jquery.keyboard.extension-autocomplete.js"></script>
 
     <!-- Bootstrap -->
     <!--<script src="xcp/extjs/jqBootstrapValidation.js"></script>-->

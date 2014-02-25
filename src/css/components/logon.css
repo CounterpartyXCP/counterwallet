@@ -21,13 +21,13 @@
 }
 
 #form-well {
-    width: 650px;
+    width: 610px;
     margin: 0 auto;
     padding-bottom: 0px;
 }
 
 #password {
-    width: 480px;
+    width: 400px;
 }
 
 #generated {
@@ -48,3 +48,12 @@
   border:1px solid #CCC;
   margin-top: 80px;  
 }
+
+.ui-keyboard-accept {
+  color: #3c763d !important;
+  background-color: #dff0d8 !important;
+  border-color: #d6e9c6 !important;
+}
+
+
+.ui-autocomplete { z-index:1400 !important;}  
