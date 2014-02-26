@@ -17,7 +17,7 @@ if(!IS_DEV) { //Production setup
   ];
 } else { //Development setup
   counterwalletd_urls = [
-    {'api': "http://xcpdev01:4100/jsonrpc/", 'feed': "http://xcpdev01:4101/", 'chat': "http://xcpdev01:4102/"}
+    {'api': "http://xcpdev01/_api/", 'feed': "http://xcpdev01/_feed/", 'chat': "http://xcpdev01/_chat/"}
     // ^ NOTE to developers: No need to modify the above, just insert an entry in your hosts file for xcpdev01
   ];
 }
