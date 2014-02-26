@@ -20,7 +20,7 @@ import stat
 ADMIN_TEMPLATE_URL = "https://www.dropbox.com/s/jt2wzt48wdjjnqu/template_1.2.zip"
 
 def usage():
-    print("SYNTAX: %s [-h] [--cdn-build]" % sys.argv[0])
+    print("SYNTAX: %s [-h] [--dev]" % sys.argv[0])
 
 def runcmd(command, abort_on_failure=True):
     logging.debug("RUNNING COMMAND: %s" % command)
@@ -29,26 +29,26 @@ def runcmd(command, abort_on_failure=True):
         logging.error("Command failed: '%s'" % command)
         sys.exit(1) 
 
-def link_or_copy(is_cdn_build, src, dest):
-    if is_cdn_build:
+def link_or_copy(copy_files, src, dest):
+    if copy_files: 
         runcmd("cp -af %s %s" % (src, dest))
-    else:
+    else: #link over files, instead of copying, so that we can edit in place
         runcmd("ln -sf %s %s" % (src, dest))
 
 def main():
     logging.basicConfig(level=logging.DEBUG, format='%(asctime)s|%(levelname)s: %(message)s')
     
     #parse any command line objects
-    is_cdn_build = False
+    copy_files = False
     try:
-        opts, args = getopt.getopt(sys.argv[1:], "h", ["cdn-build", "help"])
+        opts, args = getopt.getopt(sys.argv[1:], "h", ["copy", "help"])
     except getopt.GetoptError as err:
         usage()
         sys.exit(2)
     mode = None
     for o, a in opts:
-        if o in ("--cdn-build",):
-            is_cdn_build = True #copy files instead of linking to them
+        if o in ("--copy",):
+            copy_files = True #copy files instead of linking to them
         elif o in ("-h", "--help"):
             usage()
             sys.exit()
@@ -56,7 +56,7 @@ def main():
             assert False, "Unhandled or unimplemented switch or option"
     
     base_path = os.path.normpath(os.path.dirname(os.path.realpath(sys.argv[0])))
-    logging.info("Building counterwallet for %s distribution..." % ("local server" if not is_cdn_build else "CDN"))
+    logging.info("Building counterwallet for %s distribution..." % ("local server" if not copy_files else "CDN"))
     
     #install required deps
     runcmd("sudo apt-get -y install wget unzip npm")
@@ -85,11 +85,12 @@ def main():
     runcmd("rm -rf %s" % ' '.join(to_remove))
     
     #link/copy in the base counterwallet src dir into the build
-    link_or_copy(is_cdn_build, os.path.join(base_path, "src"), os.path.join(base_path, "build", "xcp"))
+    link_or_copy(copy_files, os.path.join(base_path, "src"), os.path.join(base_path, "build", "xcp"))
     #replace the things that need to be replaced in the build
-    link_or_copy(is_cdn_build, os.path.join(base_path, "src", "pages", "index.html"), os.path.join(base_path, "build", "index.html"))
+    link_or_copy(copy_files, os.path.join(base_path, "src", "pages", "index.html"), os.path.join(base_path, "build", "index.html"))
+    link_or_copy(copy_files, os.path.join(base_path, "src", "robots.txt"), os.path.join(base_path, "build", "robots.txt"))
     #x-editable's clear.png so we don't get a 404...
-    link_or_copy(is_cdn_build, os.path.join(base_path, "src", "images", "clear.png"), os.path.join(base_path, "build", "img", "clear.png"))
+    link_or_copy(copy_files, os.path.join(base_path, "src", "images", "clear.png"), os.path.join(base_path, "build", "img", "clear.png"))
     
     runcmd("sudo npm install -g bower")
     #TODO: move to bower and grunt-useman for a) auto installation of the javascript dependencies in

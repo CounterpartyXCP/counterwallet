@@ -11,8 +11,9 @@ var counterwalletd_urls = null;
 
 if(!IS_DEV) { //Production setup
   counterwalletd_urls = [
-    {'api': "https://cw01.counterparty.co/_/api/", 'feed': "https://cw01.counterparty.co/_/feed/", 'chat': "https://cw01.counterparty.co/_/chat/"},
-    {'api': "https://cw02.counterparty.co/_/api/", 'feed': "https://cw02.counterparty.co/_/feed/", 'chat': "https://cw02.counterparty.co/_/chat/"}
+    {'api': "https://cw01.counterparty.co/_api/", 'feed': "https://cw01.counterparty.co/_feed/", 'chat': "https://cw01.counterparty.co/_chat/"},
+    {'api': "https://cw02.counterparty.co/_api/", 'feed': "https://cw02.counterparty.co/_feed/", 'chat': "https://cw02.counterparty.co/_chat/"},
+    {'api': "https://cw03.counterparty.co/_api/", 'feed': "https://cw03.counterparty.co/_feed/", 'chat': "https://cw03.counterparty.co/_chat/"}
   ];
 } else { //Development setup
   counterwalletd_urls = [
