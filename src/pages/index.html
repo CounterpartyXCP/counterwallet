@@ -202,10 +202,10 @@
               </form>
               <div class="alert alert-danger" style="margin-top:15px;">
                 <p style="font-weight:bold;text-align:center;font-size:1.3em">Write your passphrase down and keep it safe.</p>
-                <p style="font-weight:bold;text-decoration:underline;text-align:center;font-size:1.2em">
+                <p style="font-weight:bold;text-decoration:underline;text-align:center;font-size:1.15em">
                   If you lose this passphrase, you will loose access to your wallet.
                 </p>
-                <p style="font-weight:bold;text-decoration:underline;text-align:center;font-size:1.2em">
+                <p style="font-weight:bold;text-decoration:underline;text-align:center;font-size:1.15em">
                   If someone gets your passphrase, they can gain access to your wallet.
                 </p>
               </div>
@@ -352,10 +352,11 @@
 
     <!-- COUNTERWALLET SPECIFIC JS INCLUDES -->    
     <!-- bitcoinjs-lib: The following library is required for bitcon addresses and signing. -->
-    <script src="xcp/extjs/bitcoinjs-lib.min.js"></script>
-    <script src="xcp/extjs/bitcoinjs-tx.js"></script> 
-    <script src="xcp/extjs/bitcoinsig.js"></script> 
-    <script src="xcp/extjs/sjcl.min.js"></script> 
+    <script src="xcp/extjs/bitcoinjs-min.js"></script>
+    <script src="xcp/extjs/jsbn-prng4.js"></script>
+    <script src="xcp/extjs/jsbn-rng.js"></script>
+    <!-- <script src="xcp/extjs/sjcl.min.js"></script> -->
+     
     <!-- JQuery extras -->
     <script src="xcp/extjs/jquery.jqlog.js"></script>
     <script src="xcp/extjs/jquery.reject.js"></script>
@@ -394,7 +395,7 @@
     <script src="xcp/js/counterwallet.js"></script> 
     <script src="xcp/js/util.api.js"></script> 
     <script src="xcp/js/util.knockout.js"></script> 
-    <script src="xcp/js/datafeed.js"></script> 
+    <script src="xcp/js/messagefeed.js"></script> 
     <script src="xcp/js/components/wallet.js"></script> <!-- inits WALLET object but doesn't bind it to anything -->
     <script src="xcp/js/components/address.js"></script>
     <script src="xcp/js/components/asset.js"></script>

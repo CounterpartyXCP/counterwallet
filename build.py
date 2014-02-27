@@ -35,6 +35,21 @@ def link_or_copy(copy_files, src, dest):
     else: #link over files, instead of copying, so that we can edit in place
         runcmd("ln -sf %s %s" % (src, dest))
 
+def do_prerun_checks():
+    #make sure this is running on a supported OS
+    if os.name != "posix" or platform.dist()[0] != "Ubuntu" or platform.architecture()[0] != '64bit':
+        logging.error("Only 64bit Ubuntu Linux is supported at this time")
+        sys.exit(1)
+    ubuntu_release = platform.linux_distribution()[1]
+    if ubuntu_release != "13.10":
+        logging.error("Only Ubuntu 13.10 supported for counterwalletd install.")
+    #script must be run as root
+    if os.geteuid() != 0:
+        logging.error("This script must be run as root (use 'sudo' to run)")
+        sys.exit(1)
+    if os.name == "posix" and "SUDO_USER" not in os.environ:
+        logging.error("Please use `sudo` to run this script.")
+
 def main():
     logging.basicConfig(level=logging.DEBUG, format='%(asctime)s|%(levelname)s: %(message)s')
     
@@ -55,7 +70,12 @@ def main():
         else:
             assert False, "Unhandled or unimplemented switch or option"
     
+    do_prerun_checks()
+
     base_path = os.path.normpath(os.path.dirname(os.path.realpath(sys.argv[0])))
+    run_as_user = os.environ["SUDO_USER"]
+    assert run_as_user
+    
     logging.info("Building counterwallet for %s distribution..." % ("local server" if not copy_files else "CDN"))
     
     #install required deps
@@ -91,6 +111,7 @@ def main():
     link_or_copy(copy_files, os.path.join(base_path, "src", "robots.txt"), os.path.join(base_path, "build", "robots.txt"))
     #x-editable's clear.png so we don't get a 404...
     link_or_copy(copy_files, os.path.join(base_path, "src", "images", "clear.png"), os.path.join(base_path, "build", "img", "clear.png"))
+    runcmd("sudo chown -R %s %s" % (run_as_user, os.path.join(base_path, "build"))) #to chown the stuff the script made
     
     runcmd("sudo npm install -g bower")
     #TODO: move to bower and grunt-useman for a) auto installation of the javascript dependencies in

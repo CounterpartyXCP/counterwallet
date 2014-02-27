@@ -1,3 +1,4 @@
+
 function ChatLineViewModel(type, handle, text) {
   var self = this;
   self.HANDLE = handle;
@@ -116,7 +117,13 @@ function ChatFeedViewModel() {
         
     $.jqlog.log("Starting chat feeds: " + JSON.stringify(counterwalletd_chat_urls));
     for(var i = 0; i < counterwalletd_chat_urls.length; i++) {
-      socket = io.connect(counterwalletd_chat_urls[i]);
+      socket = io.connect(counterwalletd_chat_urls[i], {
+        'max reconnection attempts': 5,
+        //'force new connection': true,
+        //'reconnection limit': 100000,
+        //'max reconnection attempts': Infinity,
+        'resource': '_chat'
+      });
       socket.on('emote', function (handle, text) {
         $.jqlog.log("chat.emote(feed-"+i+"): handle: " + handle + ", text: " + text);
         self.addLine('emote', handle, text);

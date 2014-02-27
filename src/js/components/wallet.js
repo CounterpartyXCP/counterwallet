@@ -3,7 +3,7 @@ function WalletViewModel() {
   //The user's wallet
   var self = this;
   self.DEFAULT_NUMADDRESSES = 3; //default number of addresses to generate
-  self.ELECTRUM_PRIV_KEY = null; //the master private key from electrum (from which the address priv keys are derived)
+  self.BITCOIN_WALLET = null; //Bitcoin.Wallet() BIP0032 wallet instance
   self.autoRefreshBTCBalances = true; //auto refresh BTC balances every 5 minutes
   
   self.identifier = ko.observable(null); //set when logging in
@@ -19,14 +19,14 @@ function WalletViewModel() {
     //(assets must still be added to this address, with updateBalances() or other means...)
 
     //derive an address from the key (for the appropriate network)
-    var address = key.getBitcoinAddress(USE_TESTNET ? address_types['testnet'] : address_types['prod']).toString();
+    var address = key.getBitcoinAddress().toString();
     
     //Make sure this address doesn't already exist in the wallet (sanity check)
     assert(!self.getAddressObj(address), "Cannot addKey: address already exists in wallet!");
     
     //see if there's a label already for this address that's stored in PREFERENCES, and use that if so
     var label = defaultLabel || '';
-    var addressHash = Crypto.util.bytesToBase64(Crypto.SHA256(address, {asBytes: true}));
+    var addressHash = Bitcoin.convert.bytesToBase64(Bitcoin.Crypto.SHA256(address, {asBytes: true}));
     if(addressHash in PREFERENCES.address_aliases) {
       label = PREFERENCES.address_aliases[addressHash];
     }
@@ -81,16 +81,16 @@ function WalletViewModel() {
     return true;
   }
 
-  self.getNumUnspentTxouts = function(address) {
+  self.getNumPrimedTxouts = function(address) {
     var addressObj = self.getAddressObj(address);
     if(!addressObj) return null;
-    return addressObj.numUnspentTxouts();
+    return addressObj.numPrimedTxouts();
   }
   
-  self.updateNumUnspentTxouts = function(address, numUnspentTxouts) {
+  self.updateNumPrimedTxouts = function(address, numPrimedTxouts) {
     var addressObj = self.getAddressObj(address);
     if(!addressObj) return false;
-    addressObj.numUnspentTxouts(numUnspentTxouts);
+    addressObj.numPrimedTxouts(numPrimedTxouts);
     return true;
   }
 
@@ -126,10 +126,10 @@ function WalletViewModel() {
         self.updateBalance(data[i]['address'], "BTC", data[i]['balance']);
         
         //Also refresh BTC unspent txouts (to know when to "reprime" the account)
-        self.getUnspentBTCOutputs(data[i]['address'], function(numUnspentTxouts) {
-          self.updateNumUnspentTxouts(data[i]['address'], numUnspentTxouts); //null if unknown
+        self.retrieveNumPrimedTxouts(data[i]['address'], function(numPrimedTxouts) {
+          self.updateNumPrimedTxouts(data[i]['address'], numPrimedTxouts); //null if unknown
         }, function(jqXHR, textStatus, errorThrown) {
-          self.updateNumUnspentTxouts(data[i]['address'], "BTC", null); //null = UNKNOWN
+          self.updateNumPrimedTxouts(data[i]['address'], "BTC", null); //null = UNKNOWN
         });
       }
       
@@ -145,7 +145,7 @@ function WalletViewModel() {
       var addresses = self.getAddressesList();
       for(var i=0; i < addresses.length; i++) {
         self.updateBalance(addresses[i], "BTC", null); //null = UNKNOWN
-        self.updateNumUnspentTxouts(addresses[i], "BTC", null); //null = UNKNOWN
+        self.updateNumPrimedTxouts(addresses[i], "BTC", null); //null = UNKNOWN
       }
     });
   }
@@ -162,24 +162,17 @@ function WalletViewModel() {
   
   /////////////////////////
   //BTC-related
-  self.signAndBroadcastTxRaw = function(key, unsigned_tx_hex) {
+  self.signAndBroadcastTxRaw = function(key, unsignedTxHex) {
     //Sign and broadcast a multisig transaction that we got back from counterpartyd (as a raw unsigned tx in hex)
-    //http://bitcoin.stackexchange.com/a/5241
-    //http://procbits.com/2013/08/27/generating-a-bitcoin-address-with-javascript
-    //https://github.com/BitGo/bitcoinjs-lib/blob/master/src/transaction.js#L576
-    //https://github.com/BitGo/bitcoinjs-lib/blob/master/src/script.js
-    //https://github.com/BitGo/bitcoinjs-lib/blob/master/src/address.js
-    //helpful: https://www.bitgo.com/bitgo.js
-    //multisig: https://gist.github.com/gavinandresen/3966071
-    var bytes = Crypto.util.hexToBytes(unsigned_tx_hex);
-    var sendTx = TX.deserialize(bytes);
-    $.jqlog.log("RAW UNSIGNED HEX: " + unsigned_tx_hex);
-    $.jqlog.log("RAW UNSIGNED TX: " + TX.toBBE(sendTx));
+    var bytes = Bitcoin.convert.hexToBytes(unsignedTxHex);
+    var sendTx = Bitcoin.Transaction.deserialize(bytes);
+    $.jqlog.log("RAW UNSIGNED HEX: " + unsignedTxHex);
+    //$.jqlog.log("RAW UNSIGNED Tx: " + TX.toBBE(sendTx));
 
     //Sign the output
-    var hashType = 1;
+    var SIGHASH_ALL = 1;
     for (var i = 0; i < sendTx.ins.length; i++) { //sign each input with the key
-      var hash = sendTx.hashTransactionForSignature(sendTx.ins[0].script, 0, 1 ); // hashtype = SIGHASH_ALL
+      var hash = sendTx.hashTransactionForSignature(sendTx.ins[0].script, 0, SIGHASH_ALL);
       var signature = key.sign(hash);
       signature.push(parseInt(hashType, 10));
       var pubKey = key.getPub();
@@ -190,8 +183,8 @@ function WalletViewModel() {
     }
     
     //take out to hex and broadcast
-    var signed_tx_hex = Crypto.util.bytesToHex(sendTx.serialize());
-    $.jqlog.log("RAW SIGNED TX: " + TX.toBBE(sendTx));
+    var signed_tx_hex = sendTx.serializeHex();
+    //$.jqlog.log("RAW SIGNED Tx: " + TX.toBBE(sendTx));
     $.jqlog.log("RAW SIGNED HEX: " + signed_tx_hex);
     
     if(IS_DEV) {
@@ -199,14 +192,14 @@ function WalletViewModel() {
       return;
     }
     
-    self.sendTX(signed_tx_hex, function(data) {
+    self.sendTx(signed_tx_hex, function(data) {
       $.jqlog.log("Transaction send finished.");
     });
   }
   
-  self.signAndBroadcastTx = function(address, unsigned_tx_hex) {
+  self.signAndBroadcastTx = function(address, unsignedTxHex) {
     var key = WALLET.getAddressObj(address).KEY;    
-    return self.signAndBroadcastTxRaw(key, unsigned_tx_hex);
+    return self.signAndBroadcastTxRaw(key, unsignedTxHex);
   }
   
   self.retrieveBTCBalance = function(address, callback, errorHandler) {
@@ -232,13 +225,13 @@ function WalletViewModel() {
     ).error(errorHandler || defaultErrorHandler);
   }
   
-  self.getUnspentBTCOutputs = function(address, callback, errorHandler) {
+  self.retrieveUnspentBTCOutputs = function(address, callback, errorHandler) {
     $.getJSON('http://blockchain.info/unspent',
       {cors: 'true', address: address}, callback).error(errorHandler || defaultErrorHandler);
   }
   
-  self.getNumPrimedTxoutsOnAccount = function(address, callback) {
-      return self.getUnspentBTCOutputs(address, function(data) {
+  self.retrieveNumPrimedTxouts = function(address, callback) {
+      return self.retrieveUnspentBTCOutputs(address, function(data) {
         var numSuitableUnspentTxouts = 0;
         for(var i=0; i < data["unspent_outputs"].length; i++) {
           if(data[i]['value'] >= MIN_PRIME_BALANCE) numSuitableUnspentTxouts++;
@@ -251,7 +244,7 @@ function WalletViewModel() {
       });
   }
   
-  self.sendTX = function(tx, callback) {
+  self.sendTx = function(tx, callback) {
     var postdata = 'tx=' + tx;
     
     //use Yahoo Query Language (YQL) to get around cross-domain issues

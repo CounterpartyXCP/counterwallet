@@ -491,8 +491,8 @@ function BuySellWizardViewModel() {
              get_quantity: buyAmount, get_asset: self.buyAsset(),
              expiration: 10, /* go with the default fee required and provided */ 
              multisig: WALLET.getAddressObj(self.selectedAddress().ADDRESS).PUBKEY},
-            function(unsignedTXHex, numTotalEndpoints, numConsensusEndpoints) {
-              WALLET.signAndBroadcastTx(self.selectedAddress().ADDRESS, unsignedTXHex);
+            function(unsignedTxHex, numTotalEndpoints, numConsensusEndpoints) {
+              WALLET.signAndBroadcastTx(self.selectedAddress().ADDRESS, unsignedTxHex);
               bootbox.alert("Your order for <b>" + self.selectedBuyAmount() + " " + self.selectedBuyAsset() + "</b> has been placed."
                + " You will be notified when it fills.");
               checkURL(); //reset the form and take the user back to the first tab by just refreshing the page
@@ -569,8 +569,8 @@ function BuySellWizardViewModel() {
             multiAPIConsensus("create_cancel",
               {offer_hash: item['tx_hash'],
                multisig: WALLET.getAddressObj(self.selectedAddress().ADDRESS).PUBKEY},
-              function(unsignedTXHex, numTotalEndpoints, numConsensusEndpoints) {
-                WALLET.signAndBroadcastTx(self.selectedAddress().ADDRESS, unsignedTXHex);
+              function(unsignedTxHex, numTotalEndpoints, numConsensusEndpoints) {
+                WALLET.signAndBroadcastTx(self.selectedAddress().ADDRESS, unsignedTxHex);
                 //remove order from the table
                 self.openOrders.remove(function(item) { return item.tx_index == order['tx_index']});
                 bootbox.alert("Your has been cancelled. We have removed the order from your open orders list,"

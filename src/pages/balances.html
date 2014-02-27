@@ -36,7 +36,7 @@
                 </ul>
               </div>
             </div>
-            <div class="widget-toolbar"><span id="" data-bind="click: prime, text: dispNumUnspentTxouts"></span></div>  
+            <div class="widget-toolbar"><span id="" data-bind="click: prime, text: dispNumPrimedTxouts"></span></div>  
             <div class="widget-toolbar"><span id="" data-bind="attr: {'id': 'address-text-' + $data.ADDRESS}, click: function(data, event) { return selectText('address-text-' + $data.ADDRESS); }, text: ADDRESS"></span></div>  
           </header>
           <div> <!-- widget div-->
@@ -205,7 +205,7 @@
       <div class="modal-body no-padding">
         <p class="formIntro">Sign a message from address <b data-bind="text: address"></b>.</p>
         
-        <form class="smart-form"><fieldset>
+        <form class="smart-form" data-bind="submit: doAction"><fieldset>
           <section><div class="row">
             <label class="label col col-2">Message to Sign</label>
             <div class="col col-10">
@@ -228,6 +228,7 @@
       </div>
       <div class="modal-footer">
         <button type="button" class="btn btn-default" data-bind="click: hide">Close</button>
+        <button type="button" data-bind="click: submitForm" class="btn btn-primary">Sign</button>
       </div>
     </div><!-- /.modal-content -->
   </div><!-- /.modal-dialog -->

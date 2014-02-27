@@ -127,8 +127,8 @@ function CreateAssetModalViewModel() {
        description: self.description(), callable_: self.callable, call_date: rawCallDate,
        call_price: rawCallPrice, transfer_destination: null,
        multisig: WALLET.getAddressObj(self.address()).PUBKEY},
-      function(unsignedTXHex, numTotalEndpoints, numConsensusEndpoints) {
-        WALLET.signAndBroadcastTx(self.address(), unsignedTXHex);
+      function(unsignedTxHex, numTotalEndpoints, numConsensusEndpoints) {
+        WALLET.signAndBroadcastTx(self.address(), unsignedTxHex);
         bootbox.alert("Your asset seemed to be created successfully. It will automatically appear under the \
         appropriate address once the network has confirmed it, and your account will be deducted by 5 XCP.");
       }
@@ -210,8 +210,8 @@ function IssueAdditionalAssetModalViewModel() {
        description: self.asset().description(), callable_: self.asset().CALLABLE, call_date: self.asset().CALLDATE,
        call_price: self.asset().CALLPRICE, transfer_destination: null,
        multisig: WALLET.getAddressObj(self.address()).PUBKEY},
-      function(unsignedTXHex, numTotalEndpoints, numConsensusEndpoints) {
-        WALLET.signAndBroadcastTx(self.address(), unsignedTXHex);
+      function(unsignedTxHex, numTotalEndpoints, numConsensusEndpoints) {
+        WALLET.signAndBroadcastTx(self.address(), unsignedTxHex);
         self.shown(false);
         bootbox.alert("You have issued <b>" + self.additionalIssue().toString() + "</b> additional quantity on your asset <b>"
           + self.asset().ASSET + "</b>. It may take a bit for this to reflect.");
@@ -270,8 +270,8 @@ function TransferAssetModalViewModel() {
        description: self.asset().description(), callable_: self.asset().CALLABLE, call_date: self.asset().CALLDATE,
        call_price: self.asset().CALLPRICE, transfer_destination: self.destAddress(),
        multisig: WALLET.getAddressObj(self.address()).PUBKEY},
-      function(unsignedTXHex, numTotalEndpoints, numConsensusEndpoints) {
-        WALLET.signAndBroadcastTx(self.address(), unsignedTXHex);
+      function(unsignedTxHex, numTotalEndpoints, numConsensusEndpoints) {
+        WALLET.signAndBroadcastTx(self.address(), unsignedTxHex);
         self.shown(false);
         bootbox.alert("<b>" + self.asset().ASSET + "</b> has been transferred to <b>" + self.destAddress() + "</b>. It may take a bit for this to reflect.");
     });
@@ -337,8 +337,8 @@ function ChangeAssetDescriptionModalViewModel() {
        description: self.newDescription(), callable_: self.asset().CALLABLE, call_date: self.asset().CALLDATE,
        call_price: self.asset().CALLPRICE, transfer_destination: null,
        multisig: WALLET.getAddressObj(self.address()).PUBKEY},
-      function(unsignedTXHex, numTotalEndpoints, numConsensusEndpoints) {
-        WALLET.signAndBroadcastTx(self.address(), unsignedTXHex);
+      function(unsignedTxHex, numTotalEndpoints, numConsensusEndpoints) {
+        WALLET.signAndBroadcastTx(self.address(), unsignedTxHex);
         self.shown(false);
         bootbox.alert("Your asset's description has been changed. It may take a bit for this to reflect.");
     });
@@ -425,8 +425,8 @@ function PayDividendModalViewModel() {
       {source: self.address(), quantity_per_unit: self.qtyPerUnit() * UNIT,
        share_asset: self.asset().ASSET, 
        multisig: WALLET.getAddressObj(self.address()).PUBKEY},
-      function(unsignedTXHex, numTotalEndpoints, numConsensusEndpoints) {
-        WALLET.signAndBroadcastTx(self.address(), unsignedTXHex);
+      function(unsignedTxHex, numTotalEndpoints, numConsensusEndpoints) {
+        WALLET.signAndBroadcastTx(self.address(), unsignedTxHex);
         self.shown(false);
         bootbox.alert("You have paid a dividend of <b>" + self.qtyPerUnit().toString()
           + " XCP</b> per outstanding unit to holders of asset <b>" + self.asset().ASSET

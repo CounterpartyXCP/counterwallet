@@ -2,26 +2,30 @@
 var LAST_MESSAGEIDX_RECEIVED = 0; //last message received from the data feed (socket.io) -- used to detect gaps
 var FAILOVER_CURRENT_IDX = 0; //last idx in the counterwalletd_feed_urls tried (used for socket.io failover)
 
-function tryNextSIOServer() {
+function tryNextSIOMessageFeed() {
   if(FAILOVER_LAST_IDX_TRIED + 1 == counterwalletd_feed_urls.length) {
     FAILOVER_CURRENT_IDX = 0;
   } else {
     FAILOVER_CURRENT_IDX += 1;
   }
   $.jqlog.log('socket.io: Trying next server: ' + url[FAILOVER_CURRENT_IDX]);
-  
+  initMessageFeed();
 }
 
-function initMessageFeed(url) {
+function initMessageFeed() {
   //set up a connection to the server event feed via socket.io and handle messages
   var url = counterwalletd_feed_urls[FAILOVER_CURRENT_IDX];
+  $.jqlog.log("socket.io: Connecting to: " + url);
+  //https://github.com/LearnBoost/Socket.IO/wiki/Configuring-Socket.IO
   var socket = io.connect(url, {
     'connect timeout': 5000,
     'reconnect': true,
     'reconnection delay': 500,
-    'reopen delay': 500,
-    'max reconnection attempts': 4
-    //'force new connection': true
+    'reconnection limit': 2000,
+    'max reconnection attempts': 5,
+    //'force new connection': true,
+    'try multiple transports': false,
+    'resource': '_feed'
   });
 
   //Create a wildcard event handler: http://stackoverflow.com/a/19121009
@@ -47,12 +51,12 @@ function initMessageFeed(url) {
       } else if(event == 'connect_failed') {
         $.jqlog.log('socket.io: Connection to server failed: ' + url);
         io.disconnect();
-        tryNextSIOServer();
+        tryNextSIOMessageFeed();
       } else if(event == 'reconnect_failed') {
         $.jqlog.log('socket.io: Reconnect to the server failed: ' + url);
         io.disconnect();
-        tryNextSIOServer();
-      } else if(['connect_error', 'connect_timeout', 'reconnect', 'reconnect_error'].indexOf(event) >= 0) {
+        tryNextSIOMessageFeed();
+      } else if(['connecting', 'connect_error', 'connect_timeout', 'reconnect', 'reconnect_error'].indexOf(event) >= 0) {
         //these events currently not handled
       } else{
         return parseMessage(event, data);  
@@ -206,7 +210,7 @@ function handleMessage(event, data) {
 }
 
 function detectMessageFeedGap(event, data, callback) {
-  assert(data['_message_index'] >= LAST_MESSAGEIDX_RECEIVED);
+  assert(data['_message_index'] >= LAST_MESSAGEIDX_RECEIVED, "Invalid _message_index");
   
   if(   LAST_MESSAGEIDX_RECEIVED == 0 //first message received
      || data['_message_index'] == LAST_MESSAGEIDX_RECEIVED + 1) { //next sequential message received 

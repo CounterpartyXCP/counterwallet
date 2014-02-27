@@ -92,8 +92,8 @@ function PendingBTCPayViewModel(orderMatchID, BTCPayTxIndex, myAddr, btcDestAddr
               multiAPIConsensus("create_btcpay",
                 {order_match_id: self.orderMatchID(),
                  multisig: WALLET.getAddressObj(self.address()).PUBKEY},
-                function(unsignedTXHex, numTotalEndpoints, numConsensusEndpoints) {
-                  WALLET.signAndBroadcastTx(self.myAddr(), unsignedTXHex);
+                function(unsignedTxHex, numTotalEndpoints, numConsensusEndpoints) {
+                  WALLET.signAndBroadcastTx(self.myAddr(), unsignedTxHex);
                   //remove the BTC payment from the notifications
                   ACTIVITY_FEED.removePendingBTCPay(self.orderMatchID());
                   bootbox.alert("Order successfully settled. Will take 1 block to confirm across the network.");

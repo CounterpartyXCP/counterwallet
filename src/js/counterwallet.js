@@ -3,6 +3,7 @@ var PREFERENCES = {}; //set when logging in
 var MAX_ADDRESSES = 20; //totall arbitrary :)
 var MAX_INT = Math.pow(2, 63) - 1;
 var UNIT = 100000000; //# satoshis in whole
+var MIN_FEE = 10000; // in satoshis (== .0001 BTC)
 var MIN_PRIME_BALANCE = 50000; //in satoshis ... == .0005
 var IS_DEV = document.URL.indexOf("counterwallet.com") < 0;
 var USE_TESTNET = null; //populated on login (from is_ready API call response)
@@ -10,14 +11,15 @@ var USE_TESTNET = null; //populated on login (from is_ready API call response)
 var counterwalletd_urls = null;
 
 if(!IS_DEV) { //Production setup
+  //Note that with the 'feed' and 'chat' URLs, /_feed and /_chat are used for the URL path, respectively
   counterwalletd_urls = [
-    {'api': "https://cw01.counterparty.co/_api/", 'feed': "https://cw01.counterparty.co/_feed/", 'chat': "https://cw01.counterparty.co/_chat/"},
-    {'api': "https://cw02.counterparty.co/_api/", 'feed': "https://cw02.counterparty.co/_feed/", 'chat': "https://cw02.counterparty.co/_chat/"},
-    {'api': "https://cw03.counterparty.co/_api/", 'feed': "https://cw03.counterparty.co/_feed/", 'chat': "https://cw03.counterparty.co/_chat/"}
+    {'api': "https://cw01.counterparty.co/api/", 'feed': "https://cw01.counterparty.co", 'chat': "https://cw01.counterparty.co"},
+    {'api': "https://cw02.counterparty.co/api/", 'feed': "https://cw02.counterparty.co", 'chat': "https://cw02.counterparty.co"},
+    {'api': "https://cw03.counterparty.co/api/", 'feed': "https://cw03.counterparty.co", 'chat': "https://cw03.counterparty.co"}
   ];
 } else { //Development setup
   counterwalletd_urls = [
-    {'api': "http://xcpdev01/_api/", 'feed': "http://xcpdev01/_feed/", 'chat': "http://xcpdev01/_chat/"}
+    {'api': "http://xcpdev01/api/", 'feed': "http://xcpdev01", 'chat': "http://xcpdev01"}
     // ^ NOTE to developers: No need to modify the above, just insert an entry in your hosts file for xcpdev01
   ];
 }

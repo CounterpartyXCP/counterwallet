@@ -4,7 +4,7 @@ function AddressViewModel(key, address, initialLabel) {
   var self = this;
   self.KEY = key; //  key : the ECKeyObj (eckey.js)
   self.ADDRESS = address;
-  self.PUBKEY = Crypto.util.bytesToHex(key.getPub()); //hex string
+  self.PUBKEY = key.getPub().toHex(); //hex string
   
   self.lastSort = '';
   self.lastSortDirection = '';
@@ -88,7 +88,7 @@ function AddressViewModel(key, address, initialLabel) {
   /////////////////////////
   //Address-panel-related
   self.changeLabel = function(params) {
-    var addressHash = Crypto.util.bytesToBase64(Crypto.SHA256(self.ADDRESS, {asBytes: true}));
+    var addressHash = Bitcoin.convert.bytesToBase64(Bitcoin.Crypto.SHA256(self.ADDRESS, {asBytes: true}));
     PREFERENCES.address_aliases[addressHash] = params.value;
     //update the preferences on the server 
     multiAPI("store_preferences", [WALLET.identifier(), PREFERENCES], function(data, endpoint) {

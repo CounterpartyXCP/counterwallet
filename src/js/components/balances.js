@@ -140,8 +140,8 @@ function SendModalViewModel() {
     multiAPIConsensus("create_send",
       {source: self.address(), destination: self.destAddress(), quantity: rawQuantity, asset: self.asset(),
        multisig: WALLET.getAddressObj(self.address()).PUBKEY},
-      function(unsignedTXHex, numTotalEndpoints, numConsensusEndpoints) {
-        WALLET.signAndBroadcastTx(self.address(), unsignedTXHex);
+      function(unsignedTxHex, numTotalEndpoints, numConsensusEndpoints) {
+        WALLET.signAndBroadcastTx(self.address(), unsignedTxHex);
         bootbox.alert("Your send seemed to be success. It will take effect as soon as the network has processed it.");
       }
     );
@@ -294,7 +294,7 @@ function SweepModalViewModel() {
   
     var eckey = new Bitcoin.ECKey(self.privateKey());
     asset(eckey.priv !== null && eckey.compressed !== null, "Private key not valid!"); //should have been checked already
-    var pubkey = Crypto.util.bytesToHex(eckey.getPub());
+    var pubkey = Bitcoin.convert.bytesToHex(eckey.getPub());
     var sendsComplete = [];
   
     for(var i = 0; i < self.selectedAssetsToSweep().length; i++) {
@@ -305,8 +305,8 @@ function SweepModalViewModel() {
         {source: self.addressForPrivateKey(), destination: self.destAddress(),
          quantity: self.selectedAssetsToSweep[i].BALANCE,
          asset: self.selectedAssetsToSweep()[i].ASSET, multisig: pubkey},
-        function(unsignedTXHex, numTotalEndpoints, numConsensusEndpoints) {
-          WALLET.signAndBroadcastTxRaw(eckey, unsignedTXHex);
+        function(unsignedTxHex, numTotalEndpoints, numConsensusEndpoints) {
+          WALLET.signAndBroadcastTxRaw(eckey, unsignedTxHex);
           sendsComplete.push({'result': true, 'asset': self.self.selectedAssetsToSweep()[i],
              'from': self.addressForPrivateKey(), 'to': self.destAddress(),
              'normalized_amount': self.availableAssetsToSweepRaw[i]['normalized_amount']});
@@ -356,26 +356,30 @@ function SweepModalViewModel() {
 function SignMessageModalViewModel() {
   var self = this;
   self.shown = ko.observable(false);
-  self.address = ko.observable();
-  self.message = ko.observable().extend({
+  self.address = ko.observable(null);
+  self.message = ko.observable('').extend({
     required: true,
   });
+  self.asHex = ko.observable(false); //default to base64
+  self.signedMessage = ko.observable();
   
   self.validationModel = ko.validatedObservable({
-    stringToSign: self.stringToSign
+    message: self.message
   });
   
-  self.signedMessage = ko.computed(function() {
-    if(!self.fields.message.value.isValid() || !self.fields.selectedAddress.value.isValid()) return null;
-    var eckey = WALLET.getAddressObj(self.address()).KEY;
-    return sign_message(eckey, self.message(), eckey.compressed,
-      USE_TESTNET ? address_types['testnet'] : address_types['prod']);
-  }, self);
-    
   self.resetForm = function() {
-    self.selectedAddress();
-    self.message();
+    self.address(null);
+    self.message('');
     self.validationModel.errors.showAllMessages(false);
+  }
+  
+  self.submitForm = function() {
+    if (!self.validationModel.isValid()) {
+      self.validationModel.errors.showAllMessages();
+      return false;
+    }    
+    //data entry is valid...submit to trigger doAction()
+    $('#signMessageModal form').submit();
   }
   
   self.show = function(address, resetForm) {
@@ -387,6 +391,19 @@ function SignMessageModalViewModel() {
 
   self.hide = function() {
     self.shown(false);
+  }
+
+  self.doAction = function() {
+    assert(self.fields.message.value.isValid() && self.fields.selectedAddress.value.isValid(), "Cannot sign");
+    var eckey = WALLET.getAddressObj(self.address()).KEY;
+    var hexSignedMessage = Bitcoin.Message.signMessage(eckey, self.message(), eckey.compressed);
+    //TODO: add the option for the user to choose whether they want Hex or base64 result (base64 is what bitcoin QT returns, so let's default to that)
+    if(self.asHex()) {
+      self.signedMessage(hexSignedMessage);  
+    } else { //convert to base64
+      self.signedMessage(Bitcoin.convert.bytesToBase64(Bitcoin.convert.hexToBytes(hexSignedMessage)));
+    }
+    //Keep the form up after signing, the user will manually press Close to close it...
   }
 }
 
@@ -400,7 +417,7 @@ function PrimeAddressModalViewModel() {
     min: 3,
     max: 25
   });
-  self.rawUnspentTXResponse = null;
+  self.rawUnspentTxResponse = null;
   
   self.validationModel = ko.validatedObservable({
     numNewPrimedTxouts: self.numNewPrimedTxouts
@@ -430,12 +447,12 @@ function PrimeAddressModalViewModel() {
     self.address(address);
     
     //Get the most up to date # of primed txouts
-    WALLET.getUnspentBTCOutputs(address, function(numUnspentTxouts, rawUnspentTXResponse) {
-      WALLET.updateNumUnspentTxouts(address, numUnspentTxouts);
-      self.rawUnspentTXResponse = rawUnspentTXResponse; //save for later (when creating the TX itself)
+    WALLET.retrieveNumPrimedTxouts(address, function(numPrimedTxouts, data) {
+      WALLET.updateNumPrimedTxouts(address, numPrimedTxouts);
+      self.rawUnspentTxResponse = data; //save for later (when creating the Tx itself)
       self.shown(true);
     }, function(jqXHR, textStatus, errorThrown) {
-      self.updateNumUnspentTxouts(address, null);
+      WALLET.updateNumPrimedTxouts(address, null);
       bootbox.alert("Cannot fetch the number of unspent txouts from blockchain.info. Please try again later.");
     });
   }  
@@ -444,21 +461,66 @@ function PrimeAddressModalViewModel() {
     self.shown(false);
   }
   
+  self._parseBCIUnspent = function(r) {
+    var txs = r.unspent_outputs;
+    if (!txs)
+        throw 'Not a BCI format';
+
+    delete unspenttxs;
+    var unspenttxs = {};
+    var balance = Bitcoin.BigInteger.ZERO;
+    for (var i in txs) {
+        var o = txs[i];
+        var lilendHash = o.tx_hash;
+
+        //convert script back to BBE-compatible text
+        var script = dumpScript( new Bitcoin.Script(Bitcoin.convert.hexToBytes(o.script)) );
+
+        var value = new Bitcoin.BigInteger('' + o.value, 10);
+        if (!(lilendHash in unspenttxs))
+            unspenttxs[lilendHash] = {};
+        unspenttxs[lilendHash][o.tx_output_n] = {amount: value, script: script};
+        balance = balance.add(value);
+    }
+    return {balance:balance, unspentTxs: unspenttxs};
+  }
+
   self.doAction = function() {
     //construct a transaction
-    TX.init(WALLET.getAddressObj(self.address()).KEY);
-    assert(TX.getAddress() == self.address(), "Addresses don't match!");
-    TX.parseInputs(JSON.stringify(self.rawUnspentTXResponse), TX.getAddress());
-    
-    for(var i=0; i < self.numNewPrimedTxouts.length; i++) {
-      TX.addOutput(TX.getAddress(), MIN_PRIME_BALANCE / UNIT); //add a number of .0005 outputs to the txn  
+    var sendTx = new Bitcoin.Transaction();
+    var bciUnspent = self._parseBCIUnspent(self.rawUnspentTxResponse);
+    var inputAmount = (self.numNewPrimedTxouts * MIN_PRIME_BALANCE) + MIN_FEE; //in satoshi
+    var inputAmountRemaining = inputAmount;
+    var txHash = null, txOutputN = null; 
+    //Create inputs
+    for (txHash in bciUnspent.unspentTxs) {
+      if (bciUnspent.unspentTxs.hasOwnProperty(txHash)) {
+        for (txOutputN in bciUnspent.unspentTxs[txHash]) {
+          if (bciUnspent.unspentTxs[txHash].hasOwnProperty(txOutputN)) {
+            sendTx.addInput(txHash, txOutputN);
+            inputAmountRemaining -= bciUnspent.unspentTxs[txHash][txOutputN]['amount'];
+            if(inputAmountRemaining <= 0)
+              break;
+          }
+        }
+      }
     }
-    var sendTx = TX.construct();
-    var rawTxHex = Crypto.util.bytesToHex(sendTx.serialize());
-    $.jqlog.log("RAW SIGNED TX: " + TX.toBBE(sendTx));
-    $.jqlog.log("RAW SIGNED HEX: " + rawTxHex);
-    //WALLET.sendTX(rawTxHex);
-    //^ ENABLE LATER :)
+    if(inputAmountRemaining > 0) {
+      bootbox.alert("Insufficient confirmed bitcoin balance to prime your account (require "
+        + normalizeAmount(inputAmountRemaining, true) + " BTC @ 1 confirm or more)");
+      return;
+    }
+    //Create outputs for the priming itself (.0005 BTC outputs)
+    for(var i=0; i < self.numNewPrimedTxouts.length; i++) {
+      sendTx.addOutput(self.address().ADDRESS, MIN_PRIME_BALANCE);
+    }
+    //Create an output for change
+    var changeAmount = Math.abs(inputAmountRemaining) - MIN_FEE;
+    sendTx.addOutput(self.address().ADDRESS, changeAmount);
+    //^ The remaining should be MIN_FEE, which will of course go to the miners
+    
+    var rawTxHex = sendTx.serializeHex();
+    WALLET.signAndBroadcastTx(self.address().ADDRESS, rawTxHex);
   }
 }
 

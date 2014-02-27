@@ -27,6 +27,14 @@ function mn_decode(str) {
     var out = '';
     var n = mn_words.length;
     var wlist = str.split(' ');
+    
+    // throw an error if non electrum word is given in the input
+    wlist.forEach(function (word) {
+        if (mn_words.indexOf(word) == -1) {
+            throw ("can't decode word '"+ word +"' which is not from Electrum (poetry) list");
+        }
+    });
+    
     for (var i = 0; i < wlist.length; i += 3) {
         var w1 = mn_words.indexOf(wlist[i]);
         var w2 = (mn_words.indexOf(wlist[i+1])) % n;

@@ -1115,7 +1115,7 @@ window.loadGoogleMaps = function() {
 
 //COUNTERWALLET: START MOD
 function loadScript(scriptName, callback) {
-  var scriptID = "script_" + Crypto.SHA256(scriptName);
+  var scriptID = "script_" + Bitcoin.Crypto.SHA256(scriptName);
   if($("#" + scriptID).length == 0 || IS_DEV) {
     //script doesn't exist, or it does and we're in dev mode (which means we should reinit the script to catch code changes)
     if(IS_DEV) {

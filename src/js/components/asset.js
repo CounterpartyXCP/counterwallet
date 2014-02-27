@@ -71,8 +71,8 @@ function AssetViewModel(props) {
                description: self.description(), callable_: self.CALLABLE, call_date: self.CALLDATE,
                call_price: self.CALLPRICE, transfer_destination: null,
                multisig: WALLET.getAddressObj(self.ADDRESS).PUBKEY},
-              function(unsignedTXHex, numTotalEndpoints, numConsensusEndpoints) {
-                WALLET.signAndBroadcastTx(self.ADDRESS, unsignedTXHex);
+              function(unsignedTxHex, numTotalEndpoints, numConsensusEndpoints) {
+                WALLET.signAndBroadcastTx(self.ADDRESS, unsignedTxHex);
                 bootbox.alert("Your asset has been locked. It may take a bit for this to reflect.");
             });
           }
