@@ -33,18 +33,17 @@ function CreateNewAddressModalViewModel() {
   }
 
   self.doAction = function() {
-    //generate new priv key and address via electrum
-    var r = electrum_extend_chain(electrum_get_pubkey(WALLET.ELECTRUM_PRIV_KEY),
-      WALLET.ELECTRUM_PRIV_KEY, WALLET.addresses().length /*-1 +1 = 0*/, false, true);
-    //r = [addr.toString(), sec.toString(), newPub, newPriv]
-    
-    //set the description of this address
-    $.jqlog.log("NEW address created: " + r[0]);
-    WALLET.addKey(new Bitcoin.ECKey(r[1]), self.description());
-    
-    //update PREFS and push
+    WALLET.BITCOIN_WALLET.generateAddress();
+    var i = WALLET.BITCOIN_WALLET.getPrivateKeys().length - 1;
+    var hd = WALLET.BITCOIN_WALLET.getPrivateKey(i);
+    WALLET.addKey(hd.priv, self.description());
+
+    //update PREFs and push
+    var newAddress = hd.priv.getBitcoinAddress();
+    var newAddressHash = Bitcoin.convert.bytesToBase64(Bitcoin.Crypto.SHA256(newAddress, {asBytes: true}));
+    $.jqlog.log("New address created: " + newAddress + " -- hash: " + newAddressHash);
     PREFERENCES['num_addresses_used'] += 1;
-    PREFERENCES['address_aliases'][r[0]] = self.description();
+    PREFERENCES['address_aliases'][addressHash] = self.description();
     multiAPI("store_preferences", [WALLET.identifier(), PREFERENCES], function(data, endpoint) {
       self.shown(false);
       //reload page to reflect the addition
@@ -80,7 +79,7 @@ ko.validation.registerExtenders();
 function SendModalViewModel() {
   var self = this;
   self.shown = ko.observable(false);
-  self.address = ko.observable(null);
+  self.address = ko.observable(null); //address string, not an Address object
   self.asset = ko.observable();
   self.balance = ko.observable(null);
   self.divisible = ko.observable();
@@ -150,7 +149,7 @@ function SendModalViewModel() {
   }
   
   self.show = function(fromAddress, asset, balance, isDivisible, resetForm) {
-    if(asset == 'BTC' && balance != null) {
+    if(asset == 'BTC' && balance == null) {
       return bootbox.alert("Cannot send BTC as we cannot currently get in touch with blockchain.info to get your balance");
     }
     assert(balance, "Balance is null or undefined?");
@@ -173,9 +172,11 @@ function SendModalViewModel() {
 ko.validation.rules['isValidPrivateKey'] = {
     validator: function (val, self) {
       var eckey = new Bitcoin.ECKey(self.privateKey());
-      return eckey.priv !== null && eckey.compressed !== null;
+      var doesVersionMatch = (eckey.version == USE_TESTNET ?
+        Bitcoin.Address.address_types['testnet'] : Bitcoin.Address.address_types['prod']);
+      return eckey.priv !== null && eckey.compressed !== null && eckey.version !== null && doesVersionMatch;
     },
-    message: 'Not a valid private key.'
+    message: 'Not a valid' + (USE_TESTNET ? ' TESTNET ' : '') + 'private key.'
 };
 ko.validation.rules['addressHasEnoughUnspentTxouts'] = {
   async: true,
@@ -227,13 +228,16 @@ function SweepModalViewModel() {
   });
   
   self.availableAddresses = ko.observableArray([]);
-  
+
+  self.privateKeyValidated = ko.validatedObservable({
+    privateKey: self.privateKey,
+  });
   self.addressForPrivateKey = ko.computed(function() {
-    if(!self.fields.privateKey.value.isValid()) return null;
+    if(!self.privateKeyValidated.isValid()) return null;
     //Get the address for this privatekey
     var eckey = new Bitcoin.ECKey(self.privateKey());
-    asset(eckey.priv !== null && eckey.compressed !== null, "Private key not valid!"); //should have been checked already
-    return eckey.getBitcoinAddress(USE_TESTNET ? address_types['testnet'] : address_types['prod']).toString();
+    assert(eckey.priv !== null && eckey.compressed !== null, "Private key not valid!"); //should have been checked already
+    return eckey.getBitcoinAddress().toString();
   }, self);
   
   self.validationModel = ko.validatedObservable({
@@ -274,7 +278,7 @@ function SweepModalViewModel() {
     $('#sweepModal form').submit();
   }
   
-  self._sweepCompleteDialog(sendsComplete) {
+  self._sweepCompleteDialog = function(sendsComplete) {
     var assetDisplayList = [];
     for(var i = 0; i < sendsComplete.length; i++) {
       if(sendsComplete[i]['result']) {
@@ -356,7 +360,7 @@ function SweepModalViewModel() {
 function SignMessageModalViewModel() {
   var self = this;
   self.shown = ko.observable(false);
-  self.address = ko.observable(null);
+  self.address = ko.observable(null); //address string, not an Address object
   self.message = ko.observable('').extend({
     required: true,
   });
@@ -394,7 +398,7 @@ function SignMessageModalViewModel() {
   }
 
   self.doAction = function() {
-    assert(self.fields.message.value.isValid() && self.fields.selectedAddress.value.isValid(), "Cannot sign");
+    assert(self.validationModel.isValid(), "Cannot sign");
     var eckey = WALLET.getAddressObj(self.address()).KEY;
     var hexSignedMessage = Bitcoin.Message.signMessage(eckey, self.message(), eckey.compressed);
     //TODO: add the option for the user to choose whether they want Hex or base64 result (base64 is what bitcoin QT returns, so let's default to that)
@@ -410,7 +414,7 @@ function SignMessageModalViewModel() {
 function PrimeAddressModalViewModel() {
   var self = this;
   self.shown = ko.observable(false);
-  self.address = ko.observable();
+  self.address = ko.observable(); //address string, not an Address object
   self.numNewPrimedTxouts = ko.observable(10).extend({  //default to 10
     required: true,
     number: true,
@@ -423,8 +427,8 @@ function PrimeAddressModalViewModel() {
     numNewPrimedTxouts: self.numNewPrimedTxouts
   });
   
-  self.dispNumUnspentTxouts = ko.computed(function() {
-    return WALLET.getNumUnspentTxouts(address);
+  self.dispNumPrimedTxouts = ko.computed(function() {
+    return WALLET.getNumPrimedTxouts(self.address());
   }, self);
   
   self.resetForm = function() {
@@ -450,7 +454,12 @@ function PrimeAddressModalViewModel() {
     WALLET.retrieveNumPrimedTxouts(address, function(numPrimedTxouts, data) {
       WALLET.updateNumPrimedTxouts(address, numPrimedTxouts);
       self.rawUnspentTxResponse = data; //save for later (when creating the Tx itself)
-      self.shown(true);
+      WALLET.updateNumPrimedTxouts(address, numPrimedTxouts);
+      if(numPrimedTxouts == 0) {
+        bootbox.alert("Your wallet has no available BTC to prime this account with. Please deposit BTC and try again.");
+      } else {
+        self.shown(true);
+      }
     }, function(jqXHR, textStatus, errorThrown) {
       WALLET.updateNumPrimedTxouts(address, null);
       bootbox.alert("Cannot fetch the number of unspent txouts from blockchain.info. Please try again later.");
@@ -512,15 +521,15 @@ function PrimeAddressModalViewModel() {
     }
     //Create outputs for the priming itself (.0005 BTC outputs)
     for(var i=0; i < self.numNewPrimedTxouts.length; i++) {
-      sendTx.addOutput(self.address().ADDRESS, MIN_PRIME_BALANCE);
+      sendTx.addOutput(self.address(), MIN_PRIME_BALANCE);
     }
     //Create an output for change
     var changeAmount = Math.abs(inputAmountRemaining) - MIN_FEE;
-    sendTx.addOutput(self.address().ADDRESS, changeAmount);
+    sendTx.addOutput(self.address(), changeAmount);
     //^ The remaining should be MIN_FEE, which will of course go to the miners
     
     var rawTxHex = sendTx.serializeHex();
-    WALLET.signAndBroadcastTx(self.address().ADDRESS, rawTxHex);
+    WALLET.signAndBroadcastTx(self.address(), rawTxHex);
   }
 }
 
@@ -535,7 +544,7 @@ $(document).ready(function() {
   ko.applyBindingsWithValidation(CREATE_NEW_ADDRESS_MODAL, document.getElementById("createNewAddressModal"));
   ko.applyBindingsWithValidation(SEND_MODAL, document.getElementById("sendModal"));
   ko.applyBindingsWithValidation(SWEEP_MODAL, document.getElementById("sweepModal"));
-  ko.applyBindingsWithValidation(SWEEP_MODAL, document.getElementById("signMessageModal"));
+  ko.applyBindingsWithValidation(SIGN_MESSAGE_MODAL, document.getElementById("signMessageModal"));
   ko.applyBindingsWithValidation(PRIME_ADDRESS_MODAL, document.getElementById("primeAddressModal"));
 });
 

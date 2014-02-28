@@ -23,9 +23,6 @@ function LogonViewModel() {
      return valid;
   }, self);
   
-  
-  
-  
   self.generatePassphrase = function() {
     //Generate (or regenerate) a random, new passphrase
     var pk = randomGetBytes(32);
@@ -112,28 +109,40 @@ function LogonViewModel() {
         derivationMethod: 'private'
       });
       
-      //(re)generate the HD wallet addresses from the seed
-      var i = null, hd = null;
-      for(var i=0; i < PREFERENCES['num_addresses_used']; i++) {
-        WALLET.BITCOIN_WALLET.generateAddress();
-        hd = WALLET.BITCOIN_WALLET.getPrivateKey(i);
-        WALLET.addKey(hd.priv, "My Address #" + (WALLET.addresses().length + 1).toString());
-        console.log("progrress: " + ((i + 1) * (100 / PREFERENCES['num_addresses_used'])).toString());
-        self.walletGenProgressVal((i + 1) * (100 / PREFERENCES['num_addresses_used']));
-      }
-
-      /* hide the login div and show the other divs */
-      $('#logon').hide();
-      $('#header').show();
-      $('#left-panel').show();
-      $('#main').show();
-      
-      //Update the wallet balances (isAtLogon = true)
-      WALLET.updateBalances(true);
-      
-      //next, load the balances screen
-      window.location.hash = 'xcp/pages/balances.html';
+      //kick off address generation (we have to take this hacky approach of using setTimeout, otherwise the
+      // progress bar does not update correctly through the HD wallet build process....)
+      setTimeout(self.genAddress, 1);
   }
+  
+  self.genAddress = function() {
+    WALLET.BITCOIN_WALLET.generateAddress();
+    var i = WALLET.BITCOIN_WALLET.getPrivateKeys().length - 1;
+    var hd = WALLET.BITCOIN_WALLET.getPrivateKey(i);
+    WALLET.addKey(hd.priv, "My Address #" + (WALLET.addresses().length + 1).toString());
+    var progress = (i + 1) * (100 / PREFERENCES['num_addresses_used']);
+    self.walletGenProgressVal(progress);
+    console.log("Progress: " + self.walletGenProgressVal() + " -- " + self.walletGenProgressWidth());
+    
+    if(i + 1 < PREFERENCES['num_addresses_used']) {
+      setTimeout(self.genAddress, 1);
+    } else {
+      self.openWalletPt3();
+    }
+  }
+  
+  self.openWalletPt3 = function() {
+    /* hide the login div and show the other divs */
+    $('#logon').hide();
+    $('#header').show();
+    $('#left-panel').show();
+    $('#main').show();
+    
+    //Update the wallet balances (isAtLogon = true)
+    WALLET.updateBalances(true);
+    
+    //next, load the balances screen
+    window.location.hash = 'xcp/pages/balances.html';
+  }  
 }
 
 ko.validation.rules['isValidPassphrasePart'] = {
@@ -265,7 +274,7 @@ function LogonPasswordModalViewModel() {
     $('#password').val(self.dispFullPassphrase());
     self.resetForm(); //clear out the dialog too, for security
     self.shown(false);
-    $('#open-sesame').click();
+    $('#walletLogin').click();
   }
 }
 

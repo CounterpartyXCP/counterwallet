@@ -111,18 +111,20 @@ function ChatFeedViewModel() {
       return;
     }
     
-    var socket = null;
     var initialLineSetNumReplies = 0;
     var initialLineSet = [];
         
     $.jqlog.log("Starting chat feeds: " + JSON.stringify(counterwalletd_chat_urls));
     for(var i = 0; i < counterwalletd_chat_urls.length; i++) {
-      socket = io.connect(counterwalletd_chat_urls[i], {
+      var socket = io.connect(counterwalletd_chat_urls[i], {
         'max reconnection attempts': 5,
-        //'force new connection': true,
+        'force new connection': true, /* needed, otherwise socket.io will reuse the feed connection */
         //'reconnection limit': 100000,
         //'max reconnection attempts': Infinity,
         'resource': '_chat'
+      });
+      socket.on('connect', function() {
+        $.jqlog.log('socket.io(chat): Connected to server: ' + url);
       });
       socket.on('emote', function (handle, text) {
         $.jqlog.log("chat.emote(feed-"+i+"): handle: " + handle + ", text: " + text);
@@ -155,7 +157,8 @@ function ChatFeedViewModel() {
       
       //for each feed, we need to call over to "set_walletid"
       socket.emit('set_walletid', WALLET.identifier(), function(data) {
-        self.feedConnections.push(socket);
+        console.log("here!1");
+        self.feedConnections.push(socket); //must be done before we do any chatting...
       });
       
       //populate last messages into dict, and then sort by timestamp

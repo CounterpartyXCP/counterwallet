@@ -7,7 +7,7 @@
   </div>
 </div>
 
-<section id="widget-grid"> <!-- widget grid -->
+<section id="widget-grid" class="portfolioGrid"> <!-- widget grid -->
   <div class="row"> <!-- row -->
     <article class="col-xs-12 col-sm-12 col-md-12 col-lg-12"> <!-- NEW WIDGET START -->
       <!-- Widget ID (each widget will need unique ID)-->
@@ -36,12 +36,12 @@
   </div> <!-- end row -->
     
     
-  <div class="row"> <!-- row -->
+  <div class="row" data-bind="fadeVisibleInOnly: marketCapTableRows().length > 0" style="display:none"> <!-- row -->
     <article class="col-xs-12 col-sm-12 col-md-12 col-lg-12"> <!-- NEW WIDGET START -->
       <div class="jarviswidget jarviswidget-color-blueLight" id="wid-id-txnHistory" data-widget-editbutton="false" data-widget-deletebutton="false">
         <header>
             <span class="widget-icon"> <i class="fa fa-table"></i> </span>
-            <h2>Portfolio Composition</h2>
+            <h2>Portfolio Composition (in <span data-bind="showPortfolioIn"></span>)</h2>
             <div class="widget-toolbar">
               <div class="btn-group">
                 <button class="btn dropdown-toggle btn-xs btn-primary" data-toggle="dropdown"><i class="fa fa-bars"></i> Show In <i class="fa fa-caret-down"></i></button>                
@@ -54,7 +54,7 @@
         </header>
         <div> <!-- widget div-->
             <div class="widget-body no-padding"> <!-- widget content -->
-                <table id="portfolioComposition" data-bind="fadeVisible: portfolio().length > 0" class="table table-striped table-hover dt_basic">
+                <table id="portfolioComposition" class="table table-striped table-hover dt_basic">
                     <thead>
                         <tr>
                             <th>Asset</th>

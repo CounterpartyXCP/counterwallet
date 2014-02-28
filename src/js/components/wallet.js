@@ -87,10 +87,10 @@ function WalletViewModel() {
     return addressObj.numPrimedTxouts();
   }
   
-  self.updateNumPrimedTxouts = function(address, numPrimedTxouts) {
+  self.updateNumPrimedTxouts = function(address, n) {
     var addressObj = self.getAddressObj(address);
     if(!addressObj) return false;
-    addressObj.numPrimedTxouts(numPrimedTxouts);
+    addressObj.numPrimedTxouts(n);
     return true;
   }
 
@@ -125,12 +125,16 @@ function WalletViewModel() {
       for(var i=0; i < data.length; i++) {
         self.updateBalance(data[i]['address'], "BTC", data[i]['balance']);
         
-        //Also refresh BTC unspent txouts (to know when to "reprime" the account)
-        self.retrieveNumPrimedTxouts(data[i]['address'], function(numPrimedTxouts) {
-          self.updateNumPrimedTxouts(data[i]['address'], numPrimedTxouts); //null if unknown
-        }, function(jqXHR, textStatus, errorThrown) {
-          self.updateNumPrimedTxouts(data[i]['address'], "BTC", null); //null = UNKNOWN
-        });
+        function _retrNumPrimed(num) {
+          //Also refresh BTC unspent txouts (to know when to "reprime" the account)
+          var address = data[i]['address'];
+          self.retrieveNumPrimedTxouts(address, function(numPrimedTxouts) {
+            self.updateNumPrimedTxouts(address, numPrimedTxouts); //null if unknown
+          }, function(jqXHR, textStatus, errorThrown) {
+            self.updateNumPrimedTxouts(address, null); //null = UNKNOWN
+          });
+        }
+        _retrNumPrimed(i); //closure
       }
       
       if(isRecurring && self.autoRefreshBTCBalances) {
@@ -145,7 +149,7 @@ function WalletViewModel() {
       var addresses = self.getAddressesList();
       for(var i=0; i < addresses.length; i++) {
         self.updateBalance(addresses[i], "BTC", null); //null = UNKNOWN
-        self.updateNumPrimedTxouts(addresses[i], "BTC", null); //null = UNKNOWN
+        self.updateNumPrimedTxouts(addresses[i], null); //null = UNKNOWN
       }
     });
   }
@@ -204,7 +208,7 @@ function WalletViewModel() {
   
   self.retrieveBTCBalance = function(address, callback, errorHandler) {
     //If you are requesting more than one balance, use retrieveBTCBalances instead
-    $.get('http://blockchain.info/q/addressbalance/' + address,
+    $.get('https://blockchain.info/q/addressbalance/' + address,
       {cors: 'true'}, callback).error(errorHandler || defaultErrorHandler);
   }
 
@@ -225,23 +229,24 @@ function WalletViewModel() {
     ).error(errorHandler || defaultErrorHandler);
   }
   
-  self.retrieveUnspentBTCOutputs = function(address, callback, errorHandler) {
-    $.getJSON('http://blockchain.info/unspent',
-      {cors: 'true', address: address}, callback).error(errorHandler || defaultErrorHandler);
-  }
-  
   self.retrieveNumPrimedTxouts = function(address, callback) {
-      return self.retrieveUnspentBTCOutputs(address, function(data) {
-        var numSuitableUnspentTxouts = 0;
-        for(var i=0; i < data["unspent_outputs"].length; i++) {
-          if(data[i]['value'] >= MIN_PRIME_BALANCE) numSuitableUnspentTxouts++;
-        }
-        //final number of primed txouts is lesser of either the # of txouts that are >= .0005 BTC, OR the floor(total balance / .0005 BTC)
-        return callback(Math.min(numSuitableUnspentTxouts, Math.floor(data[i]['balance'] / MIN_PRIME_BALANCE)), data);
-      },
-      function(jqXHR, textStatus, errorThrown) {
-        return callback(null); //blockchain down/error?
-      });
+    $.getJSON('https://blockchain.info/unspent', {cors: 'true', address: address}, function(data) {
+      var numSuitableUnspentTxouts = 0;
+      var totalBalance = 0;
+      var unspentOutputs = data['unspent_outputs'];
+      for(var i=0; i < unspentOutputs.length; i++) {
+        if(unspentOutputs[i]['value'] >= MIN_PRIME_BALANCE) numSuitableUnspentTxouts++;
+        totalBalance += unspentOutputs[i]['value'];
+      }
+      //final number of primed txouts is lesser of either the # of txouts that are >= .0005 BTC, OR the floor(total balance / .0005 BTC)
+      return callback(Math.min(numSuitableUnspentTxouts, Math.floor(totalBalance / MIN_PRIME_BALANCE)), data);
+    }).error(function(jqXHR, textStatus, errorThrown) {
+      if(jqXHR.responseText == 'No free outputs to spend') {
+        return callback(0);
+      } else {
+        return callback(null); //some other error
+      }
+    });
   }
   
   self.sendTx = function(tx, callback) {

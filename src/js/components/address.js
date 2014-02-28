@@ -38,10 +38,10 @@ function AddressViewModel(key, address, initialLabel) {
   
   self.dispNumPrimedTxouts = ko.computed(function(){
     var txo = self.numPrimedTxouts();
-    if(txo == null) return '<span class="badge">--</span>'; 
-    if(txo < 3) return '<span class="badge badge-danger">'+txo+'</span>'; 
-    if(txo < 5) return '<span class="badge badge-warning">'+txo+'</span>'; 
-    return '<span class="badge badge-success">'+txo+'</span>'; 
+    if(txo === null) return 'Primed:&nbsp;<span class="badge">??</span>'; 
+    if(txo < 3) return 'Primed:&nbsp;<span class="badge badge-error">'+txo+'</span>'; 
+    if(txo < 5) return 'Primed:&nbsp;<span class="badge badge-warning">'+txo+'</span>'; 
+    return 'Primed:&nbsp;<span class="badge badge-success">'+txo+'</span>'; 
   }, self);
   
   self.getAssetObj = function(asset) {
@@ -104,7 +104,7 @@ function AddressViewModel(key, address, initialLabel) {
     //Show the QR code for this address
     var qrcode = makeQRCode(self.ADDRESS);
     //Pop up a modal with this code
-    bootbox.alert('<center><h4>QR Code for ' + self.ADDRESS + '</h4><br/>' + qrcode + '</center>');
+    bootbox.alert('<center><h4>QR Code for <b>' + self.ADDRESS + '</b></h4><br/>' + qrcode + '</center>');
   }
   
   self.signMessage = function() {

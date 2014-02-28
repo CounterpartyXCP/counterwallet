@@ -13,6 +13,7 @@ function AssetPortfolioViewModel() {
   self.marketCapTableRows = ko.observable([]);
   
   self.init = function() {
+    console.log("INIT CALLED!");
     //Set up handler to regraph the data if the terms we place it in change
     self.showPortfolioIn.subscribe(function(newValue) {
       assert(newValue == "XCP" || newValue == "BTC", "Invalid value");
@@ -50,12 +51,12 @@ function AssetPortfolioViewModel() {
     //Get a list of all assets the user has
     var addresses = WALLET.getAddressesList();
     failoverAPI("get_owned_assets", { addresses: addresses }, function(data, endpoint) {
-      var otherAssets = [], i = null;
-      for(i = 0; i < data.length; i++) {
+      var otherAssets = [];
+      for(var i = 0; i < data.length; i++) {
         otherAssets.push(data[i]['asset']); //asset ID (e.g. "FOOBAR")
       }
       otherAssets.sort();
-      self.availableAssets(self.myAssets().concat(otherAssets));
+      self.myAssets(self.myAssets().concat(otherAssets));
       //^ this way, XCP and BTC stay at the top, but the other assets are alphabetically sorted
       
       //now that we have the list of assets, fetch all the info on them
@@ -67,7 +68,7 @@ function AssetPortfolioViewModel() {
         var bal = null, asset = null;
         for(asset in self.marketInfo) {
           //get the total balance of all assets across all addresses in the wallet
-          for(i = 0; i < addresses.length; i++) {
+          for(var i = 0; i < addresses.length; i++) {
             if(!self.totalBalanceByAsset[asset]) self.totalBalanceByAsset[asset] = 0;
             self.totalBalanceByAsset[asset] += WALLET.getBalance(addresses[i].ADDRESS, asset); 
           }
@@ -78,6 +79,7 @@ function AssetPortfolioViewModel() {
         self.generateCharts();
         
         self.showPortfolioIn("XCP"); //causes the table to be generated off of self.marketInfo
+      });
     });
   }
   
@@ -90,61 +92,56 @@ function AssetPortfolioViewModel() {
   }
   
   self.generateCharts = function() {
-      $('#portfolioAssetValsPie').highcharts({
-          chart: {
-              plotBackgroundColor: null,
-              plotBorderWidth: null,
-              plotShadow: false
-          },
-          title: {
-              text: 'Composition by Value (in XCP)'
-          },
-          tooltip: {
-            pointFormat: '{series.name}: <b>{point.percentage:.1f}%</b>'
-          },
-          plotOptions: {
-              pie: {
-                  allowPointSelect: true,
-                  cursor: 'pointer',
-                  dataLabels: {
-                      enabled: false
-                  },
-                  showInLegend: true
-              }
-          },
-          series: [{
-              type: 'pie',
-              name: '% of Portfolio',
-              data: self.portfolioTotalBalancesByAsset()
-          }]
-      });        
-      $('#pctChangeBarToXCP').highcharts({
-          chart: {
-              type: 'column'
-          },
-          title: {
-              text: '24h % Change To XCP'
-          },
-          credits: {
-              enabled: false
-          },
-          series: self.pctChangesToXCP()
-      });
-      $('#pctChangeBarToBTC').highcharts({
-          chart: {
-              type: 'column'
-          },
-          title: {
-              text: '24h % Change To BTC'
-          },
-          credits: {
-              enabled: false
-          },
-          series: self.pctChangesToBTC()
-      });
+    $('#portfolioAssetValsPie').highcharts({
+        chart: {
+            plotBackgroundColor: null,
+            plotBorderWidth: null,
+            plotShadow: false
+        },
+        title: {
+            text: 'Composition by Value (in XCP)'
+        },
+        tooltip: {
+          pointFormat: '{series.name}: <b>{point.percentage:.1f}%</b>'
+        },
+        plotOptions: {
+            pie: {
+                allowPointSelect: true,
+                cursor: 'pointer',
+                dataLabels: {
+                    enabled: false
+                },
+                showInLegend: true
+            }
+        },
+        credits: { enabled: false },
+        series: [{
+            type: 'pie',
+            name: '% of Portfolio',
+            data: self.portfolioTotalBalancesByAsset
+        }]
+    });        
+    $('#pctChangeBarToXCP').highcharts({
+        chart: {
+            type: 'column'
+        },
+        title: {
+            text: '24h % Change To XCP'
+        },
+        credits: { enabled: false },
+        series: self.pctChangesToXCP
+    });
+    $('#pctChangeBarToBTC').highcharts({
+        chart: {
+            type: 'column'
+        },
+        title: {
+            text: '24h % Change To BTC'
+        },
+        credits: { enabled: false },
+        series: self.pctChangesToBTC
     });
   }
-    
 
   self.dataTableResponsive = function(e) {
     // Responsive design for our data tables and more on this page
@@ -172,8 +169,8 @@ function AssetPortfolioViewModel() {
 var ASSET_PORTFOLIO = new AssetPortfolioViewModel();
 
 $(document).ready(function() {
-  ko.applyBindings(ASSET_PORTFOLIO, document.getElementById("assetPortfolio"));
-
+  ko.applyBindings(ASSET_PORTFOLIO, document.getElementsByClassName("portfolioGrid")[0]);
+  console.log("OK BOUND");
   ASSET_PORTFOLIO.init();
   
   $(window).bind("resize", ASSET_PORTFOLIO.dataTableResponsive);

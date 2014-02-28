@@ -23,7 +23,7 @@ function initMessageFeed() {
     'reconnection delay': 500,
     'reconnection limit': 2000,
     'max reconnection attempts': 5,
-    //'force new connection': true,
+    'force new connection': true,
     'try multiple transports': false,
     'resource': '_feed'
   });
@@ -37,27 +37,30 @@ function initMessageFeed() {
           original_$emit.apply(socket, ['default'].concat(args));
       }
   }
-  
-  socket.on('default',function(event, data) {
+  /*socket.on('default',function(event, data) {
       $.jqlog.log('socket.io event not trapped: ' + event + ' - data:' + JSON.stringify(data));
-  });
-  
+  });*/
   socket.on('*',function(event, data) {
-      $.jqlog.log('socket.io event received: ' + event + ' - data:' + JSON.stringify(data));
+      //$.jqlog.log('socket.io message received: ' + event + ' - data:' + JSON.stringify(data));
       if(event == 'connect') {
-        $.jqlog.log('socket.io: Connected to server: ' + url);
+        $.jqlog.log('socket.io(messages): Connected to server: ' + url);
+        return true;
       } else if(event == 'disconnect') {
-        $.jqlog.log('socket.io: The client has disconnected from server: ' + url);
+        $.jqlog.log('socket.io(messages): The client has disconnected from server: ' + url);
+        return true;
       } else if(event == 'connect_failed') {
-        $.jqlog.log('socket.io: Connection to server failed: ' + url);
+        $.jqlog.log('socket.io(messages): Connection to server failed: ' + url);
         io.disconnect();
         tryNextSIOMessageFeed();
+        return true;
       } else if(event == 'reconnect_failed') {
-        $.jqlog.log('socket.io: Reconnect to the server failed: ' + url);
+        $.jqlog.log('socket.io(messages): Reconnect to the server failed: ' + url);
         io.disconnect();
         tryNextSIOMessageFeed();
-      } else if(['connecting', 'connect_error', 'connect_timeout', 'reconnect', 'reconnect_error'].indexOf(event) >= 0) {
+        return true;
+      } else if(['connecting', 'connect_error', 'connect_timeout', 'reconnect', 'reconnecting', 'reconnect_error'].indexOf(event) >= 0) {
         //these events currently not handled
+        return true;
       } else{
         return parseMessage(event, data);  
       }
@@ -71,10 +74,11 @@ function parseMessage(event, data, detectMessagesGap) {
   } else {
     handleMessage(event, data);
   }
+  return true;
 }
   
 function handleMessage(event, data) {
-  $.jqlog.log("HANDLING event " + data['_message_index'] + ":" + event + ": " + JSON.stringify(data));
+  $.jqlog.log("socket.io(messages): Got event " + data['_message_index'] + ":" + event + ": " + JSON.stringify(data));
   
   if(event == "balances") {
   } else if(event == "credits") {
@@ -210,7 +214,9 @@ function handleMessage(event, data) {
 }
 
 function detectMessageFeedGap(event, data, callback) {
-  assert(data['_message_index'] >= LAST_MESSAGEIDX_RECEIVED, "Invalid _message_index");
+  $.jqlog.info("detectMessageFeedGap: " + data['_message_index'] + " -- " + LAST_MESSAGEIDX_RECEIVED);
+  if(data['_message_index'] === undefined && IS_DEV) debugger;
+  assert(data['_message_index'] && data['_message_index'] >= LAST_MESSAGEIDX_RECEIVED, "Invalid _message_index");
   
   if(   LAST_MESSAGEIDX_RECEIVED == 0 //first message received
      || data['_message_index'] == LAST_MESSAGEIDX_RECEIVED + 1) { //next sequential message received 
@@ -218,7 +224,15 @@ function detectMessageFeedGap(event, data, callback) {
     return;
   }
   
-  //otherwise, we have a gap
+  //Detect a reorg (reverse gap) and refresh the current page if so
+  if(data['_message_index'] <= LAST_MESSAGEIDX_RECEIVED) {
+    $.jqlog.warn("event:REORG DETECTED: our last msgidx = " + LAST_MESSAGEIDX_RECEIVED + "; server send msgidx = " + data['_message_index']);
+    LAST_MESSAGEIDX_RECEIVED = data['_message_index'];
+    checkURL();
+    return;
+  }
+  
+  //otherwise, we have a forward gap
   $.jqlog.warn("event:GAP DETECTED: our last msgidx = " + LAST_MESSAGEIDX_RECEIVED + "; server send msgidx = " + data['_message_index']);
 
   //request the missing messages from the feed and replay them...

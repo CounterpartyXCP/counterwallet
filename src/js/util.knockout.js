@@ -1,23 +1,4 @@
 /* Knockout bindings */
-ko.bindingHandlers.isotope = {
-    init: function (element, valueAccessor, allBindingsAccessor, viewModel, bindingContext) {
-      //HACK: isotope is initialized in getBalances
-     
-    },
-    update: function (element, valueAccessor, allBindingsAccessor, viewModel, bindingContext) {
-        var $el = $(element),
-            value = ko.utils.unwrapObservable(valueAccessor());
-
-        if ($el.hasClass('isotope')) {
-            $el.isotope('reLayout');
-        } else {
-            $el.isotope({
-                itemSelector: value.itemSelector
-            });
-        }
-    }
-};
-
 ko.bindingHandlers.showModal = {
   init: function (element, valueAccessor) {
   },
@@ -97,12 +78,12 @@ ko.validation.rules['isValidBitcoinAddress'] = {
     validator: function (val, otherVal) {
         try {
           var address = Bitcoin.Address(val);
-          return address.version == USE_TESTNET ? address_types['testnet'] : address_types['prod'];
+          return address.version == USE_TESTNET ? Bitcoin.Address.address_types['testnet'] : Bitcoin.Address.address_types['prod'];
         } catch (err) {
           return false;
         }
     },
-    message: USE_TESTNET ? 'This field must be a valid TESTNET bitcoin address.' : 'This field must be a valid bitcoin address.'
+    message: USE_TESTNET ? 'This field must be a valid TESTNET Bitcoin address.' : 'This field must be a valid Bitcoin address.'
 };
 ko.validation.rules['isValidQtyForDivisibility'] = {
     validator: function (val, self) {

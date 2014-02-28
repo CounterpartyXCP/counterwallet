@@ -170,15 +170,15 @@
             <form class="form-inline" role="form">
               <input id="password" data-bind="value: enteredPassphrase, valueUpdate:'afterkeydown'" placeholder="Enter your Counterwallet 12 word passphrase." class="form-control pull-left" type="password">
               <div class="pull-right">
-                <button id="open-sesame" data-bind="click: openWallet, enable: isPassphraseValid(), css: { 'btn-primary': isPassphraseValid() }" type="button" class="btn btn-default" disabled>Open Wallet</button>
+                <button id="walletLogin" data-bind="click: openWallet, enable: isPassphraseValid(), css: { 'btn-primary': isPassphraseValid() }" type="button" class="btn btn-default" disabled>Open Wallet</button>
                 &nbsp;<button id="secureKeyboard" data-bind="click: showSecureKeyboard, enable: !isPassphraseValid(), css: { 'btn-primary': !isPassphraseValid() }" type="button" class="btn btn-default" disabled><i class="fa fa-keyboard-o"></i></button>
               </div>
             </form>
             <div class="clearfix"></div>
             <div data-bind="fadeVisible: walletGenProgressVal() > 0" class="progress progress-striped active" style="margin-top:15px;margin-bottom:0;display:none">
-              <div class="progress-bar"  role="progressbar" data-bind="style: { width: walletGenProgressWidth() }">
+              <div id="loginProgressBar" class="progress-bar"  role="progressbar" data-bind="style: { width: walletGenProgressWidth() }">
               </div>
-            </div>              
+            </div>
           </div>
         </div>
         <div id="createNewAcctBtnPane" data-bind="visible: generatedPassphrase().length == 0" style="text-align:center;display:block">

@@ -5,7 +5,7 @@
         My Account Balances 
     </h1>
   </div>
-  <div class="pull-right">
+  <div class="pull-right" style="padding-right: 13px;">
       <button id="createNewAddress" type="button" class="btn btn-primary">Create New Address</button>
       <button id="sweepFunds" type="button" class="btn btn-primary">Import Funds</button>
   </div>
@@ -17,7 +17,7 @@
         <div class="jarviswidget jarviswidget-color-blueLight" data-bind="attr: {'id': 'address-wid-' + $data.ADDRESS}" data-widget-deletebutton="false" data-widget-editbutton="false">
           <header>
             <span class="widget-icon"> <i class="fa fa-bars"></i> </span>
-            <h2 class="jarviswidget-ctrls"><a href="#" data-bind="editable: label, editableOptions: { type: 'text', url: changeLabel, placement: 'bottom', title: 'Enter a new nickname for this address' }" style="text-decoration:underline"></a></h2>
+            <h2 class="jarviswidget-ctrls"><a href="#" data-bind="editable: label, editableOptions: { type: 'text', url: changeLabel, inputclass: 'addressNicknameEditable', placement: 'bottom', title: 'Enter a new nickname for this address' }" style="text-decoration:underline"></a></h2>
             <div class="widget-toolbar">
               <div class="btn-group">
                 <button class="btn dropdown-toggle btn-xs btn-primary" data-toggle="dropdown"><i class="fa fa-bars"></i> Address Actions <i class="fa fa-caret-down"></i></button>                
@@ -36,7 +36,7 @@
                 </ul>
               </div>
             </div>
-            <div class="widget-toolbar"><span id="" data-bind="click: prime, text: dispNumPrimedTxouts"></span></div>  
+            <div class="widget-toolbar"><span id="" data-bind="click: prime, html: dispNumPrimedTxouts"></span></div>  
             <div class="widget-toolbar"><span id="" data-bind="attr: {'id': 'address-text-' + $data.ADDRESS}, click: function(data, event) { return selectText('address-text-' + $data.ADDRESS); }, text: ADDRESS"></span></div>  
           </header>
           <div> <!-- widget div-->
@@ -81,8 +81,8 @@
         
         <form class="smart-form" data-bind="submit: doAction"><fieldset>
           <section><div class="row">
-            <label class="label col col-2">Description</label>
-            <div class="col col-10">
+            <label class="control-label col col-sm-2">Description</label>
+            <div class="col col-sm-10">
                 <label class="input"><i class="icon-append fa fa-info"></i>
                     <input name="description" data-bind="value: description, valueUpdate: 'afterkeydown'" type="text"/>
                 </label>
@@ -115,16 +115,16 @@
         
         <form class="smart-form" data-bind="submit: doAction"><fieldset>
           <section><div class="row">
-            <label class="label col col-2">Send To</label>
-            <div class="col col-10">
+            <label class="control-label col col-sm-2">Send To</label>
+            <div class="col col-sm-10">
                 <label class="input"><i class="icon-append fa fa-user"></i>
                     <input name="destAddress" data-bind="value: destAddress, valueUpdate:['afterkeydown','propertychange','input'], attr: {placeholder: 'Enter Bitcoin address'}" type="text"/>
                 </label>
             </div>
           </div></section>
           <section><div class="row">
-            <label class="label col col-2">Send Amount</label>
-            <div class="col col-10">
+            <label class="control-label col col-sm-2">Send Amount</label>
+            <div class="col col-sm-10">
                 <label class="input" style="display: inline-block;">
                     <i class="icon-append fa fa-share"></i>
                     <input name="quantity" data-bind="value: quantity, valueUpdate: 'afterkeydown', attr: {placeholder: 'Enter quantity'}" type="text"/>
@@ -158,8 +158,8 @@
         
         <form class="smart-form" data-bind="submit: doAction"><fieldset>
           <section><div class="row">
-            <label class="label col col-2">Private Key To Import</label>
-            <div class="col col-10">
+            <label class="control-label col col-sm-2">Private Key To Import</label>
+            <div class="col col-sm-10">
                 <label class="input"><i class="icon-append fa fa-lock"></i>
                     <input name="privateKey" data-bind="value: privateKey, valueUpdate:['afterkeydown','propertychange','input'], attr: {placeholder: 'Enter Bitcoin private key'}" type="text"/>
                 </label>
@@ -167,19 +167,17 @@
             </div>
           </div></section>
           <section><div class="row">
-            <label class="label col col-2">Destination Address</label>
-            <div class="col col-10">
-                <label class="input"><i class="icon-append fa fa-lock"></i>
-                    <select data-bind="options: availableAddresses, optionsText: 'SELECT_LABEL', select2: {  minimumResultsForSearch: -1, escapeMarkup: function(m) { return m; } }, value: destAddress"></select>
-                </label>
+            <label class="control-label col col-sm-2">Destination Address</label>
+            <div class="col col-sm-10">
+                <select style="width:100%" data-bind="options: availableAddresses, optionsText: 'SELECT_LABEL', select2: { escapeMarkup: function(m) { return m; } }, value: destAddress"></select>
                 <div class="note">Select the address in your wallet that the specified assets for the private key above should be send to.</div>
             </div>
           </div></section>
-          <section><div class="row">
-            <label class="label col col-2">Assets to Sweep</label>
-            <div class="col col-10">
+          <section data-bind="fadeVisibleInOnly: availableAssetsToSweep().length >= 1"><div class="row">
+            <label class="control-label col col-sm-2">Assets to Sweep</label>
+            <div class="col col-sm-10">
                 <label class="input">
-                    <select multiple data-bind="options: availableAssetsToSweep, optionsText: 'SELECT_LABEL', select2: {  minimumResultsForSearch: -1, escapeMarkup: function(m) { return m; } }, value: selectedAssetsToSweep"></select>
+                    <select multiple style="width:100%" data-bind="options: availableAssetsToSweep, optionsText: 'SELECT_LABEL', select2: { escapeMarkup: function(m) { return m; } }, value: selectedAssetsToSweep"></select>
                 </label>                    
                 <div class="note">Select all of the assets whose total amounts you want to move into the destination address.</div>
             </div>
@@ -207,8 +205,8 @@
         
         <form class="smart-form" data-bind="submit: doAction"><fieldset>
           <section><div class="row">
-            <label class="label col col-2">Message to Sign</label>
-            <div class="col col-10">
+            <label class="control-label col col-sm-2">Message to Sign</label>
+            <div class="col col-sm-10">
                 <label class="textarea">
                     <textarea rows="3" class="custom-scroll" data-bind="value: message, valueUpdate : 'afterkeydown'"></textarea>
                 </label>
@@ -216,8 +214,8 @@
             </div>
           </div></section>
           <section><div class="row">
-            <label class="label col col-2">Signed Message</label>
-            <div class="col col-10">
+            <label class="control-label col col-sm-2">Signed Message</label>
+            <div class="col col-sm-10">
                 <label class="textarea">
                     <textarea rows="3" class="custom-scroll" data-bind="value: signedMessage" readonly="readonly"></textarea>
                 </label>
@@ -240,22 +238,25 @@
     <div class="modal-content">
       <div class="modal-header">
         <button type="button" data-bind="click: hide" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
-        <h4 class="modal-title">"Prime" Address <span data-bind="text: address"></span></h4>
+        <h4 class="modal-title">"Prime" Address <b></b><span data-bind="text: address"></span></b></h4>
       </div>
       <div class="modal-body no-padding">
-        <p class="formIntro">In order to be able to do things with Counterparty, your address needs to
-            contain at one confirmed <a href="http://bitcoin.stackexchange.com/questions/4301/what-is-an-unspent-output" target="_blank">"unspent output"</a>.
-            for each action you want to do (e.g. send, create asset, etc). This form allows you to take one larger unspent input that you may have at
-            your address and split it into many smaller ones, allowing you to perform multiple Counterparty actions without
-            having to wait between each one. We call this "priming" the address.</p>
-        <p>You currently have <span data-bind="text: dispNumUnspentTxouts"></span> unspent outputs for address <span data-bind="text: address"></span>.
-            We recommend you try to keep between 5 and 15 unspent outputs. Note that this operation won't add, remove or delete any funds.
-            It simply changes how those funds are structured on the blockchain.</p>
+        <div class="formIntro">
+            <p>In order to do things with Counterparty, your address needs to
+                contain at one confirmed <a href="http://bitcoin.stackexchange.com/questions/4301/what-is-an-unspent-output" target="_blank">"unspent output"</a>
+                for each action you want to do (e.g. send, create asset, etc).</p>
+            <p>This form allows you to take one larger unspent input that you may have at
+                your address and split it into many smaller ones, allowing you to perform multiple Counterparty actions without
+                having to wait between each one. We call this <b>"priming"</b> the address.</p>
+            <p>You currently have <span data-bind="text: dispNumPrimedTxouts"></span> unspent outputs for address <span data-bind="text: address"></span>.
+                We recommend you try to keep between 5 and 15 unspent outputs. Note that this operation won't add, remove or delete any funds.
+                It simply changes how those funds are structured on the blockchain.</p>
+        </div>
         <form class="smart-form" data-bind="submit: doAction"><fieldset>
           <section><div class="row">
-            <label class="label col col-2">Create Additional</label>
-            <div class="col col-10">
-                <label class="textarea">
+            <label class="control-label col col-sm-2">Create Additional</label>
+            <div class="col col-sm-10">
+                <label class="input"><i class="icon-append fa fa-plus"></i>
                     <input name="numNewPrimedTxouts" data-bind="value: numNewPrimedTxouts, valueUpdate:['afterkeydown','propertychange','input']" type="text"/>
                 </label>
                 <div class="note">The number of additional unspent outputs you want to prime the account with.</div>
@@ -284,8 +285,8 @@
         
         <form class="smart-form" data-bind="submit: doAction"><fieldset>
           <section><div class="row">
-            <label class="label col col-2">For Address</label>
-            <div class="col col-10">
+            <label class="control-label col col-sm-2">For Address</label>
+            <div class="col col-sm-10">
                 <label class="input"><i class="icon-append fa fa-user"></i>
                     <input name="assetAddress" data-bind="value: address" type="text" readonly="readonly"/>
                 </label>
@@ -293,8 +294,8 @@
             </div>
           </div></section>
           <section><div class="row">
-            <label class="label col col-2">Asset Name</label>
-            <div class="col col-10">
+            <label class="control-label col col-sm-2">Asset Name</label>
+            <div class="col col-sm-10">
                 <label class="input">
                     <input name="assetName" data-bind="value: name, valueUpdate : 'afterkeydown'" type="text"/>
                 </label>
@@ -302,8 +303,8 @@
             </div>
           </div></section>
           <section><div class="row">
-            <label class="label col col-2">Description</label>
-            <div class="col col-10">
+            <label class="control-label col col-sm-2">Description</label>
+            <div class="col col-sm-10">
                 <label class="input">
                     <input name="assetDescription" data-bind="value: description, valueUpdate: 'afterkeydown'"/>
                 </label>
@@ -311,8 +312,8 @@
             </div>
           </div></section>
           <section><div class="row">
-            <label class="label col col-2">Quantity</label>
-            <div class="col col-10">
+            <label class="control-label col col-sm-2">Quantity</label>
+            <div class="col col-sm-10">
                 <label class="input">
                     <input name="assetQuantity"  data-bind="value: quantity, valueUpdate: 'afterkeydown'" type="text"/>                        
                 </label>
@@ -320,8 +321,8 @@
             </div>
           </div></section>
           <section><div class="row">
-            <div class="col col-2"></div>
-            <div class="col col-10">
+            <div class="col col-sm-2"></div>
+            <div class="col col-sm-10">
               <label class="checkbox">
                 <input name="assetDivisible" type="checkbox" data-bind="checked: divisible">
                 <i></i>Divisible asset?
@@ -329,8 +330,8 @@
               <div class="note">Divisble assets can be subdivided into decimal places.</div>
           </div></section>
           <section><div class="row">
-            <div class="col col-2"></div>
-            <div class="col col-10">
+            <div class="col col-sm-2"></div>
+            <div class="col col-sm-10">
               <label class="checkbox">
                 <input name="assetCallable" type="checkbox" data-bind="checked: callable">
                 <i></i>Callable asset?
@@ -338,8 +339,8 @@
               <div class="note">Callable assets may be called back at a specific date for a specific strike price.</div>
           </div></section>
           <section data-bind="fadeVisibleInOnly: callable"><div class="row">                
-            <label class="label col col-2">Call Date</label>
-            <div class="col col-10">
+            <label class="control-label col col-sm-2">Call Date</label>
+            <div class="col col-sm-10">
                 <label class="input">
                     <input name="assetCallDate" type="text" data-bind="datetimepicker: callDate"/>
                 </label>
@@ -347,8 +348,8 @@
             </div>
           </div></section>
           <section data-bind="fadeVisibleInOnly: callable"><div class="row">                
-            <label class="label col col-2">Call Price</label>
-            <div class="col col-10">
+            <label class="control-label col col-sm-2">Call Price</label>
+            <div class="col col-sm-10">
                 <label class="input">
                     <input name="assetCallPrice" type="text" data-bind="value: callPrice, valueUpdate: 'afterkeydown'"/>
                 </label>
@@ -381,8 +382,8 @@
         
         <form class="smart-form" data-bind="submit: doAction"><fieldset>
           <section><div class="row">
-            <label class="label col col-2">Additional Qty</label>
-            <div class="col col-10">
+            <label class="control-label col col-sm-2">Additional Qty</label>
+            <div class="col col-sm-10">
                 <label class="input"><i class="icon-append fa fa-plus"></i>
                     <input name="additionalIssue" data-bind="value: additionalIssue, valueUpdate: 'afterkeydown'" type="text"/>
                 </label>
@@ -412,8 +413,8 @@
         
         <form class="smart-form" data-bind="submit: doAction"><fieldset>
           <section><div class="row">
-            <label class="label col col-2">Transfer To</label>
-            <div class="col col-10">
+            <label class="control-label col col-sm-2">Transfer To</label>
+            <div class="col col-sm-10">
                 <label class="input"><i class="icon-append fa fa-share"></i>
                     <input name="destAddress" data-bind="value: destAddress, valueUpdate: ['afterkeydown','propertychange','input']" type="text"/>
                 </label>
@@ -442,8 +443,8 @@
         
         <form class="smart-form" data-bind="submit: doAction"><fieldset>
           <section><div class="row">
-            <label class="label col col-2">Description</label>
-            <div class="col col-10">
+            <label class="control-label col col-sm-2">Description</label>
+            <div class="col col-sm-10">
                 <label class="input"><i class="icon-append fa fa-info"></i>
                     <input name="newDescription" data-bind="value: newDescription, valueUpdate: 'afterkeydown'" type="text"/>
                 </label>
@@ -476,8 +477,8 @@
         
         <form class="smart-form" data-bind="submit: doAction"><fieldset>
           <section><div class="row">
-            <label class="label col col-2">XCP per Unit</label>
-            <div class="col col-10">
+            <label class="control-label col col-sm-2">XCP per Unit</label>
+            <div class="col col-sm-10">
                 <label class="input"><i class="icon-append fa fa-plus"></i>
                     <input name="qtyPerUnit" data-bind="value: qtyPerUnit, valueUpdate : 'afterkeydown'" type="text"/>
                 </label>

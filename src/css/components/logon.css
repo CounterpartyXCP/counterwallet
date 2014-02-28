@@ -39,7 +39,7 @@
   width: 250px;
 }
 
-#open-sesame {
+#walletLogin {
   width: 120px;
 }
 
@@ -55,5 +55,16 @@
   border-color: #d6e9c6 !important;
 }
 
+/* disable animations for the login progress bar
+ * ..if we don't do this, the login progress bar won't work correctly, due to the animations taking
+ * time and no correctly playing 
+ */
+#loginProgressBar {
+    -webkit-transition: none;
+    -moz-transition: none;
+    -ms-transition: none;
+    -o-transition: none;
+    transition: none;
+}​
 
 .ui-autocomplete { z-index:1400 !important;}  
