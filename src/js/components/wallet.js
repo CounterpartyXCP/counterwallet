@@ -20,16 +20,14 @@ function WalletViewModel() {
 
     //derive an address from the key (for the appropriate network)
     var address = key.getBitcoinAddress().toString();
-    
     //Make sure this address doesn't already exist in the wallet (sanity check)
     assert(!self.getAddressObj(address), "Cannot addKey: address already exists in wallet!");
-    
     //see if there's a label already for this address that's stored in PREFERENCES, and use that if so
-    var label = defaultLabel || '';
     var addressHash = Bitcoin.convert.bytesToBase64(Bitcoin.Crypto.SHA256(address, {asBytes: true}));
-    if(addressHash in PREFERENCES.address_aliases) {
-      label = PREFERENCES.address_aliases[addressHash];
-    }
+    //^ we store in prefs by a hash of the address so that the server data (if compromised) cannot reveal address associations
+
+    var label = PREFERENCES.address_aliases[addressHash] || defaultLabel || "UNKNOWN LABEL";
+    $.jqlog.log("Label for " + address + " is " + label);
     
     //make sure this address doesn't already exist in the wallet
     var match = ko.utils.arrayFirst(self.addresses(), function(item) {
@@ -38,7 +36,7 @@ function WalletViewModel() {
     if (!match) {
       self.addresses.push(new AddressViewModel(key, address, label)); //add new
     } else { //just update the label, since it already exists
-      match.label = label; //modify existing
+      match.label(label); //modify existing
     }
   }
   
@@ -134,7 +132,8 @@ function WalletViewModel() {
             self.updateNumPrimedTxouts(address, null); //null = UNKNOWN
           });
         }
-        _retrNumPrimed(i); //closure
+        if(data[i]['balance']) _retrNumPrimed(i); //closure
+        else self.updateNumPrimedTxouts(data[i]['address'], 0); //zero balance == no primed txouts (no need to even try and get a 500 error)
       }
       
       if(isRecurring && self.autoRefreshBTCBalances) {
@@ -166,39 +165,34 @@ function WalletViewModel() {
   
   /////////////////////////
   //BTC-related
-  self.signAndBroadcastTxRaw = function(key, unsignedTxHex) {
-    //Sign and broadcast a multisig transaction that we got back from counterpartyd (as a raw unsigned tx in hex)
-    var bytes = Bitcoin.convert.hexToBytes(unsignedTxHex);
-    var sendTx = Bitcoin.Transaction.deserialize(bytes);
-    $.jqlog.log("RAW UNSIGNED HEX: " + unsignedTxHex);
-    //$.jqlog.log("RAW UNSIGNED Tx: " + TX.toBBE(sendTx));
-
-    //Sign the output
-    var SIGHASH_ALL = 1;
-    for (var i = 0; i < sendTx.ins.length; i++) { //sign each input with the key
-      var hash = sendTx.hashTransactionForSignature(sendTx.ins[0].script, 0, SIGHASH_ALL);
-      var signature = key.sign(hash);
-      signature.push(parseInt(hashType, 10));
-      var pubKey = key.getPub();
-      var script = new Bitcoin.Script();
-      script.writeBytes(signature);
-      script.writeBytes(pubKey);
-      sendTx.ins[i].script = script;
-    }
+  self.broadcastSignedTx = function(signedTxHex) {
     
-    //take out to hex and broadcast
-    var signed_tx_hex = sendTx.serializeHex();
     //$.jqlog.log("RAW SIGNED Tx: " + TX.toBBE(sendTx));
-    $.jqlog.log("RAW SIGNED HEX: " + signed_tx_hex);
+    $.jqlog.log("RAW SIGNED HEX: " + signedTxHex);
     
     if(IS_DEV) {
       $.jqlog.log("SKIPPING SEND AS IS_DEV == 1");
       return;
     }
     
-    self.sendTx(signed_tx_hex, function(data) {
+    self.sendTx(signedTxHex, function(data) {
       $.jqlog.log("Transaction send finished.");
     });
+  }
+
+  self.signAndBroadcastTxRaw = function(key, unsignedTxHex) {
+    //Sign and broadcast a multisig transaction that we got back from counterpartyd (as a raw unsigned tx in hex)
+    var bytes = Bitcoin.convert.hexToBytes(unsignedTxHex);
+    var sendTx = Bitcoin.Transaction.deserialize(bytes);
+    $.jqlog.log("RAW UNSIGNED HEX: " + unsignedTxHex);
+    //$.jqlog.log("RAW UNSIGNED Tx: " + TX.toBBE(sendTx));
+    
+    //Sign the inputs
+    for (var i = 0; i < sendTx.ins.length; i++) { //sign each input with the key
+      sendTx.sign(i, key);
+    }
+    
+    return self.broadcastSignedTx(sendTx.serializeHex());
   }
   
   self.signAndBroadcastTx = function(address, unsignedTxHex) {
@@ -209,7 +203,8 @@ function WalletViewModel() {
   self.retrieveBTCBalance = function(address, callback, errorHandler) {
     //If you are requesting more than one balance, use retrieveBTCBalances instead
     $.get('https://blockchain.info/q/addressbalance/' + address,
-      {cors: 'true'}, callback).error(errorHandler || defaultErrorHandler);
+      {cors: 'true'}, function(data) { return callback(parseInt(data)); }
+    ).error(errorHandler || defaultErrorHandler);
   }
 
   self.retrieveBTCBalances = function(addresses, callback, errorHandler) {
@@ -235,7 +230,7 @@ function WalletViewModel() {
       var totalBalance = 0;
       var unspentOutputs = data['unspent_outputs'];
       for(var i=0; i < unspentOutputs.length; i++) {
-        if(unspentOutputs[i]['value'] >= MIN_PRIME_BALANCE) numSuitableUnspentTxouts++;
+        if(unspentOutputs[i]['value'] >= MIN_PRIME_BALANCE && unspentOutputs[i]['confirmations'] >= 1) numSuitableUnspentTxouts++;
         totalBalance += unspentOutputs[i]['value'];
       }
       //final number of primed txouts is lesser of either the # of txouts that are >= .0005 BTC, OR the floor(total balance / .0005 BTC)

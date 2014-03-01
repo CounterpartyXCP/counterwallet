@@ -169,7 +169,7 @@
           <section><div class="row">
             <label class="control-label col col-sm-2">Destination Address</label>
             <div class="col col-sm-10">
-                <select style="width:100%" data-bind="options: availableAddresses, optionsText: 'SELECT_LABEL', select2: { escapeMarkup: function(m) { return m; } }, value: destAddress"></select>
+                <select style="width:100%" data-bind="options: availableAddresses, optionsValue: 'ADDRESS', optionsText: 'SELECT_LABEL', select2: { minimumResultsForSearch: 10, escapeMarkup: function(m) { return m; } }, value: destAddress"></select>
                 <div class="note">Select the address in your wallet that the specified assets for the private key above should be send to.</div>
             </div>
           </div></section>
@@ -177,7 +177,7 @@
             <label class="control-label col col-sm-2">Assets to Sweep</label>
             <div class="col col-sm-10">
                 <label class="input">
-                    <select multiple style="width:100%" data-bind="options: availableAssetsToSweep, optionsText: 'SELECT_LABEL', select2: { escapeMarkup: function(m) { return m; } }, value: selectedAssetsToSweep"></select>
+                    <select multiple="true" style="width:100%" data-bind="options: availableAssetsToSweep, optionsValue: 'ASSET', optionsText: 'SELECT_LABEL', select2: { minimumResultsForSearch: 10, escapeMarkup: function(m) { return m; } }, selectedOptions: selectedAssetsToSweep"></select>
                 </label>                    
                 <div class="note">Select all of the assets whose total amounts you want to move into the destination address.</div>
             </div>
@@ -213,11 +213,26 @@
                 <div class="note">Enter the message text to be signed.</div>
             </div>
           </div></section>
+          
+          <section><div class="row">
+            <label class="control-label col col-sm-2">Message Format</label>
+            <div class="col col-sm-10">
+              <label class="radio">
+                <input type="radio" data-bind="checked: signatureFormat" name="signMessageFormat" value="base64">
+                <i></i>Base 64 Encoded (Bitcoin-QT Compatible)
+              </label>
+              <label class="radio">
+                <input type="radio" data-bind="checked: signatureFormat" name="signMessageFormat" value="hex">
+                <i></i>Hex Encoded
+              </label>
+            </div>
+          </div></section>
+          
           <section><div class="row">
             <label class="control-label col col-sm-2">Signed Message</label>
             <div class="col col-sm-10">
                 <label class="textarea">
-                    <textarea rows="3" class="custom-scroll" data-bind="value: signedMessage" readonly="readonly"></textarea>
+                    <textarea id="signedMessage" rows="3" class="custom-scroll" data-bind="fadeInText: signedMessage" readonly="readonly"></textarea>
                 </label>
                 <div class="note">The signed message appears above.</div>
             </div>

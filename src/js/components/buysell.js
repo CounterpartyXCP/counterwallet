@@ -62,7 +62,7 @@ ko.validation.rules['isExistingSellAssetName'] = {
 ko.validation.rules['addressHasSellAssetBalance'] = {
   validator: function (address, self) {
     if(!address) return true; //leave it alone for blank addresses
-    return WALLET.getBalance(address.ADDRESS, self.sellAsset());
+    return WALLET.getBalance(address, self.sellAsset());
   },
   message: 'You have no available balance for the sell asset at this address.'
 };
@@ -86,7 +86,7 @@ ko.validation.rules['coorespondingSellAmountDoesNotExceedBalance'] = {
 ko.validation.rules['customSellAmountDoesNotExceedBalance'] = {
   validator: function (amount, self) {
     if(self.selectedSellAmountCustom() == null) return true; //don't complain yet until the user fills something in
-    return amount <= WALLET.getBalance(self.selectedAddress().ADDRESS, self.sellAsset());
+    return amount <= WALLET.getBalance(self.selectedAddress(), self.sellAsset());
   },
   message: 'You have no available balance for the sell asset at this address.'
 };
@@ -151,7 +151,7 @@ function BuySellWizardViewModel() {
 
   self.sellAssetIsDivisible = ko.computed(function() {
     if(!self.sellAsset() || !self.selectedAddress()) return null;
-    return WALLET.getAddressObj(self.selectedAddress().ADDRESS).getAssetObj(self.sellAsset()).DIVISIBLE;
+    return WALLET.getAddressObj(self.selectedAddress()).getAssetObj(self.sellAsset()).DIVISIBLE;
   }, self);
   self.buyAssetIsDivisible = ko.observable(); //set during change of selectedBuyAsset
 
@@ -164,12 +164,16 @@ function BuySellWizardViewModel() {
   });
   self.dispSelectedAddress = ko.computed(function() {
     if(!self.selectedAddress()) return null;
-    return self.selectedAddress().ADDRESS;
+    return self.selectedAddress();
   }, self);
   self.dispSelectedAddressWithLabel = ko.computed(function() {
     if(!self.selectedAddress()) return null;
     var address = self.selectedAddress();
-    return address.LABEL ? address.LABEL + " (" + address.ADDRESS + ")" : address.ADDRESS;
+    var match = ko.utils.arrayFirst(self.availableAddressesWithBalance(), function(item) {
+      return address == item.ADDRESS;
+    });
+    assert(match);
+    return match.LABEL ? match.LABEL + " (" + match.ADDRESS + ")" : match.ADDRESS;
   }, self);
   
   self.availableAddressesWithBalance = ko.computed(function() { //stores AddressInDropdownModel objects
@@ -222,7 +226,7 @@ function BuySellWizardViewModel() {
   }, self);
   self.totalBalanceAvailForSale = ko.computed(function() {
     if(!self.selectedAddress() || !self.sellAsset()) return null;
-    return WALLET.getBalance(self.selectedAddress().ADDRESS, self.sellAsset());
+    return WALLET.getBalance(self.selectedAddress(), self.sellAsset());
   }, self);
   
   //WIZARD TAB 2
@@ -277,7 +281,7 @@ function BuySellWizardViewModel() {
   }, self);
   self.sellAmountRemainingAfterSale = ko.computed(function() {
     if(!self.selectedSellAmount()) return null;
-    var curBalance = WALLET.getBalance(self.selectedAddress().ADDRESS, self.sellAsset());
+    var curBalance = WALLET.getBalance(self.selectedAddress(), self.sellAsset());
     //curBalance - self.selectedSellAmount
     return Decimal.round(new Decimal(curBalance).sub(self.selectedSellAmount()), 8).toFloat();
   }, self);
@@ -391,7 +395,7 @@ function BuySellWizardViewModel() {
 
             //fetch and show all open orders for the selected address and asset pair
             failoverAPI("get_orders", {
-                filters: [{'field': 'source', 'op': '==', 'value': self.selectedAddress().ADDRESS},
+                filters: [{'field': 'source', 'op': '==', 'value': self.selectedAddress()},
                           {'field': 'give_asset', 'op': '==', 'value': self.buyAsset()},
                           {'field': 'get_asset', 'op': '==', 'value': self.sellAsset()},
                           {'field': 'give_remaining', 'op': '!=', 'value': 0},
@@ -403,7 +407,7 @@ function BuySellWizardViewModel() {
                 self.openOrders(data);
                 //issue a second call for the other direction
                 failoverAPI("get_orders", {
-                  filters: [{'field': 'source', 'op': '==', 'value': self.selectedAddress().ADDRESS},
+                  filters: [{'field': 'source', 'op': '==', 'value': self.selectedAddress()},
                             {'field': 'give_asset', 'op': '==', 'value': self.sellAsset()},
                             {'field': 'get_asset', 'op': '==', 'value': self.buyAsset()},
                             {'field': 'give_remaining', 'op': '!=', 'value': 0},
@@ -486,13 +490,13 @@ function BuySellWizardViewModel() {
           var sellAmount = normalizeAmount(self.selectedSellAmount(), self.sellAssetIsDivisible());
 
           multiAPIConsensus("create_order",
-            {source: self.selectedAddress().ADDRESS,
+            {source: self.selectedAddress(),
              give_quantity: sellAmount, give_asset: self.sellAsset(),
              get_quantity: buyAmount, get_asset: self.buyAsset(),
              expiration: 10, /* go with the default fee required and provided */ 
-             multisig: WALLET.getAddressObj(self.selectedAddress().ADDRESS).PUBKEY},
+             multisig: WALLET.getAddressObj(self.selectedAddress()).PUBKEY},
             function(unsignedTxHex, numTotalEndpoints, numConsensusEndpoints) {
-              WALLET.signAndBroadcastTx(self.selectedAddress().ADDRESS, unsignedTxHex);
+              WALLET.signAndBroadcastTx(self.selectedAddress(), unsignedTxHex);
               bootbox.alert("Your order for <b>" + self.selectedBuyAmount() + " " + self.selectedBuyAsset() + "</b> has been placed."
                + " You will be notified when it fills.");
               checkURL(); //reset the form and take the user back to the first tab by just refreshing the page
@@ -568,9 +572,9 @@ function BuySellWizardViewModel() {
             //issue 0 to lock the asset
             multiAPIConsensus("create_cancel",
               {offer_hash: item['tx_hash'],
-               multisig: WALLET.getAddressObj(self.selectedAddress().ADDRESS).PUBKEY},
+               multisig: WALLET.getAddressObj(self.selectedAddress()).PUBKEY},
               function(unsignedTxHex, numTotalEndpoints, numConsensusEndpoints) {
-                WALLET.signAndBroadcastTx(self.selectedAddress().ADDRESS, unsignedTxHex);
+                WALLET.signAndBroadcastTx(self.selectedAddress(), unsignedTxHex);
                 //remove order from the table
                 self.openOrders.remove(function(item) { return item.tx_index == order['tx_index']});
                 bootbox.alert("Your has been cancelled. We have removed the order from your open orders list,"

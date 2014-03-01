@@ -39,16 +39,14 @@ function CreateNewAddressModalViewModel() {
     WALLET.addKey(hd.priv, self.description());
 
     //update PREFs and push
-    var newAddress = hd.priv.getBitcoinAddress();
+    var newAddress = hd.priv.getBitcoinAddress().toString();
     var newAddressHash = Bitcoin.convert.bytesToBase64(Bitcoin.Crypto.SHA256(newAddress, {asBytes: true}));
     $.jqlog.log("New address created: " + newAddress + " -- hash: " + newAddressHash);
     PREFERENCES['num_addresses_used'] += 1;
-    PREFERENCES['address_aliases'][addressHash] = self.description();
+    PREFERENCES['address_aliases'][newAddressHash] = self.description();
     multiAPI("store_preferences", [WALLET.identifier(), PREFERENCES], function(data, endpoint) {
       self.shown(false);
-      //reload page to reflect the addition
-      $('#content').load("xcp/pages/balances.html");
-      //^ don't use loadURL here as it won't do a full reload and re-render the new widget
+      setTimeout(checkURL, 400); //necessary to use setTimeout so that the modal properly hides before we refresh the page
     });
   }
   
@@ -62,7 +60,6 @@ function CreateNewAddressModalViewModel() {
     self.shown(false);
   }  
 }
-
 
 
 ko.validation.rules['isValidSendAmountForBalance'] = {
@@ -84,7 +81,7 @@ function SendModalViewModel() {
   self.balance = ko.observable(null);
   self.divisible = ko.observable();
   
-  self.destAddress = ko.observable().extend({
+  self.destAddress = ko.observable('').trimmed().extend({
     required: true,
     isValidBitcoinAddress: self,
     isNotSameBitcoinAddress: self
@@ -170,31 +167,21 @@ function SendModalViewModel() {
 
 
 ko.validation.rules['isValidPrivateKey'] = {
-    validator: function (val, self) {
-      var eckey = new Bitcoin.ECKey(self.privateKey());
-      var doesVersionMatch = (eckey.version == USE_TESTNET ?
-        Bitcoin.Address.address_types['testnet'] : Bitcoin.Address.address_types['prod']);
-      return eckey.priv !== null && eckey.compressed !== null && eckey.version !== null && doesVersionMatch;
-    },
-    message: 'Not a valid' + (USE_TESTNET ? ' TESTNET ' : '') + 'private key.'
+  validator: function (val, self) {
+    var key = new Bitcoin.ECKey(self.privateKey());
+    var doesVersionMatch = (key.version == USE_TESTNET ?
+      Bitcoin.Address.address_types['testnet'] : Bitcoin.Address.address_types['prod']);
+    return key.priv !== null && key.compressed !== null && key.version !== null && doesVersionMatch;
+  },
+  message: 'Not a valid' + (USE_TESTNET ? ' TESTNET ' : ' ') + 'private key.'
 };
-ko.validation.rules['addressHasEnoughUnspentTxouts'] = {
-  async: true,
-  message: 'The address for the private key specified does not have enough confirmed unspent txouts to sweep everything specified.',
+ko.validation.rules['addressHasEnoughUnspentTxoutsForSelectedAssets'] = {
   validator: function (val, self, callback) {
-    if(!self.addressForPrivateKey()) return true; //isValidPrivateKey will cover this
-    //Ensure that the source address has enough unspent txouts to send it
-    WALLET.getUnspentBTCOutputs(self.addressForPrivateKey(), function(data) {
-      var num_good_txouts = 0;
-      for(var i = 0; i < data.length; i++) {
-        if(data[i]['value'] >= .0004 * UNIT && data[i]['confirmations'] >= 1) {
-          num_good_txouts += 1;     
-        }
-      }
-      return callback(num_good_txouts >= self.selectedAssetsToSweep());
-    })
-    
-  }
+    var numAssets = val.length;
+    if(self.numPrimedTxoutsForPrivateKey() === null) return false; //priv key not set yet??
+    return self.numPrimedTxoutsForPrivateKey() >= numAssets;
+  },
+  message: 'The address for the private key specified does not have enough confirmed unspent outputs to sweep everything selected.'
 };
 ko.validation.registerExtenders();
 
@@ -203,26 +190,27 @@ var AddressInDropdownItemModel = function(address, label) {
   this.LABEL = label;
   this.SELECT_LABEL = label ? ("<b>" + label + "</b><br/>" + address) : (address);
 };
-var SweepAssetInDropdownItemModel = function(asset, balance) {
+var SweepAssetInDropdownItemModel = function(asset, balance, normalizedBalance) {
   this.ASSET = asset;
-  this.BALANCE = balance; //normalized
-  this.SELECT_LABEL = asset + " (bal: " + balance + ")";
+  this.BALANCE = balance; //raw
+  this.NORMALIZED_BALANCE = normalizedBalance; //normalized
+  this.SELECT_LABEL = asset + " (bal: " + normalizedBalance + ")";
 };
 
 function SweepModalViewModel() {
   var self = this;
   self.shown = ko.observable(false);
-  self.privateKey = ko.observable().extend({
+  self.privateKey = ko.observable('').trimmed().extend({
     required: true,
-    isValidPrivateKey: self,
-    addressHasEnoughUnspentTxouts: self
+    isValidPrivateKey: self
   });
   self.availableAssetsToSweep = ko.observableArray([]);
   //^ used for select box entries (composed dynamically on privateKey update)
   self.selectedAssetsToSweep = ko.observableArray([]).extend({
     required: true,
+    addressHasEnoughUnspentTxoutsForSelectedAssets: self
   });
-  self.destAddress = ko.observable().extend({
+  self.destAddress = ko.observable('').trimmed().extend({
     required: true,
     isValidBitcoinAddress: self
   });
@@ -235,10 +223,11 @@ function SweepModalViewModel() {
   self.addressForPrivateKey = ko.computed(function() {
     if(!self.privateKeyValidated.isValid()) return null;
     //Get the address for this privatekey
-    var eckey = new Bitcoin.ECKey(self.privateKey());
-    assert(eckey.priv !== null && eckey.compressed !== null, "Private key not valid!"); //should have been checked already
-    return eckey.getBitcoinAddress().toString();
+    var key = new Bitcoin.ECKey(self.privateKey());
+    assert(key.priv !== null && key.compressed !== null, "Private key not valid!"); //should have been checked already
+    return key.getBitcoinAddress().toString();
   }, self);
+  self.numPrimedTxoutsForPrivateKey = ko.observable(null);
   
   self.validationModel = ko.validatedObservable({
     privateKey: self.privateKey,
@@ -247,9 +236,10 @@ function SweepModalViewModel() {
   });  
   
   self.resetForm = function() {
-    self.privateKey();
+    self.privateKey('');
+    self.availableAssetsToSweep([]);
     self.selectedAssetsToSweep([]);
-    self.destAddress();
+    self.destAddress('');
     
     //populate the list of addresseses again
     self.availableAddresses([]);
@@ -262,13 +252,6 @@ function SweepModalViewModel() {
   }
   
   self.submitForm = function() {
-    if(self.name.isValidating()) {
-      setTimeout(function() { //wait a bit and call again
-        self.submitForm();
-      }, 50);
-      return;
-    }
-
     if (!self.validationModel.isValid()) {
       self.validationModel.errors.showAllMessages();
       return false;
@@ -283,55 +266,120 @@ function SweepModalViewModel() {
     for(var i = 0; i < sendsComplete.length; i++) {
       if(sendsComplete[i]['result']) {
         assetDisplayList.push("<li><b>" + sendsComplete[i]['asset'] + ":</b> Sent "
-          + sendsComplete[i]['normalized_amount'] + " from " + sendsComplete[i]['from']
-          + " to " + sendsComplete[i]['to'] + "</li>");  
+          + "<b>" + sendsComplete[i]['normalized_amount'] + " " + sendsComplete[i]['asset'] + "</b>"
+          + " to <b>" + sendsComplete[i]['to'] + "</b></li>");  
       } else {
         assetDisplayList.push("<li><b>" + sendsComplete[i]['asset'] + "</b>: Funds not sent due to failure.</li>");  
       }
     }
-    bootbox.alert("The sweep is complete Sweep results:<br/><br/><ul>" + assetDisplayList.join('') + "</ul>");    
+    bootbox.alert("The sweep from address <b>" + self.addressForPrivateKey()
+      + "</b> is complete.<br/>Sweep results:<br/><br/><ul>" + assetDisplayList.join('') + "</ul><br/>"
+      + "Please note that it may take a bit of time for the swept funds to show up in your account.");
   }
-
-  self.doAction = function() {
-    var quantity = parseFloat(self.quantity());
-    var rawQuantity = self.divisible() ? Math.round(quantity * UNIT) : parseInt(quantity);
   
-    var eckey = new Bitcoin.ECKey(self.privateKey());
-    asset(eckey.priv !== null && eckey.compressed !== null, "Private key not valid!"); //should have been checked already
-    var pubkey = Bitcoin.convert.bytesToHex(eckey.getPub());
-    var sendsComplete = [];
+  self._signInputs = function(unsignedTxHex) {
+    var sendTx = Bitcoin.Transaction.deserialize(unsignedTxHex);
+    var txInHash = null, signature = null, SIGHASH_ALL = 1;
+    var key = new Bitcoin.ECKey(self.privateKey());
+    for(var i = 0; i < sendTx.ins.length; i++) {
+      txInHash = txIn.hashTransactionForSignature(sendTx.ins[i].script, i, SIGHASH_ALL);
+      signature = key.sign(txInHash);
+      signature.push(parseInt(SIGHASH_ALL, 10));
+      sendTx.ins[i].script = Bitcoin.Script.createInputScript(signature, key.getPub());
+    }    
+  }
   
-    for(var i = 0; i < self.selectedAssetsToSweep().length; i++) {
-      $.jqlog.log("Sweeping from: " + self.addressForPrivateKey() + " to " + self.destAddress() + " of RAW qty "
-        + self.selectedAssetsToSweep()[i].BALANCE + " " + self.selectedAssetsToSweep()[i].ASSET);
-       
-      multiAPIConsensus("create_send", //can send both BTC and counterparty assets
-        {source: self.addressForPrivateKey(), destination: self.destAddress(),
-         quantity: self.selectedAssetsToSweep[i].BALANCE,
-         asset: self.selectedAssetsToSweep()[i].ASSET, multisig: pubkey},
-        function(unsignedTxHex, numTotalEndpoints, numConsensusEndpoints) {
-          WALLET.signAndBroadcastTxRaw(eckey, unsignedTxHex);
-          sendsComplete.push({'result': true, 'asset': self.self.selectedAssetsToSweep()[i],
-             'from': self.addressForPrivateKey(), 'to': self.destAddress(),
-             'normalized_amount': self.availableAssetsToSweepRaw[i]['normalized_amount']});
-          if(sendsComplete.length == self.selectedAssetsToSweep().length) {
-            return self._sweepCompleteDialog(sendsComplete);
-          }
-        }, function(unmatchingResultsList) { //onConsensusError
-          sendsComplete.push({'result': false, 'asset': self.self.selectedAssetsToSweep()[i]});
-          if(sendsComplete.length == self.selectedAssetsToSweep().length) {
-            return self._sweepCompleteDialog(sendsComplete);
-          }
-        }, function(jqXHR, textStatus, errorThrown, endpoint) { //onSysError
-          sendsComplete.push({'result': false, 'asset': self.self.selectedAssetsToSweep()[i]});
-          if(sendsComplete.length == self.selectedAssetsToSweep().length) {
-            return self._sweepCompleteDialog(sendsComplete);
-          }
+  self._doSendAsset = function(asset, key, pubkey, sendsComplete, adjustedBTCAmount, callback) {
+    if(asset == 'BTC') assert(adjustedBTCAmount !== null);
+    else assert(adjustedBTCAmount === null);
+    var selectedAsset = ko.utils.arrayFirst(self.availableAssetsToSweep(), function(item) {
+      return asset == item.ASSET;
+    });
+    var amount = adjustedBTCAmount || selectedAsset.BALANCE;
+    var normalizedAmount = ((adjustedBTCAmount ? normalizeAmount(adjustedBTCAmount, true) : null)
+      || selectedAsset.NORMALIZED_BALANCE);
+    assert(selectedAsset);
+    
+    $.jqlog.log("Sweeping from: " + self.addressForPrivateKey() + " to " + self.destAddress() + " of amount "
+      + normalizedAmount + " " + selectedAsset.ASSET);
+    multiAPIConsensus("create_send", //can send both BTC and counterparty assets
+      {source: self.addressForPrivateKey(), destination: self.destAddress(),
+       quantity: amount,
+       asset: selectedAsset.ASSET, multisig: pubkey},
+      function(unsignedTxHex, numTotalEndpoints, numConsensusEndpoints) {
+        var sendTx = Bitcoin.Transaction.deserialize(unsignedTxHex);
+        //Sign the TX inputs
+        for (var i = 0; i < sendTx.ins.length; i++) { //sign each input with the key
+          sendTx.sign(i, key);
         }
-      );
+        WALLET.broadcastSignedTx(sendTx.serializeHex());
+        sendsComplete.push({
+          'result': true,
+          'asset': selectedAsset.ASSET,
+          'from': self.addressForPrivateKey(),
+          'to': self.destAddress(),
+          'normalized_amount': normalizedAmount
+        });
+        return callback();
+      }, function(unmatchingResultsList) { //onConsensusError
+        sendsComplete.push({
+          'result': false,
+          'asset': selectedAsset.ASSET
+        });
+        return callback();
+      }, function(jqXHR, textStatus, errorThrown, endpoint) { //onSysError
+        sendsComplete.push({
+          'result': false,
+          'asset': selectedAsset.ASSET
+        });
+        return callback();
+      }
+    );
+  }
+  
+  self.doAction = function() {
+    var key = new Bitcoin.ECKey(self.privateKey());
+    assert(key.priv !== null && key.compressed !== null, "Private key not valid!"); //should have been checked already
+    var pubkey = key.getPub().toHex();
+    var sendsToMake = [];
+    var sendsComplete = [];
+    
+    var selectedAsset = null, hasBTC = false;
+    for(var i = 0; i < self.selectedAssetsToSweep().length; i++) {
+      selectedAsset = self.selectedAssetsToSweep()[i];
+      if(selectedAsset == 'BTC') {
+        hasBTC = i; //send BTC last so the sweep doesn't randomly eat our primed txouts for the other assets
+      } else {
+        sendsToMake.push([selectedAsset, key, pubkey, sendsComplete, null]);
+      }
     }
-
-    self.shown(false);
+    if(hasBTC !== false) {
+      //adjust the balance of BTC to sweep out to account for the primed TXouts being consumed
+      var rawBTCBalance = self.availableAssetsToSweep()[hasBTC].BALANCE;
+      var adjustedBTCAmount = rawBTCBalance - (self.selectedAssetsToSweep().length * MIN_PRIME_BALANCE);
+      //^ the adjusted BTC balance is what we will end up sweeping out of the account.
+      //  BTW...this includes the BTC fee for the BTC sweep itself as a primed TXout size (.0005 instead of .0001...no biggie (I think)
+      sendsToMake.push(["BTC", key, pubkey, sendsComplete, adjustedBTCAmount]);
+    }
+    
+    //Make send calls sequentially
+    function makeSweeps(){
+      var d = jQuery.Deferred();
+      var doSweep = function() {
+        var sendParams = sendsToMake.shift();
+        if(sendParams === undefined) return d.resolve();
+        self._doSendAsset(sendParams[0], sendParams[1], sendParams[2], sendParams[3], sendParams[4], function() {
+          return doSweep();
+        });
+      };
+      doSweep();
+      return d.promise();
+    };
+    makeSweeps().then(function() {
+      self.shown(false);
+      assert(sendsComplete.length == self.selectedAssetsToSweep().length);
+      self._sweepCompleteDialog(sendsComplete);
+    });    
   }
   
   self.show = function(resetForm) {
@@ -344,15 +392,29 @@ function SweepModalViewModel() {
     self.shown(false);
   }
   
-  self.addressForPrivateKey.subscribe(function(newValue) {
+  self.addressForPrivateKey.subscribe(function(address) {
     //set up handler on changes in private key to generate a list of balances
-    if(!newValue) return;
+    if(!address) return;
 
     //Get the balance of ALL assets at this address
-    failoverAPI("get_normalized_balances", [newValue], function(data, endpoint) {
+    failoverAPI("get_normalized_balances", [address], function(data, endpoint) {
       for(var i=0; i < data.length; i++) {
-        self.availableAssetsToSweep.push(new SweepAssetInDropdownItemModel(data['asset'], data['normalized_amount']));
+        self.availableAssetsToSweep.push(new SweepAssetInDropdownItemModel(data[i]['asset'], data[i]['amount'], data[i]['normalized_amount']));
       }
+      
+      //Also get the BTC balance at this address and put at head of the list
+      WALLET.retrieveBTCBalance(address, function(balance) {
+        if(balance) {
+          self.availableAssetsToSweep.unshift(new SweepAssetInDropdownItemModel("BTC", balance, normalizeAmount(balance, true)));
+        }
+      });
+    });
+    
+    //Also record the number of primed txouts for the address
+    //Note that if BTC is one of the things we're sweeping, technically we don't need a full primed output amount
+    // for that (we just need an available out of > MIN_FEE... but let's just require a primed out for a BTC send to keep things simple)
+    WALLET.retrieveNumPrimedTxouts(address, function(numPrimedTxouts) {
+      self.numPrimedTxoutsForPrivateKey(numPrimedTxouts);
     });
   });  
 }
@@ -364,7 +426,8 @@ function SignMessageModalViewModel() {
   self.message = ko.observable('').extend({
     required: true,
   });
-  self.asHex = ko.observable(false); //default to base64
+  self.signatureFormat = ko.observable('base64');
+
   self.signedMessage = ko.observable();
   
   self.validationModel = ko.validatedObservable({
@@ -374,6 +437,7 @@ function SignMessageModalViewModel() {
   self.resetForm = function() {
     self.address(null);
     self.message('');
+    self.signedMessage('');
     self.validationModel.errors.showAllMessages(false);
   }
   
@@ -396,17 +460,14 @@ function SignMessageModalViewModel() {
   self.hide = function() {
     self.shown(false);
   }
-
+  
   self.doAction = function() {
     assert(self.validationModel.isValid(), "Cannot sign");
-    var eckey = WALLET.getAddressObj(self.address()).KEY;
-    var hexSignedMessage = Bitcoin.Message.signMessage(eckey, self.message(), eckey.compressed);
-    //TODO: add the option for the user to choose whether they want Hex or base64 result (base64 is what bitcoin QT returns, so let's default to that)
-    if(self.asHex()) {
-      self.signedMessage(hexSignedMessage);  
-    } else { //convert to base64
-      self.signedMessage(Bitcoin.convert.bytesToBase64(Bitcoin.convert.hexToBytes(hexSignedMessage)));
-    }
+    var key = WALLET.getAddressObj(self.address()).KEY;
+    var hexSignedMessage = Bitcoin.Message.signMessage(key, self.message(), key.compressed);
+    self.signedMessage(self.signatureFormat() == 'base64'
+      ? Bitcoin.convert.bytesToBase64(Bitcoin.convert.hexToBytes(hexSignedMessage)) : hexSignedMessage);
+    $("#signedMessage").effect("highlight", {}, 1500);
     //Keep the form up after signing, the user will manually press Close to close it...
   }
 }
@@ -470,43 +531,27 @@ function PrimeAddressModalViewModel() {
     self.shown(false);
   }
   
-  self._parseBCIUnspent = function(r) {
-    var txs = r.unspent_outputs;
-    if (!txs)
-        throw 'Not a BCI format';
-
-    delete unspenttxs;
-    var unspenttxs = {};
-    var balance = Bitcoin.BigInteger.ZERO;
-    for (var i in txs) {
-        var o = txs[i];
-        var lilendHash = o.tx_hash;
-
-        //convert script back to BBE-compatible text
-        var script = dumpScript( new Bitcoin.Script(Bitcoin.convert.hexToBytes(o.script)) );
-
-        var value = new Bitcoin.BigInteger('' + o.value, 10);
-        if (!(lilendHash in unspenttxs))
-            unspenttxs[lilendHash] = {};
-        unspenttxs[lilendHash][o.tx_output_n] = {amount: value, script: script};
-        balance = balance.add(value);
-    }
-    return {balance:balance, unspentTxs: unspenttxs};
-  }
-
   self.doAction = function() {
     //construct a transaction
     var sendTx = new Bitcoin.Transaction();
-    var bciUnspent = self._parseBCIUnspent(self.rawUnspentTxResponse);
-    var inputAmount = (self.numNewPrimedTxouts * MIN_PRIME_BALANCE) + MIN_FEE; //in satoshi
+    var bciUnspent = parseBCIUnspent(self.rawUnspentTxResponse);
+    var inputAmount = (self.numNewPrimedTxouts() * MIN_PRIME_BALANCE) + MIN_FEE; //in satoshi
     var inputAmountRemaining = inputAmount;
-    var txHash = null, txOutputN = null; 
+    var txHash = null, txOutputN = null, txIn = null;
     //Create inputs
-    for (txHash in bciUnspent.unspentTxs) {
+    for(txHash in bciUnspent.unspentTxs) {
       if (bciUnspent.unspentTxs.hasOwnProperty(txHash)) {
         for (txOutputN in bciUnspent.unspentTxs[txHash]) {
           if (bciUnspent.unspentTxs[txHash].hasOwnProperty(txOutputN)) {
-            sendTx.addInput(txHash, txOutputN);
+            txIn = new Bitcoin.TransactionIn({
+              outpoint: {
+                hash: txHash,
+                index: txOutputN
+              },
+              script: new Bitcoin.Script(bciUnspent.unspentTxs[txHash][txOutputN]['script']),
+              sequence: 4294967295
+            });
+            sendTx.addInput(txIn);
             inputAmountRemaining -= bciUnspent.unspentTxs[txHash][txOutputN]['amount'];
             if(inputAmountRemaining <= 0)
               break;
@@ -519,12 +564,13 @@ function PrimeAddressModalViewModel() {
         + normalizeAmount(inputAmountRemaining, true) + " BTC @ 1 confirm or more)");
       return;
     }
-    //Create outputs for the priming itself (.0005 BTC outputs)
-    for(var i=0; i < self.numNewPrimedTxouts.length; i++) {
+    
+    //Create outputs for the priming itself (x MIN_PRIME_BALANCE BTC outputs)
+    for(var i=0; i < parseInt(self.numNewPrimedTxouts()); i++) {
       sendTx.addOutput(self.address(), MIN_PRIME_BALANCE);
     }
     //Create an output for change
-    var changeAmount = Math.abs(inputAmountRemaining) - MIN_FEE;
+    var changeAmount = Math.abs(inputAmountRemaining);
     sendTx.addOutput(self.address(), changeAmount);
     //^ The remaining should be MIN_FEE, which will of course go to the miners
     

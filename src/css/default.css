@@ -42,7 +42,7 @@
     background: #eee;
 }
 
-p.formIntro {
+p.formIntro, div.formIntro {
     margin: 15px 10px;
 }
 
@@ -102,17 +102,6 @@ aside {
 /* Add back in colored badges (this was removed from Bootstrap 3 for some reason)
  * See http://stackoverflow.com/a/20591067
  */
-.badge {
-  padding: 1px 9px 2px;
-  font-size: 12.025px;
-  font-weight: bold;
-  white-space: nowrap;
-  color: #ffffff;
-  background-color: #999999;
-  -webkit-border-radius: 9px;
-  -moz-border-radius: 9px;
-  border-radius: 9px;
-}
 .badge:hover {
   color: #ffffff;
   text-decoration: none;

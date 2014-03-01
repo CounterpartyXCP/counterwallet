@@ -6,8 +6,8 @@ function AssetPortfolioViewModel() {
   self.marketInfo = null;
   self.showPortfolioIn = ko.observable(null);
   //graph data  
-  self.pctChangesToXCP = []; // % change in relative to XCP
-  self.pctChangesToBTC = []; // % change in relative to BTC
+  self.pctChangesInXCP = []; // % change in relative to XCP
+  self.pctChangesInBTC = []; // % change in relative to BTC
   self.portfolioTotalBalancesByAsset = [];
   //market cap table data
   self.marketCapTableRows = ko.observable([]);
@@ -70,14 +70,13 @@ function AssetPortfolioViewModel() {
           //get the total balance of all assets across all addresses in the wallet
           for(var i = 0; i < addresses.length; i++) {
             if(!self.totalBalanceByAsset[asset]) self.totalBalanceByAsset[asset] = 0;
-            self.totalBalanceByAsset[asset] += WALLET.getBalance(addresses[i].ADDRESS, asset); 
+            self.totalBalanceByAsset[asset] += WALLET.getBalance(addresses[i], asset); 
           }
-          self.pctChangesToXCP.push([ asset, data[asset]['24h_vol_price_change_in_xcp'] ]);  
-          self.pctChangesToBTC.push([ asset, data[asset]['24h_vol_price_change_in_btc'] ]);
+          self.pctChangesInXCP.push([ asset, data[asset]['24h_vol_price_change_in_xcp'] || 0 ]);  
+          self.pctChangesInBTC.push([ asset, data[asset]['24h_vol_price_change_in_btc'] || 0 ]);
           self.portfolioTotalBalancesByAsset.push([ asset, self.totalBalanceByAsset[asset] ]);  
         }
         self.generateCharts();
-        
         self.showPortfolioIn("XCP"); //causes the table to be generated off of self.marketInfo
       });
     });
@@ -102,7 +101,7 @@ function AssetPortfolioViewModel() {
             text: 'Composition by Value (in XCP)'
         },
         tooltip: {
-          pointFormat: '{series.name}: <b>{point.percentage:.1f}%</b>'
+          pointFormat: '{series.name}: <b>{point.percentage:.2f}%</b><br>(<b>{point.y:.2f} XCP</b> total value)</b>'
         },
         plotOptions: {
             pie: {
@@ -129,7 +128,7 @@ function AssetPortfolioViewModel() {
             text: '24h % Change To XCP'
         },
         credits: { enabled: false },
-        series: self.pctChangesToXCP
+        series: self.pctChangesInXCP
     });
     $('#pctChangeBarToBTC').highcharts({
         chart: {
@@ -139,7 +138,7 @@ function AssetPortfolioViewModel() {
             text: '24h % Change To BTC'
         },
         credits: { enabled: false },
-        series: self.pctChangesToBTC
+        series: self.pctChangesInBTC
     });
   }
 

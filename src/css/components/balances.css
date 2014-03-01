@@ -1,7 +1,7 @@
 
 button#createNewAddress { margin: 12px; }
 
-input#addressNicknameEditable { width: 220px; } /* for the popup x-editable control */
+input.addressNicknameEditable { width: 220px; } /* for the popup x-editable control */
 
 div#balancesContainer div[role=content] { padding: 5px; }
 

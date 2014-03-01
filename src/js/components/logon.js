@@ -118,15 +118,18 @@ function LogonViewModel() {
     WALLET.BITCOIN_WALLET.generateAddress();
     var i = WALLET.BITCOIN_WALLET.getPrivateKeys().length - 1;
     var hd = WALLET.BITCOIN_WALLET.getPrivateKey(i);
-    WALLET.addKey(hd.priv, "My Address #" + (WALLET.addresses().length + 1).toString());
+    var address = hd.priv.getBitcoinAddress().toString();
+    var defaultLabel = "My Address #" + (WALLET.addresses().length + 1).toString(); 
+    WALLET.addKey(hd.priv, defaultLabel);
     var progress = (i + 1) * (100 / PREFERENCES['num_addresses_used']);
     self.walletGenProgressVal(progress);
-    console.log("Progress: " + self.walletGenProgressVal() + " -- " + self.walletGenProgressWidth());
-    
+    console.log("Progress: Address " + (i + 1) + " of " + PREFERENCES['num_addresses_used']
+      + " (" + self.walletGenProgressVal() + "%) -- " + address);
+
     if(i + 1 < PREFERENCES['num_addresses_used']) {
       setTimeout(self.genAddress, 1);
     } else {
-      self.openWalletPt3();
+      return self.openWalletPt3();
     }
   }
   

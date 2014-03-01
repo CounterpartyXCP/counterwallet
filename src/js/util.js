@@ -91,25 +91,3 @@ function shuffle(array) {
 
   return array;
 }
-
-function normalizeAmount(amount, divisible) {
-  return divisible ? Decimal.round(new Decimal(amount).div(UNIT), 8).toFloat() : amount;
-}
-
-function randomGetBytes(numBytes) {
-     var randomBytes = null;
-    if (window.crypto && window.crypto.getRandomValues) {
-        // First we're going to try to use a built-in CSPRNG (newer Chrome, Firefox, etc)
-        randomBytes = new Uint8Array(numBytes);
-        window.crypto.getRandomValues(randomBytes);
-    } else if (window.msCrypto && window.msCrypto.getRandomValues) {
-        // Because of course IE calls it msCrypto instead of being standard
-        randomBytes = new Uint8Array(numBytes);
-        window.msCrypto.getRandomValues(randomBytes);
-    } else {
-        //Fallback to SecureRandom, for older browsers
-        randomBytes = new Array(numBytes);
-        rng_get_bytes(randomBytes);
-    }
-    return randomBytes;
-}

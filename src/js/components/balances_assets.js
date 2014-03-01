@@ -239,7 +239,7 @@ function TransferAssetModalViewModel() {
   self.address = ko.observable(''); // SOURCE address (supplied)
   self.asset = ko.observable();
   
-  self.destAddress = ko.observable('').extend({
+  self.destAddress = ko.observable('').trimmed().extend({
     required: true,
     isValidBitcoinAddress: self,
     isNotSameBitcoinAddress: self

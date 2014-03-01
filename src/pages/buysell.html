@@ -86,7 +86,7 @@
                                     <div class="row" style="min-width:300px;max-width: 1000px;padding-bottom: 0px;">
                                         <div class="col-md-2"><span>From address:</span></div>
                                         <div class="col-md-10">
-                                            <select data-bind="options: availableAddressesWithBalance, optionsText: 'SELECT_LABEL', select2: {  minimumResultsForSearch: -1, containerCssClass: 'addressSelect', escapeMarkup: function(m) { return m; } }, value: selectedAddress" data-placeholder="Enter address"></select>
+                                            <select data-bind="options: availableAddressesWithBalance, optionsValue: 'ADDRESS', optionsText: 'SELECT_LABEL', select2: {  minimumResultsForSearch: 10, containerCssClass: 'addressSelect', escapeMarkup: function(m) { return m; } }, value: selectedAddress" data-placeholder="Enter address"></select>
                                             <span class="invalid" data-bind="validationMessage: selectedAddress"></span>
                                         </div>
                                     </div>

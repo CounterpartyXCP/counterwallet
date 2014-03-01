@@ -44,39 +44,79 @@ function initMessageFeed() {
       //$.jqlog.log('socket.io message received: ' + event + ' - data:' + JSON.stringify(data));
       if(event == 'connect') {
         $.jqlog.log('socket.io(messages): Connected to server: ' + url);
-        return true;
       } else if(event == 'disconnect') {
         $.jqlog.log('socket.io(messages): The client has disconnected from server: ' + url);
-        return true;
       } else if(event == 'connect_failed') {
         $.jqlog.log('socket.io(messages): Connection to server failed: ' + url);
         io.disconnect();
         tryNextSIOMessageFeed();
-        return true;
       } else if(event == 'reconnect_failed') {
         $.jqlog.log('socket.io(messages): Reconnect to the server failed: ' + url);
         io.disconnect();
         tryNextSIOMessageFeed();
-        return true;
       } else if(['connecting', 'connect_error', 'connect_timeout', 'reconnect', 'reconnecting', 'reconnect_error'].indexOf(event) >= 0) {
         //these events currently not handled
-        return true;
       } else{
-        return parseMessage(event, data);  
+        parseMessageWithFeedGapDetection(event, data, handleMessage);
       }
   });
 }
 
-function parseMessage(event, data, detectMessagesGap) {
-  if(typeof(detectMessagesGap)==='undefined') detectMessagesGap = true;
-  if(detectMessagesGap) {
-    detectMessageFeedGap(event, data, handleMessage);
-  } else {
-    handleMessage(event, data);
-  }
-  return true;
-}
+function parseMessageWithFeedGapDetection(event, data, callback) {
+  $.jqlog.info("parseMessageWithFeedGapDetection: " + data['_message_index'] + " -- " + LAST_MESSAGEIDX_RECEIVED);
+  if(data['_message_index'] === undefined && IS_DEV) debugger;
+  assert(data['_message_index'] && data['_message_index'] >= LAST_MESSAGEIDX_RECEIVED, "Invalid _message_index");
   
+  if(   LAST_MESSAGEIDX_RECEIVED == 0 //first message received
+     || data['_message_index'] == LAST_MESSAGEIDX_RECEIVED + 1) { //next sequential message received 
+    LAST_MESSAGEIDX_RECEIVED = data['_message_index'];
+    return;
+  }
+  
+  //Detect a reorg (reverse gap) and refresh the current page if so
+  if(data['_message_index'] <= LAST_MESSAGEIDX_RECEIVED) {
+    $.jqlog.warn("event:REORG DETECTED: our last msgidx = " + LAST_MESSAGEIDX_RECEIVED + "; server send msgidx = " + data['_message_index']);
+    LAST_MESSAGEIDX_RECEIVED = data['_message_index'];
+    checkURL();
+    return;
+  }
+  
+  //otherwise, we have a forward gap
+  $.jqlog.warn("parseMessageWithFeedGapDetection:GAP DETECTED: our last msgidx = " + LAST_MESSAGEIDX_RECEIVED + "; server sent msgidx = " + data['_message_index']);
+
+  //request the missing messages from the feed and replay them...
+  debugger
+  var missingMessages = [];
+  for(var i=LAST_MESSAGEIDX_RECEIVED+1; i < data['_message_index']; i++) {
+    missingMessages.push(i);
+  }
+  
+  failoverAPI("get_messages_by_index", [missingMessages], function(missingMessageData, endpoint) {
+    var missingMessageEventData = null;
+    for(var i=0; i < data.length; i++) {
+      assert(missingMessageData['message_index'] == missingMessages[i], "Message feed resync list oddity...?");
+      missingMessageEventData = $.parseJSON(data['bindings']);
+      //Recreate what the siofeed@counterwalletd adds to the raw binding data
+      missingMessageEventData['_message_index'] = missingMessageData['message_index'];
+      missingMessageEventData['_block_index'] = missingMessageData['block_index'];
+      missingMessageEventData['_block_time'] = missingMessageData['block_time'];
+      missingMessageEventData['_command'] = missingMessageData['command'];
+      handleMessage(missingMessageData['category'], missingMessageEventData);
+      assert(LAST_MESSAGEIDX_RECEIVED + 1 == missingMessageData['message_index'], "Message feed resync counter increment oddity...?");
+      LAST_MESSAGEIDX_RECEIVED = missingMessageData['message_index']; 
+    }
+    //all caught up, call the callback for the original message itself
+    callback(event, data);
+  });
+
+    //    
+    //This is the old code that has a more crude approach...
+    //refresh all balances (just in case we missed a credit/debit)
+    //WALLET.updateBalances();
+    //refresh the current pane (to refresh anything on that pane -- just in case we missed some other kind of message)
+    //checkURL();
+}
+
 function handleMessage(event, data) {
   $.jqlog.log("socket.io(messages): Got event " + data['_message_index'] + ":" + event + ": " + JSON.stringify(data));
   
@@ -211,58 +251,4 @@ function handleMessage(event, data) {
   } else {
     $.jqlog.error("Unknown event: " + event);
   }
-}
-
-function detectMessageFeedGap(event, data, callback) {
-  $.jqlog.info("detectMessageFeedGap: " + data['_message_index'] + " -- " + LAST_MESSAGEIDX_RECEIVED);
-  if(data['_message_index'] === undefined && IS_DEV) debugger;
-  assert(data['_message_index'] && data['_message_index'] >= LAST_MESSAGEIDX_RECEIVED, "Invalid _message_index");
-  
-  if(   LAST_MESSAGEIDX_RECEIVED == 0 //first message received
-     || data['_message_index'] == LAST_MESSAGEIDX_RECEIVED + 1) { //next sequential message received 
-    LAST_MESSAGEIDX_RECEIVED = data['_message_index'];
-    return;
-  }
-  
-  //Detect a reorg (reverse gap) and refresh the current page if so
-  if(data['_message_index'] <= LAST_MESSAGEIDX_RECEIVED) {
-    $.jqlog.warn("event:REORG DETECTED: our last msgidx = " + LAST_MESSAGEIDX_RECEIVED + "; server send msgidx = " + data['_message_index']);
-    LAST_MESSAGEIDX_RECEIVED = data['_message_index'];
-    checkURL();
-    return;
-  }
-  
-  //otherwise, we have a forward gap
-  $.jqlog.warn("event:GAP DETECTED: our last msgidx = " + LAST_MESSAGEIDX_RECEIVED + "; server send msgidx = " + data['_message_index']);
-
-  //request the missing messages from the feed and replay them...
-  var missingMessages = [];
-  for(var i=LAST_MESSAGEIDX_RECEIVED+1; i > data['_message_index']; i++) {
-    missingMessages.push(i);
-  }
-  
-  failoverAPI("get_messages_by_index", [missingMessages], function(missingMessageData, endpoint) {
-    var missingMessageEventData = null;
-    for(var i=0; i < data.length; i++) {
-      assert(missingMessageData['message_index'] == missingMessages[i], "Message feed resync list oddity...?");
-      missingMessageEventData = $.parseJSON(data['bindings']);
-      //Recreate what the siofeed@counterwalletd adds to the raw binding data
-      missingMessageEventData['_message_index'] = missingMessageData['message_index'];
-      missingMessageEventData['_block_index'] = missingMessageData['block_index'];
-      missingMessageEventData['_block_time'] = missingMessageData['block_time'];
-      missingMessageEventData['_command'] = missingMessageData['command'];
-      parseMessage(missingMessageData['category'], missingMessageEventData, false);
-      assert(LAST_MESSAGEIDX_RECEIVED + 1 == missingMessageData['message_index'], "Message feed resync counter increment oddity...?");
-      LAST_MESSAGEIDX_RECEIVED = missingMessageData['message_index']; 
-    }
-    //all caught up, call the callback for the original message itself
-    return callback(event, data);
-  });
-
-    //    
-    //This is the old code that has a more crude approach...
-    //refresh all balances (just in case we missed a credit/debit)
-    //WALLET.updateBalances();
-    //refresh the current pane (to refresh anything on that pane -- just in case we missed some other kind of message)
-    //checkURL();
 }

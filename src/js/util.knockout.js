@@ -1,3 +1,16 @@
+ko.subscribable.fn.trimmed = function() {
+    return ko.computed({
+        read: function() {
+            return typeof this() == "string" ? this().trim() : this();
+        },
+        write: function(value) {
+            this(typeof value == "string" ? value.trim() : value);
+            if(typeof value == "string") this.valueHasMutated();
+        },
+        owner: this
+    });
+};
+
 /* Knockout bindings */
 ko.bindingHandlers.showModal = {
   init: function (element, valueAccessor) {
@@ -200,3 +213,11 @@ ko.bindingHandlers.fadeVisibleInOnly = {
         //ko.unwrap(value) ? $(element).animate({opacity:100}) : $(element).show().animate({opacity:0});
     }
 };*/
+
+ko.bindingHandlers.fadeInText = {
+    'update': function(element, valueAccessor) {
+        $(element).hide();
+        ko.bindingHandlers.text.update(element, valueAccessor);
+        $(element).fadeIn('slow');
+    }
+};
