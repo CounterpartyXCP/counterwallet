@@ -144,7 +144,7 @@ function WalletViewModel() {
         }, 60000 * 5);
       }
     }, function(jqXHR, textStatus, errorThrown) {
-      //blockchain down or spazzing
+      //insight down or spazzing
       var addresses = self.getAddressesList();
       for(var i=0; i < addresses.length; i++) {
         self.updateBalance(addresses[i], "BTC", null); //null = UNKNOWN
@@ -175,9 +175,11 @@ function WalletViewModel() {
       return;
     }
     
-    self.sendTx(signedTxHex, function(data) {
-      $.jqlog.log("Transaction send finished.");
-    });
+    failoverAPI("transmit", {"tx_hex": signedTxHex, "is_signed": true},
+      function(data, endpoint) {
+        $.jqlog.log("Transaction broadcast from: " + endpoint);
+      }
+    );
   }
 
   self.signAndBroadcastTxRaw = function(key, unsignedTxHex) {
@@ -202,58 +204,52 @@ function WalletViewModel() {
   
   self.retrieveBTCBalance = function(address, callback, errorHandler) {
     //If you are requesting more than one balance, use retrieveBTCBalances instead
-    $.get('https://blockchain.info/q/addressbalance/' + address,
-      {cors: 'true'}, function(data) { return callback(parseInt(data)); }
-    ).error(errorHandler || defaultErrorHandler);
+    fetchData(urlsWithPath(counterwalletd_insight_api_urls, '/addr/' + address),
+      function(data, endpoint) {
+        return callback(parseInt($.parseJSON(data)['balanceSat']));
+      },
+      errorHandler || defaultErrorHandler);
   }
 
   self.retrieveBTCBalances = function(addresses, callback, errorHandler) {
     //addresses is a list of one or more bitcoin addresses
-    $.getJSON('https://blockchain.info/multiaddr',
-      {cors: 'true', active: addresses.join('|')},
-      function(data) {
-        var balances = [];
-        for(var i=0; i<data['addresses'].length; i++) {
+    var balances = [];
+    for(var i = 0; i < addresses.length; i++) {
+      self.retrieveBTCBalance(addresses[i],
+        function(data, endpoint) {
+          data = $.parseJSON(data);
           balances.push({
-            'address': data['addresses'][i]['address'],
-            'balance': parseInt(data['addresses'][i]['final_balance'])
+            'address': data['addrStr'],
+            'balance': parseInt(data['balanceSat'])
           }); 
-        }
-        return callback(balances);
-      }
-    ).error(errorHandler || defaultErrorHandler);
+          if(balances.length == addresses.length) {
+            return callback(balances);
+          }
+        },
+        errorHandler || defaultErrorHandler);
+    }
   }
   
   self.retrieveNumPrimedTxouts = function(address, callback) {
-    $.getJSON('https://blockchain.info/unspent', {cors: 'true', address: address}, function(data) {
-      var numSuitableUnspentTxouts = 0;
-      var totalBalance = 0;
-      var unspentOutputs = data['unspent_outputs'];
-      for(var i=0; i < unspentOutputs.length; i++) {
-        if(unspentOutputs[i]['value'] >= MIN_PRIME_BALANCE && unspentOutputs[i]['confirmations'] >= 1) numSuitableUnspentTxouts++;
-        totalBalance += unspentOutputs[i]['value'];
-      }
-      //final number of primed txouts is lesser of either the # of txouts that are >= .0005 BTC, OR the floor(total balance / .0005 BTC)
-      return callback(Math.min(numSuitableUnspentTxouts, Math.floor(totalBalance / MIN_PRIME_BALANCE)), data);
-    }).error(function(jqXHR, textStatus, errorThrown) {
+    fetchData(urlsWithPath(counterwalletd_insight_api_urls, '/addr/' + address + '/utxo'),
+      function(data, endpoint) {
+        data = $.parseJSON(data);
+        var numSuitableUnspentTxouts = 0;
+        var totalBalance = 0;
+        for(var i=0; i < data.length; i++) {
+          if(data[i]['value'] * UNIT >= MIN_PRIME_BALANCE && data[i]['confirmations'] >= 1) numSuitableUnspentTxouts++;
+          totalBalance += data[i]['value'] * UNIT;
+        }
+        //final number of primed txouts is lesser of either the # of txouts that are >= .0005 BTC, OR the floor(total balance / .0005 BTC)
+        return callback(Math.min(numSuitableUnspentTxouts, Math.floor(totalBalance / MIN_PRIME_BALANCE)), data);
+      },
+      function(jqXHR, textStatus, errorThrown) {
       if(jqXHR.responseText == 'No free outputs to spend') {
-        return callback(0);
+        return callback(0, null);
       } else {
-        return callback(null); //some other error
+        return callback(null, null); //some other error
       }
     });
-  }
-  
-  self.sendTx = function(tx, callback) {
-    var postdata = 'tx=' + tx;
-    
-    //use Yahoo Query Language (YQL) to get around cross-domain issues
-    /*var q = 'use "http://brainwallet.github.com/js/htmlpost.xml" as htmlpost; ';
-    q += 'select * from htmlpost where url="' + url + '" ';
-    q += 'and postdata="' + postdata + '" and xpath="//p"';
-    $.queryYQL(q, callback).error(defaultErrorHandler);*/
-   
-    $.post('http://blockchain.info/pushtx', postdata, callback).error(defaultErrorHandler);
   }
   
   self.assetsToAssetPair = function(asset1, asset2) {

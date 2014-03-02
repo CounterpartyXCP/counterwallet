@@ -147,7 +147,7 @@ function SendModalViewModel() {
   
   self.show = function(fromAddress, asset, balance, isDivisible, resetForm) {
     if(asset == 'BTC' && balance == null) {
-      return bootbox.alert("Cannot send BTC as we cannot currently get in touch with blockchain.info to get your balance");
+      return bootbox.alert("Cannot send BTC as we cannot currently get in touch with the server to get your balance");
     }
     assert(balance, "Balance is null or undefined?");
     
@@ -170,7 +170,7 @@ ko.validation.rules['isValidPrivateKey'] = {
   validator: function (val, self) {
     var key = new Bitcoin.ECKey(self.privateKey());
     var doesVersionMatch = (key.version == USE_TESTNET ?
-      Bitcoin.Address.address_types['testnet'] : Bitcoin.Address.address_types['prod']);
+      Bitcoin.network.testnet.addressVersion : Bitcoin.network.mainnet.addressVersion);
     return key.priv !== null && key.compressed !== null && key.version !== null && doesVersionMatch;
   },
   message: 'Not a valid' + (USE_TESTNET ? ' TESTNET ' : ' ') + 'private key.'
@@ -476,6 +476,7 @@ function PrimeAddressModalViewModel() {
   var self = this;
   self.shown = ko.observable(false);
   self.address = ko.observable(); //address string, not an Address object
+  self.showNoPrimedInputsError = ko.observable(false);
   self.numNewPrimedTxouts = ko.observable(10).extend({  //default to 10
     required: true,
     number: true,
@@ -494,6 +495,7 @@ function PrimeAddressModalViewModel() {
   
   self.resetForm = function() {
     self.numNewPrimedTxouts(10);
+    self.showNoPrimedInputsError(false);
     self.validationModel.errors.showAllMessages(false);
   }
   
@@ -523,7 +525,7 @@ function PrimeAddressModalViewModel() {
       }
     }, function(jqXHR, textStatus, errorThrown) {
       WALLET.updateNumPrimedTxouts(address, null);
-      bootbox.alert("Cannot fetch the number of unspent txouts from blockchain.info. Please try again later.");
+      bootbox.alert("Cannot fetch the number of unspent txouts. Please try again later.");
     });
   }  
 

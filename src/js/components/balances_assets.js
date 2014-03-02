@@ -330,10 +330,9 @@ function ChangeAssetDescriptionModalViewModel() {
   }
 
   self.doAction = function() {
-    bootbox.alert("IMPLEMENTATION NOT FINISHED");
-    //TODO: THIS IS INCOMPLETE ... we need semantics figured out for how to just change asset desc
+    //to change the desc, issue with quantity == 0 and the new description in the description field
     multiAPIConsensus("create_issuance",
-      {source: self.address(), quantity: null, asset: self.asset().ASSET, divisible: self.asset().DIVISIBLE,
+      {source: self.address(), quantity: 0, asset: self.asset().ASSET, divisible: self.asset().DIVISIBLE,
        description: self.newDescription(), callable_: self.asset().CALLABLE, call_date: self.asset().CALLDATE,
        call_price: self.asset().CALLPRICE, transfer_destination: null,
        multisig: WALLET.getAddressObj(self.address()).PUBKEY},

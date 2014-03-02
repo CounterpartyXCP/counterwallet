@@ -114,14 +114,14 @@ function ChatFeedViewModel() {
     var initialLineSetNumReplies = 0;
     var initialLineSet = [];
         
-    $.jqlog.log("Starting chat feeds: " + JSON.stringify(counterwalletd_chat_urls));
-    for(var i = 0; i < counterwalletd_chat_urls.length; i++) {
-      var socket = io.connect(counterwalletd_chat_urls[i], {
+    $.jqlog.log("Starting chat feeds: " + JSON.stringify(counterwalletd_base_urls));
+    for(var i = 0; i < counterwalletd_base_urls.length; i++) {
+      var socket = io.connect(counterwalletd_base_urls[i], {
         'max reconnection attempts': 5,
         'force new connection': true, /* needed, otherwise socket.io will reuse the feed connection */
         //'reconnection limit': 100000,
         //'max reconnection attempts': Infinity,
-        'resource': '_chat'
+        'resource': USE_TESTNET ? '_t_chat' : '_chat'
       });
       socket.on('connect', function() {
         $.jqlog.log('socket.io(chat): Connected to server: ' + url);
@@ -168,7 +168,7 @@ function ChatFeedViewModel() {
         initialLineSet = initialLineSet.concat(linesList);
         initialLineSetNumReplies += 1;
         
-        if(initialLineSetNumReplies == counterwalletd_chat_urls.length)  { //got lines for final feed
+        if(initialLineSetNumReplies == counterwalletd_base_urls.length)  { //got lines for final feed
           //collate linesets, ordered by when object property
           initialLineSet.sort(function (a, b){ return ((a.when < b.when) ? -1 : ((a.when > b.when) ? 1 : 0)); })
           //then add the lot to the chat window          

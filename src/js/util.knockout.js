@@ -91,7 +91,7 @@ ko.validation.rules['isValidBitcoinAddress'] = {
     validator: function (val, otherVal) {
         try {
           var address = Bitcoin.Address(val);
-          return address.version == USE_TESTNET ? Bitcoin.Address.address_types['testnet'] : Bitcoin.Address.address_types['prod'];
+          return address.version == USE_TESTNET ? Bitcoin.network.testnet.addressVersion : Bitcoin.network.mainnet.addressVersion;
         } catch (err) {
           return false;
         }

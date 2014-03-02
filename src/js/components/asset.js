@@ -32,22 +32,25 @@ function AssetViewModel(props) {
   
   self.send = function () {
     if(!self.balance()) { bootbox.alert("You have no available <b>" + self.ASSET + "</b> at address <b>" + self.ADDRESS + "</b> to send."); return; }
+    if(!canDoTransaction(self.ADDRESS)) return false;
     SEND_MODAL.show(self.ADDRESS, self.ASSET, self.balance(), self.DIVISIBLE);
   };
   
   self.issueAdditional = function () {
     assert(self.isMine() && !self.isLocked());
+    if(!canDoTransaction(self.ADDRESS)) return false;
     ISSUE_ADDITIONAL_ASSET_MODAL.show(self.ADDRESS, self.DIVISIBLE, self);
   };
   
   self.transfer = function () {
     assert(self.isMine());
-    if(!self.isMine()) { bootbox.alert("Cannot transfer an asset that is not yours."); return; }
+    if(!canDoTransaction(self.ADDRESS)) return false;
     TRANSFER_ASSET_MODAL.show(self.ADDRESS, self);
   };
 
   self.lock = function () {
     assert(self.isMine() && !self.isLocked());
+    if(!canDoTransaction(self.ADDRESS)) return false;
     
     bootbox.dialog({
       message: "By locking your asset, you will not be able to issue more of it in the future.<br/><br/> \
@@ -65,10 +68,10 @@ function AssetViewModel(props) {
           label: "Lock this asset",
           className: "btn-danger",
           callback: function() {
-            //issue 0 to lock the asset
+            //to lock, issue with quantity == 0 and "LOCK" in the description field
             multiAPIConsensus("create_issuance",
               {source: self.ADDRESS, quantity: 0, asset: self.ASSET, divisible: self.DIVISIBLE,
-               description: self.description(), callable_: self.CALLABLE, call_date: self.CALLDATE,
+               description: "LOCK", callable_: self.CALLABLE, call_date: self.CALLDATE,
                call_price: self.CALLPRICE, transfer_destination: null,
                multisig: WALLET.getAddressObj(self.ADDRESS).PUBKEY},
               function(unsignedTxHex, numTotalEndpoints, numConsensusEndpoints) {
@@ -82,10 +85,12 @@ function AssetViewModel(props) {
   };
 
   self.changeDescription = function () {
+    if(!canDoTransaction(self.ADDRESS)) return false;
     CHANGE_ASSET_DESCRIPTION_MODAL.show(self.ADDRESS, self);
   };
 
   self.payDividend = function () {
+    if(!canDoTransaction(self.ADDRESS)) return false;
     PAY_DIVIDEND_MODAL.show(self.ADDRESS, self);
   };
 }

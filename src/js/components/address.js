@@ -11,9 +11,9 @@ function AddressViewModel(key, address, initialLabel) {
   
   self.label = ko.observable(initialLabel);
   self.numPrimedTxouts = ko.observable(null);
-  //^ # of unspent txouts for this address fitting our criteria, or null if unknown (e.g. blockchain is down/not responding)
+  //^ # of unspent txouts for this address fitting our criteria, or null if unknown (e.g. insight is down/not responding)
   self.assets = ko.observableArray([
-    new AssetViewModel({address: address, asset: "BTC"}), //will be updated with data loaded from blockchain
+    new AssetViewModel({address: address, asset: "BTC"}), //will be updated with data loaded from insight
     new AssetViewModel({address: address, asset: "XCP"})  //will be updated with data loaded from counterpartyd
   ]);
   
@@ -88,6 +88,7 @@ function AddressViewModel(key, address, initialLabel) {
   /////////////////////////
   //Address-panel-related
   self.changeLabel = function(params) {
+    if(!checkForPrimedTxout(self.ADDRESS)) return false;
     var addressHash = Bitcoin.convert.bytesToBase64(Bitcoin.Crypto.SHA256(self.ADDRESS, {asBytes: true}));
     PREFERENCES.address_aliases[addressHash] = params.value;
     //update the preferences on the server 
@@ -97,6 +98,7 @@ function AddressViewModel(key, address, initialLabel) {
   }
   
   self.prime = function() {
+    //No need for canDoTransaction here, as PRIME_ADDRESS_MODAL checks for 0 BTC balance
     PRIME_ADDRESS_MODAL.show(self.ADDRESS);
   }
   
@@ -112,7 +114,7 @@ function AddressViewModel(key, address, initialLabel) {
   }
 
   self.createAssetIn = function() {
-    //Create an asset for this address
+    if(!canDoTransaction(self.ADDRESS)) return false;
     CREATE_ASSET_MODAL.show(self.ADDRESS);
   }
 

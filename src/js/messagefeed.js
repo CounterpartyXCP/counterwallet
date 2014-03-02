@@ -1,9 +1,9 @@
 
 var LAST_MESSAGEIDX_RECEIVED = 0; //last message received from the data feed (socket.io) -- used to detect gaps
-var FAILOVER_CURRENT_IDX = 0; //last idx in the counterwalletd_feed_urls tried (used for socket.io failover)
+var FAILOVER_CURRENT_IDX = 0; //last idx in the counterwalletd_base_urls tried (used for socket.io failover)
 
 function tryNextSIOMessageFeed() {
-  if(FAILOVER_LAST_IDX_TRIED + 1 == counterwalletd_feed_urls.length) {
+  if(FAILOVER_LAST_IDX_TRIED + 1 == counterwalletd_base_urls.length) {
     FAILOVER_CURRENT_IDX = 0;
   } else {
     FAILOVER_CURRENT_IDX += 1;
@@ -14,7 +14,7 @@ function tryNextSIOMessageFeed() {
 
 function initMessageFeed() {
   //set up a connection to the server event feed via socket.io and handle messages
-  var url = counterwalletd_feed_urls[FAILOVER_CURRENT_IDX];
+  var url = counterwalletd_base_urls[FAILOVER_CURRENT_IDX];
   $.jqlog.log("socket.io: Connecting to: " + url);
   //https://github.com/LearnBoost/Socket.IO/wiki/Configuring-Socket.IO
   var socket = io.connect(url, {
@@ -25,7 +25,7 @@ function initMessageFeed() {
     'max reconnection attempts': 5,
     'force new connection': true,
     'try multiple transports': false,
-    'resource': '_feed'
+    'resource': USE_TESTNET ? '_t_feed' : '_feed'
   });
 
   //Create a wildcard event handler: http://stackoverflow.com/a/19121009

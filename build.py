@@ -17,10 +17,11 @@ import glob
 import subprocess
 import stat
 
-ADMIN_TEMPLATE_URL = "https://www.dropbox.com/s/jt2wzt48wdjjnqu/template_1.2.zip"
+SITE_TEMPLATE_URL = "https://www.dropbox.com/s/jt2wzt48wdjjnqu/template_1.3.zip"
+SITE_TEMPLATE_DIR = "SmartAdmin_1_3/DEVELOPER/AJAX_version" #subdir under /tmp once unzipped (do not start with slash)
 
 def usage():
-    print("SYNTAX: %s [-h] [--dev]" % sys.argv[0])
+    print("SYNTAX: %s [-h] [--copy] [--dev]" % sys.argv[0])
 
 def runcmd(command, abort_on_failure=True):
     logging.debug("RUNNING COMMAND: %s" % command)
@@ -60,7 +61,6 @@ def main():
     except getopt.GetoptError as err:
         usage()
         sys.exit(2)
-    mode = None
     for o, a in opts:
         if o in ("--copy",):
             copy_files = True #copy files instead of linking to them
@@ -79,46 +79,45 @@ def main():
     logging.info("Building counterwallet for %s distribution..." % ("local server" if not copy_files else "CDN"))
     
     #install required deps
-    runcmd("sudo apt-get -y install wget unzip npm")
-    
+    runcmd("apt-get -y install git-core wget unzip npm rsync")
+
+    cw_site_path = os.path.join(base_path, "build")
+    #remove existing SmartAdmin build dir (as it's not a git repo...just a dumb copy)
+    runcmd("rm -rf %s" % cw_site_path) 
     #fetch admin template we use and unpack
-    runcmd("rm -rf %s" % os.path.join(base_path, "build")) #remove existing build
-    runcmd("rm -rf /tmp/template.zip /tmp/SmartAdmin_1.2") #just in case...
-    runcmd("wget -O /tmp/template.zip %s && unzip -d /tmp /tmp/template.zip" % ADMIN_TEMPLATE_URL)
-    runcmd("mv /tmp/SmartAdmin_1.2/build %s" % os.path.join(base_path, "build"))
-    runcmd("rm -rf /tmp/template.zip /tmp/SmartAdmin_1.2")
-    
+    runcmd("rm -rf /tmp/template.zip /tmp/%s" % SITE_TEMPLATE_DIR) #just in case...
+    runcmd("wget -O /tmp/template.zip %s && unzip -d /tmp /tmp/template.zip" % SITE_TEMPLATE_URL)
     #remove the stuff we don't need from the build
+    site_template_unpack_base = "/tmp/%s" % SITE_TEMPLATE_DIR
     to_remove = [
-        "%s/build/ajax" % base_path,
-        "%s/build/goodies" % base_path,
-        "%s/build/HTML_version" % base_path,
-        "%s/build/php" % base_path,
-        "%s/build/*.php" % base_path,
-        "%s/build/*.html" % base_path,
-        "%s/build/js/demo.js" % base_path,
-        "%s/build/css/demo.css" % base_path,
-        "%s/build/css/invoice.css" % base_path,
-        "%s/build/css/lockscreen.css" % base_path,
-        "%s/build/css/your_style.css" % base_path,
+        "%s/ajax" % site_template_unpack_base,
+        "%s/php" % site_template_unpack_base,
+        "%s/*.php" % site_template_unpack_base,
+        "%s/*.html" % site_template_unpack_base,
+        "%s/js/demo.js" % site_template_unpack_base,
+        "%s/css/demo.css" % site_template_unpack_base,
+        "%s/css/invoice.css" % site_template_unpack_base,
+        "%s/css/lockscreen.css" % site_template_unpack_base,
+        "%s/css/your_style.css" % site_template_unpack_base,
     ]
     runcmd("rm -rf %s" % ' '.join(to_remove))
+    runcmd("mv %s %s" % (site_template_unpack_base, cw_site_path)) #merge with the repo files (if on master)
+    runcmd("rm -rf /tmp/template.zip /tmp/%s" % SITE_TEMPLATE_DIR.split('/')[0]) #don't need this anymore...
     
     #link/copy in the base counterwallet src dir into the build
-    link_or_copy(copy_files, os.path.join(base_path, "src"), os.path.join(base_path, "build", "xcp"))
+    link_or_copy(copy_files, os.path.join(base_path, "src"), os.path.join(cw_site_path, "xcp"))
     #replace the things that need to be replaced in the build
-    link_or_copy(copy_files, os.path.join(base_path, "src", "pages", "index.html"), os.path.join(base_path, "build", "index.html"))
-    link_or_copy(copy_files, os.path.join(base_path, "src", "robots.txt"), os.path.join(base_path, "build", "robots.txt"))
+    link_or_copy(copy_files, os.path.join(base_path, "src", "pages", "index.html"), os.path.join(cw_site_path, "index.html"))
+    link_or_copy(copy_files, os.path.join(base_path, "src", "robots.txt"), os.path.join(cw_site_path, "robots.txt"))
     #x-editable's clear.png so we don't get a 404...
-    link_or_copy(copy_files, os.path.join(base_path, "src", "images", "clear.png"), os.path.join(base_path, "build", "img", "clear.png"))
-    runcmd("sudo chown -R %s %s" % (run_as_user, os.path.join(base_path, "build"))) #to chown the stuff the script made
+    link_or_copy(copy_files, os.path.join(base_path, "src", "images", "clear.png"), os.path.join(cw_site_path, "img", "clear.png"))
+    runcmd("chown -R %s %s" % (run_as_user, cw_site_path)) #to chown the stuff the script made
     
-    runcmd("sudo npm install -g bower")
+    #runcmd("npm install -g bower")
     #TODO: move to bower and grunt-useman for a) auto installation of the javascript dependencies in
     # extjs (we can't do much about the smartadmin ones), and b) automatic gathering/minification of js and css resources
     # and c) replacement of the <script> and <stylesheet> tag templates as necessary to switch between debug and minified builds
     # (or, we just link to the same js/css files, and the files contain either full or minified content...either approach works) 
-    
     
 
 if __name__ == "__main__":

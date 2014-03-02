@@ -41,7 +41,11 @@ function defaultErrorHandler(jqXHR, textStatus, errorThrown, endpoint) {
   bootbox.alert("Error making request to " + endpoint + ": " + message);
 }
 
-function _fetchData(url, onSuccess, onError, postdata, extraAJAXOpts, _url_n) {
+function urlsWithPath(urls, path) {
+  return jQuery.map(urls, function(element) { return jQuery(element) + path; });
+}
+
+function fetchData(url, onSuccess, onError, postdata, extraAJAXOpts, _url_n) {
   /*Makes a simple AJAX request to the specified URL.
     
     -url: The URL to request. May be a single URL, or a list of URLs. If a list of URLs is specified,
@@ -96,7 +100,7 @@ function _fetchData(url, onSuccess, onError, postdata, extraAJAXOpts, _url_n) {
             if (onError) return onError(jqXHR, opt, err, u);
           } else {
             //try the next URL
-            return _fetchData(url, onSuccess, onError, postdata, extraAJAXOpts, _url_n + 1);
+            return fetchData(url, onSuccess, onError, postdata, extraAJAXOpts, _url_n + 1);
           }
         } else {
           if (onError) return onError(jqXHR, opt, err, u);
@@ -127,7 +131,7 @@ function _makeJSONAPICall(destType, endpoints, method, params, onSuccess, onErro
   
   //make JSON API call to counterwalletd
   if(destType == "counterwalletd") {
-    _fetchData(endpoints, onSuccess, onError,
+    fetchData(endpoints, onSuccess, onError,
       JSON.stringify({"jsonrpc": "2.0", "id": 0, "method": method, "params": params}),
       { contentType: 'application/json; charset=utf-8',
         dataType:"json",
@@ -135,7 +139,7 @@ function _makeJSONAPICall(destType, endpoints, method, params, onSuccess, onErro
     );
   } else if(destType == "counterpartyd") {
     //make JSON API call to counterwalletd, which will proxy it to counterpartyd
-    _fetchData(endpoints, onSuccess, onError,
+    fetchData(endpoints, onSuccess, onError,
       JSON.stringify({
         "jsonrpc": "2.0", "id": 0,
         "method": "proxy_to_counterpartyd",

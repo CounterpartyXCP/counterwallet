@@ -1,15 +1,13 @@
 function assert(condition, message) {
-    if (!condition) {
-        throw message || "Assertion failed";
-    }
+  if (!condition)
+      throw message || "Assertion failed";
 }
 
-function makeQRCode(addr) {
-  var qr = qrcode(3, 'M');
-  addr = addr.replace(/^[\s\u3000]+|[\s\u3000]+$/g, '');
-  qr.addData(addr);
-  qr.make();
-  return qr.createImgTag(4);
+function qs(key) {
+  //http://stackoverflow.com/a/7732379
+  key = key.replace(/[*+?^$.\[\]{}()|\\\/]/g, "\\$&"); // escape RegEx meta chars
+  var match = location.search.match(new RegExp("[?&]"+key+"=([^&]+)(&|$)"));
+  return match && decodeURIComponent(match[1].replace(/\+/g, " "));
 }
 
 function numberWithCommas(x) {
@@ -90,4 +88,25 @@ function shuffle(array) {
   }
 
   return array;
+}
+
+function noExponents(n) {
+  /* avoids floats resorting to scientific notation
+   * adopted from: http://stackoverflow.com/a/16116500
+   */
+  var data= String(n).split(/[eE]/);
+  if(data.length== 1) return data[0]; 
+
+  var  z= '', sign= this<0? '-':'',
+  str= data[0].replace('.', ''),
+  mag= Number(data[1])+ 1;
+
+  if(mag<0){
+      z= sign + '0.';
+      while(mag++) z += '0';
+      return z + str.replace(/^\-/,'');
+  }
+  mag -= str.length;  
+  while(mag--) z += '0';
+  return str + z;
 }

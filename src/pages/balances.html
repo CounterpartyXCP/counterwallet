@@ -257,6 +257,9 @@
       </div>
       <div class="modal-body no-padding">
         <div class="formIntro">
+            <p class="errorTextColor" data-bind="fadeVisibleInOnly: showNoPrimedInputsError">
+                You need to prime your account before you can perform the selected action. Please complete this then try
+                again once the priming is complete and confirmed on the blockchain.</p>
             <p>In order to do things with Counterparty, your address needs to
                 contain at one confirmed <a href="http://bitcoin.stackexchange.com/questions/4301/what-is-an-unspent-output" target="_blank">"unspent output"</a>
                 for each action you want to do (e.g. send, create asset, etc).</p>

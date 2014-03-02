@@ -2,7 +2,8 @@ function BalanceHistoryViewModel() {
   //An address on a wallet
   var self = this;
   self.selectedAsset = ko.observable('');
-  self.availableAssets = ko.observableArray(["XCP", "BTC"]);
+  self.availableAssets = !USE_TESTNET ? ko.observableArray(["XCP", "BTC"]) : ko.observableArray(["XCP"]);
+  //^ don't load BTC as an asset on testnet, since we can't show the data (since blockchain doesn't support testnet)
   self.graphData = null;
   self.ASSET_LASTCHANGE = null;
   
@@ -27,7 +28,7 @@ function BalanceHistoryViewModel() {
     self.ASSET_LASTCHANGE = self.selectedAsset();
     console.log("Balance history: Asset changed: " + self.selectedAsset());
     
-    if(self.selectedAsset() == "BTC") {
+    if(self.selectedAsset() == "BTC") { //mainnet only (as we use blockchain.info for this and they don't support testnet')
       var addresses = WALLET.getAddressesList();
       self.graphData = [];
       
@@ -48,7 +49,6 @@ function BalanceHistoryViewModel() {
           }
           //End YQL
           
-          //$.jqlog.log( "Got blockchain.info Balance Data for address " + address + ": " + decodedData);
           var addressName = PREFERENCES['address_aliases'][address] ? "<b>" + PREFERENCES['address_aliases'][address] + "</b> (" + address + ")" : address; 
           self.graphData.push({'name': addressName, 'data': decodedData});
           if(self.graphData.length == addresses.length) {

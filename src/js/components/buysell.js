@@ -59,6 +59,14 @@ ko.validation.rules['isExistingSellAssetName'] = {
   },
   message: 'The asset specified does not exist.'
 };
+
+ko.validation.rules['addressHasPrimedTxouts'] = {
+  validator: function (address, self) {
+    if(!address) return true; //leave it alone for blank addresses
+    return WALLET.getAddressObj(address).numPrimedTxouts() > 0;
+  },
+  message: 'This address has no BTC and/or no primed outputs. Please prime the address first.'
+};
 ko.validation.rules['addressHasSellAssetBalance'] = {
   validator: function (address, self) {
     if(!address) return true; //leave it alone for blank addresses
@@ -160,6 +168,7 @@ function BuySellWizardViewModel() {
       message: "This field is required.",
       onlyIf: function () { return (self.selectedBuyAsset() && self.selectedSellAsset()); }
     },
+    addressHasPrimedTxouts: self,
     addressHasSellAssetBalance: self
   });
   self.dispSelectedAddress = ko.computed(function() {
@@ -263,12 +272,12 @@ function BuySellWizardViewModel() {
     return(self.selectedSellAmountCustom() || self.selectedSellAmountAtMarket());
   }, self);
   self.unitPriceCustom = ko.computed(function() {
-    if(!self.assetPair() || !self.selectedSellAmountCustom() || !isNumber(self.selectedSellAmountCustom())) return null;
+    if(!self.assetPair() || !self.selectedBuyAmount() || !self.selectedSellAmountCustom() || !isNumber(self.selectedSellAmountCustom())) return null;
     //^ only valid when the market unit price doesn't exist or is overridden
     if(parseFloat(self.selectedSellAmountCustom()) == 0 || parseFloat(self.selectedBuyAmount()) == 0) return null;
     if(self.assetPair()[0] == self.buyAsset()) //buy asset is the base
       //self.selectedSellAmountCustom / self.selectedBuyAmount
-      return Decimal.round(new Decimal(self.selectedSellAmountCustom()).div(self.selectedBuyAmount()), 8).toFloat();
+      return Decimal.round(new Decimal(self.selectedSellAmountCustom()).div(self.selectedBuyAmount()), 8).toFloat().toFixed(8);
     else { // sell asset is the base
       assert(self.assetPair()[0] == self.sellAsset());
       //self.selectedBuyAmount / self.selectedSellAmountCustom
@@ -285,6 +294,13 @@ function BuySellWizardViewModel() {
     //curBalance - self.selectedSellAmount
     return Decimal.round(new Decimal(curBalance).sub(self.selectedSellAmount()), 8).toFloat();
   }, self);
+  self.dispSellAmountRemainingAfterSale = ko.computed(function() {
+    return numberWithCommas(noExponents(self.sellAmountRemainingAfterSale()));
+  }, self);
+  self.dispSellAmountRemainingAfterSaleAbs = ko.computed(function() {
+    return numberWithCommas(noExponents(Math.abs(self.sellAmountRemainingAfterSale())));
+  }, self);
+  
 
   //VALIDATION MODELS  
   self.validationModelTab1 = ko.validatedObservable({

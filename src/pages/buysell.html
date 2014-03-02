@@ -97,7 +97,7 @@
                                             <div class="col-md-12">
                                                 <span>You have <b><span class="sellColor" data-bind="text: totalBalanceAvailForSale"></span>
                                                 <span class="sellColor" data-bind="text: sellAsset"></span></b> at the selected address.
-                                                At the current market rate of <b><span data-bind="text: currentMarketUnitPrice"></span>
+                                                <br/>At the current market rate of <b><span data-bind="text: currentMarketUnitPrice"></span>
                                                 <span data-bind="text: quoteAsset"></span> per each <span data-bind="text: baseAsset"></span></b>,
                                                 you can afford up to <b><span class="buyColor" data-bind="text: numberWithCommas(maxAfford())"></span> <span class="buyColor" data-bind="text: buyAsset"></span>.</b>
                                                 </span>
@@ -119,6 +119,8 @@
                                         <div class="row" data-bind="fadeVisible: currentTab() == 2 && currentMarketUnitPrice() == null">
                                             <div class="col-md-12">
                                                 <span class="errorRed">There is currently insufficient data to determine a fair market price for your purchase.</span>
+                                                <br/><span>You have <b><span class="sellColor" data-bind="text: totalBalanceAvailForSale"></span>
+                                                <span class="sellColor" data-bind="text: sellAsset"></span></b> at the selected address.                                                
                                             </div>
                                         </div>
                                         <div class="row" style="max-width: 1000px;">
@@ -161,13 +163,13 @@
                                                 <span data-bind="text: quoteAsset"></span> per each <span data-bind="text: baseAsset"></span>).
                                             </span>
                                             <span data-bind="fadeVisibleInOnly: currentTab() == 2 && sellAmountRemainingAfterSale() != null && sellAmountRemainingAfterSale() >= 0">
-                                                <br/>After the sale, you will have <b><span class="sellColor" data-bind="text: sellAmountRemainingAfterSale()"></span>
+                                                <br/>After the sale, you will have <b><span class="sellColor" data-bind="text: dispSellAmountRemainingAfterSale"></span>
                                                 <span class="sellColor" data-bind="text: sellAsset"></span></b> remaining at
                                                 your address <b><span data-bind="text: dispSelectedAddressWithLabel"></span></b>.
                                             </span>
                                             <span data-bind="fadeVisibleInOnly: currentTab() == 2 && sellAmountRemainingAfterSale() < 0">
                                                 <br/><span class="errorRedColor">Your purchase would exceed your available balance
-                                                by <b><span data-bind="text: numberWithCommas(Math.abs(sellAmountRemainingAfterSale()))"></span>
+                                                by <b><span data-bind="text: dispSellAmountRemainingAfterSaleAbs"></span>
                                                 <span data-bind="text: sellAsset"></span></b>.</span>
                                             </span>
                                         </div>
@@ -195,7 +197,7 @@
                                             </tr>
                                         </tbody>
                                     </table>
-                                    After the sale, you will have <b><span class="sellColor" data-bind="text: sellAmountRemainingAfterSale()"></span>
+                                    After the sale, you will have <b><span class="sellColor" data-bind="text: dispSellAmountRemainingAfterSale"></span>
                                     <span class="sellColor" data-bind="text: sellAsset"></span></b> remaining at
                                     your address <b><span data-bind="text: dispSelectedAddressWithLabel"></span></b>.                                    
                                 </div>
@@ -313,11 +315,11 @@
                     </thead>
                     <tbody data-bind="foreach: openOrders">
                         <tr>
-                            <td><a target="_blank" data-bind="text: tx_index, attr: { href: 'http://blockscan.com/tx.aspx?q=' + tx_index }"></a></td> <!-- link to block tx at blockchain.info) -->
+                            <td><a target="_blank" data-bind="text: tx_index, attr: { href: !USE_TESTNET ? 'http://blockscan.com/tx.aspx?q=' + tx_index : null }"></a></td> <!-- link to block tx at blockscan -->
                             <td data-bind="timeago: new Date(block_time * 1000)"></td> <!-- datetime formatted string -->
                             <td data-bind="text: derivePendingOrderAssetAmount(get_asset, get_amount) + ' ' + get_asset"></td>
                             <td data-bind="text: derivePendingOrderAssetAmount(give_asset, give_amount) + ' ' + give_asset"></td>
-                            <td><a target="_blank" data-bind="text: derivePendingOrderAssetPrice(get_asset, get_amount, give_asset, give_amount)"></a></td> <!-- link to TX at blockscan -->
+                            <td><a target="_blank" data-bind="text: derivePendingOrderAssetPrice(get_asset, get_amount, give_asset, give_amount)"></a></td>
                             <td data-bind="text: derivePendingOrderAssetAmount(get_asset, get_remaining) + ' ' + get_asset"></td>
                             <td data-bind="text: derivePendingOrderAssetAmount(give_asset, give_remaining) + ' ' + give_asset"></td>
                             <td data-bind="html: derivePendingOrderExpiresIn(block_index, expiration)"></td>
@@ -362,12 +364,12 @@
                     </thead>
                     <tbody data-bind="foreach: tradeHistory">
                         <tr>
-                            <td><a target="_blank" data-bind="text: block_index, attr: { href: 'https://blockchain.info/block-index/' + block_index }"></a></td> <!-- link to block tx at blockchain.info) -->
+                            <td><a target="_blank" data-bind="text: block_index, attr: { href: BLOCKEXPLORER_URL + '/blocks?blockHeight=' + block_index }"></a></td> <!-- link to block tx at insight -->
                             <td data-bind="text: moment(block_time * 1000).format('MMM Do YYYY, h:mm:ss a')"></td> <!-- datetime formatted string -->
-                            <td><a target="_blank" data-bind="text: order_match_tx0_index, attr: { href: 'http://blockscan.com/tx.aspx?q=' + order_match_tx0_index }"></a></td> <!-- link to TX at blockscan -->
-                            <td><a target="_blank" data-bind="text: order_match_tx0_address, attr: { href: 'http://blockscan.com/address.aspx?q=' + order_match_tx0_address }"></a></td> <!-- link to source addr at blockscan -->
-                            <td><a target="_blank" data-bind="text: order_match_tx1_index, attr: { href: 'http://blockscan.com/tx.aspx?q=' + order_match_tx1_index }"></a></td> <!-- link to TX at blockscan -->
-                            <td><a target="_blank" data-bind="text: order_match_tx1_address, attr: { href: 'http://blockscan.com/address.aspx?q=' + order_match_tx1_address }"></a></td> <!-- link to source addr at blockscan -->
+                            <td><a target="_blank" data-bind="text: order_match_tx0_index, attr: { href: !USE_TESTNET ? 'http://blockscan.com/tx.aspx?q=' + order_match_tx0_index : null }"></a></td> <!-- link to TX at blockscan -->
+                            <td><a target="_blank" data-bind="text: order_match_tx0_address, attr: { href: !USE_TESTNET ? 'http://blockscan.com/address.aspx?q=' + order_match_tx0_address : null }"></a></td> <!-- link to source addr at blockscan -->
+                            <td><a target="_blank" data-bind="text: order_match_tx1_index, attr: { href: !USE_TESTNET ? 'http://blockscan.com/tx.aspx?q=' + order_match_tx1_index : null }"></a></td> <!-- link to TX at blockscan -->
+                            <td><a target="_blank" data-bind="text: order_match_tx1_address, attr: { href: !USE_TESTNET ? 'http://blockscan.com/address.aspx?q=' + order_match_tx1_address : null }"></a></td> <!-- link to source addr at blockscan -->
                             <td data-bind="text: base_amount_normalized + ' ' + base_asset"></td>
                             <td data-bind="text: quote_amount_normalized + ' ' + quote_asset"></td>
                             <td data-bind="text: unit_price"></td>

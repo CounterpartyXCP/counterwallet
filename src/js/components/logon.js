@@ -56,7 +56,7 @@ function LogonViewModel() {
     //Start with a gate check to make sure at least one of the servers is ready and caught up before we try to log in
     multiAPI("is_ready", [], function(data, endpoint) {
       assert(data['caught_up'], "Invalid is_ready result"); //otherwise we should have gotten a 525 error
-      USE_TESTNET = data['testnet'];
+      assert(USE_TESTNET == data['testnet'], "USE_TESTNET is " + USE_TESTNET + " from URL-based detection, but the server API disagrees!");
       $.jqlog.log("Backend is ready. Testnet status: " + USE_TESTNET);
 
       //User is logging in...
@@ -105,7 +105,7 @@ function LogonViewModel() {
       //generate the appropriate number of addresses
       var seed = mn_decode(self.enteredPassphrase());
       WALLET.BITCOIN_WALLET = Bitcoin.Wallet(seed, {
-        network: USE_TESTNET ? "BitcoinTest" : "Bitcoin",
+        network: USE_TESTNET ? "testnet" : "mainnet",
         derivationMethod: 'private'
       });
       

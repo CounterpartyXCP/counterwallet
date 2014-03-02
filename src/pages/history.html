@@ -77,10 +77,10 @@
                     </thead>
                     <tbody data-bind="foreach: transactions">
                         <tr>
-                            <td><a target="_blank" data-bind="text: txIndex, attr: { href: 'http://blockscan.com/tx.aspx?q=' + txIndex }"></a></td> <!-- link to TX at blockscan -->
-                            <td><a target="_blank" data-bind="text: blockIndex, attr: { href: 'https://blockchain.info/block-index/' + blockIndex }"></a></td> <!-- link to block tx at blockchain.info) -->
+                            <td><a target="_blank" data-bind="text: txIndex, attr: { href: !USE_TESTNET ? 'http://blockscan.com/tx.aspx?q=' + txIndex : null }"></a></td> <!-- link to TX at blockscan -->
+                            <td><a target="_blank" data-bind="text: blockIndex, attr: { href: BLOCKEXPLORER_URL + '/blocks?blockHeight=' + blockIndex  : null }"></a></td> <!-- link to block tx at insight -->
                             <td data-bind="text: dispBlocktime()"></td> <!-- datetime formatted string -->
-                            <td><a target="_blank" data-bind="text: dispSource(), attr: { href: 'http://blockscan.com/address.aspx?q=' + source }"></a></td> <!-- link to source addr at blockscan -->
+                            <td><a target="_blank" data-bind="text: dispSource(), attr: { href: !USE_TESTNET ? 'http://blockscan.com/address.aspx?q=' + source : null }"></a></td> <!-- link to source addr at blockscan -->
                             <td data-bind="html: dispTxType()"></td>
                             <td data-bind="html: dispDescription()"></td>
                             <!--<td data-bind="html: btcAmount"></td>

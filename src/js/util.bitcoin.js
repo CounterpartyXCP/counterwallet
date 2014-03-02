@@ -2,6 +2,14 @@ function normalizeAmount(amount, divisible) {
   return divisible ? Decimal.round(new Decimal(amount).div(UNIT), 8).toFloat() : amount;
 }
 
+function makeQRCode(addr) {
+  var qr = qrcode(3, 'M');
+  addr = addr.replace(/^[\s\u3000]+|[\s\u3000]+$/g, '');
+  qr.addData(addr);
+  qr.make();
+  return qr.createImgTag(4);
+}
+
 function randomGetBytes(numBytes) {
      var randomBytes = null;
     if (window.crypto && window.crypto.getRandomValues) {
@@ -53,4 +61,21 @@ function parseBCIUnspent(r) { /* orig from tx.js (public domain) */
       balance = balance.add(value);
   }
   return {balance:balance, unspentTxs: unspenttxs};
+}
+
+function canDoTransaction(address) {
+  /* ensures that the specified address can perform a counterparty transaction */
+  if(WALLET.getAddressObj(address).numPrimedTxouts() == 0) { //no primed txouts
+    if(WALLET.getBalance(address, "BTC") == 0) {
+      bootbox.alert("Can't do this action as you have no BTC at this address, and Counterparty actions require a"
+        + " small amount of BTC to perform. Please deposit some BTC into address <b>" + address + "</b>and try again.");
+      return false;
+    }
+    
+    //Otherwise, we DO have a balance, we just don't have any suitable primed outputs
+    PRIME_ADDRESS_MODAL.show(self.ADDRESS);
+    PRIME_ADDRESS_MODAL.showNoPrimedInputsError(true);
+    return false;
+  }
+  return true;
 }
