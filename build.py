@@ -79,7 +79,7 @@ def main():
     logging.info("Building counterwallet for %s distribution..." % ("local server" if not copy_files else "CDN"))
     
     #install required deps
-    runcmd("apt-get -y install git-core wget unzip npm rsync")
+    runcmd("apt-get -y install git-core wget unzip rsync")
 
     cw_site_path = os.path.join(base_path, "build")
     #remove existing SmartAdmin build dir (as it's not a git repo...just a dumb copy)
