@@ -2,6 +2,23 @@ function normalizeAmount(amount, divisible) {
   return divisible ? Decimal.round(new Decimal(amount).div(UNIT), 8).toFloat() : amount;
 }
 
+function assetsToAssetPair(asset1, asset2) {
+  //NOTE: This MUST use the same logic/rules as counterwalletd's assets_to_asset_pair() function in lib/util.py
+  var base = null;
+  var quote = null;
+  if(asset1 == 'XCP' || asset2 == 'XCP') {
+      base = asset1 == 'XCP' ? asset1 : asset2;
+      quote = asset1 == 'XCP' ? asset2 : asset1;
+  } else if(asset1 == 'BTC' || asset2 == 'BTC') {
+      base = asset1 == 'BTC' ? asset1 : asset2;
+      quote = asset1 == 'BTC' ? asset2 : asset1;
+  } else {
+      base = asset1 < asset2 ? asset1 : asset2;
+      quote = asset1 < asset2 ? asset2 : asset1;
+  }
+  return [base, quote];
+}
+
 function makeQRCode(addr) {
   var qr = qrcode(3, 'M');
   addr = addr.replace(/^[\s\u3000]+|[\s\u3000]+$/g, '');
@@ -61,21 +78,4 @@ function parseBCIUnspent(r) { /* orig from tx.js (public domain) */
       balance = balance.add(value);
   }
   return {balance:balance, unspentTxs: unspenttxs};
-}
-
-function canDoTransaction(address) {
-  /* ensures that the specified address can perform a counterparty transaction */
-  if(WALLET.getAddressObj(address).numPrimedTxouts() == 0) { //no primed txouts
-    if(WALLET.getBalance(address, "BTC") == 0) {
-      bootbox.alert("Can't do this action as you have no BTC at this address, and Counterparty actions require a"
-        + " small amount of BTC to perform. Please deposit some BTC into address <b>" + address + "</b>and try again.");
-      return false;
-    }
-    
-    //Otherwise, we DO have a balance, we just don't have any suitable primed outputs
-    PRIME_ADDRESS_MODAL.show(self.ADDRESS);
-    PRIME_ADDRESS_MODAL.showNoPrimedInputsError(true);
-    return false;
-  }
-  return true;
 }

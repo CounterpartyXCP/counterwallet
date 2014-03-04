@@ -42,10 +42,10 @@ function defaultErrorHandler(jqXHR, textStatus, errorThrown, endpoint) {
 }
 
 function urlsWithPath(urls, path) {
-  return jQuery.map(urls, function(element) { return jQuery(element) + path; });
+  return $.map(urls, function(element) { return element + path; });
 }
 
-function fetchData(url, onSuccess, onError, postdata, extraAJAXOpts, _url_n) {
+function fetchData(url, onSuccess, onError, postdata, isJSONRPC, extraAJAXOpts, _url_n) {
   /*Makes a simple AJAX request to the specified URL.
     
     -url: The URL to request. May be a single URL, or a list of URLs. If a list of URLs is specified,
@@ -59,8 +59,14 @@ function fetchData(url, onSuccess, onError, postdata, extraAJAXOpts, _url_n) {
   if(typeof(onError)==='undefined' || onError == "default")
     onError = function(jqXHR, textStatus, errorThrown) { return defaultErrorHandler(jqXHR, textStatus, errorThrown, u) };
   if(typeof(postdata)==='undefined') postdata = null;
+  if(typeof(isJSONRPC)==='undefined') isJSONRPC = false;
   if(typeof(extraAJAXOpts)==='undefined') extraAJAXOpts = {};
   if(typeof(_url_n)==='undefined') _url_n = 0;
+  
+  if(isJSONRPC) {
+    extraAJAXOpts['contentType'] = 'application/json; charset=utf-8';
+    extraAJAXOpts['dataType'] = 'json';
+  }
 
   //if passed a list of urls for url, then keep trying (via recursion) until we find one that works
   u = url;
@@ -75,10 +81,9 @@ function fetchData(url, onSuccess, onError, postdata, extraAJAXOpts, _url_n) {
       url: u,
       success: function(res) {
         if(onSuccess) {
-          if(extraAJAXOpts && extraAJAXOpts['dataType'] == 'json') {
-            if(res.substring) res = $.parseJSON(res); 
+          if(isJSONRPC) {
+            //if(res.substring) res = $.parseJSON(res); 
             //^ ghetto hack...sometimes jquery does not parse the JSON response (??)  
-
             if(res && res.hasOwnProperty('result')) {
               onSuccess(res['result'], u);
             } else {
@@ -89,7 +94,7 @@ function fetchData(url, onSuccess, onError, postdata, extraAJAXOpts, _url_n) {
                 /*+ "<p><b>RAW:</b> " + JSON.stringify(res) + "</p>"*/, "jsonrpc", u);
             }
           } else {
-            onSuccess(res.responseText, u);
+            onSuccess(res, u);
           }
         }
       },
@@ -100,7 +105,7 @@ function fetchData(url, onSuccess, onError, postdata, extraAJAXOpts, _url_n) {
             if (onError) return onError(jqXHR, opt, err, u);
           } else {
             //try the next URL
-            return fetchData(url, onSuccess, onError, postdata, extraAJAXOpts, _url_n + 1);
+            return fetchData(url, onSuccess, onError, postdata, isJSONRPC, extraAJAXOpts, _url_n + 1);
           }
         } else {
           if (onError) return onError(jqXHR, opt, err, u);
@@ -132,24 +137,14 @@ function _makeJSONAPICall(destType, endpoints, method, params, onSuccess, onErro
   //make JSON API call to counterwalletd
   if(destType == "counterwalletd") {
     fetchData(endpoints, onSuccess, onError,
-      JSON.stringify({"jsonrpc": "2.0", "id": 0, "method": method, "params": params}),
-      { contentType: 'application/json; charset=utf-8',
-        dataType:"json",
-      }
-    );
+      JSON.stringify({"jsonrpc": "2.0", "id": 0, "method": method, "params": params}), true);
   } else if(destType == "counterpartyd") {
     //make JSON API call to counterwalletd, which will proxy it to counterpartyd
     fetchData(endpoints, onSuccess, onError,
       JSON.stringify({
         "jsonrpc": "2.0", "id": 0,
         "method": "proxy_to_counterpartyd",
-        "params": {"method": method, "params": params }
-      }),
-      {
-        contentType: 'application/json; charset=utf-8',
-        dataType:"json"
-      }
-    );
+        "params": {"method": method, "params": params }}), true);
   }
 }
 

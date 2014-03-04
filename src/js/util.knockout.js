@@ -11,6 +11,18 @@ ko.subscribable.fn.trimmed = function() {
     });
 };
 
+//http://stackoverflow.com/a/18184016
+ko.subscribable.fn.subscribeChanged = function (callback) {
+    var oldValue;
+    this.subscribe(function (_oldValue) {
+        oldValue = _oldValue;
+    }, this, 'beforeChange');
+
+    this.subscribe(function (newValue) {
+        callback(newValue, oldValue);
+    });
+};
+
 /* Knockout bindings */
 ko.bindingHandlers.showModal = {
   init: function (element, valueAccessor) {

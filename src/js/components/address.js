@@ -88,7 +88,7 @@ function AddressViewModel(key, address, initialLabel) {
   /////////////////////////
   //Address-panel-related
   self.changeLabel = function(params) {
-    if(!checkForPrimedTxout(self.ADDRESS)) return false;
+    if(!WALLET.canDoTransaction(self.ADDRESS)) return false;
     var addressHash = Bitcoin.convert.bytesToBase64(Bitcoin.Crypto.SHA256(self.ADDRESS, {asBytes: true}));
     PREFERENCES.address_aliases[addressHash] = params.value;
     //update the preferences on the server 
@@ -98,7 +98,7 @@ function AddressViewModel(key, address, initialLabel) {
   }
   
   self.prime = function() {
-    //No need for canDoTransaction here, as PRIME_ADDRESS_MODAL checks for 0 BTC balance
+    //No need for WALLET.canDoTransaction here, as PRIME_ADDRESS_MODAL checks for 0 BTC balance
     PRIME_ADDRESS_MODAL.show(self.ADDRESS);
   }
   
@@ -114,7 +114,7 @@ function AddressViewModel(key, address, initialLabel) {
   }
 
   self.createAssetIn = function() {
-    if(!canDoTransaction(self.ADDRESS)) return false;
+    if(!WALLET.canDoTransaction(self.ADDRESS)) return false;
     CREATE_ASSET_MODAL.show(self.ADDRESS);
   }
 

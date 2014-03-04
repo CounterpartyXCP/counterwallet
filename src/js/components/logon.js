@@ -78,6 +78,11 @@ function LogonViewModel() {
       multiAPINewest("get_preferences", [WALLET.identifier()], 'last_updated', function(data) {
         assert(data && data.hasOwnProperty('preferences'), "Invalid stored preferences");
         PREFERENCES = data['preferences'];
+        
+        //Update selected language and theme
+        if(PREFERENCES['selected_theme']) THEME_SELECTOR.changeThemeByID(PREFERENCES['selected_theme']);
+        if(PREFERENCES['selected_lang']) LANG_SELECTOR.changeLangByID(PREFERENCES['selected_lang']);
+        
         self.openWalletPt2();
       }, function(jqXHR, textStatus, errorThrown) {
         //No server had the preferences
@@ -86,7 +91,9 @@ function LogonViewModel() {
         //no stored preferences on any server(s) in the federation, go with the default...
         prefs = {
           'num_addresses_used': WALLET.DEFAULT_NUMADDRESSES,
-          'address_aliases': {}
+          'address_aliases': {},
+          'selected_theme': 'ultraLight',
+          'selected_lang': 'en-us'
         };
   
         //store the preferences on the server(s) for future use

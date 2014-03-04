@@ -17,11 +17,11 @@ import glob
 import subprocess
 import stat
 
-SITE_TEMPLATE_URL = "https://www.dropbox.com/s/jt2wzt48wdjjnqu/template_1.3.zip"
+SITE_TEMPLATE_URL = "https://www.dropbox.com/s/4hjr517h6h7qbk9/template_1.3.zip"
 SITE_TEMPLATE_DIR = "SmartAdmin_1_3/DEVELOPER/AJAX_version" #subdir under /tmp once unzipped (do not start with slash)
 
 def usage():
-    print("SYNTAX: %s [-h] [--copy] [--dev]" % sys.argv[0])
+    print("SYNTAX: %s [-h] [--copy]" % sys.argv[0])
 
 def runcmd(command, abort_on_failure=True):
     logging.debug("RUNNING COMMAND: %s" % command)

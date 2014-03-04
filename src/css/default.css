@@ -58,11 +58,11 @@ span.logoText {
     bottom: 4px;
 }
 
-#logo img {
-    width: auto;
-    height: auto;
-    position: relative;
-    bottom: 8px;    
+#logo img { /* need to use !important here because the google skin has its own logo img style that borks things up */
+    width: auto !important;
+    height: auto !important;
+    position: relative !important;
+    bottom: 8px !important;    
 }
 
 #logo {
@@ -81,6 +81,9 @@ span.logoText {
 }
 #header>:first-child {
     width: 260px; /* + 20px */
+}
+.smart-style-0 #header span.logoText { /* override for a specific style */
+    color: black;
 }
 
 /* LEFT AND CONTENT PANEL INTERFACE MODIFICATIONS

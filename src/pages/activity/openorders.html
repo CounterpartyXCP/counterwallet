@@ -13,7 +13,7 @@
            Fee Required: <span data-bind="text: order['fee_required']"></span> / Provided: <span data-bind="text: order['fee_provided']"></span> / Remaining: <span data-bind="text: feeRemaining()"></span><br/>
            Expires @ block <span data-bind="text: order['expire_index']"></span><br/>
            <span class="pull-right font-xs text-muted"><i data-bind="timeago: order['expiration'] * 1000"></i></span>
-           <span class="pull-right"><button class="btn btn-xs btn-success margin-top-5" data-bind="click: completeBTCPay">Pay</button></span>
+           <span class="pull-right"><button class="btn btn-xs btn-success margin-top-5" data-bind="click: cancelOpenOrder">Cancel</button></span>
         </span>
       </span>
     </li>

@@ -63,6 +63,7 @@ function initMessageFeed() {
 }
 
 function parseMessageWithFeedGapDetection(event, data, callback) {
+  if(!data) return; //sometimes nginx can trigger this via its proxy handling it seems, with a blank payload
   $.jqlog.info("parseMessageWithFeedGapDetection: " + data['_message_index'] + " -- " + LAST_MESSAGEIDX_RECEIVED);
   if(data['_message_index'] === undefined && IS_DEV) debugger;
   assert(data['_message_index'] && data['_message_index'] >= LAST_MESSAGEIDX_RECEIVED, "Invalid _message_index");
@@ -85,7 +86,7 @@ function parseMessageWithFeedGapDetection(event, data, callback) {
   $.jqlog.warn("parseMessageWithFeedGapDetection:GAP DETECTED: our last msgidx = " + LAST_MESSAGEIDX_RECEIVED + "; server sent msgidx = " + data['_message_index']);
 
   //request the missing messages from the feed and replay them...
-  debugger
+  if(IS_DEV) debugger;
   var missingMessages = [];
   for(var i=LAST_MESSAGEIDX_RECEIVED+1; i < data['_message_index']; i++) {
     missingMessages.push(i);

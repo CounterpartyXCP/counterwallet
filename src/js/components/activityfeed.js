@@ -39,6 +39,37 @@ function OpenOrderViewModel(order) {
   self.giveRemaining = ko.observable(order['give_remaining']);
   self.getRemaining = ko.observable(order['get_remaining']);
   self.feeRemaining = ko.observable(order['fee_remaining']);
+  
+  self.cancelOpenOrder = function() {
+    bootbox.dialog({
+      message: "Are you sure that you want to cancel this order?<br/><br/> \
+        <b style='color:red'>Please NOTE that this action is irreversable!</b>",
+      title: "Are you sure?",
+      buttons: {
+        success: {
+          label: "Don't Cancel Order'",
+          className: "btn-default",
+          callback: function() {
+            //modal will disappear
+          }
+        },
+        danger: {
+          label: "Cancel Order",
+          className: "btn-danger",
+          callback: function() {
+            //issue 0 to lock the asset
+            WALLET.doTransaction(self.order['source'], "create_cancel",
+              { offer_hash: self.order['tx_hash'] },
+              function() {
+                bootbox.alert("Your order cancellation has been submitted"
+                  + " but it may take a bit for this to formally reflect on the network.");
+              }
+            );
+          }
+        },
+      }
+    });    
+  }
 }
 
 function PendingBTCPayViewModel(orderMatchID, BTCPayTxIndex, myAddr, btcDestAddress, btcAmount, myOrderTxIndex,
@@ -89,15 +120,14 @@ function PendingBTCPayViewModel(orderMatchID, BTCPayTxIndex, myAddr, btcDestAddr
             className: "btn-success",
             callback: function() {
               //complete the BTCpay. Start by getting the current BTC balance for the address
-              multiAPIConsensus("create_btcpay",
-                {order_match_id: self.orderMatchID(),
-                 multisig: WALLET.getAddressObj(self.address()).PUBKEY},
-                function(unsignedTxHex, numTotalEndpoints, numConsensusEndpoints) {
-                  WALLET.signAndBroadcastTx(self.myAddr(), unsignedTxHex);
+              WALLET.doTransaction(self.myAddr, "create_btcpay",
+                { order_match_id: self.orderMatchID() },
+                function() {
                   //remove the BTC payment from the notifications
                   ACTIVITY_FEED.removePendingBTCPay(self.orderMatchID());
                   bootbox.alert("Order successfully settled. Will take 1 block to confirm across the network.");
-              });
+                }
+              );
             }
           }
         }
@@ -178,5 +208,5 @@ function ActivityFeedViewModel(initialActivityCount) {
 var ACTIVITY_FEED = new ActivityFeedViewModel();
 
 $(document).ready(function() {
-  ko.applyBindings(ACTIVITY_FEED, document.getElementById("header"));
+  ko.applyBindings(ACTIVITY_FEED, document.getElementById("logo-group"));
 });

@@ -110,3 +110,15 @@ function noExponents(n) {
   while(mag--) z += '0';
   return str + z;
 }
+
+
+//Local storage helper functions
+//http://stackoverflow.com/a/3146971
+//Usage: var userObject = {userId: 24, name: 'Jack Bauer'}; localStorage.setObject('user', userObject); userObject = localStorage.getObject('user');
+Storage.prototype.setObject = function(key, value) {
+    this.setItem(key, JSON.stringify(value));
+}
+Storage.prototype.getObject = function(key) {
+    var value = this.getItem(key);
+    return value && JSON.parse(value);
+}

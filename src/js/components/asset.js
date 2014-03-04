@@ -32,25 +32,25 @@ function AssetViewModel(props) {
   
   self.send = function () {
     if(!self.balance()) { bootbox.alert("You have no available <b>" + self.ASSET + "</b> at address <b>" + self.ADDRESS + "</b> to send."); return; }
-    if(!canDoTransaction(self.ADDRESS)) return false;
+    if(!WALLET.canDoTransaction(self.ADDRESS)) return false;
     SEND_MODAL.show(self.ADDRESS, self.ASSET, self.balance(), self.DIVISIBLE);
   };
   
   self.issueAdditional = function () {
     assert(self.isMine() && !self.isLocked());
-    if(!canDoTransaction(self.ADDRESS)) return false;
+    if(!WALLET.canDoTransaction(self.ADDRESS)) return false;
     ISSUE_ADDITIONAL_ASSET_MODAL.show(self.ADDRESS, self.DIVISIBLE, self);
   };
   
   self.transfer = function () {
     assert(self.isMine());
-    if(!canDoTransaction(self.ADDRESS)) return false;
+    if(!WALLET.canDoTransaction(self.ADDRESS)) return false;
     TRANSFER_ASSET_MODAL.show(self.ADDRESS, self);
   };
 
   self.lock = function () {
     assert(self.isMine() && !self.isLocked());
-    if(!canDoTransaction(self.ADDRESS)) return false;
+    if(!WALLET.canDoTransaction(self.ADDRESS)) return false;
     
     bootbox.dialog({
       message: "By locking your asset, you will not be able to issue more of it in the future.<br/><br/> \
@@ -69,15 +69,21 @@ function AssetViewModel(props) {
           className: "btn-danger",
           callback: function() {
             //to lock, issue with quantity == 0 and "LOCK" in the description field
-            multiAPIConsensus("create_issuance",
-              {source: self.ADDRESS, quantity: 0, asset: self.ASSET, divisible: self.DIVISIBLE,
-               description: "LOCK", callable_: self.CALLABLE, call_date: self.CALLDATE,
-               call_price: self.CALLPRICE, transfer_destination: null,
-               multisig: WALLET.getAddressObj(self.ADDRESS).PUBKEY},
-              function(unsignedTxHex, numTotalEndpoints, numConsensusEndpoints) {
-                WALLET.signAndBroadcastTx(self.ADDRESS, unsignedTxHex);
+            WALLET.doTransaction(self.ADDRESS, "create_issuance",
+              { source: self.ADDRESS,
+                quantity: 0,
+                asset: self.ASSET,
+                divisible: self.DIVISIBLE,
+                description: "LOCK",
+                callable_: self.CALLABLE,
+                call_date: self.CALLDATE,
+                call_price: self.CALLPRICE,
+                transfer_destination: null
+              },
+              function() {
                 bootbox.alert("Your asset has been locked. It may take a bit for this to reflect.");
-            });
+              }
+            );
           }
         },
       }
@@ -85,12 +91,12 @@ function AssetViewModel(props) {
   };
 
   self.changeDescription = function () {
-    if(!canDoTransaction(self.ADDRESS)) return false;
+    if(!WALLET.canDoTransaction(self.ADDRESS)) return false;
     CHANGE_ASSET_DESCRIPTION_MODAL.show(self.ADDRESS, self);
   };
 
   self.payDividend = function () {
-    if(!canDoTransaction(self.ADDRESS)) return false;
+    if(!WALLET.canDoTransaction(self.ADDRESS)) return false;
     PAY_DIVIDEND_MODAL.show(self.ADDRESS, self);
   };
 }

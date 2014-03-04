@@ -122,18 +122,22 @@ function CreateAssetModalViewModel() {
       return false;
     }
     
-    multiAPIConsensus("create_issuance",
-      {source: self.address(), asset: self.name(), quantity: rawQuantity, divisible: self.divisible(),
-       description: self.description(), callable_: self.callable, call_date: rawCallDate,
-       call_price: rawCallPrice, transfer_destination: null,
-       multisig: WALLET.getAddressObj(self.address()).PUBKEY},
-      function(unsignedTxHex, numTotalEndpoints, numConsensusEndpoints) {
-        WALLET.signAndBroadcastTx(self.address(), unsignedTxHex);
+    WALLET.doTransaction(self.address(), "create_issuance",
+      { source: self.address(),
+        asset: self.name(),
+        quantity: rawQuantity,
+        divisible: self.divisible(),
+        description: self.description(),
+        callable_: self.callable,
+        call_date: rawCallDate,
+        call_price: rawCallPrice,
+        transfer_destination: null
+      },
+      function() {
         bootbox.alert("Your asset seemed to be created successfully. It will automatically appear under the \
         appropriate address once the network has confirmed it, and your account will be deducted by 5 XCP.");
       }
     );
-    
     self.shown(false);
   }
   
@@ -205,17 +209,23 @@ function IssueAdditionalAssetModalViewModel() {
 
   self.doAction = function() {
     //do the additional issuance (specify non-zero quantity, no transfer destination)
-    multiAPIConsensus("create_issuance",
-      {source: self.address(), quantity: self.rawAdditionalIssue(), asset: self.asset().ASSET, divisible: self.asset().DIVISIBLE,
-       description: self.asset().description(), callable_: self.asset().CALLABLE, call_date: self.asset().CALLDATE,
-       call_price: self.asset().CALLPRICE, transfer_destination: null,
-       multisig: WALLET.getAddressObj(self.address()).PUBKEY},
-      function(unsignedTxHex, numTotalEndpoints, numConsensusEndpoints) {
-        WALLET.signAndBroadcastTx(self.address(), unsignedTxHex);
+    WALLET.doTransaction(self.address(), "create_issuance",
+      { source: self.address(),
+        quantity: self.rawAdditionalIssue(),
+        asset: self.asset().ASSET,
+        divisible: self.asset().DIVISIBLE,
+        description: self.asset().description(),
+        callable_: self.asset().CALLABLE,
+        call_date: self.asset().CALLDATE,
+        call_price: self.asset().CALLPRICE,
+        transfer_destination: null
+      },
+      function() {
         self.shown(false);
         bootbox.alert("You have issued <b>" + self.additionalIssue().toString() + "</b> additional quantity on your asset <b>"
           + self.asset().ASSET + "</b>. It may take a bit for this to reflect.");
-    });
+      }
+    );
   }
   
   self.show = function(address, divisible, asset, resetForm) {
@@ -265,16 +275,22 @@ function TransferAssetModalViewModel() {
 
   self.doAction = function() {
     //do the transfer (zero quantity issuance to the specified address)
-    multiAPIConsensus("create_issuance",
-      {source: self.address(), quantity: 0, asset: self.asset().ASSET, divisible: self.asset().DIVISIBLE,
-       description: self.asset().description(), callable_: self.asset().CALLABLE, call_date: self.asset().CALLDATE,
-       call_price: self.asset().CALLPRICE, transfer_destination: self.destAddress(),
-       multisig: WALLET.getAddressObj(self.address()).PUBKEY},
-      function(unsignedTxHex, numTotalEndpoints, numConsensusEndpoints) {
-        WALLET.signAndBroadcastTx(self.address(), unsignedTxHex);
+    WALLET.doTransaction(self.address(), "create_issuance",
+      { source: self.address(),
+        quantity: 0,
+        asset: self.asset().ASSET,
+        divisible: self.asset().DIVISIBLE,
+        description: self.asset().description(),
+        callable_: self.asset().CALLABLE,
+        call_date: self.asset().CALLDATE,
+        call_price: self.asset().CALLPRICE,
+        transfer_destination: self.destAddress()
+      },
+      function() {
         self.shown(false);
         bootbox.alert("<b>" + self.asset().ASSET + "</b> has been transferred to <b>" + self.destAddress() + "</b>. It may take a bit for this to reflect.");
-    });
+      }
+    );
   }
   
   self.show = function(sourceAddress, asset, resetForm) {
@@ -331,16 +347,22 @@ function ChangeAssetDescriptionModalViewModel() {
 
   self.doAction = function() {
     //to change the desc, issue with quantity == 0 and the new description in the description field
-    multiAPIConsensus("create_issuance",
-      {source: self.address(), quantity: 0, asset: self.asset().ASSET, divisible: self.asset().DIVISIBLE,
-       description: self.newDescription(), callable_: self.asset().CALLABLE, call_date: self.asset().CALLDATE,
-       call_price: self.asset().CALLPRICE, transfer_destination: null,
-       multisig: WALLET.getAddressObj(self.address()).PUBKEY},
-      function(unsignedTxHex, numTotalEndpoints, numConsensusEndpoints) {
-        WALLET.signAndBroadcastTx(self.address(), unsignedTxHex);
+    WALLET.doTransaction(self.address(), "create_issuance",
+      { source: self.address(),
+        quantity: 0,
+        asset: self.asset().ASSET,
+        divisible: self.asset().DIVISIBLE,
+        description: self.newDescription(),
+        callable_: self.asset().CALLABLE,
+        call_date: self.asset().CALLDATE,
+        call_price: self.asset().CALLPRICE,
+        transfer_destination: null
+      },
+      function() {
         self.shown(false);
         bootbox.alert("Your asset's description has been changed. It may take a bit for this to reflect.");
-    });
+      }
+    );
   }
   
   self.show = function(address, asset, resetForm) {
@@ -420,17 +442,18 @@ function PayDividendModalViewModel() {
 
   self.doAction = function() {
     //do the additional issuance (specify non-zero quantity, no transfer destination)
-    multiAPIConsensus("create_dividend",
-      {source: self.address(), quantity_per_unit: self.qtyPerUnit() * UNIT,
-       share_asset: self.asset().ASSET, 
-       multisig: WALLET.getAddressObj(self.address()).PUBKEY},
-      function(unsignedTxHex, numTotalEndpoints, numConsensusEndpoints) {
-        WALLET.signAndBroadcastTx(self.address(), unsignedTxHex);
+    WALLET.doTransaction(self.address(), "create_dividend",
+      { source: self.address(),
+        quantity_per_unit: self.qtyPerUnit() * UNIT,
+        share_asset: self.asset().ASSET
+      },
+      function() {
         self.shown(false);
         bootbox.alert("You have paid a dividend of <b>" + self.qtyPerUnit().toString()
           + " XCP</b> per outstanding unit to holders of asset <b>" + self.asset().ASSET
           + "</b>. It may take a bit for this to reflect.");
-    });
+      }
+    );
   }
   
   self.show = function(address, asset, resetForm) {

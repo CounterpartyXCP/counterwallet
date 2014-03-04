@@ -1,0 +1,21 @@
+#themeSelector, #langSelector {
+    padding-left: 14px;
+}
+.themeBox {
+  box-sizing: border-box;
+  display: inline-block;
+  height: 18px;
+  width: 18px;
+}
+.themeBoxStyle0 {
+    background-color:#4E463F;
+}
+.themeBoxStyle1 {
+    background-color:#3A4558;
+}
+.themeBoxStyle2 {
+    background-color:#fff;
+}
+.themeBoxStyle3 {
+    background-color:#f78c40;
+}

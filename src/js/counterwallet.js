@@ -2,8 +2,17 @@
  * GLOBAL STATE
  ***********/
 var PREFERENCES = {}; //set when logging in
-var IS_DEV = qs("dev") && qs("dev") != '0' ? true : false;
-var USE_TESTNET = qs("testnet") && qs("testnet") != '0' ? true : false;
+
+//Allow the site root to specify "dev" and "testnet" parameters...
+var IS_DEV = location.pathname == "/" && qs("dev") && qs("dev") != '0' ? true : false;
+var USE_TESTNET = location.pathname == "/" && qs("testnet") && qs("testnet") != '0' ? true : false;
+//after getting these settings, clear the query string so that our hash-based AJAX navigation works after logging in...
+if(IS_DEV || USE_TESTNET) {
+  //history.replaceState is NOT supported on IE 9...ehh
+  assert($.layout.className !== 'msie9',
+    "Use of 'dev' or 'testnet' flags NOT supported on IE 9, due to lack of history.replaceState() support.");
+  history.replaceState({}, '', '/');
+}
 
 //Setup hosts to use
 var counterwalletd_urls = null;
@@ -17,13 +26,13 @@ if(!IS_DEV) { //Production setup
 }
 counterwalletd_urls = shuffle(counterwalletd_urls); //randomly shuffle the list to decide the server try order...
 var counterwalletd_base_urls = jQuery.map(counterwalletd_urls, function(element) {
-  return jQuery(element);
+  return element;
 });
 var counterwalletd_api_urls = jQuery.map(counterwalletd_urls, function(element) {
-  return jQuery(element) + (USE_TESTNET ? '/_t_api' : '/_api');
+  return element + (USE_TESTNET ? '/_t_api' : '/_api');
 });
 var counterwalletd_insight_api_urls = jQuery.map(counterwalletd_urls, function(element) {
-  return jQuery(element) + (USE_TESTNET ? '/_t_insight_api' : '/_insight_api');
+  return element + (USE_TESTNET ? '/_t_insight_api' : '/_insight_api');
 });
 
 var BLOCKEXPLORER_URL = "http://live.bitcore.io";
@@ -35,6 +44,7 @@ if(USE_TESTNET) {
 /***********
  * CONSTANTS
  ***********/
+var GOOGLE_ANALYTICS_UAID = !IS_DEV ? (!USE_TESTNET ? 'UA-47404711-2' : 'UA-47404711-4') : null;
 var MAX_ADDRESSES = 20; //totall arbitrary :)
 var MAX_INT = Math.pow(2, 63) - 1;
 var UNIT = 100000000; //# satoshis in whole
@@ -121,7 +131,7 @@ $(document).ready(function() {
   //Set up form validation
   //$("input,select,textarea").not("[type=submit]").jqBootstrapValidation();
   
-  //Reject cruddy old browsers
+  //Reject cruddy old browsers (we need IE v9 and higher!)
   $.reject({  
     reject: {
       msie5: true, //die die die!

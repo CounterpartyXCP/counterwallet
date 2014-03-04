@@ -204,7 +204,7 @@ function BuySellWizardViewModel() {
   }, self);
   self.assetPair = ko.computed(function() {
     if(!self.buyAsset() || !self.sellAsset()) return null;
-    var pair = WALLET.assetsToAssetPair(self.buyAsset(), self.sellAsset());
+    var pair = assetsToAssetPair(self.buyAsset(), self.sellAsset());
     return pair; //2 element array, as [baseAsset, quoteAsset]
   }, self);
   self.dispAssetPair = ko.computed(function() {
@@ -505,18 +505,18 @@ function BuySellWizardViewModel() {
           var buyAmount = normalizeAmount(self.selectedBuyAmount(), self.buyAssetIsDivisible());
           var sellAmount = normalizeAmount(self.selectedSellAmount(), self.sellAssetIsDivisible());
 
-          multiAPIConsensus("create_order",
+          WALLET.doTransaction(self.selectedAddress(), "create_order",
             {source: self.selectedAddress(),
              give_quantity: sellAmount, give_asset: self.sellAsset(),
              get_quantity: buyAmount, get_asset: self.buyAsset(),
-             expiration: 10, /* go with the default fee required and provided */ 
-             multisig: WALLET.getAddressObj(self.selectedAddress()).PUBKEY},
-            function(unsignedTxHex, numTotalEndpoints, numConsensusEndpoints) {
-              WALLET.signAndBroadcastTx(self.selectedAddress(), unsignedTxHex);
+             expiration: 10, /* go with the default fee required and provided */
+            },
+            function() {
               bootbox.alert("Your order for <b>" + self.selectedBuyAmount() + " " + self.selectedBuyAsset() + "</b> has been placed."
                + " You will be notified when it fills.");
               checkURL(); //reset the form and take the user back to the first tab by just refreshing the page
-          });
+            }
+          );
         }
       }
     });
@@ -586,16 +586,13 @@ function BuySellWizardViewModel() {
           className: "btn-danger",
           callback: function() {
             //issue 0 to lock the asset
-            multiAPIConsensus("create_cancel",
-              {offer_hash: item['tx_hash'],
-               multisig: WALLET.getAddressObj(self.selectedAddress()).PUBKEY},
-              function(unsignedTxHex, numTotalEndpoints, numConsensusEndpoints) {
-                WALLET.signAndBroadcastTx(self.selectedAddress(), unsignedTxHex);
-                //remove order from the table
-                self.openOrders.remove(function(item) { return item.tx_index == order['tx_index']});
-                bootbox.alert("Your has been cancelled. We have removed the order from your open orders list,"
+            WALLET.doTransaction(self.selectedAddress(), "create_cancel",
+              { offer_hash: item['tx_hash'] },
+              function() {
+                bootbox.alert("Your order cancellation has been submitted"
                   + " but it may take a bit for this to formally reflect on the network.");
-            });
+              }
+            );
           }
         },
       }

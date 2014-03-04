@@ -206,7 +206,7 @@ function WalletViewModel() {
     //If you are requesting more than one balance, use retrieveBTCBalances instead
     fetchData(urlsWithPath(counterwalletd_insight_api_urls, '/addr/' + address),
       function(data, endpoint) {
-        return callback(parseInt($.parseJSON(data)['balanceSat']));
+        return callback(parseInt(data['balanceSat']));
       },
       errorHandler || defaultErrorHandler);
   }
@@ -215,9 +215,8 @@ function WalletViewModel() {
     //addresses is a list of one or more bitcoin addresses
     var balances = [];
     for(var i = 0; i < addresses.length; i++) {
-      self.retrieveBTCBalance(addresses[i],
+      fetchData(urlsWithPath(counterwalletd_insight_api_urls, '/addr/' + addresses[i]),
         function(data, endpoint) {
-          data = $.parseJSON(data);
           balances.push({
             'address': data['addrStr'],
             'balance': parseInt(data['balanceSat'])
@@ -233,7 +232,6 @@ function WalletViewModel() {
   self.retrieveNumPrimedTxouts = function(address, callback) {
     fetchData(urlsWithPath(counterwalletd_insight_api_urls, '/addr/' + address + '/utxo'),
       function(data, endpoint) {
-        data = $.parseJSON(data);
         var numSuitableUnspentTxouts = 0;
         var totalBalance = 0;
         for(var i=0; i < data.length; i++) {
@@ -252,22 +250,36 @@ function WalletViewModel() {
     });
   }
   
-  self.assetsToAssetPair = function(asset1, asset2) {
-    //NOTE: This MUST use the same logic/rules as counterwalletd's assets_to_asset_pair() function in lib/util.py
-    var base = null;
-    var quote = null;
-    if(asset1 == 'XCP' || asset2 == 'XCP') {
-        base = asset1 == 'XCP' ? asset1 : asset2;
-        quote = asset1 == 'XCP' ? asset2 : asset1;
-    } else if(asset1 == 'BTC' || asset2 == 'BTC') {
-        base = asset1 == 'BTC' ? asset1 : asset2;
-        quote = asset1 == 'BTC' ? asset2 : asset1;
-    } else {
-        base = asset1 < asset2 ? asset1 : asset2;
-        quote = asset1 < asset2 ? asset2 : asset1;
+  /////////////////////////
+  //Counterparty transaction-related
+  self.canDoTransaction = function(address) {
+    /* ensures that the specified address can perform a counterparty transaction */
+    if(self.getAddressObj(address).numPrimedTxouts() == 0) { //no primed txouts
+      if(self.getBalance(address, "BTC") == 0) {
+        bootbox.alert("Can't do this action as you have no BTC at this address, and Counterparty actions require a"
+          + " small amount of BTC to perform.<br/><br/>Please deposit some BTC into address <b>" + address + "</b> and try again.");
+        return false;
+      }
+      
+      //Otherwise, we DO have a balance, we just don't have any suitable primed outputs
+      PRIME_ADDRESS_MODAL.show(address);
+      PRIME_ADDRESS_MODAL.showNoPrimedInputsError(true);
+      return false;
     }
-    return [base, quote];
+    return true;
   }
+  
+  self.doTransaction = function(address, action, data, onSuccess) {
+    assert(data['multisig'] === undefined);
+    data['multisig'] = WALLET.getAddressObj(address).PUBKEY;
+    multiAPIConsensus(action, data,
+      function(unsignedTxHex, numTotalEndpoints, numConsensusEndpoints) {
+        WALLET.signAndBroadcastTx(address, unsignedTxHex);
+        //TODO: register this as a pending transaction 
+        return onSuccess();
+    });
+  }
+  
 }
 
 var WALLET = new WalletViewModel();

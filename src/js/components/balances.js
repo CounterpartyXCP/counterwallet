@@ -133,15 +133,16 @@ function SendModalViewModel() {
     var quantity = parseFloat(self.quantity());
     var rawQuantity = self.divisible() ? Math.round(quantity * UNIT) : parseInt(quantity);
 
-    multiAPIConsensus("create_send",
-      {source: self.address(), destination: self.destAddress(), quantity: rawQuantity, asset: self.asset(),
-       multisig: WALLET.getAddressObj(self.address()).PUBKEY},
-      function(unsignedTxHex, numTotalEndpoints, numConsensusEndpoints) {
-        WALLET.signAndBroadcastTx(self.address(), unsignedTxHex);
+    WALLET.doTransaction(self.address(), "create_send",
+      { source: self.address(),
+        destination: self.destAddress(),
+        quantity: rawQuantity,
+        asset: self.asset()
+      },
+      function() {
         bootbox.alert("Your send seemed to be success. It will take effect as soon as the network has processed it.");
       }
     );
-    
     self.shown(false);
   }
   
@@ -302,10 +303,15 @@ function SweepModalViewModel() {
     
     $.jqlog.log("Sweeping from: " + self.addressForPrivateKey() + " to " + self.destAddress() + " of amount "
       + normalizedAmount + " " + selectedAsset.ASSET);
+
+    //dont use WALLET.doTransaction for this...
     multiAPIConsensus("create_send", //can send both BTC and counterparty assets
-      {source: self.addressForPrivateKey(), destination: self.destAddress(),
-       quantity: amount,
-       asset: selectedAsset.ASSET, multisig: pubkey},
+      { source: self.addressForPrivateKey(),
+        destination: self.destAddress(),
+        quantity: amount,
+        asset: selectedAsset.ASSET,
+        multisig: pubkey
+      },
       function(unsignedTxHex, numTotalEndpoints, numConsensusEndpoints) {
         var sendTx = Bitcoin.Transaction.deserialize(unsignedTxHex);
         //Sign the TX inputs
@@ -320,6 +326,7 @@ function SweepModalViewModel() {
           'to': self.destAddress(),
           'normalized_amount': normalizedAmount
         });
+        //TODO: show this sweep in pending actions
         return callback();
       }, function(unmatchingResultsList) { //onConsensusError
         sendsComplete.push({
