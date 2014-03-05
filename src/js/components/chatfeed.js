@@ -118,65 +118,73 @@ function ChatFeedViewModel() {
     for(var i = 0; i < counterwalletd_base_urls.length; i++) {
       var socket = io.connect(counterwalletd_base_urls[i], {
         'max reconnection attempts': 5,
+        'try multiple transports': false,
         'force new connection': true, /* needed, otherwise socket.io will reuse the feed connection */
         //'reconnection limit': 100000,
         //'max reconnection attempts': Infinity,
         'resource': USE_TESTNET ? '_t_chat' : '_chat'
       });
-      socket.on('connect', function() {
-        $.jqlog.log('socket.io(chat): Connected to server: ' + url);
-      });
-      socket.on('emote', function (handle, text) {
-        $.jqlog.log("chat.emote(feed-"+i+"): handle: " + handle + ", text: " + text);
-        self.addLine('emote', handle, text);
-      });
-      socket.on('system', function (text) {
-        $.jqlog.log("chat.system(feed-"+i+"): text: " + text);
-        self.addLine('system', null, text);
-      });
-      socket.on('error', function (error_name, error_message) {
-        $.jqlog.log("chat.error(feed-"+i+"): " + error_name + " -- " + error_message);
-        
-        if(error_name == 'invalid_id') {
-          //attempt to self correct for this one....
-          if(!self.lastSetWalletIDAttempt || ((new Date).getTime() / 1000) - self.lastSetWalletIDAttempt > 10) {
-            // ^ avoid infinite loops :)
-            socket.emit('set_walletid', WALLET.identifier(), function(data) {
-              self.lastSetWalletIDAttempt = (new Date).getTime() / 1000;
-              self.addLine('system', null,
-                "Server side issue (invalid_id). Attempted to correct. Please try sending your chat line again.");  
-            });
-          }
-        } else {
-          if(error_name == 'too_fast')
-            self._nextMessageNotSent = true; //as the success callback is triggered after receiving the error callback
+      
+      function _chatSIOCallbacks(num) {
+        socket.on('connect', function() {
+          $.jqlog.log('socket.io(chat): Connected to server: ' + counterwalletd_base_urls[num]);
           
-          self.addLine('system', null, error_message);  
-        }
-      });
-      
-      //for each feed, we need to call over to "set_walletid"
-      socket.emit('set_walletid', WALLET.identifier(), function(data) {
-        console.log("here!1");
-        self.feedConnections.push(socket); //must be done before we do any chatting...
-      });
-      
-      //populate last messages into dict, and then sort by timestamp
-      socket.emit('get_lastlines', function(linesList) {
-        $.jqlog.log("chat.get_lastlines(feed-"+i+"): len = " + linesList.length
-          + "; initialLineSet.len = " + initialLineSet.length);
-        initialLineSet = initialLineSet.concat(linesList);
-        initialLineSetNumReplies += 1;
-        
-        if(initialLineSetNumReplies == counterwalletd_base_urls.length)  { //got lines for final feed
-          //collate linesets, ordered by when object property
-          initialLineSet.sort(function (a, b){ return ((a.when < b.when) ? -1 : ((a.when > b.when) ? 1 : 0)); })
-          //then add the lot to the chat window          
-          for(var i = 0; i < initialLineSet.length; i++) {
-            self.addLine('emote', initialLineSet[i]['handle'], initialLineSet[i]['text']);
+          if(socket.chatFeed_hasInitialized === undefined) {
+            //for each feed, we need to call over to "set_walletid"
+            socket.emit('set_walletid', WALLET.identifier(), function(data) {
+              self.feedConnections.push(socket); //must be done before we do any chatting...
+            });
+            
+            //populate last messages into dict, and then sort by timestamp
+            socket.emit('get_lastlines', function(linesList) {
+              $.jqlog.log("chat.get_lastlines(feed-"+num+"): len = " + linesList.length
+                + "; initialLineSet.len = " + initialLineSet.length);
+              initialLineSet = initialLineSet.concat(linesList);
+              initialLineSetNumReplies += 1;
+              
+              if(initialLineSetNumReplies == counterwalletd_base_urls.length)  { //got lines for final feed
+                //collate linesets, ordered by when object property
+                initialLineSet.sort(function (a, b){ return ((a.when < b.when) ? -1 : ((a.when > b.when) ? 1 : 0)); })
+                //then add the lot to the chat window          
+                for(var i = 0; i < initialLineSet.length; i++) {
+                  self.addLine('emote', initialLineSet[i]['handle'], initialLineSet[i]['text']);
+                }
+              }
+            });
+            socket.chatFeed_hasInitialized = true;
           }
-        }
-      });
+          
+        });
+        socket.on('emote', function (handle, text) {
+          $.jqlog.log("chat.emote(feed-"+num+"): handle: " + handle + ", text: " + text);
+          self.addLine('emote', handle, text);
+        });
+        socket.on('system', function (text) {
+          $.jqlog.log("chat.system(feed-"+num+"): text: " + text);
+          self.addLine('system', null, text);
+        });
+        socket.on('error', function (error_name, error_message) {
+          $.jqlog.log("chat.error(feed-"+num+"): " + error_name + " -- " + error_message);
+          
+          if(error_name == 'invalid_id') {
+            //attempt to self correct for this one....
+            if(!self.lastSetWalletIDAttempt || ((new Date).getTime() / 1000) - self.lastSetWalletIDAttempt > 10) {
+              // ^ avoid infinite loops :)
+              socket.emit('set_walletid', WALLET.identifier(), function(data) {
+                self.lastSetWalletIDAttempt = (new Date).getTime() / 1000;
+                self.addLine('system', null,
+                  "Server side issue (invalid_id). Attempted to correct. Please try sending your chat line again.");  
+              });
+            }
+          } else {
+            if(error_name == 'too_fast')
+              self._nextMessageNotSent = true; //as the success callback is triggered after receiving the error callback
+            
+            self.addLine('system', null, error_message);  
+          }
+        });
+      }
+      _chatSIOCallbacks(i); //closure
     }
   }
     
@@ -205,6 +213,7 @@ function ChatFeedViewModel() {
     // can get a bit wierd with keydown vs. keypress, etc...not work messing with it
     var text = $('#chatTextBox').val();
     $.jqlog.log("chat.sendLine: " + text);
+    assert(self.feedConnections.length >= 1, "Not connected to any chat servers!");
     self.feedConnections[0].emit('emote', text, function(data) {
       //SUCCESS CALLBACK: post it to our window (as the servers won't broadcast it back to us)
       if(self._nextMessageNotSent) {

@@ -3,13 +3,6 @@ function assert(condition, message) {
       throw message || "Assertion failed";
 }
 
-function qs(key) {
-  //http://stackoverflow.com/a/7732379
-  key = key.replace(/[*+?^$.\[\]{}()|\\\/]/g, "\\$&"); // escape RegEx meta chars
-  var match = location.search.match(new RegExp("[?&]"+key+"=([^&]+)(&|$)"));
-  return match && decodeURIComponent(match[1].replace(/\+/g, " "));
-}
-
 function numberWithCommas(x) {
   if(x === undefined || x === null) return x;
   //print a number with commas, as appropriate (http://stackoverflow.com/a/2901298)

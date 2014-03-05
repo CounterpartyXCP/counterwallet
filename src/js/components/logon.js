@@ -6,6 +6,9 @@ function LogonViewModel() {
   self.enteredPassphrase = ko.observable('');
   self.generatedPassphrase = ko.observable('');
   self.walletGenProgressVal = ko.observable(0);
+  
+  self.USE_TESTNET = USE_TESTNET;
+  self.IS_DEV = IS_DEV;
 
   self.walletGenProgressWidth = ko.computed(function(){
     return self.walletGenProgressVal() + '%';
@@ -87,6 +90,7 @@ function LogonViewModel() {
       }, function(jqXHR, textStatus, errorThrown) {
         //No server had the preferences
         $.jqlog.log("Stored preferences NOT found on server(s). Creating new...");
+        WALLET.isNew(true);
         
         //no stored preferences on any server(s) in the federation, go with the default...
         prefs = {

@@ -102,8 +102,8 @@ ko.bindingHandlers.datetimepicker = {
 ko.validation.rules['isValidBitcoinAddress'] = {
     validator: function (val, otherVal) {
         try {
-          var address = Bitcoin.Address(val);
-          return address.version == USE_TESTNET ? Bitcoin.network.testnet.addressVersion : Bitcoin.network.mainnet.addressVersion;
+          var address = new Bitcoin.Address(val);
+          return address.version == (USE_TESTNET ? Bitcoin.network.testnet.addressVersion : Bitcoin.network.mainnet.addressVersion);
         } catch (err) {
           return false;
         }
@@ -172,8 +172,9 @@ ko.bindingHandlers.select2 = {
             $(element).select2('destroy');
         });
     },
-    update: function(element) {
-        $(element).trigger('change');
+    update: function(element, valueAccessor, allBindingsAccessor, viewModel) {
+      //if(!allBindingsAccessor().options.length) $(element).select2("val", "");
+      $(element).trigger('change');
     }
 };
 

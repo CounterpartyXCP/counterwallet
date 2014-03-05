@@ -99,7 +99,7 @@ function PendingBTCPayViewModel(orderMatchID, BTCPayTxIndex, myAddr, btcDestAddr
   self.completeBTCPay = function() {
     //Pop up confirm dialog, and make BTC payment
     WALLET.retrieveBTCBalance(self.myAddr(), function(balance) {
-      if(balance < (self.btcAmount() * UNIT) + MIN_PRIME_BALANCE) {
+      if(balance < (denormalizeAmount(self.btcAmount())) + MIN_PRIME_BALANCE) {
         bootbox.alert("You do not have the required BTC balance to settle this order. Please deposit more BTC into address " + self.myAddr() + " and try again.");
         return;
       }
@@ -146,6 +146,8 @@ function ActivityFeedViewModel(initialActivityCount) {
   self.openOrders = ko.observableArray([]);
   self.lastUpdated = ko.observable(new Date());
   self.unackedNotificationCount = ko.observable(0);
+  self.USE_TESTNET = USE_TESTNET;
+  self.IS_DEV = IS_DEV;
 
   self.totalActivityCount = ko.computed(function() {
     return self.unackedNotificationCount() + self.pendingBTCPays().length; //don't list open orders as a red badge 

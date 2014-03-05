@@ -67,7 +67,8 @@ function BalanceHistoryViewModel() {
     } else {
       //contact server for balances across all addresses in our wallet that have this asset
       failoverAPI("get_balance_history", {asset: self.selectedAsset(), addresses: WALLET.getAddressesList(), }, function(data, endpoint) {
-        for(var i=0; i < data.length; i++) {
+        var i = null, j = null;
+        for(i=0; i < data.length; i++) {
           data[i]['name'] = PREFERENCES['address_aliases'][data[i]['name']] || data[i]['name'];
         }
         self.graphData = data;

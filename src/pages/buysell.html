@@ -11,7 +11,7 @@
   <div class="row"> <!-- row -->
     <article class="col-xs-12 col-sm-12 col-md-12 col-lg-12"> <!-- NEW WIDGET START -->
       <!-- Widget ID (each widget will need unique ID)-->
-      <div class="jarviswidget jarviswidget-color-blueLight" id="wid-id-balHistory" data-widget-editbutton="false" data-widget-deletebutton="false">
+      <div class="jarviswidget defaultWidgetColor" id="wid-id-buySellWizard" data-widget-editbutton="false" data-widget-deletebutton="false">
           <header>
             <span class="widget-icon"> <i class="fa fa-rocket"></i> </span>
             <h2>Make a Trade</h2>
@@ -86,13 +86,13 @@
                                     <div class="row" style="min-width:300px;max-width: 1000px;padding-bottom: 0px;">
                                         <div class="col-md-2"><span>From address:</span></div>
                                         <div class="col-md-10">
-                                            <select data-bind="options: availableAddressesWithBalance, optionsValue: 'ADDRESS', optionsText: 'SELECT_LABEL', select2: {  minimumResultsForSearch: 10, containerCssClass: 'addressSelect', escapeMarkup: function(m) { return m; } }, value: selectedAddress" data-placeholder="Enter address"></select>
+                                            <select id="buySellFromAddress" data-bind="options: availableAddressesWithBalance, optionsValue: 'ADDRESS', optionsText: 'SELECT_LABEL', select2: {  minimumResultsForSearch: 10, containerCssClass: 'addressSelect', escapeMarkup: function(m) { return m; } }, value: selectedAddress" data-placeholder="Enter address"></select>
                                             <span class="invalid" data-bind="validationMessage: selectedAddress"></span>
                                         </div>
                                     </div>
                                 </div>
                                 <div class="tab-pane" id="tab2">
-                                    <div data-bind="visible: currentTab() == 2 && currentMarketUnitPrice() && !overrideMarketPrice()" style="display:none">
+                                    <div data-bind="visible: currentTab() == 2 && currentMarketUnitPrice() && !overrideMarketPrice()" style="display:none;">
                                         <div class="row">
                                             <div class="col-md-12">
                                                 <span>You have <b><span class="sellColor" data-bind="text: totalBalanceAvailForSale"></span>
@@ -148,7 +148,7 @@
                                             </div>
                                         </div>
                                     </div>
-                                    <div class="row" data-bind="fadeVisibleInOnly: currentTab() == 2 && unitPrice() && selectedBuyAmount()" style="padding-bottom: 0px;">
+                                    <div class="row" data-bind="fadeVisibleInOnly: currentTab() == 2 && unitPrice() && selectedBuyAmount()" style="padding-bottom: 0px;margin-top:15px;">
                                         <div class="col-sm-12">
                                             <span data-bind="fadeVisible: currentMarketUnitPrice() && !overrideMarketPrice()">At the market rate,
                                                 your purchase of <b><span class="buyColor" data-bind="text: numberWithCommas(selectedBuyAmount())"></span>
@@ -232,7 +232,7 @@
 
   <div data-bind="fadeVisible: showPriceChart" class="row"> <!-- row -->
     <article class="col-xs-12 col-sm-12 col-md-12 col-lg-12"> <!-- NEW WIDGET START -->
-      <div class="jarviswidget jarviswidget-color-blueLight" id="wid-id-priceChart" data-widget-editbutton="false" data-widget-deletebutton="false">
+      <div class="jarviswidget defaultWidgetColor" id="wid-id-priceChart" data-widget-editbutton="false" data-widget-deletebutton="false">
         <header>
             <span class="widget-icon"> <i class="fa fa-bar-chart-o"></i> </span>
             <h2>Price History for <span data-bind="text: dispAssetPair"></span></h2>
@@ -288,7 +288,7 @@
 
   <div data-bind="fadeVisible: showOpenOrders" class="row"> <!-- row -->
     <article class="col-xs-12 col-sm-12 col-md-12 col-lg-12"> <!-- NEW WIDGET START -->
-      <div class="jarviswidget jarviswidget-color-blueLight" id="wid-id-openOrders" data-widget-editbutton="false" data-widget-deletebutton="false">
+      <div class="jarviswidget defaultWidgetColor" id="wid-id-openOrders" data-widget-editbutton="false" data-widget-deletebutton="false">
         <header>
             <span class="widget-icon"> <i class="fa fa-spinner"></i> </span>
             <h2>Your <span data-bind="text: dispAssetPair"></span> Open Orders for <span data-bind="text: dispSelectedAddressWithLabel"></span></h2>
@@ -316,7 +316,7 @@
                     <tbody data-bind="foreach: openOrders">
                         <tr>
                             <td><a target="_blank" data-bind="text: tx_index, attr: { href: !USE_TESTNET ? 'http://blockscan.com/tx.aspx?q=' + tx_index : null }"></a></td> <!-- link to block tx at blockscan -->
-                            <td data-bind="timeago: new Date(block_time * 1000)"></td> <!-- datetime formatted string -->
+                            <td data-bind="timeago: new Date(block_time * 1000)"></td>
                             <td data-bind="text: derivePendingOrderAssetAmount(get_asset, get_amount) + ' ' + get_asset"></td>
                             <td data-bind="text: derivePendingOrderAssetAmount(give_asset, give_amount) + ' ' + give_asset"></td>
                             <td><a target="_blank" data-bind="text: derivePendingOrderAssetPrice(get_asset, get_amount, give_asset, give_amount)"></a></td>
@@ -339,7 +339,7 @@
   
   <div data-bind="fadeVisible: showTradeHistory && tradeHistory().length > 0" class="row"> <!-- row -->
     <article class="col-xs-12 col-sm-12 col-md-12 col-lg-12"> <!-- NEW WIDGET START -->
-      <div class="jarviswidget jarviswidget-color-blueLight" id="wid-id-tradeChart" data-widget-editbutton="false" data-widget-deletebutton="false">
+      <div class="jarviswidget defaultWidgetColor" id="wid-id-tradeChart" data-widget-editbutton="false" data-widget-deletebutton="false">
         <header>
             <span class="widget-icon"> <i class="fa fa-table"></i> </span>
             <h2>Trade History for <span data-bind="text: dispAssetPair"></span></h2>
@@ -365,7 +365,7 @@
                     <tbody data-bind="foreach: tradeHistory">
                         <tr>
                             <td><a target="_blank" data-bind="text: block_index, attr: { href: BLOCKEXPLORER_URL + '/blocks?blockHeight=' + block_index }"></a></td> <!-- link to block tx at insight -->
-                            <td data-bind="text: moment(block_time * 1000).format('MMM Do YYYY, h:mm:ss a')"></td> <!-- datetime formatted string -->
+                            <td data-bind="text: moment(block_time).format('MMM Do YYYY, h:mm:ss a')"></td> <!-- datetime formatted string -->
                             <td><a target="_blank" data-bind="text: order_match_tx0_index, attr: { href: !USE_TESTNET ? 'http://blockscan.com/tx.aspx?q=' + order_match_tx0_index : null }"></a></td> <!-- link to TX at blockscan -->
                             <td><a target="_blank" data-bind="text: order_match_tx0_address, attr: { href: !USE_TESTNET ? 'http://blockscan.com/address.aspx?q=' + order_match_tx0_address : null }"></a></td> <!-- link to source addr at blockscan -->
                             <td><a target="_blank" data-bind="text: order_match_tx1_index, attr: { href: !USE_TESTNET ? 'http://blockscan.com/tx.aspx?q=' + order_match_tx1_index : null }"></a></td> <!-- link to TX at blockscan -->

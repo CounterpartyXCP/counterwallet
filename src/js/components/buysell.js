@@ -156,7 +156,7 @@ function BuySellWizardViewModel() {
     if(self.selectedSellAsset() == 'Other') return self.selectedSellAssetOther();
     return self.selectedSellAsset();
   }, self);
-
+  
   self.sellAssetIsDivisible = ko.computed(function() {
     if(!self.sellAsset() || !self.selectedAddress()) return null;
     return WALLET.getAddressObj(self.selectedAddress()).getAssetObj(self.sellAsset()).DIVISIBLE;
@@ -200,6 +200,7 @@ function BuySellWizardViewModel() {
     addressesWithBalance.sort(function(left, right) {
       return left.SELECT_LABEL == right.SELECT_LABEL ? 0 : (left.SELECT_LABEL < right.SELECT_LABEL ? -1 : 1)
     });
+    
     return addressesWithBalance;
   }, self);
   self.assetPair = ko.computed(function() {
@@ -346,11 +347,23 @@ function BuySellWizardViewModel() {
     });
     
     self.buyAsset.subscribe(function(newValue) {
+      self.selectedAddress(''); //clear it
       if(!newValue) return;
       failoverAPI("get_asset_info", [newValue], function(assetInfo, endpoint) {
         self.buyAssetIsDivisible(assetInfo['divisible']);
       });    
     });  
+
+    self.sellAsset.subscribe(function(newValue) {
+      self.selectedAddress(''); //clear it
+    });
+    
+    self.selectedAddress.subscribe(function(newValue) {
+      if(!newValue) $('#buySellFromAddress').select2("val", "");
+      //^ hack to get the select box to TOTALLY clear selectedAddress is cleared
+      // ...without this, it will clear the options listing, but previously selected option (if any) will stay
+      // visible as selected, even though there are no options
+    });
 
     //RELEASE the WIZARD (Ydkokw2Y-rc)
     $('#buySellWizard').bootstrapWizard({
@@ -395,7 +408,7 @@ function BuySellWizardViewModel() {
             self.currentTab(current); //set this here so we don't get a flash with content before we load the market price data
           });
           
-          failoverAPI("get_trade_history", [self.buyAsset(), self.sellAsset()], function(data, endpoint) {
+          failoverAPI("get_trade_history_within_dates", [self.buyAsset(), self.sellAsset()], function(data, endpoint) {
             self.tradeHistory(data);
             if(data.length) {
               runDataTables('#tradeHistory', true);
@@ -502,14 +515,17 @@ function BuySellWizardViewModel() {
           }
         } else if(index == 3) {
           //user has confirmed -- submit the order to the server
-          var buyAmount = normalizeAmount(self.selectedBuyAmount(), self.buyAssetIsDivisible());
-          var sellAmount = normalizeAmount(self.selectedSellAmount(), self.sellAssetIsDivisible());
+          var buyAmount = denormalizeAmount(self.selectedBuyAmount(), self.buyAssetIsDivisible());
+          var sellAmount = denormalizeAmount(self.selectedSellAmount(), self.sellAssetIsDivisible());
 
           WALLET.doTransaction(self.selectedAddress(), "create_order",
             {source: self.selectedAddress(),
-             give_quantity: sellAmount, give_asset: self.sellAsset(),
-             get_quantity: buyAmount, get_asset: self.buyAsset(),
-             expiration: 10, /* go with the default fee required and provided */
+             give_quantity: sellAmount,
+             give_asset: self.sellAsset(),
+             get_quantity: buyAmount,
+             get_asset: self.buyAsset(),
+             expiration: 10
+             /* go with the default fee required and provided */
             },
             function() {
               bootbox.alert("Your order for <b>" + self.selectedBuyAmount() + " " + self.selectedBuyAsset() + "</b> has been placed."

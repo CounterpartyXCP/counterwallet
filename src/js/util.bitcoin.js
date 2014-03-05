@@ -1,5 +1,13 @@
 function normalizeAmount(amount, divisible) {
-  return divisible ? Decimal.round(new Decimal(amount).div(UNIT), 8).toFloat() : amount;
+  //Converts from satoshi (int) to float (decimal form)
+  if(typeof(divisible)==='undefined') divisible = true;
+  return divisible ? Decimal.round(new Decimal(amount).div(UNIT), 8).toFloat() : parseInt(amount);
+}
+
+function denormalizeAmount(amount, divisible) {
+  //Converts from float (decimal form) to satoshi (int) 
+  if(typeof(divisible)==='undefined') divisible = true;
+  return divisible ? Decimal.round(new Decimal(amount).mul(UNIT), 8).toFloat() : parseInt(amount);
 }
 
 function assetsToAssetPair(asset1, asset2) {
@@ -56,25 +64,22 @@ function dumpScript(script) { /* orig from tx.js (public domain) */
     return out.join(' ');
 }
 
-function parseBCIUnspent(r) { /* orig from tx.js (public domain) */
-  var txs = r.unspent_outputs;
-  if (!txs)
-      throw 'Not a BCI format';
-
+function parseUnspentTxnsList(txs) { 
+  assert(txs);
   delete unspenttxs;
   var unspenttxs = {};
   var balance = Bitcoin.BigInteger.ZERO;
   for(var i = 0; i < txs.length; i++) {
       var o = txs[i];
-      var lilendHash = o.tx_hash;
+      var lilendHash = o.txid;
 
       //convert script back to BBE-compatible text
-      var script = dumpScript( new Bitcoin.Script(Bitcoin.convert.hexToBytes(o.script)) );
+      var script = dumpScript( new Bitcoin.Script(Bitcoin.convert.hexToBytes(o.scriptPubKey)) );
 
-      var value = new Bitcoin.BigInteger('' + o.value, 10);
+      var value = new Bitcoin.BigInteger('' + (o.amount * UNIT), 10);
       if (!(lilendHash in unspenttxs))
           unspenttxs[lilendHash] = {};
-      unspenttxs[lilendHash][o.tx_output_n] = {amount: value, scriptText: script, script: o.script};
+      unspenttxs[lilendHash][o.vout] = {amount: value, scriptText: script, script: o.scriptPubKey};
       balance = balance.add(value);
   }
   return {balance:balance, unspentTxs: unspenttxs};

@@ -130,17 +130,14 @@ function SendModalViewModel() {
   }
 
   self.doAction = function() {
-    var quantity = parseFloat(self.quantity());
-    var rawQuantity = self.divisible() ? Math.round(quantity * UNIT) : parseInt(quantity);
-
     WALLET.doTransaction(self.address(), "create_send",
       { source: self.address(),
         destination: self.destAddress(),
-        quantity: rawQuantity,
+        quantity: denormalizeAmount(parseFloat(self.quantity()), self.divisible()),
         asset: self.asset()
       },
       function() {
-        bootbox.alert("Your send seemed to be success. It will take effect as soon as the network has processed it.");
+        bootbox.alert("<b>Your funds were sent successfully.</b><br/><br/>The action will take effect as soon as the network has processed it.");
       }
     );
     self.shown(false);
@@ -148,7 +145,7 @@ function SendModalViewModel() {
   
   self.show = function(fromAddress, asset, balance, isDivisible, resetForm) {
     if(asset == 'BTC' && balance == null) {
-      return bootbox.alert("Cannot send BTC as we cannot currently get in touch with the server to get your balance");
+      return bootbox.alert("Cannot send BTC as we cannot currently get in touch with the server to get your balance.");
     }
     assert(balance, "Balance is null or undefined?");
     
@@ -297,7 +294,7 @@ function SweepModalViewModel() {
       return asset == item.ASSET;
     });
     var amount = adjustedBTCAmount || selectedAsset.BALANCE;
-    var normalizedAmount = ((adjustedBTCAmount ? normalizeAmount(adjustedBTCAmount, true) : null)
+    var normalizedAmount = ((adjustedBTCAmount ? normalizeAmount(adjustedBTCAmount) : null)
       || selectedAsset.NORMALIZED_BALANCE);
     assert(selectedAsset);
     
@@ -412,7 +409,7 @@ function SweepModalViewModel() {
       //Also get the BTC balance at this address and put at head of the list
       WALLET.retrieveBTCBalance(address, function(balance) {
         if(balance) {
-          self.availableAssetsToSweep.unshift(new SweepAssetInDropdownItemModel("BTC", balance, normalizeAmount(balance, true)));
+          self.availableAssetsToSweep.unshift(new SweepAssetInDropdownItemModel("BTC", balance, normalizeAmount(balance)));
         }
       });
     });
@@ -543,25 +540,26 @@ function PrimeAddressModalViewModel() {
   self.doAction = function() {
     //construct a transaction
     var sendTx = new Bitcoin.Transaction();
-    var bciUnspent = parseBCIUnspent(self.rawUnspentTxResponse);
+    var unspent = parseUnspentTxnsList(self.rawUnspentTxResponse).unspentTxs;
     var inputAmount = (self.numNewPrimedTxouts() * MIN_PRIME_BALANCE) + MIN_FEE; //in satoshi
     var inputAmountRemaining = inputAmount;
     var txHash = null, txOutputN = null, txIn = null;
     //Create inputs
-    for(txHash in bciUnspent.unspentTxs) {
-      if (bciUnspent.unspentTxs.hasOwnProperty(txHash)) {
-        for (txOutputN in bciUnspent.unspentTxs[txHash]) {
-          if (bciUnspent.unspentTxs[txHash].hasOwnProperty(txOutputN)) {
+    for(txHash in unspent) {
+      if(inputAmountRemaining <= 0)
+        break;
+      if (unspent.hasOwnProperty(txHash)) {
+        for (txOutputN in unspent[txHash]) {
+          if (unspent[txHash].hasOwnProperty(txOutputN)) {
             txIn = new Bitcoin.TransactionIn({
               outpoint: {
                 hash: txHash,
-                index: txOutputN
-              },
-              script: new Bitcoin.Script(bciUnspent.unspentTxs[txHash][txOutputN]['script']),
-              sequence: 4294967295
+                index: parseInt(txOutputN)
+              }
             });
             sendTx.addInput(txIn);
-            inputAmountRemaining -= bciUnspent.unspentTxs[txHash][txOutputN]['amount'];
+            sendTx.ins[0].script = Bitcoin.Script.fromHex(unspent[txHash][txOutputN]['script']);
+            inputAmountRemaining -= unspent[txHash][txOutputN]['amount'];
             if(inputAmountRemaining <= 0)
               break;
           }
@@ -570,7 +568,7 @@ function PrimeAddressModalViewModel() {
     }
     if(inputAmountRemaining > 0) {
       bootbox.alert("Insufficient confirmed bitcoin balance to prime your account (require "
-        + normalizeAmount(inputAmountRemaining, true) + " BTC @ 1 confirm or more)");
+        + normalizeAmount(inputAmountRemaining) + " BTC @ 1 confirm or more)");
       return;
     }
     
@@ -596,11 +594,15 @@ var SIGN_MESSAGE_MODAL = new SignMessageModalViewModel();
 var PRIME_ADDRESS_MODAL = new PrimeAddressModalViewModel();
 
 $(document).ready(function() {
+  ko.applyBindings({}, document.getElementById("gettingStartedNotice"));
   ko.applyBindingsWithValidation(CREATE_NEW_ADDRESS_MODAL, document.getElementById("createNewAddressModal"));
   ko.applyBindingsWithValidation(SEND_MODAL, document.getElementById("sendModal"));
   ko.applyBindingsWithValidation(SWEEP_MODAL, document.getElementById("sweepModal"));
   ko.applyBindingsWithValidation(SIGN_MESSAGE_MODAL, document.getElementById("signMessageModal"));
   ko.applyBindingsWithValidation(PRIME_ADDRESS_MODAL, document.getElementById("primeAddressModal"));
+  
+  //Refresh BTC balances
+  WALLET.refreshBTCBalances(false);
 });
 
 $('#createNewAddress').click(function() {

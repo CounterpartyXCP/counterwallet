@@ -8,20 +8,18 @@
 
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 
-    <!-- Basic Styles -->
+    <!-- Basic Stylessheets -->
     <link rel="stylesheet" type="text/css" media="screen" href="css/bootstrap.min.css">
     <link rel="stylesheet" type="text/css" media="screen" href="css/font-awesome.min.css">
-    <!-- SmartAdmin Styles : Please note (smartadmin-production.css) was created using LESS variables -->
+    <!-- SmartAdmin Styles -->
     <link rel="stylesheet" type="text/css" media="screen" href="css/smartadmin-production.css">
     <link rel="stylesheet" type="text/css" media="screen" href="css/smartadmin-skins.css">
-    <!-- Enabled SmartAdmin plugin styles -->
     <!-- Counterwallet plugin styles -->
     <link rel="stylesheet" href="xcp/extcss/jquery.reject.css">
     <link rel="stylesheet" href="xcp/extcss/jquery.keyboard.css">
     <link rel="stylesheet" href="xcp/extcss/bootstrap-datetimepicker.css">
-    
     <!-- Counterwallet custom styles -->
-    <link rel="stylesheet" type="text/css" media="screen" href="xcp/css/default.css">
+    <link rel="stylesheet" href="xcp/css/default.css" type="text/css" media="screen">
     <link rel="stylesheet" href="xcp/css/components/misc_ui.css">
     <link rel="stylesheet" href="xcp/css/components/logon.css">
     <link rel="stylesheet" href="xcp/css/components/chatfeed.css">
@@ -45,6 +43,32 @@
     <!-- iOS web-app metas : hides Safari UI Components and Changes Status Bar Appearance -->
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black">
+    
+    <script>
+        function qs(key) {
+          //http://stackoverflow.com/a/7732379
+          key = key.replace(/[*+?^$.\[\]{}()|\\\/]/g, "\\$&"); // escape RegEx meta chars
+          var match = location.search.match(new RegExp("[?&]"+key+"=([^&]+)(&|$)"));
+          return match && decodeURIComponent(match[1].replace(/\+/g, " "));
+        }
+    
+        //Allow the site root to specify "dev" and "testnet" parameters...
+        var IS_DEV = location.pathname == "/" && qs("dev") && qs("dev") != '0' ? true : false;
+        var USE_TESTNET = location.pathname == "/" && qs("testnet") && qs("testnet") != '0' ? true : false;
+    
+        ////////////////////////////
+        //ROLLBAR SETUP
+        if(!IS_DEV) {
+            var _rollbarConfig = {
+                accessToken: "30d23b5d51244169a98fc922f0d1b940",
+                captureUncaught: true,
+                payload: {
+                    environment: USE_TESTNET ? "testnet" : "mainnet"
+                }
+            };
+            !function(a,b){function c(b){this.shimId=++f,this.notifier=null,this.parentShim=b,this.logger=function(){},a.console&&void 0===a.console.shimId&&(this.logger=a.console.log)}function d(b){var d=c;return e(function(){if(this.notifier)return this.notifier[b].apply(this.notifier,arguments);var c=this,e="scope"===b;e&&(c=new d(this));var f=Array.prototype.slice.call(arguments,0),g={shim:c,method:b,args:f,ts:new Date};return a._rollbarShimQueue.push(g),e?c:void 0})}function e(a,b){return b=b||this.logger,function(){try{return a.apply(this,arguments)}catch(c){b("Rollbar internal error:",c)}}}var f=0;c.init=function(a,b){var d=b.globalAlias||"Rollbar";if("object"==typeof a[d])return a[d];a._rollbarShimQueue=[],b=b||{};var f=new c;return e(function(){if(f.configure(b),b.captureUncaught){var c=a.onerror;a.onerror=function(){f.uncaughtError.apply(f,arguments),c&&c.apply(a,arguments)}}return a[d]=f,f},f.logger)()},c.prototype.loadFull=function(a,b,c,d){var f=e(function(){var a=b.createElement("script"),e=b.getElementsByTagName("script")[0];a.src=d.rollbarJsUrl,a.async=!c,a.onload=g,e.parentNode.insertBefore(a,e)},this.logger),g=e(function(){if(void 0===a._rollbarPayloadQueue)for(var b,c,d,e,f=new Error("rollbar.js did not load");b=a._rollbarShimQueue.shift();)for(d=b.args,e=0;e<d.length;++e)if(c=d[e],"function"==typeof c){c(f);break}},this.logger);e(function(){c?f():a.addEventListener?a.addEventListener("load",f,!1):a.attachEvent("onload",f)},this.logger)()};for(var g="log,debug,info,warn,warning,error,critical,global,configure,scope,uncaughtError".split(","),h=0;h<g.length;++h)c.prototype[g[h]]=d(g[h]);var i="//d37gvrvc0wt4s1.cloudfront.net/js/v1.0/rollbar.min.js";_rollbarConfig.rollbarJsUrl=_rollbarConfig.rollbarJsUrl||i;var j=c.init(a,_rollbarConfig);j.loadFull(a,b,!1,_rollbarConfig)}(window,document);
+        }   
+    </script>
   </head>
   <body class="fixed-header fixed-ribbon fixed-navigation smart-style-2"> <!-- default to ultra light theme (smart-style-2) -->
     <!-- possible classes: minified, fixed-ribbon, fixed-header, fixed-width-->
@@ -57,6 +81,7 @@
         <span id="activity" class="activity-dropdown">
             <i class="fa fa-user"></i><b data-bind="text: totalActivityCount" class="badge"></b>
         </span>
+
         <!-- AJAX-DROPDOWN : control this dropdown height, look and feel from the LESS variable file -->
         <div class="ajax-dropdown">
             <div class="btn-group btn-group-justified" data-toggle="buttons">
@@ -125,8 +150,10 @@
                 </ul>
             </li>
         </ul> <!-- end theme selection -->
+        
+        <span id="noticeDevMode" data-bind="visible: IS_DEV" class="label label-warning pull-right" style="display:none;margin-left:10px;padding: 5px;position:relative;top:15px"><i class="fa-fw fa fa-warning"></i>&nbsp;Dev Mode Enabled</span>
+        <span id="noticeTestnet" data-bind="visible: USE_TESTNET" class="label label-info pull-right" style="display:none;margin-left:10px;padding: 5px;position:relative;top:15px"><i class="fa-fw fa fa-info"></i>&nbsp;Testnet Enabled</span>
       </div> <!-- end pulled right: nav area -->
-
     </header> <!-- END HEADER -->
 
     <!-- Left panel : Navigation area -->
@@ -199,7 +226,11 @@
       <div id="form-well" style="margin-top:40px">
         <div class="panel panel-info">
           <div class="panel-heading">
-            <h3 class="panel-title"><b>Log Into Your Wallet</b></h3>
+            <h3 class="panel-title">
+              <b>Log Into Your Wallet</b>
+              <span data-bind="fadeVisibleInOnly: IS_DEV" class="label label-warning pull-right" style="display:none;margin-left:5px;padding: 5px;"><i class="fa-fw fa fa-warning"></i>&nbsp;Dev Mode Enabled</span>
+              <span data-bind="fadeVisibleInOnly: USE_TESTNET" class="label label-info pull-right" style="display:none;margin-left:5px;padding: 5px;"><i class="fa-fw fa fa-info"></i>&nbsp;Testnet Enabled</span>
+            </h3>
           </div>
           <div class="panel-body">
             <form class="form-inline" role="form">
@@ -257,7 +288,7 @@
           <div class="col-sm-4 col-md-4">
             <h4 style="margin-bottom:10px"><i class="fa fa-lock"></i> Secure and predictable.</h4>
             <p>Counterwallet is an online <a href="https://en.bitcoin.it/wiki/Deterministic_wallet">deterministic wallet</a>. 
-            Your passphrase is turned into a number which is then turned into Bitcoin Addresses. 
+            Your passphrase is turned into a number which is then turned into Bitcoin addresses. 
             </p>
             
             <p>Your passphrase is your wallet access and wallet backup.</p> 
@@ -268,13 +299,13 @@
               We don't store your funds (or your passphrase) locally or on our servers, only in your browser memory. 
               No trace is left on your device once you logout of your session.</p> 
             <p> 
-            Theives have fewer angles of attack with Counterwallet.
+            Thieves have fewer angles of attack with Counterwallet.
             </p>
           </div>
           <div class="col-sm-4 col-md-4">
             <h4 style="margin-bottom:10px"><i class="fa fa-bolt"></i> No backups required. Use from anywhere.</h4>
-            <p>Because your wallet is your passphase, you don't have to worry about encrypying or backing up any files.</p>
-            <p>You can use Counterwallet from any secure, trusted PC with internet access.</p> 
+            <p>Because your wallet is your passphase, you don't have to worry about encrypting or backing up any files.</p>
+            <p>You can use Counterwallet from any secure, trusted PC with Internet access.</p> 
           </div>
         </div>
       </div>
@@ -406,13 +437,12 @@
     <!-- socket.io -->
     <script src="xcp/extjs/socket.io.min.js"></script>
     <!-- knockout.js -->
-    <script src="http://knockoutjs.com/downloads/knockout-3.0.0.debug.js"></script>
-    <!--<script src="http://knockoutjs.com/downloads/knockout-3.0.0.js"></script>-->
+    <script src="xcp/extjs/knockout.js"></script>
     <script src="xcp/extjs/knockout-bootstrap.js"></script>
     <script src="xcp/extjs/knockout.x-editable.js"></script>
     <script src="xcp/extjs/knockout.validation.js"></script>
     <!-- highstock (which also includes highcharts) (minified)-->
-    <script src="http://code.highcharts.com/stock/1.3.9/highstock.js"></script>
+    <script src="xcp/extjs/highstock.js"></script>
 
     <!-- Other external libraries. -->
     <script src="xcp/extjs/qrcode.js"></script> 
@@ -439,6 +469,9 @@
     <!-- ^ unfortunately we have to mod the file itself, instead of dynamically override :( -->
 
     <script type="text/javascript">
+      ko.applyBindings({}, document.getElementById("noticeTestnet"));
+      ko.applyBindings({}, document.getElementById("noticeDevMode"));
+    
       //Google analytics (production only)
       if(GOOGLE_ANALYTICS_UAID) {
         var _gaq = _gaq || [];

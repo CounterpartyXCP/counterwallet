@@ -1,12 +1,11 @@
+
 /***********
- * GLOBAL STATE
+ * GLOBAL STATE AND SETUP
  ***********/
 var PREFERENCES = {}; //set when logging in
 
-//Allow the site root to specify "dev" and "testnet" parameters...
-var IS_DEV = location.pathname == "/" && qs("dev") && qs("dev") != '0' ? true : false;
-var USE_TESTNET = location.pathname == "/" && qs("testnet") && qs("testnet") != '0' ? true : false;
-//after getting these settings, clear the query string so that our hash-based AJAX navigation works after logging in...
+//if in dev or testnet mode (both of which are specified based on a URL querystring being present) clear the
+// query string so that our hash-based AJAX navigation works after logging in...
 if(IS_DEV || USE_TESTNET) {
   //history.replaceState is NOT supported on IE 9...ehh
   assert($.layout.className !== 'msie9',
@@ -18,9 +17,10 @@ if(IS_DEV || USE_TESTNET) {
 var counterwalletd_urls = null;
 //Note that with the socket.io feeds, we supply the path in the socketio connect() call
 if(!IS_DEV) { //Production setup
-  counterwalletd_urls = [ "https://cw01.counterparty.co", "https://cw02.counterparty.co", "https://cw03.counterparty.co" ];
+  //document.domain = "counterwallet.co"; //allow cross-subdomain access (e.g. www.counterwallet.co can AJAX to cw01.counterwallet.co)
+  counterwalletd_urls = [ "https://cw01.counterwallet.co", "https://cw02.counterwallet.co", "https://cw03.counterwallet.co" ];
 } else { //Development setup
-  counterwalletd_urls = [ "http://xcpdev01" ];
+  counterwalletd_urls = [ "https://xcpdev01" ];
   // ^ NOTE to developers: No need to modify the above, just insert an entry in your hosts file for xcpdev01
   // Just have a host entry for both xcpdev01 and testxcpdev01 going to the same server, which has a federated node setup running
 }
@@ -42,7 +42,7 @@ if(USE_TESTNET) {
 
 
 /***********
- * CONSTANTS
+ * GLOBAL CONSTANTS
  ***********/
 var GOOGLE_ANALYTICS_UAID = !IS_DEV ? (!USE_TESTNET ? 'UA-47404711-2' : 'UA-47404711-4') : null;
 var MAX_ADDRESSES = 20; //totall arbitrary :)
@@ -50,6 +50,7 @@ var MAX_INT = Math.pow(2, 63) - 1;
 var UNIT = 100000000; //# satoshis in whole
 var MIN_FEE = 10000; // in satoshis (== .0001 BTC)
 var MIN_PRIME_BALANCE = 50000; //in satoshis ... == .0005
+var ASSET_CREATION_FEE_XCP = 5; //in normalized XCP
 var ENTITY_NAMES = {
   'burns': 'Burn',
   'debits': 'Debit',
@@ -122,7 +123,7 @@ var BET_TYPES = {
 
 
 /***********
- * Primary site init
+ * PRIMARY SITE INIT
  ***********/
 $(document).ready(function() {
   //Set up logging (jqlog)

@@ -101,7 +101,7 @@ function CreateAssetModalViewModel() {
 
   self.doAction = function() {
     var quantity = parseFloat(self.quantity());
-    var rawQuantity = self.divisible() ? Math.round(quantity * UNIT) : parseInt(quantity);
+    var rawQuantity = denormalizeAmount(quantity, self.divisible());
     
     if(rawQuantity > MAX_INT) {
       bootbox.alert("The quantity desired to be issued for this asset is too high.");
@@ -114,8 +114,8 @@ function CreateAssetModalViewModel() {
     }
     
     //convert callDate + callPrice
-    var rawCallDate = self.callDate() ? self.callDate().getTime() / 1000 : null; //epoch time
-    var rawCallPrice = self.divisible() ? Math.round(parseFloat(self.callPrice()) * UNIT) : parseInt(self.callPrice());
+    var rawCallDate = self.callDate() ? parseInt(self.callDate().getTime() / 1000) : 0; //epoch ts
+    var rawCallPrice = self.callPrice() ? denormalizeAmount(self.callPrice(), self.divisible()) : 0;
 
     if(self.callable() && rawQuantity + rawCallPrice > MAX_INT) {
       bootbox.alert("The call price for this asset is too high.");
@@ -134,8 +134,8 @@ function CreateAssetModalViewModel() {
         transfer_destination: null
       },
       function() {
-        bootbox.alert("Your asset seemed to be created successfully. It will automatically appear under the \
-        appropriate address once the network has confirmed it, and your account will be deducted by 5 XCP.");
+        bootbox.alert("<b>Your asset was created successfully.</b><br/><br/>It will automatically appear under the \
+        appropriate address once the network has confirmed it, and your account will be deducted by <b>" + ASSET_CREATION_FEE_XCP + " XCP</b>.");
       }
     );
     self.shown(false);
@@ -186,7 +186,7 @@ function IssueAdditionalAssetModalViewModel() {
   
   self.rawAdditionalIssue = ko.computed(function() {
     if(!self.asset() || !isNumber(self.additionalIssue())) return null;
-    return (self.asset().DIVISIBLE ? parseFloat(self.additionalIssue()) * UNIT : parseInt(self.additionalIssue()))
+    return denormalizeAmount(self.additionalIssue(), self.asset().DIVISIBLE); 
   }, self);
 
   self.validationModel = ko.validatedObservable({
@@ -444,7 +444,7 @@ function PayDividendModalViewModel() {
     //do the additional issuance (specify non-zero quantity, no transfer destination)
     WALLET.doTransaction(self.address(), "create_dividend",
       { source: self.address(),
-        quantity_per_unit: self.qtyPerUnit() * UNIT,
+        quantity_per_unit: denormalizeAmount(self.qtyPerUnit()),
         share_asset: self.asset().ASSET
       },
       function() {

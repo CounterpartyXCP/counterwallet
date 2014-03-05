@@ -144,3 +144,26 @@ aside {
 .badge-inverse:hover {
   background-color: #1a1a1a;
 }
+
+
+/* Set default widget header color based on the chosen theme */
+
+body.smart-style-0 .defaultWidgetColor>header { /* simple grey = golden (yellow) pane */
+    background: #B09B5B;
+    color: #FFF;
+}
+
+body.smart-style-1 .defaultWidgetColor>header { /* dark elegance = lightRed pane */
+    background: #A65858;
+    color: #FFF;
+}
+
+body.smart-style-2 .defaultWidgetColor>header { /* ultra light = lightBlue pane */
+    background: #CCDADF;
+    color: #2b363c;
+}
+
+body.smart-style-3 .defaultWidgetColor>header { /* google skin = darkBlue (night sky) pane */
+    background: #4C4F53;
+    color: #FFF;
+}

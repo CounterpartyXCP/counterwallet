@@ -11,10 +11,17 @@
   </div>
 </div>
 
+<div id="gettingStartedNotice" data-bind="fadeVisibleInOnly: WALLET.isNew()" class="alert alert-success alert-block" style="display:none">
+    <a class="close" data-dismiss="alert" href="#">×</a>
+    <h4 class="alert-heading">Welcome!</h4>
+    We've created three addresses for you. You can always create more if need be. To start using the wallet, simply send some BTC or XCP to any one of them.<br/><br/> 
+    Beyond this, please check out our <a href="#" target="_blank">Counterwallet Getting Started guide</a> to learn more.
+</div>
+
 <section id="widget-grid" class="balancesContainer" data-bind="foreach: addresses"> <!-- widget grid -->
     <div class="row"> <!-- one row per widget in this case -->
       <article class="col-xs-12 col-sm-12 col-md-12 col-lg-12"> <!-- widget START -->
-        <div class="jarviswidget jarviswidget-color-blueLight" data-bind="attr: {'id': 'address-wid-' + $data.ADDRESS}" data-widget-deletebutton="false" data-widget-editbutton="false">
+        <div class="jarviswidget defaultWidgetColor" data-bind="attr: {'id': 'address-wid-' + $data.ADDRESS}" data-widget-deletebutton="false" data-widget-editbutton="false">
           <header>
             <span class="widget-icon"> <i class="fa fa-bars"></i> </span>
             <h2 class="jarviswidget-ctrls"><a href="#" data-bind="editable: label, editableOptions: { type: 'text', url: changeLabel, inputclass: 'addressNicknameEditable', placement: 'bottom', title: 'Enter a new nickname for this address' }" style="text-decoration:underline"></a></h2>

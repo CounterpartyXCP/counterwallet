@@ -155,7 +155,7 @@ function _getDestTypeFromMethod(method) {
       'get_chat_handle', 'store_chat_handle', 'get_preferences', 'store_preferences',
       'get_raw_transactions', 'get_balance_history', 'get_owned_assets',
       'get_market_price_summary', 'get_market_price_history', 'get_market_info',
-      'get_order_book', 'get_trade_history'].indexOf(method) >= 0) {
+      'get_order_book', 'get_trade_history', 'get_trade_history_within_dates'].indexOf(method) >= 0) {
     destType = "counterwalletd";
   }
   return destType;

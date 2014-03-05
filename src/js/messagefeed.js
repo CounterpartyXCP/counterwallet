@@ -63,7 +63,9 @@ function initMessageFeed() {
 }
 
 function parseMessageWithFeedGapDetection(event, data, callback) {
-  if(!data) return; //sometimes nginx can trigger this via its proxy handling it seems, with a blank payload
+  if(!data || (data.substring && data.startswith("<html>"))) return;
+  //^ sometimes nginx can trigger this via its proxy handling it seems, with a blank payload (or a html 502 Bad Gateway
+  // payload) -- especially if the server reloads, or something like that
   $.jqlog.info("parseMessageWithFeedGapDetection: " + data['_message_index'] + " -- " + LAST_MESSAGEIDX_RECEIVED);
   if(data['_message_index'] === undefined && IS_DEV) debugger;
   assert(data['_message_index'] && data['_message_index'] >= LAST_MESSAGEIDX_RECEIVED, "Invalid _message_index");

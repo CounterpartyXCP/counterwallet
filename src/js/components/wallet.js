@@ -9,6 +9,8 @@ function WalletViewModel() {
   self.identifier = ko.observable(null); //set when logging in
   self.addresses = ko.observableArray(); //AddressViewModel objects -- populated at login
   
+  self.isNew = ko.observable(false); //set to true if we can't find the user's prefs when logging on. if set, we'll show some intro text on their login, etc.
+  
   self.initBTCBalanceAutoRefresh = function() {
     assert(self.autoRefreshBTCBalances, "initBTCBalanceAutoRefresh called but autoRefreshBTCBalances != true");
     setInterval(function() { self.refreshBTCBalances(true) }, 60000 * 5); //every 5 minutes
@@ -230,13 +232,14 @@ function WalletViewModel() {
   }
   
   self.retrieveNumPrimedTxouts = function(address, callback) {
+    assert(callback, "callback must be defined");
     fetchData(urlsWithPath(counterwalletd_insight_api_urls, '/addr/' + address + '/utxo'),
       function(data, endpoint) {
         var numSuitableUnspentTxouts = 0;
         var totalBalance = 0;
         for(var i=0; i < data.length; i++) {
-          if(data[i]['value'] * UNIT >= MIN_PRIME_BALANCE && data[i]['confirmations'] >= 1) numSuitableUnspentTxouts++;
-          totalBalance += data[i]['value'] * UNIT;
+          if(denormalizeAmount(data[i]['amount']) >= MIN_PRIME_BALANCE && data[i]['confirmations'] >= 1) numSuitableUnspentTxouts++;
+          totalBalance += denormalizeAmount(data[i]['amount']);
         }
         //final number of primed txouts is lesser of either the # of txouts that are >= .0005 BTC, OR the floor(total balance / .0005 BTC)
         return callback(Math.min(numSuitableUnspentTxouts, Math.floor(totalBalance / MIN_PRIME_BALANCE)), data);
