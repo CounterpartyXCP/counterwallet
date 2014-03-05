@@ -17,7 +17,7 @@ if(IS_DEV || USE_TESTNET) {
 var counterwalletd_urls = null;
 //Note that with the socket.io feeds, we supply the path in the socketio connect() call
 if(!IS_DEV) { //Production setup
-  //document.domain = "counterwallet.co"; //allow cross-subdomain access (e.g. www.counterwallet.co can AJAX to cw01.counterwallet.co)
+  document.domain = "counterwallet.co"; //allow cross-subdomain access (e.g. www.counterwallet.co can AJAX to cw01.counterwallet.co)
   counterwalletd_urls = [ "https://cw01.counterwallet.co", "https://cw02.counterwallet.co", "https://cw03.counterwallet.co" ];
 } else { //Development setup
   counterwalletd_urls = [ "https://xcpdev01" ];

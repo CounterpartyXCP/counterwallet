@@ -53,8 +53,8 @@
         }
     
         //Allow the site root to specify "dev" and "testnet" parameters...
-        var IS_DEV = location.pathname == "/" && qs("dev") && qs("dev") != '0' ? true : false;
-        var USE_TESTNET = location.pathname == "/" && qs("testnet") && qs("testnet") != '0' ? true : false;
+        var IS_DEV = (location.pathname == "/" && qs("dev") && qs("dev") != '0' ? true : false);
+        var USE_TESTNET = ((location.pathname == "/" && qs("testnet") && qs("testnet") != '0') || location.hostname.indexOf('testnet') == 0 ? true : false);
     
         ////////////////////////////
         //ROLLBAR SETUP
