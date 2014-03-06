@@ -167,16 +167,24 @@ function WalletViewModel() {
   
   /////////////////////////
   //BTC-related
+  self.getBTCBlockHeight = function(callback) {
+    fetchData(urlsWithPath(counterwalletd_insight_api_urls, '/sync/'),
+      function(data, endpoint) {
+        if(data['syncPercentage'] < 100) {
+          $.jqlog.warn("Blockchain not fully synched in insight when trying to get BTC block height!");
+        }
+        return callback(data['blockChainHeight']);
+      }
+    );
+  }
+  
   self.broadcastSignedTx = function(signedTxHex) {
-    
-    //$.jqlog.log("RAW SIGNED Tx: " + TX.toBBE(sendTx));
     $.jqlog.log("RAW SIGNED HEX: " + signedTxHex);
     
     if(IS_DEV) {
       $.jqlog.log("SKIPPING SEND AS IS_DEV == 1");
       return;
     }
-    
     failoverAPI("transmit", {"tx_hex": signedTxHex, "is_signed": true},
       function(data, endpoint) {
         $.jqlog.log("Transaction broadcast from: " + endpoint);
@@ -186,13 +194,22 @@ function WalletViewModel() {
 
   self.signAndBroadcastTxRaw = function(key, unsignedTxHex) {
     //Sign and broadcast a multisig transaction that we got back from counterpartyd (as a raw unsigned tx in hex)
-    var bytes = Bitcoin.convert.hexToBytes(unsignedTxHex);
-    var sendTx = Bitcoin.Transaction.deserialize(bytes);
+    var sendTx = Bitcoin.Transaction.deserialize(unsignedTxHex), i = null;
     $.jqlog.log("RAW UNSIGNED HEX: " + unsignedTxHex);
     //$.jqlog.log("RAW UNSIGNED Tx: " + TX.toBBE(sendTx));
     
-    //Sign the inputs
-    for (var i = 0; i < sendTx.ins.length; i++) { //sign each input with the key
+    //Sanity check that the first regular output before the first data output is an address in our wallet
+    /*var address = null, addr = null;
+    for (i=0; i < sendTx.outs.length; i++) {
+      address = sendTx.outs[1].address;
+      address.version = !USE_TESTNET ? Bitcoin.network.mainnet.addressVersion : Bitcoin.network.testnetnet.addressVersion;
+      addr = address.toString();
+      if(USE_TESTNET && addr == TESTNET_UNSPENDABLE) continue;  //this is a testnet burn (skip validation of this out)
+      if(addr[0] != '1' || addr[0] != 'm' || addr[0] != 'n') continue; //not a pubkey hash address, skip
+    }*/
+    
+    //Sign the input(s)
+    for (i=0; i < sendTx.ins.length; i++) {
       sendTx.sign(i, key);
     }
     

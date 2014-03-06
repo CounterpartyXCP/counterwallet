@@ -46,8 +46,16 @@
     background: #eee;
 }
 
-p.formIntro, div.formIntro {
+p.formPadded, div.formPadded {
     margin: 15px 10px;
+}
+
+p.formPaddedBot, div.formPaddedBot {
+    margin: 0 10px 15px 10px;
+}
+
+.smart-form fieldset {
+    padding-top: 15px; /* reduce a bit */
 }
 
 /* LOGO AND ACTIVITY LOG INTERFACE MODIFICATIONS */

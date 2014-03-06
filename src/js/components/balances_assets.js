@@ -242,7 +242,6 @@ function IssueAdditionalAssetModalViewModel() {
   }  
 }
 
-
 function TransferAssetModalViewModel() {
   var self = this;
   self.shown = ko.observable(false);

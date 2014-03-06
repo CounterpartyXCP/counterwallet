@@ -36,6 +36,12 @@ function AssetViewModel(props) {
     SEND_MODAL.show(self.ADDRESS, self.ASSET, self.balance(), self.DIVISIBLE);
   };
   
+  self.testnetBurn = function () {
+    if(!self.balance()) { bootbox.alert("You have no available <b>" + self.ASSET + "</b> at address <b>" + self.ADDRESS + "</b> to burn."); return; }
+    if(!WALLET.canDoTransaction(self.ADDRESS)) return false;
+    TESTNET_BURN_MODAL.show(self.ADDRESS);
+  };
+  
   self.issueAdditional = function () {
     assert(self.isMine() && !self.isLocked());
     if(!WALLET.canDoTransaction(self.ADDRESS)) return false;

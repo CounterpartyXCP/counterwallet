@@ -587,11 +587,117 @@ function PrimeAddressModalViewModel() {
 }
 
 
+ko.validation.rules['isInBurnRange'] = {
+    validator: function (val, self) {
+      return parseFloat(val) > 0 && parseFloat(val) <= 1;
+    },
+    message: 'Amount must be between 0 and 1 BTC.'
+};
+ko.validation.rules['doesNotExceedBTCBalance'] = {
+    validator: function (val, self) {
+      return parseFloat(val) <= WALLET.getBalance(self.address(), 'BTC') - normalizeAmount(MIN_FEE);
+    },
+    message: 'The amount BTC entered exceeds your available balance.'
+};
+ko.validation.rules['doesNotExceedAlreadyBurned'] = {
+    validator: function (val, self) {
+      return !(parseFloat(val) > 1 - self.btcAlreadyBurned());
+    },
+    message: 'You can only burn 1 BTC total for any given address. Even over multiple burns, the total amount must be less than 1 BTC.'
+};
+ko.validation.registerExtenders();
+
+function TestnetBurnModalViewModel() {
+  var self = this;
+  self.shown = ko.observable(false);
+  self.address = ko.observable(''); // SOURCE address (supplied)
+
+  self.networkBlockHeight = ko.observable(0);
+  self.btcAlreadyBurned = ko.observable(null); // amount BTC already burned from this address (normalized)
+  
+  self.btcBurnAmount = ko.observable('').extend({
+    required: true,
+    //not using min, max and number validators here because they don't like things like ".4"
+    pattern: {
+      message: 'Must be a valid number',
+      params: '^[0-9]*\.?[0-9]{0,8}$' //not perfect ... will convert divisible assets to satoshi before sending to API
+    },
+    isInBurnRange: self,
+    doesNotExceedBTCBalance: self,
+    doesNotExceedAlreadyBurned: self
+  });
+  
+  self.amountXCPToBeCreated = ko.computed(function() { //normalized
+    if(!self.btcBurnAmount() || !parseFloat(self.btcBurnAmount())) return null;
+    return testnetBurnDetermineEarned(self.networkBlockHeight(), self.btcBurnAmount());
+  }, self);
+  
+  self.validationModel = ko.validatedObservable({
+    btcBurnAmount: self.btcBurnAmount
+  });
+
+  self.resetForm = function() {
+    self.btcBurnAmount('');
+    self.validationModel.errors.showAllMessages(false);
+  }
+  
+  self.submitForm = function() {
+    if (!self.validationModel.isValid()) {
+      self.validationModel.errors.showAllMessages();
+      return false;
+    }    
+    console.log("Submitting form...");
+    $('#testnetBurnModal form').submit();
+  }
+
+  self.doAction = function() {
+    //do the additional issuance (specify non-zero quantity, no transfer destination)
+    WALLET.doTransaction(self.address(), "create_burn",
+      { source: self.address(),
+        quantity: denormalizeAmount(self.btcBurnAmount()),
+      },
+      function() {
+        self.shown(false);
+        bootbox.alert("You have burned <b>" + self.btcBurnAmount() + " BTC</b> for approximately <b>"
+          + self.amountXCPToBeCreated() + " XCP</b>. It may take a bit for this to reflect.");
+      }
+    );
+  }
+  
+  self.show = function(address, resetForm) {
+    if(typeof(resetForm)==='undefined') resetForm = true;
+    if(resetForm) self.resetForm();
+    self.address(address);
+    
+    //get the current block height, to calculate the XCP burn payout
+    WALLET.getBTCBlockHeight(function(blockHeight) {
+      self.networkBlockHeight(blockHeight);
+      
+      //determine whether the selected address has burned before, and if so, how much
+      failoverAPI("get_burns", {filters: {'field': 'source', 'op': '==', 'value': address}}, function(data, endpoint) {
+        var totalBurned = 0;
+        for(var i=0; i < data.length; i++) {
+          totalBurned += data[i]['burned'];
+        }
+        
+        self.btcAlreadyBurned(normalizeAmount(totalBurned));
+        self.shown(true);
+      });
+    });
+  }  
+
+  self.hide = function() {
+    self.shown(false);
+  }  
+}
+
+
 var CREATE_NEW_ADDRESS_MODAL = new CreateNewAddressModalViewModel();
 var SEND_MODAL = new SendModalViewModel();
 var SWEEP_MODAL = new SweepModalViewModel();
 var SIGN_MESSAGE_MODAL = new SignMessageModalViewModel();
 var PRIME_ADDRESS_MODAL = new PrimeAddressModalViewModel();
+var TESTNET_BURN_MODAL = new TestnetBurnModalViewModel();
 
 $(document).ready(function() {
   ko.applyBindings({}, document.getElementById("gettingStartedNotice"));
@@ -600,6 +706,7 @@ $(document).ready(function() {
   ko.applyBindingsWithValidation(SWEEP_MODAL, document.getElementById("sweepModal"));
   ko.applyBindingsWithValidation(SIGN_MESSAGE_MODAL, document.getElementById("signMessageModal"));
   ko.applyBindingsWithValidation(PRIME_ADDRESS_MODAL, document.getElementById("primeAddressModal"));
+  ko.applyBindingsWithValidation(TESTNET_BURN_MODAL, document.getElementById("testnetBurnModal"));
   
   //Refresh BTC balances
   WALLET.refreshBTCBalances(false);

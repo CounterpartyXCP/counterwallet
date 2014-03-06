@@ -84,3 +84,15 @@ function parseUnspentTxnsList(txs) {
   }
   return {balance:balance, unspentTxs: unspenttxs};
 }
+
+
+function testnetBurnDetermineEarned(blockHeight, burned) {
+  //burned is the amount of BTC to burn (as a float -- normalized value)
+  //XCP amount returned is as a float -- normalized value
+  burned = denormalizeAmount(burned);
+  var total_time = TESTNET_BURN_END - TESTNET_BURN_START;
+  var partial_time = TESTNET_BURN_END - blockHeight;
+  var multiplier = 1000 * (1 + .5 * (partial_time / total_time)); //will be approximate
+  var earned = Decimal.round(new Decimal(burned).mul(multiplier), 8).toFloat();
+  return normalizeAmount(earned);
+}

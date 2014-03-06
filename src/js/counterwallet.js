@@ -18,7 +18,8 @@ var counterwalletd_urls = null;
 //Note that with the socket.io feeds, we supply the path in the socketio connect() call
 if(!IS_DEV) { //Production setup
   document.domain = "counterwallet.co"; //allow cross-subdomain access (e.g. www.counterwallet.co can AJAX to cw01.counterwallet.co)
-  counterwalletd_urls = [ "https://cw01.counterwallet.co", "https://cw02.counterwallet.co", "https://cw03.counterwallet.co" ];
+  //counterwalletd_urls = [ "https://cw01.counterwallet.co", "https://cw02.counterwallet.co", "https://cw03.counterwallet.co" ];
+  counterwalletd_urls = [ "https://cw01.counterwallet.co" ];
 } else { //Development setup
   counterwalletd_urls = [ "https://xcpdev01" ];
   // ^ NOTE to developers: No need to modify the above, just insert an entry in your hosts file for xcpdev01
@@ -120,6 +121,11 @@ var BET_TYPES = {
   2: "Equal",
   3: "Not Equal"
 };
+
+var MAINNET_UNSPENDABLE = '1CounterpartyXXXXXXXXXXXXXXXUWLpVr';
+var TESTNET_UNSPENDABLE = 'mvCounterpartyXXXXXXXXXXXXXXW24Hef';
+var TESTNET_BURN_START = 154908;
+var TESTNET_BURN_END = 4017708;
 
 
 /***********
