@@ -28,7 +28,7 @@ function BalanceHistoryViewModel() {
     self.ASSET_LASTCHANGE = self.selectedAsset();
     console.log("Balance history: Asset changed: " + self.selectedAsset());
     
-    if(self.selectedAsset() == "BTC") { //mainnet only (as we use blockchain.info for this and they don't support testnet')
+    if(self.selectedAsset() == "BTC") { //mainnet only (as we use blockchain.info for this and they don't support testnet)
       var addresses = WALLET.getAddressesList();
       self.graphData = [];
       
@@ -49,15 +49,17 @@ function BalanceHistoryViewModel() {
           }
           //End YQL
           
-          var addressName = PREFERENCES['address_aliases'][address] ? "<b>" + PREFERENCES['address_aliases'][address] + "</b> (" + address + ")" : address; 
+          var addressHash = hashToB64(address);
+          var addressName = PREFERENCES['address_aliases'][addressHash] ? "<b>" + PREFERENCES['address_aliases'][addressHash] + "</b> (" + address + ")" : address; 
           self.graphData.push({'name': addressName, 'data': decodedData});
           if(self.graphData.length == addresses.length) {
             self.doChart();
           }
         }).error(function(jqXHR, textStatus, errorThrown) {
           var address = /address%3D([A-Za-z0-9]+)%22/g.exec(jqXHR.url)[1];
+          var addressHash = hashToB64(address);
           $.jqlog.log( "Could not get BTC balance from blockchain for address " + address + ": " + errorThrown);
-          var addressName = PREFERENCES['address_aliases'][address] ? "<b>" + PREFERENCES['address_aliases'][address] + "</b> (" + address + ")" : address; 
+          var addressName = PREFERENCES['address_aliases'][addressHash] ? "<b>" + PREFERENCES['address_aliases'][addressHash] + "</b> (" + address + ")" : address; 
           self.graphData.push({'name': addressName, 'data': []});
           if(self.graphData.length == addresses.length) {
             self.doChart();
@@ -67,9 +69,10 @@ function BalanceHistoryViewModel() {
     } else {
       //contact server for balances across all addresses in our wallet that have this asset
       failoverAPI("get_balance_history", {asset: self.selectedAsset(), addresses: WALLET.getAddressesList(), }, function(data, endpoint) {
-        var i = null, j = null;
+        var i = null, j = null, addressHash = null;
         for(i=0; i < data.length; i++) {
-          data[i]['name'] = PREFERENCES['address_aliases'][data[i]['name']] || data[i]['name'];
+          addressHash = hashToB64(data[i]['name']);
+          data[i]['name'] = PREFERENCES['address_aliases'][addressHash] || data[i]['name'];
         }
         self.graphData = data;
         self.doChart();
@@ -216,7 +219,7 @@ function TransactionHistoryItemViewModel(data) {
 
 var AddressInDropdownItemModel = function(address, label) {
   this.ADDRESS = address;
-  this.LABEL = label + " (" + address + ")";
+  this.LABEL = '<b>' + label + "</b> (" + address + ")";
 };
     
 function TransactionHistoryViewModel() {
@@ -285,19 +288,5 @@ function TransactionHistoryViewModel() {
 }
 
 
-var BALANCE_HISTORY = new BalanceHistoryViewModel();
-var TXN_HISTORY = new TransactionHistoryViewModel();
-
-$(document).ready(function() {
-  ko.applyBindings(TXN_HISTORY, document.getElementById("wid-id-txnHistory"));
-  ko.applyBindings(BALANCE_HISTORY, document.getElementById("wid-id-balHistory"));
-
-  BALANCE_HISTORY.init();
-  TXN_HISTORY.init();
-  
-  $(window).bind("resize", TXN_HISTORY.dataTableResponsive);
-  $(window).on('hashchange', function() {
-    $(window).off("resize", TXN_HISTORY.dataTableResponsive);
-  });
-});
-
+/*NOTE: Any code here is only triggered the first time the page is visited. Put JS that needs to run on the
+  first load and subsequent ajax page switches in the .html <script> tag*/

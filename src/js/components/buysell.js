@@ -190,9 +190,11 @@ function BuySellWizardViewModel() {
     //Get a list of all of my available addresses with the specified sell asset balance
     var addresses = WALLET.getAddressesList(true);
     var addressesWithBalance = [];
-    var bal = null;
+    var bal = null, address = null;
     for(var i = 0; i < addresses.length; i++) {
+      address = WALLET.getAddressObj(addresses[i][0]);
       bal = WALLET.getBalance(addresses[i][0], self.sellAsset());
+      if(address.IS_WATCH_ONLY) continue; //don't list watch addresses, obviously
       if(bal) {
         addressesWithBalance.push(new AddressInDropdownItemModel(addresses[i][0], addresses[i][1], self.sellAsset(), bal));        
       } 
@@ -718,16 +720,5 @@ function BuySellWizardViewModel() {
 }
 
 
-var BUY_SELL = new BuySellWizardViewModel();
-
-$(document).ready(function() {
-  ko.applyBindings(BUY_SELL, document.getElementsByClassName("buySellGrid")[0]);
-  BUY_SELL.init();
-  
-  $(window).resize(BUY_SELL.dataTableResponsive);
-  $(window).on('hashchange', function() {
-    $(window).off("resize", BUY_SELL.dataTableResponsive);
-  });
-});
-
-
+/*NOTE: Any code here is only triggered the first time the page is visited. Put JS that needs to run on the
+  first load and subsequent ajax page switches in the .html <script> tag*/

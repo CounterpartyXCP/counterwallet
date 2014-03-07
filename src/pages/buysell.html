@@ -384,6 +384,18 @@
 </section>
 
 <script type="text/javascript">
-  loadScript("xcp/js/components/buysell.js", function() {});
   pageSetUp(); //init smartadmin featureset
+  loadScript("xcp/js/components/buysell.js", function() {
+    //This code is run on each visit to the page
+    window.BUY_SELL = new BuySellWizardViewModel();
+
+    ko.applyBindings(BUY_SELL, document.getElementsByClassName("buySellGrid")[0]);
+    
+    BUY_SELL.init();
+  
+    $(window).resize(BUY_SELL.dataTableResponsive);
+    $(window).on('hashchange', function() {
+      $(window).off("resize", BUY_SELL.dataTableResponsive);
+    });
+  });
 </script>

@@ -14,12 +14,15 @@ function ThemeSelectorViewModel() {
   self.selectedTheme = ko.observable(PREFERENCES['selected_theme'] || self.availableThemes()[2]);
   
   self.selectedTheme.subscribeChanged(function(newSelection, prevSelection) {
+    if(newSelection == prevSelection) return; //e.g., logging in with default theme settings
     $.jqlog.log("Changing theme from " + prevSelection['name'] + " to " + newSelection['name']);
     $('body').removeClass(prevSelection['styleName']);
     $('body').addClass(newSelection['styleName']);
-    //Update on the server
-    PREFERENCES['selected_theme'] = newSelection['id'];
-    multiAPI("store_preferences", [WALLET.identifier(), PREFERENCES]);
+    if(PREFERENCES['selected_theme'] != newSelection['id']) {
+      //Update on the server
+      PREFERENCES['selected_theme'] = newSelection['id'];
+      multiAPI("store_preferences", [WALLET.identifier(), PREFERENCES]);
+    }
   });
   
   self.changeTheme = function(newTheme) {
@@ -49,11 +52,14 @@ function LangSelectorViewModel() {
   self.selectedLang = ko.observable(PREFERENCES['selected_lang'] || self.availableLangs()[0]);
   
   self.selectedLang.subscribeChanged(function(newSelection, prevSelection) {
+    if(newSelection == prevSelection) return; //e.g., logging in with default theme settings
     $.jqlog.log("Changing lang from " + prevSelection['name'] + " to " + newSelection['name']);
     //TODO: Code to change the selected language
     //Update on the server
-    PREFERENCES['selected_lang'] = newSelection['id'];
-    multiAPI("store_preferences", [WALLET.identifier(), PREFERENCES]);
+    if(PREFERENCES['selected_lang'] != newSelection['id']) {
+      PREFERENCES['selected_lang'] = newSelection['id'];
+      multiAPI("store_preferences", [WALLET.identifier(), PREFERENCES]);
+    }
   });
   
   self.changeLang = function(newLang) {
@@ -70,8 +76,8 @@ function LangSelectorViewModel() {
   }
 }
 
-var THEME_SELECTOR = new ThemeSelectorViewModel();
-var LANG_SELECTOR = new LangSelectorViewModel();
+window.THEME_SELECTOR = new ThemeSelectorViewModel();
+window.LANG_SELECTOR = new LangSelectorViewModel();
 
 $(document).ready(function() {
   ko.applyBindings(THEME_SELECTOR, document.getElementById("themeSelector"));

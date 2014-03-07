@@ -469,16 +469,5 @@ function PayDividendModalViewModel() {
 }
 
 
-var CREATE_ASSET_MODAL = new CreateAssetModalViewModel();
-var ISSUE_ADDITIONAL_ASSET_MODAL = new IssueAdditionalAssetModalViewModel();
-var TRANSFER_ASSET_MODAL = new TransferAssetModalViewModel();
-var CHANGE_ASSET_DESCRIPTION_MODAL = new ChangeAssetDescriptionModalViewModel();
-var PAY_DIVIDEND_MODAL = new PayDividendModalViewModel();
-
-$(document).ready(function() {
-  ko.applyBindingsWithValidation(CREATE_ASSET_MODAL, document.getElementById("createAssetModal"));
-  ko.applyBindingsWithValidation(ISSUE_ADDITIONAL_ASSET_MODAL, document.getElementById("issueAdditionalAssetModal"));
-  ko.applyBindingsWithValidation(TRANSFER_ASSET_MODAL, document.getElementById("transferAssetModal"));
-  ko.applyBindingsWithValidation(CHANGE_ASSET_DESCRIPTION_MODAL, document.getElementById("changeAssetDescriptionModal"));
-  ko.applyBindingsWithValidation(PAY_DIVIDEND_MODAL, document.getElementById("payDividendModal"));
-});
+/*NOTE: Any code here is only triggered the first time the page is visited. Put JS that needs to run on the
+  first load and subsequent ajax page switches in the .html <script> tag*/

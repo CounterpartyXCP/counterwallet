@@ -1,24 +1,48 @@
+
+ko.validation.rules['isAddressSpecifiedIfRequired'] = {
+    validator: function (val, self) {
+      return self.forWatchOnly() ? val : true;
+    },
+    message: 'This field is required.'
+};
 ko.validation.rules['isValidAddressDescription'] = {
     validator: function (val, self) {
       return val.length <= 70; //arbitrary
     },
     message: 'Address description is more than 70 characters long.'
 };
+ko.validation.rules['addressIsNotInWallet'] = {
+    validator: function (val, self) {
+      if(!val) return true; //isAddressSpecifiedIfRequired will cover it
+      return !WALLET.getAddressObj(val);
+    },
+    message: 'This address is already in your wallet.'
+};
 ko.validation.registerExtenders();
 
 function CreateNewAddressModalViewModel() {
   var self = this;
   self.shown = ko.observable(false);
+
+  self.forWatchOnly = ko.observable(null);
+  self.watchAddress = ko.observable('').extend({
+    isAddressSpecifiedIfRequired: self,
+    isValidBitcoinAddressIfSpecified: self,
+    addressIsNotInWallet: self
+  });
   self.description = ko.observable('').extend({
     required: true,
     isValidAddressDescription: self,
   });
   
   self.validationModel = ko.validatedObservable({
-    description: self.description
+    description: self.description,
+    watchAddress: self.watchAddress
   });
 
   self.resetForm = function() {
+    self.forWatchOnly(null);
+    self.watchAddress('');
     self.description('');
     self.validationModel.errors.showAllMessages(false);
   }
@@ -33,26 +57,40 @@ function CreateNewAddressModalViewModel() {
   }
 
   self.doAction = function() {
-    WALLET.BITCOIN_WALLET.generateAddress();
-    var i = WALLET.BITCOIN_WALLET.getPrivateKeys().length - 1;
-    var hd = WALLET.BITCOIN_WALLET.getPrivateKey(i);
-    WALLET.addKey(hd.priv, self.description());
+    var newAddress = null;
 
-    //update PREFs and push
-    var newAddress = hd.priv.getBitcoinAddress().toString();
-    var newAddressHash = Bitcoin.convert.bytesToBase64(Bitcoin.Crypto.SHA256(newAddress, {asBytes: true}));
-    $.jqlog.log("New address created: " + newAddress + " -- hash: " + newAddressHash);
-    PREFERENCES['num_addresses_used'] += 1;
+    //update PREFs
+    var newAddressHash = hashToB64(newAddress);
+    if(!self.forWatchOnly()) {    
+      PREFERENCES['num_addresses_used'] += 1;
+    } else {
+      if(PREFERENCES['watch_only_addresses'] === undefined) PREFERENCES['watch_only_addresses'] = []; //init if not in prefs
+      PREFERENCES['watch_only_addresses'].push(newAddress); //can't use the hash here, unfortunately
+    }
     PREFERENCES['address_aliases'][newAddressHash] = self.description();
+
+    if(!self.forWatchOnly()) {
+      WALLET.BITCOIN_WALLET.generateAddress();
+      var i = WALLET.BITCOIN_WALLET.getPrivateKeys().length - 1;
+      var hd = WALLET.BITCOIN_WALLET.getPrivateKey(i);
+      newAddress = hd.priv.getBitcoinAddress().toString();
+      WALLET.addAddress(hd.priv);
+    } else {
+      newAddress = self.watchAddress();
+      WALLET.addWatchOnlyAddress(newAddress);
+    }
+
+    //save prefs to server
     multiAPI("store_preferences", [WALLET.identifier(), PREFERENCES], function(data, endpoint) {
       self.shown(false);
       setTimeout(checkURL, 400); //necessary to use setTimeout so that the modal properly hides before we refresh the page
     });
   }
   
-  self.show = function(resetForm) {
+  self.show = function(forWatchOnly, resetForm) {
     if(typeof(resetForm)==='undefined') resetForm = true;
     if(resetForm) self.resetForm();
+    self.forWatchOnly(forWatchOnly);
     self.shown(true);
   }  
 
@@ -692,32 +730,20 @@ function TestnetBurnModalViewModel() {
 }
 
 
-var CREATE_NEW_ADDRESS_MODAL = new CreateNewAddressModalViewModel();
-var SEND_MODAL = new SendModalViewModel();
-var SWEEP_MODAL = new SweepModalViewModel();
-var SIGN_MESSAGE_MODAL = new SignMessageModalViewModel();
-var PRIME_ADDRESS_MODAL = new PrimeAddressModalViewModel();
-var TESTNET_BURN_MODAL = new TestnetBurnModalViewModel();
-
-$(document).ready(function() {
-  ko.applyBindings({}, document.getElementById("gettingStartedNotice"));
-  ko.applyBindingsWithValidation(CREATE_NEW_ADDRESS_MODAL, document.getElementById("createNewAddressModal"));
-  ko.applyBindingsWithValidation(SEND_MODAL, document.getElementById("sendModal"));
-  ko.applyBindingsWithValidation(SWEEP_MODAL, document.getElementById("sweepModal"));
-  ko.applyBindingsWithValidation(SIGN_MESSAGE_MODAL, document.getElementById("signMessageModal"));
-  ko.applyBindingsWithValidation(PRIME_ADDRESS_MODAL, document.getElementById("primeAddressModal"));
-  ko.applyBindingsWithValidation(TESTNET_BURN_MODAL, document.getElementById("testnetBurnModal"));
-  
-  //Refresh BTC balances
-  WALLET.refreshBTCBalances(false);
-});
-
-$('#createNewAddress').click(function() {
-  if(WALLET.addresses.length >= MAX_ADDRESSES) { bootbox.alert("You already have the max number of addresses for a single wallet ("
-    + MAX_ADDRESSES + "). Please create a new wallet for more."); return; }
-  CREATE_NEW_ADDRESS_MODAL.show();
+//Some misc jquery event handlers
+$('#createAddress, #createWatchOnlyAddress').click(function() {
+  if(WALLET.addresses().length >= MAX_ADDRESSES) {
+    bootbox.alert("You already have the max number of addresses for a single wallet ("
+      + MAX_ADDRESSES + "). Please create a new wallet for more.");
+    return false;
+  }
+  CREATE_NEW_ADDRESS_MODAL.show($(this).attr('id') == 'createWatchOnlyAddress');
 });
 
 $('#sweepFunds').click(function() {
   SWEEP_MODAL.show();
 });
+
+
+/*NOTE: Any code here is only triggered the first time the page is visited. Put JS that needs to run on the
+  first load and subsequent ajax page switches in the .html <script> tag*/

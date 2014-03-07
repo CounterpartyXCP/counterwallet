@@ -65,30 +65,37 @@ function initMessageFeed() {
 function parseMessageWithFeedGapDetection(event, data, callback) {
   if(!data || (data.substring && data.startswith("<html>"))) return;
   //^ sometimes nginx can trigger this via its proxy handling it seems, with a blank payload (or a html 502 Bad Gateway
-  // payload) -- especially if the server reloads, or something like that
-  $.jqlog.info("parseMessageWithFeedGapDetection: " + data['_message_index'] + " -- " + LAST_MESSAGEIDX_RECEIVED);
-  if(data['_message_index'] === undefined && IS_DEV) debugger;
-  assert(data['_message_index'] && data['_message_index'] >= LAST_MESSAGEIDX_RECEIVED, "Invalid _message_index");
+  // payload) -- especially if the backend server reloads. Just ignore it.
+  $.jqlog.info("event:RECV IDX=" + data['_message_index'] + " (last idx: " + LAST_MESSAGEIDX_RECEIVED + ") -- " + JSON.stringify(data));
+  if((data['_message_index'] === undefined || data['_message_index'] === null) && IS_DEV) debugger; //it's an odd condition we should look into...
+  assert(LAST_MESSAGEIDX_RECEIVED, "LAST_MESSAGEIDX_RECEIVED is not defined! Should have been set from is_ready on logon.");
   
-  if(   LAST_MESSAGEIDX_RECEIVED == 0 //first message received
-     || data['_message_index'] == LAST_MESSAGEIDX_RECEIVED + 1) { //next sequential message received 
-    LAST_MESSAGEIDX_RECEIVED = data['_message_index'];
-    return;
+  //Detect a reorg (reverse gap) and refresh the current page if so.
+  if(data['_message_index'] <= LAST_MESSAGEIDX_RECEIVED) {
+    // ...however, the block difference must be within 10 block difference, otherwise it's just bogus (buffering issue ,etc??)
+    if(LAST_MESSAGEIDX_RECEIVED - data['_message_index'] <= 10) {
+      $.jqlog.warn("event:REORG DETECTED: our last msgidx = " + LAST_MESSAGEIDX_RECEIVED + "; server send msgidx = " + data['_message_index']);
+      LAST_MESSAGEIDX_RECEIVED = data['_message_index'];
+      //^ the subsequent catch up messages after this should then go through without triggering this reorg logic again
+      checkURL(); //refresh the current page to regrab the fresh data
+      //TODO/BUG??: do we need to "roll back" old messages on the bad chain???
+      return;
+    } else {
+      $.jqlog.warn("event:BOGUS (old) MESSAGE IGNORED: our last msgidx = " + LAST_MESSAGEIDX_RECEIVED + "; server send msgidx = " + data['_message_index']);
+      return;
+    }
   }
   
-  //Detect a reorg (reverse gap) and refresh the current page if so
-  if(data['_message_index'] <= LAST_MESSAGEIDX_RECEIVED) {
-    $.jqlog.warn("event:REORG DETECTED: our last msgidx = " + LAST_MESSAGEIDX_RECEIVED + "; server send msgidx = " + data['_message_index']);
-    LAST_MESSAGEIDX_RECEIVED = data['_message_index'];
-    checkURL();
-    return;
+  //handle normal case that the message we received is the next in order
+  if(data['_message_index'] == LAST_MESSAGEIDX_RECEIVED + 1) {
+    return callback(event, data);
   }
   
   //otherwise, we have a forward gap
-  $.jqlog.warn("parseMessageWithFeedGapDetection:GAP DETECTED: our last msgidx = " + LAST_MESSAGEIDX_RECEIVED + "; server sent msgidx = " + data['_message_index']);
+  $.jqlog.warn("event:GAP DETECTED: our last msgidx = " + LAST_MESSAGEIDX_RECEIVED + " --  server sent msgidx = " + data['_message_index']);
 
   //request the missing messages from the feed and replay them...
-  if(IS_DEV) debugger;
+  if(IS_DEV) debugger; //temporary...
   var missingMessages = [];
   for(var i=LAST_MESSAGEIDX_RECEIVED+1; i < data['_message_index']; i++) {
     missingMessages.push(i);
@@ -121,8 +128,6 @@ function parseMessageWithFeedGapDetection(event, data, callback) {
 }
 
 function handleMessage(event, data) {
-  $.jqlog.log("socket.io(messages): Got event " + data['_message_index'] + ":" + event + ": " + JSON.stringify(data));
-  
   if(event == "balances") {
   } else if(event == "credits") {
     if(WALLET.getAddressObj(data['address'])) {

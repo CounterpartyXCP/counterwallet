@@ -225,7 +225,7 @@ function ChatFeedViewModel() {
   }
 }
 
-var CHAT_FEED = new ChatFeedViewModel();
+window.CHAT_FEED = new ChatFeedViewModel();
 
 $(document).ready(function() {
   ko.applyBindings(CHAT_FEED, document.getElementById("chatPane"));

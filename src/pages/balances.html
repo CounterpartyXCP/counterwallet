@@ -6,8 +6,20 @@
     </h1>
   </div>
   <div class="pull-right" style="padding-right: 13px;">
-      <button id="createNewAddress" type="button" class="btn btn-primary">Create New Address</button>
-      <button id="sweepFunds" type="button" class="btn btn-primary">Import Funds</button>
+    <div class="btn-group">
+        <button id="createAddress" type="button" class="btn btn-primary">
+            Create New Address
+        </button>
+        <button class="btn btn-primary dropdown-toggle" data-toggle="dropdown">
+            <span class="caret"></span>
+        </button>
+        <ul class="dropdown-menu">
+            <li>
+                <a id="createWatchOnlyAddress" href="javascript:void(0);">Create Watch Only Address</a>
+            </li>
+        </ul>
+    </div>
+    <button id="sweepFunds" type="button" class="btn btn-primary">Import Funds</button>
   </div>
 </div>
 
@@ -23,15 +35,16 @@
       <article class="col-xs-12 col-sm-12 col-md-12 col-lg-12"> <!-- widget START -->
         <div class="jarviswidget defaultWidgetColor" data-bind="attr: {'id': 'address-wid-' + $data.ADDRESS}" data-widget-deletebutton="false" data-widget-editbutton="false">
           <header>
-            <span class="widget-icon"> <i class="fa fa-bars"></i> </span>
-            <h2 class="jarviswidget-ctrls"><a href="#" data-bind="editable: label, editableOptions: { type: 'text', url: changeLabel, inputclass: 'addressNicknameEditable', placement: 'bottom', title: 'Enter a new nickname for this address' }" style="text-decoration:underline"></a></h2>
+            <span class="widget-icon"> <i class="fa" data-bind="css: { 'fa-bars': !IS_WATCH_ONLY, 'fa-eye': IS_WATCH_ONLY } "></i> </span>
+            <h2 class="jarviswidget-ctrls"><a href="#" data-bind="editable: label, editableOptions: { type: 'text', url: changeLabel, inputclass: 'addressNicknameEditable', placement: 'bottom', title: 'Enter a new nickname for this address' }" style="text-decoration:underline"></a><span data-bind="visible: IS_WATCH_ONLY">&nbsp;&nbsp;(Watch Only)</span></h2>
             <div class="widget-toolbar">
               <div class="btn-group">
                 <button class="btn dropdown-toggle btn-xs btn-primary" data-toggle="dropdown"><i class="fa fa-bars"></i> Address Actions <i class="fa fa-caret-down"></i></button>                
                 <ul class="dropdown-menu pull-right">
                   <li><a data-bind="click: showQRCode" href="#">Show QR Code</a></li>
-                  <li><a data-bind="click: signMessage" href="#">Sign Message</a></li>
-                  <li><a data-bind="click: createAssetIn" href="#">Create Asset</a></li>
+                  <li><a data-bind="visible: !IS_WATCH_ONLY, click: signMessage" href="#">Sign Message</a></li>
+                  <li><a data-bind="visible: !IS_WATCH_ONLY, click: createAssetIn" href="#">Create Asset</a></li>
+                  <li><a data-bind="visible: IS_WATCH_ONLY, click: removeWatch" href="#">Remove Address</a></li>
                   <li class="divider"></li><li class="dropdown-header">Sort by...</li>
                     <li><a data-bind="click: sortAssetsByName" href="#">Name</a></li>
                     <li><a data-bind="click: sortAssetsByBalance" href="#">Balance</a></li>
@@ -43,22 +56,22 @@
                 </ul>
               </div>
             </div>
-            <div class="widget-toolbar"><span id="" data-bind="click: prime, html: dispNumPrimedTxouts"></span></div>  
+            <div class="widget-toolbar"><span id="" data-bind="visible: !IS_WATCH_ONLY, click: prime, html: dispNumPrimedTxouts"></span></div>  
             <div class="widget-toolbar"><span id="" data-bind="attr: {'id': 'address-text-' + $data.ADDRESS}, click: function(data, event) { return selectText('address-text-' + $data.ADDRESS); }, text: ADDRESS"></span></div>  
           </header>
           <div> <!-- widget div-->
             <div class="widget-body" data-bind="attr: {'id': 'address-balances-' + $data.ADDRESS}, foreach: filteredAssets"> <!-- widget content -->
               <div class="asset-item" data-bind="css: { btc: ASSET == 'BTC', xcp: ASSET == 'XCP', myasset: isMine(), othersasset: isMine() == false }">
-                <div class="btn-group" style="display: inline-block; float: right; width: 30px; height: 32px; line-height: 32px; position: relative; margin-left: 10px; "> <!-- asset level action button -->
+                <div class="btn-group" data-bind="visible: !$parent.IS_WATCH_ONLY" style="float: right; width: 30px; height: 32px; line-height: 32px; position: relative; margin-left: 10px;"> <!-- asset level action button -->
                   <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown"><span class="caret"></span></button>
                   <ul class="dropdown-menu" role="menu">
-                    <li><a data-bind="click: send" href="#">Send</a></li>
-                    <li data-bind="visible: USE_TESTNET && ASSET == 'BTC'"><a data-bind="click: testnetBurn" href="#">Burn for XCP</a></li>
-                    <li data-bind="visible: isMine() && !isLocked()"><a data-bind="click: issueAdditional" href="#">Issue Additional</a></li>
-                    <li data-bind="visible: isMine()"><a data-bind="click: transfer" href="#">Transfer Ownership</a></li>
-                    <li data-bind="visible: isMine() && !isLocked()"><a data-bind="click: lock" href="#">Lock Asset Ownership</a></li>
-                    <li data-bind="visible: isMine()"><a data-bind="click: changeDescription" href="#">Change Asset Description</a></li>
-                    <li data-bind="visible: isMine()"><a data-bind="click: payDividend" href="#">Pay Dividend</a></li>
+                    <li><a data-bind="visible: !$parent.IS_WATCH_ONLY, click: send" href="#">Send</a></li>
+                    <li data-bind="visible: !$parent.IS_WATCH_ONLY && USE_TESTNET && ASSET == 'BTC'"><a data-bind="click: testnetBurn" href="#">Burn for XCP</a></li>
+                    <li data-bind="visible: !$parent.IS_WATCH_ONLY && isMine() && !isLocked()"><a data-bind="click: issueAdditional" href="#">Issue Additional</a></li>
+                    <li data-bind="visible: !$parent.IS_WATCH_ONLY && isMine()"><a data-bind="click: transfer" href="#">Transfer Ownership</a></li>
+                    <li data-bind="visible: !$parent.IS_WATCH_ONLY && isMine() && !isLocked()"><a data-bind="click: lock" href="#">Lock Asset Ownership</a></li>
+                    <li data-bind="visible: !$parent.IS_WATCH_ONLY && isMine()"><a data-bind="click: changeDescription" href="#">Change Asset Description</a></li>
+                    <li data-bind="visible: !$parent.IS_WATCH_ONLY && isMine()"><a data-bind="click: payDividend" href="#">Pay Dividend</a></li>
                   </ul>
                 </div>
                 <h3 class="name pull-left" style="position: relative; top: -10px;" data-bind="text: ASSET"></h3>
@@ -81,13 +94,26 @@
     <div class="modal-content">
       <div class="modal-header">
         <button type="button" data-bind="click: hide" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
-        <h4 class="modal-title">Create New Address</h4>
+        <h4 class="modal-title" data-bind="text: forWatchOnly() ? 'Add Watch Address' : 'Create New Address'"></h4>
       </div>
       <div class="modal-body no-padding">
-        <p class="formPadded">Enter the description you'd like to use for this new address.<br/><br/>
+        <div data-bind="visible: !forWatchOnly()">
+            <p class="formPadded">Enter the description you'd like to use for this new address.<br/><br/>
             <b style='color:red'>Please NOTE that once you create a new address, you cannot delete it.</b></p>
+        </div>
+        <div data-bind="visible: forWatchOnly()">
+            <p class="formPadded">Please enter the info for the address you would like to add into your wallet as a watch-only address.</p>
+        </div>
         
         <form class="smart-form" data-bind="submit: doAction"><fieldset>
+          <section data-bind="visible: forWatchOnly()"><div class="row">
+            <label class="control-label col col-sm-2">Address</label>
+            <div class="col col-sm-10">
+                <label class="input"><i class="icon-append fa fa-tag"></i>
+                    <input name="watchAddress" data-bind="value: watchAddress, valueUpdate: 'afterkeydown'" type="text"/>
+                </label>
+            </div>
+          </div></section>
           <section><div class="row">
             <label class="control-label col col-sm-2">Description</label>
             <div class="col col-sm-10">
@@ -125,7 +151,7 @@
           <section><div class="row">
             <label class="control-label col col-sm-2">Send To</label>
             <div class="col col-sm-10">
-                <label class="input"><i class="icon-append fa fa-user"></i>
+                <label class="input"><i class="icon-append fa fa-tag"></i>
                     <input name="destAddress" data-bind="value: destAddress, valueUpdate:['afterkeydown','propertychange','input'], attr: {placeholder: 'Enter Bitcoin address'}" type="text"/>
                 </label>
             </div>
@@ -561,7 +587,7 @@
 </div><!-- /.modal -->
 
 <script type="text/javascript">
-  //Bind the WALLET object to balancesGrid (this MUST go before pageSetUp on this page!)
+  //Bind the WALLET object to balancesGrid (this MUST go before pageSetUp on this page or Wierd Things Will Happen!)
   ko.applyBindingsWithValidation(WALLET, document.getElementsByClassName("balancesContainer")[0]);
   pageSetUp(); //init smartadmin featureset
 
@@ -569,7 +595,38 @@
   function loadBalanceScripts() {
     loadScript("xcp/js/components/balances.js", b_2);
     function b_2() {
-        loadScript("xcp/js/components/balances_assets.js", null);
+      loadScript("xcp/js/components/balances_assets.js", b_3);
+    }
+    function b_3() {
+      //balances.js
+      window.CREATE_NEW_ADDRESS_MODAL = new CreateNewAddressModalViewModel();
+      window.SEND_MODAL = new SendModalViewModel();
+      window.SWEEP_MODAL = new SweepModalViewModel();
+      window.SIGN_MESSAGE_MODAL = new SignMessageModalViewModel();
+      window.PRIME_ADDRESS_MODAL = new PrimeAddressModalViewModel();
+      window.TESTNET_BURN_MODAL = new TestnetBurnModalViewModel();
+      ko.applyBindings({}, document.getElementById("gettingStartedNotice"));
+      ko.applyBindingsWithValidation(CREATE_NEW_ADDRESS_MODAL, document.getElementById("createNewAddressModal"));
+      ko.applyBindingsWithValidation(SEND_MODAL, document.getElementById("sendModal"));
+      ko.applyBindingsWithValidation(SWEEP_MODAL, document.getElementById("sweepModal"));
+      ko.applyBindingsWithValidation(SIGN_MESSAGE_MODAL, document.getElementById("signMessageModal"));
+      ko.applyBindingsWithValidation(PRIME_ADDRESS_MODAL, document.getElementById("primeAddressModal"));
+      ko.applyBindingsWithValidation(TESTNET_BURN_MODAL, document.getElementById("testnetBurnModal"));
+        
+      //balances_assets.js
+      window.CREATE_ASSET_MODAL = new CreateAssetModalViewModel();
+      window.ISSUE_ADDITIONAL_ASSET_MODAL = new IssueAdditionalAssetModalViewModel();
+      window.TRANSFER_ASSET_MODAL = new TransferAssetModalViewModel();
+      window.CHANGE_ASSET_DESCRIPTION_MODAL = new ChangeAssetDescriptionModalViewModel();
+      window.PAY_DIVIDEND_MODAL = new PayDividendModalViewModel();
+      ko.applyBindingsWithValidation(CREATE_ASSET_MODAL, document.getElementById("createAssetModal"));
+      ko.applyBindingsWithValidation(ISSUE_ADDITIONAL_ASSET_MODAL, document.getElementById("issueAdditionalAssetModal"));
+      ko.applyBindingsWithValidation(TRANSFER_ASSET_MODAL, document.getElementById("transferAssetModal"));
+      ko.applyBindingsWithValidation(CHANGE_ASSET_DESCRIPTION_MODAL, document.getElementById("changeAssetDescriptionModal"));
+      ko.applyBindingsWithValidation(PAY_DIVIDEND_MODAL, document.getElementById("payDividendModal"));
+        
+      //Called on first load, and every switch back to the balances page
+      WALLET.refreshBTCBalances(false);
     }
   }
 </script>

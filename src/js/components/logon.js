@@ -60,7 +60,11 @@ function LogonViewModel() {
     multiAPI("is_ready", [], function(data, endpoint) {
       assert(data['caught_up'], "Invalid is_ready result"); //otherwise we should have gotten a 525 error
       assert(USE_TESTNET == data['testnet'], "USE_TESTNET is " + USE_TESTNET + " from URL-based detection, but the server API disagrees!");
-      $.jqlog.log("Backend is ready. Testnet status: " + USE_TESTNET);
+      
+      //set the "starting" message_index, under which we will ignore if received on the messages feed
+      LAST_MESSAGEIDX_RECEIVED = data['last_message_index']; //LAST_MESSAGEIDX_RECEIVED defined in messagefeed.js
+
+      $.jqlog.log("Backend is ready. Testnet status: " + USE_TESTNET + ". Last message feed index: " + LAST_MESSAGEIDX_RECEIVED);
 
       //User is logging in...
       self.walletGenProgressVal(0); //reset so the progress bar hides again...
@@ -68,7 +72,7 @@ function LogonViewModel() {
       $('#createNewAcctBtnPane').animate({opacity:0}); //fade out the new account button pane if visible
       $('#extra-info').animate({opacity:0});
       
-      //Initialize the socket.io data feed
+      //Initialize the socket.io event feed (notifies us in realtime of new events, as counterparty processes confirmed blocks)
       initMessageFeed();
       
       //generate the wallet ID from a double SHA256 hash of the passphrase and the network (if testnet)
@@ -86,7 +90,7 @@ function LogonViewModel() {
         if(PREFERENCES['selected_theme']) THEME_SELECTOR.changeThemeByID(PREFERENCES['selected_theme']);
         if(PREFERENCES['selected_lang']) LANG_SELECTOR.changeLangByID(PREFERENCES['selected_lang']);
         
-        self.openWalletPt2();
+        self.openWalletPt2(false);
       }, function(jqXHR, textStatus, errorThrown) {
         //No server had the preferences
         $.jqlog.log("Stored preferences NOT found on server(s). Creating new...");
@@ -97,13 +101,12 @@ function LogonViewModel() {
           'num_addresses_used': WALLET.DEFAULT_NUMADDRESSES,
           'address_aliases': {},
           'selected_theme': 'ultraLight',
-          'selected_lang': 'en-us'
+          'selected_lang': 'en-us',
+          'watch_only_addresses': []
         };
   
-        //store the preferences on the server(s) for future use
-        multiAPI("store_preferences", [WALLET.identifier(), prefs]);
         PREFERENCES = prefs;
-        self.openWalletPt2();
+        self.openWalletPt2(true);
       });
     },
     function(jqXHR, textStatus, errorThrown, endpoint) {
@@ -112,7 +115,7 @@ function LogonViewModel() {
     });
   }
   
-  self.openWalletPt2 = function() {
+  self.openWalletPt2 = function(mustSavePreferencesToServer) {
       //generate the appropriate number of addresses
       var seed = mn_decode(self.enteredPassphrase());
       WALLET.BITCOIN_WALLET = Bitcoin.Wallet(seed, {
@@ -122,34 +125,55 @@ function LogonViewModel() {
       
       //kick off address generation (we have to take this hacky approach of using setTimeout, otherwise the
       // progress bar does not update correctly through the HD wallet build process....)
-      setTimeout(self.genAddress, 1);
+      setTimeout(function() { self.genAddress(mustSavePreferencesToServer) }, 1);
   }
   
-  self.genAddress = function() {
+  self.genAddress = function(mustSavePreferencesToServer) {
     WALLET.BITCOIN_WALLET.generateAddress();
     var i = WALLET.BITCOIN_WALLET.getPrivateKeys().length - 1;
     var hd = WALLET.BITCOIN_WALLET.getPrivateKey(i);
     var address = hd.priv.getBitcoinAddress().toString();
-    var defaultLabel = "My Address #" + (WALLET.addresses().length + 1).toString(); 
-    WALLET.addKey(hd.priv, defaultLabel);
+    var addressHash = hashToB64(address);
+    
+    if(PREFERENCES.address_aliases[addressHash] === undefined) { //no existing label. we need to set one
+      mustSavePreferencesToServer = true; //if not already true
+      PREFERENCES.address_aliases[addressHash] = "My Address #" + (WALLET.addresses().length + 1).toString();
+    }
+    WALLET.addAddress(hd.priv);
+
     var progress = (i + 1) * (100 / PREFERENCES['num_addresses_used']);
     self.walletGenProgressVal(progress);
     console.log("Progress: Address " + (i + 1) + " of " + PREFERENCES['num_addresses_used']
       + " (" + self.walletGenProgressVal() + "%) -- " + address);
 
     if(i + 1 < PREFERENCES['num_addresses_used']) {
-      setTimeout(self.genAddress, 1);
+      setTimeout(function() { self.genAddress(mustSavePreferencesToServer) }, 1);
     } else {
-      return self.openWalletPt3();
+      return self.openWalletPt3(mustSavePreferencesToServer);
     }
   }
   
-  self.openWalletPt3 = function() {
+  self.openWalletPt3 = function(mustSavePreferencesToServer) {
+    //add in the watch only addresses
+    if(PREFERENCES['watch_only_addresses'] === undefined) {
+      PREFERENCES['watch_only_addresses'] = [];
+      mustSavePreferencesToServer = true;
+    }
+    for(var i=0; i < PREFERENCES['watch_only_addresses'].length; i++) {
+      WALLET.addWatchOnlyAddress(PREFERENCES['watch_only_addresses'][i]);
+    }
+    
     /* hide the login div and show the other divs */
     $('#logon').hide();
     $('#header').show();
     $('#left-panel').show();
     $('#main').show();
+    
+    //store the preferences on the server(s) for future use
+    if(mustSavePreferencesToServer) {
+      $.jqlog.info("Preferences updated/generated during login. Updating on server(s)...");
+      multiAPI("store_preferences", [WALLET.identifier(), PREFERENCES]);
+    }
     
     //Update the wallet balances (isAtLogon = true)
     WALLET.updateBalances(true);
@@ -293,8 +317,8 @@ function LogonPasswordModalViewModel() {
 }
 
 
-var LOGON_VIEW_MODEL = new LogonViewModel();
-var LOGON_PASSWORD_MODAL = new LogonPasswordModalViewModel();
+window.LOGON_VIEW_MODEL = new LogonViewModel();
+window.LOGON_PASSWORD_MODAL = new LogonPasswordModalViewModel();
 
 $(document).ready(function() {
   ko.applyBindings(LOGON_VIEW_MODEL, document.getElementById("logon"));

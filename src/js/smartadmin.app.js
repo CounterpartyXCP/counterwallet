@@ -1312,7 +1312,7 @@ function loadURL(url, container) {
     url : url,
     dataType : 'html',
     //COUNTERWALLET: START MOD
-    cache : !IS_DEV, // (warning: IF true, this will cause a timestamp and will call the request twice)
+    cache : !IS_DEV, // yes, in development mode, memory will bloat
     //COUNTERWALLET: END MOD
     beforeSend : function() {
       // cog placed

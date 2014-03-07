@@ -165,16 +165,5 @@ function AssetPortfolioViewModel() {
 }
 
 
-var ASSET_PORTFOLIO = new AssetPortfolioViewModel();
-
-$(document).ready(function() {
-  ko.applyBindings(ASSET_PORTFOLIO, document.getElementsByClassName("portfolioGrid")[0]);
-  console.log("OK BOUND");
-  ASSET_PORTFOLIO.init();
-  
-  $(window).bind("resize", ASSET_PORTFOLIO.dataTableResponsive);
-  $(window).on('hashchange', function() {
-    $(window).off("resize", ASSET_PORTFOLIO.dataTableResponsive);
-  });
-});
-
+/*NOTE: Any code here is only triggered the first time the page is visited. Put JS that needs to run on the
+  first load and subsequent ajax page switches in the .html <script> tag*/

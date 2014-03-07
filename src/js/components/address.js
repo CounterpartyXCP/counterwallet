@@ -2,10 +2,14 @@
 function AddressViewModel(key, address, initialLabel) {
   //An address on a wallet
   var self = this;
-  self.KEY = key; //  key : the ECKeyObj (eckey.js)
-  self.ADDRESS = address;
-  self.PUBKEY = key.getPub().toHex(); //hex string
   
+  self.KEY = key; //  key : the bitcoinjs-lib ECKey object
+  //^ if null, then this is a WATCH ONLY address
+  self.IS_WATCH_ONLY = !self.KEY;
+  
+  self.ADDRESS = address;
+  self.PUBKEY = key ? key.getPub().toHex() : ''; //hex string
+
   self.lastSort = '';
   self.lastSortDirection = '';
   
@@ -88,8 +92,7 @@ function AddressViewModel(key, address, initialLabel) {
   /////////////////////////
   //Address-panel-related
   self.changeLabel = function(params) {
-    if(!WALLET.canDoTransaction(self.ADDRESS)) return false;
-    var addressHash = Bitcoin.convert.bytesToBase64(Bitcoin.Crypto.SHA256(self.ADDRESS, {asBytes: true}));
+    var addressHash = hashToB64(self.ADDRESS);
     PREFERENCES.address_aliases[addressHash] = params.value;
     //update the preferences on the server 
     multiAPI("store_preferences", [WALLET.identifier(), PREFERENCES], function(data, endpoint) {
@@ -109,11 +112,28 @@ function AddressViewModel(key, address, initialLabel) {
     bootbox.alert('<center><h4>QR Code for <b>' + self.ADDRESS + '</b></h4><br/>' + qrcode + '</center>');
   }
   
+  self.removeWatch = function() { //possible for watch only addresses only
+    assert(self.IS_WATCH_ONLY, 'Only watch-only addresses can be removed.');
+    WALLET.addresses().remove(self);
+    
+    //update the preferences with this address removed
+    PREFERENCES['watch_only_addresses'].remove(self.ADDRESS);
+    multiAPI("store_preferences", [WALLET.identifier(), PREFERENCES], function() {
+      checkURL(); //refresh the page without this address listed on it
+    });
+  }
+  
   self.signMessage = function() {
     SIGN_MESSAGE_MODAL.show(self.ADDRESS);
   }
 
   self.createAssetIn = function() {
+    var xcpBalance = WALLET.getBalance(self.ADDRESS, 'XCP');
+    if(xcpBalance < ASSET_CREATION_FEE_XCP) {
+      bootbox.alert("You need at least <b>" + ASSET_CREATION_FEE_XCP + " XCP</b> to create an asset, however, your current balance is only <b>"
+        + xcpBalance + " XCP</b>.<br/><br/>Please deposit more XCP into this address and try again.");
+      return false;
+    }
     if(!WALLET.canDoTransaction(self.ADDRESS)) return false;
     CREATE_ASSET_MODAL.show(self.ADDRESS);
   }

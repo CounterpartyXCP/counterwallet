@@ -4,6 +4,11 @@ function normalizeAmount(amount, divisible) {
   return divisible ? Decimal.round(new Decimal(amount).div(UNIT), 8).toFloat() : parseInt(amount);
 }
 
+function hashToB64(content) {
+  //used for storing address alias data, for instance
+  return Bitcoin.convert.bytesToBase64(Bitcoin.Crypto.SHA256(content, {asBytes: true}));  
+}
+
 function denormalizeAmount(amount, divisible) {
   //Converts from float (decimal form) to satoshi (int) 
   if(typeof(divisible)==='undefined') divisible = true;

@@ -67,6 +67,9 @@ function fetchData(url, onSuccess, onError, postdata, isJSONRPC, extraAJAXOpts, 
     extraAJAXOpts['contentType'] = 'application/json; charset=utf-8';
     extraAJAXOpts['dataType'] = 'json';
   }
+  
+  //by default, do NOT cache anything, since this is focused around API stuff
+  if(extraAJAXOpts['cache'] === undefined) extraAJAXOpts['cache'] = false;
 
   //if passed a list of urls for url, then keep trying (via recursion) until we find one that works
   u = url;

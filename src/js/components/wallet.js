@@ -16,32 +16,36 @@ function WalletViewModel() {
     setInterval(function() { self.refreshBTCBalances(true) }, 60000 * 5); //every 5 minutes
   }
   
-  self.addKey = function(key, defaultLabel) {
+  self.addAddress = function(key) {
     //adds a key to the wallet, making a new address object on the wallet in the process
-    //(assets must still be added to this address, with updateBalances() or other means...)
+    //(assets must still be attached to this address, with updateBalances() or other means...)
+    //also, a label should already exist for the address in PREFERENCES.address_aliases by the time this is called
 
     //derive an address from the key (for the appropriate network)
     var address = key.getBitcoinAddress().toString();
     //Make sure this address doesn't already exist in the wallet (sanity check)
-    assert(!self.getAddressObj(address), "Cannot addKey: address already exists in wallet!");
+    assert(!self.getAddressObj(address), "Cannot addAddress: address already exists in wallet!");
     //see if there's a label already for this address that's stored in PREFERENCES, and use that if so
-    var addressHash = Bitcoin.convert.bytesToBase64(Bitcoin.Crypto.SHA256(address, {asBytes: true}));
+    var addressHash = hashToB64(address);
     //^ we store in prefs by a hash of the address so that the server data (if compromised) cannot reveal address associations
+    var label = PREFERENCES.address_aliases[addressHash] || "UNKNOWN LABEL";
+    //^ an alias is made when a watch address is made, so this should always be found
 
-    var label = PREFERENCES.address_aliases[addressHash] || defaultLabel || "UNKNOWN LABEL";
-    $.jqlog.log("Label for " + address + " is " + label);
-    
-    //make sure this address doesn't already exist in the wallet
-    var match = ko.utils.arrayFirst(self.addresses(), function(item) {
-        return item.ADDRESS === address;
-    });
-    if (!match) {
-      self.addresses.push(new AddressViewModel(key, address, label)); //add new
-    } else { //just update the label, since it already exists
-      match.label(label); //modify existing
-    }
+    self.addresses.push(new AddressViewModel(key, address, label)); //add new
+    $.jqlog.log("Wallet address added: " + address + " -- hash: " + addressHash + " -- label: " + label);
   }
   
+  self.addWatchOnlyAddress = function(address) {
+    //adds a watch only address to the wallet
+    //a label should already exist for the address in PREFERENCES.address_aliases by the time this is called
+    assert(!self.getAddressObj(address), "Cannot addWatchOnlyAddress: address already exists in wallet!");
+    var addressHash = hashToB64(address);
+    var label = PREFERENCES.address_aliases[addressHash] || "UNKNOWN LABEL";
+
+    self.addresses.push(new AddressViewModel(null, address, label)); //add new
+    $.jqlog.log("Watch-only wallet address added: " + address + " -- hash: " + addressHash + " -- label: " + label);
+  }
+
   self.getAddressesList = function(withLabel) {
     if(typeof(withLabel)==='undefined') withLabel = false;
     var addresses = [];
@@ -272,17 +276,19 @@ function WalletViewModel() {
   
   /////////////////////////
   //Counterparty transaction-related
-  self.canDoTransaction = function(address) {
+  self.canDoTransaction = function(addr) {
     /* ensures that the specified address can perform a counterparty transaction */
-    if(self.getAddressObj(address).numPrimedTxouts() == 0) { //no primed txouts
+    var address = self.getAddressObj(addr);
+    assert(!address.IS_WATCH_ONLY, "Cannot perform this action on a watch only address!");
+    if(address.numPrimedTxouts() == 0) { //no primed txouts
       if(self.getBalance(address, "BTC") == 0) {
         bootbox.alert("Can't do this action as you have no BTC at this address, and Counterparty actions require a"
-          + " small amount of BTC to perform.<br/><br/>Please deposit some BTC into address <b>" + address + "</b> and try again.");
+          + " small amount of BTC to perform.<br/><br/>Please deposit some BTC into address <b>" + addr + "</b> and try again.");
         return false;
       }
       
       //Otherwise, we DO have a balance, we just don't have any suitable primed outputs
-      PRIME_ADDRESS_MODAL.show(address);
+      PRIME_ADDRESS_MODAL.show(addr);
       PRIME_ADDRESS_MODAL.showNoPrimedInputsError(true);
       return false;
     }
@@ -302,4 +308,4 @@ function WalletViewModel() {
   
 }
 
-var WALLET = new WalletViewModel();
+window.WALLET = new WalletViewModel();

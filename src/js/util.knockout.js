@@ -100,8 +100,20 @@ ko.bindingHandlers.datetimepicker = {
  * Shared knockout Validation custom rules
  */
 ko.validation.rules['isValidBitcoinAddress'] = {
-    validator: function (val, otherVal) {
+    validator: function (val, self) {
         try {
+          var address = new Bitcoin.Address(val);
+          return address.version == (USE_TESTNET ? Bitcoin.network.testnet.addressVersion : Bitcoin.network.mainnet.addressVersion);
+        } catch (err) {
+          return false;
+        }
+    },
+    message: USE_TESTNET ? 'This field must be a valid TESTNET Bitcoin address.' : 'This field must be a valid Bitcoin address.'
+};
+ko.validation.rules['isValidBitcoinAddressIfSpecified'] = {
+    validator: function (val, self) {
+        try {
+          if(!val) return true; //the "if specified" part of the name :)
           var address = new Bitcoin.Address(val);
           return address.version == (USE_TESTNET ? Bitcoin.network.testnet.addressVersion : Bitcoin.network.mainnet.addressVersion);
         } catch (err) {

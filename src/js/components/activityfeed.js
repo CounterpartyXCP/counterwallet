@@ -207,7 +207,7 @@ function ActivityFeedViewModel(initialActivityCount) {
 }
 
 
-var ACTIVITY_FEED = new ActivityFeedViewModel();
+window.ACTIVITY_FEED = new ActivityFeedViewModel();
 
 $(document).ready(function() {
   ko.applyBindings(ACTIVITY_FEED, document.getElementById("logo-group"));

@@ -469,6 +469,7 @@
     <!-- ^ unfortunately we have to mod the file itself, instead of dynamically override :( -->
 
     <script type="text/javascript">
+      //so that knockout is run on the DOM sections and global context is accessible...
       ko.applyBindings({}, document.getElementById("noticeTestnet"));
       ko.applyBindings({}, document.getElementById("noticeDevMode"));
     

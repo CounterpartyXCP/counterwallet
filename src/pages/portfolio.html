@@ -86,6 +86,18 @@
 </section>
 
 <script type="text/javascript">
-  loadScript("xcp/js/components/portfolio.js", null);
   pageSetUp(); //init smartadmin featureset
+  loadScript("xcp/js/components/portfolio.js", function() {
+    //This code is run on each visit to the page
+    window.ASSET_PORTFOLIO = new AssetPortfolioViewModel();
+
+    ko.applyBindings(ASSET_PORTFOLIO, document.getElementsByClassName("portfolioGrid")[0]);
+    
+    ASSET_PORTFOLIO.init();
+  
+    $(window).bind("resize", ASSET_PORTFOLIO.dataTableResponsive);
+    $(window).on('hashchange', function() {
+      $(window).off("resize", ASSET_PORTFOLIO.dataTableResponsive);
+    });
+  });
 </script>
