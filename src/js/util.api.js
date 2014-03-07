@@ -90,11 +90,16 @@ function fetchData(url, onSuccess, onError, postdata, isJSONRPC, extraAJAXOpts, 
             if(res && res.hasOwnProperty('result')) {
               onSuccess(res['result'], u);
             } else {
-              onError(null, "JSON-RPC Error: "
-                + "<p><b>Type:</b> " + res['error']['message'] + "</p>"
-                + "<p><b>Code:</b> " + res['error']['code'] + "</p>"
-                + "<p><b>Message:</b> " + res['error']['data']['message'] + "</p>"
-                /*+ "<p><b>RAW:</b> " + JSON.stringify(res) + "</p>"*/, "jsonrpc", u);
+              var errorMessage = null;
+              if(res['error'] === undefined) {
+                errorMessage = "JSON-RPC Error -- UNKNOWN FORMAT: " + res; 
+              } else {
+                errorMessage = ("JSON-RPC Error: "
+                  + "<p><b>Type:</b> " + res['error']['message'] + "</p>"
+                  + "<p><b>Code:</b> " + res['error']['code'] + "</p>"
+                  + "<p><b>Message:</b> " + (res['error']['data'] ? res['error']['data']['message'] : "UNSPECIFIED") + "</p>");
+              } 
+              onError(null, errorMessage, "jsonrpc", u);
             }
           } else {
             onSuccess(res, u);

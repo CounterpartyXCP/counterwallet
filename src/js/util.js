@@ -115,6 +115,24 @@ function noExponents(n) {
   return str + z;
 }
 
+//Dynamic array sort, allows for things like: People.sortBy("Name", "-Surname");
+//Won't work below IE9, but totally safe otherwise
+//From http://stackoverflow.com/a/4760279 
+!function() {
+    function _dynamicSortMultiple(attr) {
+       /* dynamicSortMultiple function body comes here */
+    }
+    function _dynamicSort(property) {
+        /* dynamicSort function body comes here */
+    }
+    Object.defineProperty(Array.prototype, "sortBy", {
+        enumerable: false,
+        writable: true,
+        value: function() {
+            return this.sort(_dynamicSortMultiple.apply(null, arguments));
+        }
+    });
+}();
 
 //Local storage helper functions
 //http://stackoverflow.com/a/3146971

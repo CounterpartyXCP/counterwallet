@@ -5,7 +5,7 @@ function AssetViewModel(props) {
   self.ADDRESS = props['address']; //will not change
   self.ASSET = props['asset']; //assetID, will not change
   self.DIVISIBLE = props['divisible'] || true;
-  self.isMine = ko.observable(props['isMine'] || null); //null for BTC and XCP, true for self assets, false for others assets
+  self.isMine = ko.observable(props['isMine'] === true ? true : (props['isMine'] === false ? false : null)); //null for BTC and XCP, true for self assets, false for others assets
   self.isLocked = ko.observable(props['isLocked'] || false);
   self.balance = ko.observable(props['balance'] || 0); //raw (not normalized)
   self.totalIssued = ko.observable(props['totalIssued'] || 0); //raw

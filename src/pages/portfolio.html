@@ -23,10 +23,10 @@
                   <div class="col-lg-4">
                       <div id="portfolioAssetValsPie"></div>
                   </div>
-                  <div class="col-lg-4" data-bind="fadeVisibleInOnly: pctChangesInXCP.length" style="display: none">
+                  <div class="col-lg-4" data-bind="fadeVisibleInOnly: pctChangesInXCP().length" style="display:none">
                       <div id="pctChangeBarToXCP"></div>
                   </div>
-                  <div class="col-lg-4" data-bind="fadeVisibleInOnly: pctChangesInBTC.length" style="display: none">
+                  <div class="col-lg-4" data-bind="fadeVisibleInOnly: pctChangesInBTC().length" style="display:none">
                     <div id="pctChangeBarToBTC"></div>
                   </div>
             </div> <!-- end widget content -->
@@ -35,13 +35,12 @@
     </article> <!-- WIDGET END -->
   </div> <!-- end row -->
     
-    
-  <div class="row" data-bind="fadeVisibleInOnly: marketCapTableRows().length > 0" style="display:none"> <!-- row -->
+  <div class="row" data-bind="fadeVisibleInOnly: marketCapTableRows().length"> <!-- row -->
     <article class="col-xs-12 col-sm-12 col-md-12 col-lg-12"> <!-- NEW WIDGET START -->
-      <div class="jarviswidget defaultWidgetColor" id="wid-id-portfolioComposition" data-widget-editbutton="false" data-widget-deletebutton="false">
+      <div class="jarviswidget defaultWidgetColor" id="wid-id-portfolioComposition" data-widget-editbutton="false" data-widget-deletebutton="false" data-bind="fadeVisibleInOnly: marketCapTableRows().length">
         <header>
             <span class="widget-icon"> <i class="fa fa-table"></i> </span>
-            <h2>Portfolio Composition (in <span data-bind="showPortfolioIn"></span>)</h2>
+            <h2>Portfolio Composition (in <span data-bind="text: showPortfolioIn"></span>)</h2>
             <div class="widget-toolbar">
               <div class="btn-group">
                 <button class="btn dropdown-toggle btn-xs btn-primary" data-toggle="dropdown"><i class="fa fa-bars"></i> Show In <i class="fa fa-caret-down"></i></button>                
@@ -66,15 +65,15 @@
                             <th>Market Cap Graph (7d)</th>
                         </tr>
                     </thead>
-                    <tbody data-bind="foreach: marketCapTableRows">
+                    <tbody data-bind="foreach: marketCapTableRows()">
                         <tr>
-                            <td data-bind="text: asset"></td>
-                            <td><span data-bind="text: marketCap"></span> <span data-bind="text: asset"></span></td>
+                            <td><span style="font-weight: bold; font-size: 1.15em" data-bind="text: asset"></span></td>
+                            <td><span data-bind="text: marketCap"></span> <span data-bind="text: $parent.showPortfolioIn()"></span></td>
                             <td><span data-bind="text: price"></span> <span data-bind="text: $parent.showPortfolioIn()"></span></td>
-                            <td data-bind="text: supply"></td>
+                            <td><span data-bind="text: supply"></span> <span data-bind="text: asset"></span></td>
                             <td><span data-bind="text: volume"></span> <span data-bind="text: $parent.showPortfolioIn()"></span></td>
                             <td><span data-bind="text: pctChange"></span> %</td>
-                            <td data-bind="sparklines: history"></td>
+                            <td data-bind="attr: { id: 'miniChart-' + asset }" style="width:180px;height:60px;"></td>
                         </tr>
                     </tbody>
                 </table>

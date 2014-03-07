@@ -225,7 +225,7 @@ var AddressInDropdownItemModel = function(address, label) {
 function TransactionHistoryViewModel() {
   var self = this;
   self._lastWindowWidth = null;
-  self.selectedAddress = ko.observable();
+  self.selectedAddress = ko.observable('');
   self.availableAddresses = ko.observableArray([]); //stores AddressInDropdownModel objects
   self.transactions = ko.observableArray([]);
   self.ADDRESS_LASTCHANGE = null;
@@ -243,17 +243,17 @@ function TransactionHistoryViewModel() {
     //addressChanged will naturally trigger on load
   }
   
-  self.addressChanged = function() {
-    if(self.selectedAddress() == self.ADDRESS_LASTCHANGE) return; //just in case for screwy browsers...
-    self.ADDRESS_LASTCHANGE = self.selectedAddress();
-    console.log("Recent Transactions: Address changed called: " + self.selectedAddress().ADDRESS);
+  self.selectedAddress.subscribeChanged(function(newSelection, prevSelection) {
+    if(newSelection == self.ADDRESS_LASTCHANGE) return; //just in case for screwy browsers...
+    self.ADDRESS_LASTCHANGE = newSelection;
+    console.log("Recent Transactions: Address changed called: " + newSelection);
 
     $('#txnHistoryLoading').show();
     $('#wid-id-txnHistory header span.jarviswidget-loader').show();
     self.transactions([]);
     $('#txnHistory').dataTable().fnClearTable();
     $('#txnHistory_wrapper').hide();
-    failoverAPI("get_raw_transactions", {address: self.selectedAddress().ADDRESS}, function(data, endpoint) {
+    failoverAPI("get_raw_transactions", {address: newSelection}, function(data, endpoint) {
       //clear table data and populate with the new data
       for(var i = 0; i< data.length; i++) {
         self.transactions.push(new TransactionHistoryItemViewModel(data[i]));  
@@ -263,7 +263,7 @@ function TransactionHistoryViewModel() {
       $('#wid-id-txnHistory header span.jarviswidget-loader').hide();
       $('#txnHistoryLoading').hide();
     });
-  }
+  });
   
   self.dataTableResponsive = function(e) {
     // Responsive design for our data tables and more on this page

@@ -56,7 +56,7 @@
                 </ul>
               </div>
             </div>
-            <div class="widget-toolbar"><span id="" data-bind="visible: !IS_WATCH_ONLY, click: prime, html: dispNumPrimedTxouts"></span></div>  
+            <div data-bind="visible: !IS_WATCH_ONLY" class="widget-toolbar"><span id="" data-bind="click: prime, html: dispNumPrimedTxouts"></span></div>  
             <div class="widget-toolbar"><span id="" data-bind="attr: {'id': 'address-text-' + $data.ADDRESS}, click: function(data, event) { return selectText('address-text-' + $data.ADDRESS); }, text: ADDRESS"></span></div>  
           </header>
           <div> <!-- widget div-->
