@@ -52,6 +52,7 @@ var UNIT = 100000000; //# satoshis in whole
 var MIN_FEE = 10000; // in satoshis (== .0001 BTC)
 var MIN_PRIME_BALANCE = 50000; //in satoshis ... == .0005
 var ASSET_CREATION_FEE_XCP = 5; //in normalized XCP
+var MAX_ASSET_DESC_LENGTH = 41; //42, minus a null term character?
 var ENTITY_NAMES = {
   'burns': 'Burn',
   'debits': 'Debit',

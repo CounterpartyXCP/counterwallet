@@ -15,6 +15,12 @@ function denormalizeAmount(amount, divisible) {
   return divisible ? Decimal.round(new Decimal(amount).mul(UNIT), 8).toFloat() : parseInt(amount);
 }
 
+function smartFormat(num) { //arbitrary rules to make amounts be formatted a bit more friendly
+  //if(num > 10) num = Decimal.round(new Decimal(num), 4).toFloat();
+  if(num > 10) num = +num.toFixed(4); //use + sign to lob off any trailing zeros...
+  return numberWithCommas(num);
+}
+
 function assetsToAssetPair(asset1, asset2) {
   //NOTE: This MUST use the same logic/rules as counterwalletd's assets_to_asset_pair() function in lib/util.py
   var base = null;

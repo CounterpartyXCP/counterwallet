@@ -12,9 +12,9 @@ ko.validation.rules['assetNameIsTaken'] = {
 };
 ko.validation.rules['isValidAssetDescription'] = {
     validator: function (val, self) {
-      return byteCount(val) <= 52;
+      return byteCount(val) <= MAX_ASSET_DESC_LENGTH;
     },
-    message: 'Asset description is more than 52 bytes long.'
+    message: 'Asset description is more than ' + MAX_ASSET_DESC_LENGTH + ' bytes long.'
 };
 ko.validation.registerExtenders();
 
@@ -172,7 +172,7 @@ function IssueAdditionalAssetModalViewModel() {
   self.additionalIssue = ko.observable('').extend({
     required: true,
     pattern: {
-      message: 'Must be a valid number',
+      message: 'Must be a valid amount',
       params: '^[0-9]*\.?[0-9]{0,8}$' //not perfect ... will convert divisible assets to satoshi before sending to API
     },
     isValidQtyForDivisibility: self,

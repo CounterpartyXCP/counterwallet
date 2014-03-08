@@ -102,7 +102,7 @@ function CreateNewAddressModalViewModel() {
 
 ko.validation.rules['isValidSendAmountForBalance'] = {
     validator: function (val, self) {
-      if((self.divisible() ? self.balance() / UNIT : self.balance()) - parseFloat(val) < 0) {
+      if(normalizeAmount(self.rawBalance(), self.divisible()) - parseFloat(val) < 0) {
         return false;
       }
       return true;
@@ -116,7 +116,7 @@ function SendModalViewModel() {
   self.shown = ko.observable(false);
   self.address = ko.observable(null); //address string, not an Address object
   self.asset = ko.observable();
-  self.balance = ko.observable(null);
+  self.rawBalance = ko.observable(null);
   self.divisible = ko.observable();
   
   self.destAddress = ko.observable('').trimmed().extend({
@@ -135,13 +135,13 @@ function SendModalViewModel() {
   });
   
   self.normalizedBalance = ko.computed(function() {
-    if(self.address() === null || self.balance() === null) return null;
-    return normalizeAmount(self.balance(), self.divisible());
+    if(self.address() === null || self.rawBalance() === null) return null;
+    return normalizeAmount(self.rawBalance(), self.divisible());
   }, self);
   
   self.normalizedBalRemaining = ko.computed(function() {
     if(!isNumber(self.quantity())) return null;
-    var curBalance = normalizeAmount(self.balance(), self.divisible());
+    var curBalance = normalizeAmount(self.rawBalance(), self.divisible());
     var balRemaining = Decimal.round(new Decimal(curBalance).sub(parseFloat(self.quantity()))).toFloat();
     if(balRemaining < 0) return null;
     return balRemaining;
@@ -181,17 +181,17 @@ function SendModalViewModel() {
     self.shown(false);
   }
   
-  self.show = function(fromAddress, asset, balance, isDivisible, resetForm) {
-    if(asset == 'BTC' && balance == null) {
+  self.show = function(fromAddress, asset, rawBalance, isDivisible, resetForm) {
+    if(asset == 'BTC' && rawBalance == null) {
       return bootbox.alert("Cannot send BTC as we cannot currently get in touch with the server to get your balance.");
     }
-    assert(balance, "Balance is null or undefined?");
+    assert(rawBalance, "Balance is null or undefined?");
     
     if(typeof(resetForm)==='undefined') resetForm = true;
     if(resetForm) self.resetForm();
     self.address(fromAddress);
     self.asset(asset);
-    self.balance(balance);
+    self.rawBalance(rawBalance);
     self.divisible(isDivisible);
     self.shown(true);
   }  
@@ -226,9 +226,9 @@ var AddressInDropdownItemModel = function(address, label) {
   this.LABEL = label;
   this.SELECT_LABEL = label ? ("<b>" + label + "</b><br/>" + address) : (address);
 };
-var SweepAssetInDropdownItemModel = function(asset, balance, normalizedBalance) {
+var SweepAssetInDropdownItemModel = function(asset, rawBalance, normalizedBalance) {
   this.ASSET = asset;
-  this.BALANCE = balance; //raw
+  this.RAW_BALANCE = rawBalance; //raw
   this.NORMALIZED_BALANCE = normalizedBalance; //normalized
   this.SELECT_LABEL = asset + " (bal: " + normalizedBalance + ")";
 };
@@ -331,7 +331,7 @@ function SweepModalViewModel() {
     var selectedAsset = ko.utils.arrayFirst(self.availableAssetsToSweep(), function(item) {
       return asset == item.ASSET;
     });
-    var amount = adjustedBTCAmount || selectedAsset.BALANCE;
+    var amount = adjustedBTCAmount || selectedAsset.RAW_BALANCE;
     var normalizedAmount = ((adjustedBTCAmount ? normalizeAmount(adjustedBTCAmount) : null)
       || selectedAsset.NORMALIZED_BALANCE);
     assert(selectedAsset);
@@ -397,7 +397,7 @@ function SweepModalViewModel() {
     }
     if(hasBTC !== false) {
       //adjust the balance of BTC to sweep out to account for the primed TXouts being consumed
-      var rawBTCBalance = self.availableAssetsToSweep()[hasBTC].BALANCE;
+      var rawBTCBalance = self.availableAssetsToSweep()[hasBTC].RAW_BALANCE;
       var adjustedBTCAmount = rawBTCBalance - (self.selectedAssetsToSweep().length * MIN_PRIME_BALANCE);
       //^ the adjusted BTC balance is what we will end up sweeping out of the account.
       //  BTW...this includes the BTC fee for the BTC sweep itself as a primed TXout size (.0005 instead of .0001...no biggie (I think)
@@ -621,6 +621,9 @@ function PrimeAddressModalViewModel() {
     
     var rawTxHex = sendTx.serializeHex();
     WALLET.signAndBroadcastTx(self.address(), rawTxHex);
+    self.shown(false);
+    bootbox.alert("Your account has successfully been primed with <b>" + self.numNewPrimedTxouts()
+      + "</b> additional outputs. This action may take a bit to take effect.");
   }
 }
 

@@ -78,7 +78,7 @@
                 <div class="clearfix"></div>
                 <p class="balance">
                     <span data-bind="visible: isMine()">Issued: <span data-bind="text: displayedTotalIssued"></span></span><br/>
-                    Bal: <span data-bind="text: normalizedBalance() === null ? '???' : numberWithCommas(normalizedBalance())"></span></p>
+                    Bal: <span data-bind="text: normalizedBalance() === null ? '???' : smartFormat(normalizedBalance())"></span></p>
                 <span data-bind="visible: isLocked()" style="position:absolute;bottom:2px;right:10px"><i class="icon-append fa fa-lock"></i></span>
               </div>
             </div> <!-- end widget content body -->

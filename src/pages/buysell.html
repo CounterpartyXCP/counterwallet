@@ -92,69 +92,78 @@
                                     </div>
                                 </div>
                                 <div class="tab-pane" id="tab2">
-                                    <div data-bind="visible: currentTab() == 2 && currentMarketUnitPrice() && !overrideMarketPrice()" style="display:none;">
-                                        <div class="row">
-                                            <div class="col-md-12">
-                                                <span>You have <b><span class="sellColor" data-bind="text: totalBalanceAvailForSale"></span>
-                                                <span class="sellColor" data-bind="text: sellAsset"></span></b> at the selected address.
-                                                <br/>At the current market rate of <b><span data-bind="text: currentMarketUnitPrice"></span>
-                                                <span data-bind="text: quoteAsset"></span> per each <span data-bind="text: baseAsset"></span></b>,
-                                                you can afford up to <b><span class="buyColor" data-bind="text: numberWithCommas(maxAfford())"></span> <span class="buyColor" data-bind="text: buyAsset"></span>.</b>
-                                                </span>
-                                            </div>
-                                        </div>
-                                        <div class="row" style="max-width: 1000px;">
-                                            <div class="col-md-4">Quantity <b class="buyColor"><span data-bind="text: buyAsset"></span></b> to buy:<br/><a href="#" data-bind="click: function() { overrideMarketPrice(true) && currentMarketUnitPrice(null) }" style="font-size:11px;position:relative;bottom:5px">Override Market Rate</a></div>
-                                            <div class="col-md-8">
-                                                <div class="input-group">
-                                                    <span class="input-group-addon"><i class="fa fa-arrow-circle-o-down fa-lg fa-fw"></i></span>
-                                                    <input class="form-control input-lg" type="text" style="max-width: 300px"
-                                                     data-bind="value: selectedBuyAmount, attr: {placeholder: 'Quantity ' + buyAsset()}, valueUpdate: 'afterkeydown'" />
-                                                </div>
-                                                <span class="invalid" data-bind="validationMessage: selectedBuyAmount"></span>
-                                            </div>
+                                    
+                                    <!-- MARKET PRICING -->
+                                    <div class="row" data-bind="visible: currentTab() == 2 && currentMarketUnitPrice() && !overrideMarketPrice()"  style="display:none;">
+                                        <div class="col-md-12">
+                                            <span>You have <b><span class="sellColor" data-bind="text: totalBalanceAvailForSale"></span>
+                                            <span class="sellColor" data-bind="text: sellAsset"></span></b> at the selected address.
+                                            <br/>At the current market rate of <b><span data-bind="text: currentMarketUnitPrice"></span>
+                                            <span data-bind="text: quoteAsset"></span> per each <span data-bind="text: baseAsset"></span></b>,
+                                            you can afford up to <b><span class="buyColor" data-bind="text: numberWithCommas(maxAfford())"></span> <span class="buyColor" data-bind="text: buyAsset"></span><span data-bind="visible: sellAsset() == 'BTC'"> (not including any fees paid)</span>.</b>
+                                            </span>
                                         </div>
                                     </div>
-                                    <div data-bind="visible: currentTab() == 2 && (currentMarketUnitPrice() == null || overrideMarketPrice())" style="display:none">
-                                        <div class="row" data-bind="fadeVisible: currentTab() == 2 && currentMarketUnitPrice() == null">
-                                            <div class="col-md-12">
-                                                <span class="errorRed">There is currently insufficient data to determine a fair market price for your purchase.</span>
-                                                <br/><span>You have <b><span class="sellColor" data-bind="text: totalBalanceAvailForSale"></span>
-                                                <span class="sellColor" data-bind="text: sellAsset"></span></b> at the selected address.                                                
-                                            </div>
+                                    <div class="row" data-bind="visible: currentTab() == 2 && currentMarketUnitPrice() && !overrideMarketPrice()" style="display:none;max-width: 1000px;">
+                                        <div class="col-md-4">Quantity <b class="buyColor"><span data-bind="text: buyAsset"></span></b> to buy:
+                                            <br/><a href="#" data-bind="click: function() { overrideMarketPrice(true) && currentMarketUnitPrice(null) }" style="font-size:11px;position:relative;bottom:5px">Override Market Rate</a>
+                                            <br/><a href="#" data-bind="visible: !overrideDefaultOptions(), click: function() { overrideDefaultOptions(true) }" style="font-size:11px;position:relative;bottom:10px">Override Trade Options</a>
                                         </div>
-                                        <div class="row" style="max-width: 1000px;">
-                                            <div class="col-md-4">Quantity <b class="buyColor"><span data-bind="text: buyAsset"></span></b> to buy:</div>
-                                            <div class="col-md-8">
-                                                <div class="input-group">
-                                                    <span class="input-group-addon"><i class="fa fa-arrow-circle-o-down fa-lg fa-fw"></i></span>
-                                                    <input class="form-control input-lg" type="text"
-                                                        data-bind="value: selectedBuyAmount, attr: {placeholder: 'Quantity ' + buyAsset()}, valueUpdate: 'afterkeydown'"
-                                                        style="max-width: 300px;" />
-                                                </div>
-                                                <span class="invalid" data-bind="validationMessage: selectedBuyAmount"></span>
+                                        <div class="col-md-8">
+                                            <div class="input-group">
+                                                <span class="input-group-addon"><i class="fa fa-arrow-circle-o-down fa-lg fa-fw"></i></span>
+                                                <input class="form-control input-lg" type="text" style="max-width: 300px"
+                                                 data-bind="value: selectedBuyAmount, attr: {placeholder: 'Quantity ' + buyAsset()}, valueUpdate: 'afterkeydown'" />
                                             </div>
-                                        </div>
-                                        <div class="row" style="max-width: 1000px;padding-bottom:20px !important">
-                                            <div class="col-md-4">Quantity <b class="sellColor"><span data-bind="text: sellAsset"></span></b> to sell:</div>
-                                            <div class="col-md-8">
-                                                <div class="input-group">
-                                                    <span class="input-group-addon"><i class="fa fa-arrow-circle-o-up fa-lg fa-fw"></i></span>
-                                                    <input class="form-control input-lg" type="text"
-                                                        data-bind="value: selectedSellAmountCustom, attr: {placeholder: 'Quantity ' + sellAsset()}, valueUpdate: 'afterkeydown'"
-                                                        style="max-width: 300px;" />
-                                                </div>
-                                                <span class="invalid" data-bind="validationMessage: selectedSellAmountCustom"></span>
-                                            </div>
+                                            <span class="invalid" data-bind="validationMessage: selectedBuyAmount"></span>
                                         </div>
                                     </div>
-                                    <div class="row" data-bind="fadeVisibleInOnly: currentTab() == 2 && unitPrice() && selectedBuyAmount()" style="padding-bottom: 0px;margin-top:15px;">
+                                    
+                                    <!-- CUSTOM PRICING -->
+                                    <div class="row" data-bind="fadeVisible: currentTab() == 2 && currentMarketUnitPrice() == null" style="display:none">
+                                        <div class="col-md-12">
+                                            <span class="errorRed">There is currently insufficient data to determine a fair market price for your purchase.</span>
+                                            <br/><span>You have <b><span class="sellColor" data-bind="text: totalBalanceAvailForSale"></span>
+                                            <span class="sellColor" data-bind="text: sellAsset"></span></b> at the selected address.                                                
+                                        </div>
+                                    </div>
+                                    <div class="row" data-bind="visible: currentTab() == 2 && (currentMarketUnitPrice() == null || overrideMarketPrice())" style="display:none;max-width: 1000px;">
+                                        <div class="col-md-4">Quantity <b class="buyColor"><span data-bind="text: buyAsset"></span></b> to buy:</div>
+                                        <div class="col-md-8">
+                                            <div class="input-group">
+                                                <span class="input-group-addon"><i class="fa fa-arrow-circle-o-down fa-lg fa-fw"></i></span>
+                                                <input class="form-control input-lg" type="text"
+                                                    data-bind="value: selectedBuyAmount, attr: {placeholder: 'Quantity ' + buyAsset()}, valueUpdate: 'afterkeydown'"
+                                                    style="max-width: 300px;" />
+                                            </div>
+                                            <span class="invalid" data-bind="validationMessage: selectedBuyAmount"></span>
+                                        </div>
+                                    </div>
+                                    <div class="row" data-bind="visible: currentTab() == 2 && (currentMarketUnitPrice() == null || overrideMarketPrice())" style="display:none;max-width: 1000px;">
+                                        <div class="col-md-4">Quantity <b class="sellColor"><span data-bind="text: sellAsset"></span></b> to sell:</div>
+                                        <div class="col-md-8">
+                                            <div class="input-group">
+                                                <span class="input-group-addon"><i class="fa fa-arrow-circle-o-up fa-lg fa-fw"></i></span>
+                                                <input class="form-control input-lg" type="text"
+                                                    data-bind="value: selectedSellAmountCustom, attr: {placeholder: 'Quantity ' + sellAsset()}, valueUpdate: 'afterkeydown'"
+                                                    style="max-width: 300px;" />
+                                            </div>
+                                            <span class="invalid" data-bind="validationMessage: selectedSellAmountCustom"></span>
+                                        </div>
+                                    </div>
+                                    <div class="row" data-bind="visible: currentTab() == 2 && (currentMarketUnitPrice() == null || overrideMarketPrice()) && !overrideDefaultOptions()" style="display:none">
+                                        <a href="#" data-bind="click: function() { overrideDefaultOptions(true) }" style="font-size:11px;">Override Trade Options</a>
+                                    </div>
+                                    
+                                    <!-- PURCHASE SUMMARY -->
+                                    <div class="row" data-bind="fadeVisibleInOnly: currentTab() == 2 && unitPrice() && selectedBuyAmount()" style="margin-top:15px;">
                                         <div class="col-sm-12">
                                             <span data-bind="fadeVisible: currentMarketUnitPrice() && !overrideMarketPrice()">At the market rate,
                                                 your purchase of <b><span class="buyColor" data-bind="text: numberWithCommas(selectedBuyAmount())"></span>
                                                 <span class="buyColor" data-bind="text: buyAsset"></span></b>
                                                 will cost you <b><span class="sellColor" data-bind="text: numberWithCommas(selectedSellAmountAtMarket())"></span>
-                                                <span class="sellColor" data-bind="text: sellAsset"></span></b>.
+                                                <span class="sellColor" data-bind="text: sellAsset"></span></b>
+                                                <span data-bind="visible: sellAsset() == 'BTC' && feeForSelectedSellAmount() != 0">, plus a <b><span data-bind="text: feeForSelectedSellAmount"></span> BTC</b> (<span data-bind="text: dispFeeForSelectedSellAmountAsPct"></span>%) miner fee (to prevent troll orders)</span>.
                                             </span>
                                             <span data-bind="fadeVisible: (currentMarketUnitPrice() == null || overrideMarketPrice()) && (selectedSellAmountCustom() && selectedSellAmountCustom() > 0) ">
                                                 The effective unit price of your <b><span data-bind="text: dispAssetPair"></span></b> order is
@@ -174,25 +183,67 @@
                                             </span>
                                         </div>
                                     </div>
+                                    
+                                    <!-- TRADE PARAMETER OVERRIDES -->
+                                    <div class="row" data-bind="fadeVisibleInOnly: currentTab() == 2 && overrideDefaultOptions()" style="max-width: 1000px;">
+                                        <div class="col-md-4"># Blocks until Expiration:</div>
+                                        <div class="col-md-8">
+                                            <div class="input-group">
+                                                <span class="input-group-addon"><i class="fa fa-clock-o fa-lg fa-fw"></i></span>
+                                                <input class="form-control input-lg" type="text" style="max-width: 300px"
+                                                 data-bind="value: numBlocksUntilExpiration, valueUpdate: 'afterkeydown'" />
+                                            </div>
+                                            <span class="invalid" data-bind="validationMessage: numBlocksUntilExpiration"></span>
+                                        </div>
+                                    </div>
+                                    <div class="row" data-bind="fadeVisibleInOnly: currentTab() == 2 && overrideDefaultOptions() && (buyAsset() == 'BTC' || sellAsset() == 'BTC')" style="max-width: 1000px;">
+                                        <div class="col-md-4">
+                                            <span data-bind="visible: buyAsset() == 'BTC'">BTC Fee Required:</span>
+                                            <span data-bind="visible: sellAsset() == 'BTC'">BTC Fee Provided:</span>
+                                        </div>
+                                        <div class="col-md-8">
+                                            <div class="input-group">
+                                                <span class="input-group-addon"><i class="fa fa-btc fa-lg fa-fw"></i></span>
+                                                <input class="form-control input-lg" type="text" style="max-width: 300px"
+                                                 data-bind="value: btcFee, valueUpdate: 'afterkeydown'" />
+                                            </div>
+                                            <span class="invalid" data-bind="validationMessage: btcFee"></span>
+                                        </div>
+                                    </div>
                                 </div>
                                 <div class="tab-pane" id="tab3">
                                     <table class="table table-bordered" style="max-width: 800px;">​
                                         <thead></thead>
                                         <tbody>
                                             <tr>
-                                                <td>Buy</td>
+                                                <td><b>Buy:</b></td>
                                                 <td><b><span class="buyColor" data-bind="text: numberWithCommas(selectedBuyAmount())"></span>&nbsp;
                                                     <span class="buyColor" data-bind="text: buyAsset"></span></b></td>
                                             </tr>
                                             <tr>
-                                                <td>Sell</td>
+                                                <td><b>Sell:</b></td>
                                                 <td><b><span class="sellColor" data-bind="text: numberWithCommas(selectedSellAmount())"></span>&nbsp;
                                                     <span class="sellColor" data-bind="text: sellAsset" placeholder="Enter amount"></span></b></td>
                                             </tr>
                                             <tr>
-                                                <td>Unit Price</td>
+                                                <td><b>Unit Price:</b></td>
                                                 <td><b><span data-bind="text: unitPrice()"></span>&nbsp;
                                                     <span data-bind="text: quoteAsset"></span> per each <span data-bind="text: baseAsset"></span></b>
+                                                </td>
+                                            </tr>
+                                            <tr data-bind="visible: numBlocksUntilExpiration">
+                                                <td><b>Expires In:</b></td>
+                                                <td><b><span data-bind="text: numBlocksUntilExpiration()"></span>&nbsp;blocks</b>
+                                                </td>
+                                            </tr>
+                                            <tr data-bind="visible: btcFee">
+                                                <td><b>
+                                                    <span data-bind="visible: buyAsset() == 'BTC'">BTC Fee Required:</span>
+                                                    <span data-bind="visible: sellAsset() == 'BTC'">BTC Fee Provided:</span>                                                    
+                                                </b></td>
+                                                <td>
+                                                    <b><span class="sellColor"><span data-bind="text: btcFee"></span>&nbsp;BTC</span></b>
+                                                    (<span data-bind="text: dispFeeForSelectedSellAmountAsPct"></span>% of sale amount)
                                                 </td>
                                             </tr>
                                         </tbody>

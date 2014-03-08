@@ -55,13 +55,13 @@ function AddressViewModel(key, address, initialLabel) {
     });
   }
   
-  self.addOrUpdateAsset = function(asset, balance) {
+  self.addOrUpdateAsset = function(asset, rawBalance) {
     if(asset == 'BTC' || asset == 'XCP') { //special case update
       var match = ko.utils.arrayFirst(self.assets(), function(item) {
           return item.ASSET === asset;
       });
       assert(match); //was created when the address viewmodel was initialized...
-      match.balance(balance);
+      match.rawBalance(rawBalance);
       return;
     }
     
@@ -73,16 +73,16 @@ function AddressViewModel(key, address, initialLabel) {
       if (!match) { //add the asset if it doesn't exist
         var assetProps = {
           address: self.ADDRESS, asset: asset, divisible: assetInfo['divisible'],
-          isMine: isMine, isLocked: assetInfo['locked'], balance: balance,
+          isMine: isMine, isLocked: assetInfo['locked'], rawBalance: rawBalance,
           totalIssued: assetInfo['total_issued'], description: assetInfo['description'], 
           callable: assetInfo['callable'], callDate: assetInfo['call_date'], callPrice: assetInfo['call_price']        
         };
         self.assets.push(new AssetViewModel(assetProps)); //add new
       } else { //update existing 
-        $.jqlog.log("Updating asset " + asset + " @ " + self.ADDRESS + ". Bal from " + match.balance() + " to " + balance + "; Others: " + JSON.stringify(assetInfo));
+        $.jqlog.log("Updating asset " + asset + " @ " + self.ADDRESS + ". Bal from " + match.rawBalance() + " to " + rawBalance + "; Others: " + JSON.stringify(assetInfo));
         match.isMine(isMine);
         match.isLocked(assetInfo['locked']);
-        match.balance(balance);
+        match.rawBalance(rawBalance);
         match.totalIssued(assetInfo['total_issued']);
         match.description(assetInfo['description']);
       }
@@ -162,11 +162,11 @@ function AddressViewModel(key, address, initialLabel) {
 
     if(reverseSort) {
       self.assets.sort(function(left, right) {
-        return left.balance() == right.balance() ? 0 : (right.balance() < left.balance() ? -1 : 1)
+        return left.rawBalance() == right.rawBalance() ? 0 : (right.rawBalance() < left.rawBalance() ? -1 : 1)
       });
     } else {
       self.assets.sort(function(left, right) {
-        return left.balance() == right.balance() ? 0 : (left.balance() < right.balance() ? -1 : 1)
+        return left.rawBalance() == right.rawBalance() ? 0 : (left.rawBalance() < right.rawBalance() ? -1 : 1)
       });
     }    
 

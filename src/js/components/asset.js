@@ -7,15 +7,15 @@ function AssetViewModel(props) {
   self.DIVISIBLE = props['divisible'] || true;
   self.isMine = ko.observable(props['isMine'] === true ? true : (props['isMine'] === false ? false : null)); //null for BTC and XCP, true for self assets, false for others assets
   self.isLocked = ko.observable(props['isLocked'] || false);
-  self.balance = ko.observable(props['balance'] || 0); //raw (not normalized)
+  self.rawBalance = ko.observable(props['rawBalance'] || 0); //raw (not normalized)
   self.totalIssued = ko.observable(props['totalIssued'] || 0); //raw
   self.description = ko.observable(props['description'] || '');
   self.CALLABLE = props['callable'] || false;
-  self.CALLDATE = props['callDate'] || null;
-  self.CALLPRICE = props['callPrice'] || null;
+  self.CALLDATE = props['callDate'] || 0;
+  self.CALLPRICE = props['callPrice'] || 0;
   
   self.normalizedBalance = ko.computed(function() {
-    return self.DIVISIBLE ? Decimal.round(new Decimal(self.balance()).div(UNIT), 8).toFloat() : self.balance(); 
+    return self.DIVISIBLE ? Decimal.round(new Decimal(self.rawBalance()).div(UNIT), 8).toFloat() : self.rawBalance(); 
   }, self);
 
   self.displayedBalance = ko.computed(function() {
@@ -31,13 +31,13 @@ function AssetViewModel(props) {
   }, self);
   
   self.send = function () {
-    if(!self.balance()) { bootbox.alert("You have no available <b>" + self.ASSET + "</b> at address <b>" + self.ADDRESS + "</b> to send."); return; }
+    if(!self.rawBalance()) { bootbox.alert("You have no available <b>" + self.ASSET + "</b> at address <b>" + self.ADDRESS + "</b> to send."); return; }
     if(!WALLET.canDoTransaction(self.ADDRESS)) return false;
-    SEND_MODAL.show(self.ADDRESS, self.ASSET, self.balance(), self.DIVISIBLE);
+    SEND_MODAL.show(self.ADDRESS, self.ASSET, self.rawBalance(), self.DIVISIBLE);
   };
   
   self.testnetBurn = function () {
-    if(!self.balance()) { bootbox.alert("You have no available <b>" + self.ASSET + "</b> at address <b>" + self.ADDRESS + "</b> to burn."); return; }
+    if(!self.rawBalance()) { bootbox.alert("You have no available <b>" + self.ASSET + "</b> at address <b>" + self.ADDRESS + "</b> to burn."); return; }
     if(!WALLET.canDoTransaction(self.ADDRESS)) return false;
     TESTNET_BURN_MODAL.show(self.ADDRESS);
   };

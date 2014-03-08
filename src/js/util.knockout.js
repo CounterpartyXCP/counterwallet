@@ -1,3 +1,4 @@
+
 ko.subscribable.fn.trimmed = function() {
     return ko.computed({
         read: function() {

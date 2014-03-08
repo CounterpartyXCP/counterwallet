@@ -87,7 +87,8 @@ ko.validation.rules['coorespondingSellAmountDoesNotExceedBalance'] = {
     if(self.selectedSellAmount() == null) return true; //don't complain yet until the user fills something in
     if(self.selectedSellAmountCustom()) return true; //this field is not used for custom orders (we do validation on the customBuy field instead)
     if(!self.selectedAddress() || buyAmount == null || buyAmount == '') return false;
-    return self.selectedSellAmount() <= self.totalBalanceAvailForSale();
+    return self.sellAmountRemainingAfterSale() >= 0;
+    //return self.selectedSellAmount() <= self.totalBalanceAvailForSale();
   },
   message: 'You are trying to buy more than you can afford.'
 };
@@ -108,6 +109,7 @@ function BuySellWizardViewModel() {
   self.showOpenOrders = ko.observable(false);
   self.currentTab = ko.observable(1);
   self.overrideMarketPrice = ko.observable(false);
+  self.overrideDefaultOptions = ko.observable(false);
 
   self.myAssets = ko.observableArray([]);
   //^ a list of all assets that this user owns in one or more addresses (for choosing which asset to sell)
@@ -223,6 +225,7 @@ function BuySellWizardViewModel() {
     if(!self.assetPair()) return null;
     return self.assetPair()[0] == self.buyAsset() ? self.sellAsset() : self.buyAsset();
   }, self);
+  
   self.maxAfford = ko.computed(function() {
     //max number of buyAsset that can be bought, given the balance
     // of sellAsset at the selectedAddress and sellAsset's market price
@@ -230,12 +233,14 @@ function BuySellWizardViewModel() {
     var pair = self.assetPair();
     if(self.buyAsset() == pair[0]) { //buy asset is the base asset
       //self.totalBalanceAvailForSale / self.currentMarketUnitPrice
-      return Decimal.round(new Decimal(self.totalBalanceAvailForSale()).div(self.currentMarketUnitPrice()), 8).toFloat();
+      var maxAfford = Decimal.round(new Decimal(self.totalBalanceAvailForSale()).div(self.currentMarketUnitPrice()), 8).toFloat();
     } else { //sell asset is the base asset
       //self.totalBalanceAvailForSale * self.currentMarketUnitPrice
-      return Decimal.round(new Decimal(self.totalBalanceAvailForSale()).mul(self.currentMarketUnitPrice()), 8).toFloat();
+      var maxAfford = Decimal.round(new Decimal(self.totalBalanceAvailForSale()).mul(self.currentMarketUnitPrice()), 8).toFloat();
     }
+    return maxAfford;
   }, self);
+  
   self.totalBalanceAvailForSale = ko.computed(function() {
     if(!self.selectedAddress() || !self.sellAsset()) return null;
     return WALLET.getBalance(self.selectedAddress(), self.sellAsset());
@@ -250,6 +255,27 @@ function BuySellWizardViewModel() {
   });
   self.currentMarketUnitPrice = ko.observable();
   // ^ quote / base (per 1 base unit). May be null if there is no established market rate
+  self.numBlocksUntilExpiration = ko.observable(null).extend({
+    required: {
+      message: "This field is required.",
+      onlyIf: function () { return self.overrideDefaultOptions(); }
+    },
+    digit: true,
+    min: 1,
+    max: 2000 //arbitrary
+  });
+  //^ default to expiration in this many blocks
+  self.btcFee = ko.observable(null).extend({
+    required: {
+      message: "This field is required.",
+      onlyIf: function () { return self.overrideDefaultOptions(); }
+    },
+    pattern: {
+      message: 'Must be a valid amount',
+      params: '^[0-9]*\.?[0-9]{0,8}$' //not perfect ... will convert divisible assets to satoshi before sending to API
+    }
+  });
+  //^ if we are selling BTC, this is a fee_required override if buying BTC, and a fee_provided override if selling BTC. if neither, this is not used
   self.selectedSellAmountCustom = ko.observable().extend({
      //only set if there is no market data, or market data is overridden
     required: {
@@ -274,6 +300,19 @@ function BuySellWizardViewModel() {
   self.selectedSellAmount = ko.computed(function() {
     return(self.selectedSellAmountCustom() || self.selectedSellAmountAtMarket());
   }, self);
+  self.feeForSelectedSellAmount = ko.computed(function() {
+    var fee = 0;
+    if(self.sellAsset() == 'BTC') {
+      var sellAmount = self.selectedSellAmountCustom() || self.selectedSellAmountAtMarket();
+      fee = self.btcFee() || Decimal.round(new Decimal(sellAmount).div(100), 8).toFloat(); // default to 1% if not explicitly specified 
+    }
+    return fee;
+  }, self);
+  self.dispFeeForSelectedSellAmountAsPct = ko.computed(function() {
+    if(!self.feeForSelectedSellAmount()) return null;
+    return Decimal.round(new Decimal(100).mul(self.feeForSelectedSellAmount()).div(self.selectedSellAmount()), 2).toFloat();
+  }, self);
+  
   self.unitPriceCustom = ko.computed(function() {
     if(!self.assetPair() || !self.selectedBuyAmount() || !self.selectedSellAmountCustom() || !isNumber(self.selectedSellAmountCustom())) return null;
     //^ only valid when the market unit price doesn't exist or is overridden
@@ -295,7 +334,11 @@ function BuySellWizardViewModel() {
     if(!self.selectedSellAmount()) return null;
     var curBalance = WALLET.getBalance(self.selectedAddress(), self.sellAsset());
     //curBalance - self.selectedSellAmount
-    return Decimal.round(new Decimal(curBalance).sub(self.selectedSellAmount()), 8).toFloat();
+    var amountLeft = Decimal.round(new Decimal(curBalance).sub(self.selectedSellAmount()), 8).toFloat();
+    if(self.sellAsset() == 'BTC') { //include the fee if we're selling BTC
+      amountLeft = Decimal.round(new Decimal(amountLeft).sub(self.feeForSelectedSellAmount()), 8).toFloat();
+    }
+    return amountLeft;
   }, self);
   self.dispSellAmountRemainingAfterSale = ko.computed(function() {
     return numberWithCommas(noExponents(self.sellAmountRemainingAfterSale()));
@@ -318,6 +361,8 @@ function BuySellWizardViewModel() {
     selectedBuyAmount: self.selectedBuyAmount,
     selectedSellAmountCustom: self.selectedSellAmountCustom,
     selectedUnitPrice: self.selectedUnitPrice,
+    numBlocksUntilExpiration: self.numBlocksUntilExpiration,
+    btcFee: self.btcFee
   });  
 
   self.init = function() {
@@ -383,12 +428,15 @@ function BuySellWizardViewModel() {
           self.showTradeHistory(false);
           self.showOpenOrders(false);
           self.overrideMarketPrice(false);
+          self.overrideDefaultOptions(false);
           $('a[href="#tab2"] span.title').text("Select Amounts");
           
           //reset the fields on tab 2
           self.selectedBuyAmount(null);
           self.selectedSellAmountCustom(null);
           self.currentMarketUnitPrice(null);
+          self.numBlocksUntilExpiration(null);
+          self.btcFee(null);
           self.tradeHistory([]);
           self.openOrders([]);
           self.currentTab(current);
@@ -526,7 +574,9 @@ function BuySellWizardViewModel() {
              give_asset: self.sellAsset(),
              get_quantity: buyAmount,
              get_asset: self.buyAsset(),
-             expiration: 10
+             fee_required: self.buyAsset() == 'BTC' ? denormalizeAmount(self.btcFee()) : null,
+             fee_provided: self.sellAsset() == 'BTC' ? denormalizeAmount(self.btcFee()) : null,
+             expiration: parseInt(self.numBlocksUntilExpiration()) || 10
              /* go with the default fee required and provided */
             },
             function() {

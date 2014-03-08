@@ -15,11 +15,6 @@ function AssetPortfolioViewModel() {
   self.miniChartData = ko.observable({});
   
   self.init = function() {
-    var _smartFormat = function(num) { //arbitrary rules to make numbers be formatted a bit more friendly
-      if(num > 10) num = +num.toFixed(2); //use + sign to lob off any trailing zeros...
-      return numberWithCommas(num);
-    };
-  
     //Set up handler to regraph the data if the terms we place it in change
     self.showPortfolioIn.subscribeChanged(function(newValue, prevValue) {
       assert(newValue == "XCP" || newValue == "BTC", "Invalid value");
@@ -31,12 +26,12 @@ function AssetPortfolioViewModel() {
           if (self.marketInfo.hasOwnProperty(asset)) {
             newRows.push({
               asset: asset,
-              marketCap: _smartFormat(self.marketInfo[asset]['market_cap_in_xcp']) || '??',
+              marketCap: smartFormat(self.marketInfo[asset]['market_cap_in_xcp']) || '??',
               price: self.marketInfo[asset]['aggregated_price_in_xcp'] || '??',
-              supply: _smartFormat(self.marketInfo[asset]['total_supply']),
+              supply: smartFormat(self.marketInfo[asset]['total_supply']),
               volume: self.marketInfo[asset]['24h_ohlc_in_xcp']['vol'] && self.marketInfo[asset]['aggregated_price_in_xcp'] 
-                ? _smartFormat(self.marketInfo[asset]['24h_ohlc_in_xcp']['vol'] * self.marketInfo[asset]['aggregated_price_in_xcp']) : '??',
-              pctChange: _smartFormat(self.marketInfo[asset]['24h_vol_price_change_in_xcp']) || '??',
+                ? smartFormat(self.marketInfo[asset]['24h_ohlc_in_xcp']['vol'] * self.marketInfo[asset]['aggregated_price_in_xcp']) : '??',
+              pctChange: smartFormat(self.marketInfo[asset]['24h_vol_price_change_in_xcp']) || '??',
               history: self.marketInfo[asset]['7d_history_in_xcp']
             });
           }
@@ -46,12 +41,12 @@ function AssetPortfolioViewModel() {
           if (self.marketInfo.hasOwnProperty(asset)) {
             newRows.push({
               asset: asset,
-              marketCap: _smartFormat(self.marketInfo[asset]['market_cap_in_btc']) || '??',
+              marketCap: smartFormat(self.marketInfo[asset]['market_cap_in_btc']) || '??',
               price: self.marketInfo[asset]['aggregated_price_in_btc'] || '??',
-              supply: _smartFormat(self.marketInfo[asset]['total_supply']),
+              supply: smartFormat(self.marketInfo[asset]['total_supply']),
               volume: self.marketInfo[asset]['24h_ohlc_in_btc']['vol'] && self.marketInfo[asset]['aggregated_price_in_btc'] 
-                ? _smartFormat(self.marketInfo[asset]['24h_ohlc_in_btc']['vol'] * self.marketInfo[asset]['aggregated_price_in_btc']) : '??',
-              pctChange: _smartFormat(self.marketInfo[asset]['24h_vol_price_change_in_btc']) || '??',
+                ? smartFormat(self.marketInfo[asset]['24h_ohlc_in_btc']['vol'] * self.marketInfo[asset]['aggregated_price_in_btc']) : '??',
+              pctChange: smartFormat(self.marketInfo[asset]['24h_vol_price_change_in_btc']) || '??',
               history: self.marketInfo[asset]['7d_history_in_btc']
             });
           }

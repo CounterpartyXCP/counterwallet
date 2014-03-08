@@ -74,7 +74,7 @@ function WalletViewModel() {
     if(!addressObj) return false;
     var assetObj = addressObj.getAssetObj(asset);
     if(!assetObj) return false;
-    return normalized ? assetObj.normalizedBalance() : assetObj.balance();
+    return normalized ? assetObj.normalizedBalance() : assetObj.rawBalance();
   }
 
   self.updateBalance = function(address, asset, balance) {
@@ -106,11 +106,7 @@ function WalletViewModel() {
     //^ if isAtLogon is true, we will start a recurring get BTC balances timer chain 
 
     //update all counterparty XCP/asset balances
-    var filters = [];
-    ko.utils.arrayForEach(self.addresses(), function(address) {
-      filters.push({'field': 'address', 'op': '==', 'value': address.ADDRESS});
-    });
-    failoverAPI("get_balances", {"filters": filters, "filterop": "or"},
+    failoverAPI("get_normalized_balances", [self.getAddressesList()],
       function(data, endpoint) {
         $.jqlog.log("Got initial balances: " + JSON.stringify(data));
         for(var i=0;i<data.length;i++) {
@@ -124,39 +120,47 @@ function WalletViewModel() {
     if(typeof(isRecurring)==='undefined') isRecurring = false; //this field should only be used by initBTCBalanceAutoRefresh
     //^ if isRecurring is set to true, we will update BTC balances every 5 min as long as self.autoRefreshBTCBalances == true
     
-    //update all BTC balances
-    self.retrieveBTCBalances(self.getAddressesList(), function(data) {
-      for(var i=0; i < data.length; i++) {
-        self.updateBalance(data[i]['address'], "BTC", data[i]['balance']);
-        
-        function _retrNumPrimed(num) {
-          //Also refresh BTC unspent txouts (to know when to "reprime" the account)
-          var address = data[i]['address'];
-          self.retrieveNumPrimedTxouts(address, function(numPrimedTxouts) {
-            self.updateNumPrimedTxouts(address, numPrimedTxouts); //null if unknown
-          }, function(jqXHR, textStatus, errorThrown) {
-            self.updateNumPrimedTxouts(address, null); //null = UNKNOWN
-          });
-        }
-        if(data[i]['balance']) _retrNumPrimed(i); //closure
-        else self.updateNumPrimedTxouts(data[i]['address'], 0); //zero balance == no primed txouts (no need to even try and get a 500 error)
-      }
-      
-      if(isRecurring && self.autoRefreshBTCBalances) {
-        setTimeout(function() {
-          if(self.autoRefreshBTCBalances) {
-            self.refreshBTCBalances(true);
+    //update all BTC balances (independently, so that one addr with a bunch of txns doesn't hold us up)
+    var addresses = self.getAddressesList();
+    var completedAddresses = []; //addresses whose balance has been retrieved
+    for(var i=0; i < addresses.length; i++) {
+      function _retrBal(address, i) {
+        self.retrieveBTCBalance(address, function(rawBalConfirmed, rawBalUnconfirmed) {
+          //if someone sends BTC using the wallet, an entire TXout is spent, and the change is routed back. During this time
+          // the (confirmed) balance will be decreased by the ENTIRE amount of that txout, even though they may be getting
+          // some/most of it back as change. To avoid people being confused over this, with BTC in particular, we should
+          // display the unconfirmed portion of the balance in addition to the confirmed balance, as it will include the change output
+          self.updateBalance(address, "BTC", rawBalConfirmed + rawBalUnconfirmed);
+          
+          if(rawBalConfirmed) {
+            //Also refresh BTC unspent txouts (to know when to "reprime" the account)
+            self.retrieveNumPrimedTxouts(address, function(numPrimedTxouts) {
+              self.updateNumPrimedTxouts(address, numPrimedTxouts); //null if unknown
+            }, function(jqXHR, textStatus, errorThrown) {
+              self.updateNumPrimedTxouts(address, null); //null = UNKNOWN
+            });
+          } else {
+            self.updateNumPrimedTxouts(address, 0); //zero balance == no primed txouts (no need to even try and get a 500 error)
           }
-        }, 60000 * 5);
+          
+          if(completedAddresses.length == addresses.length - 1) { //all done
+            completedAddresses = []; //clear for the next call through
+            if(isRecurring && self.autoRefreshBTCBalances) {
+              setTimeout(function() {
+                if(self.autoRefreshBTCBalances) {
+                  self.refreshBTCBalances(true);
+                }
+              }, 60000 * 5);
+            }
+          } else completedAddresses.push(address);
+        }, function(jqXHR, textStatus, errorThrown) {
+          //insight down or spazzing
+          self.updateBalance(address, "BTC", null); //null = UNKNOWN
+          self.updateNumPrimedTxouts(address, null); //null = UNKNOWN
+        });
       }
-    }, function(jqXHR, textStatus, errorThrown) {
-      //insight down or spazzing
-      var addresses = self.getAddressesList();
-      for(var i=0; i < addresses.length; i++) {
-        self.updateBalance(addresses[i], "BTC", null); //null = UNKNOWN
-        self.updateNumPrimedTxouts(addresses[i], null); //null = UNKNOWN
-      }
-    });
+      _retrBal(addresses[i], i); //closure
+    }
   }
 
   self.removeKeys = function() {
@@ -196,21 +200,32 @@ function WalletViewModel() {
     );
   }
 
-  self.signAndBroadcastTxRaw = function(key, unsignedTxHex) {
+  self.signAndBroadcastTxRaw = function(key, unsignedTxHex, verifySourceAddr, verifyDestAddr) {
+    assert(verifySourceAddr, "Source address must be specified");
     //Sign and broadcast a multisig transaction that we got back from counterpartyd (as a raw unsigned tx in hex)
+    //* verifySourceAddr and verifyDestAddr can be specified to verify that the txn hash we get back from the server is what we expected,
+    // at least with the bitcoin source and dest addresses (if any). This is a basic form of sanity checking, that we
+    // can enhance in the future to actually peer into the counterparty txn at a simplistic level to confirm certain additional details.
+    //* destAddr is optional (used with sends, bets, btcpays, issuances when transferring asset ownership, and burns)
+    
     var sendTx = Bitcoin.Transaction.deserialize(unsignedTxHex), i = null;
     $.jqlog.log("RAW UNSIGNED HEX: " + unsignedTxHex);
     //$.jqlog.log("RAW UNSIGNED Tx: " + TX.toBBE(sendTx));
     
-    //Sanity check that the first regular output before the first data output is an address in our wallet
-    /*var address = null, addr = null;
+    //Sanity check on the txn source address and destination address (if specified)
+    var address = null, addr = null;
     for (i=0; i < sendTx.outs.length; i++) {
-      address = sendTx.outs[1].address;
-      address.version = !USE_TESTNET ? Bitcoin.network.mainnet.addressVersion : Bitcoin.network.testnetnet.addressVersion;
+      address = sendTx.outs[i].address;
+      address.version = !USE_TESTNET ? Bitcoin.network.mainnet.addressVersion : Bitcoin.network.testnet.addressVersion;
       addr = address.toString();
-      if(USE_TESTNET && addr == TESTNET_UNSPENDABLE) continue;  //this is a testnet burn (skip validation of this out)
-      if(addr[0] != '1' || addr[0] != 'm' || addr[0] != 'n') continue; //not a pubkey hash address, skip
-    }*/
+      if(addr[0] != '1' && addr[0] != 'm' && addr[0] != 'n') continue; //not a pubkey hash address, skip
+      //if an address is present, it must be either destAddress, or sourceAddress (i.e. for getting change)
+      if(addr != verifySourceAddr && (verifyDestAddr && addr != verifyDestAddr)) {
+        bootbox.alert("Client-side transaction validation FAILED. Transaction will be aborted and NOT broadcast."
+          + " Please contact the Counterparty development team. Unexpected address was: " + addr);
+        return false;
+      }
+    }
     
     //Sign the input(s)
     for (i=0; i < sendTx.ins.length; i++) {
@@ -220,38 +235,22 @@ function WalletViewModel() {
     return self.broadcastSignedTx(sendTx.serializeHex());
   }
   
-  self.signAndBroadcastTx = function(address, unsignedTxHex) {
+  self.signAndBroadcastTx = function(address, unsignedTxHex, verifyDestAddr) {
     var key = WALLET.getAddressObj(address).KEY;    
-    return self.signAndBroadcastTxRaw(key, unsignedTxHex);
+    return self.signAndBroadcastTxRaw(key, unsignedTxHex, address, verifyDestAddr);
   }
   
   self.retrieveBTCBalance = function(address, callback, errorHandler) {
-    //If you are requesting more than one balance, use retrieveBTCBalances instead
+    //We used to have a retrieveBTCBalances function for getting balance of multiple addresses, but scrapped it
+    // since it worked in serial, and one address with a lot of txns could hold up the balance retrieval of every
+    // other address behind it
     fetchData(urlsWithPath(counterwalletd_insight_api_urls, '/addr/' + address),
       function(data, endpoint) {
-        return callback(parseInt(data['balanceSat']));
+        return callback(parseInt(data['balanceSat'] || 0), parseInt(data['unconfirmedBalanceSat'] || 0));
       },
       errorHandler || defaultErrorHandler);
   }
 
-  self.retrieveBTCBalances = function(addresses, callback, errorHandler) {
-    //addresses is a list of one or more bitcoin addresses
-    var balances = [];
-    for(var i = 0; i < addresses.length; i++) {
-      fetchData(urlsWithPath(counterwalletd_insight_api_urls, '/addr/' + addresses[i]),
-        function(data, endpoint) {
-          balances.push({
-            'address': data['addrStr'],
-            'balance': parseInt(data['balanceSat'])
-          }); 
-          if(balances.length == addresses.length) {
-            return callback(balances);
-          }
-        },
-        errorHandler || defaultErrorHandler);
-    }
-  }
-  
   self.retrieveNumPrimedTxouts = function(address, callback) {
     assert(callback, "callback must be defined");
     fetchData(urlsWithPath(counterwalletd_insight_api_urls, '/addr/' + address + '/utxo'),
@@ -296,11 +295,15 @@ function WalletViewModel() {
   }
   
   self.doTransaction = function(address, action, data, onSuccess) {
+    //specify the pubkey for a multisig tx
     assert(data['multisig'] === undefined);
     data['multisig'] = WALLET.getAddressObj(address).PUBKEY;
+    //find and specify the verifyDestAddr
+    var verifyDestAddr = data['destination'] || data['transfer_destination'] || null;
+    
     multiAPIConsensus(action, data,
       function(unsignedTxHex, numTotalEndpoints, numConsensusEndpoints) {
-        WALLET.signAndBroadcastTx(address, unsignedTxHex);
+        WALLET.signAndBroadcastTx(address, unsignedTxHex, verifyDestAddr);
         //TODO: register this as a pending transaction 
         return onSuccess();
     });
