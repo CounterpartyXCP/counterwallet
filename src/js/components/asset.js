@@ -74,10 +74,10 @@ function AssetViewModel(props) {
           label: "Lock this asset",
           className: "btn-danger",
           callback: function() {
-            //to lock, issue with quantity == 0 and "LOCK" in the description field
+            //to lock, issue with amount == 0 and "LOCK" in the description field
             WALLET.doTransaction(self.ADDRESS, "create_issuance",
               { source: self.ADDRESS,
-                quantity: 0,
+                amount: 0,
                 asset: self.ASSET,
                 divisible: self.DIVISIBLE,
                 description: "LOCK",

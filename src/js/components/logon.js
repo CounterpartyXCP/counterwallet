@@ -85,27 +85,34 @@ function LogonViewModel() {
       multiAPINewest("get_preferences", [WALLET.identifier()], 'last_updated', function(data) {
         assert(data && data.hasOwnProperty('preferences'), "Invalid stored preferences");
         PREFERENCES = data['preferences'];
+        var mustSavePreferencesToServer = false;
         
-        //Update selected language and theme
-        if(PREFERENCES['selected_theme']) THEME_SELECTOR.changeThemeByID(PREFERENCES['selected_theme']);
-        if(PREFERENCES['selected_lang']) LANG_SELECTOR.changeLangByID(PREFERENCES['selected_lang']);
+        //Provide defaults for any missing fields in the stored preferences object
+        for(var prop in DEFAULT_PREFERENCES) {
+          if(DEFAULT_PREFERENCES.hasOwnProperty(prop)) {
+            if(PREFERENCES[prop] === undefined) {
+              $.jqlog.info("Providing default for preferences property: " + prop);
+              PREFERENCES[prop] = DEFAULT_PREFERENCES[prop];
+              mustSavePreferencesToServer = true;
+            }
+          }
+        }
         
-        self.openWalletPt2(false);
+        //Update options from what's in preferences
+        WALLET_OPTIONS_MODAL.autoPrimeEnabled(PREFERENCES['auto_prime']);
+        WALLET_OPTIONS_MODAL.selectedTheme(PREFERENCES['selected_theme']);
+        WALLET_OPTIONS_MODAL.selectedLang(PREFERENCES['selected_lang']);
+        
+        self.openWalletPt2(mustSavePreferencesToServer);
       }, function(jqXHR, textStatus, errorThrown) {
         //No server had the preferences
         $.jqlog.log("Stored preferences NOT found on server(s). Creating new...");
         WALLET.isNew(true);
         
         //no stored preferences on any server(s) in the federation, go with the default...
-        prefs = {
-          'num_addresses_used': WALLET.DEFAULT_NUMADDRESSES,
-          'address_aliases': {},
-          'selected_theme': 'ultraLight',
-          'selected_lang': 'en-us',
-          'watch_only_addresses': []
-        };
-  
-        PREFERENCES = prefs;
+        PREFERENCES = DEFAULT_PREFERENCES;
+
+        //Update options from what's in preferences (no need, as the default are fine)
         self.openWalletPt2(true);
       });
     },
@@ -316,11 +323,5 @@ function LogonPasswordModalViewModel() {
   }
 }
 
-
-window.LOGON_VIEW_MODEL = new LogonViewModel();
-window.LOGON_PASSWORD_MODAL = new LogonPasswordModalViewModel();
-
-$(document).ready(function() {
-  ko.applyBindings(LOGON_VIEW_MODEL, document.getElementById("logon"));
-  ko.applyBindingsWithValidation(LOGON_PASSWORD_MODAL, document.getElementById("logonPassphaseModal"));
-});
+/*NOTE: Any code here is only triggered the first time the page is visited. Put JS that needs to run on the
+  first load and subsequent ajax page switches in the .html <script> tag*/

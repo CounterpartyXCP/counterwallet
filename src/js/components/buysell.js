@@ -1,3 +1,5 @@
+var MARKET_INFO_REFRESH_EVERY = 5 * 60 * 1000; //refresh market info every 5 minutes while on tab 2 
+
 var AddressInDropdownItemModel = function(address, label, asset, balance) {
   this.ADDRESS = address;
   this.LABEL = label;
@@ -247,6 +249,7 @@ function BuySellWizardViewModel() {
   }, self);
   
   //WIZARD TAB 2
+  self.MARKET_DATA_REFRESH_TIMERID = null;
   self.selectedBuyAmount = ko.observable().extend({
     required: true,
     isValidBuyOrSellAmount: self,
@@ -255,17 +258,17 @@ function BuySellWizardViewModel() {
   });
   self.currentMarketUnitPrice = ko.observable();
   // ^ quote / base (per 1 base unit). May be null if there is no established market rate
-  self.numBlocksUntilExpiration = ko.observable(null).extend({
+  self.numBlocksUntilExpiration = ko.observable(ORDER_DEFAULT_EXPIRATION).extend({
     required: {
       message: "This field is required.",
       onlyIf: function () { return self.overrideDefaultOptions(); }
     },
     digit: true,
     min: 1,
-    max: 2000 //arbitrary
+    max: 1000 //arbitrary
   });
   //^ default to expiration in this many blocks
-  self.btcFee = ko.observable(null).extend({
+  self.btcFee = ko.observable(ORDER_DEFAULT_BTCFEE_PCT).extend({
     required: {
       message: "This field is required.",
       onlyIf: function () { return self.overrideDefaultOptions(); }
@@ -276,6 +279,12 @@ function BuySellWizardViewModel() {
     }
   });
   //^ if we are selling BTC, this is a fee_required override if buying BTC, and a fee_provided override if selling BTC. if neither, this is not used
+  self.btcFeeAs = ko.observable('percentage');
+  self.delayedBTCFee = ko.computed(self.btcFee).extend({ rateLimit: { method: "notifyWhenChangesStop", timeout: 400 } });
+  //^ this is used for refreshing the order book, depending on what BTC fee was entered as. However we want the refresh to be
+  // delayed to that we don't make a bunch of ajax requests WHILE the user is typing...instead, waiting until the user
+  // a) finishes typing and b) the value is valid, before making changes. Subscribing to changes in delayedBTCFee allows us to do this
+  
   self.selectedSellAmountCustom = ko.observable().extend({
      //only set if there is no market data, or market data is overridden
     required: {
@@ -301,16 +310,23 @@ function BuySellWizardViewModel() {
     return(self.selectedSellAmountCustom() || self.selectedSellAmountAtMarket());
   }, self);
   self.feeForSelectedSellAmount = ko.computed(function() {
+    //returns the fee (as an amount, not a %) for the specified sell amount
     var fee = 0;
     if(self.sellAsset() == 'BTC') {
-      var sellAmount = self.selectedSellAmountCustom() || self.selectedSellAmountAtMarket();
-      fee = self.btcFee() || Decimal.round(new Decimal(sellAmount).div(100), 8).toFloat(); // default to 1% if not explicitly specified 
+      if(!self.selectedSellAmount() || !self.btcFee()) return 0;
+      if(self.btcFeeAs() == 'percentage') {
+        fee = Decimal.round(new Decimal(self.selectedSellAmount()).mul(self.btcFee() / 100), 8).toFloat(); 
+      } else { //the amount itself
+        fee = parseFloat(self.btcFee());
+      }
     }
     return fee;
   }, self);
   self.dispFeeForSelectedSellAmountAsPct = ko.computed(function() {
     if(!self.feeForSelectedSellAmount()) return null;
-    return Decimal.round(new Decimal(100).mul(self.feeForSelectedSellAmount()).div(self.selectedSellAmount()), 2).toFloat();
+    return self.btcFeeAs() == 'percentage'
+      ? self.btcFee()
+      : Decimal.round(new Decimal(100).mul(self.feeForSelectedSellAmount()).div(self.selectedSellAmount()), 2).toFloat();
   }, self);
   
   self.unitPriceCustom = ko.computed(function() {
@@ -362,7 +378,13 @@ function BuySellWizardViewModel() {
     selectedSellAmountCustom: self.selectedSellAmountCustom,
     selectedUnitPrice: self.selectedUnitPrice,
     numBlocksUntilExpiration: self.numBlocksUntilExpiration,
-    btcFee: self.btcFee
+    btcFee: self.btcFee,
+    btcFeeAs: self.btcFeeAs
+  });  
+
+  self.validationModelTab2BTCFee = ko.validatedObservable({
+    btcFee: self.btcFee,
+    btcFeeAs: self.btcFeeAs
   });  
 
   self.init = function() {
@@ -399,7 +421,7 @@ function BuySellWizardViewModel() {
       failoverAPI("get_asset_info", [newValue], function(assetInfo, endpoint) {
         self.buyAssetIsDivisible(assetInfo['divisible']);
       });    
-    });  
+    });
 
     self.sellAsset.subscribe(function(newValue) {
       self.selectedAddress(''); //clear it
@@ -410,6 +432,13 @@ function BuySellWizardViewModel() {
       //^ hack to get the select box to TOTALLY clear selectedAddress is cleared
       // ...without this, it will clear the options listing, but previously selected option (if any) will stay
       // visible as selected, even though there are no options
+    });
+    
+    //auto refresh the order book tuned to the entered fee, if it applies
+    self.delayedBTCFee.subscribeChanged(function(newValue, prevValue) {
+      assert(self.buyAsset() == 'BTC' || self.sellAsset() == 'BTC'); //should not fire otherwise, as the field would not be shown
+      if(!self.validationModelTab2BTCFee.isValid()) return;
+      self.tab2RefreshOrderBook(); //refresh the order book
     });
 
     //RELEASE the WIZARD (Ydkokw2Y-rc)
@@ -422,24 +451,27 @@ function BuySellWizardViewModel() {
         var total = navigation.find('li').length;
         var current = index + 1;
         console.log("onTabShow: " + current);
+        self.currentTab(current);
         
         if(current == 1) { //going BACK to tab 1
+          self._tab2StopAutoRefresh();
           self.showPriceChart(false);
           self.showTradeHistory(false);
           self.showOpenOrders(false);
           self.overrideMarketPrice(false);
           self.overrideDefaultOptions(false);
           $('a[href="#tab2"] span.title').text("Select Amounts");
+          $('#tradeHistory').dataTable().fnClearTable(); //otherwise we get duplicate rows for some reason...
           
           //reset the fields on tab 2
           self.selectedBuyAmount(null);
           self.selectedSellAmountCustom(null);
           self.currentMarketUnitPrice(null);
-          self.numBlocksUntilExpiration(null);
-          self.btcFee(null);
+          self.numBlocksUntilExpiration(ORDER_DEFAULT_EXPIRATION);
+          self.btcFee(ORDER_DEFAULT_BTCFEE_PCT);
+          self.btcFeeAs('percentage');
           self.tradeHistory([]);
           self.openOrders([]);
-          self.currentTab(current);
           self.currentBlockIndex(null);
           self.askBook([]);
           self.bidBook([]);
@@ -451,87 +483,13 @@ function BuySellWizardViewModel() {
           self.selectedBuyAmount.isModified(false);
           self.selectedSellAmountCustom.isModified(false);
           $('a[href="#tab2"] span.title').text("Select Amounts (" + self.dispAssetPair() + ")");
-          
-          //get the market price (if available) for display
-          failoverAPI("get_market_price_summary", [self.buyAsset(), self.sellAsset()], function(data, endpoint) {
-            self.currentMarketUnitPrice(data['market_price'] || null); //may end up being null
-            self.currentTab(current); //set this here so we don't get a flash with content before we load the market price data
-          });
-          
-          failoverAPI("get_trade_history_within_dates", [self.buyAsset(), self.sellAsset()], function(data, endpoint) {
-            self.tradeHistory(data);
-            if(data.length) {
-              runDataTables('#tradeHistory', true);
-              self.showTradeHistory(true);
-            } else {
-              self.showTradeHistory(false);
-            }
-          });
 
-          //fetch the current block index
-          failoverAPI("get_running_info", [], function(data, endpoint) {
-            self.currentBlockIndex(data['bitcoin_block_count']);
-
-            //fetch and show all open orders for the selected address and asset pair
-            failoverAPI("get_orders", {
-                filters: [{'field': 'source', 'op': '==', 'value': self.selectedAddress()},
-                          {'field': 'give_asset', 'op': '==', 'value': self.buyAsset()},
-                          {'field': 'get_asset', 'op': '==', 'value': self.sellAsset()},
-                          {'field': 'give_remaining', 'op': '!=', 'value': 0},
-                         ],
-                show_expired: false,
-                order_by: 'block_index',
-                order_dir: 'asc',
-              }, function(data, endpoint) {
-                self.openOrders(data);
-                //issue a second call for the other direction
-                failoverAPI("get_orders", {
-                  filters: [{'field': 'source', 'op': '==', 'value': self.selectedAddress()},
-                            {'field': 'give_asset', 'op': '==', 'value': self.sellAsset()},
-                            {'field': 'get_asset', 'op': '==', 'value': self.buyAsset()},
-                            {'field': 'give_remaining', 'op': '!=', 'value': 0},
-                           ],
-                  show_expired: false,
-                  order_by: 'block_index',
-                  order_dir: 'asc',
-                  }, function(data, endpoint) {
-                    self.openOrders(self.openOrders().concat(data)); //combine the two
-                    //now that we have the complete data, show the orders listing
-                    if(data.length) {
-                      runDataTables('#openOrders', true);
-                      self.showOpenOrders(true);
-                    } else {
-                      self.showOpenOrders(false);
-                    }
-                  }
-                )
-              }
-            );
-          });
-          
-          //now that an asset pair is picked, we can show a price chart for that pair
-          failoverAPI("get_market_price_history", [self.buyAsset(), self.sellAsset()], function(data, endpoint) {
-            if(data.length) {
-              self.showPriceChart(true);
-              self.doChart($('#priceHistory'), data);
-              
-              //get order book (only if we have a price history, which we do)
-              failoverAPI("get_order_book", [self.buyAsset(), self.sellAsset()], function(data, endpoint) {
-                data['base_ask_book'].reverse(); //for display
-                self.askBook(data['base_ask_book'].slice(0,7)); //limit to 7 entries
-                self.bidBook(data['base_bid_book'].slice(0,7));
-                self.bidAskMedian(data['bid_ask_median']);
-                self.bidDepth(data['bid_depth']);
-                self.askDepth(data['ask_depth']);
-              });
-            } else {
-              self.showPriceChart(false);
-            }
-          });
-
+          //Set up the timer to refresh market data (this will immediately refresh and display data as well)
+          self._tab2StartAutoRefresh();
         } else {
           assert(current == 3, "Unknown wizard tab change!");
-          self.currentTab(current);
+          $('#tradeHistory').dataTable().fnClearTable(); //otherwise we get duplicate rows for some reason...
+          self._tab2StopAutoRefresh();
         }
         
         //If it's the first tab, disable the previous button
@@ -544,7 +502,7 @@ function BuySellWizardViewModel() {
         } else {
           $('#buySellWizard').find('.pager .next').show();
           $('#buySellWizard').find('.pager .finish').hide();
-        }                
+        }
       },
       onNext: function (tab, navigation, index) {
         console.log("onNext: " + index);
@@ -570,14 +528,13 @@ function BuySellWizardViewModel() {
 
           WALLET.doTransaction(self.selectedAddress(), "create_order",
             {source: self.selectedAddress(),
-             give_quantity: sellAmount,
+             give_amount: sellAmount,
              give_asset: self.sellAsset(),
-             get_quantity: buyAmount,
+             get_amount: buyAmount,
              get_asset: self.buyAsset(),
-             fee_required: self.buyAsset() == 'BTC' ? denormalizeAmount(self.btcFee()) : null,
-             fee_provided: self.sellAsset() == 'BTC' ? denormalizeAmount(self.btcFee()) : null,
-             expiration: parseInt(self.numBlocksUntilExpiration()) || 10
-             /* go with the default fee required and provided */
+             fee_required: self.buyAsset() == 'BTC' ? denormalizeAmount(self.feeForSelectedSellAmount()) : null,
+             fee_provided: self.sellAsset() == 'BTC' ? denormalizeAmount(self.feeForSelectedSellAmount()) : null,
+             expiration: parseInt(self.numBlocksUntilExpiration())
             },
             function() {
               bootbox.alert("Your order for <b>" + self.selectedBuyAmount() + " " + self.selectedBuyAsset() + "</b> has been placed."
@@ -586,6 +543,97 @@ function BuySellWizardViewModel() {
             }
           );
         }
+      }
+    });
+  }
+
+  self._tab2StartAutoRefresh = function() {
+    if(self.currentTab() != 2) return; //stop refreshing
+    $.jqlog.log("Refreshing market data for " + self.dispAssetPair() + ' ...');
+    self.tab2RefreshMarketUnitPrice();
+    self.tab2RefreshPriceChart();
+    self.tab2RefreshTradeHistory();
+    self.tab2RefreshCurrentBlockIndex();
+    self.tab2RefreshOrderBook();
+    self.MARKET_DATA_REFRESH_TIMERID = setTimeout(self._tab2StartAutoRefresh, MARKET_INFO_REFRESH_EVERY);
+  }
+  
+  self._tab2StopAutoRefresh = function() {
+    if(self.MARKET_DATA_REFRESH_TIMERID) { //stop auto update of market data
+      clearTimeout(self.MARKET_DATA_REFRESH_TIMERID);
+      self.MARKET_DATA_REFRESH_TIMERID = null;
+    }
+  }
+
+  self.tab2RefreshMarketUnitPrice = function() {
+    //get the market price (if available) for display
+    failoverAPI("get_market_price_summary", [self.buyAsset(), self.sellAsset()], function(data, endpoint) {
+      self.currentMarketUnitPrice(data['market_price'] || null); //may end up being null
+    });
+  }
+          
+  self.tab2RefreshPriceChart = function() {
+    //now that an asset pair is picked, we can show a price chart for that pair
+    failoverAPI("get_market_price_history", [self.buyAsset(), self.sellAsset()], function(data, endpoint) {
+      if(data.length) {
+        self.showPriceChart(true);
+        self.doChart($('#priceHistory'), data);
+      } else {
+        self.showPriceChart(false);
+      }
+    });
+  }
+
+  self.tab2RefreshTradeHistory = function() {
+    failoverAPI("get_trade_history_within_dates", [self.buyAsset(), self.sellAsset()], function(data, endpoint) {
+      self.tradeHistory(data);
+      if(data.length) {
+        runDataTables('#tradeHistory', true);
+        self.showTradeHistory(true);
+      } else {
+        self.showTradeHistory(false);
+      }
+    });
+  }
+
+  self.tab2RefreshCurrentBlockIndex = function() {
+    //fetch the current block index (to show the order expiration in statistic)
+    failoverAPI("get_running_info", [], function(data, endpoint) {
+      self.currentBlockIndex(data['bitcoin_block_count']);
+    });
+  }
+  
+  self.tab2RefreshOrderBook = function() {
+    //get order book
+    var args = {'asset1': self.buyAsset(), 'asset2': self.sellAsset()};
+    if(self.buyAsset() == 'BTC') args['normalized_fee_required'] = self.feeForSelectedSellAmount();
+    if(self.sellAsset() == 'BTC') args['normalized_fee_provided'] = self.feeForSelectedSellAmount();
+    
+    failoverAPI("get_order_book", args, function(data, endpoint) {
+      if(!data['raw_orders'] || data['raw_orders'].length == 0) return;
+      //^ no order book, showPriceChart should end up being set to false and the order book wont show
+
+      //set up order book display
+      data['base_ask_book'].reverse(); //for display
+      self.askBook(data['base_ask_book'].slice(0,7)); //limit to 7 entries
+      self.bidBook(data['base_bid_book'].slice(0,7));
+      self.bidAskMedian(data['bid_ask_median']);
+      self.bidDepth(data['bid_depth']);
+      self.askDepth(data['ask_depth']);
+      
+      //fetch and show all my open orders for the selected address and asset pair
+      var myOrders = [];
+      for(var i=0; i < data['raw_orders']; i++) { //O(n^2)...optimize later
+        if(WALLET.getAddressObj(data['raw_orders'][i]['source']))
+          myOrders.push(data['raw_orders'][i]);
+      }
+      self.openOrders(myOrders);
+      //now that we have the complete data, show the orders listing
+      if(data.length) {
+        runDataTables('#openOrders', true);
+        self.showOpenOrders(true);
+      } else {
+        self.showOpenOrders(false);
       }
     });
   }
@@ -617,6 +665,7 @@ function BuySellWizardViewModel() {
   }
   
   self.derivePendingOrderExpiresIn = function(blockIndexCreatedAt, expiration) {
+    if(!self.currentBlockIndex()) return '??'; //if block index isn't set yet
     //Outputs HTML
     var blockLifetime = self.currentBlockIndex() - blockIndexCreatedAt;
     var timeLeft = expiration - blockLifetime;

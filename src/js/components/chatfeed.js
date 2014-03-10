@@ -225,11 +225,10 @@ function ChatFeedViewModel() {
   }
 }
 
-window.CHAT_FEED = new ChatFeedViewModel();
+/*NOTE: Any code here is only triggered the first time the page is visited. Put JS that needs to run on the
+  first load and subsequent ajax page switches in the .html <script> tag*/
 
 $(document).ready(function() {
-  ko.applyBindings(CHAT_FEED, document.getElementById("chatPane"));
-  
   //Set up link on the side bar to show/hide chat box
   $('#chatLink').click(function() {
     $('#chatPane').is(':hidden') ? CHAT_FEED.showChat() : CHAT_FEED.hideChat(); 

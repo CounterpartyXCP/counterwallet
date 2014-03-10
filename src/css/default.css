@@ -58,7 +58,9 @@ p.formPaddedBot, div.formPaddedBot {
     padding-top: 15px; /* reduce a bit */
 }
 
-/* LOGO AND ACTIVITY LOG INTERFACE MODIFICATIONS */
+/* 
+ * LOGO AND ACTIVITY LOG INTERFACE MODIFICATIONS
+ */
 span.logoText {
     font-size: 1.6em;
     color: white;
@@ -84,15 +86,61 @@ span.logoText {
     position:relative;
     left: 20px; /* + 20px */
 }
-.ajax-dropdown {
-    left: 56px; /* + 20px */
-}
 #header>:first-child {
-    width: 260px; /* + 20px */
+    width: 340px; /* + 100px */
 }
 .smart-style-0 #header span.logoText { /* override for a specific style */
     color: black;
 }
+
+#logo-group span.activity-parent { /* custom style */
+  margin-left: 10px;
+}
+#logo-group span.activity-dropdown {
+  -moz-border-radius: 2px;
+  -webkit-border-radius: 2px;
+  border-radius: 2px;
+  cursor: default !important;
+  display: inline-block;
+  font-weight: bold;
+  height: 24px;
+  width: 24px;
+  padding: 2px;
+  text-align: center;
+  text-decoration: none !important;
+  -moz-user-select: none;
+  -webkit-user-select: none;
+  background-color: #f8f8f8;
+  background-image: -webkit-gradient(linear, left top, left bottom, from(#f8f8f8), to(#f1f1f1));
+  background-image: -webkit-linear-gradient(top, #f8f8f8, #f1f1f1);
+  background-image: -moz-linear-gradient(top, #f8f8f8, #f1f1f1);
+  background-image: -ms-linear-gradient(top, #f8f8f8, #f1f1f1);
+  background-image: -o-linear-gradient(top, #f8f8f8, #f1f1f1);
+  background-image: linear-gradient(top, #f8f8f8, #f1f1f1);
+  border: 1px solid #bfbfbf;
+  color: #c4bab6;
+  font-size: 19px;
+  margin: 10px 0 0 0;
+  position: relative;
+}
+#logo-group span.activity-dropdown:hover {
+  border: 1px solid #bfbfbf;
+  transition: all 0.0s;
+  cursor: pointer !important;
+  -webkit-box-shadow: inset 0px 0px 4px 1px rgba(0, 0, 0, 0.08);
+  box-shadow: inset 0px 0px 4px 1px rgba(0, 0, 0, 0.08);
+}
+
+#notificationFeed .ajax-dropdown {
+    left: 46px;
+}
+#openOrderFeed .ajax-dropdown {
+    left: 86px;
+}
+#pendingActionFeed .ajax-dropdown {
+    left: 126px;
+}
+
 
 /* LEFT AND CONTENT PANEL INTERFACE MODIFICATIONS
  * (the goal is to make the interface a bit more compact)

@@ -124,7 +124,7 @@ function SendModalViewModel() {
     isValidBitcoinAddress: self,
     isNotSameBitcoinAddress: self
   });
-  self.quantity = ko.observable().extend({
+  self.amount = ko.observable().extend({
     required: true,
     pattern: {
       message: 'Must be a valid number',
@@ -140,21 +140,21 @@ function SendModalViewModel() {
   }, self);
   
   self.normalizedBalRemaining = ko.computed(function() {
-    if(!isNumber(self.quantity())) return null;
+    if(!isNumber(self.amount())) return null;
     var curBalance = normalizeAmount(self.rawBalance(), self.divisible());
-    var balRemaining = Decimal.round(new Decimal(curBalance).sub(parseFloat(self.quantity()))).toFloat();
+    var balRemaining = Decimal.round(new Decimal(curBalance).sub(parseFloat(self.amount()))).toFloat();
     if(balRemaining < 0) return null;
     return balRemaining;
   }, self);
   
   self.validationModel = ko.validatedObservable({
     destAddress: self.destAddress,
-    quantity: self.quantity
+    amount: self.amount
   });  
   
   self.resetForm = function() {
     self.destAddress('');
-    self.quantity(null);
+    self.amount(null);
     self.validationModel.errors.showAllMessages(false);
   }
   
@@ -171,7 +171,7 @@ function SendModalViewModel() {
     WALLET.doTransaction(self.address(), "create_send",
       { source: self.address(),
         destination: self.destAddress(),
-        quantity: denormalizeAmount(parseFloat(self.quantity()), self.divisible()),
+        amount: denormalizeAmount(parseFloat(self.amount()), self.divisible()),
         asset: self.asset()
       },
       function() {
@@ -343,7 +343,7 @@ function SweepModalViewModel() {
     multiAPIConsensus("create_send", //can send both BTC and counterparty assets
       { source: self.addressForPrivateKey(),
         destination: self.destAddress(),
-        quantity: amount,
+        amount: amount,
         asset: selectedAsset.ASSET,
         multisig: pubkey
       },
@@ -353,16 +353,22 @@ function SweepModalViewModel() {
         for (var i = 0; i < sendTx.ins.length; i++) { //sign each input with the key
           sendTx.sign(i, key);
         }
-        WALLET.broadcastSignedTx(sendTx.serializeHex());
-        sendsComplete.push({
-          'result': true,
-          'asset': selectedAsset.ASSET,
-          'from': self.addressForPrivateKey(),
-          'to': self.destAddress(),
-          'normalized_amount': normalizedAmount
+        WALLET.broadcastSignedTx(sendTx.serializeHex(), function(data, endpoint) { //transmit was successful
+          sendsComplete.push({
+            'result': true,
+            'asset': selectedAsset.ASSET,
+            'from': self.addressForPrivateKey(),
+            'to': self.destAddress(),
+            'normalized_amount': normalizedAmount
+          });
+          //TODO: show this sweep in pending actions
+          return callback();
+        }, function() { //on error transmitting tx
+          sendsComplete.push({
+            'result': false,
+            'asset': selectedAsset.ASSET
+          });
         });
-        //TODO: show this sweep in pending actions
-        return callback();
       }, function(unmatchingResultsList) { //onConsensusError
         sendsComplete.push({
           'result': false,
@@ -525,6 +531,7 @@ function PrimeAddressModalViewModel() {
     min: 3,
     max: 25
   });
+  self.autoPrime = ko.observable(false); //set in show() to whatever the current value from PREFs is
   self.rawUnspentTxResponse = null;
   
   self.validationModel = ko.validatedObservable({
@@ -554,11 +561,12 @@ function PrimeAddressModalViewModel() {
     if(typeof(resetForm)==='undefined') resetForm = true;
     if(resetForm) self.resetForm();
     self.address(address);
+    self.autoPrime(PREFERENCES['auto_prime']);
     
     //Get the most up to date # of primed txouts
-    WALLET.retrieveNumPrimedTxouts(address, function(numPrimedTxouts, data) {
+    WALLET.retrieveNumPrimedTxouts(address, function(numPrimedTxouts, utxosData) {
       WALLET.updateNumPrimedTxouts(address, numPrimedTxouts);
-      self.rawUnspentTxResponse = data; //save for later (when creating the Tx itself)
+      self.rawUnspentTxResponse = utxosData; //save for later (when creating the Tx itself)
       WALLET.updateNumPrimedTxouts(address, numPrimedTxouts);
       if(numPrimedTxouts == 0) {
         bootbox.alert("Your wallet has no available BTC to prime this account with. Please deposit BTC and try again.");
@@ -576,54 +584,13 @@ function PrimeAddressModalViewModel() {
   }
   
   self.doAction = function() {
-    //construct a transaction
-    var sendTx = new Bitcoin.Transaction();
-    var unspent = parseUnspentTxnsList(self.rawUnspentTxResponse).unspentTxs;
-    var inputAmount = (self.numNewPrimedTxouts() * MIN_PRIME_BALANCE) + MIN_FEE; //in satoshi
-    var inputAmountRemaining = inputAmount;
-    var txHash = null, txOutputN = null, txIn = null;
-    //Create inputs
-    for(txHash in unspent) {
-      if(inputAmountRemaining <= 0)
-        break;
-      if (unspent.hasOwnProperty(txHash)) {
-        for (txOutputN in unspent[txHash]) {
-          if (unspent[txHash].hasOwnProperty(txOutputN)) {
-            txIn = new Bitcoin.TransactionIn({
-              outpoint: {
-                hash: txHash,
-                index: parseInt(txOutputN)
-              }
-            });
-            sendTx.addInput(txIn);
-            sendTx.ins[0].script = Bitcoin.Script.fromHex(unspent[txHash][txOutputN]['script']);
-            inputAmountRemaining -= unspent[txHash][txOutputN]['amount'];
-            if(inputAmountRemaining <= 0)
-              break;
-          }
-        }
+    primeAddress(self.address(), parseInt(self.numNewPrimedTxouts()), self.rawUnspentTxResponse,
+      function(address, numNewPrimedTxouts) {
+        self.shown(false);
+        bootbox.alert("Your account has successfully been primed with <b>" + numNewPrimedTxouts
+          + "</b> additional outputs. This action may take a bit to take effect.");
       }
-    }
-    if(inputAmountRemaining > 0) {
-      bootbox.alert("Insufficient confirmed bitcoin balance to prime your account (require "
-        + normalizeAmount(inputAmountRemaining) + " BTC @ 1 confirm or more)");
-      return;
-    }
-    
-    //Create outputs for the priming itself (x MIN_PRIME_BALANCE BTC outputs)
-    for(var i=0; i < parseInt(self.numNewPrimedTxouts()); i++) {
-      sendTx.addOutput(self.address(), MIN_PRIME_BALANCE);
-    }
-    //Create an output for change
-    var changeAmount = Math.abs(inputAmountRemaining);
-    sendTx.addOutput(self.address(), changeAmount);
-    //^ The remaining should be MIN_FEE, which will of course go to the miners
-    
-    var rawTxHex = sendTx.serializeHex();
-    WALLET.signAndBroadcastTx(self.address(), rawTxHex);
-    self.shown(false);
-    bootbox.alert("Your account has successfully been primed with <b>" + self.numNewPrimedTxouts()
-      + "</b> additional outputs. This action may take a bit to take effect.");
+    );
   }
 }
 
@@ -686,16 +653,16 @@ function TestnetBurnModalViewModel() {
     if (!self.validationModel.isValid()) {
       self.validationModel.errors.showAllMessages();
       return false;
-    }    
+    }
     console.log("Submitting form...");
     $('#testnetBurnModal form').submit();
   }
 
   self.doAction = function() {
-    //do the additional issuance (specify non-zero quantity, no transfer destination)
+    //do the additional issuance (specify non-zero amount, no transfer destination)
     WALLET.doTransaction(self.address(), "create_burn",
       { source: self.address(),
-        quantity: denormalizeAmount(self.btcBurnAmount()),
+        amount: denormalizeAmount(self.btcBurnAmount()),
       },
       function() {
         self.shown(false);

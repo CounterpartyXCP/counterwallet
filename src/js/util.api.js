@@ -159,7 +159,7 @@ function _makeJSONAPICall(destType, endpoints, method, params, onSuccess, onErro
 function _getDestTypeFromMethod(method) {
   //based on the method, determine the endpoints list to use
   var destType = "counterpartyd";
-  if(['is_ready', 'get_normalized_balances',
+  if(['is_ready', 'get_normalized_balances', 'get_btc_address_info', 'get_btc_address_utxos', 'get_btc_block_height',
       'get_chat_handle', 'store_chat_handle', 'get_preferences', 'store_preferences',
       'get_raw_transactions', 'get_balance_history', 'get_owned_assets',
       'get_market_price_summary', 'get_market_price_history', 'get_market_info',

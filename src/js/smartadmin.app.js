@@ -121,18 +121,17 @@ $(document).ready(function() {
     $.root_.removeClass('search-mobile');
   });
 
-  // ACTIVITY
-  // ajax drop
-  $('#activity').click(function(e) {
+  //COUNTERWALLET: START MOD
+  $('.activity-dropdown').click(function(e) {
     var $this = $(this);
 
     if ($this.find('.badge').hasClass('bg-color-red')) {
       $this.find('.badge').removeClassPrefix('bg-color-');
-      //COUNTERWALLET: START MOD
-      ACTIVITY_FEED.unackedActivityCount(0);
-      //$this.find('.badge').text("0");
-      //COUNTERWALLET: END MOD
-      // console.log("Ajax call for activity")
+      
+      if($this.parent().attr('id') == 'notificationFeed') {
+        NOTIFICATION_FEED.count(0); //reset, since the user viewed it
+      }
+      //The other two feed types don't reset their count when viewed
     }
 
     if (!$this.next('.ajax-dropdown').is(':visible')) {
@@ -142,21 +141,16 @@ $(document).ready(function() {
       $this.next('.ajax-dropdown').fadeOut(150);
       $this.removeClass('active')
     }
-
-    //COUNTERWALLET: START MOD
-    //var mytest = $this.next('.ajax-dropdown').find('.btn-group > .active > input').attr('id');
-    //console.log(mytest)
-    var activeNotoPage = $this.next('.ajax-dropdown').find('.btn-group > .active > input').attr('id');
-    if(!activeNotoPage) {
-      //make the first page active
-      $this.next('.ajax-dropdown').find('.btn').first()[0].click();
-    }
-    //COUNTERWALLET: END MOD
+    
+    //Load the content
+    var url = $this.parent().attr('data-contenturl');
+    var container = $($this.parent().find('.ajax-notifications')[0]);
+    loadURL(url, container);
 
     e.preventDefault();
   });
 
-  $('input[name="activity"]').change(function() {
+  /*$('input[name="activity"]').change(function() {
     //alert($(this).val())
     var $this = $(this);
 
@@ -164,8 +158,8 @@ $(document).ready(function() {
     container = $('.ajax-notifications');
 
     loadURL(url, container);
-
-  });
+  });*/
+  //COUNTERWALLET: END MOD
 
   $(document).mouseup(function(e) {
     if (!$('.ajax-dropdown').is(e.target)// if the target of the click isn't the container...
@@ -1453,6 +1447,7 @@ function runDataTables(specificTableID, destroyOption) {
    * BASIC
    */
   $(tableSelector+'.dt_basic').dataTable({
+    "bDestroy": destroyOption,
     "sPaginationType" : "bootstrap_full"
   });
 
@@ -1489,8 +1484,6 @@ function runDataTables(specificTableID, destroyOption) {
     },
     "bSortCellsTop" : true
   });   
-  
-
 
   /*
    * COL ORDER
@@ -1524,7 +1517,6 @@ function runDataTables(specificTableID, destroyOption) {
       });
     }
   });
-  
   /* END TABLE TOOLS */
 }
 //COUNTERWALLET: END MOD

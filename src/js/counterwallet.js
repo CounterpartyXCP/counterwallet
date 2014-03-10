@@ -53,6 +53,23 @@ var MIN_FEE = 10000; // in satoshis (== .0001 BTC)
 var MIN_PRIME_BALANCE = 50000; //in satoshis ... == .0005
 var ASSET_CREATION_FEE_XCP = 5; //in normalized XCP
 var MAX_ASSET_DESC_LENGTH = 41; //42, minus a null term character?
+var ORDER_DEFAULT_BTCFEE_PCT = 1; //1% of total order
+var ORDER_DEFAULT_EXPIRATION = 100; //num blocks until expiration
+var DEFAULT_NUM_ADDRESSES = 3; //default number of addresses to generate
+
+var AUTOPRIME_AT_LESSTHAN_REMAINING = 10; //auto prime at less than this many txouts remaining
+var AUTOPRIME_MAX_AMOUNT = 10; //max number of txns to add with an autoprime
+var AUTOPRIME_MIN_CONFIRMED_BTC_BAL = 0.005; //don't autoprime if the account has less than this balance (too much churn)
+
+var DEFAULT_PREFERENCES = {
+  'num_addresses_used': DEFAULT_NUM_ADDRESSES,
+  'address_aliases': {},
+  'selected_theme': 'ultraLight',
+  'selected_lang': 'en-us',
+  'watch_only_addresses': [],
+  'auto_prime': true, //default to auto prime being enabled 
+};
+
 var ENTITY_NAMES = {
   'burns': 'Burn',
   'debits': 'Debit',

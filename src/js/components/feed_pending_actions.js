@@ -1,77 +1,4 @@
 
-function NotificationViewModel(type, message, when) {
-  if(typeof(when)==='undefined') when = new Date().getTime();
-
-  var self = this;
-  self.type = ko.observable(type);
-  /*
-   * Possible types:
-   * user: Misc user notification (not critical)
-   * alert: Something to alert the user to at a notification level
-   * security: Security-related notification
-   * 
-   * Beyond this, any one of the valid message category types:
-   * credits, debits, orders, bets, broadcasts, etc
-   */
-  self.message = ko.observable(message);
-  self.when = ko.observable(when); //when generated
-  
-  self.displayIconForType = ko.computed(function() {
-    if(type == 'user') return 'fa-user';
-    if(type == 'alert') return 'fa-exclamation';
-    if(type == 'security') return 'fa-shield';
-    return ENTITY_ICONS[type] ? ENTITY_ICONS[type] : 'fa-question';
-  }, self);
-  
-  self.displayColorForType = ko.computed(function() {
-    if(type == 'user') return 'bg-color-lighten';
-    if(type == 'alert') return 'bg-color-redLight';
-    if(type == 'security') return 'bg-color-redLight';
-    return ENTITY_NOTO_COLORS[type] ? ENTITY_NOTO_COLORS[type] : 'bg-color-white';
-  }, self);
-}
-
-function OpenOrderViewModel(order) {
-  assert(order['tx_index'], "Must be a valid order object");
-  var self = this;
-  self.order = order;
-  //break out the dynamic (changing) fields as observables
-  self.giveRemaining = ko.observable(order['give_remaining']);
-  self.getRemaining = ko.observable(order['get_remaining']);
-  self.feeRemaining = ko.observable(order['fee_remaining']);
-  
-  self.cancelOpenOrder = function() {
-    bootbox.dialog({
-      message: "Are you sure that you want to cancel this order?<br/><br/> \
-        <b style='color:red'>Please NOTE that this action is irreversable!</b>",
-      title: "Are you sure?",
-      buttons: {
-        success: {
-          label: "Don't Cancel Order'",
-          className: "btn-default",
-          callback: function() {
-            //modal will disappear
-          }
-        },
-        danger: {
-          label: "Cancel Order",
-          className: "btn-danger",
-          callback: function() {
-            //issue 0 to lock the asset
-            WALLET.doTransaction(self.order['source'], "create_cancel",
-              { offer_hash: self.order['tx_hash'] },
-              function() {
-                bootbox.alert("Your order cancellation has been submitted"
-                  + " but it may take a bit for this to formally reflect on the network.");
-              }
-            );
-          }
-        },
-      }
-    });    
-  }
-}
-
 function PendingBTCPayViewModel(orderMatchID, BTCPayTxIndex, myAddr, btcDestAddress, btcAmount, myOrderTxIndex,
   otherOrderTxIndex, otherOrderOtherAsset, otherOrderOtherAssetAmount, whenBTCPayCreated) {
   if(typeof(whenBTCPayCreated)==='undefined') whenBTCPayCreated = new Date().getTime();
@@ -124,7 +51,7 @@ function PendingBTCPayViewModel(orderMatchID, BTCPayTxIndex, myAddr, btcDestAddr
                 { order_match_id: self.orderMatchID() },
                 function() {
                   //remove the BTC payment from the notifications
-                  ACTIVITY_FEED.removePendingBTCPay(self.orderMatchID());
+                  PENDING_ACTION_FEED.removePendingBTCPay(self.orderMatchID());
                   bootbox.alert("Order successfully settled. Will take 1 block to confirm across the network.");
                 }
               );
@@ -136,38 +63,87 @@ function PendingBTCPayViewModel(orderMatchID, BTCPayTxIndex, myAddr, btcDestAddr
   }
 }
 
-function ActivityFeedViewModel(initialActivityCount) {
-  if(typeof(initialActivityCount)==='undefined') initialActivityCount = 0;
-  
-  //An address has 2 or more assets (BTC, XCP, and any others)
+function PendingActionViewModel(type, keyData, keyDataJSON) {
   var self = this;
-  self.notifications = ko.observableArray([]);
-  self.pendingBTCPays = ko.observableArray([]);
-  self.openOrders = ko.observableArray([]);
-  self.lastUpdated = ko.observable(new Date());
-  self.unackedNotificationCount = ko.observable(0);
-  self.USE_TESTNET = USE_TESTNET;
-  self.IS_DEV = IS_DEV;
+  self.WHEN_CREATED = new Date();
+  self.TYPE = type;
+  self.KEYDATA = keyData;
+  self.KEYDATAJSON = keyDataJSON;
+}
 
-  self.totalActivityCount = ko.computed(function() {
-    return self.unackedNotificationCount() + self.pendingBTCPays().length; //don't list open orders as a red badge 
-  }, self);
+function PendingActionFeedViewModel() {
+  var self = this;
+  self.pendingBTCPays = ko.observableArray([]);
+  self.pendingActions = ko.observableArray([]); //pending actions beyond pending BTCpays
+  self.lastUpdated = ko.observable(new Date());
 
   self.dispLastUpdated = ko.computed(function() {
     return "Last Updated: " + self.lastUpdated().toTimeString(); 
   }, self);
+
+  self.dispCount = ko.computed(function() {
+    return self.pendingBTCPays().length + self.pendingActions().length;
+  }, self);
+
+  self._generateKeyData = function(type, data) {
+    //compose the data dictionary from the passed in create_ dict
+    // the goal of the dict is to contain just enough parameters to uniquely identify the pending txn so it can be found
+    // and removed from the list, once the it is confirmed on the blockchain and we get the message feed message
+    var keyData = null;
+    if(type == 'burns')
+      keyData = {'source': data.source, 'burned': data.burned || data.amount};
+    else if(type == 'credits' || type == 'debits')
+      keyData = {'address': data.address, 'asset': data.asset, 'amount': data.amount};
+    else if(type == 'sends')
+      keyData = {'source': data.source, 'destination': data.destination, 'asset': data.asset, 'amount': data.amount};
+    else if(type == 'orders')
+      keyData = {'source': data.source, 'give_asset': data.give_asset, 'give_amount': data.give_amount,
+        'get_asset': data.get_asset, 'get_amount': data.get_amount, 'expiration': data.expiration};    
+    else if(type == 'issuances') //issue new, lock, transfer, change description, issue additional
+      keyData = {'source': data.source, 'asset': data.asset, 'amount': data.amount,
+        'destination': data.destination || data.transfer_destination,
+        'issuer': data.issuer || data.source, 'description': data.description};
+    else if(type == 'broadcasts')
+      keyData = {'source': data.source, 'text': data.text, 'value': data.value};
+    else if(type == 'bets')
+      keyData = {'source': data.source, 'feed_address': data.feed_address, 'bet_type': data.bet_type,
+        'deadline': data.deadline, 'wager_amount': data.wager_amount, 'counterwager_amount': data.counterwager_amount};    
+    else if(type == 'dividends')
+      keyData = {'source': data.source, 'asset': data.asset, 'dividend_asset': data.dividend_asset,
+        'amount_per_unit': data.amount_per_unit};
+    else if(type == 'cancels')
+      keyData = {'source': data.source, 'offer_hash': data.offer_hash};
+    else if(type == 'callbacks')
+      keyData = {'source': data.source, 'fraction': data.fraction, 'asset': data.asset};
+    else
+      assert(false, "Invalid action: " + type);
+    $.jqlog.log("pendingEvent:" + type + ": " + keyData);
+    return keyData;
+  }
   
-  self.addNotification = function(type, message, when) {
-    self.notifications.unshift(new NotificationViewModel(type, message, when)); //add to front of array
-    self.unackedNotificationCount(self.unackedNotificationCount() + 1);
-    //if the number of notifications are over 40, remove the oldest one
-    if(self.notifications().length > 40) self.notifications.pop();
+  self.addPendingAction = function(type, data) {
+    var keyData = self._generateKeyData(type, data);
+    self.pendingActions.push(new PendingActionViewModel(type, keyData, JSON.stringify(keyData)));
+    self.lastUpdated(new Date());
   }
 
+  self.removePendingAction = function(type, data) {
+    var keyData = self._generateKeyData(type, data);
+    var keyDataJSON = JSON.stringify(keyData);
+    var match = ko.utils.arrayFirst(self.pendingActions(), function(item) {
+      return item.TYPE == type && item.KEYDATAJSON == keyDataJSON;
+    });
+    if (match) {
+      ko.utils.arrayRemoveItem(self.pendingActions, match);
+    }
+    self.lastUpdated(new Date());
+  }
+  
   self.addPendingBTCPay = function(orderMatchID, BTCPayTxIndex, myAddr, btcDestAddress, btcAmount, myOrderTxIndex,
   otherOrderTxIndex, otherOrderOtherAsset, otherOrderOtherAssetAmount, whenBTCPayCreated) {
     self.pendingBTCPays.push(new PendingBTCPayViewModel(orderMatchID, BTCPayTxIndex, myAddr, btcDestAddress, btcAmount, myOrderTxIndex,
       otherOrderTxIndex, otherOrderOtherAsset, otherOrderOtherAssetAmount, whenBTCPayCreated));
+    self.lastUpdated(new Date());
   }
   
   self.removePendingBTCPay = function(orderMatchID) {
@@ -177,6 +153,7 @@ function ActivityFeedViewModel(initialActivityCount) {
     if (match) {
       ko.utils.arrayRemoveItem(self.pendingBTCPays, match);
     }
+    self.lastUpdated(new Date());
   }
   
   self.removePendingBTCPayByOrderID = function(orderID) {
@@ -189,26 +166,9 @@ function ActivityFeedViewModel(initialActivityCount) {
     if (match) {
       ko.utils.arrayRemoveItem(self.pendingBTCPays, match);
     }
-  }
-
-  self.addOpenOrder = function(order) {
-    assert(order);
-    self.openOrders.push(new OpenOrderViewModel(order));
-  }
-
-  self.removeOpenOrder = function(orderTxIndex) {
-    var match = ko.utils.arrayFirst(self.openOrders(), function(item) {
-        return orderTxIndex == item.order['tx_index'];
-    });
-    if (match) {
-      ko.utils.arrayRemoveItem(self.openOrders, match);
-    }
+    self.lastUpdated(new Date());
   }
 }
 
-
-window.ACTIVITY_FEED = new ActivityFeedViewModel();
-
-$(document).ready(function() {
-  ko.applyBindings(ACTIVITY_FEED, document.getElementById("logo-group"));
-});
+/*NOTE: Any code here is only triggered the first time the page is visited. Put JS that needs to run on the
+  first load and subsequent ajax page switches in the .html <script> tag*/

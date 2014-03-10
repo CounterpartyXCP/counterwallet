@@ -134,7 +134,7 @@ function TransactionHistoryItemViewModel(data) {
   self.rawTxType = self.data['_entity'];
   self.source = self.data['source'] || self.data['address'] || self.data['issuer'] || '';
   self.dispSource = function() {
-    return PREFERENCES['address_aliases'][self.source] || self.source;
+    return PREFERENCES['address_aliases'][hashToB64(self.source)] || self.source;
   }
   //self.btcAmount = TODO
   //self.fee = TODO
@@ -156,7 +156,7 @@ function TransactionHistoryItemViewModel(data) {
     } else if(self.rawTxType == 'sends') {
       desc = "Send of " + numberWithCommas(self.data['_divisible'] ? self.data['amount'] / UNIT : self.data['amount']) + " " + self.data['asset']
         + " to <a href=\"http://blockscan.com/address.aspx?q=" + self.data['destination'] + "\" target=\"blank\">"
-        + (PREFERENCES['address_aliases'][self.data['destination']] || self.data['destination']) + "</a>"; 
+        + (PREFERENCES['address_aliases'][hashToB64(self.data['destination'])] || self.data['destination']) + "</a>"; 
     } else if(self.rawTxType == 'orders') {
       desc = "Sell " + numberWithCommas(self.data['_give_divisible'] ? self.data['give_amount'] / UNIT : self.data['give_amount'])
         + " " + self.data['give_asset'] + " for "
@@ -174,7 +174,7 @@ function TransactionHistoryItemViewModel(data) {
     } else if(self.rawTxType == 'issuances') {
       if(self.data['transfer']) {
         desc = "Asset " + self.data['asset'] + " transferred to "
-          + (PREFERENCES['address_aliases'][self.data['transfer']] || self.data['transfer']);
+          + (PREFERENCES['address_aliases'][hashToB64(self.data['issuer'])] || self.data['issuer']);
       } else if(self.data['amount'] == 0) {
         desc = "Asset " + self.data['asset'] + " locked against additional issuance";
       } else {
@@ -185,12 +185,12 @@ function TransactionHistoryItemViewModel(data) {
       desc = "Text: " + self.data['text'] + "<br/>Value: " + self.data['value'];
     } else if(self.rawTxType == 'bets') {
       desc = BET_TYPES[self.data['bet_type']] + " bet on feed @ "
-        + (PREFERENCES['address_aliases'][self.data['feed_address']] || self.data['feed_address']) + "<br/>"
+        + (PREFERENCES['address_aliases'][hashToB64(self.data['feed_address'])] || self.data['feed_address']) + "<br/>"
         + "Odds: " + self.data['odds'] + ", Wager: "
         + numberWithCommas(self.data['wager_amount'] / UNIT) + " XCP, Counterwager: "
         + numberWithCommas(self.data['counterwager_amount'] / UNIT) + " XCP";  
     } else if(self.rawTxType == 'bet_matches') {
-      desc = "For feed " + (PREFERENCES['address_aliases'][self.data['feed_address']] || self.data['feed_address'])
+      desc = "For feed " + (PREFERENCES['address_aliases'][hashToB64(self.data['feed_address'])] || self.data['feed_address'])
         + ", " + self.data['tx0_address'] + " bet "
         + numberWithCommas(self.data['forward_amount'] / UNIT) + " XCP"
         + self.data['tx1_address'] + " bet "

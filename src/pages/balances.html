@@ -161,7 +161,7 @@
             <div class="col col-sm-10">
                 <label class="input" style="display: inline-block;">
                     <i class="icon-append fa fa-share"></i>
-                    <input name="quantity" data-bind="value: quantity, valueUpdate: 'afterkeydown', attr: {placeholder: 'Enter quantity'}" type="text"/>
+                    <input name="amount" data-bind="value: amount, valueUpdate: 'afterkeydown', attr: {placeholder: 'Enter amount'}" type="text"/>
                 </label>
                 <span>&nbsp;&nbsp;<span style="font-weight: bold" data-bind="text: asset"></span></span>
             </div>
@@ -294,13 +294,15 @@
             <p class="errorTextColor" data-bind="fadeVisibleInOnly: showNoPrimedInputsError">
                 You need to prime your account before you can perform the selected action. Please complete this then try
                 again once the priming is complete and confirmed on the blockchain.</p>
+            <p style="color: green;font-weight:bold" data-bind="fadeVisibleInOnly: autoPrime">
+                As auto-priming is enabled for your wallet, you shouldn't have to use this.</p>
             <p>In order to do things with Counterparty, your address needs to
                 contain at one confirmed <a href="http://bitcoin.stackexchange.com/questions/4301/what-is-an-unspent-output" target="_blank">"unspent output"</a>
                 for each action you want to do (e.g. send, create asset, etc).</p>
             <p>This form allows you to take one larger unspent input that you may have at
                 your address and split it into many smaller ones, allowing you to perform multiple Counterparty actions without
                 having to wait between each one. We call this <b>"priming"</b> the address.</p>
-            <p>You currently have <span data-bind="text: dispNumPrimedTxouts"></span> unspent outputs for address <span data-bind="text: address"></span>.
+            <p>You currently have <b><span data-bind="text: dispNumPrimedTxouts"></span> unspent outputs</b> for address <b><span data-bind="text: address"></span></b>.
                 We recommend you try to keep between 5 and 15 unspent outputs. Note that this operation won't add, remove or delete any funds.
                 It simply changes how those funds are structured on the blockchain.</p>
         </div>
@@ -403,7 +405,7 @@
             <label class="control-label col col-sm-2">Quantity</label>
             <div class="col col-sm-10">
                 <label class="input">
-                    <input name="assetQuantity"  data-bind="value: quantity, valueUpdate: 'afterkeydown'" type="text"/>                        
+                    <input name="assetQuantity"  data-bind="value: amount, valueUpdate: 'afterkeydown'" type="text"/>                        
                 </label>
                 <div class="note">How many of the units of the asset to issue (can be increased later).</div>
             </div>
@@ -463,7 +465,7 @@
         <h4 class="modal-title">Issue Additional Asset Quantity</h4>
       </div>
       <div class="modal-body no-padding">
-        <p class="formPadded">How many more quantity of this asset would you like to issue? <i>(For divisible assets, state
+        <p class="formPadded">How much more of this asset would you like to issue? <i>(For divisible assets, state
        the amount as a whole or floating point number, not in satoshis -- e.g. '732.45')</i><br/><br/>
        There is currently quantity <b class="buyColor" data-bind="text: displayedTotalIssued"></b> of this asset issued.<br/><br/>
        <b style='color:red'>Please NOTE that this action is irreversable!</b></p>
@@ -527,7 +529,10 @@
         <h4 class="modal-title">Change Asset Description</h4>
       </div>
       <div class="modal-body no-padding">
-        <p class="formPadded">Enter the new description for this asset:</p>
+        <div class="formPadded">
+            <p>The asset's current description is: <b><span data-bind="text: asset() ? asset().description : ''"></span></b></p>
+            <p>Enter the new description for this asset:</p>
+        </div>
         
         <form class="smart-form" data-bind="submit: doAction"><fieldset>
           <section><div class="row">
@@ -568,12 +573,12 @@
             <label class="control-label col col-sm-2">XCP per Unit</label>
             <div class="col col-sm-10">
                 <label class="input"><i class="icon-append fa fa-plus"></i>
-                    <input name="qtyPerUnit" data-bind="value: qtyPerUnit, valueUpdate : 'afterkeydown'" type="text"/>
+                    <input name="amountPerUnit" data-bind="value: amountPerUnit, valueUpdate : 'afterkeydown'" type="text"/>
                 </label>
             </div>
           </div></section>
         </fieldset></form>
-        <span class="formPaddedBot" data-bind="fadeVisibleInOnly: qtyPerUnit() && displayedXCPBalRemainingPostPay() >= 0">
+        <span class="formPaddedBot" data-bind="fadeVisibleInOnly: amountPerUnit() && displayedXCPBalRemainingPostPay() >= 0">
             After dividend payment this address will have a remaining balance of
             <b style="color: #a4781b" data-bind="text: displayedXCPBalRemainingPostPay"></b> XCP.<br/><br/>
         </span>
@@ -605,6 +610,7 @@
       window.SIGN_MESSAGE_MODAL = new SignMessageModalViewModel();
       window.PRIME_ADDRESS_MODAL = new PrimeAddressModalViewModel();
       window.TESTNET_BURN_MODAL = new TestnetBurnModalViewModel();
+      
       ko.applyBindings({}, document.getElementById("gettingStartedNotice"));
       ko.applyBindingsWithValidation(CREATE_NEW_ADDRESS_MODAL, document.getElementById("createNewAddressModal"));
       ko.applyBindingsWithValidation(SEND_MODAL, document.getElementById("sendModal"));
@@ -619,6 +625,7 @@
       window.TRANSFER_ASSET_MODAL = new TransferAssetModalViewModel();
       window.CHANGE_ASSET_DESCRIPTION_MODAL = new ChangeAssetDescriptionModalViewModel();
       window.PAY_DIVIDEND_MODAL = new PayDividendModalViewModel();
+      
       ko.applyBindingsWithValidation(CREATE_ASSET_MODAL, document.getElementById("createAssetModal"));
       ko.applyBindingsWithValidation(ISSUE_ADDITIONAL_ASSET_MODAL, document.getElementById("issueAdditionalAssetModal"));
       ko.applyBindingsWithValidation(TRANSFER_ASSET_MODAL, document.getElementById("transferAssetModal"));

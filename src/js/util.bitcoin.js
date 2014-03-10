@@ -1,18 +1,19 @@
+
 function normalizeAmount(amount, divisible) {
   //Converts from satoshi (int) to float (decimal form)
   if(typeof(divisible)==='undefined') divisible = true;
   return divisible ? Decimal.round(new Decimal(amount).div(UNIT), 8).toFloat() : parseInt(amount);
 }
 
-function hashToB64(content) {
-  //used for storing address alias data, for instance
-  return Bitcoin.convert.bytesToBase64(Bitcoin.Crypto.SHA256(content, {asBytes: true}));  
-}
-
 function denormalizeAmount(amount, divisible) {
   //Converts from float (decimal form) to satoshi (int) 
   if(typeof(divisible)==='undefined') divisible = true;
   return divisible ? Decimal.round(new Decimal(amount).mul(UNIT), 8).toFloat() : parseInt(amount);
+}
+
+function hashToB64(content) {
+  //used for storing address alias data, for instance
+  return Bitcoin.convert.bytesToBase64(Bitcoin.Crypto.SHA256(content, {asBytes: true}));  
 }
 
 function smartFormat(num) { //arbitrary rules to make amounts be formatted a bit more friendly
@@ -64,39 +65,6 @@ function randomGetBytes(numBytes) {
     return randomBytes;
 }
 
-function dumpScript(script) { /* orig from tx.js (public domain) */
-    var out = [];
-    for (var i = 0; i < script.chunks.length; i++) {
-        var chunk = script.chunks[i];
-        var op = new Bitcoin.Opcode(chunk);
-        typeof chunk == 'number' ?  out.push(op.toString()) :
-            out.push(Bitcoin.convert.bytesToHex(chunk));
-    }
-    return out.join(' ');
-}
-
-function parseUnspentTxnsList(txs) { 
-  assert(txs);
-  delete unspenttxs;
-  var unspenttxs = {};
-  var balance = Bitcoin.BigInteger.ZERO;
-  for(var i = 0; i < txs.length; i++) {
-      var o = txs[i];
-      var lilendHash = o.txid;
-
-      //convert script back to BBE-compatible text
-      var script = dumpScript( new Bitcoin.Script(Bitcoin.convert.hexToBytes(o.scriptPubKey)) );
-
-      var value = new Bitcoin.BigInteger('' + (o.amount * UNIT), 10);
-      if (!(lilendHash in unspenttxs))
-          unspenttxs[lilendHash] = {};
-      unspenttxs[lilendHash][o.vout] = {amount: value, scriptText: script, script: o.scriptPubKey};
-      balance = balance.add(value);
-  }
-  return {balance:balance, unspentTxs: unspenttxs};
-}
-
-
 function testnetBurnDetermineEarned(blockHeight, burned) {
   //burned is the amount of BTC to burn (as a float -- normalized value)
   //XCP amount returned is as a float -- normalized value
@@ -106,4 +74,42 @@ function testnetBurnDetermineEarned(blockHeight, burned) {
   var multiplier = 1000 * (1 + .5 * (partial_time / total_time)); //will be approximate
   var earned = Decimal.round(new Decimal(burned).mul(multiplier), 8).toFloat();
   return normalizeAmount(earned);
+}
+
+function primeAddress(address, numNewPrimedTxouts, utxosData, onSuccess) {
+  //construct a transaction
+  var sendTx = new Bitcoin.Transaction();
+  var inputAmount = (numNewPrimedTxouts * MIN_PRIME_BALANCE) + MIN_FEE; //in satoshi
+  var inputAmountRemaining = inputAmount;
+  var txHash = null, txOutputN = null, txIn = null;
+  //Create inputs
+  for(var i=0; i < utxosData.length; i++) {
+      txIn = new Bitcoin.TransactionIn({
+        outpoint: {
+          hash: utxosData[i].txid,
+          index: utxosData[i].vout
+        }
+      });
+      sendTx.addInput(txIn);
+      sendTx.ins[i].script = Bitcoin.Script.fromHex(utxosData[i].scriptPubKey);
+      inputAmountRemaining -= denormalizeAmount(utxosData[i].amount);
+      if(inputAmountRemaining <= 0)
+        break;
+    
+  } 
+  assert(inputAmountRemaining <= 0, "Insufficient confirmed bitcoin balance to prime account: " + address);
+  
+  //Create outputs for the priming itself (x MIN_PRIME_BALANCE BTC outputs)
+  for(var i=0; i < numNewPrimedTxouts; i++) {
+    sendTx.addOutput(address, MIN_PRIME_BALANCE);
+  }
+  //Create an output for change
+  var changeAmount = Math.abs(inputAmountRemaining);
+  sendTx.addOutput(address, changeAmount);
+  //^ The remaining should be MIN_FEE, which will of course go to the miners
+  
+  var rawTxHex = sendTx.serializeHex();
+  WALLET.signAndBroadcastTx(address, rawTxHex, function() {
+    return onSuccess(address, numNewPrimedTxouts);
+  });
 }

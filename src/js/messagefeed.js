@@ -66,7 +66,7 @@ function parseMessageWithFeedGapDetection(event, data, callback) {
   if(!data || (data.substring && data.startswith("<html>"))) return;
   //^ sometimes nginx can trigger this via its proxy handling it seems, with a blank payload (or a html 502 Bad Gateway
   // payload) -- especially if the backend server reloads. Just ignore it.
-  $.jqlog.info("event:RECV IDX=" + data['_message_index'] + " (last idx: " + LAST_MESSAGEIDX_RECEIVED + ") -- " + JSON.stringify(data));
+  $.jqlog.info("event:RECV EVENT=" + event + ", IDX=" + data['_message_index'] + " (last idx: " + LAST_MESSAGEIDX_RECEIVED + ") -- " + JSON.stringify(data));
   if((data['_message_index'] === undefined || data['_message_index'] === null) && IS_DEV) debugger; //it's an odd condition we should look into...
   assert(LAST_MESSAGEIDX_RECEIVED, "LAST_MESSAGEIDX_RECEIVED is not defined! Should have been set from is_ready on logon.");
   
@@ -128,27 +128,30 @@ function parseMessageWithFeedGapDetection(event, data, callback) {
 }
 
 function handleMessage(event, data) {
+  if(event != "btcpays") //remove any pending message (btcpays have their own remove method)
+    PENDING_ACTION_FEED.removePendingAction(event, data);
+  
   if(event == "balances") {
   } else if(event == "credits") {
     if(WALLET.getAddressObj(data['address'])) {
       WALLET.updateBalance(data['address'], data['asset'], data['balance']);
-      ACTIVITY_FEED.addNotification(event, "Credit to <b>" + data['address'] + "</b> of <b>" + data['_amount_normalized'] + " "
+      NOTIFICATION_FEED.add(event, "Credit to <b>" + data['address'] + "</b> of <b>" + data['_amount_normalized'] + " "
         + data['asset'] + "</b>. New " + data['asset'] + " balance is <b>" +  data['_balance_normalized'] + "</b>.");
     }
   } else if(event == "debits") {
     if(WALLET.getAddressObj(data['address'])) {
       WALLET.updateBalance(data['address'], data['asset'], data['balance']);
-      ACTIVITY_FEED.addNotification(event, "Debit from <b>" + data['address'] + "</b> of <b>" + data['_amount_normalized'] + " "
+      NOTIFICATION_FEED.add(event, "Debit from <b>" + data['address'] + "</b> of <b>" + data['_amount_normalized'] + " "
         + data['asset'] + "</b>. New " + data['asset'] + " balance is <b>" +  data['_balance_normalized'] + "</b>.");
     }
   } else if(event == "broadcasts") {
     //TODO
   } else if(event == "btcpays") {
     //Remove the BTCpay if the ordermatch is one of the ones in our pending list
-    ACTIVITY_FEED.removePendingBTCPay(data['order_match_id']);
+    PENDING_ACTION_FEED.removePendingBTCPay(data['order_match_id']);
   } else if(event == "burns") {
     if(WALLET.getAddressObj(data['source'])) {
-      ACTIVITY_FEED.addNotification(event, "Your address " + data['source'] + " has burned "
+      NOTIFICATION_FEED.add(event, "Your address " + data['source'] + " has burned "
         + normalizeAmount(data['burned'], true) + " BTC for " + normalizeAmount(data['earned'], true) + " XCP.");
     }
   } else if(event == "cancels") {
@@ -159,12 +162,12 @@ function handleMessage(event, data) {
         BUY_SELL.openOrders.remove(function(item) { return item.tx_index == data['offer_hash']});
       } 
       //Also remove the canceled order from the open orders and pending orders list (if present)
-      ACTIVITY_FEED.removeOpenOrder(data['offer_hash']);
-      ACTIVITY_FEED.removePendingBTCPayByOrderID(data['offer_hash']);
+      OPEN_ORDER_FEED.remove(data['offer_hash']);
+      PENDING_ACTION_FEED.removePendingBTCPayByOrderID(data['offer_hash']);
   
       //TODO: If for a bet, do nothing for now.
 
-      ACTIVITY_FEED.addNotification(event, "Order/Bid " + data['offer_hash'] + " for your address " + data['source'] + " was cancelled.");
+      NOTIFICATION_FEED.add(event, "Order/Bid " + data['offer_hash'] + " for your address " + data['source'] + " was cancelled.");
     }
   } else if(event == "callbacks") {
     //See if any of our addresses own any of the specified asset, and if so, notify them of the callback
@@ -172,7 +175,7 @@ function handleMessage(event, data) {
     var addresses = WALLET.getAddressesList();
     for(var i=0; i < addresses.length; i++) {
       if(WALLET.getBalance(addresses[i], data['asset'])) {
-        ACTIVITY_FEED.addNotification(event, data['asset'] + " balance adjusted on your address " + addresses[i]
+        NOTIFICATION_FEED.add(event, data['asset'] + " balance adjusted on your address " + addresses[i]
           + " due to " + (parseFloat(data['fraction']) * 100).toString() + "% callback option being exercised.");
       }
     }
@@ -181,7 +184,7 @@ function handleMessage(event, data) {
     var addresses = WALLET.getAddressesList();
     for(var i=0; i < addresses.length; i++) {
       if(WALLET.getBalance(addresses[i], data['asset'])) {
-        ACTIVITY_FEED.addNotification(event, data['asset'] + " balance adjusted on your address " + addresses[i]
+        NOTIFICATION_FEED.add(event, data['asset'] + " balance adjusted on your address " + addresses[i]
           + " due to " + numberWithCommas(normalizeAmount(data['amount_per_unit'], data['_divisible'])) + " unit dividend payment.");
       }
     }
@@ -197,26 +200,26 @@ function handleMessage(event, data) {
     });
   } else if(event == "sends") {
     if(WALLET.getAddressObj(data['source'])) { //we sent funds
-        ACTIVITY_FEED.addNotification(event, "You successfully sent <b>"
+        NOTIFICATION_FEED.add(event, "You successfully sent <b>"
           + numberWithCommas(normalizeAmount(data['amount'], data['_divisible'])) + " " + data['asset']
           + "</b> from your address " + data['source'] + " to address " + data['destination']);
     }
     if(WALLET.getAddressObj(data['destination'])) { //we received funds
-        ACTIVITY_FEED.addNotification(event, "You successfully received <b>"
+        NOTIFICATION_FEED.add(event, "You successfully received <b>"
           + numberWithCommas(normalizeAmount(data['amount'], data['_divisible'])) + " " + data['asset']
           + "</b> from address " + data['source'] + " to your address " + data['destination']);
     }
   } else if(event == "orders") {
     if(WALLET.getAddressObj(data['source'])) {
       //List the order in our open orders list (activities feed)
-      ACTIVITY_FEED.addOpenOrder(data);
+      OPEN_ORDER_FEED.add(data);
       //Also list the order on open orders if we're viewing the dex page
       if (typeof BUY_SELL !== 'undefined') {
         BUY_SELL.openOrders.push(order);
       }
       
       //Notify the user 
-      ACTIVITY_FEED.addNotification(event, "Your order to buy " + numberWithCommas(normalizeAmount(data['get_amount'], data['_get_asset_divisible']))
+      NOTIFICATION_FEED.add(event, "Your order to buy " + numberWithCommas(normalizeAmount(data['get_amount'], data['_get_asset_divisible']))
         + " " + data['get_asset'] + " in exchange for " + numberWithCommas(normalizeAmount(data['give_amount'], data['_give_asset_divisible']))
         + " " + data['get_asset'] + " was successfully created.");
     }
@@ -231,21 +234,21 @@ function handleMessage(event, data) {
     //If for some reason we can't perform a BTCpay, alert the user and throw the entry on the "Pending Orders" list in the activity feed
   } else if(event == "order_expirations") {
     //Remove the order from the open orders list and pending orders list, if on either
-    ACTIVITY_FEED.removeOpenOrder(data['order_hash']);
-    ACTIVITY_FEED.removePendingBTCPayByOrderID(data['order_hash']);
+    OPEN_ORDER_FEED.remove(data['order_hash']);
+    PENDING_ACTION_FEED.removePendingBTCPayByOrderID(data['order_hash']);
     //Also, notify the user of the expiration
     if(WALLET.getAddressObj(data['source'])) {
-      ACTIVITY_FEED.addNotification(event, "Your order <b>"
+      NOTIFICATION_FEED.add(event, "Your order <b>"
         + data['order_hash'] + " from address " + data['source'] + " has expired.");
     }
   } else if(event == "order_match_expirations") {
     //Notify the user
     if(WALLET.getAddressObj(data['tx0_address'])) {
-      ACTIVITY_FEED.addNotification(event, "An order match between your address <b>"
+      NOTIFICATION_FEED.add(event, "An order match between your address <b>"
         + data['tx0_address'] + " and address <b>" + data['tx1_address'] + "</b> has expired.");
     } 
     if(WALLET.getAddressObj(data['tx1_address'])) {
-      ACTIVITY_FEED.addNotification(event, "An order match between your address <b>"
+      NOTIFICATION_FEED.add(event, "An order match between your address <b>"
         + data['tx1_address'] + " and address <b>" + data['tx0_address'] + "</b> has expired.");
     } 
   } else if(event == "bets") {

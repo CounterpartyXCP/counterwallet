@@ -2,7 +2,6 @@
 function WalletViewModel() {
   //The user's wallet
   var self = this;
-  self.DEFAULT_NUMADDRESSES = 3; //default number of addresses to generate
   self.BITCOIN_WALLET = null; //Bitcoin.Wallet() BIP0032 wallet instance
   self.autoRefreshBTCBalances = true; //auto refresh BTC balances every 5 minutes
   
@@ -134,8 +133,27 @@ function WalletViewModel() {
           
           if(rawBalConfirmed) {
             //Also refresh BTC unspent txouts (to know when to "reprime" the account)
-            self.retrieveNumPrimedTxouts(address, function(numPrimedTxouts) {
-              self.updateNumPrimedTxouts(address, numPrimedTxouts); //null if unknown
+            self.retrieveNumPrimedTxouts(address, function(numPrimedTxouts, utxosData) {
+              self.updateNumPrimedTxouts(address, numPrimedTxouts); 
+              
+              //see if we should auto auto prime
+              if(   PREFERENCES['auto_prime']
+                 && !(self.getAddressObj(address).IS_WATCH_ONLY)
+                 && rawBalConfirmed >= AUTOPRIME_MIN_CONFIRMED_BTC_BAL * UNIT
+                 && numPrimedTxouts !== null
+                 && numPrimedTxouts < AUTOPRIME_AT_LESSTHAN_REMAINING) {
+                var maxPrimedTxoutsPossible = parseInt((rawBalConfirmed - MIN_FEE) / MIN_PRIME_BALANCE);
+                var numPrimedTxoutsToCreate = Math.min(maxPrimedTxoutsPossible, AUTOPRIME_MAX_AMOUNT);
+                assert(numPrimedTxoutsToCreate > 0); //shouldn't ever hit this with the earlier balanace check
+                $.jqlog.log("Address " + address + " has a confirmed balance of " + normalizeAmount(rawBalConfirmed)
+                  + " BTC and only " + numPrimedTxouts + " primed utxos remaining. Creating " + numPrimedTxoutsToCreate
+                  + " additional utxos...");
+                primeAddress(address, numPrimedTxoutsToCreate, utxosData,
+                  function(address, numNewPrimedTxouts) {
+                    $.jqlog.log("Auto priming for address " + address + " complete!");
+                  }
+                );
+              }
             }, function(jqXHR, textStatus, errorThrown) {
               self.updateNumPrimedTxouts(address, null); //null = UNKNOWN
             });
@@ -176,31 +194,34 @@ function WalletViewModel() {
   /////////////////////////
   //BTC-related
   self.getBTCBlockHeight = function(callback) {
-    fetchData(urlsWithPath(counterwalletd_insight_api_urls, '/sync/'),
+    failoverAPI("get_btc_block_height", [],
       function(data, endpoint) {
-        if(data['syncPercentage'] < 100) {
+        if(!data['caught_up']) {
           $.jqlog.warn("Blockchain not fully synched in insight when trying to get BTC block height!");
         }
-        return callback(data['blockChainHeight']);
+        return callback(data['block_height']);
       }
     );
   }
   
-  self.broadcastSignedTx = function(signedTxHex) {
+  self.broadcastSignedTx = function(signedTxHex, onSuccess, onError) {
     $.jqlog.log("RAW SIGNED HEX: " + signedTxHex);
     
     if(IS_DEV) {
       $.jqlog.log("SKIPPING SEND AS IS_DEV == 1");
       return;
     }
-    failoverAPI("transmit", {"tx_hex": signedTxHex, "is_signed": true},
+    failoverAPI("transmit",
+      {"tx_hex": signedTxHex, "is_signed": true},
       function(data, endpoint) {
         $.jqlog.log("Transaction broadcast from: " + endpoint);
-      }
+        return onSuccess(data, endpoint);
+      },
+      onError
     );
   }
 
-  self.signAndBroadcastTxRaw = function(key, unsignedTxHex, verifySourceAddr, verifyDestAddr) {
+  self.signAndBroadcastTxRaw = function(key, unsignedTxHex, onSuccess, onError, verifySourceAddr, verifyDestAddr) {
     assert(verifySourceAddr, "Source address must be specified");
     //Sign and broadcast a multisig transaction that we got back from counterpartyd (as a raw unsigned tx in hex)
     //* verifySourceAddr and verifyDestAddr can be specified to verify that the txn hash we get back from the server is what we expected,
@@ -232,19 +253,19 @@ function WalletViewModel() {
       sendTx.sign(i, key);
     }
     
-    return self.broadcastSignedTx(sendTx.serializeHex());
+    return self.broadcastSignedTx(sendTx.serializeHex(), onSuccess, onError);
   }
   
-  self.signAndBroadcastTx = function(address, unsignedTxHex, verifyDestAddr) {
+  self.signAndBroadcastTx = function(address, unsignedTxHex, onSuccess, onError, verifyDestAddr) {
     var key = WALLET.getAddressObj(address).KEY;    
-    return self.signAndBroadcastTxRaw(key, unsignedTxHex, address, verifyDestAddr);
+    return self.signAndBroadcastTxRaw(key, unsignedTxHex, onSuccess, onError, address, verifyDestAddr);
   }
   
   self.retrieveBTCBalance = function(address, callback, errorHandler) {
     //We used to have a retrieveBTCBalances function for getting balance of multiple addresses, but scrapped it
     // since it worked in serial, and one address with a lot of txns could hold up the balance retrieval of every
     // other address behind it
-    fetchData(urlsWithPath(counterwalletd_insight_api_urls, '/addr/' + address),
+    failoverAPI("get_btc_address_info", {"address": address},    
       function(data, endpoint) {
         return callback(parseInt(data['balanceSat'] || 0), parseInt(data['unconfirmedBalanceSat'] || 0));
       },
@@ -253,7 +274,7 @@ function WalletViewModel() {
 
   self.retrieveNumPrimedTxouts = function(address, callback) {
     assert(callback, "callback must be defined");
-    fetchData(urlsWithPath(counterwalletd_insight_api_urls, '/addr/' + address + '/utxo'),
+    failoverAPI("get_btc_address_utxos", {"address": address},
       function(data, endpoint) {
         var numSuitableUnspentTxouts = 0;
         var totalBalance = 0;
@@ -294,7 +315,7 @@ function WalletViewModel() {
     return true;
   }
   
-  self.doTransaction = function(address, action, data, onSuccess) {
+  self.doTransaction = function(address, action, data, onSuccess, onError) {
     //specify the pubkey for a multisig tx
     assert(data['multisig'] === undefined);
     data['multisig'] = WALLET.getAddressObj(address).PUBKEY;
@@ -303,12 +324,18 @@ function WalletViewModel() {
     
     multiAPIConsensus(action, data,
       function(unsignedTxHex, numTotalEndpoints, numConsensusEndpoints) {
-        WALLET.signAndBroadcastTx(address, unsignedTxHex, verifyDestAddr);
-        //TODO: register this as a pending transaction 
-        return onSuccess();
+        WALLET.signAndBroadcastTx(address, unsignedTxHex, function(txResult, endpoint) {
+          
+          //register this as a pending transaction
+          var type = action.replace('create_', '') + 's';
+          if(data['source'] === undefined) data['source'] = address;
+          PENDING_ACTION_FEED.addPendingAction(type, data);
+          
+          return onSuccess(data, endpoint);
+        }, onError, verifyDestAddr);
     });
   }
-  
 }
 
-window.WALLET = new WalletViewModel();
+/*NOTE: Any code here is only triggered the first time the page is visited. Put JS that needs to run on the
+  first load and subsequent ajax page switches in the .html <script> tag*/

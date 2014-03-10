@@ -120,7 +120,7 @@
                                     </div>
                                     
                                     <!-- CUSTOM PRICING -->
-                                    <div class="row" data-bind="fadeVisible: currentTab() == 2 && currentMarketUnitPrice() == null" style="display:none">
+                                    <div class="row" data-bind="fadeVisibleInOnly: currentTab() == 2 && currentMarketUnitPrice() == null" style="display:none">
                                         <div class="col-md-12">
                                             <span class="errorRed">There is currently insufficient data to determine a fair market price for your purchase.</span>
                                             <br/><span>You have <b><span class="sellColor" data-bind="text: totalBalanceAvailForSale"></span>
@@ -151,7 +151,7 @@
                                             <span class="invalid" data-bind="validationMessage: selectedSellAmountCustom"></span>
                                         </div>
                                     </div>
-                                    <div class="row" data-bind="visible: currentTab() == 2 && (currentMarketUnitPrice() == null || overrideMarketPrice()) && !overrideDefaultOptions()" style="display:none">
+                                    <div class="row" data-bind="visible: currentTab() == 2 && (currentMarketUnitPrice() == null || overrideMarketPrice()) && !overrideDefaultOptions()" style="display:none;max-width: 1000px;">
                                         <a href="#" data-bind="click: function() { overrideDefaultOptions(true) }" style="font-size:11px;">Override Trade Options</a>
                                     </div>
                                     
@@ -201,13 +201,22 @@
                                             <span data-bind="visible: buyAsset() == 'BTC'">BTC Fee Required:</span>
                                             <span data-bind="visible: sellAsset() == 'BTC'">BTC Fee Provided:</span>
                                         </div>
-                                        <div class="col-md-8">
+                                        <div class="col-md-4">
                                             <div class="input-group">
                                                 <span class="input-group-addon"><i class="fa fa-btc fa-lg fa-fw"></i></span>
                                                 <input class="form-control input-lg" type="text" style="max-width: 300px"
                                                  data-bind="value: btcFee, valueUpdate: 'afterkeydown'" />
                                             </div>
                                             <span class="invalid" data-bind="validationMessage: btcFee"></span>
+                                        </div>
+                                        <div class="col-md-4">
+                                            <div class="btn-group" data-toggle="buttons">
+                                              <label class="radioBtn btn btn-lg" data-bind="css: { 'btn-success': btcFeeAs() == 'percentage' }">
+                                                <input type="radio" name="btcFeeAs" value="percentage" data-bind="btnGroupChecked: btcFeeAs">As %</label>
+                                                <!-- , attr: {disabled: selectedSellAsset() == 'XCP' ? 'disabled' : null }" -->
+                                              <label class="radioBtn btn btn-lg" data-bind="css: { 'btn-success': btcFeeAs() == 'amount' }">
+                                                <input type="radio" name="btcFeeAs" value="amount" data-bind="btnGroupChecked: btcFeeAs">As Amount</label>
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
@@ -242,7 +251,7 @@
                                                     <span data-bind="visible: sellAsset() == 'BTC'">BTC Fee Provided:</span>                                                    
                                                 </b></td>
                                                 <td>
-                                                    <b><span class="sellColor"><span data-bind="text: btcFee"></span>&nbsp;BTC</span></b>
+                                                    <b><span class="sellColor"><span data-bind="text: feeForSelectedSellAmount"></span>&nbsp;BTC</span></b>
                                                     (<span data-bind="text: dispFeeForSelectedSellAmountAsPct"></span>% of sale amount)
                                                 </td>
                                             </tr>
@@ -281,9 +290,9 @@
     </article> <!-- WIDGET END -->
   </div> <!-- end row -->
 
-  <div data-bind="fadeVisible: showPriceChart" class="row"> <!-- row -->
+  <div data-bind="fadeVisibleInOnly: showPriceChart" class="row"> <!-- row -->
     <article class="col-xs-12 col-sm-12 col-md-12 col-lg-12"> <!-- NEW WIDGET START -->
-      <div class="jarviswidget defaultWidgetColor" id="wid-id-priceChart" data-widget-editbutton="false" data-widget-deletebutton="false">
+      <div class="jarviswidget defaultWidgetColor" id="wid-id-priceChart" data-widget-editbutton="false" data-widget-deletebutton="false" data-bind="fadeVisibleInOnly: showPriceChart">
         <header>
             <span class="widget-icon"> <i class="fa fa-bar-chart-o"></i> </span>
             <h2>Price History for <span data-bind="text: dispAssetPair"></span></h2>
@@ -337,9 +346,9 @@
     </article> <!-- WIDGET END -->
   </div> <!-- end row -->
 
-  <div data-bind="fadeVisible: showOpenOrders" class="row"> <!-- row -->
+  <div data-bind="fadeVisibleInOnly: showOpenOrders" class="row"> <!-- row -->
     <article class="col-xs-12 col-sm-12 col-md-12 col-lg-12"> <!-- NEW WIDGET START -->
-      <div class="jarviswidget defaultWidgetColor" id="wid-id-openOrders" data-widget-editbutton="false" data-widget-deletebutton="false">
+      <div class="jarviswidget defaultWidgetColor" id="wid-id-openOrders" data-widget-editbutton="false" data-widget-deletebutton="false" data-bind="fadeVisibleInOnly: showOpenOrders">
         <header>
             <span class="widget-icon"> <i class="fa fa-spinner"></i> </span>
             <h2>Your <span data-bind="text: dispAssetPair"></span> Open Orders for <span data-bind="text: dispSelectedAddressWithLabel"></span></h2>
@@ -348,7 +357,7 @@
             <div class="widget-body no-padding"> <!-- widget content -->
                 <div class="widget-body-toolbar">
                 </div>
-                <table id="openOrders" class="table table-striped table-hover dt_basic" style="width: 100% !important;">
+                <table id="openOrders" class="table table-striped table-hover datatable_tabletools" style="width: 100% !important;">
                     <thead>
                         <tr>
                             <th>Tx ID</th>
@@ -367,7 +376,7 @@
                     <tbody data-bind="foreach: openOrders">
                         <tr>
                             <td><a target="_blank" data-bind="text: tx_index, attr: { href: !USE_TESTNET ? 'http://blockscan.com/tx.aspx?q=' + tx_index : null }"></a></td> <!-- link to block tx at blockscan -->
-                            <td data-bind="timeago: new Date(block_time * 1000)"></td>
+                            <td data-bind="timeago: new Date(block_time)"></td>
                             <td data-bind="text: derivePendingOrderAssetAmount(get_asset, get_amount) + ' ' + get_asset"></td>
                             <td data-bind="text: derivePendingOrderAssetAmount(give_asset, give_amount) + ' ' + give_asset"></td>
                             <td><a target="_blank" data-bind="text: derivePendingOrderAssetPrice(get_asset, get_amount, give_asset, give_amount)"></a></td>
@@ -388,9 +397,9 @@
     </article> <!-- WIDGET END -->
   </div> <!-- end row -->
   
-  <div data-bind="fadeVisible: showTradeHistory && tradeHistory().length > 0" class="row"> <!-- row -->
+  <div data-bind="fadeVisibleInOnly: showTradeHistory && tradeHistory().length > 0" class="row"> <!-- row -->
     <article class="col-xs-12 col-sm-12 col-md-12 col-lg-12"> <!-- NEW WIDGET START -->
-      <div class="jarviswidget defaultWidgetColor" id="wid-id-tradeChart" data-widget-editbutton="false" data-widget-deletebutton="false">
+      <div class="jarviswidget defaultWidgetColor" id="wid-id-tradeChart" data-widget-editbutton="false" data-widget-deletebutton="false" data-bind="fadeVisibleInOnly: showTradeHistory && tradeHistory().length > 0">
         <header>
             <span class="widget-icon"> <i class="fa fa-table"></i> </span>
             <h2>Trade History for <span data-bind="text: dispAssetPair"></span></h2>
@@ -415,7 +424,7 @@
                     </thead>
                     <tbody data-bind="foreach: tradeHistory">
                         <tr>
-                            <td><a target="_blank" data-bind="text: block_index, attr: { href: BLOCKEXPLORER_URL + '/blocks?blockHeight=' + block_index }"></a></td> <!-- link to block tx at insight -->
+                            <td><a target="_blank" data-bind="text: block_index, attr: { href: BLOCKEXPLORER_URL + '/block-index/' + block_index }"></a></td> <!-- link to block tx at insight -->
                             <td data-bind="text: moment(block_time).format('MMM Do YYYY, h:mm:ss a')"></td> <!-- datetime formatted string -->
                             <td><a target="_blank" data-bind="text: order_match_tx0_index, attr: { href: !USE_TESTNET ? 'http://blockscan.com/tx.aspx?q=' + order_match_tx0_index : null }"></a></td> <!-- link to TX at blockscan -->
                             <td><a target="_blank" data-bind="text: order_match_tx0_address, attr: { href: !USE_TESTNET ? 'http://blockscan.com/address.aspx?q=' + order_match_tx0_address : null }"></a></td> <!-- link to source addr at blockscan -->
@@ -446,6 +455,7 @@
   
     $(window).resize(BUY_SELL.dataTableResponsive);
     $(window).on('hashchange', function() {
+      BUY_SELL._tab2StopAutoRefresh(); //just in case
       $(window).off("resize", BUY_SELL.dataTableResponsive);
     });
   });

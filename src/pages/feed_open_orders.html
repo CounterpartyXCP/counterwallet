@@ -1,4 +1,4 @@
-<ul data-bind="foreach: openOrders" class="notification-body">
+<ul id="openOrderFeedContent" data-bind="foreach: openOrders" class="notification-body">
     <li>
       <span class="padding-10">
         <em data-bind="css: { displayColor }" class="badge padding-5 no-border-radius pull-left margin-right-5">
@@ -18,3 +18,7 @@
       </span>
     </li>
 </ul>
+
+<script type="text/javascript">
+  ko.applyBindings(OPEN_ORDER_FEED, document.getElementById("openOrderFeedContent"));
+</script>

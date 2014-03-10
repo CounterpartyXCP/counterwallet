@@ -20,7 +20,6 @@
     <link rel="stylesheet" href="xcp/extcss/bootstrap-datetimepicker.css">
     <!-- Counterwallet custom styles -->
     <link rel="stylesheet" href="xcp/css/default.css" type="text/css" media="screen">
-    <link rel="stylesheet" href="xcp/css/components/misc_ui.css">
     <link rel="stylesheet" href="xcp/css/components/logon.css">
     <link rel="stylesheet" href="xcp/css/components/chatfeed.css">
     <link rel="stylesheet" href="xcp/css/components/balances.css">
@@ -78,30 +77,38 @@
       <div id="logo-group">
         <span id="logo"><img src="xcp/images/logo-small.png" alt="" /><span class="logoText">Counterwallet</span></span>
         
-        <span id="activity" class="activity-dropdown">
-            <i class="fa fa-user"></i><b data-bind="text: totalActivityCount" class="badge"></b>
+        <span id="notificationFeed" class="activity-parent" data-contenturl="xcp/pages/feed_notifications.html" >
+            <span class="activity-dropdown">
+                <i class="fa fa-check"></i><b data-bind="visible: dispCount() > 0, text: dispCount" class="badge"></b>
+            </span>
+            <div class="ajax-dropdown">
+              <h2>Notifications</h2>
+              <div class="ajax-notifications custom-scroll"></div> <!-- notification content -->
+              <span data-bind="text: dispLastUpdated"></span> <!-- footer -->
+            </div> <!-- .ajax-dropdown -->
         </span>
-
-        <!-- AJAX-DROPDOWN : control this dropdown height, look and feel from the LESS variable file -->
-        <div class="ajax-dropdown">
-            <div class="btn-group btn-group-justified" data-toggle="buttons">
-                <label class="btn btn-default">
-                    <input type="radio" name="activity" data-bind="click: function() { unackedNotificationCount(0) }" id="xcp/pages/activity/notifications.html">
-                    Notifications (<span data-bind="text: notifications().length"></span>) </label>
-                <label class="btn btn-default">
-                    <input type="radio" name="activity" id="xcp/pages/activity/openorders.html">
-                    Open Orders (<span data-bind="text: openOrders().length"></span>) </label>
-                <label class="btn btn-default">
-                    <input type="radio" name="activity" id="xcp/pages/activity/pendingbtcpays.html">
-                    Unsettled Orders (<span data-bind="text: pendingBTCPays().length"></span>) </label>
-                    <!-- orders the user owes BTC on -->
-            </div>
-            
-            <div class="ajax-notifications custom-scroll"> <!-- notification content -->
-                <!-- we will select the first button automatically when the activity icon is clicked -->
-            </div> <!-- end notification content -->
-          <span data-bind="text: dispLastUpdated"></span> <!-- footer -->
-        </div> <!-- .ajax-dropdown -->
+        
+        <span id="openOrderFeed" class="activity-parent" data-contenturl="xcp/pages/feed_open_orders.html">
+            <span class="activity-dropdown">
+                <i class="fa fa-clock-o"></i><b data-bind="visible: dispCount() > 0, text: dispCount" class="badge"></b>
+            </span>
+            <div class="ajax-dropdown">
+              <h2>Open Orders</h2>
+              <div class="ajax-notifications custom-scroll"></div> <!-- notification content -->
+              <span data-bind="text: dispLastUpdated"></span> <!-- footer -->
+            </div> <!-- .ajax-dropdown -->
+        </span>
+        
+        <span id="pendingActionFeed" class="activity-parent" data-contenturl="xcp/pages/feed_pending_actions.html">
+            <span class="activity-dropdown">
+                <i class="fa fa-exchange"></i><b data-bind="visible: dispCount() > 0, text: dispCount" class="badge"></b>
+            </span>
+            <div class="ajax-dropdown">
+              <h2>Pending Actions</h2>
+              <div class="ajax-notifications custom-scroll"></div> <!-- notification content -->
+              <span data-bind="text: dispLastUpdated"></span> <!-- footer -->
+            </div> <!-- .ajax-dropdown -->
+        </span>
       </div> <!-- logo-group -->
 
       <div class="pull-right"> <!-- pulled right: nav area -->
@@ -109,47 +116,13 @@
           <span> <a href="xcp/pages/logon.html" title="Sign Out"><i class="fa fa-sign-out"></i></a> </span>
         </div> <!-- end logout button -->
 
-        <!-- reset widget settings menu -->
-        <div id="reset-widgets" class="btn-header pull-right">
-            <span> <a id="refresh" href="#" data-title="refresh" rel="tooltip" data-placement="bottom"
-                  data-original-title="<i class='text-warning fa fa-warning'></i> Warning! This will reset all your widget settings."
-                  data-html="true"><i class="fa fa-eraser"></i></a> </span>
-        </div>          
-
-        <!-- collapse menu button -->
-        <div id="hide-menu" class="btn-header pull-right">
-          <span> <a href="javascript:void(0);" title="Collapse Menu"><i class="fa fa-reorder"></i></a> </span>
-        </div>
-        <!-- end collapse menu -->
-        
-        <!-- fullscreen button -->
-        <div id="fullscreen" class="btn-header transparent pull-right">
+        <div id="fullscreen" class="btn-header transparent pull-right"> <!-- fullscreen button -->
             <span> <a href="javascript:void(0);" onclick="launchFullscreen(document.documentElement);" title="Full Screen"><i class="fa fa-fullscreen"></i></a> </span>
-        </div>
-        <!-- end fullscreen button -->
-        
-        <!-- multiple lang dropdown : find all flags in the image folder -->
-        <ul id="langSelector" class="header-dropdown-list hidden-xs">
-            <li>
-                <a href="#" class="dropdown-toggle" data-toggle="dropdown"> <img alt="" data-bind="attr: {src: selectedLang()['selectorImage']}"> <span data-bind="text: selectedLang()['name']"></span> <i class="fa fa-angle-down"></i> </a>
-                <ul class="dropdown-menu pull-right" data-bind="foreach: availableLangs">
-                    <li data-bind="css: {active: name == $parent.selectedLang()['name'] }">
-                        <a href="javascript:void(0);" data-bind="click: $parent.changeLang"><img alt="" data-bind="attr: {src: selectorImage}" />&nbsp;&nbsp;<span data-bind="text: name"></span></a>
-                    </li>
-                </ul>
-            </li>
-        </ul> <!-- end multiple lang -->
+        </div> <!-- end fullscreen button -->
 
-        <ul id="themeSelector" class="header-dropdown-list hidden-xs"> <!-- theme selection dropdown -->
-            <li>
-                <a href="#" class="dropdown-toggle" data-toggle="dropdown"> <div class="themeBox" data-bind="css: selectedTheme()['selectorStyleName']">&nbsp;</div> <i class="fa fa-angle-down"></i> </a>
-                <ul class="dropdown-menu pull-right" data-bind="foreach: availableThemes">
-                    <li data-bind="css: {active: name == $parent.selectedTheme()['name'] }">
-                        <a href="javascript:void(0);" data-bind="click: $parent.changeTheme"><span data-bind="css: selectorStyleName"></span>&nbsp;&nbsp;<span data-bind="text: name"></span></a>
-                    </li>
-                </ul>
-            </li>
-        </ul> <!-- end theme selection -->
+        <div id="fullscreen" class="btn-header transparent pull-right"> <!-- options button -->
+            <span> <a href="javascript:void(0);" onclick="WALLET_OPTIONS_MODAL.show();" title="Show Options"><i class="fa fa-gear"></i></a> </span>
+        </div> <!-- end options button -->
         
         <span id="noticeDevMode" data-bind="visible: IS_DEV" class="label label-warning pull-right" style="display:none;margin-left:10px;padding: 5px;position:relative;top:15px"><i class="fa-fw fa fa-warning"></i>&nbsp;Dev Mode Enabled</span>
         <span id="noticeTestnet" data-bind="visible: USE_TESTNET" class="label label-info pull-right" style="display:none;margin-left:10px;padding: 5px;position:relative;top:15px"><i class="fa-fw fa fa-info"></i>&nbsp;Testnet Enabled</span>
@@ -224,33 +197,8 @@
       <h1 style="font-size: 3em; text-align: center">Welcome to Your Secure Web Wallet</h1>
       <h2 style="font-size: 2em; text-align: center; padding-bottom: 5px; color: #333">Powered by Counterparty</h2>
       <div id="form-well" style="margin-top:40px">
-        <div class="panel panel-info">
-          <div class="panel-heading">
-            <h3 class="panel-title">
-              <b>Log Into Your Wallet</b>
-              <span data-bind="fadeVisibleInOnly: IS_DEV" class="label label-warning pull-right" style="display:none;margin-left:5px;padding: 5px;"><i class="fa-fw fa fa-warning"></i>&nbsp;Dev Mode Enabled</span>
-              <span data-bind="fadeVisibleInOnly: USE_TESTNET" class="label label-info pull-right" style="display:none;margin-left:5px;padding: 5px;"><i class="fa-fw fa fa-info"></i>&nbsp;Testnet Enabled</span>
-            </h3>
-          </div>
-          <div class="panel-body">
-            <form class="form-inline" role="form">
-              <input id="password" data-bind="value: enteredPassphrase, valueUpdate:'afterkeydown'" placeholder="Enter your Counterwallet 12 word passphrase." class="form-control pull-left" type="password">
-              <div class="pull-right">
-                <button id="walletLogin" data-bind="click: openWallet, enable: isPassphraseValid(), css: { 'btn-primary': isPassphraseValid() }" type="button" class="btn btn-default" disabled>Open Wallet</button>
-                &nbsp;<button id="secureKeyboard" data-bind="click: showSecureKeyboard, enable: !isPassphraseValid(), css: { 'btn-primary': !isPassphraseValid() }" type="button" class="btn btn-default" disabled><i class="fa fa-keyboard-o"></i></button>
-              </div>
-            </form>
-            <div class="clearfix"></div>
-            <div data-bind="fadeVisible: walletGenProgressVal() > 0" class="progress progress-striped active" style="margin-top:15px;margin-bottom:0;display:none">
-              <div id="loginProgressBar" class="progress-bar"  role="progressbar" data-bind="style: { width: walletGenProgressWidth() }">
-              </div>
-            </div>
-          </div>
-        </div>
-        <div id="createNewAcctBtnPane" data-bind="visible: generatedPassphrase().length == 0" style="text-align:center;display:block">
-          <p style="font-size:1.7em">or&nbsp;              
-          <button data-bind="click: generatePassphrase" type="button" class="btn btn-success btn-lg">Create a new wallet</button>
-          </p>
+        <div id="createNewAcctBtnPane" data-bind="visible: generatedPassphrase().length == 0" style="text-align:center;display:block;margin-bottom: 35px;">
+          <button data-bind="click: generatePassphrase" type="button" class="btn btn-success btn-lg" style="font-size: 21px;">Create a new wallet</button>
         </div>
         <div id="newAccountInfoPane" data-bind="fadeVisible: generatedPassphrase().length > 0" style="display:none">
           <br/>
@@ -275,11 +223,35 @@
                   If someone gets your passphrase, they can gain access to your wallet.
                 </p>
               </div>
-              <p>To log into your wallet, input your passphase in the wallet login textbox above, and press the "Open Wallet" button.</p>
+              <p>To log into your wallet, input your passphase in the wallet login textbox above, and press the <b>Open Wallet</b> button.</p>
+            </div>
+          </div>
+        </div>
+        <div class="panel panel-info">
+          <div class="panel-heading">
+            <h3 class="panel-title">
+              <b>Log Into Your Wallet</b>
+              <span data-bind="fadeVisibleInOnly: IS_DEV" class="label label-warning pull-right" style="display:none;margin-left:5px;padding: 5px;"><i class="fa-fw fa fa-warning"></i>&nbsp;Dev Mode Enabled</span>
+              <span data-bind="fadeVisibleInOnly: USE_TESTNET" class="label label-info pull-right" style="display:none;margin-left:5px;padding: 5px;"><i class="fa-fw fa fa-info"></i>&nbsp;Testnet Enabled</span>
+            </h3>
+          </div>
+          <div class="panel-body">
+            <form class="form-inline" role="form">
+              <input id="password" data-bind="value: enteredPassphrase, valueUpdate:'afterkeydown'" placeholder="Enter your Counterwallet 12 word passphrase." class="form-control pull-left" type="password">
+              <div class="pull-right">
+                <button id="walletLogin" data-bind="click: openWallet, enable: isPassphraseValid(), css: { 'btn-primary': isPassphraseValid() }" type="button" class="btn btn-default" disabled>Open Wallet</button>
+                &nbsp;<button id="secureKeyboard" data-bind="click: showSecureKeyboard, enable: !isPassphraseValid(), css: { 'btn-primary': !isPassphraseValid() }" type="button" class="btn btn-default" disabled><i class="fa fa-keyboard-o"></i></button>
+              </div>
+            </form>
+            <div class="clearfix"></div>
+            <div data-bind="fadeVisible: walletGenProgressVal() > 0" class="progress progress-striped active" style="margin-top:15px;margin-bottom:0;display:none">
+              <div id="loginProgressBar" class="progress-bar"  role="progressbar" data-bind="style: { width: walletGenProgressWidth() }">
               </div>
             </div>
-          </div>              
+          </div>
+        </div>
       </div> <!-- form-well -->
+      
       <div id="extra-info" class="container" data-bind="visible: !(generatedPassphrase().length > 0)">
         <h3 class="sales-title">Why use Counterwallet?</h3>
         <h4 class="sales-subtitle">We're a rapidly evolving online wallet with a goal of supporting all <a href="http://www.counterparty.co" target="_blank">Counterparty</a> functionality.</h4>
@@ -311,7 +283,7 @@
       </div>
     </div> <!-- END logged out cover div -->
     
-    <!-- modal for keyboardless passphrase entry -->
+    <!-- modal for keyboardless passphrase entry (on login page) -->
     <div data-bind="showModal: shown" id="logonPassphaseModal" class="modal fade" data-backdrop="static" data-keyboard="false" tabindex="-1" role="dialog" aria-labelledby="logonPassphaseModal" aria-hidden="true">
       <div class="modal-dialog">
         <div class="modal-content">
@@ -371,6 +343,55 @@
           <div class="modal-footer">
             <button type="button" class="btn btn-default" data-bind="click: hide">Cancel</button>
             <button type="button" data-bind="click: submitForm" class="btn btn-primary">Login</button>
+          </div>
+        </div><!-- /.modal-content -->
+      </div><!-- /.modal-dialog -->
+    </div><!-- /.modal -->
+    
+    <!-- modal for options window (in logged in interface) -->
+    <div data-bind="showModal: shown" id="walletOptionsModal" class="modal fade" data-backdrop="static" data-keyboard="false" tabindex="-1" role="dialog" aria-labelledby="walletOptionsModal" aria-hidden="true">
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <div class="modal-header">
+            <button type="button" data-bind="click: hide" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+            <h4 class="modal-title">Wallet Options</h4>
+          </div>
+          <div class="modal-body no-padding">
+            
+            <form class="smart-form"><fieldset>
+              <section><div class="row">
+                <label class="control-label col col-sm-2">Theme</label>
+                <div class="col col-sm-10">
+                    <select id="themeSelector" style="width:100%" data-bind="options: availableThemes, value: selectedTheme, optionsValue: 'id', optionsText: 'name', select2: {  minimumResultsForSearch: -1, escapeMarkup: function(m) { return m; } }"></select>
+                </div>
+              </div></section>
+
+              <section><div class="row">
+                <label class="control-label col col-sm-2">Language</label>
+                <div class="col col-sm-10">
+                    <select id="langSelector" style="width:100%" data-bind="options: availableLangs, value: selectedLang, optionsValue: 'id', optionsText: 'name', select2: {  minimumResultsForSearch: -1, escapeMarkup: function(m) { return m; } }"></select>
+                </div>
+              </div></section>
+              <section><div class="row">
+                <div class="col col-sm-2">Auto Prime</div>
+                <div class="col col-sm-10">
+                  <label class="checkbox">
+                    <input name="autoPrimeEnabled" type="checkbox" data-bind="checked: autoPrimeEnabled">
+                    <i></i>Enable Address Auto-Priming
+                  </label>
+                  <div class="note">If auto priming is enabled, each of your addresses will be automatically primed to
+                      at least 10 unspent outputs, if they have an available BTC balance to do this with.</div>
+              </div></section>
+              <section><div class="row">
+                <div class="col col-sm-2">Reset State</div>
+                <div class="col col-sm-10">
+                    <button id="refresh" type="button" data-title="refresh" href="javascript:void(0);" class="btn btn-danger">Reset Widget State</button>
+                    <div class="note">Click this button to reset custom color settings, widget positioning, etc.</div>
+              </div></section>
+            </fieldset></form>                    
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-primary" data-bind="click: hide">Close</button>
           </div>
         </div><!-- /.modal-content -->
       </div><!-- /.modal-dialog -->
@@ -450,28 +471,53 @@
     <script src="xcp/extjs/decimal.js"></script> <!-- for accurate arithmetic price operations -->
     
     <!-- JavaScript created specifically for Counterwallet. -->
-    <script src="xcp/js/util.js"></script> 
-    <script src="xcp/js/counterwallet.js"></script> 
-    <script src="xcp/js/util.api.js"></script> 
-    <script src="xcp/js/util.bitcoin.js"></script> 
-    <script src="xcp/js/util.knockout.js"></script> 
-    <script src="xcp/js/messagefeed.js"></script> 
-    <script src="xcp/js/components/misc_ui.js"></script>
-    <script src="xcp/js/components/wallet.js"></script> <!-- inits WALLET object but doesn't bind it to anything -->
+    <script src="xcp/js/util.js"></script>
+    <script src="xcp/js/counterwallet.js"></script>
+    <script src="xcp/js/util.api.js"></script>
+    <script src="xcp/js/util.bitcoin.js"></script>
+    <script src="xcp/js/util.knockout.js"></script>
+    <script src="xcp/js/messagefeed.js"></script>
+    <script src="xcp/js/components/wallet.js"></script>
+    <script src="xcp/js/components/wallet_options.js"></script>
     <script src="xcp/js/components/address.js"></script>
     <script src="xcp/js/components/asset.js"></script>
-    <script src="xcp/js/components/logon.js"></script> 
-    <script src="xcp/js/components/activityfeed.js"></script> <!-- inits ACTIVITY_FEED object and binds it to activityBox -->
-    <script src="xcp/js/components/chatfeed.js"></script> 
+    <script src="xcp/js/components/logon.js"></script>
+    <script src="xcp/js/components/feed_notifications.js"></script>
+    <script src="xcp/js/components/feed_open_orders.js"></script>
+    <script src="xcp/js/components/feed_pending_actions.js"></script>
+    <script src="xcp/js/components/chatfeed.js"></script>
 
     <!-- custom app.js --> 
     <script src="xcp/js/smartadmin.app.js"></script>
     <!-- ^ unfortunately we have to mod the file itself, instead of dynamically override :( -->
 
     <script type="text/javascript">
-      //so that knockout is run on the DOM sections and global context is accessible...
-      ko.applyBindings({}, document.getElementById("noticeTestnet"));
-      ko.applyBindings({}, document.getElementById("noticeDevMode"));
+      window.LOGON_VIEW_MODEL = new LogonViewModel();
+      window.LOGON_PASSWORD_MODAL = new LogonPasswordModalViewModel();
+
+      window.WALLET = new WalletViewModel();
+      window.WALLET_OPTIONS_MODAL = new WalletOptionsModalViewModel();
+
+      window.CHAT_FEED = new ChatFeedViewModel();
+      window.PENDING_ACTION_FEED = new PendingActionFeedViewModel();
+      window.OPEN_ORDER_FEED = new OpenOrderFeedViewModel();
+      window.NOTIFICATION_FEED = new NotificationFeedViewModel();
+
+      $(document).ready(function() {
+        ko.applyBindings(LOGON_VIEW_MODEL, document.getElementById("logon"));
+        ko.applyBindingsWithValidation(LOGON_PASSWORD_MODAL, document.getElementById("logonPassphaseModal"));
+
+        ko.applyBindingsWithValidation(WALLET_OPTIONS_MODAL, document.getElementById("walletOptionsModal"));
+        
+        ko.applyBindings(CHAT_FEED, document.getElementById("chatPane"));
+        ko.applyBindings(PENDING_ACTION_FEED, document.getElementById("pendingActionFeed"));
+        ko.applyBindings(OPEN_ORDER_FEED, document.getElementById("openOrderFeed"));
+        ko.applyBindings(NOTIFICATION_FEED, document.getElementById("notificationFeed"));        
+                
+        //so that knockout is run on the DOM sections and global context is accessible...
+        ko.applyBindings({}, document.getElementById("noticeTestnet"));
+        ko.applyBindings({}, document.getElementById("noticeDevMode"));
+      });
     
       //Google analytics (production only)
       if(GOOGLE_ANALYTICS_UAID) {
