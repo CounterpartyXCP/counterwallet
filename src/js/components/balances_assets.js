@@ -377,20 +377,33 @@ function ChangeAssetDescriptionModalViewModel() {
 }
 
 
-ko.validation.rules['dividendDoesNotExceedXCPBalance'] = {
+ko.validation.rules['amountDoesNotExceedDividendAssetBalance'] = {
     validator: function (val, self) {
-      if(!isNumber(val)) return null;
-      return val * self.asset().normalizedTotalIssued() <= WALLET.getBalance(self.address(), "XCP");
+      if(self.dividendAssetBalRemainingPostPay() === null) return true; //wait until dividend asset chosen to validate
+      return self.dividendAssetBalRemainingPostPay() >= 0;
+      //if(!isNumber(val)) return false;
+      //return val * self.asset().normalizedTotalIssued() <= WALLET.getBalance(self.address(), self.selectedDividendAsset());
     },
-    message: 'The total dividend would exceed this address\' XCP balance.'
+    message: 'The total dividend would exceed the address\' balance for the selected Dividend Asset.'
 };
 ko.validation.registerExtenders();
 
+var DividendAssetInDropdownItemModel = function(asset, rawBalance, normalizedBalance) {
+  this.ASSET = asset;
+  this.RAW_BALANCE = rawBalance; //raw
+  this.NORMALIZED_BALANCE = normalizedBalance; //normalized
+  this.SELECT_LABEL = asset + " (bal: " + normalizedBalance + ")";
+};
 function PayDividendModalViewModel() {
   var self = this;
   self.shown = ko.observable(false);
   self.address = ko.observable(''); // SOURCE address (supplied)
-  self.asset = ko.observable();
+  self.asset = ko.observable(null); //dividends are paid to holders of this asset
+
+  self.availableDividendAssets = ko.observableArray([]);
+  self.selectedDividendAsset = ko.observable(null).extend({ //dividends are paid IN (i.e. with) this asset
+    required: true
+  });
   
   self.amountPerUnit = ko.observable('').extend({
     required: true,
@@ -398,7 +411,7 @@ function PayDividendModalViewModel() {
       message: 'Must be a valid number',
       params: '^[0-9]*\.?[0-9]{0,8}$' //not perfect ... will convert divisible assets to satoshi before sending to API
     },
-    dividendDoesNotExceedXCPBalance: self
+    amountDoesNotExceedDividendAssetBalance: self
   });
   
   self.assetName = ko.computed(function() {
@@ -406,26 +419,30 @@ function PayDividendModalViewModel() {
     return self.asset().ASSET;
   }, self);
   
-  self.displayedAddressXCPBalance = ko.computed(function() {
-    return WALLET.getBalance(self.address(), "XCP"); //normalized
-  }, self);
-
-  self.displayedTotalPay = ko.computed(function() {
+  self.totalPay = ko.computed(function() {
     if(!self.asset()) return null;
     return self.amountPerUnit() * self.asset().normalizedTotalIssued();
   }, self);
 
-  self.displayedXCPBalRemainingPostPay = ko.computed(function() {
-    if(!self.asset()) return null;
-    return Decimal.round(new Decimal(self.displayedAddressXCPBalance()).sub(self.displayedTotalPay()), 8).toFloat();
+  self.dividendAssetBalance = ko.computed(function() {
+    if(!self.selectedDividendAsset()) return null;
+    return WALLET.getBalance(self.address(), self.selectedDividendAsset()); //normalized
+  }, self);
+
+  self.dividendAssetBalRemainingPostPay = ko.computed(function() {
+    if(!self.asset() || self.dividendAssetBalance() === null) return null;
+    return Decimal.round(new Decimal(self.dividendAssetBalance()).sub(self.totalPay()), 8).toFloat();
   }, self);
   
   self.validationModel = ko.validatedObservable({
-    amountPerUnit: self.amountPerUnit
+    amountPerUnit: self.amountPerUnit,
+    selectedDividendAsset: self.selectedDividendAsset
   });
 
   self.resetForm = function() {
     self.amountPerUnit(null);
+    self.availableDividendAssets([]);
+    self.selectedDividendAsset(null);
     self.validationModel.errors.showAllMessages(false);
   }
   
@@ -442,9 +459,9 @@ function PayDividendModalViewModel() {
     //do the additional issuance (specify non-zero amount, no transfer destination)
     WALLET.doTransaction(self.address(), "create_dividend",
       { source: self.address(),
-        amount_per_unit: denormalizeAmount(self.amountPerUnit()),
+        amount_per_unit: denormalizeAmount(parseFloat(self.amountPerUnit())),
         asset: self.asset().ASSET,
-        dividend_asset: 'XCP' //TODO: allow other assets beyond XCP
+        dividend_asset: self.selectedDividendAsset()
       },
       function() {
         self.shown(false);
@@ -461,6 +478,21 @@ function PayDividendModalViewModel() {
     self.address(address);
     self.asset(asset);
     self.shown(true);
+    
+    //Get the balance of ALL assets at this address
+    failoverAPI("get_normalized_balances", [address], function(data, endpoint) {
+      for(var i=0; i < data.length; i++) {
+        if(data[i]['amount'] !== null && data[i]['amount'] !== 0)
+          self.availableDividendAssets.push(new DividendAssetInDropdownItemModel(data[i]['asset'], data[i]['amount'], data[i]['normalized_amount']));
+      }
+      //TODO: enable this once counterpartyd supports dividends in BTC
+      /*//Also get the BTC balance at this address and put at head of the list
+      WALLET.retrieveBTCBalance(address, function(balance) {
+        if(balance) {
+          self.availableDividendAssets.unshift(new DividendAssetInDropdownItemModel("BTC", balance, normalizeAmount(balance)));
+        }
+      });*/
+    });
   }  
 
   self.hide = function() {

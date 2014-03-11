@@ -463,6 +463,9 @@ function SweepModalViewModel() {
     // for that (we just need an available out of > MIN_FEE... but let's just require a primed out for a BTC send to keep things simple)
     WALLET.retrieveNumPrimedTxouts(address, function(numPrimedTxouts) {
       self.numPrimedTxoutsForPrivateKey(numPrimedTxouts);
+    }, function(jqXHR, textStatus, errorThrown) {
+      bootbox.alert("Cannot fetch the number of unspent txouts. Please try again later.");
+      self.numPrimedTxoutsForPrivateKey(0);
     });
   });  
 }

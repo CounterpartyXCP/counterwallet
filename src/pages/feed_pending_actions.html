@@ -2,7 +2,7 @@
 <ul id="pendingBTCPayActionFeedContent" data-bind="foreach: pendingBTCPays" class="notification-body">
     <li>
       <span class="padding-10">
-        <em data-bind="css: { displayColor }" class="badge padding-5 no-border-radius pull-left margin-right-5">
+        <em data-bind="css: displayColor" class="padding-5 no-border-radius pull-left margin-right-5">
           <i class="fa fa-fw fa-clock-o fa-2x"></i>
         </em>
         <span>
@@ -17,20 +17,15 @@
       </span>
     </li>
 </ul>
-<ul id="pendingActionFeedContent" data-bind="foreach: pendingBTCPays" class="notification-body">
+<ul id="pendingActionFeedContent" data-bind="foreach: pendingActions" class="notification-body">
     <li>
       <span class="padding-10">
-        <em data-bind="css: { displayColor }" class="badge padding-5 no-border-radius pull-left margin-right-5">
-          <i class="fa fa-fw fa-clock-o fa-2x"></i>
+        <em data-bind="css: DISPLAY_COLOR" class="padding-5 no-border-radius pull-left margin-right-5">
+          <i class="fa fa-fw fa-2x" data-bind="css: DISPLAY_ICON"></i>
         </em>
         <span>
-           <b>You have a pending payment of <span data-bind="text: btcAmount"></span> BTC required for order <span data-bind="text: origOrderTxIndex"></span></b>
-           <br/>Order is for <b><span data-bind="text: origOrderOtherAssetAmount"></span> <span data-bind="text: origOrderOtherAsset"></span></b>
-           <br/><i>Order TxID: <a data-bind="text: origOrderTxIndex, attr: { href: 'http://blockscan.com/tx.aspx?q=' + origOrderTxIndex }"></a> / BTCPay TxID: <a data-bind="text: txIndex, attr: { href: 'http://blockscan.com/tx.aspx?q=' + txIndex }"></a></i>
-           <br/><i>Your Address: <span data-bind="text: btcDestAddress"></span> / BTCPay Dest Address: <span data-bind="text: btcDestAddress"></span></i>
-           <br/>
-           <span class="pull-right font-xs text-muted"><i data-bind="timeago: whenBTCPayCreated"></i></span>
-           <span class="pull-right"><button class="btn btn-xs btn-success margin-top-5" data-bind="click: completeBTCPay">Pay</button></span>
+           <span data-bind="html: displayText()"></span>
+           <span class="pull-right font-xs text-muted"><i data-bind="timeago: WHEN"></i></span>
         </span>
       </span>
     </li>

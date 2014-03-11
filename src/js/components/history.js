@@ -154,20 +154,20 @@ function TransactionHistoryItemViewModel(data) {
       desc = "XCP Proof-of-Burn<br/>Burned: " + (self.data['burned'] / UNIT).toString() + " BTC<br/>"
         + "Earned: " + numberWithCommas(self.data['earned'] / UNIT) + " XCP";
     } else if(self.rawTxType == 'sends') {
-      desc = "Send of " + numberWithCommas(self.data['_divisible'] ? self.data['amount'] / UNIT : self.data['amount']) + " " + self.data['asset']
+      desc = "Send of " + numberWithCommas(normalizeAmount(self.data['amount'], self.data['_divisible'])) + " " + self.data['asset']
         + " to <a href=\"http://blockscan.com/address.aspx?q=" + self.data['destination'] + "\" target=\"blank\">"
         + (PREFERENCES['address_aliases'][hashToB64(self.data['destination'])] || self.data['destination']) + "</a>"; 
     } else if(self.rawTxType == 'orders') {
-      desc = "Sell " + numberWithCommas(self.data['_give_divisible'] ? self.data['give_amount'] / UNIT : self.data['give_amount'])
+      desc = "Sell " + numberWithCommas(normalizeAmount(self.data['give_amount'], self.data['_give_divisible']))
         + " " + self.data['give_asset'] + " for "
-        + numberWithCommas(self.data['_get_divisible'] ? self.data['get_amount'] / UNIT : self.data['get_amount']) + " "
+        + numberWithCommas(normalizeAmount(self.data['get_amount'], self.data['_get_divisible'])) + " "
         + self.data['get_asset'];
     } else if(self.rawTxType == 'order_matches') {
       desc = self.data['tx0_address'] + " sent "
-        + numberWithCommas(self.data['_forward_divisible'] ? self.data['forward_amount'] / UNIT : self.data['forward_amount'])
+        + numberWithCommas(normalizeAmount(self.data['forward_amount'], self.data['_forward_divisible']))
         + " " + self.data['forward_asset']
         + self.data['tx1_address'] + " sent "
-        + numberWithCommas(self.data['_backward_divisible'] ? self.data['backward_amount'] / UNIT : self.data['backward_amount'])
+        + numberWithCommas(normalizeAmount(self.data['backward_amount'], self.data['_backward_divisible']))
         + " " + self.data['backward_asset'];
     } else if(self.rawTxType == 'btcpays') {
       desc = "Payment for Order tx <a href=\"http://blockscan.com/order.aspx?q=" + self.txIndex + "\" target=\"blank\">" + self.txIndex + "</a>";
@@ -175,10 +175,10 @@ function TransactionHistoryItemViewModel(data) {
       if(self.data['transfer']) {
         desc = "Asset " + self.data['asset'] + " transferred to "
           + (PREFERENCES['address_aliases'][hashToB64(self.data['issuer'])] || self.data['issuer']);
-      } else if(self.data['amount'] == 0) {
+      } else if(self.data['locked']) {
         desc = "Asset " + self.data['asset'] + " locked against additional issuance";
       } else {
-        desc = "Quantity " + numberWithCommas(self.data['divisible'] ? self.data['amount'] / UNIT : self.data['amount'])
+        desc = "Quantity " + numberWithCommas(normalizeAmount(self.data['amount'], self.data['divisible']))
           + " of asset " + self.data['asset'] + " issued";
       }
     } else if(self.rawTxType == 'broadcasts') {
@@ -187,18 +187,19 @@ function TransactionHistoryItemViewModel(data) {
       desc = BET_TYPES[self.data['bet_type']] + " bet on feed @ "
         + (PREFERENCES['address_aliases'][hashToB64(self.data['feed_address'])] || self.data['feed_address']) + "<br/>"
         + "Odds: " + self.data['odds'] + ", Wager: "
-        + numberWithCommas(self.data['wager_amount'] / UNIT) + " XCP, Counterwager: "
-        + numberWithCommas(self.data['counterwager_amount'] / UNIT) + " XCP";  
+        + numberWithCommas(normalizeAmount(self.data['wager_amount'])) + " XCP, Counterwager: "
+        + numberWithCommas(normalizeAmount(self.data['counterwager_amount'])) + " XCP";  
     } else if(self.rawTxType == 'bet_matches') {
       desc = "For feed " + (PREFERENCES['address_aliases'][hashToB64(self.data['feed_address'])] || self.data['feed_address'])
         + ", " + self.data['tx0_address'] + " bet "
-        + numberWithCommas(self.data['forward_amount'] / UNIT) + " XCP"
+        + numberWithCommas(normalizeAmount(self.data['forward_amount'])) + " XCP"
         + self.data['tx1_address'] + " bet "
-        + numberWithCommas(self.data['backward_amount'] / UNIT) + " XCP";
+        + numberWithCommas(normalizeAmount(self.data['backward_amount'])) + " XCP";
     } else if(self.rawTxType == 'dividends') {
-      desc = "Paid " + numberWithCommas(self.data['amount_per_share'] / UNIT) + " XCP on asset " + self.data['asset'];
+      desc = "Paid " + numberWithCommas(normalizeAmount(self.data['amount_per_share'])) + " "+ self.KEYDATA['dividend_asset']
+        + " on asset " + self.data['asset'];
     } else if(self.rawTxType == 'cancels') {
-      desc = "Order/Bet " + data['offer_hash'] +"cancelled.";
+      desc = "Order/Bet " + data['offer_hash'] +" cancelled.";
     } else if(self.rawTxType == 'callbacks') {
       desc = self.data['fraction'] + " called back for asset " + self.data['asset'];
     } else if(self.rawTxType == 'bet_expirations') {
@@ -213,7 +214,6 @@ function TransactionHistoryItemViewModel(data) {
       desc = "UNKNOWN TRANSACTION TYPE";
     }
     return desc;
-    
   };
 }
 

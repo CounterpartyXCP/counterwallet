@@ -65,10 +65,58 @@ function PendingBTCPayViewModel(orderMatchID, BTCPayTxIndex, myAddr, btcDestAddr
 
 function PendingActionViewModel(type, keyData, keyDataJSON) {
   var self = this;
-  self.WHEN_CREATED = new Date();
+  self.WHEN = ko.observable(new Date());
   self.TYPE = type;
   self.KEYDATA = keyData;
   self.KEYDATAJSON = keyDataJSON;
+  self.DISPLAY_ICON = ENTITY_ICONS[self.TYPE];
+  self.DISPLAY_COLOR = ENTITY_NOTO_COLORS[self.TYPE];
+   
+  self.displayText = function() {
+    //TODO: this display of data is very elementary and basic. IMPROVE greatly in the future...
+    var desc = "";
+    var asset = WALLET.getAsset
+    if(self.TYPE == 'burns') {
+      desc = "Pending burn of " + normalizeAmount(self.KEYDATA['burned']) + " BTC";
+    } else if(self.TYPE == 'sends') {
+      desc = "Pending send of " + numberWithCommas(normalizeAmount(self.KEYDATA['amount'], self.KEYDATA['_divisible'])) + " " + self.KEYDATA['asset']
+        + " to <a href=\"http://blockscan.com/address.aspx?q=" + self.KEYDATA['destination'] + "\" target=\"blank\">"
+        + (PREFERENCES['address_aliases'][hashToB64(self.KEYDATA['destination'])] || self.KEYDATA['destination']) + "</a>"; 
+    } else if(self.TYPE == 'orders') {
+      desc = "Pending order to sell " + numberWithCommas(normalizeAmount(self.KEYDATA['give_amount'], self.KEYDATA['_give_divisible']))
+        + " " + self.KEYDATA['give_asset'] + " for "
+        + numberWithCommas(normalizeAmount(self.KEYDATA['get_amount'], self.KEYDATA['_get_divisible'])) + " "
+        + self.KEYDATA['get_asset'];
+    } else if(self.TYPE == 'issuances') {
+      if(self.KEYDATA['transfer']) {
+        desc = "Pending transfer of asset " + self.KEYDATA['asset'] + " to "
+          + (PREFERENCES['address_aliases'][hashToB64(self.KEYDATA['issuer'])] || self.KEYDATA['issuer']);
+      } else if(self.KEYDATA['description'] == 'LOCK') {
+        desc = "Pending lock of asset " + self.KEYDATA['asset'] + " against additional issuance";
+      } else {
+        desc = "Pending issuance for quantity " + numberWithCommas(normalizeAmount(self.KEYDATA['amount'], self.KEYDATA['divisible']))
+          + " of asset " + self.KEYDATA['asset'];
+      }
+    } else if(self.TYPE == 'broadcasts') {
+      desc = "Pending broadcast:<br/>Text: " + self.KEYDATA['text'] + "<br/>Value:" + self.KEYDATA['value'];
+    } else if(self.TYPE == 'bets') {
+      desc = "Pending " + BET_TYPES[self.KEYDATA['bet_type']] + " bet on feed @ "
+        + (PREFERENCES['address_aliases'][hashToB64(self.KEYDATA['feed_address'])] || self.KEYDATA['feed_address']) + "<br/>"
+        + "Odds: " + self.KEYDATA['odds'] + ", Wager: "
+        + numberWithCommas(normalizeAmount(self.KEYDATA['wager_amount'])) + " XCP, Counterwager: "
+        + numberWithCommas(normalizeAmount(self.KEYDATA['counterwager_amount'])) + " XCP";  
+    } else if(self.TYPE == 'dividends') {
+      desc = "Pending dividend payment of " + numberWithCommas(self.KEYDATA['amount_per_share']) + " "
+        + self.KEYDATA['dividend_asset'] + " on asset " + self.KEYDATA['asset'];
+    } else if(self.TYPE == 'cancels') {
+      desc = "Pending cancellation of order/bet " + data['offer_hash'];
+    } else if(self.TYPE == 'callbacks') {
+      desc = "Pending callback for " + self.KEYDATA['fraction'] + " fraction on asset " + self.KEYDATA['asset'];
+    } else {
+      desc = "UNHANDLED TRANSACTION TYPE";
+    }
+    return desc;
+  };
 }
 
 function PendingActionFeedViewModel() {
@@ -90,40 +138,52 @@ function PendingActionFeedViewModel() {
     // the goal of the dict is to contain just enough parameters to uniquely identify the pending txn so it can be found
     // and removed from the list, once the it is confirmed on the blockchain and we get the message feed message
     var keyData = null;
-    if(type == 'burns')
+    if(type == 'burns') {
       keyData = {'source': data.source, 'burned': data.burned || data.amount};
-    else if(type == 'credits' || type == 'debits')
+    } else if(type == 'credits' || type == 'debits') {
       keyData = {'address': data.address, 'asset': data.asset, 'amount': data.amount};
-    else if(type == 'sends')
+      keyData['source'] = data.address; //for easier display
+    } else if(type == 'sends') {
       keyData = {'source': data.source, 'destination': data.destination, 'asset': data.asset, 'amount': data.amount};
-    else if(type == 'orders')
-      keyData = {'source': data.source, 'give_asset': data.give_asset, 'give_amount': data.give_amount,
-        'get_asset': data.get_asset, 'get_amount': data.get_amount, 'expiration': data.expiration};    
-    else if(type == 'issuances') //issue new, lock, transfer, change description, issue additional
+    } else if(type == 'orders') {
+      keyData = {'source': data.source,
+        'give_asset': data.give_asset, 'give_amount': data.give_amount, '_give_divisible': data._give_divisible,
+        'get_asset': data.get_asset, 'get_amount': data.get_amount, '_get_divisible': data._get_divisible,
+        'expiration': data.expiration};    
+    } else if(type == 'issuances') { //issue new, lock, transfer, change description, issue additional
       keyData = {'source': data.source, 'asset': data.asset, 'amount': data.amount,
         'destination': data.destination || data.transfer_destination,
-        'issuer': data.issuer || data.source, 'description': data.description};
-    else if(type == 'broadcasts')
+        'issuer': data.issuer || data.source, 'description': data.description, 'divisible': data.divisible};
+    } else if(type == 'broadcasts') {
       keyData = {'source': data.source, 'text': data.text, 'value': data.value};
-    else if(type == 'bets')
+    } else if(type == 'bets') {
       keyData = {'source': data.source, 'feed_address': data.feed_address, 'bet_type': data.bet_type,
         'deadline': data.deadline, 'wager_amount': data.wager_amount, 'counterwager_amount': data.counterwager_amount};    
-    else if(type == 'dividends')
+    } else if(type == 'dividends') {
       keyData = {'source': data.source, 'asset': data.asset, 'dividend_asset': data.dividend_asset,
         'amount_per_unit': data.amount_per_unit};
-    else if(type == 'cancels')
+    } else if(type == 'cancels') {
       keyData = {'source': data.source, 'offer_hash': data.offer_hash};
-    else if(type == 'callbacks')
+    } else if(type == 'callbacks') {
       keyData = {'source': data.source, 'fraction': data.fraction, 'asset': data.asset};
-    else
+    } else {
       assert(false, "Invalid action: " + type);
-    $.jqlog.log("pendingEvent:" + type + ": " + keyData);
+    }
+    //check for some common fields
+    assert(keyData['source'], "Missing source");
+    
+    //add in some other helpful fields
+    if(keyData['asset'] && keyData['divisible'] === undefined && keyData['_divisible'] === undefined) {
+      keyData['_divisible'] = WALLET.getAddressObj(keyData['source']).getAssetObj(keyData['asset']).DIVISIBLE;
+    }
     return keyData;
   }
   
   self.addPendingAction = function(type, data) {
     var keyData = self._generateKeyData(type, data);
-    self.pendingActions.push(new PendingActionViewModel(type, keyData, JSON.stringify(keyData)));
+    var keyDataJSON = JSON.stringify(keyData);
+    self.pendingActions.push(new PendingActionViewModel(type, keyData, keyDataJSON));
+    $.jqlog.log("pendingAction:add:" + type + ": " + keyDataJSON);
     self.lastUpdated(new Date());
   }
 
@@ -135,8 +195,11 @@ function PendingActionFeedViewModel() {
     });
     if (match) {
       ko.utils.arrayRemoveItem(self.pendingActions, match);
+      $.jqlog.log("pendingAction:remove:" + type + ": " + keyDataJSON);
+      self.lastUpdated(new Date());
+    } else{
+      $.jqlog.log("pendingAction:NOT FOUND:" + type + ": " + keyDataJSON);
     }
-    self.lastUpdated(new Date());
   }
   
   self.addPendingBTCPay = function(orderMatchID, BTCPayTxIndex, myAddr, btcDestAddress, btcAmount, myOrderTxIndex,

@@ -44,6 +44,7 @@ function initMessageFeed() {
       //$.jqlog.log('socket.io message received: ' + event + ' - data:' + JSON.stringify(data));
       if(event == 'connect') {
         $.jqlog.log('socket.io(messages): Connected to server: ' + url);
+        socket.emit("subscribe"); //subscribe to the data feed itself
       } else if(event == 'disconnect') {
         $.jqlog.log('socket.io(messages): The client has disconnected from server: ' + url);
       } else if(event == 'connect_failed') {
@@ -57,12 +58,13 @@ function initMessageFeed() {
       } else if(['connecting', 'connect_error', 'connect_timeout', 'reconnect', 'reconnecting', 'reconnect_error'].indexOf(event) >= 0) {
         //these events currently not handled
       } else{
-        parseMessageWithFeedGapDetection(event, data, handleMessage);
+        assert(data['_category'] !== undefined && event == data['_category'], "Message feed message lacks category field!");
+        parseMessageWithFeedGapDetection(event, data);
       }
   });
 }
 
-function parseMessageWithFeedGapDetection(event, data, callback) {
+function parseMessageWithFeedGapDetection(event, data) {
   if(!data || (data.substring && data.startswith("<html>"))) return;
   //^ sometimes nginx can trigger this via its proxy handling it seems, with a blank payload (or a html 502 Bad Gateway
   // payload) -- especially if the backend server reloads. Just ignore it.
@@ -88,7 +90,7 @@ function parseMessageWithFeedGapDetection(event, data, callback) {
   
   //handle normal case that the message we received is the next in order
   if(data['_message_index'] == LAST_MESSAGEIDX_RECEIVED + 1) {
-    return callback(event, data);
+    return handleMessage(event, data);
   }
   
   //otherwise, we have a forward gap
@@ -101,22 +103,15 @@ function parseMessageWithFeedGapDetection(event, data, callback) {
     missingMessages.push(i);
   }
   
-  failoverAPI("get_messages_by_index", [missingMessages], function(missingMessageData, endpoint) {
-    var missingMessageEventData = null;
+  failoverAPI("get_messagefeed_messages_by_index", [missingMessages], function(missingMessageData, endpoint) {
     for(var i=0; i < data.length; i++) {
-      assert(missingMessageData['message_index'] == missingMessages[i], "Message feed resync list oddity...?");
-      missingMessageEventData = $.parseJSON(data['bindings']);
-      //Recreate what the siofeed@counterwalletd adds to the raw binding data
-      missingMessageEventData['_message_index'] = missingMessageData['message_index'];
-      missingMessageEventData['_block_index'] = missingMessageData['block_index'];
-      missingMessageEventData['_block_time'] = missingMessageData['block_time'];
-      missingMessageEventData['_command'] = missingMessageData['command'];
-      handleMessage(missingMessageData['category'], missingMessageEventData);
-      assert(LAST_MESSAGEIDX_RECEIVED + 1 == missingMessageData['message_index'], "Message feed resync counter increment oddity...?");
-      LAST_MESSAGEIDX_RECEIVED = missingMessageData['message_index']; 
+      assert(missingMessageData[i]['_message_index'] == missingMessages[i], "Message feed resync list oddity...?");
+      handleMessage(missingMessageData[i]['_category'], missingMessageData[i]);
+      assert(LAST_MESSAGEIDX_RECEIVED + 1 == missingMessageData[i]['_message_index'], "Message feed resync counter increment oddity...?");
+      LAST_MESSAGEIDX_RECEIVED = missingMessageData[i]['_message_index']; 
     }
     //all caught up, call the callback for the original message itself
-    callback(event, data);
+    handleMessage(event, data);
   });
 
     //    

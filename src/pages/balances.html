@@ -166,10 +166,11 @@
                 <span>&nbsp;&nbsp;<span style="font-weight: bold" data-bind="text: asset"></span></span>
             </div>
           </div></section>
-        <span class="formPaddedBot" data-bind="fadeVisibleInOnly: numberWithCommas(normalizedBalRemaining())" style="font-weight: bold">
-            After sending, you will have <span class="sellColor" data-bind="text: numberWithCommas(normalizedBalRemaining())"></span>
-            <span class="sellColor" data-bind="text: asset"></span> remaining at this address (minus fees).</span>
         </fieldset></form>
+        <p class="formPaddedBot" data-bind="fadeVisibleInOnly: numberWithCommas(normalizedBalRemaining())" style="font-weight: bold">
+            After sending, you will have <span class="sellColor" data-bind="text: numberWithCommas(normalizedBalRemaining())"></span>
+            <span class="sellColor" data-bind="text: asset"></span> remaining at this address (minus fees).
+        </p>
       </div>
       <div class="modal-footer">
         <button type="button" class="btn btn-default" data-bind="click: hide">Cancel</button>
@@ -352,7 +353,8 @@
         </fieldset></form>
         <p class="formPaddedBot" data-bind="fadeVisibleInOnly: validationModel.isValid()" style="font-weight: bold">
             After burning, you will have approximately
-            <b class="buyColor"><span data-bind="text: numberWithCommas(amountXCPToBeCreated())"></span> XCP</b> created at this address.</p>
+            <b class="buyColor"><span data-bind="text: numberWithCommas(amountXCPToBeCreated())"></span> XCP</b> created at this address.
+        </p>
       </div>
       <div class="modal-footer">
         <button type="button" class="btn btn-default" data-bind="click: hide">Cancel</button>
@@ -562,26 +564,36 @@
         <h4 class="modal-title">Pay Dividend on <span data-bind="text: assetName"></span></h4>
       </div>
       <div class="modal-body no-padding">
-        <p class="formPadded">How many XCP per share of this unit would you like to pay to asset holders as a dividend?
-        <i>(Note that the full balance of XCP paid out must be present at this same address.)</i><br/><br/>
-       <span data-bind="fadeVisible: displayedAddressXCPBalance !== null">This address has a balance of
-           <b style="color: green" data-bind="text: displayedAddressXCPBalance"></b> XCP that can be paid as a dividend.<br/><br/></span>
+        <p class="formPadded">Use this form to pay holders of <b><span data-bind="text: assetName"></span></b> a dividend using XCP or any other asset.
+        <i>Note that the full required balance of the asset paid out must be present at this same address.</i><br/><br/>
        <b style='color:red'>Please NOTE that this action is irreversable!</b></p>
-        
         <form class="smart-form" data-bind="submit: doAction"><fieldset>
           <section><div class="row">
-            <label class="control-label col col-sm-2">XCP per Unit</label>
+            <label class="control-label col col-sm-2">Dividend Asset</label>
+            <div class="col col-sm-10">
+                <label class="input">
+                    <select id="selectedDividendAsset" style="width:100%" data-bind="options: availableDividendAssets, optionsValue: 'ASSET', optionsText: 'SELECT_LABEL', select2: { minimumResultsForSearch: 10, escapeMarkup: function(m) { return m; } }, value: selectedDividendAsset"></select>
+                </label>                    
+                <div class="note">Select the asset with which the dividend should be paid.</div>
+            </div>
+          </div></section>
+          <section><div class="row">
+            <label class="control-label col col-sm-2">Dividend per Unit</label>
             <div class="col col-sm-10">
                 <label class="input"><i class="icon-append fa fa-plus"></i>
                     <input name="amountPerUnit" data-bind="value: amountPerUnit, valueUpdate : 'afterkeydown'" type="text"/>
                 </label>
+                <div class="note">Enter the quantity of the Dividend Asset that should be distributed per share of <span data-bind="text: assetName"></span>.</div>
             </div>
           </div></section>
         </fieldset></form>
-        <span class="formPaddedBot" data-bind="fadeVisibleInOnly: amountPerUnit() && displayedXCPBalRemainingPostPay() >= 0">
-            After dividend payment this address will have a remaining balance of
-            <b style="color: #a4781b" data-bind="text: displayedXCPBalRemainingPostPay"></b> XCP.<br/><br/>
-        </span>
+        <div class="formPaddedBot" data-bind="fadeVisibleInOnly: amountPerUnit() && selectedDividendAsset()">
+            <p>This dividend payment would cost you a total of 
+            <b class="sellColor"><span data-bind="text: numberWithCommas(totalPay())"></span> <span data-bind="html: selectedDividendAsset"></span></b>.</p>
+            <p>After dividend payment this address would have a remaining balance of
+            <b data-bind="css: {errorTextColor: dividendAssetBalRemainingPostPay() < 0, sellColor:  dividendAssetBalRemainingPostPay() >= 0}">
+                <span data-bind="text: numberWithCommas(dividendAssetBalRemainingPostPay())"></span> <span data-bind="html: selectedDividendAsset"></span></b>.</p>
+        </div>
       </div>
       <div class="modal-footer">
         <button type="button" class="btn btn-default" data-bind="click: hide">Cancel</button>
@@ -633,7 +645,11 @@
       ko.applyBindingsWithValidation(PAY_DIVIDEND_MODAL, document.getElementById("payDividendModal"));
         
       //Called on first load, and every switch back to the balances page
-      WALLET.refreshBTCBalances(false);
+      if(window._BALANCES_HAS_LOADED_ALREADY === undefined) {
+          window._BALANCES_HAS_LOADED_ALREADY = true;
+      } else {
+          WALLET.refreshBTCBalances(false);
+      }
     }
   }
 </script>

@@ -314,9 +314,9 @@
                                     </tr>
                                 </thead>
                                 <tbody data-bind="foreach: askBook"> <!-- descending order -->
-                                    <tr>
+                                    <tr class="sellColor">
                                         <td data-bind="text: unit_price"></td>
-                                        <td data-bind="text: amount.toFixed(8) + ' (' + count + ')'"></td> <!-- amount (count) -->
+                                        <td data-bind="text: +amount.toFixed(8) + ' (' + count + ')'"></td> <!-- amount (count) -->
                                         <td data-bind="text: numberWithCommas(depth)"></td>
                                     </tr>
                                 </tbody>
@@ -332,9 +332,11 @@
                                     </tr>
                                 </tbody>
                                 <tbody data-bind="foreach: bidBook"> <!-- descending order -->
+                                    <tr class="buyColor">
                                         <td data-bind="text: unit_price"></td>
-                                        <td data-bind="text: amount.toFixed(8) + ' (' + count + ')'"></td>
+                                        <td data-bind="text: +amount.toFixed(8) + ' (' + count + ')'"></td>
                                         <td data-bind="text: numberWithCommas(depth)"></td>
+                                    </tr>
                                 </tbody>
                             </table>
                         </div>

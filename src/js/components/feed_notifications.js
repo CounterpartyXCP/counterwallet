@@ -15,14 +15,14 @@ function NotificationViewModel(type, message, when) {
   self.message = ko.observable(message);
   self.when = ko.observable(when); //when generated
   
-  self.displayIconForType = ko.computed(function() {
+  self.displayIcon = ko.computed(function() {
     if(type == 'user') return 'fa-user';
     if(type == 'alert') return 'fa-exclamation';
     if(type == 'security') return 'fa-shield';
     return ENTITY_ICONS[type] ? ENTITY_ICONS[type] : 'fa-question';
   }, self);
   
-  self.displayColorForType = ko.computed(function() {
+  self.displayColor = ko.computed(function() {
     if(type == 'user') return 'bg-color-lighten';
     if(type == 'alert') return 'bg-color-redLight';
     if(type == 'security') return 'bg-color-redLight';

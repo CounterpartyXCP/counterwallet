@@ -1,8 +1,8 @@
 <ul id="notificationFeedContent" data-bind="foreach: notifications" class="notification-body">
     <li>
       <span class="padding-10">
-        <em data-bind="css: { displayColorForType }" class="badge padding-5 no-border-radius pull-left margin-right-5">
-          <i data-bind="css: { displayIconForType }" class="fa fa-fw fa-2x"></i>
+        <em data-bind="css: displayColor" class="padding-5 no-border-radius pull-left margin-right-5">
+          <i data-bind="css: displayIcon" class="fa fa-fw fa-2x"></i>
         </em>
         <span>
            <span data-bind="text: message"></span>

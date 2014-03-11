@@ -10,11 +10,6 @@ function WalletViewModel() {
   
   self.isNew = ko.observable(false); //set to true if we can't find the user's prefs when logging on. if set, we'll show some intro text on their login, etc.
   
-  self.initBTCBalanceAutoRefresh = function() {
-    assert(self.autoRefreshBTCBalances, "initBTCBalanceAutoRefresh called but autoRefreshBTCBalances != true");
-    setInterval(function() { self.refreshBTCBalances(true) }, 60000 * 5); //every 5 minutes
-  }
-  
   self.addAddress = function(key) {
     //adds a key to the wallet, making a new address object on the wallet in the process
     //(assets must still be attached to this address, with updateBalances() or other means...)
@@ -116,7 +111,7 @@ function WalletViewModel() {
   }
   
   self.refreshBTCBalances = function(isRecurring) {
-    if(typeof(isRecurring)==='undefined') isRecurring = false; //this field should only be used by initBTCBalanceAutoRefresh
+    if(typeof(isRecurring)==='undefined') isRecurring = false;
     //^ if isRecurring is set to true, we will update BTC balances every 5 min as long as self.autoRefreshBTCBalances == true
     
     //update all BTC balances (independently, so that one addr with a bunch of txns doesn't hold us up)
@@ -131,21 +126,33 @@ function WalletViewModel() {
           // display the unconfirmed portion of the balance in addition to the confirmed balance, as it will include the change output
           self.updateBalance(address, "BTC", rawBalConfirmed + rawBalUnconfirmed);
           
-          if(rawBalConfirmed) {
+          if(rawBalConfirmed && !self.getAddressObj(address).IS_WATCH_ONLY) {
             //Also refresh BTC unspent txouts (to know when to "reprime" the account)
             self.retrieveNumPrimedTxouts(address, function(numPrimedTxouts, utxosData) {
               self.updateNumPrimedTxouts(address, numPrimedTxouts); 
+              
+              //get the number of unconfirmed txouts with 0 confirms (otherwise, if we use the txouts with >= 1 confirm
+              // we will have a situation where the thing will keep repriming the account every 5 minutes until the next block comes in)
+              var numPrimedTxouts0Confirms = 0;
+              for(var j=0; j < utxosData.length; j++) {
+                if(denormalizeAmount(utxosData[j]['amount']) >= MIN_PRIME_BALANCE)
+                  numPrimedTxouts0Confirms++;
+              }
+
+              $.jqlog.log("refreshBTCBalances: Address " + address + " -- confirmed bal = " +  rawBalConfirmed
+                + "; unconfirmed bal = " + rawBalUnconfirmed + "; numPrimedTxouts = " + numPrimedTxouts
+                + "; numPrimedTxouts0Confirms = " + numPrimedTxouts0Confirms);
               
               //see if we should auto auto prime
               if(   PREFERENCES['auto_prime']
                  && !(self.getAddressObj(address).IS_WATCH_ONLY)
                  && rawBalConfirmed >= AUTOPRIME_MIN_CONFIRMED_BTC_BAL * UNIT
-                 && numPrimedTxouts !== null
-                 && numPrimedTxouts < AUTOPRIME_AT_LESSTHAN_REMAINING) {
+                 && numPrimedTxouts0Confirms !== null
+                 && numPrimedTxouts0Confirms < AUTOPRIME_AT_LESSTHAN_REMAINING) {
                 var maxPrimedTxoutsPossible = parseInt((rawBalConfirmed - MIN_FEE) / MIN_PRIME_BALANCE);
                 var numPrimedTxoutsToCreate = Math.min(maxPrimedTxoutsPossible, AUTOPRIME_MAX_AMOUNT);
                 assert(numPrimedTxoutsToCreate > 0); //shouldn't ever hit this with the earlier balanace check
-                $.jqlog.log("Address " + address + " has a confirmed balance of " + normalizeAmount(rawBalConfirmed)
+                $.jqlog.log("refreshBTCBalances: Address " + address + " has a confirmed balance of " + normalizeAmount(rawBalConfirmed)
                   + " BTC and only " + numPrimedTxouts + " primed utxos remaining. Creating " + numPrimedTxoutsToCreate
                   + " additional utxos...");
                 primeAddress(address, numPrimedTxoutsToCreate, utxosData,
@@ -157,8 +164,8 @@ function WalletViewModel() {
             }, function(jqXHR, textStatus, errorThrown) {
               self.updateNumPrimedTxouts(address, null); //null = UNKNOWN
             });
-          } else {
-            self.updateNumPrimedTxouts(address, 0); //zero balance == no primed txouts (no need to even try and get a 500 error)
+          } else { //non-watch only with a zero balance == no primed txouts (no need to even try and get a 500 error)
+            self.updateNumPrimedTxouts(address, 0);
           }
           
           if(completedAddresses.length == addresses.length - 1) { //all done
@@ -252,7 +259,6 @@ function WalletViewModel() {
     for (i=0; i < sendTx.ins.length; i++) {
       sendTx.sign(i, key);
     }
-    
     return self.broadcastSignedTx(sendTx.serializeHex(), onSuccess, onError);
   }
   
@@ -272,26 +278,27 @@ function WalletViewModel() {
       errorHandler || defaultErrorHandler);
   }
 
-  self.retrieveNumPrimedTxouts = function(address, callback) {
-    assert(callback, "callback must be defined");
+  self.retrieveNumPrimedTxouts = function(address, onSuccess, onError, minConfirmations) {
+    if(typeof(minConfirmations)==='undefined') minConfirmations = 1;
+    if(typeof(onError)==='undefined')
+      onError = function(jqXHR, textStatus, errorThrown) { return defaultErrorHandler(jqXHR, textStatus, errorThrown); };
+    assert(onSuccess, "callback must be defined");
+    
     failoverAPI("get_btc_address_utxos", {"address": address},
       function(data, endpoint) {
         var numSuitableUnspentTxouts = 0;
         var totalBalance = 0;
         for(var i=0; i < data.length; i++) {
-          if(denormalizeAmount(data[i]['amount']) >= MIN_PRIME_BALANCE && data[i]['confirmations'] >= 1) numSuitableUnspentTxouts++;
+          if(denormalizeAmount(data[i]['amount']) >= MIN_PRIME_BALANCE && data[i]['confirmations'] >= minConfirmations) numSuitableUnspentTxouts++;
           totalBalance += denormalizeAmount(data[i]['amount']);
         }
         //final number of primed txouts is lesser of either the # of txouts that are >= .0005 BTC, OR the floor(total balance / .0005 BTC)
-        return callback(Math.min(numSuitableUnspentTxouts, Math.floor(totalBalance / MIN_PRIME_BALANCE)), data);
+        return onSuccess(Math.min(numSuitableUnspentTxouts, Math.floor(totalBalance / MIN_PRIME_BALANCE)), data);
       },
       function(jqXHR, textStatus, errorThrown) {
-      if(jqXHR.responseText == 'No free outputs to spend') {
-        return callback(0, null);
-      } else {
-        return callback(null, null); //some other error
+        return onError(jqXHR, textStatus, errorThrown); //some other error
       }
-    });
+    );
   }
   
   /////////////////////////
@@ -322,13 +329,27 @@ function WalletViewModel() {
     //find and specify the verifyDestAddr
     var verifyDestAddr = data['destination'] || data['transfer_destination'] || null;
     
+    //order handling hack, so we can get asset divisibility to pending
+    var extra1 = null, extra2 = null;
+    if(action == 'create_order') {
+      extra1 = data['_give_divisible'];
+      delete data['_give_divisible'];
+      extra2 = data['_get_divisible'];  
+      delete data['_get_divisible'];
+    }
+    
     multiAPIConsensus(action, data,
       function(unsignedTxHex, numTotalEndpoints, numConsensusEndpoints) {
+        $.jqlog.log("TXN CREATED. numTotalEndpoints=" + numTotalEndpoints + "; numConsensusEndpoints=" + numConsensusEndpoints);
         WALLET.signAndBroadcastTx(address, unsignedTxHex, function(txResult, endpoint) {
           
           //register this as a pending transaction
           var type = action.replace('create_', '') + 's';
           if(data['source'] === undefined) data['source'] = address;
+          if(action == 'create_order') {
+            data['_give_divisible'] = extra1;
+            data['_get_divisible'] = extra2;
+          }
           PENDING_ACTION_FEED.addPendingAction(type, data);
           
           return onSuccess(data, endpoint);
