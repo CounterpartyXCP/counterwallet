@@ -3,7 +3,7 @@ Counterwallet
 
 JavaScript Based Online Bitcoin Wallet for [Counterparty](http://www.counterparty.co), originally based off of [Carbonwallet](http://www.carbonwallet.com) (however more than 90% of the original code has been removed or rewritten).
 
-Website: http://www.counterwallet.com
+Website: https://counterwallet.co
 
 Features:
 
