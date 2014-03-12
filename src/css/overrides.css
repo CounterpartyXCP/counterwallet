@@ -1,0 +1,170 @@
+/* OVERRIDES/ENHANCEMENTS TO smartadmin STYLING */
+
+/* 
+ * FORM STYLING OVERRIDES (we have to redo these because we do forms a bit
+ * differently than SmartAdmin does, due to our use of knockout)
+ */
+.errorTextColor {
+    color: #D56161;
+}
+
+.smart-form span.invalid {
+    display: block;
+    margin-top: 6px;
+    padding: 0 1px;
+    font-style: normal;
+    font-size: 11px;
+    line-height: 15px;
+    color: #D56161;
+}
+
+.smart-form input.invalid {
+    background: #fff0f0;
+    border-color: #A90329;
+}
+
+.smart-form input[readonly="readonly"] {
+    background: #eee;
+}
+
+p.formPadded, div.formPadded {
+    margin: 15px 10px;
+}
+
+p.formPaddedBot, div.formPaddedBot {
+    margin: 0 10px 15px 10px;
+}
+
+.smart-form fieldset {
+    padding-top: 15px; /* reduce a bit */
+}
+
+/* 
+ * LOGO AND ACTIVITY LOG INTERFACE MODIFICATIONS
+ */
+span.logoText {
+    font-size: 1.6em;
+    color: white;
+    position: relative;
+    bottom: 4px;
+}
+
+#logo img { /* need to use !important here because the google skin has its own logo img style that borks things up */
+    width: auto !important;
+    height: auto !important;
+    position: relative !important;
+    bottom: 8px !important;    
+}
+
+#logo {
+    width: 195px; /* + 20px */
+}
+#logo span.logoText {
+    padding-left: 4px;
+}
+
+#logo-group span#activity {
+    position:relative;
+    left: 20px; /* + 20px */
+}
+#header>:first-child {
+    width: 340px; /* + 100px */
+}
+.smart-style-0 #header span.logoText { /* override for a specific style */
+    color: black;
+}
+
+#logo-group span.activity-parent { /* custom style */
+  margin-left: 10px;
+}
+#logo-group span.activity-dropdown {
+  -moz-border-radius: 2px;
+  -webkit-border-radius: 2px;
+  border-radius: 2px;
+  cursor: default !important;
+  display: inline-block;
+  font-weight: bold;
+  height: 24px;
+  width: 24px;
+  padding: 2px;
+  text-align: center;
+  text-decoration: none !important;
+  -moz-user-select: none;
+  -webkit-user-select: none;
+  background-color: #f8f8f8;
+  background-image: -webkit-gradient(linear, left top, left bottom, from(#f8f8f8), to(#f1f1f1));
+  background-image: -webkit-linear-gradient(top, #f8f8f8, #f1f1f1);
+  background-image: -moz-linear-gradient(top, #f8f8f8, #f1f1f1);
+  background-image: -ms-linear-gradient(top, #f8f8f8, #f1f1f1);
+  background-image: -o-linear-gradient(top, #f8f8f8, #f1f1f1);
+  background-image: linear-gradient(top, #f8f8f8, #f1f1f1);
+  border: 1px solid #bfbfbf;
+  color: #c4bab6;
+  font-size: 19px;
+  margin: 10px 0 0 0;
+  position: relative;
+}
+#logo-group span.activity-dropdown:hover {
+  border: 1px solid #bfbfbf;
+  transition: all 0.0s;
+  cursor: pointer !important;
+  -webkit-box-shadow: inset 0px 0px 4px 1px rgba(0, 0, 0, 0.08);
+  box-shadow: inset 0px 0px 4px 1px rgba(0, 0, 0, 0.08);
+}
+
+#notificationFeed .ajax-dropdown {
+    left: 46px;
+}
+#pendingActionFeed .ajax-dropdown {
+    left: 86px;
+}
+#openOrderFeed .ajax-dropdown {
+    left: 126px;
+}
+
+
+/* LEFT AND CONTENT PANEL INTERFACE MODIFICATIONS
+ * (the goal is to make the interface a bit more compact)
+ */
+.smart-style-2 #left-panel {
+    padding: 15px 5px;
+}
+
+aside {
+    width: 180px;
+}
+
+.fixed-ribbon #content {
+    padding-top: 10px;
+}
+
+#main {
+    margin-left: 180px;
+}
+
+/* 
+ * STYLE SPECIFIC OVERRIDES
+ */
+
+/* change dark elegance menu item padding so things fit on one line */
+.smart-style-1 nav ul li a { 
+    padding: 12px 12px 12px 12px;
+}
+
+/* Set default widget header color based on the chosen theme */
+body.smart-style-0 .defaultWidgetColor>header { /* simple grey = golden (yellow) pane */
+    background: #B09B5B;
+    color: #FFF;
+}
+body.smart-style-1 .defaultWidgetColor>header { /* dark elegance = lightRed pane */
+    background: #A65858;
+    color: #FFF;
+}
+body.smart-style-2 .defaultWidgetColor>header { /* ultra light = lightBlue pane */
+    background: #CCDADF;
+    color: #2b363c;
+}
+body.smart-style-3 .defaultWidgetColor>header { /* google skin = darkBlue (night sky) pane */
+    background: #4C4F53;
+    color: #FFF;
+}

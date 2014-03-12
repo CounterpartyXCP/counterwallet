@@ -3,11 +3,8 @@ button#createNewAddress { margin: 12px; }
 
 input.addressNicknameEditable { width: 220px; } /* for the popup x-editable control */
 
-div#balancesContainer div[role=content] { padding: 5px; }
-
-div#balancesContainer div.popover { width: 300px; }
-
-div#balancesContainer div.popover h3.popover-title { color: black; }
+section.balancesContainer div[role=content] { padding: 5px; }
+/*section.balancesContainer div.popover { min-width: 300px; }*/
 
 .asset-item {
   position: relative;
@@ -17,7 +14,7 @@ div#balancesContainer div.popover h3.popover-title { color: black; }
   margin: 5px;
   padding: 12px 8px 8px 8px;
   border-style:solid;
-  border-width:3px;  
+  border-width: 1px;  
   border-radius: 3px;  
 }
 
@@ -43,15 +40,21 @@ div#balancesContainer div.popover h3.popover-title { color: black; }
   line-height: 18px;
 }
 
-/*.asset-item .issued {
-  position: relative;
-  bottom: 10px;
-  letter-spacing: 0;
-  font-size: 15px;
-  font-weight: bold;
-}*/
+.asset-item button.dropdown-toggle {
+  border-radius: 4px;
+}
 
-.asset-item.btc          { color: #a94442; background-color: #f2dede; border-color: #ebccd1; }
-.asset-item.xcp          { color: #3c763d; background-color: #dff0d8; border-color: #d6e9c6; }
-.asset-item.myasset     { color: #8a6d3b; background-color: #faebcc; border-color: #f4dbab; }
-.asset-item.othersasset { color: #31708f; background-color: #d9edf7; border-color: #bce8f1; }
+.asset-item div.btn-group {
+  float: right;
+  width: 30px;
+  height: 32px;
+  line-height: 32px;
+  position: relative;
+  margin-left: 10px;
+  margin-top: 2px;    
+}
+
+.asset-item.btc          { color: #a94442; background-color: #ebccd1; border-color: #c4aaaf; }
+.asset-item.xcp          { color: #3c763d; background-color: #d6e9c6; border-color: #b2c2a5; }
+.asset-item.myasset     { color: #8a6d3b; background-color: #f4dbab; border-color: #cfb991; }
+.asset-item.othersasset { color: #31708f; background-color: #bce8f1; border-color: #9fc4cc; }

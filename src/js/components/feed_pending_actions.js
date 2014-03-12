@@ -140,9 +140,6 @@ function PendingActionFeedViewModel() {
     var keyData = null;
     if(type == 'burns') {
       keyData = {'source': data.source, 'burned': data.burned || data.amount};
-    } else if(type == 'credits' || type == 'debits') {
-      keyData = {'address': data.address, 'asset': data.asset, 'amount': data.amount};
-      keyData['source'] = data.address; //for easier display
     } else if(type == 'sends') {
       keyData = {'source': data.source, 'destination': data.destination, 'asset': data.asset, 'amount': data.amount};
     } else if(type == 'orders') {
@@ -167,7 +164,9 @@ function PendingActionFeedViewModel() {
     } else if(type == 'callbacks') {
       keyData = {'source': data.source, 'fraction': data.fraction, 'asset': data.asset};
     } else {
-      assert(false, "Invalid action: " + type);
+      //certain actions, like debits, credits, cancellations, etc either are ignored or don't apply
+      $.jqlog.log("Ignored action: " + type + " -- " + JSON.stringify(keyData));
+      return null;
     }
     //check for some common fields
     assert(keyData['source'], "Missing source");
@@ -181,17 +180,17 @@ function PendingActionFeedViewModel() {
   
   self.addPendingAction = function(type, data) {
     var keyData = self._generateKeyData(type, data);
-    var keyDataJSON = JSON.stringify(keyData);
-    self.pendingActions.push(new PendingActionViewModel(type, keyData, keyDataJSON));
-    $.jqlog.log("pendingAction:add:" + type + ": " + keyDataJSON);
+    if(keyData === null) return; //ignored action
+    self.pendingActions.push(new PendingActionViewModel(type, keyData));
+    $.jqlog.log("pendingAction:add:" + type + ": " + JSON.stringify(keyData));
     self.lastUpdated(new Date());
   }
 
   self.removePendingAction = function(type, data) {
     var keyData = self._generateKeyData(type, data);
-    var keyDataJSON = JSON.stringify(keyData);
+    if(keyData === null) return; //ignored action
     var match = ko.utils.arrayFirst(self.pendingActions(), function(item) {
-      return item.TYPE == type && item.KEYDATAJSON == keyDataJSON;
+      return item.TYPE == type && deepCompare(item, keyData);
     });
     if (match) {
       ko.utils.arrayRemoveItem(self.pendingActions, match);

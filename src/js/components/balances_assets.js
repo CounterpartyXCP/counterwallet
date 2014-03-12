@@ -116,11 +116,6 @@ function CreateAssetModalViewModel() {
     //convert callDate + callPrice
     var rawCallDate = self.callDate() ? parseInt(self.callDate().getTime() / 1000) : 0; //epoch ts
 
-    /*if(self.callable() && rawAmount + rawCallPrice > MAX_INT) {
-      bootbox.alert("The call price for this asset is too high.");
-      return false;
-    }*/
-    
     WALLET.doTransaction(self.address(), "create_issuance",
       { source: self.address(),
         asset: self.name(),
@@ -129,7 +124,7 @@ function CreateAssetModalViewModel() {
         description: self.description(),
         callable_: self.callable,
         call_date: rawCallDate,
-        call_price: self.callPrice() || 0, //float
+        call_price: parseFloat(self.callPrice()) || 0.0, //float
         transfer_destination: null
       },
       function() {
@@ -381,8 +376,6 @@ ko.validation.rules['amountDoesNotExceedDividendAssetBalance'] = {
     validator: function (val, self) {
       if(self.dividendAssetBalRemainingPostPay() === null) return true; //wait until dividend asset chosen to validate
       return self.dividendAssetBalRemainingPostPay() >= 0;
-      //if(!isNumber(val)) return false;
-      //return val * self.asset().normalizedTotalIssued() <= WALLET.getBalance(self.address(), self.selectedDividendAsset());
     },
     message: 'The total dividend would exceed the address\' balance for the selected Dividend Asset.'
 };
@@ -485,6 +478,126 @@ function PayDividendModalViewModel() {
         if(data[i]['amount'] !== null && data[i]['amount'] !== 0)
           self.availableDividendAssets.push(new DividendAssetInDropdownItemModel(data[i]['asset'], data[i]['amount'], data[i]['normalized_amount']));
       }
+
+      //Also get the BTC balance at this address and put at head of the list
+      WALLET.retrieveBTCBalance(address, function(balance) {
+        if(balance) {
+          self.availableDividendAssets.unshift(new DividendAssetInDropdownItemModel("BTC", balance, normalizeAmount(balance)));
+        }
+      });
+    });
+  }  
+
+  self.hide = function() {
+    self.shown(false);
+  }  
+}
+
+
+ko.validation.rules['calledAmountDoesNotExceedXCPBalanceRequired'] = {
+    validator: function (val, self) {
+      if(self.xcpBalRemainingPostCall() === null) return true; //wait until dividend asset chosen to validate
+      return self.xcpBalRemainingPostCall() >= 0;
+    },
+    message: 'The total dividend would exceed the address\' balance for the selected Dividend Asset.'
+};
+ko.validation.registerExtenders();
+
+function CallAssetModalViewModel() {
+  var self = this;
+  self.shown = ko.observable(false);
+  self.address = ko.observable(''); // SOURCE address (supplied)
+
+  self.callableAssets = ko.observableArray([]);
+  self.selectedCallableAsset = ko.observable(null).extend({ //dividends are paid IN (i.e. with) this asset
+    required: true
+  });
+  
+  self.percentageToCall = ko.observable('').extend({
+    required: true,
+    pattern: {
+      message: 'Must be a valid number',
+      params: '^[0-9]*\.?[0-9]{0,8}$' //not perfect ... will convert divisible assets to satoshi before sending to API
+    },
+    max: 100,
+    min: 0.00000001, 
+    calledAmountDoesNotExceedXCPBalanceRequired: self
+  });
+  
+      //if(!isNumber(val)) return false;
+      //return val * self.asset().normalizedTotalIssued() <= WALLET.getBalance(self.address(), self.selectedDividendAsset());
+  
+  self.assetName = ko.computed(function() {
+    if(!self.asset()) return null;
+    return self.asset().ASSET;
+  }, self);
+  
+  self.totalPay = ko.computed(function() {
+    if(!self.asset()) return null;
+    return self.amountPerUnit() * self.asset().normalizedTotalIssued();
+  }, self);
+
+  self.dividendAssetBalance = ko.computed(function() {
+    if(!self.selectedDividendAsset()) return null;
+    return WALLET.getBalance(self.address(), self.selectedDividendAsset()); //normalized
+  }, self);
+
+  self.xcpBalRemainingPostCall = ko.computed(function() {
+    if(!self.asset() || self.dividendAssetBalance() === null) return null;
+    return Decimal.round(new Decimal(self.dividendAssetBalance()).sub(self.totalPay()), 8).toFloat();
+  }, self);
+  
+  self.validationModel = ko.validatedObservable({
+    selectedCallableAsset: self.selectedCallableAsset,
+    percentageToCall: self.percentageToCall
+  });
+
+  self.resetForm = function() {
+    self.amountPerUnit(null);
+    self.availableDividendAssets([]);
+    self.selectedDividendAsset(null);
+    self.validationModel.errors.showAllMessages(false);
+  }
+  
+  self.submitForm = function() {
+    if (!self.validationModel.isValid()) {
+      self.validationModel.errors.showAllMessages();
+      return false;
+    }    
+    console.log("Submitting form...");
+    $('#payDividendModal form').submit();
+  }
+
+  self.doAction = function() {
+    //do the additional issuance (specify non-zero amount, no transfer destination)
+    WALLET.doTransaction(self.address(), "create_dividend",
+      { source: self.address(),
+        amount_per_unit: denormalizeAmount(parseFloat(self.amountPerUnit())),
+        asset: self.asset().ASSET,
+        dividend_asset: self.selectedDividendAsset()
+      },
+      function() {
+        self.shown(false);
+        bootbox.alert("You have paid a dividend of <b>" + self.amountPerUnit().toString()
+          + " XCP</b> per outstanding unit to holders of asset <b>" + self.asset().ASSET
+          + "</b>. It may take a bit for this to reflect.");
+      }
+    );
+  }
+  
+  self.show = function(address, asset, resetForm) {
+    if(typeof(resetForm)==='undefined') resetForm = true;
+    if(resetForm) self.resetForm();
+    self.address(address);
+    self.asset(asset);
+    self.shown(true);
+    
+    //Get the balance of ALL assets at this address
+    failoverAPI("get_normalized_balances", [address], function(data, endpoint) {
+      for(var i=0; i < data.length; i++) {
+        if(data[i]['amount'] !== null && data[i]['amount'] !== 0)
+          self.availableDividendAssets.push(new DividendAssetInDropdownItemModel(data[i]['asset'], data[i]['amount'], data[i]['normalized_amount']));
+      }
       //TODO: enable this once counterpartyd supports dividends in BTC
       /*//Also get the BTC balance at this address and put at head of the list
       WALLET.retrieveBTCBalance(address, function(balance) {
@@ -499,7 +612,6 @@ function PayDividendModalViewModel() {
     self.shown(false);
   }  
 }
-
 
 /*NOTE: Any code here is only triggered the first time the page is visited. Put JS that needs to run on the
   first load and subsequent ajax page switches in the .html <script> tag*/

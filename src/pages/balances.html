@@ -62,7 +62,7 @@
           <div> <!-- widget div-->
             <div class="widget-body" data-bind="attr: {'id': 'address-balances-' + $data.ADDRESS}, foreach: filteredAssets"> <!-- widget content -->
               <div class="asset-item" data-bind="css: { btc: ASSET == 'BTC', xcp: ASSET == 'XCP', myasset: isMine(), othersasset: isMine() == false }">
-                <div class="btn-group" data-bind="visible: !$parent.IS_WATCH_ONLY" style="float: right; width: 30px; height: 32px; line-height: 32px; position: relative; margin-left: 10px;"> <!-- asset level action button -->
+                <div class="btn-group" data-bind="visible: !$parent.IS_WATCH_ONLY"> <!-- asset level action button -->
                   <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown"><span class="caret"></span></button>
                   <ul class="dropdown-menu" role="menu">
                     <li><a data-bind="visible: !$parent.IS_WATCH_ONLY, click: send" href="#">Send</a></li>
@@ -445,7 +445,7 @@
                 <label class="input">
                     <input name="assetCallPrice" type="text" data-bind="value: callPrice, valueUpdate: 'afterkeydown'"/>
                 </label>
-                <div class="note">The price per unit that the owner of the asset may call it back for.</div>
+                <div class="note">The <b>XCP price per unit</b> that the owner of the asset may call it back for.</div>
             </div>
           </div></section>
         </fieldset></form>                    

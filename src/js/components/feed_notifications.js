@@ -36,18 +36,19 @@ function NotificationFeedViewModel(initialCount) {
   self.notifications = ko.observableArray([]);
   self.lastUpdated = ko.observable(new Date());
   self.count = ko.observable(initialCount || 0);
+  self.unackedCount = ko.observable(initialCount || 0);
 
   self.dispLastUpdated = ko.computed(function() {
     return "Last Updated: " + self.lastUpdated().toTimeString(); 
   }, self);
   
-  self.dispCount = ko.computed(function() {
-    return self.count();
-  }, self);
+  self.ack = function() {
+    self.unackedCount(0);
+  }
   
   self.add = function(type, message, when) {
     self.notifications.unshift(new NotificationViewModel(type, message, when)); //add to front of array
-    self.unackedNotificationCount(self.unackedNotificationCount() + 1);
+    self.unackedCount(self.unackedCount() + 1);
     //if the number of notifications are over 40, remove the oldest one
     if(self.notifications().length > 40) self.notifications.pop();
     self.lastUpdated(new Date());

@@ -1,3 +1,7 @@
+
+var TIMEOUT_FAILOVER_API = 2000; // 2 seconds
+var TIMEOUT_MULTI_API = 4000; // 4 seconds
+
 //Inlude a .url param in every jqXHR object -- http://stackoverflow.com/a/11980396
 $.ajaxSetup({
     beforeSend: function(jqXHR, settings) {
@@ -126,7 +130,7 @@ function fetchData(url, onSuccess, onError, postdata, isJSONRPC, extraAJAXOpts, 
   $.ajax(ajaxOpts);
 }
 
-function _makeJSONAPICall(destType, endpoints, method, params, onSuccess, onError) {
+function _makeJSONAPICall(destType, endpoints, method, params, timeout, onSuccess, onError) {
   /*Makes a JSON RPC API call to a specific counterpartyd/counterwalletd endpoint.
    
     -endpoints: The specific API endpoint URL string to make the API request to.
@@ -182,7 +186,7 @@ function _multiAPIPrimative(method, params, onFinished) {
 
   for(var i=0;i < counterwalletd_api_urls.length; i++) {
     //make multiple _makeJSONAPICall calls in parallel, one call for each API endpoint, and collect results...
-    _makeJSONAPICall(destType, counterwalletd_api_urls[i], method, params,
+    _makeJSONAPICall(destType, counterwalletd_api_urls[i], method, params, TIMEOUT_MULTI_API,
     function(data, endpoint) { //success callback
       gatheredResults.push({'success': true, 'endpoint': endpoint, 'data': data});
       
@@ -256,7 +260,7 @@ function failoverAPI(method, params, onSuccess, onError) {
   }
 
   var destType = _getDestTypeFromMethod(method);
-  _makeJSONAPICall(destType, counterwalletd_api_urls, method, params, onSuccess, onErrorOverride);
+  _makeJSONAPICall(destType, counterwalletd_api_urls, method, params, TIMEOUT_FAILOVER_API, onSuccess, onErrorOverride);
 }
   
 function multiAPI(method, params, onSuccess, onError) {

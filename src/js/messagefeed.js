@@ -71,25 +71,11 @@ function parseMessageWithFeedGapDetection(event, data) {
   $.jqlog.info("event:RECV EVENT=" + event + ", IDX=" + data['_message_index'] + " (last idx: " + LAST_MESSAGEIDX_RECEIVED + ") -- " + JSON.stringify(data));
   if((data['_message_index'] === undefined || data['_message_index'] === null) && IS_DEV) debugger; //it's an odd condition we should look into...
   assert(LAST_MESSAGEIDX_RECEIVED, "LAST_MESSAGEIDX_RECEIVED is not defined! Should have been set from is_ready on logon.");
-  
-  //Detect a reorg (reverse gap) and refresh the current page if so.
-  if(data['_message_index'] <= LAST_MESSAGEIDX_RECEIVED) {
-    // ...however, the block difference must be within 10 block difference, otherwise it's just bogus (buffering issue ,etc??)
-    if(LAST_MESSAGEIDX_RECEIVED - data['_message_index'] <= 10) {
-      $.jqlog.warn("event:REORG DETECTED: our last msgidx = " + LAST_MESSAGEIDX_RECEIVED + "; server send msgidx = " + data['_message_index']);
-      LAST_MESSAGEIDX_RECEIVED = data['_message_index'];
-      //^ the subsequent catch up messages after this should then go through without triggering this reorg logic again
-      checkURL(); //refresh the current page to regrab the fresh data
-      //TODO/BUG??: do we need to "roll back" old messages on the bad chain???
-      return;
-    } else {
-      $.jqlog.warn("event:BOGUS (old) MESSAGE IGNORED: our last msgidx = " + LAST_MESSAGEIDX_RECEIVED + "; server send msgidx = " + data['_message_index']);
-      return;
-    }
-  }
+  assert(data['_message_index'] > LAST_MESSAGEIDX_RECEIVED, "Received message_index is < LAST_MESSAGEIDX_RECEIVED");
   
   //handle normal case that the message we received is the next in order
   if(data['_message_index'] == LAST_MESSAGEIDX_RECEIVED + 1) {
+    LAST_MESSAGEIDX_RECEIVED += 1;
     return handleMessage(event, data);
   }
   
@@ -113,16 +99,23 @@ function parseMessageWithFeedGapDetection(event, data) {
     //all caught up, call the callback for the original message itself
     handleMessage(event, data);
   });
-
-    //    
-    //This is the old code that has a more crude approach...
-    //refresh all balances (just in case we missed a credit/debit)
-    //WALLET.updateBalances();
-    //refresh the current pane (to refresh anything on that pane -- just in case we missed some other kind of message)
-    //checkURL();
 }
 
 function handleMessage(event, data) {
+  //Detect a reorg and refresh the current page if so.
+  if(msg['_category'] == 'reorg') {
+    //Don't need to adjust the message index
+    $.jqlog.warn("event:REORG DETECTED back to block: " + data['block_index']);
+    checkURL(); //refresh the current page to regrab the fresh data
+    //TODO/BUG??: do we need to "roll back" old messages on the bad chain???
+    return;
+  }
+  
+  if(   !(data['status'] === undefined || data['status'].startsWith('valid'))
+     || !status.startsWith('pending')
+     || !status.startsWith('completed'))
+    return; //ignore message
+  
   if(event != "btcpays") //remove any pending message (btcpays have their own remove method)
     PENDING_ACTION_FEED.removePendingAction(event, data);
   

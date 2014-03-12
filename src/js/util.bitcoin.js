@@ -82,7 +82,9 @@ function primeAddress(address, numNewPrimedTxouts, utxosData, onSuccess) {
   var inputAmount = (numNewPrimedTxouts * MIN_PRIME_BALANCE) + MIN_FEE; //in satoshi
   var inputAmountRemaining = inputAmount;
   var txHash = null, txOutputN = null, txIn = null;
-  //Create inputs
+  //Create inputs, using smallest quantity of the highest value UTXOs possible (to avoid
+  // consuming our small primed inputs, which would be counterproductive :)
+  utxosData.sort(function(a, b) { return b.amount - a.amount; }); //sort descending on output value  
   for(var i=0; i < utxosData.length; i++) {
       txIn = new Bitcoin.TransactionIn({
         outpoint: {
@@ -95,7 +97,6 @@ function primeAddress(address, numNewPrimedTxouts, utxosData, onSuccess) {
       inputAmountRemaining -= denormalizeAmount(utxosData[i].amount);
       if(inputAmountRemaining <= 0)
         break;
-    
   } 
   assert(inputAmountRemaining <= 0, "Insufficient confirmed bitcoin balance to prime account: " + address);
   

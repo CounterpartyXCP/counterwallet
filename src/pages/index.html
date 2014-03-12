@@ -15,15 +15,16 @@
     <link rel="stylesheet" type="text/css" media="screen" href="css/smartadmin-production.css">
     <link rel="stylesheet" type="text/css" media="screen" href="css/smartadmin-skins.css">
     <!-- Counterwallet plugin styles -->
-    <link rel="stylesheet" href="xcp/extcss/jquery.reject.css">
-    <link rel="stylesheet" href="xcp/extcss/jquery.keyboard.css">
-    <link rel="stylesheet" href="xcp/extcss/bootstrap-datetimepicker.css">
+    <link rel="stylesheet" type="text/css" href="xcp/extcss/jquery.reject.css">
+    <link rel="stylesheet" type="text/css" href="xcp/extcss/jquery.keyboard.css">
+    <link rel="stylesheet" type="text/css" href="xcp/extcss/bootstrap-datetimepicker.css">
     <!-- Counterwallet custom styles -->
-    <link rel="stylesheet" href="xcp/css/default.css" type="text/css" media="screen">
-    <link rel="stylesheet" href="xcp/css/components/logon.css">
-    <link rel="stylesheet" href="xcp/css/components/chatfeed.css">
-    <link rel="stylesheet" href="xcp/css/components/balances.css">
-    <link rel="stylesheet" href="xcp/css/components/buysell.css">
+    <link rel="stylesheet" type="text/css" media="screen" href="xcp/css/default.css">
+    <link rel="stylesheet" type="text/css" media="screen" href="xcp/css/overrides.css">
+    <link rel="stylesheet" type="text/css" media="screen" href="xcp/css/components/logon.css">
+    <link rel="stylesheet" type="text/css" media="screen" href="xcp/css/components/chatfeed.css">
+    <link rel="stylesheet" type="text/css" media="screen" href="xcp/css/components/balances.css">
+    <link rel="stylesheet" type="text/css" media="screen" href="xcp/css/components/buysell.css">
 
     <!-- FAVICONS -->
     <link rel="shortcut icon" href="xcp/images/favicon.ico">
@@ -53,7 +54,9 @@
     
         //Allow the site root to specify "dev" and "testnet" parameters...
         var IS_DEV = (location.pathname == "/" && qs("dev") && qs("dev") != '0' ? true : false);
-        var USE_TESTNET = ((location.pathname == "/" && qs("testnet") && qs("testnet") != '0') || location.hostname.indexOf('testnet') == 0 ? true : false);
+        var USE_TESTNET = (   (location.pathname == "/" && qs("testnet") && qs("testnet") != '0')
+                           || location.hostname.indexOf('testnet') == 0 ? true : false
+                          );
     
         ////////////////////////////
         //ROLLBAR SETUP
@@ -77,9 +80,9 @@
       <div id="logo-group">
         <span id="logo"><img src="xcp/images/logo-small.png" alt="" /><span class="logoText">Counterwallet</span></span>
         
-        <span id="notificationFeed" class="activity-parent" data-contenturl="xcp/pages/feed_notifications.html" >
+        <span id="notificationFeed" class="activity-parent" data-contenturl="xcp/pages/feed_notifications.html", data-bind="click: ack">
             <span class="activity-dropdown">
-                <i class="fa fa-check"></i><b data-bind="visible: dispCount() > 0, text: dispCount" class="badge"></b>
+                <i class="fa fa-check"></i><b data-bind="fadeVisible: unackedCount() > 0, text: unackedCount" class="badge"></b>
             </span>
             <div class="ajax-dropdown">
               <h2>Notifications</h2>
@@ -88,9 +91,20 @@
             </div> <!-- .ajax-dropdown -->
         </span>
         
-        <span id="openOrderFeed" class="activity-parent" data-contenturl="xcp/pages/feed_open_orders.html">
+        <span id="pendingActionFeed" class="activity-parent" data-contenturl="xcp/pages/feed_pending_actions.html">
             <span class="activity-dropdown">
                 <i class="fa fa-clock-o"></i><b data-bind="visible: dispCount() > 0, text: dispCount" class="badge"></b>
+            </span>
+            <div class="ajax-dropdown">
+              <h2>Pending Actions</h2>
+              <div class="ajax-notifications custom-scroll"></div> <!-- notification content -->
+              <span data-bind="text: dispLastUpdated"></span> <!-- footer -->
+            </div> <!-- .ajax-dropdown -->
+        </span>
+
+        <span id="openOrderFeed" class="activity-parent" data-contenturl="xcp/pages/feed_open_orders.html">
+            <span class="activity-dropdown">
+                <i class="fa fa-exchange"></i><b data-bind="visible: dispCount() > 0, text: dispCount" class="badge"></b>
             </span>
             <div class="ajax-dropdown">
               <h2>Open Orders</h2>
@@ -99,16 +113,6 @@
             </div> <!-- .ajax-dropdown -->
         </span>
         
-        <span id="pendingActionFeed" class="activity-parent" data-contenturl="xcp/pages/feed_pending_actions.html">
-            <span class="activity-dropdown">
-                <i class="fa fa-exchange"></i><b data-bind="visible: dispCount() > 0, text: dispCount" class="badge"></b>
-            </span>
-            <div class="ajax-dropdown">
-              <h2>Pending Actions</h2>
-              <div class="ajax-notifications custom-scroll"></div> <!-- notification content -->
-              <span data-bind="text: dispLastUpdated"></span> <!-- footer -->
-            </div> <!-- .ajax-dropdown -->
-        </span>
       </div> <!-- logo-group -->
 
       <div class="pull-right"> <!-- pulled right: nav area -->
@@ -125,7 +129,7 @@
         </div> <!-- end options button -->
         
         <span id="noticeDevMode" data-bind="visible: IS_DEV" class="label label-warning pull-right" style="display:none;margin-left:10px;padding: 5px;position:relative;top:15px"><i class="fa-fw fa fa-warning"></i>&nbsp;Dev Mode Enabled</span>
-        <span id="noticeTestnet" data-bind="visible: USE_TESTNET" class="label label-info pull-right" style="display:none;margin-left:10px;padding: 5px;position:relative;top:15px"><i class="fa-fw fa fa-info"></i>&nbsp;Testnet Enabled</span>
+        <span id="noticeTestnet" data-bind="visible: USE_TESTNET" class="label label-info pull-right" style="display:none;margin-left:10px;padding: 5px;position:relative;top:15px"><i class="fa-fw fa fa-info"></i>&nbsp;Testnet In Use</span>
       </div> <!-- end pulled right: nav area -->
     </header> <!-- END HEADER -->
 
@@ -232,7 +236,7 @@
             <h3 class="panel-title">
               <b>Log Into Your Wallet</b>
               <span data-bind="fadeVisibleInOnly: IS_DEV" class="label label-warning pull-right" style="display:none;margin-left:5px;padding: 5px;"><i class="fa-fw fa fa-warning"></i>&nbsp;Dev Mode Enabled</span>
-              <span data-bind="fadeVisibleInOnly: USE_TESTNET" class="label label-info pull-right" style="display:none;margin-left:5px;padding: 5px;"><i class="fa-fw fa fa-info"></i>&nbsp;Testnet Enabled</span>
+              <span data-bind="fadeVisibleInOnly: USE_TESTNET" class="label label-info pull-right" style="display:none;margin-left:5px;padding: 5px;"><i class="fa-fw fa fa-info"></i>&nbsp;Testnet In Use</span>
             </h3>
           </div>
           <div class="panel-body">

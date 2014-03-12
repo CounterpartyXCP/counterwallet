@@ -59,16 +59,6 @@ function CreateNewAddressModalViewModel() {
   self.doAction = function() {
     var newAddress = null;
 
-    //update PREFs
-    var newAddressHash = hashToB64(newAddress);
-    if(!self.forWatchOnly()) {    
-      PREFERENCES['num_addresses_used'] += 1;
-    } else {
-      if(PREFERENCES['watch_only_addresses'] === undefined) PREFERENCES['watch_only_addresses'] = []; //init if not in prefs
-      PREFERENCES['watch_only_addresses'].push(newAddress); //can't use the hash here, unfortunately
-    }
-    PREFERENCES['address_aliases'][newAddressHash] = self.description();
-
     if(!self.forWatchOnly()) {
       WALLET.BITCOIN_WALLET.generateAddress();
       var i = WALLET.BITCOIN_WALLET.getPrivateKeys().length - 1;
@@ -79,6 +69,18 @@ function CreateNewAddressModalViewModel() {
       newAddress = self.watchAddress();
       WALLET.addWatchOnlyAddress(newAddress);
     }
+
+    //update PREFs
+    var newAddressHash = hashToB64(newAddress);
+    if(!self.forWatchOnly()) {
+      PREFERENCES['num_addresses_used'] += 1;
+    } else {
+      PREFERENCES['watch_only_addresses'].push(newAddress); //can't use the hash here, unfortunately
+    }
+    PREFERENCES['address_aliases'][newAddressHash] = self.description();
+    
+    //manually set the address in this case to get around the chicken and egg issue here (and have client side match the server)
+    WALLET.getAddressObj(newAddress).label(self.description());
 
     //save prefs to server
     multiAPI("store_preferences", [WALLET.identifier(), PREFERENCES], function(data, endpoint) {
