@@ -177,7 +177,7 @@ function SendModalViewModel() {
         asset: self.asset()
       },
       function() {
-        bootbox.alert("<b>Your funds were sent successfully.</b><br/><br/>The action will take effect as soon as the network has processed it.");
+        bootbox.alert("<b>Your funds were sent successfully.</b> " + ACTION_PENDING_NOTICE);
       }
     );
     self.shown(false);
@@ -311,8 +311,8 @@ function SweepModalViewModel() {
       }
     }
     bootbox.alert("The sweep from address <b>" + self.addressForPrivateKey()
-      + "</b> is complete.<br/>Sweep results:<br/><br/><ul>" + assetDisplayList.join('') + "</ul><br/>"
-      + "Please note that it may take a bit of time for the swept funds to show up in your account.");
+      + "</b> is complete.<br/>Sweep results:<br/><br/><ul>" + assetDisplayList.join('') + "</ul><br/><br/>"
+      + ACTION_PENDING_NOTICE_NO_UI);
   }
   
   self._signInputs = function(unsignedTxHex) {
@@ -593,7 +593,7 @@ function PrimeAddressModalViewModel() {
       function(address, numNewPrimedTxouts) {
         self.shown(false);
         bootbox.alert("Your account has successfully been primed with <b>" + numNewPrimedTxouts
-          + "</b> additional outputs. This action may take a bit to take effect.");
+          + "</b> additional outputs. " + ACTION_PENDING_NOTICE_NO_UI);
       }
     );
   }
@@ -672,7 +672,7 @@ function TestnetBurnModalViewModel() {
       function() {
         self.shown(false);
         bootbox.alert("You have burned <b>" + self.btcBurnAmount() + " BTC</b> for approximately <b>"
-          + self.amountXCPToBeCreated() + " XCP</b>. It may take a bit for this to reflect.");
+          + self.amountXCPToBeCreated() + " XCP</b>. " + ACTION_PENDING_NOTICE);
       }
     );
   }

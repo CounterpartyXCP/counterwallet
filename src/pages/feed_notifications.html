@@ -5,9 +5,9 @@
           <i data-bind="css: displayIcon" class="fa fa-fw fa-2x"></i>
         </em>
         <span>
-           <span data-bind="text: message"></span>
+           <span data-bind="html: displayText()"></span>
            <br/>
-           <span class="pull-right font-xs text-muted"><i data-bind="timeago: when"></i></span>
+           <span class="pull-right font-xs text-muted"><i data-bind="timeago: WHEN"></i></span>
         </span>
       </span>
     </li>

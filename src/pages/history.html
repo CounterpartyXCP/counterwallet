@@ -63,9 +63,9 @@
                         <tr>
                             <th>Tx</th>
                             <th>Block</th>
-                            <th>BlockTime</th>
+                            <th>Block Time</th>
                             <th>Source</th>
-                            <th>TxType</th>
+                            <th>Type</th>
                             <th>Description</th>
                             <!--<th>BTCAmount</th>
                             <th>Fee</th>-->
@@ -73,10 +73,10 @@
                     </thead>
                     <tbody data-bind="foreach: transactions">
                         <tr>
-                            <td><a target="_blank" data-bind="text: txIndex, attr: { href: !USE_TESTNET ? 'http://blockscan.com/tx.aspx?q=' + txIndex : null }"></a></td> <!-- link to TX at blockscan -->
-                            <td><a target="_blank" data-bind="text: blockIndex, attr: { href: BLOCKEXPLORER_URL + '/block-index/' + blockIndex }"></a></td> <!-- link to block tx at insight -->
-                            <td data-bind="text: dispBlocktime()"></td> <!-- datetime formatted string -->
-                            <td><a target="_blank" data-bind="text: dispSource(), attr: { href: !USE_TESTNET ? 'http://blockscan.com/address.aspx?q=' + source : null }"></a></td> <!-- link to source addr at blockscan -->
+                            <td data-bind="html: getLinkForCPData('tx', txIndex)"></td> 
+                            <td data-bind="html: getLinkForBlock(blockIndex)"></td>
+                            <td data-bind="text: dispBlockTime()"></td>
+                            <td data-bind="html: getLinkForCPData('address', source, dispSource())"></td>
                             <td data-bind="html: dispTxType()"></td>
                             <td data-bind="html: dispDescription()"></td>
                             <!--<td data-bind="html: btcAmount"></td>

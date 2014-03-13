@@ -29,8 +29,7 @@ function OpenOrderViewModel(order) {
             WALLET.doTransaction(self.order['source'], "create_cancel",
               { offer_hash: self.order['tx_hash'] },
               function() {
-                bootbox.alert("Your order cancellation has been submitted"
-                  + " but it may take a bit for this to formally reflect on the network.");
+                bootbox.alert("Your order cancellation has been submitted. " + ACTION_PENDING_NOTICE);
               }
             );
           }

@@ -50,7 +50,7 @@ function AddressViewModel(key, address, initialLabel) {
   
   self.getAssetObj = function(asset) {
     //given an asset string, return a reference to the cooresponding AssetViewModel object
-    return ko.utils.arrayFirst(this.assets(), function(a) {
+    return ko.utils.arrayFirst(self.assets(), function(a) {
       return a.ASSET == asset;
     });
   }
@@ -66,27 +66,32 @@ function AddressViewModel(key, address, initialLabel) {
     }
     
     failoverAPI("get_asset_info", [asset], function(assetInfo, endpoint) {
-      var isMine = assetInfo['owner'] == self.ADDRESS; //default to false on error or when we can't find the asset too
       var match = ko.utils.arrayFirst(self.assets(), function(item) {
           return item.ASSET === asset;
       });
       if (!match) { //add the asset if it doesn't exist
         var assetProps = {
           address: self.ADDRESS, asset: asset, divisible: assetInfo['divisible'],
-          isMine: isMine, isLocked: assetInfo['locked'], rawBalance: rawBalance,
-          totalIssued: assetInfo['total_issued'], description: assetInfo['description'], 
+          owner: assetInfo['owner'], isLocked: assetInfo['locked'], rawBalance: rawBalance,
+          rawTotalIssued: assetInfo['total_issued'], description: assetInfo['description'], 
           callable: assetInfo['callable'], callDate: assetInfo['call_date'], callPrice: assetInfo['call_price']        
         };
         self.assets.push(new AssetViewModel(assetProps)); //add new
       } else { //update existing 
         $.jqlog.log("Updating asset " + asset + " @ " + self.ADDRESS + ". Bal from " + match.rawBalance() + " to " + rawBalance + "; Others: " + JSON.stringify(assetInfo));
-        match.isMine(isMine);
+        match.owner(assetInfo['owner']);
         match.isLocked(assetInfo['locked']);
         match.rawBalance(rawBalance);
-        match.totalIssued(assetInfo['total_issued']);
+        match.rawTotalIssued(assetInfo['total_issued']);
         match.description(assetInfo['description']);
       }
     });
+  }
+  
+  self.removeAsset = function(asset) {
+    self.assets.remove(function(item) {
+        return item.ASSET == asset;
+    });    
   }
   
   /////////////////////////
@@ -127,15 +132,22 @@ function AddressViewModel(key, address, initialLabel) {
     SIGN_MESSAGE_MODAL.show(self.ADDRESS);
   }
 
-  self.createAssetIn = function() {
+  self.createAsset = function() {
+    if(!WALLET.canDoTransaction(self.ADDRESS)) return false;
+
     var xcpBalance = WALLET.getBalance(self.ADDRESS, 'XCP');
     if(xcpBalance < ASSET_CREATION_FEE_XCP) {
       bootbox.alert("You need at least <b>" + ASSET_CREATION_FEE_XCP + " XCP</b> to create an asset, however, your current balance is only <b>"
         + xcpBalance + " XCP</b>.<br/><br/>Please deposit more XCP into this address and try again.");
       return false;
     }
-    if(!WALLET.canDoTransaction(self.ADDRESS)) return false;
+
     CREATE_ASSET_MODAL.show(self.ADDRESS);
+  }
+
+  self.callAsset = function() {
+    if(!WALLET.canDoTransaction(self.ADDRESS)) return false;
+    CALL_ASSET_MODAL.show(self.ADDRESS);
   }
 
   self.sortAssetsByName = function() {

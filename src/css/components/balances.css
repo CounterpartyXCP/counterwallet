@@ -6,6 +6,17 @@ input.addressNicknameEditable { width: 220px; } /* for the popup x-editable cont
 section.balancesContainer div[role=content] { padding: 5px; }
 /*section.balancesContainer div.popover { min-width: 300px; }*/
 
+div#showAssetInfoModal table {
+  width:95%;
+  margin: 0 auto;
+  border: 1px solid #ddd !important;
+}
+
+div#showAssetInfoModal table tbody {
+  max-height: 500px;
+  overflow: scroll;    
+}
+
 .asset-item {
   position: relative;
   float: left;

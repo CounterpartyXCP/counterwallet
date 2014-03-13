@@ -8,7 +8,7 @@
         <span>
            <b>You have a pending payment of <span data-bind="text: btcAmount"></span> BTC required for order <span data-bind="text: origOrderTxIndex"></span></b>
            <br/>Order is for <b><span data-bind="text: origOrderOtherAssetAmount"></span> <span data-bind="text: origOrderOtherAsset"></span></b>
-           <br/><i>Order TxID: <a data-bind="text: origOrderTxIndex, attr: { href: 'http://blockscan.com/tx.aspx?q=' + origOrderTxIndex }"></a> / BTCPay TxID: <a data-bind="text: txIndex, attr: { href: 'http://blockscan.com/tx.aspx?q=' + txIndex }"></a></i>
+           <br/><i>Order TxID: <span data-bind="html: getLinkForCPData('tx', origOrderTxIndex)"></span> / BTCPay TxID: <span data-bind="html: getLinkForCPData('tx', txIndex)"></span></i>
            <br/><i>Your Address: <span data-bind="text: btcDestAddress"></span> / BTCPay Dest Address: <span data-bind="text: btcDestAddress"></span></i>
            <br/>
            <span class="pull-right font-xs text-muted"><i data-bind="timeago: whenBTCPayCreated"></i></span>

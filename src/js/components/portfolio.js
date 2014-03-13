@@ -26,6 +26,7 @@ function AssetPortfolioViewModel() {
           if (self.marketInfo.hasOwnProperty(asset)) {
             newRows.push({
               asset: asset,
+              marketCapRaw: self.marketInfo[asset]['market_cap_in_xcp'],
               marketCap: smartFormat(self.marketInfo[asset]['market_cap_in_xcp']) || '??',
               price: self.marketInfo[asset]['aggregated_price_in_xcp'] || '??',
               supply: smartFormat(self.marketInfo[asset]['total_supply']),
@@ -41,6 +42,7 @@ function AssetPortfolioViewModel() {
           if (self.marketInfo.hasOwnProperty(asset)) {
             newRows.push({
               asset: asset,
+              marketCapRaw: self.marketInfo[asset]['market_cap_in_btc'],
               marketCap: smartFormat(self.marketInfo[asset]['market_cap_in_btc']) || '??',
               price: self.marketInfo[asset]['aggregated_price_in_btc'] || '??',
               supply: smartFormat(self.marketInfo[asset]['total_supply']),
@@ -52,7 +54,7 @@ function AssetPortfolioViewModel() {
           }
         }
       }
-      newRows.sortBy("-marketCap"); //sort newRows by marketCap descending
+      newRows.sortBy("-marketCapRaw"); //sort newRows by marketCap descending
       self.marketCapTableRows(newRows); // table will update
       self.generateAssetMiniCharts();
     });  

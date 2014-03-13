@@ -71,11 +71,15 @@ function WalletViewModel() {
     return normalized ? assetObj.normalizedBalance() : assetObj.rawBalance();
   }
 
-  self.updateBalance = function(address, asset, balance) {
+  self.updateBalance = function(address, asset, rawBalance) {
     //Update a balance for a specific asset on a specific address
     var addressObj = self.getAddressObj(address);
     if(!addressObj) return false;
-    addressObj.addOrUpdateAsset(asset, balance);
+    var assetObj = addressObj.getAssetObj(asset);
+    if(rawBalance || asset == 'BTC' || asset == 'XCP' || (assetObj && assetObj.isMine()))
+      addressObj.addOrUpdateAsset(asset, rawBalance);
+    else //if balance goes down to zero and the asset isn't ours (or isn't BTC/LTC), remove it from the listing
+      addressObj.removeAsset(asset);
     return true;
   }
 

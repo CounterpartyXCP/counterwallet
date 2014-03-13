@@ -1,5 +1,5 @@
 
-var LAST_MESSAGEIDX_RECEIVED = 0; //last message received from the data feed (socket.io) -- used to detect gaps
+var LAST_MESSAGEIDX_RECEIVED = 0; //last message received from the message feed (socket.io) -- used to detect gaps
 var FAILOVER_CURRENT_IDX = 0; //last idx in the counterwalletd_base_urls tried (used for socket.io failover)
 
 function tryNextSIOMessageFeed() {
@@ -64,190 +64,160 @@ function initMessageFeed() {
   });
 }
 
-function parseMessageWithFeedGapDetection(event, data) {
-  if(!data || (data.substring && data.startswith("<html>"))) return;
+function parseMessageWithFeedGapDetection(category, message) {
+  if(!message || (message.substring && message.startswith("<html>"))) return;
   //^ sometimes nginx can trigger this via its proxy handling it seems, with a blank payload (or a html 502 Bad Gateway
   // payload) -- especially if the backend server reloads. Just ignore it.
-  $.jqlog.info("event:RECV EVENT=" + event + ", IDX=" + data['_message_index'] + " (last idx: " + LAST_MESSAGEIDX_RECEIVED + ") -- " + JSON.stringify(data));
-  if((data['_message_index'] === undefined || data['_message_index'] === null) && IS_DEV) debugger; //it's an odd condition we should look into...
+  $.jqlog.info("feed:RECV MESSAGE=" + category + ", IDX=" + message['_message_index'] + " (last idx: " + LAST_MESSAGEIDX_RECEIVED + ") -- " + JSON.stringify(message));
+  if((message['_message_index'] === undefined || message['_message_index'] === null) && IS_DEV) debugger; //it's an odd condition we should look into...
   assert(LAST_MESSAGEIDX_RECEIVED, "LAST_MESSAGEIDX_RECEIVED is not defined! Should have been set from is_ready on logon.");
-  assert(data['_message_index'] > LAST_MESSAGEIDX_RECEIVED, "Received message_index is < LAST_MESSAGEIDX_RECEIVED");
+  assert(message['_message_index'] > LAST_MESSAGEIDX_RECEIVED, "Received message_index is < LAST_MESSAGEIDX_RECEIVED");
   
   //handle normal case that the message we received is the next in order
-  if(data['_message_index'] == LAST_MESSAGEIDX_RECEIVED + 1) {
+  if(message['_message_index'] == LAST_MESSAGEIDX_RECEIVED + 1) {
     LAST_MESSAGEIDX_RECEIVED += 1;
-    return handleMessage(event, data);
+    return handleMessage(category, message);
   }
   
   //otherwise, we have a forward gap
-  $.jqlog.warn("event:GAP DETECTED: our last msgidx = " + LAST_MESSAGEIDX_RECEIVED + " --  server sent msgidx = " + data['_message_index']);
+  $.jqlog.warn("feed:MESSAGE GAP DETECTED: our last msgidx = " + LAST_MESSAGEIDX_RECEIVED + " --  server sent msgidx = " + message['_message_index']);
 
   //request the missing messages from the feed and replay them...
   if(IS_DEV) debugger; //temporary...
   var missingMessages = [];
-  for(var i=LAST_MESSAGEIDX_RECEIVED+1; i < data['_message_index']; i++) {
+  for(var i=LAST_MESSAGEIDX_RECEIVED+1; i < message['_message_index']; i++) {
     missingMessages.push(i);
   }
   
   failoverAPI("get_messagefeed_messages_by_index", [missingMessages], function(missingMessageData, endpoint) {
-    for(var i=0; i < data.length; i++) {
+    for(var i=0; i < missingMessageData.length; i++) {
       assert(missingMessageData[i]['_message_index'] == missingMessages[i], "Message feed resync list oddity...?");
       handleMessage(missingMessageData[i]['_category'], missingMessageData[i]);
       assert(LAST_MESSAGEIDX_RECEIVED + 1 == missingMessageData[i]['_message_index'], "Message feed resync counter increment oddity...?");
       LAST_MESSAGEIDX_RECEIVED = missingMessageData[i]['_message_index']; 
     }
     //all caught up, call the callback for the original message itself
-    handleMessage(event, data);
+    handleMessage(category, message);
   });
 }
 
-function handleMessage(event, data) {
+function handleMessage(category, message) {
   //Detect a reorg and refresh the current page if so.
-  if(msg['_category'] == 'reorg') {
+  if(message['_category'] == 'reorg') {
     //Don't need to adjust the message index
-    $.jqlog.warn("event:REORG DETECTED back to block: " + data['block_index']);
+    $.jqlog.warn("feed:REORG DETECTED back to block: " + message['block_index']);
     checkURL(); //refresh the current page to regrab the fresh data
     //TODO/BUG??: do we need to "roll back" old messages on the bad chain???
     return;
   }
   
-  if(   !(data['status'] === undefined || data['status'].startsWith('valid'))
-     || !status.startsWith('pending')
-     || !status.startsWith('completed'))
+  //filter out non insert messages for now
+  if(message['_command'] != 'insert')
+    return;
+  
+  //filter out any invalid messages
+  if(   !message['_status'].startsWith('valid')
+     && !message['_status'].startsWith('pending')
+     && !message['_status'].startsWith('completed'))
     return; //ignore message
   
-  if(event != "btcpays") //remove any pending message (btcpays have their own remove method)
-    PENDING_ACTION_FEED.removePendingAction(event, data);
-  
-  if(event == "balances") {
-  } else if(event == "credits") {
-    if(WALLET.getAddressObj(data['address'])) {
-      WALLET.updateBalance(data['address'], data['asset'], data['balance']);
-      NOTIFICATION_FEED.add(event, "Credit to <b>" + data['address'] + "</b> of <b>" + data['_amount_normalized'] + " "
-        + data['asset'] + "</b>. New " + data['asset'] + " balance is <b>" +  data['_balance_normalized'] + "</b>.");
+  //remove any pending message from the pending actions pane
+  if(category != "btcpays") // (btcpays have their own remove method)
+    PENDING_ACTION_FEED.removePendingAction(category, message);
+  //...and notify the user in the notification pane
+  NOTIFICATION_FEED.add(category, message);
+
+  //Have the action take effect (i.e. everything besides notifying the user in the notifcations pane, which was done above)
+  if(category == "balances") {
+  } else if(category == "credits" || category == "debits") {
+    if(WALLET.getAddressObj(message['address'])) {
+      WALLET.updateBalance(message['address'], message['asset'], message['balance']);
     }
-  } else if(event == "debits") {
-    if(WALLET.getAddressObj(data['address'])) {
-      WALLET.updateBalance(data['address'], data['asset'], data['balance']);
-      NOTIFICATION_FEED.add(event, "Debit from <b>" + data['address'] + "</b> of <b>" + data['_amount_normalized'] + " "
-        + data['asset'] + "</b>. New " + data['asset'] + " balance is <b>" +  data['_balance_normalized'] + "</b>.");
-    }
-  } else if(event == "broadcasts") {
+  } else if(category == "broadcasts") {
     //TODO
-  } else if(event == "btcpays") {
+  } else if(category == "btcpays") {
     //Remove the BTCpay if the ordermatch is one of the ones in our pending list
-    PENDING_ACTION_FEED.removePendingBTCPay(data['order_match_id']);
-  } else if(event == "burns") {
-    if(WALLET.getAddressObj(data['source'])) {
-      NOTIFICATION_FEED.add(event, "Your address " + data['source'] + " has burned "
-        + normalizeAmount(data['burned'], true) + " BTC for " + normalizeAmount(data['earned'], true) + " XCP.");
-    }
-  } else if(event == "cancels") {
-    if(WALLET.getAddressObj(data['source'])) {
+    PENDING_ACTION_FEED.removePendingBTCPay(message['order_match_id']);
+  } else if(category == "burns") {
+  } else if(category == "cancels") {
+    if(WALLET.getAddressObj(message['source'])) {
       //If for an order (and we are on the DEx page), refresh the order book if the orders page is displayed
       // and if the cooresponding order is for one of the assets that is being displayed
       if (typeof BUY_SELL !== 'undefined') {
-        BUY_SELL.openOrders.remove(function(item) { return item.tx_index == data['offer_hash']});
+        BUY_SELL.openOrders.remove(function(item) { return item.tx_index == message['offer_hash']});
       } 
       //Also remove the canceled order from the open orders and pending orders list (if present)
-      OPEN_ORDER_FEED.remove(data['offer_hash']);
-      PENDING_ACTION_FEED.removePendingBTCPayByOrderID(data['offer_hash']);
+      OPEN_ORDER_FEED.remove(message['offer_hash']);
+      PENDING_ACTION_FEED.removePendingBTCPayByOrderID(message['offer_hash']);
   
       //TODO: If for a bet, do nothing for now.
-
-      NOTIFICATION_FEED.add(event, "Order/Bid " + data['offer_hash'] + " for your address " + data['source'] + " was cancelled.");
     }
-  } else if(event == "callbacks") {
-    //See if any of our addresses own any of the specified asset, and if so, notify them of the callback
-    // NOTE that counterpartyd has automatically already adusted the balances of all asset holders...we just need to notify
-    var addresses = WALLET.getAddressesList();
-    for(var i=0; i < addresses.length; i++) {
-      if(WALLET.getBalance(addresses[i], data['asset'])) {
-        NOTIFICATION_FEED.add(event, data['asset'] + " balance adjusted on your address " + addresses[i]
-          + " due to " + (parseFloat(data['fraction']) * 100).toString() + "% callback option being exercised.");
+  } else if(category == "callbacks") {
+    //assets that are totally called back will be removed automatically when their
+    // balance goes to zero, via WALLET.updateBalance
+  } else if(category == "dividends") {
+  } else if(category == "issuances") {
+    var issuerAddressObj = WALLET.getAddressObj(message['issuer']);
+    if(issuerAddressObj && !issuerAddressObj.getAsset(message['asset'])) {
+      //Asset being created, add the asset to the issuing address
+      issuerAddressObj.addOrUpdateAsset(message['asset'], message['_amount_normalized']);
+    } else{
+      //Otherwise, detect asset changes, and make the cooresponding state change(s) across any addresses that have the asset
+      var addresses = WALLET.getAddressesList();
+      var addrsWithBalance = [];
+      var addressObj = null, assetObj = null;
+      for(var i=0; i < addresses.length; i++) {
+        addressObj = WALLET.getAddressObj(addresses[i]);
+        assetObj = addressObj.getAsset(message['asset']);
+        if(!assetObj) continue;
+        
+        assetObj.owner(assetInfo['issuer']);
+        if(!assetObj.isMine() && !assetObj.rawBalance()) { //not owned by this address with a zero balance
+          addressObj.removeAsset(message['asset']);
+          continue;
+        }
+        //otherwise, just update the asset's data (rawBalance will be updated through debit/credit messages, not issuances)
+        assetObj.owner(message['issuer']);
+        assetObj.isLocked(message['locked']);
+        assetObj.rawTotalIssued(message['amount']);
+        assetObj.description(message['description']);
       }
     }
-  } else if(event == "dividends") {
-    //Similar approach as to callbacks above...
-    var addresses = WALLET.getAddressesList();
-    for(var i=0; i < addresses.length; i++) {
-      if(WALLET.getBalance(addresses[i], data['asset'])) {
-        NOTIFICATION_FEED.add(event, data['asset'] + " balance adjusted on your address " + addresses[i]
-          + " due to " + numberWithCommas(normalizeAmount(data['amount_per_unit'], data['_divisible'])) + " unit dividend payment.");
-      }
-    }
-  } else if(event == "issuances") {
-    //See if the issuer matches any of our addresses
-    var address = WALLET.getAddressObj(data['issuer']);
-    if(!address) return;
-    
-    //get info on the asset to determine if it's locked or not
-    failoverAPI("get_asset_info", [data['asset']], function(data, endpoint) {
-      assert(data['owner'] == address.ADDRESS);
-      address.addOrUpdateAsset(data['asset'], data['amount']);
-    });
-  } else if(event == "sends") {
-    if(WALLET.getAddressObj(data['source'])) { //we sent funds
-        NOTIFICATION_FEED.add(event, "You successfully sent <b>"
-          + numberWithCommas(normalizeAmount(data['amount'], data['_divisible'])) + " " + data['asset']
-          + "</b> from your address " + data['source'] + " to address " + data['destination']);
-    }
-    if(WALLET.getAddressObj(data['destination'])) { //we received funds
-        NOTIFICATION_FEED.add(event, "You successfully received <b>"
-          + numberWithCommas(normalizeAmount(data['amount'], data['_divisible'])) + " " + data['asset']
-          + "</b> from address " + data['source'] + " to your address " + data['destination']);
-    }
-  } else if(event == "orders") {
-    if(WALLET.getAddressObj(data['source'])) {
+  } else if(category == "sends") {
+  } else if(category == "orders") {
+    if(WALLET.getAddressObj(message['source'])) {
       //List the order in our open orders list (activities feed)
-      OPEN_ORDER_FEED.add(data);
+      OPEN_ORDER_FEED.add(message);
       //Also list the order on open orders if we're viewing the dex page
       if (typeof BUY_SELL !== 'undefined') {
         BUY_SELL.openOrders.push(order);
       }
-      
-      //Notify the user 
-      NOTIFICATION_FEED.add(event, "Your order to buy " + numberWithCommas(normalizeAmount(data['get_amount'], data['_get_asset_divisible']))
-        + " " + data['get_asset'] + " in exchange for " + numberWithCommas(normalizeAmount(data['give_amount'], data['_give_asset_divisible']))
-        + " " + data['get_asset'] + " was successfully created.");
     }
-  } else if(event == "order_matches") {
+  } else if(category == "order_matches") {
     //Determine if the match is one where one of our addresses owes BTC, and if so perform an automatic BTCPay
-    if(WALLET.getAddressObj(data['tx0_address']) && data['forward_asset'] == 'BTC') {
-      
+    if(WALLET.getAddressObj(message['tx0_address']) && message['forward_asset'] == 'BTC') {
+      //If automatic BTC pays are enabled, just take care of the BTC pay ourselves
+      //Otherwise, prompt the user to make the BTC pay
+      //If the user says no, then throw the BTC pay in pending BTC pays
     }
-    if(WALLET.getAddressObj(data['tx1_address']) && data['backward_asset'] == 'BTC') {
+    if(WALLET.getAddressObj(message['tx1_address']) && message['backward_asset'] == 'BTC') {
       
     }
     //If for some reason we can't perform a BTCpay, alert the user and throw the entry on the "Pending Orders" list in the activity feed
-  } else if(event == "order_expirations") {
+  } else if(category == "order_expirations") {
     //Remove the order from the open orders list and pending orders list, if on either
-    OPEN_ORDER_FEED.remove(data['order_hash']);
-    PENDING_ACTION_FEED.removePendingBTCPayByOrderID(data['order_hash']);
-    //Also, notify the user of the expiration
-    if(WALLET.getAddressObj(data['source'])) {
-      NOTIFICATION_FEED.add(event, "Your order <b>"
-        + data['order_hash'] + " from address " + data['source'] + " has expired.");
-    }
-  } else if(event == "order_match_expirations") {
-    //Notify the user
-    if(WALLET.getAddressObj(data['tx0_address'])) {
-      NOTIFICATION_FEED.add(event, "An order match between your address <b>"
-        + data['tx0_address'] + " and address <b>" + data['tx1_address'] + "</b> has expired.");
-    } 
-    if(WALLET.getAddressObj(data['tx1_address'])) {
-      NOTIFICATION_FEED.add(event, "An order match between your address <b>"
-        + data['tx1_address'] + " and address <b>" + data['tx0_address'] + "</b> has expired.");
-    } 
-  } else if(event == "bets") {
+    OPEN_ORDER_FEED.remove(message['order_hash']);
+    PENDING_ACTION_FEED.removePendingBTCPayByOrderID(message['order_hash']);
+  } else if(category == "order_match_expirations") {
+  } else if(category == "bets") {
     //TODO
-  } else if(event == "bet_matches") {
+  } else if(category == "bet_matches") {
     //TODO
-  } else if(event == "bet_expirations") {
+  } else if(category == "bet_expirations") {
     //TODO
-  } else if(event == "bet_match_expirations") {
+  } else if(category == "bet_match_expirations") {
     //TODO
   } else {
-    $.jqlog.error("Unknown event: " + event);
+    $.jqlog.error("Unknown message category: " + category);
   }
 }

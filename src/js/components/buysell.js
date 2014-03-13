@@ -539,8 +539,9 @@ function BuySellWizardViewModel() {
              expiration: parseInt(self.numBlocksUntilExpiration())
             },
             function() {
-              bootbox.alert("Your order for <b>" + self.selectedBuyAmount() + " " + self.selectedBuyAsset() + "</b> has been placed."
-               + " You will be notified when it fills.");
+              bootbox.alert("Your order for <b>" + self.selectedBuyAmount() + " "
+               + self.selectedBuyAsset() + "</b> has been placed. "
+               + ACTION_PENDING_NOTICE);
               checkURL(); //reset the form and take the user back to the first tab by just refreshing the page
             }
           );
@@ -708,8 +709,7 @@ function BuySellWizardViewModel() {
             WALLET.doTransaction(self.selectedAddress(), "create_cancel",
               { offer_hash: item['tx_hash'] },
               function() {
-                bootbox.alert("Your order cancellation has been submitted"
-                  + " but it may take a bit for this to formally reflect on the network.");
+                bootbox.alert("Your order cancellation has been submitted. " + ACTION_PENDING_NOTICE);
               }
             );
           }

@@ -61,6 +61,9 @@ var AUTOPRIME_AT_LESSTHAN_REMAINING = 10; //auto prime at less than this many tx
 var AUTOPRIME_MAX_AMOUNT = 10; //max number of txns to add with an autoprime
 var AUTOPRIME_MIN_CONFIRMED_BTC_BAL = 0.005; //don't autoprime if the account has less than this balance (too much churn)
 
+var ACTION_PENDING_NOTICE = "This action will appear as a Pending Action until confirmed on the network.";
+var ACTION_PENDING_NOTICE_NO_UI = "This will reflect once the network has confirmed the transaction.";
+
 var DEFAULT_PREFERENCES = {
   'num_addresses_used': DEFAULT_NUM_ADDRESSES,
   'address_aliases': {},

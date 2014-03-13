@@ -52,7 +52,7 @@ function PendingBTCPayViewModel(orderMatchID, BTCPayTxIndex, myAddr, btcDestAddr
                 function() {
                   //remove the BTC payment from the notifications
                   PENDING_ACTION_FEED.removePendingBTCPay(self.orderMatchID());
-                  bootbox.alert("Order successfully settled. Will take 1 block to confirm across the network.");
+                  bootbox.alert("Order successfully settled. " + ACTION_PENDING_NOTICE);
                 }
               );
             }
@@ -63,57 +63,56 @@ function PendingBTCPayViewModel(orderMatchID, BTCPayTxIndex, myAddr, btcDestAddr
   }
 }
 
-function PendingActionViewModel(type, keyData, keyDataJSON) {
+function PendingActionViewModel(category, keyData, keyDataJSON) {
   var self = this;
   self.WHEN = ko.observable(new Date());
-  self.TYPE = type;
+  self.CATEGORY = category;
   self.KEYDATA = keyData;
   self.KEYDATAJSON = keyDataJSON;
-  self.DISPLAY_ICON = ENTITY_ICONS[self.TYPE];
-  self.DISPLAY_COLOR = ENTITY_NOTO_COLORS[self.TYPE];
+  self.DISPLAY_ICON = ENTITY_ICONS[self.CATEGORY];
+  self.DISPLAY_COLOR = ENTITY_NOTO_COLORS[self.CATEGORY];
    
   self.displayText = function() {
     //TODO: this display of data is very elementary and basic. IMPROVE greatly in the future...
     var desc = "";
     var asset = WALLET.getAsset
-    if(self.TYPE == 'burns') {
+    if(self.CATEGORY == 'burns') {
       desc = "Pending burn of " + normalizeAmount(self.KEYDATA['burned']) + " BTC";
-    } else if(self.TYPE == 'sends') {
+    } else if(self.CATEGORY == 'sends') {
       desc = "Pending send of " + numberWithCommas(normalizeAmount(self.KEYDATA['amount'], self.KEYDATA['_divisible'])) + " " + self.KEYDATA['asset']
-        + " to <a href=\"http://blockscan.com/address.aspx?q=" + self.KEYDATA['destination'] + "\" target=\"blank\">"
-        + (PREFERENCES['address_aliases'][hashToB64(self.KEYDATA['destination'])] || self.KEYDATA['destination']) + "</a>"; 
-    } else if(self.TYPE == 'orders') {
+        + " to " + getLinkForCPData('address', self.KEYDATA['destination'],  getAddressLabel(self.KEYDATA['destination'])); 
+    } else if(self.CATEGORY == 'orders') {
       desc = "Pending order to sell " + numberWithCommas(normalizeAmount(self.KEYDATA['give_amount'], self.KEYDATA['_give_divisible']))
         + " " + self.KEYDATA['give_asset'] + " for "
         + numberWithCommas(normalizeAmount(self.KEYDATA['get_amount'], self.KEYDATA['_get_divisible'])) + " "
         + self.KEYDATA['get_asset'];
-    } else if(self.TYPE == 'issuances') {
+    } else if(self.CATEGORY == 'issuances') {
       if(self.KEYDATA['transfer']) {
         desc = "Pending transfer of asset " + self.KEYDATA['asset'] + " to "
-          + (PREFERENCES['address_aliases'][hashToB64(self.KEYDATA['issuer'])] || self.KEYDATA['issuer']);
+          + getLinkForCPData('address', self.KEYDATA['issuer'], getAddressLabel(self.KEYDATA['issuer'])); 
       } else if(self.KEYDATA['description'] == 'LOCK') {
         desc = "Pending lock of asset " + self.KEYDATA['asset'] + " against additional issuance";
       } else {
         desc = "Pending issuance for quantity " + numberWithCommas(normalizeAmount(self.KEYDATA['amount'], self.KEYDATA['divisible']))
           + " of asset " + self.KEYDATA['asset'];
       }
-    } else if(self.TYPE == 'broadcasts') {
+    } else if(self.CATEGORY == 'broadcasts') {
       desc = "Pending broadcast:<br/>Text: " + self.KEYDATA['text'] + "<br/>Value:" + self.KEYDATA['value'];
-    } else if(self.TYPE == 'bets') {
-      desc = "Pending " + BET_TYPES[self.KEYDATA['bet_type']] + " bet on feed @ "
-        + (PREFERENCES['address_aliases'][hashToB64(self.KEYDATA['feed_address'])] || self.KEYDATA['feed_address']) + "<br/>"
+    } else if(self.CATEGORY == 'bets') {
+      desc = "Pending " + BET_CATEGORYS[self.KEYDATA['bet_type']] + " bet on feed @ "
+        + getLinkForCPData('address', self.KEYDATA['feed_address'], getAddressLabel(self.KEYDATA['feed_address'])) + "<br/>"
         + "Odds: " + self.KEYDATA['odds'] + ", Wager: "
         + numberWithCommas(normalizeAmount(self.KEYDATA['wager_amount'])) + " XCP, Counterwager: "
         + numberWithCommas(normalizeAmount(self.KEYDATA['counterwager_amount'])) + " XCP";  
-    } else if(self.TYPE == 'dividends') {
+    } else if(self.CATEGORY == 'dividends') {
       desc = "Pending dividend payment of " + numberWithCommas(self.KEYDATA['amount_per_share']) + " "
         + self.KEYDATA['dividend_asset'] + " on asset " + self.KEYDATA['asset'];
-    } else if(self.TYPE == 'cancels') {
+    } else if(self.CATEGORY == 'cancels') {
       desc = "Pending cancellation of order/bet " + data['offer_hash'];
-    } else if(self.TYPE == 'callbacks') {
+    } else if(self.CATEGORY == 'callbacks') {
       desc = "Pending callback for " + self.KEYDATA['fraction'] + " fraction on asset " + self.KEYDATA['asset'];
     } else {
-      desc = "UNHANDLED TRANSACTION TYPE";
+      desc = "UNHANDLED TRANSACTION CATEGORY";
     }
     return desc;
   };
@@ -133,39 +132,39 @@ function PendingActionFeedViewModel() {
     return self.pendingBTCPays().length + self.pendingActions().length;
   }, self);
 
-  self._generateKeyData = function(type, data) {
+  self._generateKeyData = function(category, data) {
     //compose the data dictionary from the passed in create_ dict
     // the goal of the dict is to contain just enough parameters to uniquely identify the pending txn so it can be found
     // and removed from the list, once the it is confirmed on the blockchain and we get the message feed message
     var keyData = null;
-    if(type == 'burns') {
+    if(category == 'burns') {
       keyData = {'source': data.source, 'burned': data.burned || data.amount};
-    } else if(type == 'sends') {
+    } else if(category == 'sends') {
       keyData = {'source': data.source, 'destination': data.destination, 'asset': data.asset, 'amount': data.amount};
-    } else if(type == 'orders') {
+    } else if(category == 'orders') {
       keyData = {'source': data.source,
         'give_asset': data.give_asset, 'give_amount': data.give_amount, '_give_divisible': data._give_divisible,
         'get_asset': data.get_asset, 'get_amount': data.get_amount, '_get_divisible': data._get_divisible,
         'expiration': data.expiration};    
-    } else if(type == 'issuances') { //issue new, lock, transfer, change description, issue additional
+    } else if(category == 'issuances') { //issue new, lock, transfer, change description, issue additional
       keyData = {'source': data.source, 'asset': data.asset, 'amount': data.amount,
         'destination': data.destination || data.transfer_destination,
         'issuer': data.issuer || data.source, 'description': data.description, 'divisible': data.divisible};
-    } else if(type == 'broadcasts') {
+    } else if(category == 'broadcasts') {
       keyData = {'source': data.source, 'text': data.text, 'value': data.value};
-    } else if(type == 'bets') {
+    } else if(category == 'bets') {
       keyData = {'source': data.source, 'feed_address': data.feed_address, 'bet_type': data.bet_type,
         'deadline': data.deadline, 'wager_amount': data.wager_amount, 'counterwager_amount': data.counterwager_amount};    
-    } else if(type == 'dividends') {
+    } else if(category == 'dividends') {
       keyData = {'source': data.source, 'asset': data.asset, 'dividend_asset': data.dividend_asset,
         'amount_per_unit': data.amount_per_unit};
-    } else if(type == 'cancels') {
+    } else if(category == 'cancels') {
       keyData = {'source': data.source, 'offer_hash': data.offer_hash};
-    } else if(type == 'callbacks') {
+    } else if(category == 'callbacks') {
       keyData = {'source': data.source, 'fraction': data.fraction, 'asset': data.asset};
     } else {
       //certain actions, like debits, credits, cancellations, etc either are ignored or don't apply
-      $.jqlog.log("Ignored action: " + type + " -- " + JSON.stringify(keyData));
+      $.jqlog.log("Ignored action: " + category + " -- " + JSON.stringify(keyData));
       return null;
     }
     //check for some common fields
@@ -178,26 +177,26 @@ function PendingActionFeedViewModel() {
     return keyData;
   }
   
-  self.addPendingAction = function(type, data) {
-    var keyData = self._generateKeyData(type, data);
+  self.addPendingAction = function(category, data) {
+    var keyData = self._generateKeyData(category, data);
     if(keyData === null) return; //ignored action
-    self.pendingActions.push(new PendingActionViewModel(type, keyData));
-    $.jqlog.log("pendingAction:add:" + type + ": " + JSON.stringify(keyData));
+    self.pendingActions.push(new PendingActionViewModel(category, keyData));
+    $.jqlog.log("pendingAction:add:" + category + ": " + JSON.stringify(keyData));
     self.lastUpdated(new Date());
   }
 
-  self.removePendingAction = function(type, data) {
-    var keyData = self._generateKeyData(type, data);
+  self.removePendingAction = function(category, data) {
+    var keyData = self._generateKeyData(category, data);
     if(keyData === null) return; //ignored action
     var match = ko.utils.arrayFirst(self.pendingActions(), function(item) {
-      return item.TYPE == type && deepCompare(item, keyData);
+      return item.CATEGORY == category && deepCompare(item, keyData);
     });
     if (match) {
       ko.utils.arrayRemoveItem(self.pendingActions, match);
-      $.jqlog.log("pendingAction:remove:" + type + ": " + keyDataJSON);
+      $.jqlog.log("pendingAction:remove:" + category + ": " + JSON.stringify(keyData));
       self.lastUpdated(new Date());
     } else{
-      $.jqlog.log("pendingAction:NOT FOUND:" + type + ": " + keyDataJSON);
+      $.jqlog.log("pendingAction:NOT FOUND:" + category + ": " + JSON.stringify(keyData));
     }
   }
   

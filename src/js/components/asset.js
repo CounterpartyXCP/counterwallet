@@ -5,35 +5,48 @@ function AssetViewModel(props) {
   self.ADDRESS = props['address']; //will not change
   self.ASSET = props['asset']; //assetID, will not change
   self.DIVISIBLE = props['divisible'] || true;
-  self.isMine = ko.observable(props['isMine'] === true ? true : (props['isMine'] === false ? false : null)); //null for BTC and XCP, true for self assets, false for others assets
+  self.owner = ko.observable(props['owner']);
   self.isLocked = ko.observable(props['isLocked'] || false);
   self.rawBalance = ko.observable(props['rawBalance'] || 0); //raw (not normalized)
-  self.totalIssued = ko.observable(props['totalIssued'] || 0); //raw
+  self.rawTotalIssued = ko.observable(props['rawTotalIssued'] || 0); //raw
   self.description = ko.observable(props['description'] || '');
   self.CALLABLE = props['callable'] || false;
   self.CALLDATE = props['callDate'] || 0;
   self.CALLPRICE = props['callPrice'] || 0;
+
+  self.isMine = ko.computed(function() {
+    if(self.ASSET == 'BTC' || self.ASSET == 'XCP') return null; //special value for BTC and XCP
+    return self.owner() == self.ADDRESS;
+  }, self);
   
   self.normalizedBalance = ko.computed(function() {
-    return self.DIVISIBLE ? Decimal.round(new Decimal(self.rawBalance()).div(UNIT), 8).toFloat() : self.rawBalance(); 
+    return normalizeAmount(self.rawBalance(), self.DIVISIBLE);
   }, self);
 
-  self.displayedBalance = ko.computed(function() {
-    return numberWithCommas(self.normalizedBalance()).toString(); 
+  self.dispBalance = ko.computed(function() {
+    return numberWithCommas(self.normalizedBalance()); 
   }, self);
   
   self.normalizedTotalIssued = ko.computed(function() {
-    return self.DIVISIBLE ? Decimal.round(new Decimal(self.totalIssued()).div(UNIT), 8).toFloat() : self.totalIssued(); 
+    return normalizeAmount(self.rawTotalIssued(), self.DIVISIBLE);
   }, self);
 
-  self.displayedTotalIssued = ko.computed(function() {
+  self.dispTotalIssued = ko.computed(function() {
     return numberWithCommas(self.normalizedTotalIssued()); 
   }, self);
   
+  self.dispCallDate = ko.computed(function() {
+    return moment(self.CALLDATE * 1000).format("MMM Do YYYY, h:mm:ss a");
+  }, self);
+
   self.send = function () {
     if(!self.rawBalance()) { bootbox.alert("You have no available <b>" + self.ASSET + "</b> at address <b>" + self.ADDRESS + "</b> to send."); return; }
     if(!WALLET.canDoTransaction(self.ADDRESS)) return false;
     SEND_MODAL.show(self.ADDRESS, self.ASSET, self.rawBalance(), self.DIVISIBLE);
+  };
+  
+  self.showInfo = function () {
+    SHOW_ASSET_INFO_MODAL.show(self);
   };
   
   self.testnetBurn = function () {

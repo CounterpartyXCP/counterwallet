@@ -71,8 +71,7 @@ function BalanceHistoryViewModel() {
       failoverAPI("get_balance_history", {asset: self.selectedAsset(), addresses: WALLET.getAddressesList(), }, function(data, endpoint) {
         var i = null, j = null, addressHash = null;
         for(i=0; i < data.length; i++) {
-          addressHash = hashToB64(data[i]['name']);
-          data[i]['name'] = PREFERENCES['address_aliases'][addressHash] || data[i]['name'];
+          data[i]['name'] = getAddressLabel(data[i]['name']);
         }
         self.graphData = data;
         self.doChart();
@@ -133,13 +132,14 @@ function TransactionHistoryItemViewModel(data) {
   self.blockTime = self.data['_block_time'];
   self.rawTxType = self.data['_entity'];
   self.source = self.data['source'] || self.data['address'] || self.data['issuer'] || '';
+  
   self.dispSource = function() {
-    return PREFERENCES['address_aliases'][hashToB64(self.source)] || self.source;
+    return getAddressLabel(self.source);
   }
   //self.btcAmount = TODO
   //self.fee = TODO
   
-  self.dispBlocktime = function() {
+  self.dispBlockTime = function() {
     return moment(self.blockTime * 1000).format("MMM Do YYYY, h:mm:ss a");
   };
   
@@ -151,12 +151,11 @@ function TransactionHistoryItemViewModel(data) {
     //TODO: this display of data is very elementary and basic. IMPROVE greatly in the future...
     var desc = "";
     if(self.rawTxType == 'burns') {
-      desc = "XCP Proof-of-Burn<br/>Burned: " + (self.data['burned'] / UNIT).toString() + " BTC<br/>"
-        + "Earned: " + numberWithCommas(self.data['earned'] / UNIT) + " XCP";
+      desc = "XCP Proof-of-Burn<br/>Burned: " + normalizeAmount(self.data['burned']) + " BTC<br/>"
+        + "Earned: " + numberWithCommas(normalizeAmount(self.data['earned']) ) + " XCP";
     } else if(self.rawTxType == 'sends') {
       desc = "Send of " + numberWithCommas(normalizeAmount(self.data['amount'], self.data['_divisible'])) + " " + self.data['asset']
-        + " to <a href=\"http://blockscan.com/address.aspx?q=" + self.data['destination'] + "\" target=\"blank\">"
-        + (PREFERENCES['address_aliases'][hashToB64(self.data['destination'])] || self.data['destination']) + "</a>"; 
+        + " to " + getLinkForCPData('address', self.data['destination'], getAddressLabel(self.data['destination']));
     } else if(self.rawTxType == 'orders') {
       desc = "Sell " + numberWithCommas(normalizeAmount(self.data['give_amount'], self.data['_give_divisible']))
         + " " + self.data['give_asset'] + " for "
@@ -170,11 +169,11 @@ function TransactionHistoryItemViewModel(data) {
         + numberWithCommas(normalizeAmount(self.data['backward_amount'], self.data['_backward_divisible']))
         + " " + self.data['backward_asset'];
     } else if(self.rawTxType == 'btcpays') {
-      desc = "Payment for Order tx <a href=\"http://blockscan.com/order.aspx?q=" + self.txIndex + "\" target=\"blank\">" + self.txIndex + "</a>";
+      desc = "Payment for Order tx " + getLinkForCPData('order', self.txIndex);
     } else if(self.rawTxType == 'issuances') {
       if(self.data['transfer']) {
         desc = "Asset " + self.data['asset'] + " transferred to "
-          + (PREFERENCES['address_aliases'][hashToB64(self.data['issuer'])] || self.data['issuer']);
+          + getLinkForCPData('address', self.data['issuer'], getAddressLabel(self.data['issuer']));
       } else if(self.data['locked']) {
         desc = "Asset " + self.data['asset'] + " locked against additional issuance";
       } else {
@@ -185,18 +184,19 @@ function TransactionHistoryItemViewModel(data) {
       desc = "Text: " + self.data['text'] + "<br/>Value: " + self.data['value'];
     } else if(self.rawTxType == 'bets') {
       desc = BET_TYPES[self.data['bet_type']] + " bet on feed @ "
-        + (PREFERENCES['address_aliases'][hashToB64(self.data['feed_address'])] || self.data['feed_address']) + "<br/>"
+        + getLinkForCPData('address', self.data['feed_address'], getAddressLabel(self.data['feed_address'])) + "<br/>"
         + "Odds: " + self.data['odds'] + ", Wager: "
         + numberWithCommas(normalizeAmount(self.data['wager_amount'])) + " XCP, Counterwager: "
         + numberWithCommas(normalizeAmount(self.data['counterwager_amount'])) + " XCP";  
     } else if(self.rawTxType == 'bet_matches') {
-      desc = "For feed " + (PREFERENCES['address_aliases'][hashToB64(self.data['feed_address'])] || self.data['feed_address'])
+      desc = "For feed " 
+        + getLinkForCPData('address', self.data['feed_address'], getAddressLabel(self.data['feed_address']))
         + ", " + self.data['tx0_address'] + " bet "
         + numberWithCommas(normalizeAmount(self.data['forward_amount'])) + " XCP"
         + self.data['tx1_address'] + " bet "
         + numberWithCommas(normalizeAmount(self.data['backward_amount'])) + " XCP";
     } else if(self.rawTxType == 'dividends') {
-      desc = "Paid " + numberWithCommas(normalizeAmount(self.data['amount_per_share'])) + " "+ self.KEYDATA['dividend_asset']
+      desc = "Paid " + numberWithCommas(normalizeAmount(self.data['amount_per_share'])) + " "+ self.data['dividend_asset']
         + " on asset " + self.data['asset'];
     } else if(self.rawTxType == 'cancels') {
       desc = "Order/Bet " + data['offer_hash'] +" cancelled.";

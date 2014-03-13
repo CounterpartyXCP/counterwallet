@@ -47,6 +47,36 @@ function makeQRCode(addr) {
   return qr.createImgTag(4);
 }
 
+function getLinkForCPData(type, dataID, dataTitle, htmlize) {
+  if(typeof(dataTitle)==='undefined' || dataTitle === null) dataTitle = dataID;
+  if(typeof(htmlize)==='undefined' || htmlize === null) htmlize = true;
+  if(typeof(type)==='undefined') type = 'tx';
+  var url = null;
+  if(type == 'address') { //dataID is an address
+    url = "http://blockscan.com/address.aspx?q=" + dataID;
+  } else if(type == 'order') { //txID is an order ID
+    url = "http://blockscan.com/order.aspx?q=" + dataID;
+  } else if(type == 'tx') { //generic TX
+    url = "http://blockscan.com/tx.aspx?q=" + dataID;
+  } else {
+    assert(false, "Unknown type of " + type);
+  }
+  if(USE_TESTNET) return htmlize ? '' : '#'; //blockscan not for testnet currently
+  return htmlize ? '<a href="' + url + '" target="_blank">' + dataTitle + '</a>' : url;
+}
+
+function getLinkForBlock(blockIndex, dataTitle, htmlize) {
+  if(typeof(dataTitle)==='undefined' || dataTitle === null) dataTitle = blockIndex;
+  if(typeof(htmlize)==='undefined' || htmlize === null) htmlize = true;
+  var url = BLOCKEXPLORER_URL + '/block-index/' + blockIndex;
+  return htmlize ? '<a href="' + url + '" target="_blank">' + dataTitle + '</a>' : url;
+}
+
+function getAddressLabel(address) {
+  //gets the address label if the address is in this wallet
+  return PREFERENCES['address_aliases'][hashToB64(address)] || address;
+}
+
 function randomGetBytes(numBytes) {
      var randomBytes = null;
     if (window.crypto && window.crypto.getRandomValues) {
