@@ -60,12 +60,9 @@ function OpenOrderFeedViewModel() {
   }
 
   self.remove = function(orderTxHashOrIndex) {
-    var match = ko.utils.arrayFirst(self.openOrders(), function(item) {
+    self.openOrders.remove(function(item) {
         return orderTxHashOrIndex == item.order['tx_index'] || orderTxHashOrIndex == item.order['tx_hash'];
     });
-    if (match) {
-      ko.utils.arrayRemoveItem(self.openOrders, match);
-    }
     self.lastUpdated(new Date());
   }
 }

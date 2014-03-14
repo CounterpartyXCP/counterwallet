@@ -76,6 +76,9 @@ function LogonViewModel() {
       initMessageFeed();
       
       //generate the wallet ID from a double SHA256 hash of the passphrase and the network (if testnet)
+      //var hash1 = Bitcoin.Crypto.SHA256(self.enteredPassphrase() + (USE_TESTNET ? '_testnet' : ''));
+      //var hash2 = Bitcoin.Crypto.SHA256(hash1).toString(Bitcoin.Crypto.enc.Base64);
+      //WALLET.identifier(hash2);
       WALLET.identifier(Bitcoin.convert.bytesToBase64(Bitcoin.Crypto.SHA256(
         Bitcoin.Crypto.SHA256(self.enteredPassphrase() + (USE_TESTNET ? '_testnet' : ''),
         {asBytes: true}), {asBytes: true})));
@@ -161,12 +164,14 @@ function LogonViewModel() {
   }
   
   self.openWalletPt3 = function(mustSavePreferencesToServer) {
+    var i = null;
+    
     //add in the watch only addresses
     if(PREFERENCES['watch_only_addresses'] === undefined) {
       PREFERENCES['watch_only_addresses'] = [];
       mustSavePreferencesToServer = true;
     }
-    for(var i=0; i < PREFERENCES['watch_only_addresses'].length; i++) {
+    for(i=0; i < PREFERENCES['watch_only_addresses'].length; i++) {
       WALLET.addWatchOnlyAddress(PREFERENCES['watch_only_addresses'][i]);
     }
     
@@ -184,6 +189,22 @@ function LogonViewModel() {
     
     //Update the wallet balances (isAtLogon = true)
     WALLET.updateBalances(true);
+    
+    //Grab any pending BTC pays
+    var addresses = WALLET.getAddressesList();
+    var filters = [];
+    for(i=0; i < addresses.length; i++) {
+      filters.push({'field': 'tx0_address', 'op': '==', 'value': addresses[i]});
+      filters.push({'field': 'tx1_address', 'op': '==', 'value': addresses[i]});
+    }
+    failoverAPI("get_order_matches", {'filters': filters, 'filterop': 'or', status: 'pending'},
+      function(data, endpoint) {
+        for(i=0; i < data.length; i++) {
+          var btcPayData = PendingActionFeedViewModel.makeBTCPayData(data[i]);
+          PENDING_ACTION_FEED.addPendingBTCPay(btcPayData);
+        }
+      }
+    );
     
     //next, load the balances screen
     window.location.hash = 'xcp/pages/balances.html';

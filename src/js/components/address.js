@@ -64,7 +64,7 @@ function AddressViewModel(key, address, initialLabel) {
       match.rawBalance(rawBalance);
       return;
     }
-    
+
     failoverAPI("get_asset_info", [asset], function(assetInfo, endpoint) {
       var match = ko.utils.arrayFirst(self.assets(), function(item) {
           return item.ASSET === asset;
@@ -77,13 +77,18 @@ function AddressViewModel(key, address, initialLabel) {
           callable: assetInfo['callable'], callDate: assetInfo['call_date'], callPrice: assetInfo['call_price']        
         };
         self.assets.push(new AssetViewModel(assetProps)); //add new
-      } else { //update existing 
+      } else { //update existing
         $.jqlog.log("Updating asset " + asset + " @ " + self.ADDRESS + ". Bal from " + match.rawBalance() + " to " + rawBalance + "; Others: " + JSON.stringify(assetInfo));
         match.owner(assetInfo['owner']);
         match.isLocked(assetInfo['locked']);
         match.rawBalance(rawBalance);
         match.rawTotalIssued(assetInfo['total_issued']);
         match.description(assetInfo['description']);
+
+        if(rawBalance == 0 && !match.isMine()) {
+          //if balance goes down to zero and the asset isn't ours (or isn't BTC/LTC), remove it from the listing
+          addressObj.removeAsset(asset);
+        }
       }
     });
   }

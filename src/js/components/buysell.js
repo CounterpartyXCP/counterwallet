@@ -488,6 +488,8 @@ function BuySellWizardViewModel() {
           self._tab2StartAutoRefresh();
         } else {
           assert(current == 3, "Unknown wizard tab change!");
+          self.showTradeHistory(false);
+          self.showOpenOrders(false);
           $('#tradeHistory').dataTable().fnClearTable(); //otherwise we get duplicate rows for some reason...
           self._tab2StopAutoRefresh();
         }

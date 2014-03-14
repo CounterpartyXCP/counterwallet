@@ -302,7 +302,7 @@
             <p>In order to do things with Counterparty, your address needs to
                 contain at one confirmed <a href="http://bitcoin.stackexchange.com/questions/4301/what-is-an-unspent-output" target="_blank">"unspent output"</a>
                 for each action you want to do (e.g. send, create asset, etc).</p>
-            <p>This form allows you to take one larger unspent input that you may have at
+            <p>This form allows you to take one or more larger unspent outputs that you may have at
                 your address and split it into many smaller ones, allowing you to perform multiple Counterparty actions without
                 having to wait between each one. We call this <b>"priming"</b> the address.</p>
             <p>You currently have <b><span data-bind="text: dispNumPrimedTxouts"></span> unspent outputs</b> for address <b><span data-bind="text: address"></span></b>.
@@ -720,7 +720,7 @@
             <label class="control-label col col-sm-2">Call Date</label>
             <div class="col col-sm-10">
                 <label class="input">
-                    <input name="assetCallDate" type="text" data-bind="text: callDate" readonly="readonly"/>
+                    <input name="assetCallDate" type="text" data-bind="value: callDate" readonly="readonly"/>
                 </label>
                 <div class="note">The date and time after which the owner of the asset may choose to call it back.</div>
             </div>

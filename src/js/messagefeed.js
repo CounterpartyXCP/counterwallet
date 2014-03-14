@@ -124,8 +124,10 @@ function handleMessage(category, message) {
   //remove any pending message from the pending actions pane
   if(category != "btcpays") // (btcpays have their own remove method)
     PENDING_ACTION_FEED.removePendingAction(category, message);
+  
   //...and notify the user in the notification pane
   NOTIFICATION_FEED.add(category, message);
+  //^ especially with issuances, it's important that this line come before we modify state below
 
   //Have the action take effect (i.e. everything besides notifying the user in the notifcations pane, which was done above)
   if(category == "balances") {
@@ -158,18 +160,18 @@ function handleMessage(category, message) {
   } else if(category == "dividends") {
   } else if(category == "issuances") {
     var issuerAddressObj = WALLET.getAddressObj(message['issuer']);
-    if(issuerAddressObj && !issuerAddressObj.getAsset(message['asset'])) {
+    if(issuerAddressObj && !issuerAddressObj.getAssetObj(message['asset'])) {
       //Asset being created, add the asset to the issuing address
       issuerAddressObj.addOrUpdateAsset(message['asset'], message['_amount_normalized']);
-    } else{
+    } else {
       //Otherwise, detect asset changes, and make the cooresponding state change(s) across any addresses that have the asset
       var addresses = WALLET.getAddressesList();
       var addrsWithBalance = [];
       var addressObj = null, assetObj = null;
       for(var i=0; i < addresses.length; i++) {
         addressObj = WALLET.getAddressObj(addresses[i]);
-        assetObj = addressObj.getAsset(message['asset']);
-        if(!assetObj) continue;
+        assetObj = addressObj.getAssetObj(message['asset']);
+        if(!assetObj) continue; //this address doesn't have the asset...that's fine
         
         assetObj.owner(assetInfo['issuer']);
         if(!assetObj.isMine() && !assetObj.rawBalance()) { //not owned by this address with a zero balance
@@ -185,7 +187,7 @@ function handleMessage(category, message) {
     }
   } else if(category == "sends") {
   } else if(category == "orders") {
-    if(WALLET.getAddressObj(message['source'])) {
+    if(!WALLET.getAddressObj(message['source'])) {
       //List the order in our open orders list (activities feed)
       OPEN_ORDER_FEED.add(message);
       //Also list the order on open orders if we're viewing the dex page
@@ -194,21 +196,86 @@ function handleMessage(category, message) {
       }
     }
   } else if(category == "order_matches") {
-    //Determine if the match is one where one of our addresses owes BTC, and if so perform an automatic BTCPay
-    if(WALLET.getAddressObj(message['tx0_address']) && message['forward_asset'] == 'BTC') {
-      //If automatic BTC pays are enabled, just take care of the BTC pay ourselves
-      //Otherwise, prompt the user to make the BTC pay
-      //If the user says no, then throw the BTC pay in pending BTC pays
-    }
-    if(WALLET.getAddressObj(message['tx1_address']) && message['backward_asset'] == 'BTC') {
+    if(   (WALLET.getAddressObj(message['tx0_address']) && message['forward_asset'] == 'BTC')
+       || (WALLET.getAddressObj(message['tx1_address']) && message['backward_asset'] == 'BTC')) {
+      //If here, we got an order match where an address in our wallet owes BTC.
+      // This being the case, we must settle up with a BTCPay
+      var btcPayData = PendingActionFeedViewModel.makeBTCPayData(message);
       
+      //If automatic BTC pays are enabled, just take care of the BTC pay right now
+      if(PREFERENCES['auto_btcpay']) {
+        if(WALLET.getBalance(btcPayData['myAddr'], 'BTC', false) >= (btcPayData['btcAmountRaw']) + MIN_PRIME_BALANCE) {
+          //user has the sufficient balance
+          WALLET.doTransaction(btcPayData['myAddr'], "create_btcpay",
+            { order_match_id: btcPayData['orderMatchID'] },
+            function() {
+              //notify the user of the automatic BTC payment
+              bootbox.alert("Automatic BTC payment of <b>"
+                + btcPayData['btcAmount'] + " BTC</b> made from address " + btcPayData['myAddr'] + " for <b>"
+                + btcPayData['otherOrderAmount'] + " " + btcPayData['otherOrderAsset'] + "</b>. " + ACTION_PENDING_NOTICE);
+            }, function() {
+              PENDING_ACTION_FEED.addPendingBTCPay(btcPayData);
+              bootbox.alert("There was an error processing an automatic BTC payment."
+                + " This BTC payment has been placed in a pending state. Please try again manually.");
+            }
+          );
+        } else {
+          //The user doesn't have the necessary balance on the address... let them know and add the BTC as pending
+          PENDING_ACTION_FEED.addPendingBTCPay(btcPayData);
+          bootbox.alert("A payment on a matched order for <b>" + btcPayData['btcAmount'] + " BTC</b> is required,"
+            + " however, the address that made the order (" + getAddressLabel(btcPayData['myAddr'])
+            + ") lacks the balance necessary to do this automatically. This order has been placed in a pending state."
+            + "<br/><br/><b>Please deposit the necessary BTC into this address and manually make the BTC payment from"
+            + " the clock icon in the top bar of the site.</b>");  
+        }
+      } else {
+        //Otherwise, prompt the user to make the BTC pay
+        var prompt = "An order match for <b>" + btcPayData['otherOrderAmount'] + " " + btcPayData['otherOrderAsset'] + "</b> was successfully made. "
+          + " To finalize, this requires payment of <b>"+ btcPayData['btcAmount'] + " BTC</b>"
+          + " from address " + getAddressLabel(btcPayData['myAddr']) + ".<br/><br/>Pay now?";          
+        bootbox.dialog({
+          message: prompt,
+          title: "Order Settlement (BTC Pay)",
+          buttons: {
+            success: {
+              label: "No, hold off",
+              className: "btn-danger",
+              callback: function() {
+                //If the user says no, then throw the BTC pay in pending BTC pays
+                PENDING_ACTION_FEED.addPendingBTCPay(btcPayData);
+              }
+            },
+            danger: {
+              label: "Yes",
+              className: "btn-success",
+              callback: function() {
+                WALLET.doTransaction(self.MY_ADDR, "create_btcpay",
+                  { order_match_id: btcPayData['orderMatchID'] },
+                  function() {
+                    //notify the user of the automatic BTC payment
+                    bootbox.alert("Automatic BTC payment of <b>" + btcPayData['btcAmount'] + " BTC</b>"
+                      + " made from address " + getAddressLabel(btcPayData['myAddr']) + " for <b>"
+                      + btcPayData['otherOrderAmount'] + " " + btcPayData['otherOrderAsset'] + "</b>. " + ACTION_PENDING_NOTICE);
+                  }, function() {
+                    PENDING_ACTION_FEED.addPendingBTCPay(btcPayData);
+                    bootbox.alert("There was an error processing an automatic BTC payment. Please manually make the payment from"
+                      + " the clock icon in the top bar of the site.</b>");
+                  }
+                );
+              }
+            },
+          }
+        });    
+      }
     }
-    //If for some reason we can't perform a BTCpay, alert the user and throw the entry on the "Pending Orders" list in the activity feed
   } else if(category == "order_expirations") {
     //Remove the order from the open orders list and pending orders list, if on either
     OPEN_ORDER_FEED.remove(message['order_hash']);
-    PENDING_ACTION_FEED.removePendingBTCPayByOrderID(message['order_hash']);
+    PENDING_ACTION_FEED.removePendingBTCPayByOrderID(message['order_hash']); //just in case
   } else if(category == "order_match_expirations") {
+    //Would happen if the user didn't make a BTC payment in time
+    PENDING_ACTION_FEED.removePendingBTCPay(message['order_match_id']);
+    OPEN_ORDER_FEED.remove(message['order_match_id']); //just in case
   } else if(category == "bets") {
     //TODO
   } else if(category == "bet_matches") {

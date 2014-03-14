@@ -76,10 +76,7 @@ function WalletViewModel() {
     var addressObj = self.getAddressObj(address);
     if(!addressObj) return false;
     var assetObj = addressObj.getAssetObj(asset);
-    if(rawBalance || asset == 'BTC' || asset == 'XCP' || (assetObj && assetObj.isMine()))
-      addressObj.addOrUpdateAsset(asset, rawBalance);
-    else //if balance goes down to zero and the asset isn't ours (or isn't BTC/LTC), remove it from the listing
-      addressObj.removeAsset(asset);
+    addressObj.addOrUpdateAsset(asset, rawBalance);
     return true;
   }
 
@@ -334,6 +331,7 @@ function WalletViewModel() {
     var verifyDestAddr = data['destination'] || data['transfer_destination'] || null;
     
     //order handling hack, so we can get asset divisibility to pending
+    // here we only have to worry about what we create a txn for (so not order matches, debits/credits, etc)
     var extra1 = null, extra2 = null;
     if(action == 'create_order') {
       extra1 = data['_give_divisible'];
@@ -346,9 +344,8 @@ function WalletViewModel() {
       function(unsignedTxHex, numTotalEndpoints, numConsensusEndpoints) {
         $.jqlog.log("TXN CREATED. numTotalEndpoints=" + numTotalEndpoints + "; numConsensusEndpoints=" + numConsensusEndpoints);
         WALLET.signAndBroadcastTx(address, unsignedTxHex, function(txResult, endpoint) {
-          
           //register this as a pending transaction
-          var type = action.replace('create_', '') + 's';
+          var type = action.replace('create_', '') + 's'; //hack
           if(data['source'] === undefined) data['source'] = address;
           if(action == 'create_order') {
             data['_give_divisible'] = extra1;

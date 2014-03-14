@@ -1,58 +1,49 @@
 
-function PendingBTCPayViewModel(orderMatchID, BTCPayTxIndex, myAddr, btcDestAddress, btcAmount, myOrderTxIndex,
-  otherOrderTxIndex, otherOrderOtherAsset, otherOrderOtherAssetAmount, whenBTCPayCreated) {
-  if(typeof(whenBTCPayCreated)==='undefined') whenBTCPayCreated = new Date().getTime();
-  
+function PendingBTCPayViewModel(btcPayData) {
+  /* message is a message data object from the message feed for an order_match that requires a btc pay from an address in our wallet*/
   var self = this;
-  self.orderMatchID = ko.observable(orderMatchID);
-  self.BTCPayTxIndex = ko.observable(BTCPayTxIndex);
-  self.myAddr = ko.observable(myAddr);
-  self.btcDestAddress = ko.observable(btcDestAddress);
-  self.btcAmount = ko.observable(btcAmount); //normalized
-  self.myOrderTxIndex = ko.observable(myOrderTxIndex);
-  self.otherOrderTxIndex = ko.observable(otherOrderTxIndex);  
-  self.otherOrderOtherAsset = ko.observable(otherOrderOtherAsset);
-  self.otherOrderOtherAssetAmount = ko.observable(otherOrderOtherAssetAmount);
-  self.whenBTCPayCreated = ko.observable(whenBTCPayCreated); //epoch ts (in ms)
+  self.BTCPAY_DATA = btcPayData;
+  self.whenBTCPayRequested = ko.observable(new Date());
+  self.now = ko.observable(new Date()); //auto updates from the parent model every minute
   
   self.displayColor = ko.computed(function() {
-    var curTS = new Date().getTime();
-    if(curTS - self.whenBTCPayCreated() > 3600 * 1000) return 'bg-color-red'; //> 1 hour
-    if(curTS - self.whenBTCPayCreated() > 1800 * 1000) return 'bg-color-orange'; //> 30 min
-    if(curTS - self.whenBTCPayCreated() > 900 * 1000) return 'bg-color-yellow'; //> 15 min
+    /* todo make this work off of an updating timestamp..*/
+    if(self.now() - self.whenBTCPayRequested() > 3600 * 1000) return 'bg-color-red'; //> 1 hour
+    if(self.now() - self.whenBTCPayRequested() > 1800 * 1000) return 'bg-color-orange'; //> 30 min
+    if(self.now() - self.whenBTCPayRequested() > 900 * 1000) return 'bg-color-yellow'; //> 15 min
     return 'bg-color-greenLight';
   }, self);
   
   self.completeBTCPay = function() {
     //Pop up confirm dialog, and make BTC payment
-    WALLET.retrieveBTCBalance(self.myAddr(), function(balance) {
-      if(balance < (denormalizeAmount(self.btcAmount())) + MIN_PRIME_BALANCE) {
-        bootbox.alert("You do not have the required BTC balance to settle this order. Please deposit more BTC into address " + self.myAddr() + " and try again.");
+    WALLET.retrieveBTCBalance(self.btcPayData['myAddr'], function(balance) {
+      if(balance < self.btcPayData['btcAmountRaw'] + MIN_PRIME_BALANCE) {
+        bootbox.alert("You do not have the required BTC balance to settle this order. Please deposit more BTC into address "
+          + self.btcPayData['myAddr'] + " and try again.");
         return;
       }
       
       bootbox.dialog({
-        message: "Confirm a payment of " + self.btcAmount() + " BTC to address " + self.btcDestAddress() + " to settle order ID " + self.origOrderTxIndex() + "?",
-        title: "Confirm Order Settlement",
+        message: "Confirm a payment of " + self.btcPayData['btcAmount'] + " BTC to address " + self.btcPayData['btcDestAddr']
+          + " to settle order ID " + self.btcPayData['myOrderTxIndex'] + "?",
+        title: "Confirm Order Settlement (BTC Payment)",
         buttons: {
           cancel: {
             label: "Cancel",
             className: "btn-danger",
-            callback: function() {
-              //just close the dialog
-            }
+            callback: function() { } //just close the dialog
           },
           confirm: {
             label: "Confirm and Pay",
             className: "btn-success",
             callback: function() {
               //complete the BTCpay. Start by getting the current BTC balance for the address
-              WALLET.doTransaction(self.myAddr, "create_btcpay",
-                { order_match_id: self.orderMatchID() },
+              WALLET.doTransaction(self.btcPayData['myAddr'], "create_btcpay",
+                { order_match_id: self.btcPayData['orderMatchID'] },
                 function() {
                   //remove the BTC payment from the notifications
-                  PENDING_ACTION_FEED.removePendingBTCPay(self.orderMatchID());
-                  bootbox.alert("Order successfully settled. " + ACTION_PENDING_NOTICE);
+                  PENDING_ACTION_FEED.removePendingBTCPay(self.btcPayData['orderMatchID']);
+                  //bootbox.alert("Order successfully settled. " + ACTION_PENDING_NOTICE);
                 }
               );
             }
@@ -63,12 +54,11 @@ function PendingBTCPayViewModel(orderMatchID, BTCPayTxIndex, myAddr, btcDestAddr
   }
 }
 
-function PendingActionViewModel(category, keyData, keyDataJSON) {
+function PendingActionViewModel(category, keyData) {
   var self = this;
   self.WHEN = ko.observable(new Date());
   self.CATEGORY = category;
   self.KEYDATA = keyData;
-  self.KEYDATAJSON = keyDataJSON;
   self.DISPLAY_ICON = ENTITY_ICONS[self.CATEGORY];
   self.DISPLAY_COLOR = ENTITY_NOTO_COLORS[self.CATEGORY];
    
@@ -77,43 +67,50 @@ function PendingActionViewModel(category, keyData, keyDataJSON) {
     var desc = "";
     var asset = WALLET.getAsset
     if(self.CATEGORY == 'burns') {
-      desc = "Pending burn of " + normalizeAmount(self.KEYDATA['burned']) + " BTC";
+      desc = "Pending burn of <Am>" + normalizeAmount(self.KEYDATA['burned']) + "</Am> <As>BTC</As>";
     } else if(self.CATEGORY == 'sends') {
-      desc = "Pending send of " + numberWithCommas(normalizeAmount(self.KEYDATA['amount'], self.KEYDATA['_divisible'])) + " " + self.KEYDATA['asset']
-        + " to " + getLinkForCPData('address', self.KEYDATA['destination'],  getAddressLabel(self.KEYDATA['destination'])); 
+      desc = "Pending send of <Am>" + numberWithCommas(normalizeAmount(self.KEYDATA['amount'], self.KEYDATA['_divisible'])) + "</Am> <As>" + self.KEYDATA['asset']
+        + "</As> to <Ad>" + getLinkForCPData('address', self.KEYDATA['destination'],  getAddressLabel(self.KEYDATA['destination'])) + "</Ad>"; 
     } else if(self.CATEGORY == 'orders') {
-      desc = "Pending order to sell " + numberWithCommas(normalizeAmount(self.KEYDATA['give_amount'], self.KEYDATA['_give_divisible']))
-        + " " + self.KEYDATA['give_asset'] + " for "
-        + numberWithCommas(normalizeAmount(self.KEYDATA['get_amount'], self.KEYDATA['_get_divisible'])) + " "
-        + self.KEYDATA['get_asset'];
+      desc = "Pending order to sell <Am>" + numberWithCommas(normalizeAmount(self.KEYDATA['give_amount'], self.KEYDATA['_give_divisible']))
+        + "</Am> <As>" + self.KEYDATA['give_asset'] + "</As> for <Am>"
+        + numberWithCommas(normalizeAmount(self.KEYDATA['get_amount'], self.KEYDATA['_get_divisible'])) + "</Am> <As>"
+        + self.KEYDATA['get_asset'] + "</As>";
     } else if(self.CATEGORY == 'issuances') {
-      if(self.KEYDATA['transfer']) {
-        desc = "Pending transfer of asset " + self.KEYDATA['asset'] + " to "
-          + getLinkForCPData('address', self.KEYDATA['issuer'], getAddressLabel(self.KEYDATA['issuer'])); 
+      if(self.KEYDATA['destination']) {
+        desc = "Pending transfer of asset <As>" + self.KEYDATA['asset'] + "</As> from <Ad>"
+          + getLinkForCPData('address', self.KEYDATA['issuer'], getAddressLabel(self.KEYDATA['issuer'])) + "</Ad> to <Ad>"
+          + getLinkForCPData('address', self.KEYDATA['destination'], getAddressLabel(self.KEYDATA['destination'])) + "</Ad>"; 
       } else if(self.KEYDATA['description'] == 'LOCK') {
-        desc = "Pending lock of asset " + self.KEYDATA['asset'] + " against additional issuance";
+        desc = "Pending lock of asset <As>" + self.KEYDATA['asset'] + "</As> against additional issuance";
+      } else if(self.KEYDATA['amount'] == 0) {
+        desc = "Pending change of description for asset <As>" + self.KEYDATA['asset'] + "</As> to <b>" + self.KEYDATA['description'] + "</b>";
       } else {
-        desc = "Pending issuance for quantity " + numberWithCommas(normalizeAmount(self.KEYDATA['amount'], self.KEYDATA['divisible']))
-          + " of asset " + self.KEYDATA['asset'];
+        desc = "Pending issuance for quantity <Am>" + numberWithCommas(normalizeAmount(self.KEYDATA['amount'], self.KEYDATA['divisible']))
+          + "</Am> of asset <As>" + self.KEYDATA['asset'] + "</As>";
       }
     } else if(self.CATEGORY == 'broadcasts') {
       desc = "Pending broadcast:<br/>Text: " + self.KEYDATA['text'] + "<br/>Value:" + self.KEYDATA['value'];
     } else if(self.CATEGORY == 'bets') {
-      desc = "Pending " + BET_CATEGORYS[self.KEYDATA['bet_type']] + " bet on feed @ "
-        + getLinkForCPData('address', self.KEYDATA['feed_address'], getAddressLabel(self.KEYDATA['feed_address'])) + "<br/>"
-        + "Odds: " + self.KEYDATA['odds'] + ", Wager: "
-        + numberWithCommas(normalizeAmount(self.KEYDATA['wager_amount'])) + " XCP, Counterwager: "
-        + numberWithCommas(normalizeAmount(self.KEYDATA['counterwager_amount'])) + " XCP";  
+      desc = "Pending <b>" + BET_CATEGORYS[self.KEYDATA['bet_type']] + "</b> bet on feed @ <Ad>"
+        + getLinkForCPData('address', self.KEYDATA['feed_address'], getAddressLabel(self.KEYDATA['feed_address'])) + "</Ad><br/>"
+        + "Odds: " + self.KEYDATA['odds'] + ", Wager: <Am>"
+        + numberWithCommas(normalizeAmount(self.KEYDATA['wager_amount'])) + "</Am> <As>XCP</As>, Counterwager: <Am>"
+        + numberWithCommas(normalizeAmount(self.KEYDATA['counterwager_amount'])) + "</Am> <As>XCP</As>";  
     } else if(self.CATEGORY == 'dividends') {
-      desc = "Pending dividend payment of " + numberWithCommas(self.KEYDATA['amount_per_share']) + " "
-        + self.KEYDATA['dividend_asset'] + " on asset " + self.KEYDATA['asset'];
+      desc = "Pending dividend payment of <Am>" + numberWithCommas(self.KEYDATA['amount_per_share']) + "</Am> <As>"
+        + self.KEYDATA['dividend_asset'] + "</As> on asset <As>" + self.KEYDATA['asset'] + "</As>";
     } else if(self.CATEGORY == 'cancels') {
-      desc = "Pending cancellation of order/bet " + data['offer_hash'];
+      desc = "Pending cancellation of order/bet <i>" + data['offer_hash'] + "</i>";
     } else if(self.CATEGORY == 'callbacks') {
-      desc = "Pending callback for " + self.KEYDATA['fraction'] + " fraction on asset " + self.KEYDATA['asset'];
+      desc = "Pending callback for <Am>" + self.KEYDATA['fraction'] + "</Am> fraction on asset <As>" + self.KEYDATA['asset'] + "</As>";
     } else {
       desc = "UNHANDLED TRANSACTION CATEGORY";
     }
+
+    desc = desc.replace(/<Am>/g, '<b class="notoAmountColor">').replace(/<\/Am>/g, '</b>');
+    desc = desc.replace(/<Ad>/g, '<b class="notoAddrColor">').replace(/<\/Ad>/g, '</b>');
+    desc = desc.replace(/<As>/g, '<b class="notoAssetColor">').replace(/<\/As>/g, '</b>');
     return desc;
   };
 }
@@ -123,7 +120,7 @@ function PendingActionFeedViewModel() {
   self.pendingBTCPays = ko.observableArray([]);
   self.pendingActions = ko.observableArray([]); //pending actions beyond pending BTCpays
   self.lastUpdated = ko.observable(new Date());
-
+  
   self.dispLastUpdated = ko.computed(function() {
     return "Last Updated: " + self.lastUpdated().toTimeString(); 
   }, self);
@@ -131,6 +128,14 @@ function PendingActionFeedViewModel() {
   self.dispCount = ko.computed(function() {
     return self.pendingBTCPays().length + self.pendingActions().length;
   }, self);
+
+  //Every 60 seconds, run through all pendingBTCPays and update their 'now' members
+  setInterval(function() {
+    var now = new Date();
+    for(var i=0; i < self.pendingBTCPays().length; i++) {
+      self.pendingBTCPays()[i].now(now);
+    }  
+  }, 60 * 1000); 
 
   self._generateKeyData = function(category, data) {
     //compose the data dictionary from the passed in create_ dict
@@ -148,8 +153,11 @@ function PendingActionFeedViewModel() {
         'expiration': data.expiration};    
     } else if(category == 'issuances') { //issue new, lock, transfer, change description, issue additional
       keyData = {'source': data.source, 'asset': data.asset, 'amount': data.amount,
-        'destination': data.destination || data.transfer_destination,
-        'issuer': data.issuer || data.source, 'description': data.description, 'divisible': data.divisible};
+        'destination': data.transfer ? data.issuer : (data.transfer === false ? null : data.transfer_destination),
+        //^ transfer_destination is used with outgoing requests, data.transfer is used with incoming data
+        // (with the issuer set to where the asset was transferred to)
+        'issuer': data.issuer || data.source,
+        'description': data.description, 'divisible': data.divisible};
     } else if(category == 'broadcasts') {
       keyData = {'source': data.source, 'text': data.text, 'value': data.value};
     } else if(category == 'bets') {
@@ -189,10 +197,10 @@ function PendingActionFeedViewModel() {
     var keyData = self._generateKeyData(category, data);
     if(keyData === null) return; //ignored action
     var match = ko.utils.arrayFirst(self.pendingActions(), function(item) {
-      return item.CATEGORY == category && deepCompare(item, keyData);
+      return item.CATEGORY == category && deepCompare(item.KEYDATA, keyData);
     });
-    if (match) {
-      ko.utils.arrayRemoveItem(self.pendingActions, match);
+    if(match) {
+      self.pendingActions.remove(match);
       $.jqlog.log("pendingAction:remove:" + category + ": " + JSON.stringify(keyData));
       self.lastUpdated(new Date());
     } else{
@@ -200,34 +208,43 @@ function PendingActionFeedViewModel() {
     }
   }
   
-  self.addPendingBTCPay = function(orderMatchID, BTCPayTxIndex, myAddr, btcDestAddress, btcAmount, myOrderTxIndex,
-  otherOrderTxIndex, otherOrderOtherAsset, otherOrderOtherAssetAmount, whenBTCPayCreated) {
-    self.pendingBTCPays.push(new PendingBTCPayViewModel(orderMatchID, BTCPayTxIndex, myAddr, btcDestAddress, btcAmount, myOrderTxIndex,
-      otherOrderTxIndex, otherOrderOtherAsset, otherOrderOtherAssetAmount, whenBTCPayCreated));
+  self.addPendingBTCPay = function(message) {
+    self.pendingBTCPays.push(new PendingBTCPayViewModel(message));
     self.lastUpdated(new Date());
   }
   
   self.removePendingBTCPay = function(orderMatchID) {
-    var match = ko.utils.arrayFirst(self.pendingBTCPays(), function(item) {
-      return orderMatchID == item.orderMatchID();
+    self.pendingBTCPays.remove(function(item) {
+        return orderMatchID == item.ORDER_MATCH_ID;
     });
-    if (match) {
-      ko.utils.arrayRemoveItem(self.pendingBTCPays, match);
-    }
     self.lastUpdated(new Date());
   }
   
   self.removePendingBTCPayByOrderID = function(orderID) {
-    var orderID1 = null, orderID2 = null;
-    var match = ko.utils.arrayFirst(self.pendingBTCPays(), function(item) {
-      orderID1 = item.orderMatchID().substring(0, 64);
-      orderID2 = item.orderMatchID().substring(64);
+    self.pendingBTCPays.remove(function(item) {
+      var orderID1 = item.orderMatchID().substring(0, 64);
+      var orderID2 = item.orderMatchID().substring(64);
       return orderID == orderID1 || orderID == orderID2;
     });
-    if (match) {
-      ko.utils.arrayRemoveItem(self.pendingBTCPays, match);
-    }
     self.lastUpdated(new Date());
+  }
+}
+
+PendingActionFeedViewModel.makeBTCPayData = function(data) {
+  var firstInPair = WALLET.getAddressObj(message['tx0_address']) ? true : false;
+  if(!firstInPair) assert(WALLET.getAddressObj(message['tx1_address']));
+  return {
+    orderMatchID: data['tx0_hash'] + data['tx1_hash'],
+    myAddr: firstInPair ? data['tx0_address'] : data['tx1_address'],
+    btcDestAddr: firstInPair ? data['tx1_address'] : data['tx0_address'],
+    btcAmount: normalizeAmount(firstInPair ? data['forward_amount'] : data['backward_amount']), //normalized
+    btcAmountRaw: firstInPair ? data['forward_amount'] : data['backward_amount'],
+    myOrderTxIndex: firstInPair ? data['tx0_index'] : data['tx1_index'],
+    otherOrderTxIndex: firstInPair ? data['tx1_index'] : data['tx0_index'],
+    otherOrderAsset: firstInPair ? data['backward_asset'] : data['forward_asset'],
+    otherOrderAmount: normalizeAmount(firstInPair ? data['backward_amount'] : data['forward_amount'],
+      firstInPair ? data['_backward_asset_divisible'] : data['_forward_asset_divisible']), //normalized
+    otherOrderAmountRaw: firstInPair ? data['backward_amount'] : data['forward_amount']
   }
 }
 

@@ -11,8 +11,8 @@ function AssetViewModel(props) {
   self.rawTotalIssued = ko.observable(props['rawTotalIssued'] || 0); //raw
   self.description = ko.observable(props['description'] || '');
   self.CALLABLE = props['callable'] || false;
-  self.CALLDATE = props['callDate'] || 0;
-  self.CALLPRICE = props['callPrice'] || 0;
+  self.CALLDATE = props['callDate'] || null;
+  self.CALLPRICE = props['callPrice'] || null;
 
   self.isMine = ko.computed(function() {
     if(self.ASSET == 'BTC' || self.ASSET == 'XCP') return null; //special value for BTC and XCP

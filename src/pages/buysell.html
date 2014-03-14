@@ -95,10 +95,10 @@
                                     
                                     <!-- MARKET PRICING -->
                                     <div class="row" data-bind="visible: currentTab() == 2 && currentMarketUnitPrice() && !overrideMarketPrice()"  style="display:none;">
-                                        <div class="col-md-12">
+                                        <div class="col-md-12" style="max-width: 1000px;">
                                             <span>You have <b><span class="sellColor" data-bind="text: totalBalanceAvailForSale"></span>
                                             <span class="sellColor" data-bind="text: sellAsset"></span></b> at the selected address.
-                                            <br/>At the current market rate of <b><span data-bind="text: currentMarketUnitPrice"></span>
+                                            At the current market rate of <b><span data-bind="text: currentMarketUnitPrice"></span>
                                             <span data-bind="text: quoteAsset"></span> per each <span data-bind="text: baseAsset"></span></b>,
                                             you can afford up to <b><span class="buyColor" data-bind="text: numberWithCommas(maxAfford())"></span> <span class="buyColor" data-bind="text: buyAsset"></span><span data-bind="visible: sellAsset() == 'BTC'"> (not including any fees paid)</span>.</b>
                                             </span>
@@ -121,7 +121,7 @@
                                     
                                     <!-- CUSTOM PRICING -->
                                     <div class="row" data-bind="fadeVisibleInOnly: currentTab() == 2 && currentMarketUnitPrice() == null" style="display:none">
-                                        <div class="col-md-12">
+                                        <div class="col-md-12" style="max-width: 1000px;">
                                             <span class="errorRed">There is currently insufficient data to determine a fair market price for your purchase.</span>
                                             <br/><span>You have <b><span class="sellColor" data-bind="text: totalBalanceAvailForSale"></span>
                                             <span class="sellColor" data-bind="text: sellAsset"></span></b> at the selected address.                                                
@@ -157,7 +157,7 @@
                                     
                                     <!-- PURCHASE SUMMARY -->
                                     <div class="row" data-bind="fadeVisibleInOnly: currentTab() == 2 && unitPrice() && selectedBuyAmount()" style="margin-top:15px;">
-                                        <div class="col-sm-12">
+                                        <div class="col-sm-12" style="max-width: 1000px;">
                                             <span data-bind="fadeVisible: currentMarketUnitPrice() && !overrideMarketPrice()">At the market rate,
                                                 your purchase of <b><span class="buyColor" data-bind="text: numberWithCommas(selectedBuyAmount())"></span>
                                                 <span class="buyColor" data-bind="text: buyAsset"></span></b>
@@ -172,12 +172,12 @@
                                                 <span data-bind="text: quoteAsset"></span> per each <span data-bind="text: baseAsset"></span>).
                                             </span>
                                             <span data-bind="fadeVisibleInOnly: currentTab() == 2 && sellAmountRemainingAfterSale() != null && sellAmountRemainingAfterSale() >= 0">
-                                                <br/>After the sale, you will have <b><span class="sellColor" data-bind="text: dispSellAmountRemainingAfterSale"></span>
+                                                After the sale, you will have <b><span class="sellColor" data-bind="text: dispSellAmountRemainingAfterSale"></span>
                                                 <span class="sellColor" data-bind="text: sellAsset"></span></b> remaining at
                                                 your address <b><span data-bind="text: dispSelectedAddressWithLabel"></span></b>.
                                             </span>
                                             <span data-bind="fadeVisibleInOnly: currentTab() == 2 && sellAmountRemainingAfterSale() < 0">
-                                                <br/><span class="errorRedColor">Your purchase would exceed your available balance
+                                                <span class="errorRedColor">Your purchase would exceed your available balance
                                                 by <b><span data-bind="text: dispSellAmountRemainingAfterSaleAbs"></span>
                                                 <span data-bind="text: sellAsset"></span></b>.</span>
                                             </span>
@@ -257,9 +257,11 @@
                                             </tr>
                                         </tbody>
                                     </table>
-                                    After the sale, you will have <b><span class="sellColor" data-bind="text: dispSellAmountRemainingAfterSale"></span>
-                                    <span class="sellColor" data-bind="text: sellAsset"></span></b> remaining at
-                                    your address <b><span data-bind="text: dispSelectedAddressWithLabel"></span></b>.                                    
+                                    <span style="max-width: 1000px;">
+                                        After the sale, you will have <b><span class="sellColor" data-bind="text: dispSellAmountRemainingAfterSale"></span>
+                                        <span class="sellColor" data-bind="text: sellAsset"></span></b> remaining at
+                                        your address <b><span data-bind="text: dispSelectedAddressWithLabel"></span></b>.
+                                    </span>                                    
                                 </div>
     
                                 <div class="form-actions">

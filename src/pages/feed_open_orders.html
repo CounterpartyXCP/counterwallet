@@ -5,12 +5,12 @@
           <i class="fa fa-fw fa-exchange fa-2x"></i>
         </em>
         <span>
-           <b>Order ID <span data-bind="text: order['tx_index']"></span> @ <span data-bind="text: order['source']"></b>
-           <b>Buy:</b> <span data-bind="text: normalizeAmount(order['get_amount'], order['_get_asset_divisible'])"></span>
-               <span data-bind="text: order['get_asset']"></span> (remaining: <b><span data-bind="text: getRemaining()"></span></b>)<br/>
-           <b>Sell:</b> <span data-bind="text: normalizeAmount(order['give_amount'], order['_give_asset_divisible'])"></span>
-               <span data-bind="text: order['give_asset']"></span> (remaining: <b><span data-bind="text: giveRemaining()"></span></b>)<br/>
-           Fee Required: <span data-bind="text: order['fee_required']"></span> / Provided: <span data-bind="text: order['fee_provided']"></span> / Remaining: <span data-bind="text: feeRemaining()"></span><br/>
+           Order ID <i><span data-bind="text: order['tx_index']"></span></i> @ <b class="notoAddrColor"><span data-bind="text: order['source']"></span></b><br/>
+           Buy: <b class="notoAmountColor"><span data-bind="text: normalizeAmount(order['get_amount'], order['_get_asset_divisible'])"></span></b>
+               <b class="notoAssetColor"><span data-bind="text: order['get_asset']"></span></b> (remaining: <b class="notoAmountColor"><span data-bind="text: getRemaining()"></span></b>)<br/>
+           Sell: <b class="notoAmountColor"><span data-bind="text: normalizeAmount(order['give_amount'], order['_give_asset_divisible'])"></span></b>
+               <b class="notoAssetColor"><span data-bind="text: order['give_asset']"></span></b> (remaining: <b class="notoAmountColor"><span data-bind="text: giveRemaining()"></span></b>)<br/>
+           Fee Required: <b><span data-bind="text: order['fee_required']"></span></b> / Provided: <b><span data-bind="text: order['fee_provided']"></span></b> / Remaining: <b><span data-bind="text: feeRemaining()"></span></b><br/>
            Expires @ block <span data-bind="text: order['expire_index']"></span><br/>
            <span class="pull-right font-xs text-muted"><i data-bind="timeago: order['expiration'] * 1000"></i></span>
            <span class="pull-right"><button class="btn btn-xs btn-success margin-top-5" data-bind="click: cancelOpenOrder">Cancel</button></span>

@@ -387,6 +387,16 @@
                       at least 10 unspent outputs, if they have an available BTC balance to do this with.</div>
               </div></section>
               <section><div class="row">
+                <div class="col col-sm-2">Auto BTCPay</div>
+                <div class="col col-sm-10">
+                  <label class="checkbox">
+                    <input name="autoBTCPayEnabled" type="checkbox" data-bind="checked: autoBTCPayEnabled">
+                    <i></i>Enable Automatic BTCPays
+                  </label>
+                  <div class="note">If this option is enabled, Counterwallet will automatically take care of making BTC
+                      payments for matched orders where you owe BTC.</div>
+              </div></section>
+              <section><div class="row">
                 <div class="col col-sm-2">Reset State</div>
                 <div class="col col-sm-10">
                     <button id="refresh" type="button" data-title="refresh" href="javascript:void(0);" class="btn btn-danger">Reset Widget State</button>

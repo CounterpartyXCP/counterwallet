@@ -20,6 +20,17 @@
     color: #2F7DBE;    
 }
 
+.notoAmountColor {
+    color: #f89406;    
+}
+
+.notoAddrColor {
+    color: #0088cc;    
+}
+
+.notoAssetColor {
+    color: #f89406;    
+}
 
 /* Add back in colored badges (this was removed from Bootstrap 3 for some reason)
  * See http://stackoverflow.com/a/20591067

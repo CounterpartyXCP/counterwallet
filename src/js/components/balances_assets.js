@@ -624,24 +624,30 @@ var AssetHistoryItemModel = function(historyObj) {
   }
 
   self.dispDescription = function() {
+    var desc = '';
     if(self.HISTORYOBJ['type'] == 'created') {
-      return "Asset created with description '" + self.HISTORYOBJ['description']
-        + "' and total issuance of " + numberWithCommas(self.HISTORYOBJ['total_issued_normalized']) + " units."
-        + " Owned by address " + self.HISTORYOBJ['owner'];
+      desc = "Asset created with description '<b>" + self.HISTORYOBJ['description']
+        + "</b>' and total issuance of <Am>" + numberWithCommas(self.HISTORYOBJ['total_issued_normalized']) + "</Am> units."
+        + " Owned by address <Ad>" + getAddressLabel(self.HISTORYOBJ['owner']) + "</Ad>";
     } else if(self.HISTORYOBJ['type'] == 'issued_more') {
-      return "An additional " + numberWithCommas(self.HISTORYOBJ['additional_normalized']) + " units issued."
-        + " Total issuance increased to " + numberWithCommas(self.HISTORYOBJ['total_issued_normalized']) + " units";
+      desc = "An additional <Am>" + numberWithCommas(self.HISTORYOBJ['additional_normalized']) + "</Am> units issued."
+        + " Total issuance increased to <Am>" + numberWithCommas(self.HISTORYOBJ['total_issued_normalized']) + "</Am> units";
     } else if(self.HISTORYOBJ['type'] == 'changed_description') {
-      return "Description changed to '" + self.HISTORYOBJ['new_description'] + "'";
+      desc = "Description changed to '<b>" + self.HISTORYOBJ['new_description'] + "</b>'";
     } else if(self.HISTORYOBJ['type'] == 'locked') {
-      return "Asset locked";
+      desc = "Asset locked";
     } else if(self.HISTORYOBJ['type'] == 'transferred') {
-      return "Asset transferred to address " + self.HISTORYOBJ['new_owner'];
+      desc = "Asset transferred from address <Ad>" + getAddressLabel(self.HISTORYOBJ['prev_owner'])
+        + "</Ad> to address <Ad>" + getAddressLabel(self.HISTORYOBJ['new_owner']) + "</Ad>";
     } else if(self.HISTORYOBJ['type'] == 'called_back') {
-      return self.HISTORYOBJ['percentage'] + "% of asset called back";
+      desc = "<Am>" + self.HISTORYOBJ['percentage'] + "%</Am> of asset called back";
     } else {
-      return "UNKNOWN OP: " + self.HISTORYOBJ['type'];
+      desc = "UNKNOWN OP: <b>" + self.HISTORYOBJ['type'] + "</b>";
     }
+    
+    desc = desc.replace(/<Am>/g, '<b class="notoAmountColor">').replace(/<\/Am>/g, '</b>');
+    desc = desc.replace(/<Ad>/g, '<b class="notoAddrColor">').replace(/<\/Ad>/g, '</b>');
+    return desc;
   }
 };
 
@@ -674,7 +680,7 @@ function ShowAssetInfoModalViewModel() {
     self.history([]); //clear until we have the data from the API call below...
     
     //Fetch the asset history and populate the table with it
-    failoverAPI("get_asset_history", [assetObj.ASSET],
+    failoverAPI("get_asset_history", {asset: assetObj.ASSET, reverse: true},
       function(history, endpoint) {
         for(var i=0; i < history.length; i++) {
           self.history.push(new AssetHistoryItemModel(history[i]));

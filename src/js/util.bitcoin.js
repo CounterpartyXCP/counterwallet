@@ -13,6 +13,7 @@ function denormalizeAmount(amount, divisible) {
 
 function hashToB64(content) {
   //used for storing address alias data, for instance
+  //return Bitcoin.Crypto.SHA256(content).toString(Bitcoin.Crypto.enc.Base64);
   return Bitcoin.convert.bytesToBase64(Bitcoin.Crypto.SHA256(content, {asBytes: true}));  
 }
 
@@ -61,8 +62,11 @@ function getLinkForCPData(type, dataID, dataTitle, htmlize) {
   } else {
     assert(false, "Unknown type of " + type);
   }
-  if(USE_TESTNET) return htmlize ? '' : '#'; //blockscan not for testnet currently
-  return htmlize ? '<a href="' + url + '" target="_blank">' + dataTitle + '</a>' : url;
+  if(USE_TESTNET) {
+    return dataTitle ? dataTitle : dataID; //blockscan not for testnet currently
+  } else {
+    return htmlize ? ('<a href="' + url + '" target="_blank">' + dataTitle + '</a>') : url;  
+  }
 }
 
 function getLinkForBlock(blockIndex, dataTitle, htmlize) {

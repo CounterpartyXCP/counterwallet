@@ -70,7 +70,8 @@ var DEFAULT_PREFERENCES = {
   'selected_theme': 'ultraLight',
   'selected_lang': 'en-us',
   'watch_only_addresses': [],
-  'auto_prime': true, //default to auto prime being enabled 
+  'auto_prime': true, //default to auto prime being enabled
+  'auto_btcpay': true //default to auto BTC payments being enabled
 };
 
 var ENTITY_NAMES = {
