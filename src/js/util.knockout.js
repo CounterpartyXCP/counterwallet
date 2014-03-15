@@ -130,7 +130,7 @@ ko.validation.rules['isValidQtyForDivisibility'] = {
       }
       return true;
     },
-    message: 'The amount must be a whole number, since this is a non-divisible asset.'
+    message: 'The quantity entered must be a whole number, since this is a non-divisible asset.'
 };
 ko.validation.rules['isNotSameBitcoinAddress'] = {
     validator: function (val, self) {

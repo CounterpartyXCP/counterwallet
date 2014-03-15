@@ -113,9 +113,9 @@
                                             <div class="input-group">
                                                 <span class="input-group-addon"><i class="fa fa-arrow-circle-o-down fa-lg fa-fw"></i></span>
                                                 <input class="form-control input-lg" type="text" style="max-width: 300px"
-                                                 data-bind="value: selectedBuyAmount, attr: {placeholder: 'Quantity ' + buyAsset()}, valueUpdate: 'afterkeydown'" />
+                                                 data-bind="value: selectedBuyQuantity, attr: {placeholder: 'Quantity ' + buyAsset()}, valueUpdate: 'afterkeydown'" />
                                             </div>
-                                            <span class="invalid" data-bind="validationMessage: selectedBuyAmount"></span>
+                                            <span class="invalid" data-bind="validationMessage: selectedBuyQuantity"></span>
                                         </div>
                                     </div>
                                     
@@ -133,10 +133,10 @@
                                             <div class="input-group">
                                                 <span class="input-group-addon"><i class="fa fa-arrow-circle-o-down fa-lg fa-fw"></i></span>
                                                 <input class="form-control input-lg" type="text"
-                                                    data-bind="value: selectedBuyAmount, attr: {placeholder: 'Quantity ' + buyAsset()}, valueUpdate: 'afterkeydown'"
+                                                    data-bind="value: selectedBuyQuantity, attr: {placeholder: 'Quantity ' + buyAsset()}, valueUpdate: 'afterkeydown'"
                                                     style="max-width: 300px;" />
                                             </div>
-                                            <span class="invalid" data-bind="validationMessage: selectedBuyAmount"></span>
+                                            <span class="invalid" data-bind="validationMessage: selectedBuyQuantity"></span>
                                         </div>
                                     </div>
                                     <div class="row" data-bind="visible: currentTab() == 2 && (currentMarketUnitPrice() == null || overrideMarketPrice())" style="display:none;max-width: 1000px;">
@@ -145,10 +145,10 @@
                                             <div class="input-group">
                                                 <span class="input-group-addon"><i class="fa fa-arrow-circle-o-up fa-lg fa-fw"></i></span>
                                                 <input class="form-control input-lg" type="text"
-                                                    data-bind="value: selectedSellAmountCustom, attr: {placeholder: 'Quantity ' + sellAsset()}, valueUpdate: 'afterkeydown'"
+                                                    data-bind="value: selectedSellQuantityCustom, attr: {placeholder: 'Quantity ' + sellAsset()}, valueUpdate: 'afterkeydown'"
                                                     style="max-width: 300px;" />
                                             </div>
-                                            <span class="invalid" data-bind="validationMessage: selectedSellAmountCustom"></span>
+                                            <span class="invalid" data-bind="validationMessage: selectedSellQuantityCustom"></span>
                                         </div>
                                     </div>
                                     <div class="row" data-bind="visible: currentTab() == 2 && (currentMarketUnitPrice() == null || overrideMarketPrice()) && !overrideDefaultOptions()" style="display:none;max-width: 1000px;">
@@ -156,29 +156,29 @@
                                     </div>
                                     
                                     <!-- PURCHASE SUMMARY -->
-                                    <div class="row" data-bind="fadeVisibleInOnly: currentTab() == 2 && unitPrice() && selectedBuyAmount()" style="margin-top:15px;">
+                                    <div class="row" data-bind="fadeVisibleInOnly: currentTab() == 2 && unitPrice() && selectedBuyQuantity()" style="margin-top:15px;">
                                         <div class="col-sm-12" style="max-width: 1000px;">
                                             <span data-bind="fadeVisible: currentMarketUnitPrice() && !overrideMarketPrice()">At the market rate,
-                                                your purchase of <b><span class="buyColor" data-bind="text: numberWithCommas(selectedBuyAmount())"></span>
+                                                your purchase of <b><span class="buyColor" data-bind="text: numberWithCommas(selectedBuyQuantity())"></span>
                                                 <span class="buyColor" data-bind="text: buyAsset"></span></b>
-                                                will cost you <b><span class="sellColor" data-bind="text: numberWithCommas(selectedSellAmountAtMarket())"></span>
+                                                will cost you <b><span class="sellColor" data-bind="text: numberWithCommas(selectedSellQuantityAtMarket())"></span>
                                                 <span class="sellColor" data-bind="text: sellAsset"></span></b>
-                                                <span data-bind="visible: sellAsset() == 'BTC' && feeForSelectedSellAmount() != 0">, plus a <b><span data-bind="text: feeForSelectedSellAmount"></span> BTC</b> (<span data-bind="text: dispFeeForSelectedSellAmountAsPct"></span>%) miner fee (to prevent troll orders)</span>.
+                                                <span data-bind="visible: sellAsset() == 'BTC' && feeForSelectedSellQuantity() != 0">, plus a <b><span data-bind="text: feeForSelectedSellQuantity"></span> BTC</b> (<span data-bind="text: dispFeeForSelectedSellQuantityAsPct"></span>%) miner fee (to prevent troll orders)</span>.
                                             </span>
-                                            <span data-bind="fadeVisible: (currentMarketUnitPrice() == null || overrideMarketPrice()) && (selectedSellAmountCustom() && selectedSellAmountCustom() > 0) ">
+                                            <span data-bind="fadeVisible: (currentMarketUnitPrice() == null || overrideMarketPrice()) && (selectedSellQuantityCustom() && selectedSellQuantityCustom() > 0) ">
                                                 The effective unit price of your <b><span data-bind="text: dispAssetPair"></span></b> order is
                                                 <b><span data-bind="text: unitPrice"></span></b>
                                                 (i.e. <span data-bind="text: numberWithCommas(unitPrice())"></span>
                                                 <span data-bind="text: quoteAsset"></span> per each <span data-bind="text: baseAsset"></span>).
                                             </span>
-                                            <span data-bind="fadeVisibleInOnly: currentTab() == 2 && sellAmountRemainingAfterSale() != null && sellAmountRemainingAfterSale() >= 0">
-                                                After the sale, you will have <b><span class="sellColor" data-bind="text: dispSellAmountRemainingAfterSale"></span>
+                                            <span data-bind="fadeVisibleInOnly: currentTab() == 2 && sellQuantityRemainingAfterSale() != null && sellQuantityRemainingAfterSale() >= 0">
+                                                After the sale, you will have <b><span class="sellColor" data-bind="text: dispSellQuantityRemainingAfterSale"></span>
                                                 <span class="sellColor" data-bind="text: sellAsset"></span></b> remaining at
                                                 your address <b><span data-bind="text: dispSelectedAddressWithLabel"></span></b>.
                                             </span>
-                                            <span data-bind="fadeVisibleInOnly: currentTab() == 2 && sellAmountRemainingAfterSale() < 0">
+                                            <span data-bind="fadeVisibleInOnly: currentTab() == 2 && sellQuantityRemainingAfterSale() < 0">
                                                 <span class="errorRedColor">Your purchase would exceed your available balance
-                                                by <b><span data-bind="text: dispSellAmountRemainingAfterSaleAbs"></span>
+                                                by <b><span data-bind="text: dispSellQuantityRemainingAfterSaleAbs"></span>
                                                 <span data-bind="text: sellAsset"></span></b>.</span>
                                             </span>
                                         </div>
@@ -214,8 +214,8 @@
                                               <label class="radioBtn btn btn-lg" data-bind="css: { 'btn-success': btcFeeAs() == 'percentage' }">
                                                 <input type="radio" name="btcFeeAs" value="percentage" data-bind="btnGroupChecked: btcFeeAs">As %</label>
                                                 <!-- , attr: {disabled: selectedSellAsset() == 'XCP' ? 'disabled' : null }" -->
-                                              <label class="radioBtn btn btn-lg" data-bind="css: { 'btn-success': btcFeeAs() == 'amount' }">
-                                                <input type="radio" name="btcFeeAs" value="amount" data-bind="btnGroupChecked: btcFeeAs">As Amount</label>
+                                              <label class="radioBtn btn btn-lg" data-bind="css: { 'btn-success': btcFeeAs() == 'quantity' }">
+                                                <input type="radio" name="btcFeeAs" value="quantity" data-bind="btnGroupChecked: btcFeeAs">As Amount</label>
                                             </div>
                                         </div>
                                     </div>
@@ -226,13 +226,13 @@
                                         <tbody>
                                             <tr>
                                                 <td><b>Buy:</b></td>
-                                                <td><b><span class="buyColor" data-bind="text: numberWithCommas(selectedBuyAmount())"></span>&nbsp;
+                                                <td><b><span class="buyColor" data-bind="text: numberWithCommas(selectedBuyQuantity())"></span>&nbsp;
                                                     <span class="buyColor" data-bind="text: buyAsset"></span></b></td>
                                             </tr>
                                             <tr>
                                                 <td><b>Sell:</b></td>
-                                                <td><b><span class="sellColor" data-bind="text: numberWithCommas(selectedSellAmount())"></span>&nbsp;
-                                                    <span class="sellColor" data-bind="text: sellAsset" placeholder="Enter amount"></span></b></td>
+                                                <td><b><span class="sellColor" data-bind="text: numberWithCommas(selectedSellQuantity())"></span>&nbsp;
+                                                    <span class="sellColor" data-bind="text: sellAsset" placeholder="Enter quantity"></span></b></td>
                                             </tr>
                                             <tr>
                                                 <td><b>Unit Price:</b></td>
@@ -251,14 +251,14 @@
                                                     <span data-bind="visible: sellAsset() == 'BTC'">BTC Fee Provided:</span>                                                    
                                                 </b></td>
                                                 <td>
-                                                    <b><span class="sellColor"><span data-bind="text: feeForSelectedSellAmount"></span>&nbsp;BTC</span></b>
-                                                    (<span data-bind="text: dispFeeForSelectedSellAmountAsPct"></span>% of sale amount)
+                                                    <b><span class="sellColor"><span data-bind="text: feeForSelectedSellQuantity"></span>&nbsp;BTC</span></b>
+                                                    (<span data-bind="text: dispFeeForSelectedSellQuantityAsPct"></span>% of sale amount)
                                                 </td>
                                             </tr>
                                         </tbody>
                                     </table>
                                     <span style="max-width: 1000px;">
-                                        After the sale, you will have <b><span class="sellColor" data-bind="text: dispSellAmountRemainingAfterSale"></span>
+                                        After the sale, you will have <b><span class="sellColor" data-bind="text: dispSellQuantityRemainingAfterSale"></span>
                                         <span class="sellColor" data-bind="text: sellAsset"></span></b> remaining at
                                         your address <b><span data-bind="text: dispSelectedAddressWithLabel"></span></b>.
                                     </span>                                    
@@ -318,7 +318,7 @@
                                 <tbody data-bind="foreach: askBook"> <!-- descending order -->
                                     <tr class="sellColor">
                                         <td data-bind="text: unit_price"></td>
-                                        <td data-bind="text: +amount.toFixed(8) + ' (' + count + ')'"></td> <!-- amount (count) -->
+                                        <td data-bind="text: + quantity.toFixed(8) + ' (' + count + ')'"></td> <!-- quantity (count) -->
                                         <td data-bind="text: numberWithCommas(depth)"></td>
                                     </tr>
                                 </tbody>
@@ -336,7 +336,7 @@
                                 <tbody data-bind="foreach: bidBook"> <!-- descending order -->
                                     <tr class="buyColor">
                                         <td data-bind="text: unit_price"></td>
-                                        <td data-bind="text: +amount.toFixed(8) + ' (' + count + ')'"></td>
+                                        <td data-bind="text: + quantity.toFixed(8) + ' (' + count + ')'"></td>
                                         <td data-bind="text: numberWithCommas(depth)"></td>
                                     </tr>
                                 </tbody>
@@ -381,14 +381,14 @@
                         <tr>
                             <td data-bind="html: getLinkForCPData('tx', tx_index)"></td>
                             <td data-bind="timeago: new Date(block_time)"></td>
-                            <td data-bind="text: derivePendingOrderAssetAmount(get_asset, get_amount) + ' ' + get_asset"></td>
-                            <td data-bind="text: derivePendingOrderAssetAmount(give_asset, give_amount) + ' ' + give_asset"></td>
-                            <td><a target="_blank" data-bind="text: derivePendingOrderAssetPrice(get_asset, get_amount, give_asset, give_amount)"></a></td>
-                            <td data-bind="text: derivePendingOrderAssetAmount(get_asset, get_remaining) + ' ' + get_asset"></td>
-                            <td data-bind="text: derivePendingOrderAssetAmount(give_asset, give_remaining) + ' ' + give_asset"></td>
+                            <td data-bind="text: derivePendingOrderAssetQuantity(get_asset, get_quantity) + ' ' + get_asset"></td>
+                            <td data-bind="text: derivePendingOrderAssetQuantity(give_asset, give_quantity) + ' ' + give_asset"></td>
+                            <td><a target="_blank" data-bind="text: derivePendingOrderAssetPrice(get_asset, get_quantity, give_asset, give_quantity)"></a></td>
+                            <td data-bind="text: derivePendingOrderAssetQuantity(get_asset, get_remaining) + ' ' + get_asset"></td>
+                            <td data-bind="text: derivePendingOrderAssetQuantity(give_asset, give_remaining) + ' ' + give_asset"></td>
                             <td data-bind="html: derivePendingOrderExpiresIn(block_index, expiration)"></td>
-                            <td data-bind="text: fee_provided ? (normalizeAmount(fee_provided) + ' BTC') : ''"></td>                            
-                            <td data-bind="text: fee_required ? (normalizeAmount(fee_required) + ' BTC') : ''"></td>
+                            <td data-bind="text: fee_provided ? (normalizeQuantity(fee_provided) + ' BTC') : ''"></td>                            
+                            <td data-bind="text: fee_required ? (normalizeQuantity(fee_required) + ' BTC') : ''"></td>
                             <td>
                                 <a href="#" data-bind="click: $parent.cancelOrder" class="btn btn-danger btn-xs">Cancel Order</a>
                             </td>                            
@@ -434,8 +434,8 @@
                             <td data-bind="html: getLinkForCPData('address', order_match_tx0_address)"></td>
                             <td data-bind="html: getLinkForCPData('tx', order_match_tx1_index)"></td>
                             <td data-bind="html: getLinkForCPData('address', order_match_tx1_address)"></td>
-                            <td data-bind="text: base_amount_normalized + ' ' + base_asset"></td>
-                            <td data-bind="text: quote_amount_normalized + ' ' + quote_asset"></td>
+                            <td data-bind="text: base_quantity_normalized + ' ' + base_asset"></td>
+                            <td data-bind="text: quote_quantity_normalized + ' ' + quote_asset"></td>
                             <td data-bind="text: unit_price"></td>
                         </tr>
                     </tbody>

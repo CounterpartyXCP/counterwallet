@@ -20,7 +20,7 @@ function AssetViewModel(props) {
   }, self);
   
   self.normalizedBalance = ko.computed(function() {
-    return normalizeAmount(self.rawBalance(), self.DIVISIBLE);
+    return normalizeQuantity(self.rawBalance(), self.DIVISIBLE);
   }, self);
 
   self.dispBalance = ko.computed(function() {
@@ -28,7 +28,7 @@ function AssetViewModel(props) {
   }, self);
   
   self.normalizedTotalIssued = ko.computed(function() {
-    return normalizeAmount(self.rawTotalIssued(), self.DIVISIBLE);
+    return normalizeQuantity(self.rawTotalIssued(), self.DIVISIBLE);
   }, self);
 
   self.dispTotalIssued = ko.computed(function() {
@@ -36,6 +36,7 @@ function AssetViewModel(props) {
   }, self);
   
   self.dispCallDate = ko.computed(function() {
+    if(!self.CALLDATE) return null;
     return moment(self.CALLDATE * 1000).format("MMM Do YYYY, h:mm:ss a");
   }, self);
 
@@ -87,10 +88,10 @@ function AssetViewModel(props) {
           label: "Lock this asset",
           className: "btn-danger",
           callback: function() {
-            //to lock, issue with amount == 0 and "LOCK" in the description field
+            //to lock, issue with quantity == 0 and "LOCK" in the description field
             WALLET.doTransaction(self.ADDRESS, "create_issuance",
               { source: self.ADDRESS,
-                amount: 0,
+                quantity: 0,
                 asset: self.ASSET,
                 divisible: self.DIVISIBLE,
                 description: "LOCK",
@@ -118,4 +119,9 @@ function AssetViewModel(props) {
     if(!WALLET.canDoTransaction(self.ADDRESS)) return false;
     PAY_DIVIDEND_MODAL.show(self.ADDRESS, self);
   };
+  
+  self.call = function() {
+    if(!WALLET.canDoTransaction(self.ADDRESS)) return false;
+    CALL_ASSET_MODAL.show(self.ADDRESS, self.ASSET);
+  }
 }

@@ -7,10 +7,10 @@
         </em>
         <span>
            You have a pending payment of
-           <b class="notoAmountColor"><span data-bind="text: btcPayData['btcAmount']"></span></b>
+           <b class="notoQuantityColor"><span data-bind="text: btcPayData['btcQuantity']"></span></b>
            <b class="notoAssetColor">BTC</b> required from your address
            <b class="notoAddrColor"><span data-bind="text: getAddressLabel(btcPayData['myAddr'])"></span></b> to settle payment for
-           <b class="notoAmountColor"><span data-bind="text: btcPayData['otherOrderAmount']"></span></b>
+           <b class="notoQuantityColor"><span data-bind="text: btcPayData['otherOrderQuantity']"></span></b>
            <b class="notoAssetColor"><span data-bind="text: btcPayData['otherOrderAsset']"></span></b>.
            <br/>Your Order TxID: <b><span data-bind="html: getLinkForCPData('tx', btcPayData['myOrderTxIndex'])"></span></b> / Matching Order TxID: <b><span data-bind="html: getLinkForCPData('tx', btcPayData['otherOrderTxIndex'])"></span></b>
            <br/>Payent Dest Address: <b class="notoAddrColor"><span data-bind="text: btcPayData['btcDestAddr']"></span></b>

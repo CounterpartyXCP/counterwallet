@@ -163,6 +163,38 @@ function LogonViewModel() {
     }
   }
   
+  self.updateBalances = function(onSuccess) {
+    //updates all balances for all addesses, creating the asset objects on the address if need be
+    WALLET.refreshBTCBalances(true);
+    //^ specify true here to start a recurring get BTC balances timer chain 
+
+    //update all counterparty asset balances (including XCP)
+    failoverAPI("get_normalized_balances", [WALLET.getAddressesList()],
+      function(balancesData, endpoint) {
+        $.jqlog.log("Got initial balances: " + JSON.stringify(balancesData));
+        var i = null, j = null;
+        var numBalProcessed = 0;
+        var assets = [];
+        //Make a unique list of assets
+        for(i=0; i < balancesData.length; i++) {
+          if(!assets.contains(balancesData[i]['asset']))
+          assets.push(balancesData[i]['asset']);
+        }
+        failoverAPI("get_asset_info", [assets], function(assetsInfo, endpoint) {
+          for(i=0; i < assetsInfo.length; i++) {
+            for(j=0; j < balancesData.length; j++) {
+              if(balancesData[j]['asset'] != assetsInfo[i]['asset']) continue;
+              WALLET.getAddressObj(balancesData[j]['address']).addOrUpdateAsset(
+                assetsInfo[i]['asset'], balancesData[j]['quantity'], assetsInfo[i]);
+              numBalProcessed += 1;
+              if(numBalProcessed == balancesData.length) return onSuccess();
+            }
+          }
+        });
+      }
+    );
+  }
+  
   self.openWalletPt3 = function(mustSavePreferencesToServer) {
     var i = null;
     
@@ -188,8 +220,10 @@ function LogonViewModel() {
     }
     
     //Update the wallet balances (isAtLogon = true)
-    WALLET.updateBalances(true);
+    self.updateBalances(self.openWalletPt4);
+  }
     
+  self.openWalletPt4 = function() {
     //Grab any pending BTC pays
     var addresses = WALLET.getAddressesList();
     var filters = [];
@@ -206,8 +240,8 @@ function LogonViewModel() {
       }
     );
     
-    //next, load the balances screen
-    window.location.hash = 'xcp/pages/balances.html';
+    //all done. load the balances screen
+    window.location.hash = 'xcp/pages/balances.html'; 
   }  
 }
 

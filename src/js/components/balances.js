@@ -102,14 +102,14 @@ function CreateNewAddressModalViewModel() {
 }
 
 
-ko.validation.rules['isValidSendAmountForBalance'] = {
+ko.validation.rules['isValidSendQuantityForBalance'] = {
     validator: function (val, self) {
-      if(normalizeAmount(self.rawBalance(), self.divisible()) - parseFloat(val) < 0) {
+      if(normalizeQuantity(self.rawBalance(), self.divisible()) - parseFloat(val) < 0) {
         return false;
       }
       return true;
     },
-    message: 'Entered amount exceeds your current balance.'
+    message: 'Quantity entered exceeds your current balance.'
 };
 ko.validation.registerExtenders();
 
@@ -126,37 +126,37 @@ function SendModalViewModel() {
     isValidBitcoinAddress: self,
     isNotSameBitcoinAddress: self
   });
-  self.amount = ko.observable().extend({
+  self.quantity = ko.observable().extend({
     required: true,
     pattern: {
       message: 'Must be a valid number',
       params: '^[0-9]*\.?[0-9]{0,8}$' //not perfect ... additional checking required
     },
     isValidQtyForDivisibility: self,
-    isValidSendAmountForBalance: self
+    isValidSendQuantityForBalance: self
   });
   
   self.normalizedBalance = ko.computed(function() {
     if(self.address() === null || self.rawBalance() === null) return null;
-    return normalizeAmount(self.rawBalance(), self.divisible());
+    return normalizeQuantity(self.rawBalance(), self.divisible());
   }, self);
   
   self.normalizedBalRemaining = ko.computed(function() {
-    if(!isNumber(self.amount())) return null;
-    var curBalance = normalizeAmount(self.rawBalance(), self.divisible());
-    var balRemaining = Decimal.round(new Decimal(curBalance).sub(parseFloat(self.amount()))).toFloat();
+    if(!isNumber(self.quantity())) return null;
+    var curBalance = normalizeQuantity(self.rawBalance(), self.divisible());
+    var balRemaining = Decimal.round(new Decimal(curBalance).sub(parseFloat(self.quantity()))).toFloat();
     if(balRemaining < 0) return null;
     return balRemaining;
   }, self);
   
   self.validationModel = ko.validatedObservable({
     destAddress: self.destAddress,
-    amount: self.amount
+    quantity: self.quantity
   });  
   
   self.resetForm = function() {
     self.destAddress('');
-    self.amount(null);
+    self.quantity(null);
     self.validationModel.errors.showAllMessages(false);
   }
   
@@ -173,7 +173,7 @@ function SendModalViewModel() {
     WALLET.doTransaction(self.address(), "create_send",
       { source: self.address(),
         destination: self.destAddress(),
-        amount: denormalizeAmount(parseFloat(self.amount()), self.divisible()),
+        quantity: denormalizeQuantity(parseFloat(self.quantity()), self.divisible()),
         asset: self.asset()
       },
       function() {
@@ -304,7 +304,7 @@ function SweepModalViewModel() {
     for(var i = 0; i < sendsComplete.length; i++) {
       if(sendsComplete[i]['result']) {
         assetDisplayList.push("<li><b>" + sendsComplete[i]['asset'] + ":</b> Sent "
-          + "<b>" + sendsComplete[i]['normalized_amount'] + " " + sendsComplete[i]['asset'] + "</b>"
+          + "<b>" + sendsComplete[i]['normalized_quantity'] + " " + sendsComplete[i]['asset'] + "</b>"
           + " to <b>" + sendsComplete[i]['to'] + "</b></li>");  
       } else {
         assetDisplayList.push("<li><b>" + sendsComplete[i]['asset'] + "</b>: Funds not sent due to failure.</li>");  
@@ -327,25 +327,25 @@ function SweepModalViewModel() {
     }    
   }
   
-  self._doSendAsset = function(asset, key, pubkey, sendsComplete, adjustedBTCAmount, callback) {
-    if(asset == 'BTC') assert(adjustedBTCAmount !== null);
-    else assert(adjustedBTCAmount === null);
+  self._doSendAsset = function(asset, key, pubkey, sendsComplete, adjustedBTCQuantity, callback) {
+    if(asset == 'BTC') assert(adjustedBTCQuantity !== null);
+    else assert(adjustedBTCQuantity === null);
     var selectedAsset = ko.utils.arrayFirst(self.availableAssetsToSweep(), function(item) {
       return asset == item.ASSET;
     });
-    var amount = adjustedBTCAmount || selectedAsset.RAW_BALANCE;
-    var normalizedAmount = ((adjustedBTCAmount ? normalizeAmount(adjustedBTCAmount) : null)
+    var quantity = adjustedBTCQuantity || selectedAsset.RAW_BALANCE;
+    var normalizedQuantity = ((adjustedBTCQuantity ? normalizeQuantity(adjustedBTCQuantity) : null)
       || selectedAsset.NORMALIZED_BALANCE);
     assert(selectedAsset);
     
-    $.jqlog.log("Sweeping from: " + self.addressForPrivateKey() + " to " + self.destAddress() + " of amount "
-      + normalizedAmount + " " + selectedAsset.ASSET);
+    $.jqlog.log("Sweeping from: " + self.addressForPrivateKey() + " to " + self.destAddress() + " of quantity "
+      + normalizedQuantity + " " + selectedAsset.ASSET);
 
     //dont use WALLET.doTransaction for this...
     multiAPIConsensus("create_send", //can send both BTC and counterparty assets
       { source: self.addressForPrivateKey(),
         destination: self.destAddress(),
-        amount: amount,
+        quantity: quantity,
         asset: selectedAsset.ASSET,
         multisig: pubkey
       },
@@ -361,7 +361,7 @@ function SweepModalViewModel() {
             'asset': selectedAsset.ASSET,
             'from': self.addressForPrivateKey(),
             'to': self.destAddress(),
-            'normalized_amount': normalizedAmount
+            'normalized_quantity': normalizedQuantity
           });
           //TODO: show this sweep in pending actions
           return callback();
@@ -406,10 +406,10 @@ function SweepModalViewModel() {
     if(hasBTC !== false) {
       //adjust the balance of BTC to sweep out to account for the primed TXouts being consumed
       var rawBTCBalance = self.availableAssetsToSweep()[hasBTC].RAW_BALANCE;
-      var adjustedBTCAmount = rawBTCBalance - (self.selectedAssetsToSweep().length * MIN_PRIME_BALANCE);
+      var adjustedBTCQuantity = rawBTCBalance - (self.selectedAssetsToSweep().length * MIN_PRIME_BALANCE);
       //^ the adjusted BTC balance is what we will end up sweeping out of the account.
       //  BTW...this includes the BTC fee for the BTC sweep itself as a primed TXout size (.0005 instead of .0001...no biggie (I think)
-      sendsToMake.push(["BTC", key, pubkey, sendsComplete, adjustedBTCAmount]);
+      sendsToMake.push(["BTC", key, pubkey, sendsComplete, adjustedBTCQuantity]);
     }
     
     //Make send calls sequentially
@@ -449,19 +449,19 @@ function SweepModalViewModel() {
     //Get the balance of ALL assets at this address
     failoverAPI("get_normalized_balances", [address], function(data, endpoint) {
       for(var i=0; i < data.length; i++) {
-        self.availableAssetsToSweep.push(new SweepAssetInDropdownItemModel(data[i]['asset'], data[i]['amount'], data[i]['normalized_amount']));
+        self.availableAssetsToSweep.push(new SweepAssetInDropdownItemModel(data[i]['asset'], data[i]['quantity'], data[i]['normalized_quantity']));
       }
       
       //Also get the BTC balance at this address and put at head of the list
       WALLET.retrieveBTCBalance(address, function(balance) {
         if(balance) {
-          self.availableAssetsToSweep.unshift(new SweepAssetInDropdownItemModel("BTC", balance, normalizeAmount(balance)));
+          self.availableAssetsToSweep.unshift(new SweepAssetInDropdownItemModel("BTC", balance, normalizeQuantity(balance)));
         }
       });
     });
     
     //Also record the number of primed txouts for the address
-    //Note that if BTC is one of the things we're sweeping, technically we don't need a full primed output amount
+    //Note that if BTC is one of the things we're sweeping, technically we don't need a full primed output quantity
     // for that (we just need an available out of > MIN_FEE... but let's just require a primed out for a BTC send to keep things simple)
     WALLET.retrieveNumPrimedTxouts(address, function(numPrimedTxouts) {
       self.numPrimedTxoutsForPrivateKey(numPrimedTxouts);
@@ -604,19 +604,19 @@ ko.validation.rules['isInBurnRange'] = {
     validator: function (val, self) {
       return parseFloat(val) > 0 && parseFloat(val) <= 1;
     },
-    message: 'Amount must be between 0 and 1 BTC.'
+    message: 'Quantity entered must be between 0 and 1 BTC.'
 };
 ko.validation.rules['doesNotExceedBTCBalance'] = {
     validator: function (val, self) {
-      return parseFloat(val) <= WALLET.getBalance(self.address(), 'BTC') - normalizeAmount(MIN_FEE);
+      return parseFloat(val) <= WALLET.getBalance(self.address(), 'BTC') - normalizeQuantity(MIN_FEE);
     },
-    message: 'The amount BTC entered exceeds your available balance.'
+    message: 'The quantity of BTC entered exceeds your available balance.'
 };
 ko.validation.rules['doesNotExceedAlreadyBurned'] = {
     validator: function (val, self) {
       return !(parseFloat(val) > 1 - self.btcAlreadyBurned());
     },
-    message: 'You can only burn 1 BTC total for any given address. Even over multiple burns, the total amount must be less than 1 BTC.'
+    message: 'You can only burn 1 BTC total for any given address. Even over multiple burns, the total quantity must be less than 1 BTC.'
 };
 ko.validation.registerExtenders();
 
@@ -626,9 +626,9 @@ function TestnetBurnModalViewModel() {
   self.address = ko.observable(''); // SOURCE address (supplied)
 
   self.networkBlockHeight = ko.observable(0);
-  self.btcAlreadyBurned = ko.observable(null); // amount BTC already burned from this address (normalized)
+  self.btcAlreadyBurned = ko.observable(null); // quantity BTC already burned from this address (normalized)
   
-  self.btcBurnAmount = ko.observable('').extend({
+  self.btcBurnQuantity = ko.observable('').extend({
     required: true,
     //not using min, max and number validators here because they don't like things like ".4"
     pattern: {
@@ -640,17 +640,17 @@ function TestnetBurnModalViewModel() {
     doesNotExceedAlreadyBurned: self
   });
   
-  self.amountXCPToBeCreated = ko.computed(function() { //normalized
-    if(!self.btcBurnAmount() || !parseFloat(self.btcBurnAmount())) return null;
-    return testnetBurnDetermineEarned(self.networkBlockHeight(), self.btcBurnAmount());
+  self.quantityXCPToBeCreated = ko.computed(function() { //normalized
+    if(!self.btcBurnQuantity() || !parseFloat(self.btcBurnQuantity())) return null;
+    return testnetBurnDetermineEarned(self.networkBlockHeight(), self.btcBurnQuantity());
   }, self);
   
   self.validationModel = ko.validatedObservable({
-    btcBurnAmount: self.btcBurnAmount
+    btcBurnQuantity: self.btcBurnQuantity
   });
 
   self.resetForm = function() {
-    self.btcBurnAmount('');
+    self.btcBurnQuantity('');
     self.validationModel.errors.showAllMessages(false);
   }
   
@@ -664,15 +664,15 @@ function TestnetBurnModalViewModel() {
   }
 
   self.doAction = function() {
-    //do the additional issuance (specify non-zero amount, no transfer destination)
+    //do the additional issuance (specify non-zero quantity, no transfer destination)
     WALLET.doTransaction(self.address(), "create_burn",
       { source: self.address(),
-        amount: denormalizeAmount(self.btcBurnAmount()),
+        quantity: denormalizeQuantity(self.btcBurnQuantity()),
       },
       function() {
         self.shown(false);
-        bootbox.alert("You have burned <b>" + self.btcBurnAmount() + " BTC</b> for approximately <b>"
-          + self.amountXCPToBeCreated() + " XCP</b>. " + ACTION_PENDING_NOTICE);
+        bootbox.alert("You have burned <b>" + self.btcBurnQuantity() + " BTC</b> for approximately <b>"
+          + self.quantityXCPToBeCreated() + " XCP</b>. " + ACTION_PENDING_NOTICE);
       }
     );
   }
@@ -693,7 +693,7 @@ function TestnetBurnModalViewModel() {
           totalBurned += data[i]['burned'];
         }
         
-        self.btcAlreadyBurned(normalizeAmount(totalBurned));
+        self.btcAlreadyBurned(normalizeQuantity(totalBurned));
         self.shown(true);
       });
     });

@@ -44,7 +44,6 @@
                   <li><a data-bind="click: showQRCode" href="#">Show QR Code</a></li>
                   <li><a data-bind="visible: !IS_WATCH_ONLY, click: signMessage" href="#">Sign Message</a></li>
                   <li><a data-bind="visible: !IS_WATCH_ONLY, click: createAsset" href="#">Create Asset</a></li>
-                  <li><a data-bind="visible: !IS_WATCH_ONLY, click: callAsset" href="#">Call Asset</a></li>
                   <li><a data-bind="visible: IS_WATCH_ONLY, click: removeWatch" href="#">Remove Address</a></li>
                   <li class="divider"></li><li class="dropdown-header">Sort by...</li>
                     <li><a data-bind="click: sortAssetsByName" href="#">Name</a></li>
@@ -74,6 +73,7 @@
                     <li data-bind="visible: !$parent.IS_WATCH_ONLY && isMine() && !isLocked()"><a data-bind="click: lock" href="#">Lock Asset Ownership</a></li>
                     <li data-bind="visible: !$parent.IS_WATCH_ONLY && isMine()"><a data-bind="click: changeDescription" href="#">Change Asset Description</a></li>
                     <li data-bind="visible: !$parent.IS_WATCH_ONLY && isMine()"><a data-bind="click: payDividend" href="#">Pay Dividend</a></li>
+                    <li data-bind="visible: !$parent.IS_WATCH_ONLY && isMine() && CALLABLE"><a data-bind="click: call" href="#">Call</a></li>
                   </ul>
                 </div>
                 <h3 class="name pull-left" style="position: relative; top: -10px;" data-bind="text: ASSET"></h3>
@@ -81,7 +81,12 @@
                 <p class="balance">
                     <span data-bind="visible: isMine()">Issued: <span data-bind="text: dispTotalIssued"></span></span><br/>
                     Bal: <span data-bind="text: normalizedBalance() === null ? '???' : smartFormat(normalizedBalance())"></span></p>
-                <span data-bind="visible: isLocked()" style="position:absolute;bottom:2px;right:10px"><i class="icon-append fa fa-lock"></i></span>
+                <div style="position:absolute;bottom:2px;right:10px">
+                    <span data-bind="visible: isLocked()" style="float:right;padding-left:5px;"
+                        title="Asset is locked"><i class="icon-append fa fa-lock"></i></span>
+                    <span data-bind="visible: CALLABLE" style="float:right;padding-left:5px;"
+                        title="Asset is callable"><i class="icon-append fa fa-mail-reply-all"></i></span>
+                </div>
               </div>
             </div> <!-- end widget content body -->
           </div> <!-- end widget div -->
@@ -145,7 +150,7 @@
       <div class="modal-body no-padding">
         <p class="formPadded">Send <b data-bind="text: asset"></b> from your address <b data-bind="text: address"></b>
         to the address you enter below.<br/><br/>
-        You have <b><span class="sellColor" data-bind="text: numberWithCommas(normalizedBalance())"></span> <span class="sellColor" data-bind="text: asset"></span></b>
+        You have <b><span class="buyColor" data-bind="text: numberWithCommas(normalizedBalance())"></span> <span class="sellColor" data-bind="text: asset"></span></b>
         available to send from this address.
         </p>
         
@@ -163,15 +168,15 @@
             <div class="col col-sm-10">
                 <label class="input" style="display: inline-block;">
                     <i class="icon-append fa fa-share"></i>
-                    <input name="amount" data-bind="value: amount, valueUpdate: 'afterkeydown', attr: {placeholder: 'Enter amount'}" type="text"/>
+                    <input name="quantity" data-bind="value: quantity, valueUpdate: 'afterkeydown', attr: {placeholder: 'Enter quantity'}" type="text"/>
                 </label>
                 <span>&nbsp;&nbsp;<span style="font-weight: bold" data-bind="text: asset"></span></span>
             </div>
           </div></section>
         </fieldset></form>
-        <p class="formPaddedBot" data-bind="fadeVisibleInOnly: normalizedBalRemaining() !== null" style="font-weight: bold">
-            After sending, you will have <span class="sellColor" data-bind="text: numberWithCommas(normalizedBalRemaining())"></span>
-            <span class="sellColor" data-bind="text: asset"></span> remaining at this address (minus fees).
+        <p class="formPaddedBot" data-bind="fadeVisibleInOnly: normalizedBalRemaining() !== null">
+            After sending, you will have <b><span class="sellColor" data-bind="text: numberWithCommas(normalizedBalRemaining())"></span>
+            <span class="sellColor" data-bind="text: asset"></span> remaining</b> at this address (minus fees).
         </p>
       </div>
       <div class="modal-footer">
@@ -216,7 +221,7 @@
                 <label class="input">
                     <select multiple="true" style="width:100%" data-bind="options: availableAssetsToSweep, optionsValue: 'ASSET', optionsText: 'SELECT_LABEL', select2: { minimumResultsForSearch: 10, escapeMarkup: function(m) { return m; } }, selectedOptions: selectedAssetsToSweep"></select>
                 </label>                    
-                <div class="note">Select all of the assets whose total amounts you want to move into the destination address.</div>
+                <div class="note">Select all of the assets whose total balances you want to move into the destination address.</div>
             </div>
           </div></section>
         </fieldset></form>
@@ -294,7 +299,7 @@
       </div>
       <div class="modal-body no-padding">
         <div class="formPadded">
-            <p class="errorTextColor" data-bind="fadeVisibleInOnly: showNoPrimedInputsError">
+            <p class="errorColor" data-bind="fadeVisibleInOnly: showNoPrimedInputsError">
                 You need to prime your account before you can perform the selected action. Please complete this then try
                 again once the priming is complete and confirmed on the blockchain.</p>
             <p style="color: green;font-weight:bold" data-bind="fadeVisibleInOnly: autoPrime">
@@ -341,21 +346,21 @@
         <p class="formPadded">
          Create XCP on Testnet by "burning" your test BTC. Please note that you can only burn up to <b>1 BTC total</b> for any given address.<br/><br/>
          <span data-bind="visible: 1 - btcAlreadyBurned() > 0"><b>You may currently burn up to <span class="sellColor"><span data-bind="text: 1 - btcAlreadyBurned()"></span> BTC</span> from this address.</b></span>
-         <span data-bind="visible: 1 - btcAlreadyBurned() <= 0"><b style="color: errorTextColor">You have already burned the maximum allowed BTC from this address.</b></span>
+         <span data-bind="visible: 1 - btcAlreadyBurned() <= 0"><b style="color: errorColor">You have already burned the maximum allowed BTC from this address.</b></span>
        </p>
        <form class="smart-form" data-bind="submit: doAction"><fieldset>
           <section><div class="row">
             <label class="control-label col col-sm-2">BTC to Burn</label>
             <div class="col col-sm-10">
                 <label class="input"><i class="icon-append fa fa-fire"></i>
-                    <input name="additionalIssue" data-bind="value: btcBurnAmount, valueUpdate: 'afterkeydown'" type="text"/>
+                    <input name="additionalIssue" data-bind="value: btcBurnQuantity, valueUpdate: 'afterkeydown'" type="text"/>
                 </label>
             </div>
           </div></section>
         </fieldset></form>
         <p class="formPaddedBot" data-bind="fadeVisibleInOnly: validationModel.isValid()" style="font-weight: bold">
             After burning, you will have approximately
-            <b class="buyColor"><span data-bind="text: numberWithCommas(amountXCPToBeCreated())"></span> XCP</b> created at this address.
+            <b class="buyColor"><span data-bind="text: numberWithCommas(quantityXCPToBeCreated())"></span> XCP</b> created at this address.
         </p>
       </div>
       <div class="modal-footer">
@@ -409,7 +414,7 @@
             <label class="control-label col col-sm-2">Quantity</label>
             <div class="col col-sm-10">
                 <label class="input"><i class="icon-append fa fa-plus"></i>
-                    <input name="assetQuantity"  data-bind="value: amount, valueUpdate: 'afterkeydown'" type="text"/>                        
+                    <input name="assetQuantity"  data-bind="value: quantity, valueUpdate: 'afterkeydown'" type="text"/>                        
                 </label>
                 <div class="note">How many of the units of the asset to issue (can be increased later).</div>
             </div>
@@ -470,7 +475,7 @@
       </div>
       <div class="modal-body no-padding">
         <p class="formPadded">How much more of this asset would you like to issue? <i>(For divisible assets, state
-       the amount as a whole or floating point number, not in satoshis -- e.g. '732.45')</i><br/><br/>
+       the quantity as a whole or floating point number, not in satoshis -- e.g. '732.45')</i><br/><br/>
        There is currently quantity <b class="buyColor" data-bind="text: dispTotalIssued"></b> of this asset issued.<br/><br/>
        <b style='color:red'>Please NOTE that this action is irreversable!</b></p>
         
@@ -583,17 +588,17 @@
             <label class="control-label col col-sm-2">Dividend per Unit</label>
             <div class="col col-sm-10">
                 <label class="input"><i class="icon-append fa fa-plus"></i>
-                    <input name="amountPerUnit" data-bind="value: amountPerUnit, valueUpdate : 'afterkeydown'" type="text"/>
+                    <input name="quantityPerUnit" data-bind="value: quantityPerUnit, valueUpdate : 'afterkeydown'" type="text"/>
                 </label>
                 <div class="note">Enter the quantity of the Dividend Asset that should be distributed per share of <span data-bind="text: assetName"></span>.</div>
             </div>
           </div></section>
         </fieldset></form>
-        <div class="formPaddedBot" data-bind="fadeVisibleInOnly: amountPerUnit() && selectedDividendAsset()">
+        <div class="formPaddedBot" data-bind="fadeVisibleInOnly: quantityPerUnit() && selectedDividendAsset()">
             <p>This dividend payment would cost you a total of 
             <b class="sellColor"><span data-bind="text: numberWithCommas(totalPay())"></span> <span data-bind="html: selectedDividendAsset"></span></b>.</p>
             <p>After dividend payment this address would have a remaining balance of
-            <b data-bind="css: {errorTextColor: dividendAssetBalRemainingPostPay() < 0, sellColor:  dividendAssetBalRemainingPostPay() >= 0}">
+            <b data-bind="css: {errorColor: dividendAssetBalRemainingPostPay() < 0, sellColor:  dividendAssetBalRemainingPostPay() >= 0}">
                 <span data-bind="text: numberWithCommas(dividendAssetBalRemainingPostPay())"></span> <span data-bind="html: selectedDividendAsset"></span></b>.</p>
         </div>
       </div>
@@ -611,25 +616,15 @@
     <div class="modal-content">
       <div class="modal-header">
         <button type="button" data-bind="click: hide" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
-        <h4 class="modal-title">Call Asset</h4>
+        <h4 class="modal-title">Call Asset <b><span data-bind="text: asset"></span></b></h4>
       </div>
-      <div class="modal-body no-padding">
-        <p class="formPadded">Use this form to call an asset that is owned by this address
-            (<span data-bind="text: address"></span>), is callable, and has a call date equal to or later
-            than the current date.<br/><br/>
+      <div class="modal-body no-padding" data-bind="visible: assetObj">
+        <p class="formPadded">Use this form to exercise a call option for the selected asset
+            (<b><span data-bind="text: asset"></span></b>), whose call date is <b><span data-bind="text: dispCallDate"></span></b>.<br/><br/>
        <b style='color:red'>Please NOTE that this action is irreversable!</b></p>
         <form class="smart-form" data-bind="submit: doAction"><fieldset>
           <section><div class="row">
-            <label class="control-label col col-sm-2">Asset to Call</label>
-            <div class="col col-sm-10">
-                <label class="input">
-                    <select id="selectedAsset" style="width:100%" data-bind="options: callableAssets, select2: { minimumResultsForSearch: 10, escapeMarkup: function(m) { return m; } }, value: selectedAsset"></select>
-                </label>                    
-                <div class="note">Select the asset that will be called back.</div>
-            </div>
-          </div></section>
-          <section><div class="row">
-            <label class="control-label col col-sm-2">% Outstanding to Call</label>
+            <label class="control-label col col-sm-2">% to Call</label>
             <div class="col col-sm-10">
                 <label class="input"><i class="icon-append fa fa-plus"></i>
                     <input name="percentageToCall" data-bind="value: percentageToCall, valueUpdate : 'afterkeydown'" type="text"/>
@@ -639,17 +634,17 @@
           </div></section>
         </fieldset></form>
         <div class="formPaddedBot" data-bind="fadeVisibleInOnly: xcpBalRemainingPostCall() !== null">
-            <p>At the given call price of <b><span data-bind="text: selectedAssetCallPrice"></span> XCP</b> per unit
-                of <b><span data-bind="text: selectedAsset"></span></b> (which has <span data-bind="text: selectedAssetUnitsIssued"></span> units issued),
-                your total cost for a <b><span data-bind="text: self.percentageToCall"></span>% callback</b> would be <b class="totalXCPPay"> XCP</b>.</p>
+            <p>At the given call price of <b><span data-bind="text: dispCallPrice"></span> XCP</b> per unit
+                of <b><span data-bind="text: asset"></span></b> (which has <span data-bind="text: dispTotalIssued"></span> units issued),
+                your total cost for a <b><span data-bind="text: percentageToCall"></span>% callback</b> would be <b class="totalXCPPay"> XCP</b>.</p>
             <p>After this callback, this address would have a remaining balance of
-            <b data-bind="css: {errorTextColor: xcpBalRemainingPostCall() < 0, sellColor:  xcpBalRemainingPostCall() >= 0}">
+            <b data-bind="css: {errorColor: xcpBalRemainingPostCall() < 0, sellColor:  xcpBalRemainingPostCall() >= 0}">
                 <span data-bind="text: numberWithCommas(xcpBalRemainingPostCall())"></span> XCP</b>.</p>
         </div>
       </div>
       <div class="modal-footer">
         <button type="button" class="btn btn-default" data-bind="click: hide">Cancel</button>
-        <button type="button" data-bind="click: submitForm" class="btn btn-warning">Pay Dividend</button>
+        <button type="button" data-bind="click: submitForm" class="btn btn-warning">Call</button>
       </div>
     </div><!-- /.modal-content -->
   </div><!-- /.modal-dialog -->

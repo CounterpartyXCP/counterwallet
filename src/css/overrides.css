@@ -4,10 +4,6 @@
  * FORM STYLING OVERRIDES (we have to redo these because we do forms a bit
  * differently than SmartAdmin does, due to our use of knockout)
  */
-.errorTextColor {
-    color: #D56161;
-}
-
 .smart-form span.invalid {
     display: block;
     margin-top: 6px;
@@ -38,6 +34,7 @@ p.formPaddedBot, div.formPaddedBot {
 .smart-form fieldset {
     padding-top: 15px; /* reduce a bit */
 }
+
 
 /* 
  * LOGO AND ACTIVITY LOG INTERFACE MODIFICATIONS
@@ -141,6 +138,29 @@ aside {
 #main {
     margin-left: 180px;
 }
+
+
+/*
+ * Tone down some of the annoying SmartAdmin animation styles
+ */
+.active+.ajax-dropdown {
+  -webkit-animation-name: fadeIn;
+  -moz-animation-name: fadeIn;
+  -o-animation-name: fadeIn;
+  animation-name: fadeIn;
+  -webkit-animation-duration: .4s;
+  -moz-animation-duration: .4s;
+  -o-animation-duration: .4s;
+  animation-duration: .4s;
+}
+
+.open>.dropdown-menu {
+  -webkit-animation-name: fadeIn;
+  -moz-animation-name: fadeIn;
+  -o-animation-name: fadeIn;
+  animation-name: fadeIn;
+}
+
 
 /* 
  * STYLE SPECIFIC OVERRIDES

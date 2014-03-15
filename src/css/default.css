@@ -12,6 +12,10 @@
     z-index: 1;
 }
 
+.errorColor {
+    color: #D56161;
+}
+
 .buyColor {
     color: #78973B;    
 }
@@ -20,7 +24,7 @@
     color: #2F7DBE;    
 }
 
-.notoAmountColor {
+.notoQuantityColor {
     color: #f89406;    
 }
 

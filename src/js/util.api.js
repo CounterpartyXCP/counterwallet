@@ -111,7 +111,7 @@ function fetchData(url, onSuccess, onError, postdata, isJSONRPC, extraAJAXOpts, 
         }
       },
       error:function (jqXHR, opt, err) {
-        if (url instanceof Array) {
+        if(url instanceof Array) {
           if(url.length <= _url_n + 1) {
             //no more urls to hit...finally call error callback (if there is one)
             if (onError) return onError(jqXHR, opt, err, u);
@@ -128,6 +128,16 @@ function fetchData(url, onSuccess, onError, postdata, isJSONRPC, extraAJAXOpts, 
     for (var attrname in extraAJAXOpts) { ajaxOpts[attrname] = extraAJAXOpts[attrname]; }
   }
   $.ajax(ajaxOpts);
+}
+
+function _formulateEndpoints(endpoints, rpcMethod) {
+  //append the method name in the query string to aid in reporting/request log analysis
+  var newEndpoints = [];
+  if(!(endpoints instanceof Array)) endpoints = [endpoints];
+  for(var i=0; i < endpoints.length; i++) {
+    newEndpoints.push(endpoints + "?method=" + rpcMethod);
+  }
+  return newEndpoints;
 }
 
 function _makeJSONAPICall(destType, endpoints, method, params, timeout, onSuccess, onError) {
@@ -148,11 +158,13 @@ function _makeJSONAPICall(destType, endpoints, method, params, timeout, onSucces
   
   //make JSON API call to counterwalletd
   if(destType == "counterwalletd") {
-    fetchData(endpoints, onSuccess, onError,
+    fetchData(_formulateEndpoints(endpoints, method),
+      onSuccess, onError,
       JSON.stringify({"jsonrpc": "2.0", "id": 0, "method": method, "params": params}), true);
   } else if(destType == "counterpartyd") {
     //make JSON API call to counterwalletd, which will proxy it to counterpartyd
-    fetchData(endpoints, onSuccess, onError,
+    fetchData(_formulateEndpoints(endpoints, method),
+      onSuccess, onError,
       JSON.stringify({
         "jsonrpc": "2.0", "id": 0,
         "method": "proxy_to_counterpartyd",

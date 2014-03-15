@@ -35,7 +35,7 @@ function CreateAssetModalViewModel() {
     isValidAssetDescription: self
   });
   self.divisible = ko.observable(true);
-  self.amount = ko.observable().extend({
+  self.quantity = ko.observable().extend({
     required: true,
     pattern: {
       message: 'Must be a valid number',
@@ -68,7 +68,7 @@ function CreateAssetModalViewModel() {
   self.validationModel = ko.validatedObservable({
     name: self.name,
     description: self.description,
-    amount: self.amount,
+    quantity: self.quantity,
     callDate: self.callDate,
     callPrice: self.callPrice
   });  
@@ -77,7 +77,7 @@ function CreateAssetModalViewModel() {
     self.name('');
     self.description('');
     self.divisible(true);
-    self.amount(null);
+    self.quantity(null);
     self.validationModel.errors.showAllMessages(false);
   }
   
@@ -100,11 +100,11 @@ function CreateAssetModalViewModel() {
   }
 
   self.doAction = function() {
-    var amount = parseFloat(self.amount());
-    var rawAmount = denormalizeAmount(amount, self.divisible());
+    var quantity = parseFloat(self.quantity());
+    var rawQuantity = denormalizeQuantity(quantity, self.divisible());
     
-    if(rawAmount > MAX_INT) {
-      bootbox.alert("The amount desired to be issued for this asset is too high.");
+    if(rawQuantity > MAX_INT) {
+      bootbox.alert("The quantity desired to be issued for this asset is too high.");
       return false;
     }
     
@@ -119,7 +119,7 @@ function CreateAssetModalViewModel() {
     WALLET.doTransaction(self.address(), "create_issuance",
       { source: self.address(),
         asset: self.name(),
-        amount: rawAmount,
+        quantity: rawQuantity,
         divisible: self.divisible(),
         description: self.description(),
         callable_: self.callable(),
@@ -152,7 +152,7 @@ ko.validation.rules['additionalIssueDoesNotExceedLimit'] = {
     validator: function (val, self) {
       return self.rawAdditionalIssue() + self.asset().rawTotalIssued() <= MAX_INT;
     },
-    message: 'This issuance would exceed the hard limit for maximum amount.'
+    message: 'This issuance would exceed the hard limit for maximum quantity.'
 };
 ko.validation.registerExtenders();
 
@@ -166,7 +166,7 @@ function IssueAdditionalAssetModalViewModel() {
   self.additionalIssue = ko.observable('').extend({
     required: true,
     pattern: {
-      message: 'Must be a valid amount',
+      message: 'Must be a valid quantity',
       params: '^[0-9]*\.?[0-9]{0,8}$' //not perfect ... will convert divisible assets to satoshi before sending to API
     },
     isValidQtyForDivisibility: self,
@@ -180,7 +180,7 @@ function IssueAdditionalAssetModalViewModel() {
   
   self.rawAdditionalIssue = ko.computed(function() {
     if(!self.asset() || !isNumber(self.additionalIssue())) return null;
-    return denormalizeAmount(self.additionalIssue(), self.asset().DIVISIBLE); 
+    return denormalizeQuantity(self.additionalIssue(), self.asset().DIVISIBLE); 
   }, self);
 
   self.validationModel = ko.validatedObservable({
@@ -202,10 +202,10 @@ function IssueAdditionalAssetModalViewModel() {
   }
 
   self.doAction = function() {
-    //do the additional issuance (specify non-zero amount, no transfer destination)
+    //do the additional issuance (specify non-zero quantity, no transfer destination)
     WALLET.doTransaction(self.address(), "create_issuance",
       { source: self.address(),
-        amount: self.rawAdditionalIssue(),
+        quantity: self.rawAdditionalIssue(),
         asset: self.asset().ASSET,
         divisible: self.asset().DIVISIBLE,
         description: self.asset().description(),
@@ -268,10 +268,10 @@ function TransferAssetModalViewModel() {
   }
 
   self.doAction = function() {
-    //do the transfer (zero amount issuance to the specified address)
+    //do the transfer (zero quantity issuance to the specified address)
     WALLET.doTransaction(self.address(), "create_issuance",
       { source: self.address(),
-        amount: 0,
+        quantity: 0,
         asset: self.asset().ASSET,
         divisible: self.asset().DIVISIBLE,
         description: self.asset().description(),
@@ -341,10 +341,10 @@ function ChangeAssetDescriptionModalViewModel() {
   }
 
   self.doAction = function() {
-    //to change the desc, issue with amount == 0 and the new description in the description field
+    //to change the desc, issue with quantity == 0 and the new description in the description field
     WALLET.doTransaction(self.address(), "create_issuance",
       { source: self.address(),
-        amount: 0,
+        quantity: 0,
         asset: self.asset().ASSET,
         divisible: self.asset().DIVISIBLE,
         description: self.newDescription(),
@@ -374,7 +374,7 @@ function ChangeAssetDescriptionModalViewModel() {
 }
 
 
-ko.validation.rules['amountDoesNotExceedDividendAssetBalance'] = {
+ko.validation.rules['quantityDoesNotExceedDividendAssetBalance'] = {
     validator: function (val, self) {
       if(self.dividendAssetBalRemainingPostPay() === null) return true; //wait until dividend asset chosen to validate
       return self.dividendAssetBalRemainingPostPay() >= 0;
@@ -400,13 +400,13 @@ function PayDividendModalViewModel() {
     required: true
   });
   
-  self.amountPerUnit = ko.observable('').extend({
+  self.quantityPerUnit = ko.observable('').extend({
     required: true,
     pattern: {
       message: 'Must be a valid number',
       params: '^[0-9]*\.?[0-9]{0,8}$' //not perfect ... will convert divisible assets to satoshi before sending to API
     },
-    amountDoesNotExceedDividendAssetBalance: self
+    quantityDoesNotExceedDividendAssetBalance: self
   });
   
   self.assetName = ko.computed(function() {
@@ -416,7 +416,7 @@ function PayDividendModalViewModel() {
   
   self.totalPay = ko.computed(function() {
     if(!self.asset()) return null;
-    return self.amountPerUnit() * self.asset().normalizedTotalIssued();
+    return self.quantityPerUnit() * self.asset().normalizedTotalIssued();
   }, self);
 
   self.dividendAssetBalance = ko.computed(function() {
@@ -430,12 +430,12 @@ function PayDividendModalViewModel() {
   }, self);
   
   self.validationModel = ko.validatedObservable({
-    amountPerUnit: self.amountPerUnit,
+    quantityPerUnit: self.quantityPerUnit,
     selectedDividendAsset: self.selectedDividendAsset
   });
 
   self.resetForm = function() {
-    self.amountPerUnit(null);
+    self.quantityPerUnit(null);
     self.availableDividendAssets([]);
     self.selectedDividendAsset(null);
     self.validationModel.errors.showAllMessages(false);
@@ -451,16 +451,16 @@ function PayDividendModalViewModel() {
   }
 
   self.doAction = function() {
-    //do the additional issuance (specify non-zero amount, no transfer destination)
+    //do the additional issuance (specify non-zero quantity, no transfer destination)
     WALLET.doTransaction(self.address(), "create_dividend",
       { source: self.address(),
-        amount_per_unit: denormalizeAmount(parseFloat(self.amountPerUnit())),
+        quantity_per_unit: denormalizeQuantity(parseFloat(self.quantityPerUnit())),
         asset: self.asset().ASSET,
         dividend_asset: self.selectedDividendAsset()
       },
       function() {
         self.shown(false);
-        bootbox.alert("You have paid a dividend of <b>" + self.amountPerUnit().toString()
+        bootbox.alert("You have paid a dividend of <b>" + self.quantityPerUnit().toString()
           + " XCP</b> per outstanding unit to holders of asset <b>" + self.asset().ASSET
           + "</b>. " + ACTION_PENDING_NOTICE);
       }
@@ -477,14 +477,14 @@ function PayDividendModalViewModel() {
     //Get the balance of ALL assets at this address
     failoverAPI("get_normalized_balances", [address], function(data, endpoint) {
       for(var i=0; i < data.length; i++) {
-        if(data[i]['amount'] !== null && data[i]['amount'] !== 0)
-          self.availableDividendAssets.push(new DividendAssetInDropdownItemModel(data[i]['asset'], data[i]['amount'], data[i]['normalized_amount']));
+        if(data[i]['quantity'] !== null && data[i]['quantity'] !== 0)
+          self.availableDividendAssets.push(new DividendAssetInDropdownItemModel(data[i]['asset'], data[i]['quantity'], data[i]['normalized_quantity']));
       }
 
       //Also get the BTC balance at this address and put at head of the list
       WALLET.retrieveBTCBalance(address, function(balance) {
         if(balance) {
-          self.availableDividendAssets.unshift(new DividendAssetInDropdownItemModel("BTC", balance, normalizeAmount(balance)));
+          self.availableDividendAssets.unshift(new DividendAssetInDropdownItemModel("BTC", balance, normalizeQuantity(balance)));
         }
       });
     });
@@ -496,7 +496,7 @@ function PayDividendModalViewModel() {
 }
 
 
-ko.validation.rules['calledAmountDoesNotExceedXCPBalanceRequired'] = {
+ko.validation.rules['calledQuantityDoesNotExceedXCPBalanceRequired'] = {
     validator: function (val, self) {
       if(self.xcpBalRemainingPostCall() === null) return true; //wait until dividend asset chosen to validate
       return self.xcpBalRemainingPostCall() >= 0;
@@ -508,12 +508,9 @@ ko.validation.registerExtenders();
 function CallAssetModalViewModel() {
   var self = this;
   self.shown = ko.observable(false);
-  self.address = ko.observable(''); // SOURCE address (supplied)
-
-  self.callableAssets = ko.observableArray([]);
-  self.selectedAsset = ko.observable(null).extend({ //the selected asset to callback
-    required: true
-  });
+  self.address = ko.observable(null); // SOURCE address (supplied)
+  self.asset = ko.observable(null); // Asset to call (supplied)
+  self.assetObj = ko.observable(null);
   
   self.percentageToCall = ko.observable(null).extend({
     required: true,
@@ -523,37 +520,39 @@ function CallAssetModalViewModel() {
     },
     max: 100,
     min: 0.00001, 
-    calledAmountDoesNotExceedXCPBalanceRequired: self
+    calledQuantityDoesNotExceedXCPBalanceRequired: self
   });
+
+  self.dispCallDate = ko.computed(function() {
+    if(!self.assetObj()) return null;
+    return self.assetObj().dispCallDate();
+  }, self);
+    
+  self.dispCallPrice = ko.computed(function() {
+    if(!self.assetObj()) return null;
+    return self.assetObj().CALLPRICE;
+  }, self);
   
-  self.selectedAssetUnitsIssued = ko.computed(function() {
-    if(!self.selectedAsset()) return null;
-    return WALLET.getAddressObj(self.address()).getAssetObj(self.selectedAsset()).normalizedTotalIssued();
-  }, self);
-
-  self.selectedAssetCallPrice = ko.computed(function() {
-    if(!self.selectedAsset()) return null;
-    return WALLET.getAddressObj(self.address()).getAssetObj(self.selectedAsset()).CALLPRICE;
-  }, self);
-
+  self.dispTotalIssued = ko.computed(function() {
+    if(!self.assetObj()) return null;
+    return self.assetObj().normalizedTotalIssued();
+  }, self); 
+  
   self.totalXCPPay = ko.computed(function() {
-    if(!self.selectedAssetUnitsIssued() || !self.selectedAssetCallPrice()) return null;
-    return self.percentageToCall() * self.asset().normalizedTotalIssued() * self.selectedAssetCallPrice();
+    if(!self.percentageToCall() || !self.assetObj()) return null;
+    return self.percentageToCall() * self.assetObj().normalizedTotalIssued() * self.assetObj().CALLPRICE;
   }, self);
 
   self.xcpBalRemainingPostCall = ko.computed(function() {
     if(self.totalXCPPay() === null) return null;
-    return Decimal.round(new Decimal(WALLET.getBalance(self.address(), 'BTC')).sub(self.totalXCPPay()), 8).toFloat();
+    return Decimal.round(new Decimal(WALLET.getBalance(self.address(), 'XCP')).sub(self.totalXCPPay()), 8).toFloat();
   }, self);
   
   self.validationModel = ko.validatedObservable({
-    selectedAsset: self.selectedAsset,
     percentageToCall: self.percentageToCall
   });
 
   self.resetForm = function() {
-    self.callableAssets([]);
-    self.selectedAsset(null);
     self.percentageToCall(null);
     self.validationModel.errors.showAllMessages(false);
   }
@@ -568,44 +567,41 @@ function CallAssetModalViewModel() {
   }
 
   self.doAction = function() {
-    //do the additional issuance (specify non-zero amount, no transfer destination)
+    //do the additional issuance (specify non-zero quantity, no transfer destination)
     WALLET.doTransaction(self.address(), "create_callback",
       { source: self.address(),
         fraction: Decimal.round(new Decimal(self.percentageToCall()).div(100), 8).toFloat(),
-        asset: self.selectedAsset()
+        asset: self.asset()
       },
       function() {
         self.shown(false);
         bootbox.alert("You have called back <b>" + self.percentageToCall()
-          + "%</b> of asset <b>" + self.asset().ASSET
+          + "%</b> of asset <b>" + self.asset()
           + "</b> for the price of <b>" + self.totalXCPPay() + " XCP</b>. "
           + ACTION_PENDING_NOTICE);
       }
     );
   }
   
-  self.show = function(address, resetForm) {
+  self.show = function(address, asset, resetForm) {
     if(typeof(resetForm)==='undefined') resetForm = true;
     if(resetForm) self.resetForm();
     self.address(address);
+    self.asset(asset);
+    self.assetObj(WALLET.getAddressObj(address).getAssetObj(asset));
     var now = new Date(); 
     var nowUTC = new Date(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate(),  now.getUTCHours(), now.getUTCMinutes(), now.getUTCSeconds());
-        
-    //Show assets that are owned by this address that are callable
-    var assets = ko.utils.arrayFilter(WALLET.getAddressObj(address).assets(), function(asset) {
-      var callDate = new Date(0);
-      callDate.setUTCSeconds(asset.CALLDATE);
-      return asset.isMine() && asset.CALLABLE && callDate >= nowUTC;
-    });
-    for(var i=0; i < assets.length; i++) {
-      self.callableAssets.push(assets[i].ASSET);  
-    }
-    
-    if(!self.callableAssets().length) {
-      bootbox.alert("There are no assets owned by this address that are both callable and past their call date.");
+
+    //Check if the passed asset is callable
+    assert(self.assetObj().isMine(), "Asset is not yours!");
+    assert(self.assetObj().CALLABLE, "Asset is not callable!");
+
+    var callDate = new Date(0);
+    callDate.setUTCSeconds(asset.CALLDATE);
+    if(callDate > nowUTC) {
+      bootbox.alert("The selected asset cannot be called until " + self.assetObj().dispCallDate());
       return;
     }
-    
     self.shown(true);
   }  
 
@@ -645,7 +641,7 @@ var AssetHistoryItemModel = function(historyObj) {
       desc = "UNKNOWN OP: <b>" + self.HISTORYOBJ['type'] + "</b>";
     }
     
-    desc = desc.replace(/<Am>/g, '<b class="notoAmountColor">').replace(/<\/Am>/g, '</b>');
+    desc = desc.replace(/<Am>/g, '<b class="notoQuantityColor">').replace(/<\/Am>/g, '</b>');
     desc = desc.replace(/<Ad>/g, '<b class="notoAddrColor">').replace(/<\/Ad>/g, '</b>');
     return desc;
   }

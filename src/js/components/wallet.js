@@ -72,12 +72,27 @@ function WalletViewModel() {
   }
 
   self.updateBalance = function(address, asset, rawBalance) {
-    //Update a balance for a specific asset on a specific address
+    //Update a balance for a specific asset on a specific address. Requires that the asset exist
     var addressObj = self.getAddressObj(address);
     if(!addressObj) return false;
     var assetObj = addressObj.getAssetObj(asset);
-    addressObj.addOrUpdateAsset(asset, rawBalance);
+    assert(assetObj, "Trying to updateBalance for an asset that doesn't exist in the wallet");
+    assetObj.rawBalance(rawBalance);
     return true;
+  }
+  
+  self.getAddressesWithAsset = function(asset) {
+    var addresses = self.getAddressesList();
+    var addressesWithAsset = [];
+    //Grab the first asset object we can find for this asset
+    var addressObj = null, assetObj = null;
+    for(var i=0; i < addresses.length; i++) {
+      addressObj = WALLET.getAddressObj(addresses[i]);
+      assetObj = addressObj.getAssetObj(asset);
+      if(!assetObj) continue; //this address doesn't have the asset...that's fine
+      addressesWithAsset.push(assetObj.ADDRESS);
+    }
+    return addressesWithAsset;
   }
 
   self.getNumPrimedTxouts = function(address) {
@@ -93,24 +108,6 @@ function WalletViewModel() {
     return true;
   }
 
-  self.updateBalances = function(isAtLogon) {
-    //updates all balances for all addesses, creating the asset objects on the address if need be
-    if(typeof(isAtLogon)==='undefined') isAtLogon = false; //this field should only be used during login
-    
-    self.refreshBTCBalances(isAtLogon);
-    //^ if isAtLogon is true, we will start a recurring get BTC balances timer chain 
-
-    //update all counterparty XCP/asset balances
-    failoverAPI("get_normalized_balances", [self.getAddressesList()],
-      function(data, endpoint) {
-        $.jqlog.log("Got initial balances: " + JSON.stringify(data));
-        for(var i=0;i<data.length;i++) {
-          self.updateBalance(data[i]['address'], data[i]['asset'], data[i]['amount']);  
-        }
-      }
-    );
-  }
-  
   self.refreshBTCBalances = function(isRecurring) {
     if(typeof(isRecurring)==='undefined') isRecurring = false;
     //^ if isRecurring is set to true, we will update BTC balances every 5 min as long as self.autoRefreshBTCBalances == true
@@ -122,7 +119,7 @@ function WalletViewModel() {
       function _retrBal(address, i) {
         self.retrieveBTCBalance(address, function(rawBalConfirmed, rawBalUnconfirmed) {
           //if someone sends BTC using the wallet, an entire TXout is spent, and the change is routed back. During this time
-          // the (confirmed) balance will be decreased by the ENTIRE amount of that txout, even though they may be getting
+          // the (confirmed) balance will be decreased by the ENTIRE quantity of that txout, even though they may be getting
           // some/most of it back as change. To avoid people being confused over this, with BTC in particular, we should
           // display the unconfirmed portion of the balance in addition to the confirmed balance, as it will include the change output
           self.updateBalance(address, "BTC", rawBalConfirmed + rawBalUnconfirmed);
@@ -136,7 +133,7 @@ function WalletViewModel() {
               // we will have a situation where the thing will keep repriming the account every 5 minutes until the next block comes in)
               var numPrimedTxouts0Confirms = 0;
               for(var j=0; j < utxosData.length; j++) {
-                if(denormalizeAmount(utxosData[j]['amount']) >= MIN_PRIME_BALANCE)
+                if(denormalizeQuantity(utxosData[j]['amount']) >= MIN_PRIME_BALANCE)
                   numPrimedTxouts0Confirms++;
               }
 
@@ -151,9 +148,9 @@ function WalletViewModel() {
                  && numPrimedTxouts0Confirms !== null
                  && numPrimedTxouts0Confirms < AUTOPRIME_AT_LESSTHAN_REMAINING) {
                 var maxPrimedTxoutsPossible = parseInt((rawBalConfirmed - MIN_FEE) / MIN_PRIME_BALANCE);
-                var numPrimedTxoutsToCreate = Math.min(maxPrimedTxoutsPossible, AUTOPRIME_MAX_AMOUNT);
+                var numPrimedTxoutsToCreate = Math.min(maxPrimedTxoutsPossible, AUTOPRIME_MAX_COUNT);
                 assert(numPrimedTxoutsToCreate > 0); //shouldn't ever hit this with the earlier balanace check
-                $.jqlog.log("refreshBTCBalances: Address " + address + " has a confirmed balance of " + normalizeAmount(rawBalConfirmed)
+                $.jqlog.log("refreshBTCBalances: Address " + address + " has a confirmed balance of " + normalizeQuantity(rawBalConfirmed)
                   + " BTC and only " + numPrimedTxouts + " primed utxos remaining. Creating " + numPrimedTxoutsToCreate
                   + " additional utxos...");
                 primeAddress(address, numPrimedTxoutsToCreate, utxosData,
@@ -290,8 +287,8 @@ function WalletViewModel() {
         var numSuitableUnspentTxouts = 0;
         var totalBalance = 0;
         for(var i=0; i < data.length; i++) {
-          if(denormalizeAmount(data[i]['amount']) >= MIN_PRIME_BALANCE && data[i]['confirmations'] >= minConfirmations) numSuitableUnspentTxouts++;
-          totalBalance += denormalizeAmount(data[i]['amount']);
+          if(denormalizeQuantity(data[i]['amount']) >= MIN_PRIME_BALANCE && data[i]['confirmations'] >= minConfirmations) numSuitableUnspentTxouts++;
+          totalBalance += denormalizeQuantity(data[i]['amount']);
         }
         //final number of primed txouts is lesser of either the # of txouts that are >= .0005 BTC, OR the floor(total balance / .0005 BTC)
         return onSuccess(Math.min(numSuitableUnspentTxouts, Math.floor(totalBalance / MIN_PRIME_BALANCE)), data);
@@ -311,7 +308,7 @@ function WalletViewModel() {
     if(address.numPrimedTxouts() == 0) { //no primed txouts
       if(self.getBalance(address, "BTC") == 0) {
         bootbox.alert("Can't do this action as you have no BTC at this address, and Counterparty actions require a"
-          + " small amount of BTC to perform.<br/><br/>Please deposit some BTC into address <b>" + addr + "</b> and try again.");
+          + " small balance of BTC to perform.<br/><br/>Please deposit some BTC into address <b>" + addr + "</b> and try again.");
         return false;
       }
       
@@ -328,7 +325,6 @@ function WalletViewModel() {
     assert(data['multisig'] === undefined);
     data['multisig'] = WALLET.getAddressObj(address).PUBKEY;
     //find and specify the verifyDestAddr
-    var verifyDestAddr = data['destination'] || data['transfer_destination'] || null;
     
     //order handling hack, so we can get asset divisibility to pending
     // here we only have to worry about what we create a txn for (so not order matches, debits/credits, etc)
@@ -340,6 +336,7 @@ function WalletViewModel() {
       delete data['_get_divisible'];
     }
     
+    var verifyDestAddr = data['destination'] || data['transfer_destination'] || null;
     multiAPIConsensus(action, data,
       function(unsignedTxHex, numTotalEndpoints, numConsensusEndpoints) {
         $.jqlog.log("TXN CREATED. numTotalEndpoints=" + numTotalEndpoints + "; numConsensusEndpoints=" + numConsensusEndpoints);

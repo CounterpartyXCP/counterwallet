@@ -55,42 +55,46 @@ function AddressViewModel(key, address, initialLabel) {
     });
   }
   
-  self.addOrUpdateAsset = function(asset, rawBalance) {
+  self.addOrUpdateAsset = function(asset, rawBalance, assetInfo) {
+    //assetInfo comes from a call to get_asset_info
+    var match = ko.utils.arrayFirst(self.assets(), function(item) {
+        return item.ASSET === asset;
+    });
+    
     if(asset == 'BTC' || asset == 'XCP') { //special case update
-      var match = ko.utils.arrayFirst(self.assets(), function(item) {
-          return item.ASSET === asset;
-      });
       assert(match); //was created when the address viewmodel was initialized...
       match.rawBalance(rawBalance);
       return;
     }
 
-    failoverAPI("get_asset_info", [asset], function(assetInfo, endpoint) {
-      var match = ko.utils.arrayFirst(self.assets(), function(item) {
-          return item.ASSET === asset;
-      });
-      if (!match) { //add the asset if it doesn't exist
-        var assetProps = {
-          address: self.ADDRESS, asset: asset, divisible: assetInfo['divisible'],
-          owner: assetInfo['owner'], isLocked: assetInfo['locked'], rawBalance: rawBalance,
-          rawTotalIssued: assetInfo['total_issued'], description: assetInfo['description'], 
-          callable: assetInfo['callable'], callDate: assetInfo['call_date'], callPrice: assetInfo['call_price']        
-        };
-        self.assets.push(new AssetViewModel(assetProps)); //add new
-      } else { //update existing
-        $.jqlog.log("Updating asset " + asset + " @ " + self.ADDRESS + ". Bal from " + match.rawBalance() + " to " + rawBalance + "; Others: " + JSON.stringify(assetInfo));
+    if (!match) { //add the asset if it doesn't exist
+      var assetProps = {
+        address: self.ADDRESS,
+        asset: asset,
+        divisible: assetInfo['divisible'],
+        owner: assetInfo['owner'] || assetInfo['issuer'],
+        isLocked: assetInfo['locked'],
+        rawBalance: rawBalance,
+        rawTotalIssued: assetInfo['total_issued'] || assetInfo['quantity'],
+        description: assetInfo['description'], 
+        callable: assetInfo['callable'],
+        callDate: assetInfo['call_date'],
+        callPrice: assetInfo['call_price']        
+      };
+      self.assets.push(new AssetViewModel(assetProps)); //add new
+    } else { //update existing
+      $.jqlog.log("Updating asset " + asset + " @ " + self.ADDRESS + ". Bal from " + match.rawBalance() + " to " + rawBalance + "; Others: " + JSON.stringify(assetInfo));
+      if(rawBalance == 0 && match.isMine() === false) {
+        //if balance goes down to zero and the asset isn't ours (or isn't BTC/LTC), remove it from the listing
+        self.assets.remove(match);
+      } else {
         match.owner(assetInfo['owner']);
-        match.isLocked(assetInfo['locked']);
+        if(assetInfo['locked']) match.isLocked(assetInfo['locked']); //only add locking
         match.rawBalance(rawBalance);
         match.rawTotalIssued(assetInfo['total_issued']);
         match.description(assetInfo['description']);
-
-        if(rawBalance == 0 && !match.isMine()) {
-          //if balance goes down to zero and the asset isn't ours (or isn't BTC/LTC), remove it from the listing
-          addressObj.removeAsset(asset);
-        }
       }
-    });
+    }
   }
   
   self.removeAsset = function(asset) {
@@ -148,11 +152,6 @@ function AddressViewModel(key, address, initialLabel) {
     }
 
     CREATE_ASSET_MODAL.show(self.ADDRESS);
-  }
-
-  self.callAsset = function() {
-    if(!WALLET.canDoTransaction(self.ADDRESS)) return false;
-    CALL_ASSET_MODAL.show(self.ADDRESS);
   }
 
   self.sortAssetsByName = function() {

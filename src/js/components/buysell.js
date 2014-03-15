@@ -15,7 +15,7 @@ ko.validation.rules['isValidQtyForBuyAssetDivisibility'] = {
       }
       return true;
     },
-    message: 'The amount must be a whole number, since this is a non-divisible asset.'
+    message: 'The quantity entered must be a whole number, since this is a non-divisible asset.'
 };
 ko.validation.rules['isValidQtyForSellAssetDivisibility'] = {
     validator: function (val, self) {
@@ -24,7 +24,7 @@ ko.validation.rules['isValidQtyForSellAssetDivisibility'] = {
       }
       return true;
     },
-    message: 'The amount must be a whole number, since this is a non-divisible asset.'
+    message: 'The quantity entered must be a whole number, since this is a non-divisible asset.'
 };
 ko.validation.rules['doesNotMatchSelectedBuyAsset'] = {
   validator: function (asset, self) {
@@ -76,28 +76,28 @@ ko.validation.rules['addressHasSellAssetBalance'] = {
   },
   message: 'You have no available balance for the sell asset at this address.'
 };
-ko.validation.rules['isValidBuyOrSellAmount'] = {
-  validator: function (amount, self) {
-    if(amount == null || amount == '') return true; //let the required validator handle this
-    return amount > 0;
+ko.validation.rules['isValidBuyOrSellQuantity'] = {
+  validator: function (quantity, self) {
+    if(quantity == null || quantity == '') return true; //let the required validator handle this
+    return quantity > 0;
   },
   message: 'Must be greater than 0'
 };
-ko.validation.rules['coorespondingSellAmountDoesNotExceedBalance'] = {
-  //For the amount the user wants to buy
-  validator: function (buyAmount, self) {
-    if(self.selectedSellAmount() == null) return true; //don't complain yet until the user fills something in
-    if(self.selectedSellAmountCustom()) return true; //this field is not used for custom orders (we do validation on the customBuy field instead)
-    if(!self.selectedAddress() || buyAmount == null || buyAmount == '') return false;
-    return self.sellAmountRemainingAfterSale() >= 0;
-    //return self.selectedSellAmount() <= self.totalBalanceAvailForSale();
+ko.validation.rules['coorespondingSellQuantityDoesNotExceedBalance'] = {
+  //For the quantity the user wants to buy
+  validator: function (buyQuantity, self) {
+    if(self.selectedSellQuantity() == null) return true; //don't complain yet until the user fills something in
+    if(self.selectedSellQuantityCustom()) return true; //this field is not used for custom orders (we do validation on the customBuy field instead)
+    if(!self.selectedAddress() || buyQuantity == null || buyQuantity == '') return false;
+    return self.sellQuantityRemainingAfterSale() >= 0;
+    //return self.selectedSellQuantity() <= self.totalBalanceAvailForSale();
   },
   message: 'You are trying to buy more than you can afford.'
 };
-ko.validation.rules['customSellAmountDoesNotExceedBalance'] = {
-  validator: function (amount, self) {
-    if(self.selectedSellAmountCustom() == null) return true; //don't complain yet until the user fills something in
-    return amount <= WALLET.getBalance(self.selectedAddress(), self.sellAsset());
+ko.validation.rules['customSellQuantityDoesNotExceedBalance'] = {
+  validator: function (quantity, self) {
+    if(self.selectedSellQuantityCustom() == null) return true; //don't complain yet until the user fills something in
+    return quantity <= WALLET.getBalance(self.selectedAddress(), self.sellAsset());
   },
   message: 'You have no available balance for the sell asset at this address.'
 };
@@ -250,10 +250,10 @@ function BuySellWizardViewModel() {
   
   //WIZARD TAB 2
   self.MARKET_DATA_REFRESH_TIMERID = null;
-  self.selectedBuyAmount = ko.observable().extend({
+  self.selectedBuyQuantity = ko.observable().extend({
     required: true,
-    isValidBuyOrSellAmount: self,
-    coorespondingSellAmountDoesNotExceedBalance: self,
+    isValidBuyOrSellQuantity: self,
+    coorespondingSellQuantityDoesNotExceedBalance: self,
     isValidQtyForBuyAssetDivisibility: self
   });
   self.currentMarketUnitPrice = ko.observable();
@@ -285,82 +285,82 @@ function BuySellWizardViewModel() {
   // delayed to that we don't make a bunch of ajax requests WHILE the user is typing...instead, waiting until the user
   // a) finishes typing and b) the value is valid, before making changes. Subscribing to changes in delayedBTCFee allows us to do this
   
-  self.selectedSellAmountCustom = ko.observable().extend({
+  self.selectedSellQuantityCustom = ko.observable().extend({
      //only set if there is no market data, or market data is overridden
     required: {
       message: "This field is required.",
       onlyIf: function () { return (self.currentMarketUnitPrice() === null); }
     },
-    isValidBuyOrSellAmount: self,
+    isValidBuyOrSellQuantity: self,
     isValidQtyForSellAssetDivisibility: self
   });
-  self.selectedSellAmountAtMarket = ko.computed(function() {
-    if(!self.assetPair() || !self.selectedBuyAmount() || !isNumber(self.selectedBuyAmount()) || !self.currentMarketUnitPrice()) return null;
-    if(parseFloat(self.selectedBuyAmount()) == 0) return 0;
+  self.selectedSellQuantityAtMarket = ko.computed(function() {
+    if(!self.assetPair() || !self.selectedBuyQuantity() || !isNumber(self.selectedBuyQuantity()) || !self.currentMarketUnitPrice()) return null;
+    if(parseFloat(self.selectedBuyQuantity()) == 0) return 0;
     if(self.assetPair()[0] == self.buyAsset()) //buy asset is the base
-      //self.selectedBuyAmount * self.currentMarketUnitPrice
-      return Decimal.round(new Decimal(self.selectedBuyAmount()).mul(self.currentMarketUnitPrice()), 8).toFloat();
+      //self.selectedBuyQuantity * self.currentMarketUnitPrice
+      return Decimal.round(new Decimal(self.selectedBuyQuantity()).mul(self.currentMarketUnitPrice()), 8).toFloat();
     else { // sell asset is the base
       assert(self.assetPair()[0] == self.sellAsset(), "Asset pair is what we thought it should be");
-      //self.selectedBuyAmount / self.currentMarketUnitPrice
-      return Decimal.round(new Decimal(self.selectedBuyAmount()).div(self.currentMarketUnitPrice()), 8).toFloat();
+      //self.selectedBuyQuantity / self.currentMarketUnitPrice
+      return Decimal.round(new Decimal(self.selectedBuyQuantity()).div(self.currentMarketUnitPrice()), 8).toFloat();
     }
   }, self);
-  self.selectedSellAmount = ko.computed(function() {
-    return(self.selectedSellAmountCustom() || self.selectedSellAmountAtMarket());
+  self.selectedSellQuantity = ko.computed(function() {
+    return(self.selectedSellQuantityCustom() || self.selectedSellQuantityAtMarket());
   }, self);
-  self.feeForSelectedSellAmount = ko.computed(function() {
-    //returns the fee (as an amount, not a %) for the specified sell amount
+  self.feeForSelectedSellQuantity = ko.computed(function() {
+    //returns the fee (as an quantity, not a %) for the specified sell quantity
     var fee = 0;
     if(self.sellAsset() == 'BTC') {
-      if(!self.selectedSellAmount() || !self.btcFee()) return 0;
+      if(!self.selectedSellQuantity() || !self.btcFee()) return 0;
       if(self.btcFeeAs() == 'percentage') {
-        fee = Decimal.round(new Decimal(self.selectedSellAmount()).mul(self.btcFee() / 100), 8).toFloat(); 
-      } else { //the amount itself
+        fee = Decimal.round(new Decimal(self.selectedSellQuantity()).mul(self.btcFee() / 100), 8).toFloat(); 
+      } else { //the quantity itself
         fee = parseFloat(self.btcFee());
       }
     }
     return fee;
   }, self);
-  self.dispFeeForSelectedSellAmountAsPct = ko.computed(function() {
-    if(!self.feeForSelectedSellAmount()) return null;
+  self.dispFeeForSelectedSellQuantityAsPct = ko.computed(function() {
+    if(!self.feeForSelectedSellQuantity()) return null;
     return self.btcFeeAs() == 'percentage'
       ? self.btcFee()
-      : Decimal.round(new Decimal(100).mul(self.feeForSelectedSellAmount()).div(self.selectedSellAmount()), 2).toFloat();
+      : Decimal.round(new Decimal(100).mul(self.feeForSelectedSellQuantity()).div(self.selectedSellQuantity()), 2).toFloat();
   }, self);
   
   self.unitPriceCustom = ko.computed(function() {
-    if(!self.assetPair() || !self.selectedBuyAmount() || !self.selectedSellAmountCustom() || !isNumber(self.selectedSellAmountCustom())) return null;
+    if(!self.assetPair() || !self.selectedBuyQuantity() || !self.selectedSellQuantityCustom() || !isNumber(self.selectedSellQuantityCustom())) return null;
     //^ only valid when the market unit price doesn't exist or is overridden
-    if(parseFloat(self.selectedSellAmountCustom()) == 0 || parseFloat(self.selectedBuyAmount()) == 0) return null;
+    if(parseFloat(self.selectedSellQuantityCustom()) == 0 || parseFloat(self.selectedBuyQuantity()) == 0) return null;
     if(self.assetPair()[0] == self.buyAsset()) //buy asset is the base
-      //self.selectedSellAmountCustom / self.selectedBuyAmount
-      return Decimal.round(new Decimal(self.selectedSellAmountCustom()).div(self.selectedBuyAmount()), 8).toFloat().toFixed(8);
+      //self.selectedSellQuantityCustom / self.selectedBuyQuantity
+      return Decimal.round(new Decimal(self.selectedSellQuantityCustom()).div(self.selectedBuyQuantity()), 8).toFloat().toFixed(8);
     else { // sell asset is the base
       assert(self.assetPair()[0] == self.sellAsset());
-      //self.selectedBuyAmount / self.selectedSellAmountCustom
-      return Decimal.round(new Decimal(self.selectedBuyAmount()).div(self.selectedSellAmountCustom()), 8).toFloat();
+      //self.selectedBuyQuantity / self.selectedSellQuantityCustom
+      return Decimal.round(new Decimal(self.selectedBuyQuantity()).div(self.selectedSellQuantityCustom()), 8).toFloat();
     }
   }, self);
   self.unitPrice = ko.computed(function() {
     //if we've overridden the unit price, return that, otherwise go with the market rate (if there is one)
     return(self.unitPriceCustom() || self.currentMarketUnitPrice());
   }, self);
-  self.sellAmountRemainingAfterSale = ko.computed(function() {
-    if(!self.selectedSellAmount()) return null;
+  self.sellQuantityRemainingAfterSale = ko.computed(function() {
+    if(!self.selectedSellQuantity()) return null;
     var curBalance = WALLET.getBalance(self.selectedAddress(), self.sellAsset());
-    //curBalance - self.selectedSellAmount
-    var amountLeft = Decimal.round(new Decimal(curBalance).sub(self.selectedSellAmount()), 8).toFloat();
+    //curBalance - self.selectedSellQuantity
+    var quantityLeft = Decimal.round(new Decimal(curBalance).sub(self.selectedSellQuantity()), 8).toFloat();
     if(self.sellAsset() == 'BTC') { //include the fee if we're selling BTC
-      amountLeft = Decimal.round(new Decimal(amountLeft).sub(self.feeForSelectedSellAmount()), 8).toFloat();
+      quantityLeft = Decimal.round(new Decimal(quantityLeft).sub(self.feeForSelectedSellQuantity()), 8).toFloat();
     }
-    return amountLeft;
+    return quantityLeft;
   }, self);
-  self.dispSellAmountRemainingAfterSale = ko.computed(function() {
-    return numberWithCommas(noExponents(self.sellAmountRemainingAfterSale()));
+  self.dispSellQuantityRemainingAfterSale = ko.computed(function() {
+    return numberWithCommas(noExponents(self.sellQuantityRemainingAfterSale()));
   }, self);
-  self.dispSellAmountRemainingAfterSaleAbs = ko.computed(function() {
-    return numberWithCommas(noExponents(Math.abs(self.sellAmountRemainingAfterSale())));
+  self.dispSellQuantityRemainingAfterSaleAbs = ko.computed(function() {
+    return numberWithCommas(noExponents(Math.abs(self.sellQuantityRemainingAfterSale())));
   }, self);
   
 
@@ -374,8 +374,8 @@ function BuySellWizardViewModel() {
   });  
   
   self.validationModelTab2 = ko.validatedObservable({
-    selectedBuyAmount: self.selectedBuyAmount,
-    selectedSellAmountCustom: self.selectedSellAmountCustom,
+    selectedBuyQuantity: self.selectedBuyQuantity,
+    selectedSellQuantityCustom: self.selectedSellQuantityCustom,
     selectedUnitPrice: self.selectedUnitPrice,
     numBlocksUntilExpiration: self.numBlocksUntilExpiration,
     btcFee: self.btcFee,
@@ -460,12 +460,12 @@ function BuySellWizardViewModel() {
           self.showOpenOrders(false);
           self.overrideMarketPrice(false);
           self.overrideDefaultOptions(false);
-          $('a[href="#tab2"] span.title').text("Select Amounts");
+          $('a[href="#tab2"] span.title').text("Select Quantitys");
           $('#tradeHistory').dataTable().fnClearTable(); //otherwise we get duplicate rows for some reason...
           
           //reset the fields on tab 2
-          self.selectedBuyAmount(null);
-          self.selectedSellAmountCustom(null);
+          self.selectedBuyQuantity(null);
+          self.selectedSellQuantityCustom(null);
           self.currentMarketUnitPrice(null);
           self.numBlocksUntilExpiration(ORDER_DEFAULT_EXPIRATION);
           self.btcFee(ORDER_DEFAULT_BTCFEE_PCT);
@@ -480,9 +480,9 @@ function BuySellWizardViewModel() {
           self.askDepth(null);
         } else if(current == 2) {
           assert(self.assetPair(), "Asset pair is not set");
-          self.selectedBuyAmount.isModified(false);
-          self.selectedSellAmountCustom.isModified(false);
-          $('a[href="#tab2"] span.title').text("Select Amounts (" + self.dispAssetPair() + ")");
+          self.selectedBuyQuantity.isModified(false);
+          self.selectedSellQuantityCustom.isModified(false);
+          $('a[href="#tab2"] span.title').text("Select Quantitys (" + self.dispAssetPair() + ")");
 
           //Set up the timer to refresh market data (this will immediately refresh and display data as well)
           self._tab2StartAutoRefresh();
@@ -525,23 +525,23 @@ function BuySellWizardViewModel() {
           }
         } else if(index == 3) {
           //user has confirmed -- submit the order to the server
-          var buyAmount = denormalizeAmount(self.selectedBuyAmount(), self.buyAssetIsDivisible());
-          var sellAmount = denormalizeAmount(self.selectedSellAmount(), self.sellAssetIsDivisible());
+          var buyQuantity = denormalizeQuantity(self.selectedBuyQuantity(), self.buyAssetIsDivisible());
+          var sellQuantity = denormalizeQuantity(self.selectedSellQuantity(), self.sellAssetIsDivisible());
 
           WALLET.doTransaction(self.selectedAddress(), "create_order",
             {source: self.selectedAddress(),
-             give_amount: sellAmount,
+             give_quantity: sellQuantity,
              give_asset: self.sellAsset(),
              _give_divisible: self.sellAssetIsDivisible(),
-             get_amount: buyAmount,
+             get_quantity: buyQuantity,
              get_asset: self.buyAsset(),
              _get_divisible: self.buyAssetIsDivisible(),
-             fee_required: self.buyAsset() == 'BTC' ? denormalizeAmount(self.feeForSelectedSellAmount()) : null,
-             fee_provided: self.sellAsset() == 'BTC' ? denormalizeAmount(self.feeForSelectedSellAmount()) : null,
+             fee_required: self.buyAsset() == 'BTC' ? denormalizeQuantity(self.feeForSelectedSellQuantity()) : null,
+             fee_provided: self.sellAsset() == 'BTC' ? denormalizeQuantity(self.feeForSelectedSellQuantity()) : null,
              expiration: parseInt(self.numBlocksUntilExpiration())
             },
             function() {
-              bootbox.alert("Your order for <b>" + self.selectedBuyAmount() + " "
+              bootbox.alert("Your order for <b>" + self.selectedBuyQuantity() + " "
                + self.selectedBuyAsset() + "</b> has been placed. "
                + ACTION_PENDING_NOTICE);
               checkURL(); //reset the form and take the user back to the first tab by just refreshing the page
@@ -611,8 +611,8 @@ function BuySellWizardViewModel() {
   self.tab2RefreshOrderBook = function() {
     //get order book
     var args = {'asset1': self.buyAsset(), 'asset2': self.sellAsset()};
-    if(self.buyAsset() == 'BTC') args['normalized_fee_required'] = self.feeForSelectedSellAmount();
-    if(self.sellAsset() == 'BTC') args['normalized_fee_provided'] = self.feeForSelectedSellAmount();
+    if(self.buyAsset() == 'BTC') args['normalized_fee_required'] = self.feeForSelectedSellQuantity();
+    if(self.sellAsset() == 'BTC') args['normalized_fee_provided'] = self.feeForSelectedSellQuantity();
     
     failoverAPI("get_order_book", args, function(data, endpoint) {
       if(!data['raw_orders'] || data['raw_orders'].length == 0) return;
@@ -643,29 +643,29 @@ function BuySellWizardViewModel() {
     });
   }
   
-  self.derivePendingOrderAssetAmount = function(asset, amount) {
+  self.derivePendingOrderAssetQuantity = function(asset, quantity) {
     //helper function for showing pending trades
-    assert(asset && amount, "Asset and/or amount not present");
+    assert(asset && quantity, "Asset and/or quantity not present");
     if(asset == self.buyAsset()) {
-      return normalizeAmount(amount, self.buyAssetIsDivisible());
+      return normalizeQuantity(quantity, self.buyAssetIsDivisible());
     } else {
       assert(asset == self.sellAsset());
-      return normalizeAmount(amount, self.sellAssetIsDivisible());
+      return normalizeQuantity(quantity, self.sellAssetIsDivisible());
     }
   }
 
-  self.derivePendingOrderAssetPrice = function(asset1, amount1, asset2, amount2) {
+  self.derivePendingOrderAssetPrice = function(asset1, quantity1, asset2, quantity2) {
     //helper function for showing pending trades
-    assert(asset1 && amount1, "Asset1 and/or amount1 not present");
-    assert(asset2 && amount2, "Asset2 and/or amount2 not present");
-    var derivedAmount1 = self.derivePendingOrderAssetAmount(asset1, amount1);
-    var derivedAmount2 = self.derivePendingOrderAssetAmount(asset2, amount2);
+    assert(asset1 && quantity1, "Asset1 and/or quantity1 not present");
+    assert(asset2 && quantity2, "Asset2 and/or quantity2 not present");
+    var derivedQuantity1 = self.derivePendingOrderAssetQuantity(asset1, quantity1);
+    var derivedQuantity2 = self.derivePendingOrderAssetQuantity(asset2, quantity2);
     
     if(asset1 == self.baseAsset()) {
-      return Decimal.round(new Decimal(derivedAmount2).div(derivedAmount1), 8).toFloat();
+      return Decimal.round(new Decimal(derivedQuantity2).div(derivedQuantity1), 8).toFloat();
     } else {
       assert(asset2 == self.baseAsset());
-      return Decimal.round(new Decimal(derivedAmount1).div(derivedAmount2), 8).toFloat();
+      return Decimal.round(new Decimal(derivedQuantity1).div(derivedQuantity2), 8).toFloat();
     }
   }
   

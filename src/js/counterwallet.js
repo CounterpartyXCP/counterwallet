@@ -58,7 +58,7 @@ var ORDER_DEFAULT_EXPIRATION = 100; //num blocks until expiration
 var DEFAULT_NUM_ADDRESSES = 3; //default number of addresses to generate
 
 var AUTOPRIME_AT_LESSTHAN_REMAINING = 10; //auto prime at less than this many txouts remaining
-var AUTOPRIME_MAX_AMOUNT = 10; //max number of txns to add with an autoprime
+var AUTOPRIME_MAX_COUNT = 10; //max number of txns to add with an autoprime
 var AUTOPRIME_MIN_CONFIRMED_BTC_BAL = 0.005; //don't autoprime if the account has less than this balance (too much churn)
 
 var ACTION_PENDING_NOTICE = "This action will appear as a Pending Action until confirmed on the network.";

@@ -1,14 +1,14 @@
 
-function normalizeAmount(amount, divisible) {
+function normalizeQuantity(quantity, divisible) {
   //Converts from satoshi (int) to float (decimal form)
   if(typeof(divisible)==='undefined') divisible = true;
-  return divisible ? Decimal.round(new Decimal(amount).div(UNIT), 8).toFloat() : parseInt(amount);
+  return divisible ? Decimal.round(new Decimal(quantity).div(UNIT), 8).toFloat() : parseInt(quantity);
 }
 
-function denormalizeAmount(amount, divisible) {
+function denormalizeQuantity(quantity, divisible) {
   //Converts from float (decimal form) to satoshi (int) 
   if(typeof(divisible)==='undefined') divisible = true;
-  return divisible ? Decimal.round(new Decimal(amount).mul(UNIT), 8).toFloat() : parseInt(amount);
+  return divisible ? Decimal.round(new Decimal(quantity).mul(UNIT), 8).toFloat() : parseInt(quantity);
 }
 
 function hashToB64(content) {
@@ -17,7 +17,7 @@ function hashToB64(content) {
   return Bitcoin.convert.bytesToBase64(Bitcoin.Crypto.SHA256(content, {asBytes: true}));  
 }
 
-function smartFormat(num) { //arbitrary rules to make amounts be formatted a bit more friendly
+function smartFormat(num) { //arbitrary rules to make quantities formatted a bit more friendly
   //if(num > 10) num = Decimal.round(new Decimal(num), 4).toFloat();
   if(num > 10) num = +num.toFixed(4); //use + sign to lob off any trailing zeros...
   return numberWithCommas(num);
@@ -100,47 +100,47 @@ function randomGetBytes(numBytes) {
 }
 
 function testnetBurnDetermineEarned(blockHeight, burned) {
-  //burned is the amount of BTC to burn (as a float -- normalized value)
-  //XCP amount returned is as a float -- normalized value
-  burned = denormalizeAmount(burned);
+  //burned is the quantity of BTC to burn (as a float -- normalized value)
+  //XCP quantity returned is as a float -- normalized value
+  burned = denormalizeQuantity(burned);
   var total_time = TESTNET_BURN_END - TESTNET_BURN_START;
   var partial_time = TESTNET_BURN_END - blockHeight;
   var multiplier = 1000 * (1 + .5 * (partial_time / total_time)); //will be approximate
   var earned = Decimal.round(new Decimal(burned).mul(multiplier), 8).toFloat();
-  return normalizeAmount(earned);
+  return normalizeQuantity(earned);
 }
 
 function primeAddress(address, numNewPrimedTxouts, utxosData, onSuccess) {
   //construct a transaction
   var sendTx = new Bitcoin.Transaction();
-  var inputAmount = (numNewPrimedTxouts * MIN_PRIME_BALANCE) + MIN_FEE; //in satoshi
-  var inputAmountRemaining = inputAmount;
+  var inputQuantity = (numNewPrimedTxouts * MIN_PRIME_BALANCE) + MIN_FEE; //in satoshi
+  var inputQuantityRemaining = inputQuantity;
   var txHash = null, txOutputN = null, txIn = null;
   //Create inputs, using smallest quantity of the highest value UTXOs possible (to avoid
   // consuming our small primed inputs, which would be counterproductive :)
-  utxosData.sort(function(a, b) { return b.amount - a.amount; }); //sort descending on output value  
+  utxosData.sort(function(a, b) { return b['amount'] - a['amount']; }); //sort descending on output value  
   for(var i=0; i < utxosData.length; i++) {
       txIn = new Bitcoin.TransactionIn({
         outpoint: {
-          hash: utxosData[i].txid,
-          index: utxosData[i].vout
+          hash: utxosData[i]['txid'],
+          index: utxosData[i]['vout']
         }
       });
       sendTx.addInput(txIn);
-      sendTx.ins[i].script = Bitcoin.Script.fromHex(utxosData[i].scriptPubKey);
-      inputAmountRemaining -= denormalizeAmount(utxosData[i].amount);
-      if(inputAmountRemaining <= 0)
+      sendTx.ins[i].script = Bitcoin.Script.fromHex(utxosData[i]['scriptPubKey']);
+      inputQuantityRemaining -= denormalizeQuantity(utxosData[i]['amount']);
+      if(inputQuantityRemaining <= 0)
         break;
   } 
-  assert(inputAmountRemaining <= 0, "Insufficient confirmed bitcoin balance to prime account: " + address);
+  assert(inputQuantityRemaining <= 0, "Insufficient confirmed bitcoin balance to prime account: " + address);
   
   //Create outputs for the priming itself (x MIN_PRIME_BALANCE BTC outputs)
   for(var i=0; i < numNewPrimedTxouts; i++) {
     sendTx.addOutput(address, MIN_PRIME_BALANCE);
   }
   //Create an output for change
-  var changeAmount = Math.abs(inputAmountRemaining);
-  sendTx.addOutput(address, changeAmount);
+  var changeQuantity = Math.abs(inputQuantityRemaining);
+  sendTx.addOutput(address, changeQuantity);
   //^ The remaining should be MIN_FEE, which will of course go to the miners
   
   var rawTxHex = sendTx.serializeHex();
