@@ -185,7 +185,7 @@ function LogonViewModel() {
             for(j=0; j < balancesData.length; j++) {
               if(balancesData[j]['asset'] != assetsInfo[i]['asset']) continue;
               WALLET.getAddressObj(balancesData[j]['address']).addOrUpdateAsset(
-                assetsInfo[i]['asset'], balancesData[j]['quantity'], assetsInfo[i]);
+                assetsInfo[i]['asset'], assetsInfo[i], balancesData[j]['quantity']);
               numBalProcessed += 1;
               if(numBalProcessed == balancesData.length) return onSuccess();
             }

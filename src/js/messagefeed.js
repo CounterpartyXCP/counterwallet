@@ -64,11 +64,20 @@ function initMessageFeed() {
   });
 }
 
+function _getEventID(message) {
+  var eventID = message['event'] || message['tx_hash'] || (message['tx0_hash'] + message['tx1_hash']);
+  assert(eventID, "Cannot derive a eventID: " + JSON.stringify(message));
+  return eventID;
+}
+
 function parseMessageWithFeedGapDetection(category, message) {
   if(!message || (message.substring && message.startswith("<html>"))) return;
   //^ sometimes nginx can trigger this via its proxy handling it seems, with a blank payload (or a html 502 Bad Gateway
   // payload) -- especially if the backend server reloads. Just ignore it.
-  $.jqlog.info("feed:RECV MESSAGE=" + category + ", IDX=" + message['_message_index'] + " (last idx: " + LAST_MESSAGEIDX_RECEIVED + ") -- " + JSON.stringify(message));
+  var eventID = _getEventID(message);
+  $.jqlog.info("feed:RECV MESSAGE=" + category + ", IDX=" + message['_message_index'] + " (last idx: "
+    + LAST_MESSAGEIDX_RECEIVED + "), EVENTID=" + eventID + ", CONTENTS=" + JSON.stringify(message));
+
   if((message['_message_index'] === undefined || message['_message_index'] === null) && IS_DEV) debugger; //it's an odd condition we should look into...
   assert(LAST_MESSAGEIDX_RECEIVED, "LAST_MESSAGEIDX_RECEIVED is not defined! Should have been set from is_ready on logon.");
   assert(message['_message_index'] > LAST_MESSAGEIDX_RECEIVED, "Received message_index is < LAST_MESSAGEIDX_RECEIVED");
@@ -76,7 +85,7 @@ function parseMessageWithFeedGapDetection(category, message) {
   //handle normal case that the message we received is the next in order
   if(message['_message_index'] == LAST_MESSAGEIDX_RECEIVED + 1) {
     LAST_MESSAGEIDX_RECEIVED += 1;
-    return handleMessage(category, message);
+    return handleMessage(eventID, category, message);
   }
   
   //otherwise, we have a forward gap
@@ -90,18 +99,20 @@ function parseMessageWithFeedGapDetection(category, message) {
   }
   
   failoverAPI("get_messagefeed_messages_by_index", [missingMessages], function(missingMessageData, endpoint) {
+    var missingEventID = null;
     for(var i=0; i < missingMessageData.length; i++) {
+      missingEventID = _getEventID(message);
       assert(missingMessageData[i]['_message_index'] == missingMessages[i], "Message feed resync list oddity...?");
-      handleMessage(missingMessageData[i]['_category'], missingMessageData[i]);
+      handleMessage(missingEventID, missingMessageData[i]['_category'], missingMessageData[i]);
       assert(LAST_MESSAGEIDX_RECEIVED + 1 == missingMessageData[i]['_message_index'], "Message feed resync counter increment oddity...?");
       LAST_MESSAGEIDX_RECEIVED = missingMessageData[i]['_message_index']; 
     }
     //all caught up, call the callback for the original message itself
-    handleMessage(category, message);
+    handleMessage(eventID, category, message);
   });
 }
 
-function handleMessage(category, message) {
+function handleMessage(eventID, category, message) {
   //Detect a reorg and refresh the current page if so.
   if(message['_category'] == 'reorg') {
     //Don't need to adjust the message index
@@ -114,13 +125,12 @@ function handleMessage(category, message) {
   //filter out non insert messages for now
   if(message['_command'] != 'insert')
     return;
-
+    
   //remove any pending message from the pending actions pane (we do this before we filter out invalid messages
   // because we need to report on invalid messages)
-  if(category != "btcpays") // (btcpays have their own remove method)
-    PENDING_ACTION_FEED.removePendingAction(category, message);
-  else if(category == "btcpays" && message['status'].startsWith('invalid'))
-    PENDING_ACTION_FEED.removePendingBTCPay(message['order_match_id'], message);
+  PENDING_ACTION_FEED.removePendingAction(eventID, category, message);
+  if(category == "btcpays" && message['status'].startsWith('invalid'))
+    PENDING_ACTION_FEED.removePendingBTCPay(message['order_match_id'], message); //this will notify the user that their BTCpay was not valid
 
   //filter out any invalid messages for action processing itself
   assert(message['_status'].startsWith('valid')
@@ -136,9 +146,22 @@ function handleMessage(category, message) {
   
   //Have the action take effect (i.e. everything besides notifying the user in the notifcations pane, which was done above)
   if(category == "balances") {
+    //DO NOTHING
   } else if(category == "credits" || category == "debits") {
     if(WALLET.getAddressObj(message['address'])) {
-      WALLET.updateBalance(message['address'], message['asset'], message['_balance']);
+      //remove non-BTC/XCP asset objects that now have a zero balance from a debit
+      if(message['_balance'] == 0 && message['asset'] != "BTC" && message['asset'] != "XCP") {
+        assert(category == "debits"); //a credit to a balance of zero??
+        var addressObj = WALLET.getAddressObj(message['address']);
+        var assetObj = addressObj.getAssetObj(message['asset']);
+        if(assetObj.isMine()) { //keep the asset object here, even if it has a zero balance
+          WALLET.updateBalance(message['address'], message['asset'], message['_balance']);
+        } else {
+          addressObj.assets.remove(assetObj); //not owned by this address, with a zero balance?!? it's outta here
+        }
+      } else {
+        WALLET.updateBalance(message['address'], message['asset'], message['_balance']);
+      }
     }
   } else if(category == "broadcasts") {
     //TODO
@@ -166,10 +189,14 @@ function handleMessage(category, message) {
   } else if(category == "issuances") {
     var addressesWithAsset = WALLET.getAddressesWithAsset(message['asset']);
     for(var i=0; i < addressesWithAsset.length; i++) {
-      WALLET.getAddressObj(addressesWithAsset[i]).addOrUpdateAsset(
-        message['asset'], message['_quantity_normalized'], message);
+      WALLET.getAddressObj(addressesWithAsset[i]).addOrUpdateAsset(message['asset'], message, null);
+    }
+    //Also, if this is a new asset creation, or a transfer to an address that doesn't have the asset yet
+    if(!addressesWithAsset.contains(message['issuer'])) {
+      WALLET.getAddressObj(message['issuer']).addOrUpdateAsset(message['asset'], message, null);
     }
   } else if(category == "sends") {
+    //the effects of a send are handled based on the credit and debit messages it creates, so nothing to do here
   } else if(category == "orders") {
     if(!WALLET.getAddressObj(message['source'])) {
       //List the order in our open orders list (activities feed)

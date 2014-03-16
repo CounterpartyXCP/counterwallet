@@ -5,7 +5,7 @@
         My Account Balances 
     </h1>
   </div>
-  <div class="pull-right" style="padding-right: 13px;">
+  <div class="pull-right" style="padding-right: 14px;padding-top: 14px;">
     <div class="btn-group">
         <button id="createAddress" type="button" class="btn btn-primary">
             Create New Address
@@ -68,9 +68,9 @@
                     <li><a data-bind="visible: !$parent.IS_WATCH_ONLY, click: send" href="#">Send</a></li>
                     <li><a data-bind="visible: isMine() !== null, click: showInfo" href="#">Show Info</a></li>
                     <li data-bind="visible: !$parent.IS_WATCH_ONLY && USE_TESTNET && ASSET == 'BTC'"><a data-bind="click: testnetBurn" href="#">Burn for XCP</a></li>
-                    <li data-bind="visible: !$parent.IS_WATCH_ONLY && isMine() && !isLocked()"><a data-bind="click: issueAdditional" href="#">Issue Additional</a></li>
+                    <li data-bind="visible: !$parent.IS_WATCH_ONLY && isMine() && !locked()"><a data-bind="click: issueAdditional" href="#">Issue Additional</a></li>
                     <li data-bind="visible: !$parent.IS_WATCH_ONLY && isMine()"><a data-bind="click: transfer" href="#">Transfer Ownership</a></li>
-                    <li data-bind="visible: !$parent.IS_WATCH_ONLY && isMine() && !isLocked()"><a data-bind="click: lock" href="#">Lock Asset Ownership</a></li>
+                    <li data-bind="visible: !$parent.IS_WATCH_ONLY && isMine() && !locked()"><a data-bind="click: lock" href="#">Lock Asset Ownership</a></li>
                     <li data-bind="visible: !$parent.IS_WATCH_ONLY && isMine()"><a data-bind="click: changeDescription" href="#">Change Asset Description</a></li>
                     <li data-bind="visible: !$parent.IS_WATCH_ONLY && isMine()"><a data-bind="click: payDividend" href="#">Pay Dividend</a></li>
                     <li data-bind="visible: !$parent.IS_WATCH_ONLY && isMine() && CALLABLE"><a data-bind="click: call" href="#">Call</a></li>
@@ -82,7 +82,7 @@
                     <span data-bind="visible: isMine()">Issued: <span data-bind="text: dispTotalIssued"></span></span><br/>
                     Bal: <span data-bind="text: normalizedBalance() === null ? '???' : smartFormat(normalizedBalance())"></span></p>
                 <div style="position:absolute;bottom:2px;right:10px">
-                    <span data-bind="visible: isLocked()" style="float:right;padding-left:5px;"
+                    <span data-bind="visible: locked()" style="float:right;padding-left:5px;"
                         title="Asset is locked"><i class="icon-append fa fa-lock"></i></span>
                     <span data-bind="visible: CALLABLE" style="float:right;padding-left:5px;"
                         title="Asset is callable"><i class="icon-append fa fa-mail-reply-all"></i></span>
@@ -150,7 +150,7 @@
       <div class="modal-body no-padding">
         <p class="formPadded">Send <b data-bind="text: asset"></b> from your address <b data-bind="text: address"></b>
         to the address you enter below.<br/><br/>
-        You have <b><span class="buyColor" data-bind="text: numberWithCommas(normalizedBalance())"></span> <span class="sellColor" data-bind="text: asset"></span></b>
+        You have <b><span class="buyColor" data-bind="text: numberWithCommas(normalizedBalance())"></span> <span class="buyColor" data-bind="text: asset"></span></b>
         available to send from this address.
         </p>
         
@@ -170,7 +170,9 @@
                     <i class="icon-append fa fa-share"></i>
                     <input name="quantity" data-bind="value: quantity, valueUpdate: 'afterkeydown', attr: {placeholder: 'Enter quantity'}" type="text"/>
                 </label>
-                <span>&nbsp;&nbsp;<span style="font-weight: bold" data-bind="text: asset"></span></span>
+                <span>
+                    &nbsp;&nbsp;<button type="button" data-bind="click: maxAmount" class="btn btn-default btn-sm">MAX</button>
+                </span>
             </div>
           </div></section>
         </fieldset></form>
@@ -688,7 +690,7 @@
             <div class="col col-sm-2"></div>
             <div class="col col-sm-10">
               <label class="checkbox">
-                <input name="assetDivisible" type="checkbox" data-bind="checked: isLocked" disabled="disabled">
+                <input name="assetDivisible" type="checkbox" data-bind="checked: locked" disabled="disabled">
                 <i></i>Is locked?
               </label>
               <div class="note">Locked assets may not have additional unit issued.</div>

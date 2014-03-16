@@ -3,14 +3,14 @@ function PendingBTCPayViewModel(btcPayData) {
   /* message is a message data object from the message feed for an order_match that requires a btc pay from an address in our wallet*/
   var self = this;
   self.BTCPAY_DATA = btcPayData;
-  self.whenBTCPayRequested = ko.observable(new Date());
+  self.WHEN_REQUESTED = new Date();
   self.now = ko.observable(new Date()); //auto updates from the parent model every minute
   
   self.displayColor = ko.computed(function() {
     /* todo make this work off of an updating timestamp..*/
-    if(self.now() - self.whenBTCPayRequested() > 3600 * 1000) return 'bg-color-red'; //> 1 hour
-    if(self.now() - self.whenBTCPayRequested() > 1800 * 1000) return 'bg-color-orange'; //> 30 min
-    if(self.now() - self.whenBTCPayRequested() > 900 * 1000) return 'bg-color-yellow'; //> 15 min
+    if(self.now() - self.WHEN_REQUESTED > 3600 * 1000) return 'bg-color-red'; //> 1 hour
+    if(self.now() - self.WHEN_REQUESTED > 1800 * 1000) return 'bg-color-orange'; //> 30 min
+    if(self.now() - self.WHEN_REQUESTED > 900 * 1000) return 'bg-color-yellow'; //> 15 min
     return 'bg-color-greenLight';
   }, self);
   
@@ -54,88 +54,96 @@ function PendingBTCPayViewModel(btcPayData) {
   }
 }
 
-function PendingActionViewModel(category, keyData) {
-  var self = this;
-  self.WHEN = ko.observable(new Date());
-  self.CATEGORY = category;
-  self.KEYDATA = keyData;
-  self.DISPLAY_ICON = ENTITY_ICONS[self.CATEGORY];
-  self.DISPLAY_COLOR = ENTITY_NOTO_COLORS[self.CATEGORY];
-   
-  self.displayText = function() {
-    //TODO: this display of data is very elementary and basic. IMPROVE greatly in the future...
-    var desc = "";
-    var asset = WALLET.getAsset
-    if(self.CATEGORY == 'burns') {
-      desc = "Pending burn of <Am>" + normalizeQuantity(self.KEYDATA['burned']) + "</Am> <As>BTC</As>";
-    } else if(self.CATEGORY == 'sends') {
-      desc = "Pending send of <Am>" + numberWithCommas(normalizeQuantity(self.KEYDATA['quantity'], self.KEYDATA['_divisible'])) + "</Am> <As>" + self.KEYDATA['asset']
-        + "</As> to <Ad>" + getLinkForCPData('address', self.KEYDATA['destination'],  getAddressLabel(self.KEYDATA['destination'])) + "</Ad>"; 
-    } else if(self.CATEGORY == 'orders') {
-      desc = "Pending order to sell <Am>" + numberWithCommas(normalizeQuantity(self.KEYDATA['give_quantity'], self.KEYDATA['_give_divisible']))
-        + "</Am> <As>" + self.KEYDATA['give_asset'] + "</As> for <Am>"
-        + numberWithCommas(normalizeQuantity(self.KEYDATA['get_quantity'], self.KEYDATA['_get_divisible'])) + "</Am> <As>"
-        + self.KEYDATA['get_asset'] + "</As>";
-    } else if(self.CATEGORY == 'issuances') {
-      if(self.KEYDATA['transfer']) {
-        desc = "Pending transfer of asset <As>" + self.KEYDATA['asset'] + "</As> from <Ad>"
-          + getLinkForCPData('address', self.KEYDATA['source'], getAddressLabel(self.KEYDATA['source'])) + "</Ad> to <Ad>"
-          + getLinkForCPData('address', self.KEYDATA['issuer'], getAddressLabel(self.KEYDATA['issuer'])) + "</Ad>"; 
-      } else if(self.KEYDATA['description'] == 'LOCK') {
-        desc = "Pending lock of asset <As>" + self.KEYDATA['asset'] + "</As> against additional issuance";
-      } else if(self.KEYDATA['quantity'] == 0) {
-        desc = "Pending change of description for asset <As>" + self.KEYDATA['asset'] + "</As> to <b>" + self.KEYDATA['description'] + "</b>";
-      } else {
-        //See if this is an issuance or not
-        var assetObj = null;
-        var addressesWithAsset = WALLET.getAddressesWithAsset(msg['asset']);
-        if(addressesWithAsset.length)
-          assetObj = WALLET.getAddressObj(addressesWithAsset[0]).getAssetObj(msg['asset']);
-        
-        if(assetObj) { //additional issuance
-          desc = "Pending issuance for quantity <Am>" + numberWithCommas(normalizeQuantity(self.KEYDATA['quantity'], self.KEYDATA['divisible']))
-            + "</Am> units for asset <As>" + self.KEYDATA['asset'] + "</As>";
-        } else { //new issuance
-          desc = "Pending creation of asset <As>" + self.KEYDATA['asset'] + "</As> with initial quantity of <Am>"
-            + numberWithCommas(normalizeQuantity(self.KEYDATA['quantity'], self.KEYDATA['divisible'])) + "</Am> units";
-        }
-      }
-    } else if(self.CATEGORY == 'broadcasts') {
-      desc = "Pending broadcast:<br/>Text: " + self.KEYDATA['text'] + "<br/>Value:" + self.KEYDATA['value'];
-    } else if(self.CATEGORY == 'bets') {
-      desc = "Pending <b>" + BET_CATEGORYS[self.KEYDATA['bet_type']] + "</b> bet on feed @ <Ad>"
-        + getLinkForCPData('address', self.KEYDATA['feed_address'], getAddressLabel(self.KEYDATA['feed_address'])) + "</Ad><br/>"
-        + "Odds: " + self.KEYDATA['odds'] + ", Wager: <Am>"
-        + numberWithCommas(normalizeQuantity(self.KEYDATA['wager_quantity'])) + "</Am> <As>XCP</As>, Counterwager: <Am>"
-        + numberWithCommas(normalizeQuantity(self.KEYDATA['counterwager_quantity'])) + "</Am> <As>XCP</As>";  
-    } else if(self.CATEGORY == 'dividends') {
-      desc = "Pending dividend payment of <Am>" + numberWithCommas(self.KEYDATA['quantity_per_share']) + "</Am> <As>"
-        + self.KEYDATA['dividend_asset'] + "</As> on asset <As>" + self.KEYDATA['asset'] + "</As>";
-    } else if(self.CATEGORY == 'cancels') {
-      desc = "Pending cancellation of order/bet <i>" + data['offer_hash'] + "</i>";
-    } else if(self.CATEGORY == 'callbacks') {
-      desc = "Pending callback for <Am>" + self.KEYDATA['fraction'] + "</Am> fraction on asset <As>" + self.KEYDATA['asset'] + "</As>";
-    } else {
-      desc = "UNHANDLED TRANSACTION CATEGORY";
-    }
 
-    desc = desc.replace(/<Am>/g, '<b class="notoQuantityColor">').replace(/<\/Am>/g, '</b>');
-    desc = desc.replace(/<Ad>/g, '<b class="notoAddrColor">').replace(/<\/Ad>/g, '</b>');
-    desc = desc.replace(/<As>/g, '<b class="notoAssetColor">').replace(/<\/As>/g, '</b>');
-    return desc;
-  };
+function PendingActionViewModel(eventID, category, data) {
+  var self = this;
+  self.WHEN = new Date();
+  self.EVENTID = eventID;
+  self.CATEGORY = category;
+  self.DATA = data;
+  self.ICON_CLASS = ENTITY_ICONS[category];
+  self.COLOR_CLASS = ENTITY_NOTO_COLORS[category];
+  self.ACTION_TEXT = PendingActionViewModel.calcText(category, data);
 }
+PendingActionViewModel.calcText = function(category, data) {
+  //This is data as it is specified from the relevant create_ API request parameters (NOT as it comes in from the message feed)
+  var desc = "";
+  var divisible = null;
+  assert(!(category == "btcpays" || category == "balances" || category == "debits" || category == "credits"), "Invalid category");
+  if(data['source'] && data['asset'])
+    divisible = WALLET.getAddressObj(data['source']).getAssetObj(data['asset']).DIVISIBLE;
+
+  if(category == 'burns') {
+    desc = "Pending burn of <Am>" + normalizeQuantity(data['quantity']) + "</Am> <As>BTC</As>";
+  } else if(category == 'sends') {
+    desc = "Pending send of <Am>" + numberWithCommas(normalizeQuantity(data['quantity'], divisible)) + "</Am> <As>" + data['asset']
+      + "</As> from <Ad>" + getLinkForCPData('address', data['source'],  getAddressLabel(data['source'])) + "</Ad>"
+      + " to <Ad>" + getLinkForCPData('address', data['destination'],  getAddressLabel(data['destination'])) + "</Ad>"; 
+  } else if(category == 'orders') {
+    desc = "Pending order to sell <Am>" + numberWithCommas(normalizeQuantity(data['give_quantity'], data['_give_divisible']))
+      + "</Am> <As>" + data['give_asset'] + "</As> for <Am>"
+      + numberWithCommas(normalizeQuantity(data['get_quantity'], data['_get_divisible'])) + "</Am> <As>"
+      + data['get_asset'] + "</As>";
+  } else if(category == 'issuances') {
+    if(data['transfer_destination']) {
+      desc = "Pending transfer of asset <As>" + data['asset'] + "</As> from <Ad>"
+        + getLinkForCPData('address', data['source'], getAddressLabel(data['source'])) + "</Ad> to <Ad>"
+        + getLinkForCPData('address', data['transfer_destination'], getAddressLabel(data['transfer_destination'])) + "</Ad>"; 
+    } else if(data['locked']) {
+      desc = "Pending lock of asset <As>" + data['asset'] + "</As> against additional issuance";
+    } else if(data['quantity'] == 0) {
+      desc = "Pending change of description for asset <As>" + data['asset'] + "</As> to <b>" + data['description'] + "</b>";
+    } else {
+      //See if this is a new issuance or not
+      var assetObj = null;
+      var addressesWithAsset = WALLET.getAddressesWithAsset(data['asset']);
+      if(addressesWithAsset.length)
+        assetObj = WALLET.getAddressObj(addressesWithAsset[0]).getAssetObj(data['asset']);
+      
+      if(assetObj) { //the asset exists in our wallet already somewhere, so it's an additional issuance of more units for it
+        desc = "Pending issuance of <Am>" + numberWithCommas(normalizeQuantity(data['quantity'], data['divisible']))
+          + "</Am> additional units for asset <As>" + data['asset'] + "</As>";
+      } else { //new issuance
+        desc = "Pending creation of asset <As>" + data['asset'] + "</As> with initial quantity of <Am>"
+          + numberWithCommas(normalizeQuantity(data['quantity'], data['divisible'])) + "</Am> units";
+      }
+    }
+  } else if(category == 'broadcasts') {
+    desc = "Pending broadcast:<br/>Text: " + data['text'] + "<br/>Value:" + data['value'];
+  } else if(category == 'bets') {
+    desc = "Pending <b>" + BET_CATEGORYS[data['bet_type']] + "</b> bet on feed @ <Ad>"
+      + getLinkForCPData('address', data['feed_address'], getAddressLabel(data['feed_address'])) + "</Ad><br/>"
+      + "Odds: " + data['odds'] + ", Wager: <Am>"
+      + numberWithCommas(normalizeQuantity(data['wager_quantity'])) + "</Am> <As>XCP</As>, Counterwager: <Am>"
+      + numberWithCommas(normalizeQuantity(data['counterwager_quantity'])) + "</Am> <As>XCP</As>";  
+  } else if(category == 'dividends') {
+    desc = "Pending dividend payment of <Am>" + numberWithCommas(data['quantity_per_share']) + "</Am> <As>"
+      + data['dividend_asset'] + "</As> on asset <As>" + data['asset'] + "</As>";
+  } else if(category == 'cancels') {
+    desc = "Pending cancellation of order/bet <i>" + data['offer_hash'] + "</i>";
+  } else if(category == 'callbacks') {
+    desc = "Pending callback for <Am>" + data['fraction'] + "</Am> fraction on asset <As>" + data['asset'] + "</As>";
+  } else {
+    desc = "UNHANDLED TRANSACTION CATEGORY";
+  }
+
+  desc = desc.replace(/<Am>/g, '<b class="notoQuantityColor">').replace(/<\/Am>/g, '</b>');
+  desc = desc.replace(/<Ad>/g, '<b class="notoAddrColor">').replace(/<\/Ad>/g, '</b>');
+  desc = desc.replace(/<As>/g, '<b class="notoAssetColor">').replace(/<\/As>/g, '</b>');
+  return desc;
+}
+
 
 function PendingActionFeedViewModel() {
   var self = this;
   self.pendingBTCPays = ko.observableArray([]);
   self.pendingActions = ko.observableArray([]); //pending actions beyond pending BTCpays
   self.lastUpdated = ko.observable(new Date());
+  self.ALLOWED_CATEGORIES = [
+    'sends', 'orders', 'issuances', 'broadcasts', 'bets', 'dividends', 'burns', 'cancels', 'callbacks'
+    //^ pending actions are only allowed for these categories
+  ];
   
-  self.dispLastUpdated = ko.computed(function() {
-    return "Last Updated: " + self.lastUpdated().toTimeString(); 
-  }, self);
-
   self.dispCount = ko.computed(function() {
     return self.pendingBTCPays().length + self.pendingActions().length;
   }, self);
@@ -148,82 +156,33 @@ function PendingActionFeedViewModel() {
     }  
   }, 60 * 1000); 
 
-  self._generateKeyData = function(category, data) {
-    //compose the data dictionary from the passed in create_ dict
-    // the goal of the dict is to contain just enough parameters to uniquely identify the pending txn so it can be found
-    // and removed from the list, once the it is confirmed on the blockchain and we get the message feed message
-    var keyData = null;
-    if(category == 'burns') {
-      keyData = {'source': data.source, 'burned': data.burned || data.quantity};
-    } else if(category == 'sends') {
-      keyData = {'source': data.source, 'destination': data.destination, 'asset': data.asset, 'quantity': data.quantity};
-    } else if(category == 'orders') {
-      keyData = {'source': data.source,
-        'give_asset': data.give_asset, 'give_quantity': data.give_quantity, '_give_divisible': data._give_divisible,
-        'get_asset': data.get_asset, 'get_quantity': data.get_quantity, '_get_divisible': data._get_divisible,
-        'expiration': data.expiration};    
-    } else if(category == 'issuances') { //issue new, lock, transfer, change description, issue additional
-      keyData = {'source': data.source, 'asset': data.asset, 'quantity': data.quantity,
-        'transfer': data.transfer !== undefined ? data.transfer : (data.transfer_destination ? true : false),
-        'issuer': data.transfer_destination || data.issuer || data.source,
-        // the issuer is set to where the asset was transferred to, in the case of transfers. otherwise, go with the existing issuer
-        'description': data.description, 'divisible': data.divisible};
-    } else if(category == 'broadcasts') {
-      keyData = {'source': data.source, 'text': data.text, 'value': data.value};
-    } else if(category == 'bets') {
-      keyData = {'source': data.source, 'feed_address': data.feed_address, 'bet_type': data.bet_type,
-        'deadline': data.deadline, 'wager_quantity': data.wager_quantity, 'counterwager_quantity': data.counterwager_quantity};    
-    } else if(category == 'dividends') {
-      keyData = {'source': data.source, 'asset': data.asset, 'dividend_asset': data.dividend_asset,
-        'quantity_per_unit': data.quantity_per_unit};
-    } else if(category == 'cancels') {
-      keyData = {'source': data.source, 'offer_hash': data.offer_hash};
-    } else if(category == 'callbacks') {
-      keyData = {'source': data.source, 'fraction': data.fraction, 'asset': data.asset};
-    } else {
-      //certain actions, like debits, credits, cancellations, etc either are ignored or don't apply
-      $.jqlog.log("Ignored action: " + category + " -- " + JSON.stringify(keyData));
-      return null;
-    }
-    //check for some common fields
-    assert(keyData['source'], "Missing source");
-    
-    //add in some other helpful fields
-    if(keyData['asset']) {
-      if(data['_divisible'] === undefined && data['divisible'] === undefined)
-        keyData['_divisible'] = WALLET.getAddressObj(keyData['source']).getAssetObj(keyData['asset']).DIVISIBLE;
-      else
-        keyData['_divisible'] = data['_divisible'] || data['divisible']; 
-    }
-    return keyData;
-  }
-  
-  self.addPendingAction = function(category, data) {
-    var keyData = self._generateKeyData(category, data);
-    if(keyData === null) return; //ignored action
-    self.pendingActions.push(new PendingActionViewModel(category, keyData));
-    $.jqlog.log("pendingAction:add:" + category + ": " + JSON.stringify(keyData));
+  self.addPendingAction = function(eventID, category, data) {
+    assert(self.ALLOWED_CATEGORIES.contains(category), "Illegal pending action category");
+    var pendingAction = new PendingActionViewModel(eventID, category, data);
+    if(!pendingAction.ACTION_TEXT) return; //not something we need to display and/or add to the list
+    self.pendingActions.unshift(pendingAction);
+    $.jqlog.log("pendingAction:add:" + eventID + ":" + category + ": " + JSON.stringify(data));
     self.lastUpdated(new Date());
   }
 
-  self.removePendingAction = function(category, data) {
-    var keyData = self._generateKeyData(category, data);
-    if(keyData === null) return; //ignored action
+  self.removePendingAction = function(eventID, category, data) {
+    if(!self.ALLOWED_CATEGORIES.contains(category)) return; //ignore this category as we don't handle it
     var match = ko.utils.arrayFirst(self.pendingActions(), function(item) {
-      return item.CATEGORY == category && deepCompare(item.KEYDATA, keyData);
+      return item.EVENTID == eventID;
+      //item.CATEGORY == category
     });
     if(match) {
       self.pendingActions.remove(match);
-      $.jqlog.log("pendingAction:remove:" + category + ": " + JSON.stringify(keyData));
+      $.jqlog.log("pendingAction:remove:" + eventID + ":" + category + ": " + JSON.stringify(data));
       self.lastUpdated(new Date());
     } else{
-      $.jqlog.log("pendingAction:NOT FOUND:" + category + ": " + JSON.stringify(keyData));
+      $.jqlog.log("pendingAction:NOT FOUND:" + eventID + ":" + category + ": " + JSON.stringify(data));
     }
     
     //If the pending action is marked as invalid, then we want to let the user know (as it wont be added to their notifications)
-    if(match && data['status'].startsWith('invalid')) {
+    if(match && data['status'] && data['status'].startsWith('invalid')) {
       bootbox.alert("Network processing of the following action <b class='errorColor'>failed</b>:<br/><br/>"
-        + match.displayText() + "<br/><br/><b>Reason:</b> " + data['status']);
+        + match.ACTION_TEXT + "<br/><br/><b>Reason:</b> " + data['status']);
     }
   }
   
@@ -262,7 +221,6 @@ function PendingActionFeedViewModel() {
     }
   }
 }
-
 PendingActionFeedViewModel.makeBTCPayData = function(data) {
   var firstInPair = WALLET.getAddressObj(message['tx0_address']) ? true : false;
   if(!firstInPair) assert(WALLET.getAddressObj(message['tx1_address']));

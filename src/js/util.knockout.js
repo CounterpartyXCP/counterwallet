@@ -42,32 +42,19 @@ ko.bindingHandlers.showModal = {
 };
 
 ko.bindingHandlers.timeago = {
-  //http://stackoverflow.com/a/11270500
-  update: function(element, valueAccessor) {
-    var value = ko.utils.unwrapObservable(valueAccessor());
-    var $this = $(element);
-
-    // Set the title attribute to the new value = timestamp
-    $this.attr('title', value);
-
-    // If timeago has already been applied to this node, don't reapply it -
-    // since timeago isn't really flexible (it doesn't provide a public
-    // remove() or refresh() method) we need to do everything by ourselves.
-    if ($this.data('timeago')) {
-      var datetime = $.timeago.datetime($this);
-      var distance = (new Date().getTime() - datetime.getTime());
-      var inWords = $.timeago.inWords(distance);
-
-      // Update cache and displayed text..
-      $this.data('timeago', { 'datetime': datetime });
-      $this.text(inWords);
-    } else {
-      // timeago hasn't been applied to this node -> we should do that now
-      $this.timeago();
+    init: function (element, valueAccessor, allBindingsAccessor, viewModel, bindingContext) {
+        var value = valueAccessor();
+        var valueUnwrapped = ko.unwrap(value);
+        element.title = moment(valueUnwrapped).toISOString();
+        $(element).timeago();
+    },
+    update: function (element, valueAccessor, allBindingsAccessor, viewModel, bindingContext) {
+        var value = valueAccessor();
+        var valueUnwrapped = ko.unwrap(value);
+        element.title = moment(valueUnwrapped).toISOString();
+        $(element).timeago('update', element.title);
     }
-  }
-};
-
+}
 
 ko.bindingHandlers.datetimepicker = {
   init: function(element, valueAccessor, allBindingsAccessor) {

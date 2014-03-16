@@ -49,7 +49,7 @@ function urlsWithPath(urls, path) {
   return $.map(urls, function(element) { return element + path; });
 }
 
-function fetchData(url, onSuccess, onError, postdata, isJSONRPC, extraAJAXOpts, _url_n) {
+function fetchData(url, onSuccess, onError, postdata, extraAJAXOpts, isJSONRPC, _url_n) {
   /*Makes a simple AJAX request to the specified URL.
     
     -url: The URL to request. May be a single URL, or a list of URLs. If a list of URLs is specified,
@@ -67,11 +67,6 @@ function fetchData(url, onSuccess, onError, postdata, isJSONRPC, extraAJAXOpts, 
   if(typeof(extraAJAXOpts)==='undefined') extraAJAXOpts = {};
   if(typeof(_url_n)==='undefined') _url_n = 0;
   
-  if(isJSONRPC) {
-    extraAJAXOpts['contentType'] = 'application/json; charset=utf-8';
-    extraAJAXOpts['dataType'] = 'json';
-  }
-  
   //by default, do NOT cache anything, since this is focused around API stuff
   if(extraAJAXOpts['cache'] === undefined) extraAJAXOpts['cache'] = false;
 
@@ -83,7 +78,7 @@ function fetchData(url, onSuccess, onError, postdata, isJSONRPC, extraAJAXOpts, 
   
   var ajaxOpts = {
       type: !postdata ? "GET" : "POST",
-      data: !postdata ? "" : postdata,
+      data: postdata,
       //dataType: dataType, 
       url: u,
       success: function(res) {
@@ -117,7 +112,7 @@ function fetchData(url, onSuccess, onError, postdata, isJSONRPC, extraAJAXOpts, 
             if (onError) return onError(jqXHR, opt, err, u);
           } else {
             //try the next URL
-            return fetchData(url, onSuccess, onError, postdata, isJSONRPC, extraAJAXOpts, _url_n + 1);
+            return fetchData(url, onSuccess, onError, postdata, extraAJAXOpts, isJSONRPC, _url_n + 1);
           }
         } else {
           if (onError) return onError(jqXHR, opt, err, u);
@@ -130,17 +125,23 @@ function fetchData(url, onSuccess, onError, postdata, isJSONRPC, extraAJAXOpts, 
   $.ajax(ajaxOpts);
 }
 
-function _formulateEndpoints(endpoints, rpcMethod) {
-  //append the method name in the query string to aid in reporting/request log analysis
+function _formulateEndpoints(endpoints, qs) {
+  //for POST API requests, this is used to append the method name in the query string to aid in reporting/request log analysis
+  //for GET API requests, this is used to append the request itself to the endpoint host portion of the URI
   var newEndpoints = [];
   if(!(endpoints instanceof Array)) endpoints = [endpoints];
   for(var i=0; i < endpoints.length; i++) {
-    newEndpoints.push(endpoints + "?method=" + rpcMethod);
+    newEndpoints.push(endpoints + "?" + qs);
   }
   return newEndpoints;
 }
 
-function _makeJSONAPICall(destType, endpoints, method, params, timeout, onSuccess, onError) {
+function _encodeForJSONRPCOverGET(params) {
+  //This may be non-standard with JSON RPC 2.0...going off of http://www.jsonrpc.org/historical/json-rpc-over-http.html#get
+  return encodeURIComponent(Bitcoin.convert.bytesToBase64(Bitcoin.convert.stringToBytes(JSON.stringify(params))));
+}
+
+function _makeJSONAPICall(destType, endpoints, method, params, timeout, onSuccess, onError, httpMethod) {
   /*Makes a JSON RPC API call to a specific counterpartyd/counterwalletd endpoint.
    
     -endpoints: The specific API endpoint URL string to make the API request to.
@@ -155,20 +156,62 @@ function _makeJSONAPICall(destType, endpoints, method, params, timeout, onSucces
     onError = function(jqXHR, textStatus, errorThrown, endpoint) {
       return defaultErrorHandler(jqXHR, textStatus, errorThrown, method + "@" + destType)
     };
+  if(typeof(httpMethod)==='undefined') httpMethod = "POST"; //default to POST
+  assert(httpMethod == "POST" || httpMethod == "GET", "Invalid HTTP method");
   
   //make JSON API call to counterwalletd
-  if(destType == "counterwalletd") {
-    fetchData(_formulateEndpoints(endpoints, method),
-      onSuccess, onError,
-      JSON.stringify({"jsonrpc": "2.0", "id": 0, "method": method, "params": params}), true);
-  } else if(destType == "counterpartyd") {
-    //make JSON API call to counterwalletd, which will proxy it to counterpartyd
-    fetchData(_formulateEndpoints(endpoints, method),
-      onSuccess, onError,
-      JSON.stringify({
-        "jsonrpc": "2.0", "id": 0,
+  if(httpMethod == "POST") {
+    var extraAJAXOpts = {
+      'contentType': 'application/json; charset=utf-8',
+      'dataType': 'json'
+    }
+    
+    if(destType == "counterwalletd") {
+      fetchData(endpoints,
+        onSuccess, onError,
+        JSON.stringify({
+          "jsonrpc": "2.0",
+          "id": 0,
+          "method": method,
+          "params": params
+        }), extraAJAXOpts, true);
+    } else if(destType == "counterpartyd") {
+      //make JSON API call to counterwalletd, which will proxy it to counterpartyd
+      fetchData(endpoints,
+        onSuccess, onError,
+        JSON.stringify({
+          "jsonrpc": "2.0",
+          "id": 0,
+          "method": "proxy_to_counterpartyd",
+          "params": {"method": method, "params": params }
+        }), extraAJAXOpts, true);
+    }
+  } else { //GET
+    //The GET approach encodes the API request parameters into a URL query string on a GET request
+    //NOTE: GET query support is currently NOT IMPLEMENTED ON THE SERVER SIDE.
+    var qs = null;
+    var extraAJAXOpts = {
+      'crossDomain': true,
+    }
+    
+    if(destType == "counterwalletd") {
+      qs = $.param({
+        "jsonrpc": "2.0",
+        "id": 0,
+        "method": method,
+        "params": _encodeForJSONRPCOverGET(params)
+      });
+      fetchData(_formulateEndpoints(endpoints, qs), onSuccess, onError, null, extraAJAXOpts, true);
+    } else if(destType == "counterpartyd") {
+      //make JSON API call to counterwalletd, which will proxy it to counterpartyd
+      qs = $.param({
+        "jsonrpc": "2.0",
+        "id": 0,
         "method": "proxy_to_counterpartyd",
-        "params": {"method": method, "params": params }}), true);
+        "params": _encodeForJSONRPCOverGET({"method": method, "params": params })
+      });
+      fetchData(_formulateEndpoints(endpoints, qs), onSuccess, onError, null, extraAJAXOpts, true);
+    }
   }
 }
 
@@ -176,7 +219,7 @@ function _getDestTypeFromMethod(method) {
   //based on the method, determine the endpoints list to use
   var destType = "counterpartyd";
   if(['is_ready', 'get_messagefeed_messages_by_index', 'get_normalized_balances',
-      'get_btc_address_info', 'get_btc_address_utxos', 'get_btc_block_height',
+      'get_btc_address_info', 'get_btc_block_height',
       'get_chat_handle', 'store_chat_handle', 'get_preferences', 'store_preferences',
       'get_raw_transactions', 'get_balance_history',
       'get_owned_assets', 'get_asset_history',

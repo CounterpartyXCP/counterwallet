@@ -87,7 +87,7 @@
             <div class="ajax-dropdown">
               <h2>Notifications</h2>
               <div class="ajax-notifications custom-scroll"></div> <!-- notification content -->
-              <span data-bind="text: dispLastUpdated"></span> <!-- footer -->
+              <span><b>Last updated:</b> <span id="notoLastUpdated" data-bind="timeago: NOTIFICATION_FEED.lastUpdated()"></span></span> <!-- footer -->
             </div> <!-- .ajax-dropdown -->
         </span>
         
@@ -98,7 +98,7 @@
             <div class="ajax-dropdown">
               <h2>Pending Actions</h2>
               <div class="ajax-notifications custom-scroll"></div> <!-- notification content -->
-              <span data-bind="text: dispLastUpdated"></span> <!-- footer -->
+              <span><b>Last updated:</b> <span id="pendingLastUpdated" data-bind="timeago: PENDING_ACTION_FEED.lastUpdated()"></span></span> <!-- footer -->
             </div> <!-- .ajax-dropdown -->
         </span>
 
@@ -109,7 +109,7 @@
             <div class="ajax-dropdown">
               <h2>Open Orders</h2>
               <div class="ajax-notifications custom-scroll"></div> <!-- notification content -->
-              <span data-bind="text: dispLastUpdated"></span> <!-- footer -->
+              <span><b>Last updated:</b> <span id="openOrdersLastUpdated" data-bind="timeago: OPEN_ORDER_FEED.lastUpdated()"></span></span> <!-- footer -->
             </div> <!-- .ajax-dropdown -->
         </span>
         

@@ -74,3 +74,11 @@
 .badge-inverse:hover {
   background-color: #1a1a1a;
 }
+
+/* extra custom badges */
+.badge-orange {
+  background-color: #e69500;
+}
+.badge-orange:hover {
+  background-color: #FFA500;
+}

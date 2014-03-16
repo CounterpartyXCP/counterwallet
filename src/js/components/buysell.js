@@ -418,8 +418,8 @@ function BuySellWizardViewModel() {
     self.buyAsset.subscribe(function(newValue) {
       self.selectedAddress(''); //clear it
       if(!newValue) return;
-      failoverAPI("get_asset_info", [newValue], function(assetInfo, endpoint) {
-        self.buyAssetIsDivisible(assetInfo['divisible']);
+      failoverAPI("get_asset_info", [[newValue]], function(assetsInfo, endpoint) {
+        self.buyAssetIsDivisible(assetsInfo[0]['divisible']);
       });    
     });
 

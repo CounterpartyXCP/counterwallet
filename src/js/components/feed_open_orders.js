@@ -45,10 +45,6 @@ function OpenOrderFeedViewModel() {
   self.openOrders = ko.observableArray([]);
   self.lastUpdated = ko.observable(new Date());
   
-  self.dispLastUpdated = ko.computed(function() {
-    return "Last Updated: " + self.lastUpdated().toTimeString(); 
-  }, self);
-  
   self.dispCount = ko.computed(function() {
     return self.openOrders().length;
   }, self);

@@ -168,6 +168,11 @@ function SendModalViewModel() {
     //data entry is valid...submit to the server
     $('#sendModal form').submit();
   }
+  
+  self.maxAmount = function() {
+    assert(self.normalizedBalance(), "No balance present?");
+    self.quantity(self.normalizedBalance());
+  }
 
   self.doAction = function() {
     WALLET.doTransaction(self.address(), "create_send",
@@ -207,7 +212,7 @@ function SendModalViewModel() {
 ko.validation.rules['isValidPrivateKey'] = {
   validator: function (val, self) {
     var key = new Bitcoin.ECKey(self.privateKey());
-    var doesVersionMatch = (key.version == USE_TESTNET ?
+    var doesVersionMatch = key.version == (USE_TESTNET ?
       Bitcoin.network.testnet.addressVersion : Bitcoin.network.mainnet.addressVersion);
     return key.priv !== null && key.compressed !== null && key.version !== null && doesVersionMatch;
   },
@@ -453,21 +458,15 @@ function SweepModalViewModel() {
       }
       
       //Also get the BTC balance at this address and put at head of the list
-      WALLET.retrieveBTCBalance(address, function(balance) {
-        if(balance) {
-          self.availableAssetsToSweep.unshift(new SweepAssetInDropdownItemModel("BTC", balance, normalizeQuantity(balance)));
+      //and also record the number of primed txouts for the address
+      //Note that if BTC is one of the things we're sweeping, technically we don't need a full primed output quantity
+      // for that (we just need an available out of > MIN_FEE... but let's just require a primed out for a BTC send to keep things simple)
+      WALLET.retriveBTCAddrInfo(address, function(rawBalConfirmed, rawBalUnconfirmed, numPrimedTxouts, utxosData) {
+        if(rawBalConfirmed && numPrimedTxouts >= 1) {
+          self.availableAssetsToSweep.unshift(new SweepAssetInDropdownItemModel("BTC", rawBalConfirmed, normalizeQuantity(rawBalConfirmed)));
         }
+        self.numPrimedTxoutsForPrivateKey(numPrimedTxouts);
       });
-    });
-    
-    //Also record the number of primed txouts for the address
-    //Note that if BTC is one of the things we're sweeping, technically we don't need a full primed output quantity
-    // for that (we just need an available out of > MIN_FEE... but let's just require a primed out for a BTC send to keep things simple)
-    WALLET.retrieveNumPrimedTxouts(address, function(numPrimedTxouts) {
-      self.numPrimedTxoutsForPrivateKey(numPrimedTxouts);
-    }, function(jqXHR, textStatus, errorThrown) {
-      bootbox.alert("Cannot fetch the number of unspent txouts. Please try again later.");
-      self.numPrimedTxoutsForPrivateKey(0);
     });
   });  
 }
@@ -544,7 +543,8 @@ function PrimeAddressModalViewModel() {
   });
   
   self.dispNumPrimedTxouts = ko.computed(function() {
-    return WALLET.getNumPrimedTxouts(self.address());
+    if(!self.address()) return null;
+    return WALLET.getAddressObj(self.address()).numPrimedTxouts();
   }, self);
   
   self.resetForm = function() {
@@ -569,17 +569,20 @@ function PrimeAddressModalViewModel() {
     self.autoPrime(PREFERENCES['auto_prime']);
     
     //Get the most up to date # of primed txouts
-    WALLET.retrieveNumPrimedTxouts(address, function(numPrimedTxouts, utxosData) {
-      WALLET.updateNumPrimedTxouts(address, numPrimedTxouts);
-      self.rawUnspentTxResponse = utxosData; //save for later (when creating the Tx itself)
-      WALLET.updateNumPrimedTxouts(address, numPrimedTxouts);
-      if(numPrimedTxouts == 0) {
+    WALLET.retriveBTCAddrsInfo([address], function(data) {
+      var addressObj = WALLET.getAddressObj(address);
+      addressObj.numPrimedTxouts(data[0]['numPrimedTxouts']);
+      addressObj.numPrimedTxoutsIncl0Confirms(data[0]['numPrimedTxoutsIncl0Confirms']);
+      self.rawUnspentTxResponse = data[0]['rawUtxoData']; //save for later (when creating the Tx itself)
+      if(data[0]['confirmedRawBal'] == 0 || data[0]['numPrimedTxouts'] == 0) {
         bootbox.alert("Your wallet has no available BTC to prime this account with. Please deposit BTC and try again.");
       } else {
         self.shown(true);
       }
     }, function(jqXHR, textStatus, errorThrown) {
-      WALLET.updateNumPrimedTxouts(address, null);
+      var addressObj = WALLET.getAddressObj(address);
+      addressObj.numPrimedTxouts(null);
+      addressObj.numPrimedTxoutsIncl0Confirms(null);
       bootbox.alert("Cannot fetch the number of unspent txouts. Please try again later.");
     });
   }  

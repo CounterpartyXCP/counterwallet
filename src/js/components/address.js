@@ -16,6 +16,8 @@ function AddressViewModel(key, address, initialLabel) {
   self.label = ko.observable(initialLabel);
   self.numPrimedTxouts = ko.observable(null);
   //^ # of unspent txouts for this address fitting our criteria, or null if unknown (e.g. insight is down/not responding)
+  self.numPrimedTxoutsIncl0Confirms = ko.observable(null);
+
   self.assets = ko.observableArray([
     new AssetViewModel({address: address, asset: "BTC"}), //will be updated with data loaded from insight
     new AssetViewModel({address: address, asset: "XCP"})  //will be updated with data loaded from counterpartyd
@@ -42,10 +44,14 @@ function AddressViewModel(key, address, initialLabel) {
   
   self.dispNumPrimedTxouts = ko.computed(function(){
     var txo = self.numPrimedTxouts();
-    if(txo === null) return 'Primed:&nbsp;<span class="badge">??</span>'; 
-    if(txo < 3) return 'Primed:&nbsp;<span class="badge badge-error">'+txo+'</span>'; 
-    if(txo < 5) return 'Primed:&nbsp;<span class="badge badge-warning">'+txo+'</span>'; 
-    return 'Primed:&nbsp;<span class="badge badge-success">'+txo+'</span>'; 
+    var priming = txo != self.numPrimedTxoutsIncl0Confirms();
+    if(txo === null || self.numPrimedTxoutsIncl0Confirms() === null)
+      return 'Primed:&nbsp;<span class="badge">??</span>'; 
+    if(txo < 3)
+      return 'Primed:&nbsp;<span class="badge ' + (priming ? 'badge-orange' : 'badge-error') + '">'+txo+'</span>'; 
+    if(txo < 5)
+      return 'Primed:&nbsp;<span class="badge ' + (priming ? 'badge-orange' : 'badge-warning') + '">'+txo+'</span>';
+    return 'Primed:&nbsp;<span class="badge ' + (priming ? 'badge-orange' : 'badge-success') + '">'+txo+'</span>'; 
   }, self);
   
   self.getAssetObj = function(asset) {
@@ -55,44 +61,66 @@ function AddressViewModel(key, address, initialLabel) {
     });
   }
   
-  self.addOrUpdateAsset = function(asset, rawBalance, assetInfo) {
-    //assetInfo comes from a call to get_asset_info
+  self.addOrUpdateAsset = function(asset, assetInfo, initialRawBalance) {
+    //Update asset property changes (ONLY establishes initial balance when logging in! -- past that, balance changes
+    // come from debit and credit messages)
+    //initialRawBalance is null if this is not an initial update
+    //assetInfo comes from a call to get_asset_info, or as an issuance message feed object itself
     var match = ko.utils.arrayFirst(self.assets(), function(item) {
         return item.ASSET === asset;
     });
     
     if(asset == 'BTC' || asset == 'XCP') { //special case update
       assert(match); //was created when the address viewmodel was initialized...
-      match.rawBalance(rawBalance);
+      match.rawBalance(initialRawBalance);
       return;
     }
 
-    if (!match) { //add the asset if it doesn't exist
+    if (!match) {
+      //add the asset if it doesn't exist. this can be triggered on login (from get_asset_info API results)
+      // OR via the message feed (through receiving an asset send or ownership transfer for an asset not in the address yet)
+      $.jqlog.log("Adding asset " + asset + " to address " + self.ADDRESS);
       var assetProps = {
         address: self.ADDRESS,
         asset: asset,
         divisible: assetInfo['divisible'],
         owner: assetInfo['owner'] || assetInfo['issuer'],
-        isLocked: assetInfo['locked'],
-        rawBalance: rawBalance,
+        locked: assetInfo['locked'],
+        rawBalance: initialRawBalance,
         rawTotalIssued: assetInfo['total_issued'] || assetInfo['quantity'],
         description: assetInfo['description'], 
         callable: assetInfo['callable'],
         callDate: assetInfo['call_date'],
-        callPrice: assetInfo['call_price']        
+        callPrice: assetInfo['call_price']
       };
       self.assets.push(new AssetViewModel(assetProps)); //add new
-    } else { //update existing
-      $.jqlog.log("Updating asset " + asset + " @ " + self.ADDRESS + ". Bal from " + match.rawBalance() + " to " + rawBalance + "; Others: " + JSON.stringify(assetInfo));
-      if(rawBalance == 0 && match.isMine() === false) {
-        //if balance goes down to zero and the asset isn't ours (or isn't BTC/LTC), remove it from the listing
-        self.assets.remove(match);
-      } else {
-        match.owner(assetInfo['owner']);
-        if(assetInfo['locked']) match.isLocked(assetInfo['locked']); //only add locking
-        match.rawBalance(rawBalance);
-        match.rawTotalIssued(assetInfo['total_issued']);
+    } else {
+      //update existing. this logic is really only reached from the messages feed
+      assert(initialRawBalance === null);
+      assert(assetInfo['owner'] === undefined, "Logic should only be reached via messages feed data, not with get_asset_info data");
+      
+      if(assetInfo['description'] != match.description()) {
+        //when the description changes, the balance will get 0 passed into it to note this. obviously, don't take that as the literal balance :)
+        $.jqlog.log("Updating asset " + asset + " @ " + self.ADDRESS + " description to '" + assetInfo['description'] + "'");
         match.description(assetInfo['description']);
+      } else if(assetInfo['transfer']) {
+        //transfer come in through the messages feed only (get_asset_info results doesn't have a transfer field passed in)
+        $.jqlog.log("Asset " + asset + " @ " + self.ADDRESS + " transferred to '" + assetInfo['issuer'] + "'");
+        //like with a description change, the balance is passed as 0
+        match.owner(assetInfo['issuer']);
+        if(match.isMine() === false && match.rawBalance() == 0)
+          self.assets.remove(match); //i.e. remove the asset if it was owned by this address (and no longer is), and had a zero balance
+      } else if(assetInfo['locked']) { //only add locking (do not change from locked back to unlocked, as that is not valid)
+        $.jqlog.log("Asset " + asset + " @ " + self.ADDRESS + " locked");
+        match.locked(assetInfo['locked']);
+      } else {
+        //handle issuance increases
+        assert(match.description() == assetInfo['description']); //description change was handled earlier
+        assert(match.owner() == (assetInfo['issuer'])); //transfer change was handled earlier
+        assert(!assetInfo['locked']); //lock change was handled earlier
+        assert(match.rawTotalIssued() != assetInfo['quantity']);
+        $.jqlog.log("Updating asset " + asset + " @ " + self.ADDRESS + " # issued units. Orig #: " + match.rawTotalIssued() + ", new #: " + assetInfo['quantity']);
+        match.rawTotalIssued(assetInfo['quantity']);
       }
     }
   }

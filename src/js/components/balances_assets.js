@@ -128,7 +128,7 @@ function CreateAssetModalViewModel() {
         transfer_destination: null
       },
       function() {
-        bootbox.alert("<b>Your asset " + self.name() + " was created successfully.</b><br/><br/>It will automatically appear under the \
+        bootbox.alert("<b>Your asset " + self.name() + " has been created.</b><br/><br/>It will automatically appear under the \
         appropriate address once the network has confirmed it, and your account will be deducted by <b>" + ASSET_CREATION_FEE_XCP + " XCP</b>.");
       }
     );
@@ -355,7 +355,7 @@ function ChangeAssetDescriptionModalViewModel() {
       },
       function() {
         self.shown(false);
-        bootbox.alert("Your asset's description has been changed. " + ACTION_PENDING_NOTICE);
+        bootbox.alert("Your asset's description has been changed to <b>" + self.newDescription() + "</b>. " + ACTION_PENDING_NOTICE);
       }
     );
   }
@@ -655,7 +655,7 @@ function ShowAssetInfoModalViewModel() {
   self.owner = ko.observable(null);
   self.description = ko.observable(null);
   self.totalIssued = ko.observable(null);
-  self.isLocked = ko.observable(null);
+  self.locked = ko.observable(null);
   self.divisible = ko.observable(null);
   self.callable = ko.observable(null);
   self.callDate = ko.observable(null);
@@ -668,7 +668,7 @@ function ShowAssetInfoModalViewModel() {
     self.owner(assetObj.owner());
     self.description(assetObj.description());
     self.totalIssued(assetObj.normalizedTotalIssued());
-    self.isLocked(assetObj.isLocked());
+    self.locked(assetObj.locked());
     self.divisible(assetObj.DIVISIBLE);
     self.callable(assetObj.CALLABLE);
     self.callDate(assetObj.dispCallDate());

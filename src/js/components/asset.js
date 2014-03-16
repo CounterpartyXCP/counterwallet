@@ -6,7 +6,7 @@ function AssetViewModel(props) {
   self.ASSET = props['asset']; //assetID, will not change
   self.DIVISIBLE = props['divisible'] || true;
   self.owner = ko.observable(props['owner']);
-  self.isLocked = ko.observable(props['isLocked'] || false);
+  self.locked = ko.observable(props['locked'] || false);
   self.rawBalance = ko.observable(props['rawBalance'] || 0); //raw (not normalized)
   self.rawTotalIssued = ko.observable(props['rawTotalIssued'] || 0); //raw
   self.description = ko.observable(props['description'] || '');
@@ -57,7 +57,7 @@ function AssetViewModel(props) {
   };
   
   self.issueAdditional = function () {
-    assert(self.isMine() && !self.isLocked());
+    assert(self.isMine() && !self.locked());
     if(!WALLET.canDoTransaction(self.ADDRESS)) return false;
     ISSUE_ADDITIONAL_ASSET_MODAL.show(self.ADDRESS, self.DIVISIBLE, self);
   };
@@ -69,7 +69,7 @@ function AssetViewModel(props) {
   };
 
   self.lock = function () {
-    assert(self.isMine() && !self.isLocked());
+    assert(self.isMine() && !self.locked());
     if(!WALLET.canDoTransaction(self.ADDRESS)) return false;
     
     bootbox.dialog({
@@ -94,7 +94,8 @@ function AssetViewModel(props) {
                 quantity: 0,
                 asset: self.ASSET,
                 divisible: self.DIVISIBLE,
-                description: "LOCK",
+                description: self.description(),
+                lock: true,
                 callable_: self.CALLABLE,
                 call_date: self.CALLDATE,
                 call_price: self.CALLPRICE,
