@@ -174,8 +174,10 @@ function AddressViewModel(key, address, initialLabel) {
 
     var xcpBalance = WALLET.getBalance(self.ADDRESS, 'XCP');
     if(xcpBalance < ASSET_CREATION_FEE_XCP) {
-      bootbox.alert("You need at least <b>" + ASSET_CREATION_FEE_XCP + " XCP</b> to create an asset, however, your current balance is only <b>"
-        + xcpBalance + " XCP</b>.<br/><br/>Please deposit more XCP into this address and try again.");
+      bootbox.alert("You need at least <b class='notoAmountColor'>" + ASSET_CREATION_FEE_XCP + "</b> <b class='notoAssetColor'>XCP</b>"
+        + " to create an asset, however, your current balance is only"
+        + " <b class='notoAmountColor'>" + xcpBalance + "</b> <b class='notoAssetColor'>XCP</b>."
+        + "<br/><br/>Please deposit more <b class='notoAssetColor'>XCP</b> into this address and try again.");
       return false;
     }
 

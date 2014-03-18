@@ -45,40 +45,40 @@
   cursor: pointer;
 }
 .badge-error {
-  background-color: #b94a48;
+  background-color: #b94a48 !important;
 }
 .badge-error:hover {
-  background-color: #953b39;
+  background-color: #953b39 !important;
 }
 .badge-warning {
-  background-color: #f89406;
+  background-color: #f89406 !important;
 }
 .badge-warning:hover {
-  background-color: #c67605;
+  background-color: #c67605 !important;
 }
 .badge-success {
-  background-color: #468847;
+  background-color: #468847 !important;
 }
 .badge-success:hover {
-  background-color: #356635;
+  background-color: #356635 !important;
 }
 .badge-info {
-  background-color: #3a87ad;
+  background-color: #3a87ad !important;
 }
 .badge-info:hover {
-  background-color: #2d6987;
+  background-color: #2d6987 !important;
 }
 .badge-inverse {
-  background-color: #333333;
+  background-color: #333333 !important;
 }
 .badge-inverse:hover {
-  background-color: #1a1a1a;
+  background-color: #1a1a1a !important;
 }
 
 /* extra custom badges */
 .badge-orange {
-  background-color: #e69500;
+  background-color: #e69500 !important;
 }
 .badge-orange:hover {
-  background-color: #FFA500;
+  background-color: #FFA500 !important;
 }

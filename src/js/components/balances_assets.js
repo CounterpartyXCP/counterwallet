@@ -128,8 +128,10 @@ function CreateAssetModalViewModel() {
         transfer_destination: null
       },
       function() {
-        bootbox.alert("<b>Your asset " + self.name() + " has been created.</b><br/><br/>It will automatically appear under the \
-        appropriate address once the network has confirmed it, and your account will be deducted by <b>" + ASSET_CREATION_FEE_XCP + " XCP</b>.");
+        bootbox.alert("Your asset <b class='notoAssetColor'>" + self.name() + "</b>"
+          + " has been created.<br/><br/>It will automatically appear under the appropriate address once the network"
+          + " has confirmed it, and your address <b class='notoAddrColor'>" + getAddressLabel(self.address())
+          +  "</b> will be deducted by <b class='notoQuantityColor'>" + ASSET_CREATION_FEE_XCP + "</b> <b class='notoAssetColor'>XCP</b>.");
       }
     );
     self.shown(false);
@@ -216,8 +218,8 @@ function IssueAdditionalAssetModalViewModel() {
       },
       function() {
         self.shown(false);
-        bootbox.alert("You have issued <b>" + self.additionalIssue().toString() + "</b> additional quantity on your asset <b>"
-          + self.asset().ASSET + "</b>. "
+        bootbox.alert("You have issued <b class='notoQuantityColor'>" + self.additionalIssue() + "</b> additional"
+          + " quantity on your asset <b class='notoAssetColor'>" + self.asset().ASSET + "</b>. "
           + ACTION_PENDING_NOTICE);
       }
     );
@@ -282,7 +284,8 @@ function TransferAssetModalViewModel() {
       },
       function() {
         self.shown(false);
-        bootbox.alert("<b>" + self.asset().ASSET + "</b> has been transferred to <b>" + self.destAddress() + "</b>. "
+        bootbox.alert("<b class='notoAssetColor'>" + self.asset().ASSET + "</b> has been transferred to "
+          + " <b class='notoAddressColor'>" + self.destAddress() + "</b>. "
           + ACTION_PENDING_NOTICE);
       }
     );
@@ -355,7 +358,8 @@ function ChangeAssetDescriptionModalViewModel() {
       },
       function() {
         self.shown(false);
-        bootbox.alert("Your asset's description has been changed to <b>" + self.newDescription() + "</b>. " + ACTION_PENDING_NOTICE);
+        bootbox.alert("The description for asset <b class='notoAssetColor'>" + self.asset().ASSET + "</b> has been"
+          + " changed to <b>" + self.newDescription() + "</b>. " + ACTION_PENDING_NOTICE);
       }
     );
   }
@@ -460,9 +464,9 @@ function PayDividendModalViewModel() {
       },
       function() {
         self.shown(false);
-        bootbox.alert("You have paid a dividend of <b>" + self.quantityPerUnit().toString()
-          + " XCP</b> per outstanding unit to holders of asset <b>" + self.asset().ASSET
-          + "</b>. " + ACTION_PENDING_NOTICE);
+        bootbox.alert("You have paid a dividend of <b class='notoQuantityColor'>" + self.quantityPerUnit() + "</b>"
+          + " <b class='notoAssetColor'>" + self.selectedDividendAsset() + "</b> per outstanding unit to holders of asset"
+          + " <b class='notoAssetColor'>" + self.asset().ASSET + "</b>. " + ACTION_PENDING_NOTICE);
       }
     );
   }
@@ -538,14 +542,30 @@ function CallAssetModalViewModel() {
     return self.assetObj().normalizedTotalIssued();
   }, self); 
   
+  self.dispTotalOutstanding = ko.computed(function() {
+    //total qty of this asset in hands other than the asset's owner
+    if(!self.assetObj()) return null;
+    return self.assetObj().normalizedTotalIssued() - self.assetObj().normalizedBalance();
+  }, self); 
+
+  self.dispUnitsToCallback = ko.computed(function() {
+    if(!self.dispTotalOutstanding() || !self.percentageToCall()) return null;
+    return +(self.dispTotalOutstanding() * Decimal.round(new Decimal(self.percentageToCall()).div(100), 8).toFloat()).toFixed(4); 
+  }, self); 
+
+  self.dispUnitsAfterCallback = ko.computed(function() {
+    if(!self.assetObj() || !self.dispUnitsToCallback()) return null;
+    return +(self.assetObj().normalizedBalance() + self.dispUnitsToCallback()).toFixed(4);
+  }, self); 
+
   self.totalXCPPay = ko.computed(function() {
     if(!self.percentageToCall() || !self.assetObj()) return null;
-    return self.percentageToCall() * self.assetObj().normalizedTotalIssued() * self.assetObj().CALLPRICE;
+    return +(self.percentageToCall() * (self.assetObj().normalizedTotalIssued() - self.assetObj().normalizedBalance()) * self.assetObj().CALLPRICE).toFixed(4);
   }, self);
 
   self.xcpBalRemainingPostCall = ko.computed(function() {
     if(self.totalXCPPay() === null) return null;
-    return Decimal.round(new Decimal(WALLET.getBalance(self.address(), 'XCP')).sub(self.totalXCPPay()), 8).toFloat();
+    return +(Decimal.round(new Decimal(WALLET.getBalance(self.address(), 'XCP')).sub(self.totalXCPPay()), 8).toFloat()).toFixed(4);
   }, self);
   
   self.validationModel = ko.validatedObservable({
@@ -575,9 +595,9 @@ function CallAssetModalViewModel() {
       },
       function() {
         self.shown(false);
-        bootbox.alert("You have called back <b>" + self.percentageToCall()
-          + "%</b> of asset <b>" + self.asset()
-          + "</b> for the price of <b>" + self.totalXCPPay() + " XCP</b>. "
+        bootbox.alert("You have called back <b class='notoQuantityColor'>" + self.percentageToCall() + "%</b>"
+          + " of asset <b class='notoAssetColor'>" + self.asset() + "</b>"
+          + " for the price of <b class='notoQuantityColor'>" + self.totalXCPPay() + "</b> <b class='notoAssetColor'>XCP</b>. "
           + ACTION_PENDING_NOTICE);
       }
     );
@@ -590,16 +610,17 @@ function CallAssetModalViewModel() {
     self.asset(asset);
     self.assetObj(WALLET.getAddressObj(address).getAssetObj(asset));
     var now = new Date(); 
-    var nowUTC = new Date(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate(),  now.getUTCHours(), now.getUTCMinutes(), now.getUTCSeconds());
+    var nowUTC = new Date(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate(), now.getUTCHours(), now.getUTCMinutes(), now.getUTCSeconds());
 
     //Check if the passed asset is callable
     assert(self.assetObj().isMine(), "Asset is not yours!");
     assert(self.assetObj().CALLABLE, "Asset is not callable!");
 
     var callDate = new Date(0);
-    callDate.setUTCSeconds(asset.CALLDATE);
+    callDate.setUTCSeconds(self.assetObj().CALLDATE);
     if(callDate > nowUTC) {
-      bootbox.alert("The selected asset cannot be called until " + self.assetObj().dispCallDate());
+      bootbox.alert("Asset <b class='notoAssetColor'>" + self.asset()
+      + "</b> cannot be called until " + self.assetObj().dispCallDate());
       return;
     }
     self.shown(true);

@@ -20,6 +20,11 @@ function WalletOptionsModalViewModel() {
   self.selectedTheme = ko.observable(self.availableThemes()[0]['id']);
   self.selectedLang = ko.observable(self.availableLangs()[0]['id']);
   self.ORIG_PREFERENCES = null;
+  
+  //Info table related props
+  self.showInfoTable = ko.observable(false);
+  self.myIPAddr = ko.observable('');
+  self.myCookie = ko.observable('');
 
   self.autoPrimeEnabled.subscribeChanged(function(newVal, prevVal) {
     assert(newVal === true || newVal === false);
@@ -63,6 +68,11 @@ function WalletOptionsModalViewModel() {
     // not fire off events when NOT using this option. wtf... o_O
     $('#themeSelector').select2("val", self.selectedTheme());
     $('#langSelector').select2("val", self.selectedLang());
+
+    failoverAPI("get_reflected_host_info", [], function(data, endpoint) {
+      self.myIPAddr(data['ip']);
+      self.myCookie(data['cookie']);
+    });
     
     self.shown(true);
   }  

@@ -57,50 +57,52 @@ function ChatFeedViewModel() {
     
     //pop up a dialog box to gather and set user's chat handle, and save to preferences
     multiAPINewest("get_chat_handle", [WALLET.identifier()], 'last_updated', function(data, endpoint) {
-      assert(data && data.hasOwnProperty('handle'));
-      //handle already set, just pop up chat window
-      handle = data['handle'];
-      $.jqlog.log("Chat handle: " + handle);
-      self.handle(handle);
-      self._showChatWindow();
-      self._initChatFeed();
-    }, function(jqXHR, textStatus, errorThrown, endpoint) {
-      //handle is not stored on any server
-      bootbox.dialog({
-        message: "To use chat, you must have a handle (or nickname) you wish to use (alphanumeric/underscore/hyphen, between 4 and 12 characters). Please enter it below:<br/><br/> \
-        <input type='text' id='chat_handle' class='bootbox-input bootbox-input-text form-control'></input><br/><br/> \
-        <b style='color:red'>Please remember that people in chat may not always be who they seem. Until a verified \
-         identity system is implemented for chat, do not simply trust someone is who their handle says they are!</b>",
-        title: "Enter your chat handle",
-        buttons: {
-          cancel: {
-            label: "Cancel",
-            className: "btn-default",
-            callback: function() {
-              //modal will disappear
-            }
-          },
-          success: {
-            label: "Start Chat",
-            className: "btn-primary",
-            callback: function() {
-              handle = $('#chat_handle').val();
-              
-              //Validate handle, must be alpha numeric, less than 12 characters
-              if(!handle.match(/[A-Za-z0-9_-]{4,12}/g)) {
-                return bootbox.alert("Invalid handle, must be between 4 and 12 characters, alphanumeric, underscore or hyphen allowed.");
+      if(data) {
+        assert(data && data.hasOwnProperty('handle'));
+        //handle already set, just pop up chat window
+        handle = data['handle'];
+        $.jqlog.log("Chat handle: " + handle);
+        self.handle(handle);
+        self._showChatWindow();
+        self._initChatFeed();
+      } else {
+        //handle is not stored on any server
+        bootbox.dialog({
+          message: "To use chat, you must have a handle (or nickname) you wish to use (alphanumeric/underscore/hyphen, between 4 and 12 characters). Please enter it below:<br/><br/> \
+          <input type='text' id='chat_handle' class='bootbox-input bootbox-input-text form-control'></input><br/><br/> \
+          <b style='color:red'>Please remember that people in chat may not always be who they seem. Until a verified \
+           identity system is implemented for chat, do not simply trust someone is who their handle says they are!</b>",
+          title: "Enter your chat handle",
+          buttons: {
+            cancel: {
+              label: "Cancel",
+              className: "btn-default",
+              callback: function() {
+                //modal will disappear
               }
-              
-              //Save the handle back at counterwalletd
-              multiAPI("store_chat_handle", [WALLET.identifier(), handle], function(data, endpoint) {
-                self.handle(handle);
-                self._showChatWindow();
-                self._initChatFeed();
-              });
-            }
-          },
-        }
-      });
+            },
+            success: {
+              label: "Start Chat",
+              className: "btn-primary",
+              callback: function() {
+                handle = $('#chat_handle').val();
+                
+                //Validate handle, must be alpha numeric, less than 12 characters
+                if(!handle.match(/[A-Za-z0-9_-]{4,12}/g)) {
+                  return bootbox.alert("Invalid handle, must be between 4 and 12 characters, alphanumeric, underscore or hyphen allowed.");
+                }
+                
+                //Save the handle back at counterwalletd
+                multiAPI("store_chat_handle", [WALLET.identifier(), handle], function(data, endpoint) {
+                  self.handle(handle);
+                  self._showChatWindow();
+                  self._initChatFeed();
+                });
+              }
+            },
+          }
+        });
+      }
     });
   }
   

@@ -4,37 +4,56 @@
  ***********/
 var PREFERENCES = {}; //set when logging in
 
-//if in dev or testnet mode (both of which are specified based on a URL querystring being present) clear the
-// query string so that our hash-based AJAX navigation works after logging in...
-if(IS_DEV || USE_TESTNET) {
+//IE does not include support for location.origin ...
+if (!window.location.origin) {
+  window.location.origin = window.location.protocol + "//" + window.location.hostname + (window.location.port ? ':' + window.location.port: '');
+}
+
+//if in dev or testnet mode (both of which are specified based on a URL querystring being present), IF a query string is
+// provided clear the query string so that our hash-based AJAX navigation works after logging in...
+if((IS_DEV || USE_TESTNET) && location.search) {
   //history.replaceState is NOT supported on IE 9...ehh
-  assert($.layout.className !== 'msie9',
+  assert($.layout.className !== 'trident9',
     "Use of 'dev' or 'testnet' flags NOT supported on IE 9, due to lack of history.replaceState() support.");
   history.replaceState({}, '', '/');
 }
 
 //Setup hosts to use
-var counterwalletd_urls = null;
-//Note that with the socket.io feeds, we supply the path in the socketio connect() call
-if(!IS_DEV) { //Production setup
-  document.domain = "counterwallet.co"; //allow cross-subdomain access (e.g. www.counterwallet.co can AJAX to cw01.counterwallet.co)
-  //counterwalletd_urls = [ "https://cw01.counterwallet.co", "https://cw02.counterwallet.co", "https://cw03.counterwallet.co" ];
-  counterwalletd_urls = [ "https://cw01.counterwallet.co" ];
-} else { //Development setup
-  counterwalletd_urls = [ "https://xcpdev01" ];
-  // ^ NOTE to developers: No need to modify the above, just insert an entry in your hosts file for xcpdev01
-  // Just have a host entry for both xcpdev01 and testxcpdev01 going to the same server, which has a federated node setup running
+function produceCWServerList() {
+  counterwalletd_urls = shuffle(counterwalletd_urls); //randomly shuffle the list to decide the server try order...
+  console.log("MultiAPI Backends: " + JSON.stringify(counterwalletd_urls));
+  
+  counterwalletd_base_urls = jQuery.map(counterwalletd_urls, function(element) {
+    return element;
+  });
+  counterwalletd_api_urls = jQuery.map(counterwalletd_urls, function(element) {
+    return element + (USE_TESTNET ? '/_t_api' : '/_api');
+  });
+  counterwalletd_insight_api_urls = jQuery.map(counterwalletd_urls, function(element) {
+    return element + (USE_TESTNET ? '/_t_insight_api' : '/_insight_api');
+  });
 }
-counterwalletd_urls = shuffle(counterwalletd_urls); //randomly shuffle the list to decide the server try order...
-var counterwalletd_base_urls = jQuery.map(counterwalletd_urls, function(element) {
-  return element;
-});
-var counterwalletd_api_urls = jQuery.map(counterwalletd_urls, function(element) {
-  return element + (USE_TESTNET ? '/_t_api' : '/_api');
-});
-var counterwalletd_insight_api_urls = jQuery.map(counterwalletd_urls, function(element) {
-  return element + (USE_TESTNET ? '/_t_insight_api' : '/_insight_api');
-});
+
+var counterwalletd_urls = null, counterwalletd_base_urls = null, counterwalletd_api_urls = null, counterwalletd_insight_api_urls = null;
+//Note that with the socket.io feeds, we supply the path in the socketio connect() call
+if(location.hostname.endsWith('counterwallet.co')) { //Main counterwallet setup
+  document.domain = "counterwallet.co"; //allow cross-subdomain access (e.g. www.counterwallet.co can AJAX to cw01.counterwallet.co)
+  //counterwalletd_urls = [ "https://cw01.counterwallet.co", "https://cw02.counterwallet.co",
+  // "https://cw03.counterwallet.co", "https://cw04.counterwallet.co", "https://cw05.counterwallet.co" ];
+  counterwalletd_urls = [ "https://cw01.counterwallet.co" ];
+  produceCWServerList();
+} else {
+  //Request for the servers.json file, which should contain an array of API backends for us to use
+  $.getJSON("servers.json", function( data ) {
+    assert(data && data instanceof Array, "Returned servers.json file is not an array");
+    counterwalletd_urls = data;
+    produceCWServerList();
+  }).fail(function() {
+    //File not found, just use the local box as the API server
+    counterwalletd_urls = [ location.origin ];
+    produceCWServerList();
+  });
+}
 
 var BLOCKEXPLORER_URL = "http://live.bitcore.io";
 if(USE_TESTNET) {
@@ -50,11 +69,12 @@ var MAX_ADDRESSES = 20; //totall arbitrary :)
 var MAX_INT = Math.pow(2, 63) - 1;
 var UNIT = 100000000; //# satoshis in whole
 var MIN_FEE = 10000; // in satoshis (== .0001 BTC)
+var APPROX_SECONDS_PER_BLOCK = 8 * 60; //a *rough* estimate on how many seconds per each block (used for estimating open order time left until expiration, etc)
 var MIN_PRIME_BALANCE = 50000; //in satoshis ... == .0005
-var ASSET_CREATION_FEE_XCP = 5; //in normalized XCP
+var ASSET_CREATION_FEE_XCP = 0.5; //in normalized XCP
 var MAX_ASSET_DESC_LENGTH = 41; //42, minus a null term character?
 var ORDER_DEFAULT_BTCFEE_PCT = 1; //1% of total order
-var ORDER_DEFAULT_EXPIRATION = 100; //num blocks until expiration
+var ORDER_DEFAULT_EXPIRATION = 320; //num blocks until expiration (at ~9 min per block this is ~48hours)
 var DEFAULT_NUM_ADDRESSES = 3; //default number of addresses to generate
 
 var AUTOPRIME_AT_LESSTHAN_REMAINING = 10; //auto prime at less than this many txouts remaining
@@ -180,3 +200,7 @@ ko.validation.init({
   errorMessageClass: 'invalid',
   errorElementClass: 'invalid'
 });
+
+//Allow future timestamps with timeago
+$.timeago.settings.allowFuture = true;
+

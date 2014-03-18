@@ -28,7 +28,7 @@ function AssetPortfolioViewModel() {
               asset: asset,
               marketCapRaw: self.marketInfo[asset]['market_cap_in_xcp'],
               marketCap: smartFormat(self.marketInfo[asset]['market_cap_in_xcp']) || '??',
-              price: self.marketInfo[asset]['aggregated_price_in_xcp'] || '??',
+              price: self.marketInfo[asset]['aggregated_price_as_xcp'] || '??',
               supply: smartFormat(self.marketInfo[asset]['total_supply']),
               volume: self.marketInfo[asset]['24h_ohlc_in_xcp']['vol'] && self.marketInfo[asset]['aggregated_price_in_xcp'] 
                 ? smartFormat(self.marketInfo[asset]['24h_ohlc_in_xcp']['vol'] * self.marketInfo[asset]['aggregated_price_in_xcp']) : '??',
@@ -44,7 +44,7 @@ function AssetPortfolioViewModel() {
               asset: asset,
               marketCapRaw: self.marketInfo[asset]['market_cap_in_btc'],
               marketCap: smartFormat(self.marketInfo[asset]['market_cap_in_btc']) || '??',
-              price: self.marketInfo[asset]['aggregated_price_in_btc'] || '??',
+              price: self.marketInfo[asset]['aggregated_price_as_btc'] || '??',
               supply: smartFormat(self.marketInfo[asset]['total_supply']),
               volume: self.marketInfo[asset]['24h_ohlc_in_btc']['vol'] && self.marketInfo[asset]['aggregated_price_in_btc'] 
                 ? smartFormat(self.marketInfo[asset]['24h_ohlc_in_btc']['vol'] * self.marketInfo[asset]['aggregated_price_in_btc']) : '??',
@@ -84,11 +84,14 @@ function AssetPortfolioViewModel() {
               if(!self.totalBalanceByAsset[asset]) self.totalBalanceByAsset[asset] = 0;
               self.totalBalanceByAsset[asset] += WALLET.getBalance(addresses[i], asset); 
             }
-            self.pctChangesInXCP.push({ name: asset, data: [data[asset]['24h_vol_price_change_in_xcp'] || 0] });  
-            self.pctChangesInBTC.push({ name: asset, data: [data[asset]['24h_vol_price_change_in_btc'] || 0] });
-            if(data[asset]['price_in_xcp'])
+            if(asset == 'XCP' || asset == 'BTC' || data[asset]['24h_vol_price_change_in_xcp'] !== null)
+              self.pctChangesInXCP.push({ name: asset, data: [data[asset]['24h_vol_price_change_in_xcp'] || 0] });  
+            if(asset == 'XCP' || asset == 'BTC' || data[asset]['24h_vol_price_change_in_btc'] !== null)
+              self.pctChangesInBTC.push({ name: asset, data: [data[asset]['24h_vol_price_change_in_btc'] || 0] });
+            if(asset == 'XCP' || asset == 'BTC' || data[asset]['price_in_xcp'] !== null) {
               self.totalXCPValueByAsset[asset] = self.totalBalanceByAsset[asset] / data[asset]['price_in_xcp']; 
-            self.portfolioTotalXCPValueByAsset.push([ asset, self.totalXCPValueByAsset[asset] || 0 ]);
+              self.portfolioTotalXCPValueByAsset.push([ asset, self.totalXCPValueByAsset[asset] || 0]);
+            }
           }
         }
         

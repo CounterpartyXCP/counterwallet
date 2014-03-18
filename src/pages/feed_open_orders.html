@@ -1,19 +1,19 @@
 <ul id="openOrderFeedContent" data-bind="foreach: openOrders" class="notification-body">
     <li>
       <span class="padding-10">
-        <em data-bind="css: { displayColor }" class="padding-5 no-border-radius pull-left margin-right-5">
+        <em data-bind="css: displayColor" class="padding-5 no-border-radius pull-left margin-right-5">
           <i class="fa fa-fw fa-exchange fa-2x"></i>
         </em>
         <span>
-           Order ID <i><span data-bind="text: order['tx_index']"></span></i> @ <b class="notoAddrColor"><span data-bind="text: order['source']"></span></b><br/>
-           Buy: <b class="notoQuantityColor"><span data-bind="text: normalizeQuantity(order['get_quantity'], order['_get_asset_divisible'])"></span></b>
-               <b class="notoAssetColor"><span data-bind="text: order['get_asset']"></span></b> (remaining: <b class="notoQuantityColor"><span data-bind="text: getRemaining()"></span></b>)<br/>
-           Sell: <b class="notoQuantityColor"><span data-bind="text: normalizeQuantity(order['give_quantity'], order['_give_asset_divisible'])"></span></b>
-               <b class="notoAssetColor"><span data-bind="text: order['give_asset']"></span></b> (remaining: <b class="notoQuantityColor"><span data-bind="text: giveRemaining()"></span></b>)<br/>
-           Fee Required: <b><span data-bind="text: order['fee_required']"></span></b> / Provided: <b><span data-bind="text: order['fee_provided']"></span></b> / Remaining: <b><span data-bind="text: feeRemaining()"></span></b><br/>
-           Expires @ block <span data-bind="text: order['expire_index']"></span><br/>
-           <span class="pull-right font-xs text-muted"><i data-bind="timeago: order['expiration'] * 1000"></i></span>
-           <span class="pull-right"><button class="btn btn-xs btn-success margin-top-5" data-bind="click: cancelOpenOrder">Cancel</button></span>
+           Order <b><span data-bind="text: ORDER['tx_index']"></span></b> @ <b class="notoAddrColor"><span data-bind="text: getAddressLabel(ORDER['source'])"></span></b><br/>
+           <b>Buy:</b> <b class="notoQuantityColor"><span data-bind="text: normalizeQuantity(ORDER['get_quantity'], ORDER['_get_asset_divisible'])"></span></b>
+               <b class="notoAssetColor"><span data-bind="text: ORDER['get_asset']"></span></b>
+               (remaining: <b class="notoQuantityColor"><span data-bind="text: normalizeQuantity(rawGetRemaining(), ORDER['_get_asset_divisible'])"></span></b> <b class="notoAssetColor"><span data-bind="text: ORDER['get_asset']"></span></b>)<br/>
+           <b>Sell:</b> <b class="notoQuantityColor"><span data-bind="text: normalizeQuantity(ORDER['give_quantity'], ORDER['_give_asset_divisible'])"></span></b>
+               <b class="notoAssetColor"><span data-bind="text: ORDER['give_asset']"></span></b>
+               (remaining: <b class="notoQuantityColor"><span data-bind="text: normalizeQuantity(rawGiveRemaining(), ORDER['_give_asset_divisible'])"></span></b> <b class="notoAssetColor"><span data-bind="text: ORDER['give_asset']"></span></b>)<br/>
+           <span class="pull-right"><button class="btn btn-xs btn-default margin-top-5" data-bind="click: cancelOpenOrder">Cancel</button></span>
+           <span class="pull-left font-xs text-muted"><i>Expires ~<span data-bind="timeago: approxExpiresInTime"></span> (@ block <span data-bind="text: ORDER['expire_index']"></span>)</i>
         </span>
       </span>
     </li>

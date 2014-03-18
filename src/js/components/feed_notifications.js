@@ -54,20 +54,20 @@ NotificationViewModel.calcText = function(category, message) {
         + "</Ad> to your address <Ad>" +  getAddressLabel(message['destination']) + "</Ad>";
     }
   } else if(category == "btcpays" && (WALLET.getAddressObj(message['source']) || WALLET.getAddressObj(message['destination']))) {
-    desc = "BTCPay from " + getAddressLabel(message['source']) + " to " + getAddressLabel(message['destination'])
-      + " for " + normalizeQuantity(message['btc_quantity']) + " BTC";
+    desc = "BTCPay from <Ad>" + getAddressLabel(message['source']) + "</Ad> to <Ad>" + getAddressLabel(message['destination'])
+      + "</Ad> for <Am>" + normalizeQuantity(message['btc_amount']) + "</Am> <As>BTC</As>";
   } else if(category == "burns" && WALLET.getAddressObj(message['source'])) {
-    desc = "Your address " + getAddressLabel(message['source']) + " has burned " + normalizeQuantity(message['burned'])
-      + " BTC for " + normalizeQuantity(message['earned']) + " XCP";
+    desc = "Your address <Ad>" + getAddressLabel(message['source']) + "</Ad> has burned <Am>" + normalizeQuantity(message['burned'])
+      + "</Am> <As>BTC</As> for <Am>" + normalizeQuantity(message['earned']) + "</Am> <As>XCP</As>";
   } else if(category == "cancels" && WALLET.getAddressObj(message['source'])) {
-    desc = "Order/Bid " + message['offer_hash'] + " for your address " + getAddressLabel(message['source']) + " was cancelled";
+    desc = "Order/Bid ID <b>" + message['tx_index'] + "</b> for your address <Ad>" + getAddressLabel(message['source']) + "</Ad> was cancelled";
   } else if(category == "callbacks" || category == "dividend") {
     //See if any of our addresses own any of the specified asset, and if so, notify them of the callback or dividend
     // NOTE that counterpartyd has automatically already adusted the balances of all asset holders...we just need to notify
     var addressesWithAsset = WALLET.getAddressesWithAsset(message['asset']);
     if(!addressesWithAsset.length) return;
     if(category == "callbacks") {
-      desc = "XCP balance adjusted on your address(es) <Ad>" + addressesWithAsset.join(', ')
+      desc = "<As>XCP</As> balance adjusted on your address(es) <Ad>" + addressesWithAsset.join(', ')
         + "</Ad> due to <Am>" + (parseFloat(message['fraction']) * 100).toString()
         + "%</Am> callback option being exercised for asset <As>" + message['asset'] + "</As>";
     } else {
@@ -117,10 +117,10 @@ NotificationViewModel.calcText = function(category, message) {
       + "</Am> <As>" + message['get_asset'] + "</As> is active";
   } else if(category == "order_matches" && (WALLET.getAddressObj(message['tx0_address']) || WALLET.getAddressObj(message['tx1_address']))) {
     desc = "Order matched between <Ad>" 
-      + getAddressLabel(message['tx0_address']) + "</Ad> (offering <Am>"
+      + getAddressLabel(message['tx0_address']) + "</Ad> (gave <Am>"
       + numberWithCommas(normalizeQuantity(message['forward_quantity'], message['_forward_asset_divisible'])) + "</Ad> <As>" + message['forward_asset'] + "</As>) and <Ad>"
-      + getAddressLabel(message['tx1_address']) + "</Ad> (offering <Am>"
-      + numberWithCommas(normalizeQuantity(message['forward_quantity'], message['_backward_asset_divisible'])) + "</Ad> <As>" + message['forward_asset'] + "</As>)";
+      + getAddressLabel(message['tx1_address']) + "</Ad> (gave <Am>"
+      + numberWithCommas(normalizeQuantity(message['backward_quantity'], message['_backward_asset_divisible'])) + "</Ad> <As>" + message['backward_asset'] + "</As>)";
   } else if(category == "order_expirations" && WALLET.getAddressObj(message['source'])) {
     desc = "Your order <i>" + message['order_hash'] + "</i> from address <Ad>" + getAddressLabel(message['source']) + "</Ad> has expired";
   } else if(category == "order_match_expirations") {

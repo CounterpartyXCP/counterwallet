@@ -1440,16 +1440,22 @@ $('body').on('click', function(e) {
 
 //COUNTERWALLET: START MOD
 //THIS FUNCTION MOVED OVER FROM datatables.html, and changed the selectors to use classes (e.g. table.dt_basic) instead of IDs (#dt_basic)
-function runDataTables(specificTableID, destroyOption) {
+function runDataTables(specificTableID, destroyOption, extraProps) {
+  if(typeof(destroyOption)==='undefined') destroyOption = true;
+  if(typeof(extraProps)==='undefined') extraProps = {};
+  
   var tableSelector = specificTableID || 'table';
+  var props = null;
   
   /*
    * BASIC
    */
-  $(tableSelector+'.dt_basic').dataTable({
+  props = {
     "bDestroy": destroyOption,
     "sPaginationType" : "bootstrap_full"
-  });
+  };
+  $.extend(props, extraProps);
+  $(tableSelector+'.dt_basic').dataTable(props);
 
   /* END BASIC */
 
@@ -1474,8 +1480,7 @@ function runDataTables(specificTableID, destroyOption) {
     }
   });   
   
-
-  var oTable = $(tableSelector+'.datatable_fixed_column').dataTable({
+  props = {
     "bDestroy": destroyOption,
     "sDom" : "<'dt-top-row'><'dt-wrapper't><'dt-row dt-bottom-row'<'row'<'col-sm-6'i><'col-sm-6 text-right'p>>",
     //"sDom" : "t<'row dt-wrapper'<'col-sm-6'i><'dt-row dt-bottom-row'<'row'<'col-sm-6'i><'col-sm-6 text-right'>>",
@@ -1483,24 +1488,28 @@ function runDataTables(specificTableID, destroyOption) {
       "sSearch" : "Search all columns:"
     },
     "bSortCellsTop" : true
-  });   
+  };
+  $.extend(props, extraProps);
+  var oTable = $(tableSelector+'.datatable_fixed_column').dataTable(props);   
 
   /*
    * COL ORDER
    */
-  $(tableSelector+'.datatable_col_reorder').dataTable({
+  props = {
     "bDestroy": destroyOption,
     "sPaginationType" : "bootstrap",
     "sDom" : "R<'dt-top-row'Clf>r<'dt-wrapper't><'dt-row dt-bottom-row'<'row'<'col-sm-6'i><'col-sm-6 text-right'p>>",
     "fnInitComplete" : function(oSettings, json) {
       $('.ColVis_Button').addClass('btn btn-default btn-sm').html('Columns <i class="icon-arrow-down"></i>');
     }
-  });
+  };
+  $.extend(props, extraProps);
+  $(tableSelector+'.datatable_col_reorder').dataTable(props);
   
   /* END COL ORDER */
 
   /* TABLE TOOLS */
-  $(tableSelector+'.datatable_tabletools').dataTable({
+ props = {
     "bDestroy": destroyOption,
     "sDom" : "<'dt-top-row'Tlf>r<'dt-wrapper't><'dt-row dt-bottom-row'<'row'<'col-sm-6'i><'col-sm-6 text-right'p>>",
     "oTableTools" : {
@@ -1516,7 +1525,9 @@ function runDataTables(specificTableID, destroyOption) {
         $(this).addClass('btn-sm btn-default');
       });
     }
-  });
+  };
+  $.extend(props, extraProps);
+  $(tableSelector+'.datatable_tabletools').dataTable(props);
   /* END TABLE TOOLS */
 }
 //COUNTERWALLET: END MOD

@@ -121,7 +121,6 @@ function BuySellWizardViewModel() {
   //^ a list of the last X trades for the specified asset pair (once selected and tab 2 is showing)
   self.openOrders = ko.observableArray([]);
   //^ a list of open orders for the selected asset pair and address
-  self.currentBlockIndex = ko.observable(null);
   self.askBook = ko.observableArray([]);
   self.bidBook = ko.observableArray([]);
   self.bidAskMedian = ko.observable(null);
@@ -181,12 +180,7 @@ function BuySellWizardViewModel() {
   }, self);
   self.dispSelectedAddressWithLabel = ko.computed(function() {
     if(!self.selectedAddress()) return null;
-    var address = self.selectedAddress();
-    var match = ko.utils.arrayFirst(self.availableAddressesWithBalance(), function(item) {
-      return address == item.ADDRESS;
-    });
-    assert(match);
-    return match.LABEL ? match.LABEL + " (" + match.ADDRESS + ")" : match.ADDRESS;
+    return getAddressLabel(self.selectedAddress());
   }, self);
   
   self.availableAddressesWithBalance = ko.computed(function() { //stores AddressInDropdownModel objects
@@ -280,10 +274,6 @@ function BuySellWizardViewModel() {
   });
   //^ if we are selling BTC, this is a fee_required override if buying BTC, and a fee_provided override if selling BTC. if neither, this is not used
   self.btcFeeAs = ko.observable('percentage');
-  self.delayedBTCFee = ko.computed(self.btcFee).extend({ rateLimit: { method: "notifyWhenChangesStop", timeout: 400 } });
-  //^ this is used for refreshing the order book, depending on what BTC fee was entered as. However we want the refresh to be
-  // delayed to that we don't make a bunch of ajax requests WHILE the user is typing...instead, waiting until the user
-  // a) finishes typing and b) the value is valid, before making changes. Subscribing to changes in delayedBTCFee allows us to do this
   
   self.selectedSellQuantityCustom = ko.observable().extend({
      //only set if there is no market data, or market data is overridden
@@ -295,7 +285,7 @@ function BuySellWizardViewModel() {
     isValidQtyForSellAssetDivisibility: self
   });
   self.selectedSellQuantityAtMarket = ko.computed(function() {
-    if(!self.assetPair() || !self.selectedBuyQuantity() || !isNumber(self.selectedBuyQuantity()) || !self.currentMarketUnitPrice()) return null;
+    if(!self.assetPair() || !isNumber(self.selectedBuyQuantity()) || !self.currentMarketUnitPrice()) return null;
     if(parseFloat(self.selectedBuyQuantity()) == 0) return 0;
     if(self.assetPair()[0] == self.buyAsset()) //buy asset is the base
       //self.selectedBuyQuantity * self.currentMarketUnitPrice
@@ -309,33 +299,51 @@ function BuySellWizardViewModel() {
   self.selectedSellQuantity = ko.computed(function() {
     return(self.selectedSellQuantityCustom() || self.selectedSellQuantityAtMarket());
   }, self);
-  self.feeForSelectedSellQuantity = ko.computed(function() {
-    //returns the fee (as an quantity, not a %) for the specified sell quantity
+
+  self.feeForSelectedBTCQuantity = ko.computed(function() {
+    //returns the fee (as an quantity, not a %) for the specified buy OR sell quantity (if EITHER is for BTC)
+    // -- if the BUY asset is BTC, the fee returned is the FEE REQUIRED
+    // -- if the SELL asset is BTC, the fee returned is the FEE PROVIDED
+    //if neither the buy nor sell asset is in BTC, then 0 will be returned
     var fee = 0;
-    if(self.sellAsset() == 'BTC') {
-      if(!self.selectedSellQuantity() || !self.btcFee()) return 0;
+    if(self.buyAsset() == 'BTC' || self.sellAsset() == 'BTC') {
+      var quantity = self.buyAsset() == 'BTC' ? self.selectedBuyQuantity() : self.selectedSellQuantity();
+      
+      if(!isNumber(quantity) || parseFloat(quantity) == 0) return 0; //no quantity == zero fee (since there is nothing to get e.g. 1% from)
+      
+      if(!self.btcFee())
+        return Decimal.round(new Decimal(quantity).mul(ORDER_DEFAULT_BTCFEE_PCT / 100), 8).toFloat();
+      //^ default percentage fee (depends on btcFeeAs() defaulting to 'percentage')
+      
       if(self.btcFeeAs() == 'percentage') {
-        fee = Decimal.round(new Decimal(self.selectedSellQuantity()).mul(self.btcFee() / 100), 8).toFloat(); 
+        if(!parseFloat(self.btcFee())) return 0;
+        //^ avoid decimal round bug giving undefined if fee specified is zero, or any nonnumber garbage
+        fee = Decimal.round(new Decimal(quantity).mul(self.btcFee() / 100), 8).toFloat(); 
       } else { //the quantity itself
         fee = parseFloat(self.btcFee());
       }
     }
     return fee;
   }, self);
-  self.dispFeeForSelectedSellQuantityAsPct = ko.computed(function() {
-    if(!self.feeForSelectedSellQuantity()) return null;
+  self.delayedFeeForSelectedBTCQuantity = ko.computed(self.feeForSelectedBTCQuantity).extend({ rateLimit: { method: "notifyWhenChangesStop", timeout: 400 } });
+  //^ this is used for refreshing the order book, depending on what BTC fee was entered as. However we want the refresh to be
+  // delayed to that we don't make a bunch of ajax requests WHILE the user is typing...instead, waiting until the user
+  // a) finishes typing and b) the value is valid, before making changes. Subscribing to changes in delayedFeeForSelectedBTCQuantity allows us to do this
+  
+  self.dispFeeForSelectedBTCQuantityAsPct = ko.computed(function() {
+    if(!self.feeForSelectedBTCQuantity()) return null;
     return self.btcFeeAs() == 'percentage'
       ? self.btcFee()
-      : Decimal.round(new Decimal(100).mul(self.feeForSelectedSellQuantity()).div(self.selectedSellQuantity()), 2).toFloat();
+      : Decimal.round(new Decimal(100).mul(self.feeForSelectedBTCQuantity()).div(self.selectedSellQuantity()), 2).toFloat();
   }, self);
   
   self.unitPriceCustom = ko.computed(function() {
-    if(!self.assetPair() || !self.selectedBuyQuantity() || !self.selectedSellQuantityCustom() || !isNumber(self.selectedSellQuantityCustom())) return null;
+    if(!self.assetPair() || !isNumber(self.selectedBuyQuantity()) || !isNumber(self.selectedSellQuantityCustom())) return null;
     //^ only valid when the market unit price doesn't exist or is overridden
     if(parseFloat(self.selectedSellQuantityCustom()) == 0 || parseFloat(self.selectedBuyQuantity()) == 0) return null;
     if(self.assetPair()[0] == self.buyAsset()) //buy asset is the base
       //self.selectedSellQuantityCustom / self.selectedBuyQuantity
-      return Decimal.round(new Decimal(self.selectedSellQuantityCustom()).div(self.selectedBuyQuantity()), 8).toFloat().toFixed(8);
+      return Decimal.round(new Decimal(self.selectedSellQuantityCustom()).div(self.selectedBuyQuantity()), 8).toFloat();
     else { // sell asset is the base
       assert(self.assetPair()[0] == self.sellAsset());
       //self.selectedBuyQuantity / self.selectedSellQuantityCustom
@@ -346,13 +354,18 @@ function BuySellWizardViewModel() {
     //if we've overridden the unit price, return that, otherwise go with the market rate (if there is one)
     return(self.unitPriceCustom() || self.currentMarketUnitPrice());
   }, self);
+  self.dispUnitPrice = ko.computed(function() {
+    if(!self.unitPrice()) return null;
+    return numberWithCommas(+(self.unitPrice().toFixed(8)));
+  }, self);
+  
   self.sellQuantityRemainingAfterSale = ko.computed(function() {
     if(!self.selectedSellQuantity()) return null;
     var curBalance = WALLET.getBalance(self.selectedAddress(), self.sellAsset());
     //curBalance - self.selectedSellQuantity
     var quantityLeft = Decimal.round(new Decimal(curBalance).sub(self.selectedSellQuantity()), 8).toFloat();
     if(self.sellAsset() == 'BTC') { //include the fee if we're selling BTC
-      quantityLeft = Decimal.round(new Decimal(quantityLeft).sub(self.feeForSelectedSellQuantity()), 8).toFloat();
+      quantityLeft = Decimal.round(new Decimal(quantityLeft).sub(self.feeForSelectedBTCQuantity()), 8).toFloat();
     }
     return quantityLeft;
   }, self);
@@ -435,7 +448,7 @@ function BuySellWizardViewModel() {
     });
     
     //auto refresh the order book tuned to the entered fee, if it applies
-    self.delayedBTCFee.subscribeChanged(function(newValue, prevValue) {
+    self.delayedFeeForSelectedBTCQuantity.subscribeChanged(function(newValue, prevValue) {
       assert(self.buyAsset() == 'BTC' || self.sellAsset() == 'BTC'); //should not fire otherwise, as the field would not be shown
       if(!self.validationModelTab2BTCFee.isValid()) return;
       self.tab2RefreshOrderBook(); //refresh the order book
@@ -472,7 +485,6 @@ function BuySellWizardViewModel() {
           self.btcFeeAs('percentage');
           self.tradeHistory([]);
           self.openOrders([]);
-          self.currentBlockIndex(null);
           self.askBook([]);
           self.bidBook([]);
           self.bidAskMedian(null);
@@ -536,13 +548,13 @@ function BuySellWizardViewModel() {
              get_quantity: buyQuantity,
              get_asset: self.buyAsset(),
              _get_divisible: self.buyAssetIsDivisible(),
-             fee_required: self.buyAsset() == 'BTC' ? denormalizeQuantity(self.feeForSelectedSellQuantity()) : null,
-             fee_provided: self.sellAsset() == 'BTC' ? denormalizeQuantity(self.feeForSelectedSellQuantity()) : null,
+             fee_required: self.buyAsset() == 'BTC' ? denormalizeQuantity(self.feeForSelectedBTCQuantity()) : null,
+             fee_provided: self.sellAsset() == 'BTC' ? denormalizeQuantity(self.feeForSelectedBTCQuantity()) : null,
              expiration: parseInt(self.numBlocksUntilExpiration())
             },
             function() {
-              bootbox.alert("Your order for <b>" + self.selectedBuyQuantity() + " "
-               + self.selectedBuyAsset() + "</b> has been placed. "
+              bootbox.alert("Your order for <b class='notoQuantityColor'>" + self.selectedBuyQuantity() + "</b>"
+               + " <b class='notoAssetColor'>" + self.selectedBuyAsset() + "</b> has been placed. "
                + ACTION_PENDING_NOTICE);
               checkURL(); //reset the form and take the user back to the first tab by just refreshing the page
             }
@@ -558,7 +570,6 @@ function BuySellWizardViewModel() {
     self.tab2RefreshMarketUnitPrice();
     self.tab2RefreshPriceChart();
     self.tab2RefreshTradeHistory();
-    self.tab2RefreshCurrentBlockIndex();
     self.tab2RefreshOrderBook();
     self.MARKET_DATA_REFRESH_TIMERID = setTimeout(self._tab2StartAutoRefresh, MARKET_INFO_REFRESH_EVERY);
   }
@@ -593,7 +604,7 @@ function BuySellWizardViewModel() {
     failoverAPI("get_trade_history_within_dates", [self.buyAsset(), self.sellAsset()], function(data, endpoint) {
       self.tradeHistory(data);
       if(data.length) {
-        runDataTables('#tradeHistory', true);
+        runDataTables('#tradeHistory', true, { "aaSorting": [ [0, 'desc'] ] });
         self.showTradeHistory(true);
       } else {
         self.showTradeHistory(false);
@@ -601,19 +612,10 @@ function BuySellWizardViewModel() {
     });
   }
 
-  self.tab2RefreshCurrentBlockIndex = function() {
-    //fetch the current block index (to show the order expiration in statistic)
-    failoverAPI("get_running_info", [], function(data, endpoint) {
-      self.currentBlockIndex(data['bitcoin_block_count']);
-    });
-  }
-  
   self.tab2RefreshOrderBook = function() {
-    //get order book
-    var args = {'asset1': self.buyAsset(), 'asset2': self.sellAsset()};
-    if(self.buyAsset() == 'BTC') args['normalized_fee_required'] = self.feeForSelectedSellQuantity();
-    if(self.sellAsset() == 'BTC') args['normalized_fee_provided'] = self.feeForSelectedSellQuantity();
-    
+    var args = {'buy_asset': self.buyAsset(), 'sell_asset': self.sellAsset()};
+    if(self.buyAsset() == 'BTC') args['normalized_fee_required'] = self.feeForSelectedBTCQuantity();
+    if(self.sellAsset() == 'BTC') args['normalized_fee_provided'] = self.feeForSelectedBTCQuantity();
     failoverAPI("get_order_book", args, function(data, endpoint) {
       if(!data['raw_orders'] || data['raw_orders'].length == 0) return;
       //^ no order book, showPriceChart should end up being set to false and the order book wont show
@@ -635,7 +637,7 @@ function BuySellWizardViewModel() {
       self.openOrders(myOrders);
       //now that we have the complete data, show the orders listing
       if(data.length) {
-        runDataTables('#openOrders', true);
+        runDataTables('#openOrders', true, { "aaSorting": [ [0, 'desc'] ] });
         self.showOpenOrders(true);
       } else {
         self.showOpenOrders(false);
@@ -670,9 +672,9 @@ function BuySellWizardViewModel() {
   }
   
   self.derivePendingOrderExpiresIn = function(blockIndexCreatedAt, expiration) {
-    if(!self.currentBlockIndex()) return '??'; //if block index isn't set yet
+    assert(WALLET.networkBlockHeight());
     //Outputs HTML
-    var blockLifetime = self.currentBlockIndex() - blockIndexCreatedAt;
+    var blockLifetime = WALLET.networkBlockHeight() - blockIndexCreatedAt;
     var timeLeft = expiration - blockLifetime;
     assert(timeLeft >= 0);
     var labelType = null;
@@ -709,7 +711,11 @@ function BuySellWizardViewModel() {
           callback: function() {
             //issue 0 to lock the asset
             WALLET.doTransaction(self.selectedAddress(), "create_cancel",
-              { offer_hash: item['tx_hash'] },
+              {
+                offer_hash: item['tx_hash'],
+                _type: 'order',
+                _tx_index: item['tx_index']
+              },
               function() {
                 bootbox.alert("Your order cancellation has been submitted. " + ACTION_PENDING_NOTICE);
               }

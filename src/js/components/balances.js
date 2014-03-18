@@ -190,7 +190,8 @@ function SendModalViewModel() {
   
   self.show = function(fromAddress, asset, rawBalance, isDivisible, resetForm) {
     if(asset == 'BTC' && rawBalance == null) {
-      return bootbox.alert("Cannot send BTC as we cannot currently get in touch with the server to get your balance.");
+      return bootbox.alert("Cannot send <b class='notoAssetColor'>BTC</b> right now, as we cannot currently get"
+        + " in touch with the server to get your balance. Please try again later.");
     }
     assert(rawBalance, "Balance is null or undefined?");
     
@@ -308,14 +309,15 @@ function SweepModalViewModel() {
     var assetDisplayList = [];
     for(var i = 0; i < sendsComplete.length; i++) {
       if(sendsComplete[i]['result']) {
-        assetDisplayList.push("<li><b>" + sendsComplete[i]['asset'] + ":</b> Sent "
-          + "<b>" + sendsComplete[i]['normalized_quantity'] + " " + sendsComplete[i]['asset'] + "</b>"
-          + " to <b>" + sendsComplete[i]['to'] + "</b></li>");  
+        assetDisplayList.push("<li><b class='notoAssetColor'>" + sendsComplete[i]['asset'] + ":</b> Sent"
+          + " <b class='notoQuantityColor'>" + sendsComplete[i]['normalized_quantity'] + "</b>"
+          + " <b class='notoAssetColor'>" + sendsComplete[i]['asset'] + "</b>"
+          + " to <b class='notoAddrColor'>" + getAddressLabel(sendsComplete[i]['to']) + "</b></li>");  
       } else {
-        assetDisplayList.push("<li><b>" + sendsComplete[i]['asset'] + "</b>: Funds not sent due to failure.</li>");  
+        assetDisplayList.push("<li><b class='notoAssetColor'>" + sendsComplete[i]['asset'] + "</b>: Funds not sent due to failure.</li>");  
       }
     }
-    bootbox.alert("The sweep from address <b>" + self.addressForPrivateKey()
+    bootbox.alert("The sweep from address <b class='notoAddrColor'>" + self.addressForPrivateKey()
       + "</b> is complete.<br/>Sweep results:<br/><br/><ul>" + assetDisplayList.join('') + "</ul><br/><br/>"
       + ACTION_PENDING_NOTICE_NO_UI);
   }
@@ -575,7 +577,7 @@ function PrimeAddressModalViewModel() {
       addressObj.numPrimedTxoutsIncl0Confirms(data[0]['numPrimedTxoutsIncl0Confirms']);
       self.rawUnspentTxResponse = data[0]['rawUtxoData']; //save for later (when creating the Tx itself)
       if(data[0]['confirmedRawBal'] == 0 || data[0]['numPrimedTxouts'] == 0) {
-        bootbox.alert("Your wallet has no available BTC to prime this account with. Please deposit BTC and try again.");
+        bootbox.alert("Your wallet has no available <b class='notoAssetColor'>BTC</b> to prime this account with. Please deposit some and try again.");
       } else {
         self.shown(true);
       }
@@ -619,7 +621,7 @@ ko.validation.rules['doesNotExceedAlreadyBurned'] = {
     validator: function (val, self) {
       return !(parseFloat(val) > 1 - self.btcAlreadyBurned());
     },
-    message: 'You can only burn 1 BTC total for any given address. Even over multiple burns, the total quantity must be less than 1 BTC.'
+    message: 'You can only burn <b>1 BTC</b> total for any given address. Even over multiple burns, the total quantity must be less than <b>1 BTC</b>.'
 };
 ko.validation.registerExtenders();
 
@@ -627,10 +629,8 @@ function TestnetBurnModalViewModel() {
   var self = this;
   self.shown = ko.observable(false);
   self.address = ko.observable(''); // SOURCE address (supplied)
-
-  self.networkBlockHeight = ko.observable(0);
   self.btcAlreadyBurned = ko.observable(null); // quantity BTC already burned from this address (normalized)
-  
+
   self.btcBurnQuantity = ko.observable('').extend({
     required: true,
     //not using min, max and number validators here because they don't like things like ".4"
@@ -645,7 +645,7 @@ function TestnetBurnModalViewModel() {
   
   self.quantityXCPToBeCreated = ko.computed(function() { //normalized
     if(!self.btcBurnQuantity() || !parseFloat(self.btcBurnQuantity())) return null;
-    return testnetBurnDetermineEarned(self.networkBlockHeight(), self.btcBurnQuantity());
+    return testnetBurnDetermineEarned(WALLET.networkBlockHeight(), self.btcBurnQuantity());
   }, self);
   
   self.validationModel = ko.validatedObservable({
@@ -674,8 +674,10 @@ function TestnetBurnModalViewModel() {
       },
       function() {
         self.shown(false);
-        bootbox.alert("You have burned <b>" + self.btcBurnQuantity() + " BTC</b> for approximately <b>"
-          + self.quantityXCPToBeCreated() + " XCP</b>. " + ACTION_PENDING_NOTICE);
+        bootbox.alert("You have burned <b class='notoQuantityColor'>" + self.btcBurnQuantity() + "</b>"
+          + " <b class='notoAssetColor'>BTC</b> for approximately"
+          + " <b class='notoQuantityColor'>" + self.quantityXCPToBeCreated() + "</b>"
+          + " <b class='notoAssetColor'>XCP</b>. " + ACTION_PENDING_NOTICE);
       }
     );
   }
@@ -686,19 +688,15 @@ function TestnetBurnModalViewModel() {
     self.address(address);
     
     //get the current block height, to calculate the XCP burn payout
-    WALLET.getBTCBlockHeight(function(blockHeight) {
-      self.networkBlockHeight(blockHeight);
+    //determine whether the selected address has burned before, and if so, how much
+    failoverAPI("get_burns", {filters: {'field': 'source', 'op': '==', 'value': address}}, function(data, endpoint) {
+      var totalBurned = 0;
+      for(var i=0; i < data.length; i++) {
+        totalBurned += data[i]['burned'];
+      }
       
-      //determine whether the selected address has burned before, and if so, how much
-      failoverAPI("get_burns", {filters: {'field': 'source', 'op': '==', 'value': address}}, function(data, endpoint) {
-        var totalBurned = 0;
-        for(var i=0; i < data.length; i++) {
-          totalBurned += data[i]['burned'];
-        }
-        
-        self.btcAlreadyBurned(normalizeQuantity(totalBurned));
-        self.shown(true);
-      });
+      self.btcAlreadyBurned(normalizeQuantity(totalBurned));
+      self.shown(true);
     });
   }  
 
@@ -711,8 +709,8 @@ function TestnetBurnModalViewModel() {
 //Some misc jquery event handlers
 $('#createAddress, #createWatchOnlyAddress').click(function() {
   if(WALLET.addresses().length >= MAX_ADDRESSES) {
-    bootbox.alert("You already have the max number of addresses for a single wallet ("
-      + MAX_ADDRESSES + "). Please create a new wallet for more.");
+    bootbox.alert("You already have the max number of addresses for a single wallet (<b>"
+      + MAX_ADDRESSES + "</b>). Please create a new wallet (i.e. different passphrase) for more.");
     return false;
   }
   CREATE_NEW_ADDRESS_MODAL.show($(this).attr('id') == 'createWatchOnlyAddress');

@@ -25,9 +25,18 @@
 
 <div id="gettingStartedNotice" data-bind="fadeVisibleInOnly: WALLET.isNew()" class="alert alert-success alert-block" style="display:none">
     <a class="close" data-dismiss="alert" href="#">×</a>
-    <h4 class="alert-heading">Welcome!</h4>
-    We've created three addresses for you. You can always create more if need be. To start using the wallet, simply send some BTC or XCP to any one of them.<br/><br/> 
-    Beyond this, please check out our <a href="#" target="_blank">Counterwallet Getting Started guide</a> to learn more.
+    <h4 class="alert-heading" style="padding-bottom: 10px">Welcome to Counterwallet!</h4>
+    We've created three addresses for you, which serve as both Bitcoin and Counterparty addresses.
+    To start using the wallet, simply send some BTC or XCP to any one of them (just single click on the address string
+    itself to select it, then copy that text, which you can then give to others or use to send funds to).<br/><br/>
+    
+    One important thing to know before getting started is that when you perform an action in Counterwallet (i.e. place
+    an order, create an asset, etc), it doesn't take effect immediately as it must first be confirmed on the Bitcoin blockchain.
+    Counterwallet lets you know this by displaying your actions under the <b>Pending Actions</b> panel (the Clock icon on the top bar), and then moving
+    them to the <b>Notifications</b> panel (the Checkbox icon) automatically once the network has successfully confirmed them.
+    Note that depending on the speed at which blocks are solved, it could take anywhere from 2 to 40 minutes for your actions to be confirmed.<br/><br/>
+     
+    Beyond this, please check out our <a href="#" target="_blank">Counterwallet Getting Started guide</a> <b>(coming soon)</b> to learn more.
 </div>
 
 <section id="widget-grid" class="balancesContainer" data-bind="foreach: addresses"> <!-- widget grid -->
@@ -80,7 +89,7 @@
                 <div class="clearfix"></div>
                 <p class="balance">
                     <span data-bind="visible: isMine()">Issued: <span data-bind="text: dispTotalIssued"></span></span><br/>
-                    Bal: <span data-bind="text: normalizedBalance() === null ? '???' : smartFormat(normalizedBalance())"></span></p>
+                    Bal: <span data-bind="text: normalizedBalance() === null ? '--' : smartFormat(normalizedBalance())"></span></p>
                 <div style="position:absolute;bottom:2px;right:10px">
                     <span data-bind="visible: locked()" style="float:right;padding-left:5px;"
                         title="Asset is locked"><i class="icon-append fa fa-lock"></i></span>
@@ -117,7 +126,7 @@
             <label class="control-label col col-sm-2">Address</label>
             <div class="col col-sm-10">
                 <label class="input"><i class="icon-append fa fa-tag"></i>
-                    <input name="watchAddress" data-bind="value: watchAddress, valueUpdate: 'afterkeydown'" type="text"/>
+                    <input name="watchAddress" data-bind="value: watchAddress, valueUpdate: 'input'" type="text"/>
                 </label>
             </div>
           </div></section>
@@ -125,7 +134,7 @@
             <label class="control-label col col-sm-2">Description</label>
             <div class="col col-sm-10">
                 <label class="input"><i class="icon-append fa fa-info"></i>
-                    <input name="description" data-bind="value: description, valueUpdate: 'afterkeydown'" type="text"/>
+                    <input name="description" data-bind="value: description, valueUpdate: 'input'" type="text"/>
                 </label>
             </div>
           </div></section>
@@ -159,7 +168,7 @@
             <label class="control-label col col-sm-2">Send To</label>
             <div class="col col-sm-10">
                 <label class="input"><i class="icon-append fa fa-tag"></i>
-                    <input name="destAddress" data-bind="value: destAddress, valueUpdate:['afterkeydown','propertychange','input'], attr: {placeholder: 'Enter Bitcoin address'}" type="text"/>
+                    <input name="destAddress" data-bind="value: destAddress, valueUpdate: 'input', attr: {placeholder: 'Enter Bitcoin address'}" type="text"/>
                 </label>
             </div>
           </div></section>
@@ -168,7 +177,7 @@
             <div class="col col-sm-10">
                 <label class="input" style="display: inline-block;">
                     <i class="icon-append fa fa-share"></i>
-                    <input name="quantity" data-bind="value: quantity, valueUpdate: 'afterkeydown', attr: {placeholder: 'Enter quantity'}" type="text"/>
+                    <input name="quantity" data-bind="value: quantity, valueUpdate: 'input', attr: {placeholder: 'Enter quantity'}" type="text"/>
                 </label>
                 <span>
                     &nbsp;&nbsp;<button type="button" data-bind="click: maxAmount" class="btn btn-default btn-sm">MAX</button>
@@ -205,7 +214,7 @@
             <label class="control-label col col-sm-2">Private Key To Import</label>
             <div class="col col-sm-10">
                 <label class="input"><i class="icon-append fa fa-lock"></i>
-                    <input name="privateKey" data-bind="value: privateKey, valueUpdate:['afterkeydown','propertychange','input'], attr: {placeholder: 'Enter Bitcoin private key'}" type="text"/>
+                    <input name="privateKey" data-bind="value: privateKey, valueUpdate: 'input', attr: {placeholder: 'Enter Bitcoin private key'}" type="text"/>
                 </label>
                 <div class="note">Enter the unencrypted private key that cooresponds to the address with the funds you want to move.</div>
             </div>
@@ -252,7 +261,7 @@
             <label class="control-label col col-sm-2">Message to Sign</label>
             <div class="col col-sm-10">
                 <label class="textarea">
-                    <textarea rows="3" class="custom-scroll" data-bind="value: message, valueUpdate : 'afterkeydown'"></textarea>
+                    <textarea rows="3" class="custom-scroll" data-bind="value: message, valueUpdate : 'input'"></textarea>
                 </label>
                 <div class="note">Enter the message text to be signed.</div>
             </div>
@@ -321,7 +330,7 @@
             <label class="control-label col col-sm-2">Create Additional</label>
             <div class="col col-sm-10">
                 <label class="input"><i class="icon-append fa fa-plus"></i>
-                    <input name="numNewPrimedTxouts" data-bind="value: numNewPrimedTxouts, valueUpdate:['afterkeydown','propertychange','input']" type="text"/>
+                    <input name="numNewPrimedTxouts" data-bind="value: numNewPrimedTxouts, valueUpdate: 'input'" type="text"/>
                 </label>
                 <div class="note">The number of additional unspent outputs you want to prime the account with.</div>
             </div>
@@ -355,7 +364,7 @@
             <label class="control-label col col-sm-2">BTC to Burn</label>
             <div class="col col-sm-10">
                 <label class="input"><i class="icon-append fa fa-fire"></i>
-                    <input name="additionalIssue" data-bind="value: btcBurnQuantity, valueUpdate: 'afterkeydown'" type="text"/>
+                    <input name="additionalIssue" data-bind="value: btcBurnQuantity, valueUpdate: 'input'" type="text"/>
                 </label>
             </div>
           </div></section>
@@ -398,7 +407,7 @@
             <label class="control-label col col-sm-2">Asset Name</label>
             <div class="col col-sm-10">
                 <label class="input"><i class="icon-append fa fa-tag"></i>
-                    <input name="assetName" data-bind="value: name, valueUpdate : 'afterkeydown'" type="text"/>
+                    <input name="assetName" data-bind="value: name, valueUpdate : 'input'" type="text"/>
                 </label>
                 <div class="note">The asset's trading symbol (also known as the Asset ID).</div>
             </div>
@@ -407,7 +416,7 @@
             <label class="control-label col col-sm-2">Description</label>
             <div class="col col-sm-10">
                 <label class="input"><i class="icon-append fa fa-info"></i>
-                    <input name="assetDescription" data-bind="value: description, valueUpdate: 'afterkeydown'"/>
+                    <input name="assetDescription" data-bind="value: description, valueUpdate: 'input'"/>
                 </label>
                 <div class="note">Optional text that provides more information on the asset.</div>
             </div>
@@ -416,7 +425,7 @@
             <label class="control-label col col-sm-2">Quantity</label>
             <div class="col col-sm-10">
                 <label class="input"><i class="icon-append fa fa-plus"></i>
-                    <input name="assetQuantity"  data-bind="value: quantity, valueUpdate: 'afterkeydown'" type="text"/>                        
+                    <input name="assetQuantity"  data-bind="value: quantity, valueUpdate: 'input'" type="text"/>                        
                 </label>
                 <div class="note">How many of the units of the asset to issue (can be increased later).</div>
             </div>
@@ -452,7 +461,7 @@
             <label class="control-label col col-sm-2">Call Price</label>
             <div class="col col-sm-10">
                 <label class="input">
-                    <input name="assetCallPrice" type="text" data-bind="value: callPrice, valueUpdate: 'afterkeydown'"/>
+                    <input name="assetCallPrice" type="text" data-bind="value: callPrice, valueUpdate: 'input'"/>
                 </label>
                 <div class="note">The <b>XCP price per unit</b> that the owner of the asset may call it back for.</div>
             </div>
@@ -486,7 +495,7 @@
             <label class="control-label col col-sm-2">Additional Qty</label>
             <div class="col col-sm-10">
                 <label class="input"><i class="icon-append fa fa-plus"></i>
-                    <input name="additionalIssue" data-bind="value: additionalIssue, valueUpdate: 'afterkeydown'" type="text"/>
+                    <input name="additionalIssue" data-bind="value: additionalIssue, valueUpdate: 'input'" type="text"/>
                 </label>
             </div>
           </div></section>
@@ -517,7 +526,7 @@
             <label class="control-label col col-sm-2">Transfer To</label>
             <div class="col col-sm-10">
                 <label class="input"><i class="icon-append fa fa-user"></i>
-                    <input name="destAddress" data-bind="value: destAddress, valueUpdate: ['afterkeydown','propertychange','input']" type="text"/>
+                    <input name="destAddress" data-bind="value: destAddress, valueUpdate: 'input'" type="text"/>
                 </label>
             </div>
           </div></section>
@@ -550,7 +559,7 @@
             <label class="control-label col col-sm-2">Description</label>
             <div class="col col-sm-10">
                 <label class="input"><i class="icon-append fa fa-info"></i>
-                    <input name="newDescription" data-bind="value: newDescription, valueUpdate: 'afterkeydown'" type="text"/>
+                    <input name="newDescription" data-bind="value: newDescription, valueUpdate: 'input'" type="text"/>
                 </label>
             </div>
           </div></section>
@@ -590,7 +599,7 @@
             <label class="control-label col col-sm-2">Dividend per Unit</label>
             <div class="col col-sm-10">
                 <label class="input"><i class="icon-append fa fa-plus"></i>
-                    <input name="quantityPerUnit" data-bind="value: quantityPerUnit, valueUpdate : 'afterkeydown'" type="text"/>
+                    <input name="quantityPerUnit" data-bind="value: quantityPerUnit, valueUpdate : 'input'" type="text"/>
                 </label>
                 <div class="note">Enter the quantity of the Dividend Asset that should be distributed per share of <span data-bind="text: assetName"></span>.</div>
             </div>
@@ -622,14 +631,14 @@
       </div>
       <div class="modal-body no-padding" data-bind="visible: assetObj">
         <p class="formPadded">Use this form to exercise a call option for the selected asset
-            (<b><span data-bind="text: asset"></span></b>), whose call date is <b><span data-bind="text: dispCallDate"></span></b>.<br/><br/>
+            (<b><span data-bind="text: asset"></span></b>), any time after its call date of <b><span data-bind="text: dispCallDate"></span></b>.<br/><br/>
        <b style='color:red'>Please NOTE that this action is irreversable!</b></p>
         <form class="smart-form" data-bind="submit: doAction"><fieldset>
           <section><div class="row">
             <label class="control-label col col-sm-2">% to Call</label>
             <div class="col col-sm-10">
                 <label class="input"><i class="icon-append fa fa-plus"></i>
-                    <input name="percentageToCall" data-bind="value: percentageToCall, valueUpdate : 'afterkeydown'" type="text"/>
+                    <input name="percentageToCall" data-bind="value: percentageToCall, valueUpdate : 'input'" type="text"/>
                 </label>
                 <div class="note">Enter the percentage of the asset to call back (e.g. 40.5 for 40.5%).</div>
             </div>
@@ -637,11 +646,17 @@
         </fieldset></form>
         <div class="formPaddedBot" data-bind="fadeVisibleInOnly: xcpBalRemainingPostCall() !== null">
             <p>At the given call price of <b><span data-bind="text: dispCallPrice"></span> XCP</b> per unit
-                of <b><span data-bind="text: asset"></span></b> (which has <span data-bind="text: dispTotalIssued"></span> units issued),
-                your total cost for a <b><span data-bind="text: percentageToCall"></span>% callback</b> would be <b class="totalXCPPay"> XCP</b>.</p>
+                of <b><span data-bind="text: asset"></span></b> (which has <b><span data-bind="text: dispTotalIssued"></span></b> units issued
+                and <b class="sellColor"><span data-bind="text: dispTotalOutstanding"></span></b> units outstanding),
+                your total cost for a <b><span data-bind="text: percentageToCall"></span>% callback</b> would be
+                <b class="sellColor"><span data-bind="text: totalXCPPay"></span> XCP</b>.</p>
             <p>After this callback, this address would have a remaining balance of
             <b data-bind="css: {errorColor: xcpBalRemainingPostCall() < 0, sellColor:  xcpBalRemainingPostCall() >= 0}">
-                <span data-bind="text: numberWithCommas(xcpBalRemainingPostCall())"></span> XCP</b>.</p>
+                <span data-bind="text: numberWithCommas(xcpBalRemainingPostCall())"></span> XCP</b>, and gain
+            <b class="buyColor"><span data-bind="text: numberWithCommas(dispUnitsToCallback())"></span>
+                <span data-bind="text: asset"></span></b>, for a final balance of
+             <b><span data-bind="text: numberWithCommas(dispUnitsAfterCallback())"></span>
+                <span data-bind="text: asset"></span></b>.</p>
         </div>
       </div>
       <div class="modal-footer">

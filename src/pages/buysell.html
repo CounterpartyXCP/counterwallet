@@ -113,7 +113,7 @@
                                             <div class="input-group">
                                                 <span class="input-group-addon"><i class="fa fa-arrow-circle-o-down fa-lg fa-fw"></i></span>
                                                 <input class="form-control input-lg" type="text" style="max-width: 300px"
-                                                 data-bind="value: selectedBuyQuantity, attr: {placeholder: 'Quantity ' + buyAsset()}, valueUpdate: 'afterkeydown'" />
+                                                 data-bind="value: selectedBuyQuantity, attr: {placeholder: 'Quantity ' + buyAsset()}, valueUpdate: 'input'" />
                                             </div>
                                             <span class="invalid" data-bind="validationMessage: selectedBuyQuantity"></span>
                                         </div>
@@ -133,7 +133,7 @@
                                             <div class="input-group">
                                                 <span class="input-group-addon"><i class="fa fa-arrow-circle-o-down fa-lg fa-fw"></i></span>
                                                 <input class="form-control input-lg" type="text"
-                                                    data-bind="value: selectedBuyQuantity, attr: {placeholder: 'Quantity ' + buyAsset()}, valueUpdate: 'afterkeydown'"
+                                                    data-bind="value: selectedBuyQuantity, attr: {placeholder: 'Quantity ' + buyAsset()}, valueUpdate: 'input'"
                                                     style="max-width: 300px;" />
                                             </div>
                                             <span class="invalid" data-bind="validationMessage: selectedBuyQuantity"></span>
@@ -145,7 +145,7 @@
                                             <div class="input-group">
                                                 <span class="input-group-addon"><i class="fa fa-arrow-circle-o-up fa-lg fa-fw"></i></span>
                                                 <input class="form-control input-lg" type="text"
-                                                    data-bind="value: selectedSellQuantityCustom, attr: {placeholder: 'Quantity ' + sellAsset()}, valueUpdate: 'afterkeydown'"
+                                                    data-bind="value: selectedSellQuantityCustom, attr: {placeholder: 'Quantity ' + sellAsset()}, valueUpdate: 'input'"
                                                     style="max-width: 300px;" />
                                             </div>
                                             <span class="invalid" data-bind="validationMessage: selectedSellQuantityCustom"></span>
@@ -163,18 +163,17 @@
                                                 <span class="buyColor" data-bind="text: buyAsset"></span></b>
                                                 will cost you <b><span class="sellColor" data-bind="text: numberWithCommas(selectedSellQuantityAtMarket())"></span>
                                                 <span class="sellColor" data-bind="text: sellAsset"></span></b>
-                                                <span data-bind="visible: sellAsset() == 'BTC' && feeForSelectedSellQuantity() != 0">, plus a <b><span data-bind="text: feeForSelectedSellQuantity"></span> BTC</b> (<span data-bind="text: dispFeeForSelectedSellQuantityAsPct"></span>%) miner fee (to prevent troll orders)</span>.
+                                                <span data-bind="visible: sellAsset() == 'BTC' && feeForSelectedBTCQuantity() != 0">, plus a <b><span data-bind="text: feeForSelectedBTCQuantity"></span> BTC</b> (<span data-bind="text: dispFeeForSelectedBTCQuantityAsPct"></span>%) miner fee (to prevent troll orders)</span>.
                                             </span>
                                             <span data-bind="fadeVisible: (currentMarketUnitPrice() == null || overrideMarketPrice()) && (selectedSellQuantityCustom() && selectedSellQuantityCustom() > 0) ">
                                                 The effective unit price of your <b><span data-bind="text: dispAssetPair"></span></b> order is
-                                                <b><span data-bind="text: unitPrice"></span></b>
-                                                (i.e. <span data-bind="text: numberWithCommas(unitPrice())"></span>
-                                                <span data-bind="text: quoteAsset"></span> per each <span data-bind="text: baseAsset"></span>).
+                                                <b><span data-bind="text: dispUnitPrice"></span></b>
+                                                <b><span data-bind="text: quoteAsset"></span></b> per each <b><span data-bind="text: baseAsset"></span></b>.
                                             </span>
                                             <span data-bind="fadeVisibleInOnly: currentTab() == 2 && sellQuantityRemainingAfterSale() != null && sellQuantityRemainingAfterSale() >= 0">
                                                 After the sale, you will have <b><span class="sellColor" data-bind="text: dispSellQuantityRemainingAfterSale"></span>
                                                 <span class="sellColor" data-bind="text: sellAsset"></span></b> remaining at
-                                                your address <b><span data-bind="text: dispSelectedAddressWithLabel"></span></b>.
+                                                your address <b class='notoAddrColor'><span data-bind="text: dispSelectedAddressWithLabel"></span></b>.
                                             </span>
                                             <span data-bind="fadeVisibleInOnly: currentTab() == 2 && sellQuantityRemainingAfterSale() < 0">
                                                 <span class="errorRedColor">Your purchase would exceed your available balance
@@ -191,7 +190,7 @@
                                             <div class="input-group">
                                                 <span class="input-group-addon"><i class="fa fa-clock-o fa-lg fa-fw"></i></span>
                                                 <input class="form-control input-lg" type="text" style="max-width: 300px"
-                                                 data-bind="value: numBlocksUntilExpiration, valueUpdate: 'afterkeydown'" />
+                                                 data-bind="value: numBlocksUntilExpiration, valueUpdate: 'input'" />
                                             </div>
                                             <span class="invalid" data-bind="validationMessage: numBlocksUntilExpiration"></span>
                                         </div>
@@ -205,7 +204,7 @@
                                             <div class="input-group">
                                                 <span class="input-group-addon"><i class="fa fa-btc fa-lg fa-fw"></i></span>
                                                 <input class="form-control input-lg" type="text" style="max-width: 300px"
-                                                 data-bind="value: btcFee, valueUpdate: 'afterkeydown'" />
+                                                 data-bind="value: btcFee, valueUpdate: 'input'" />
                                             </div>
                                             <span class="invalid" data-bind="validationMessage: btcFee"></span>
                                         </div>
@@ -251,8 +250,8 @@
                                                     <span data-bind="visible: sellAsset() == 'BTC'">BTC Fee Provided:</span>                                                    
                                                 </b></td>
                                                 <td>
-                                                    <b><span class="sellColor"><span data-bind="text: feeForSelectedSellQuantity"></span>&nbsp;BTC</span></b>
-                                                    (<span data-bind="text: dispFeeForSelectedSellQuantityAsPct"></span>% of sale amount)
+                                                    <b><span data-bind="css: {'sellColor':  sellAsset() == 'BTC', 'buyColor': buyAsset() == 'BTC'}"><span data-bind="text: feeForSelectedBTCQuantity"></span>&nbsp;BTC</span></b>
+                                                    (<span data-bind="text: dispFeeForSelectedBTCQuantityAsPct"></span>% of sale amount)
                                                 </td>
                                             </tr>
                                         </tbody>
@@ -406,7 +405,7 @@
       <div class="jarviswidget defaultWidgetColor" id="wid-id-tradeChart" data-widget-editbutton="false" data-widget-deletebutton="false" data-bind="fadeVisibleInOnly: showTradeHistory && tradeHistory().length > 0">
         <header>
             <span class="widget-icon"> <i class="fa fa-table"></i> </span>
-            <h2>Trade History for <span data-bind="text: dispAssetPair"></span></h2>
+            <h2>Completed Trades for <span data-bind="text: dispAssetPair"></span></h2>
         </header>
         <div> <!-- widget div-->
             <div class="widget-body no-padding"> <!-- widget content -->

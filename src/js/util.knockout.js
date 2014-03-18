@@ -82,8 +82,7 @@ ko.bindingHandlers.datetimepicker = {
   }
 };
 
-
-
+  
 /* 
  * Shared knockout Validation custom rules
  */

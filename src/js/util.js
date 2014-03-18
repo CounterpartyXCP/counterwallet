@@ -38,6 +38,12 @@ if (typeof String.prototype.startsWith != 'function') {
   };
 }
 
+if (typeof String.prototype.endsWith != 'function') {
+  String.prototype.endsWith = function(suffix) {
+      return this.indexOf(suffix, this.length - suffix.length) !== -1;
+  };
+}
+
 Array.prototype.contains = function(element){
     return this.indexOf(element) > -1;
 };

@@ -1,0 +1,22 @@
+<ul id="waitingBTCPayFeedContent" data-bind="foreach: waitingBTCPays" class="notification-body">
+    <li>
+      <span class="padding-10">
+        <em data-bind="css: displayColor" class="padding-5 no-border-radius pull-left margin-right-5">
+          <i class="fa fa-fw fa-clock-o fa-2x"></i>
+        </em>
+        <span>
+           A payment of
+           <b class="notoQuantityColor"><span data-bind="text: BTCPAY_DATA['btcQuantity']"></span></b>
+           <b class="notoAssetColor">BTC</b> is required from 
+           <b class="notoAddrColor"><span data-bind="text: getAddressLabel(BTCPAY_DATA['myAddr'])"></span></b> to settle payment for
+           matched order <b><span data-bind="html: getLinkForCPData('tx', BTCPAY_DATA['myOrderTxIndex'])"></span></b>.
+           <span class="pull-right"><button class="btn btn-xs btn-success margin-top-5" data-bind="click: completeBTCPay">Pay Now</button></span>
+           <span class="pull-left font-xs text-muted"><i>Expires ~<span data-bind="timeago: approxExpiresInTime"></span> (@ block <span data-bind="text: BTCPAY_DATA['matchExpireIndex']"></span>)</i>
+        </span>
+      </span>
+    </li>
+</ul>
+
+<script type="text/javascript">
+  ko.applyBindings(WAITING_BTCPAY_FEED, document.getElementById("waitingBTCPayFeedContent"));
+</script>

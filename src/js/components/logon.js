@@ -65,6 +65,7 @@ function LogonViewModel() {
       LAST_MESSAGEIDX_RECEIVED = data['last_message_index']; //LAST_MESSAGEIDX_RECEIVED defined in messagefeed.js
 
       $.jqlog.log("Backend is ready. Testnet status: " + USE_TESTNET + ". Last message feed index: " + LAST_MESSAGEIDX_RECEIVED);
+      assert(LAST_MESSAGEIDX_RECEIVED > 0);
 
       //User is logging in...
       self.walletGenProgressVal(0); //reset so the progress bar hides again...
@@ -86,19 +87,30 @@ function LogonViewModel() {
     
       //Grab preferences
       multiAPINewest("get_preferences", [WALLET.identifier()], 'last_updated', function(data) {
-        assert(data && data.hasOwnProperty('preferences'), "Invalid stored preferences");
-        PREFERENCES = data['preferences'];
         var mustSavePreferencesToServer = false;
         
-        //Provide defaults for any missing fields in the stored preferences object
-        for(var prop in DEFAULT_PREFERENCES) {
-          if(DEFAULT_PREFERENCES.hasOwnProperty(prop)) {
-            if(PREFERENCES[prop] === undefined) {
-              $.jqlog.info("Providing default for preferences property: " + prop);
-              PREFERENCES[prop] = DEFAULT_PREFERENCES[prop];
-              mustSavePreferencesToServer = true;
+        if(data) { //user stored preferences located successfully
+          assert(data && data.hasOwnProperty('preferences'), "Invalid stored preferences");
+          PREFERENCES = data['preferences'];
+          
+          //Provide defaults for any missing fields in the stored preferences object
+          for(var prop in DEFAULT_PREFERENCES) {
+            if(DEFAULT_PREFERENCES.hasOwnProperty(prop)) {
+              if(PREFERENCES[prop] === undefined) {
+                $.jqlog.info("Providing default for preferences property: " + prop);
+                PREFERENCES[prop] = DEFAULT_PREFERENCES[prop];
+                mustSavePreferencesToServer = true;
+              }
             }
           }
+        } else { //could not find user stored preferences
+          //No server had the preferences
+          $.jqlog.log("Stored preferences NOT found on server(s). Creating new...");
+          WALLET.isNew(true);
+          
+          //no stored preferences on any server(s) in the federation, go with the default...
+          PREFERENCES = DEFAULT_PREFERENCES;
+          mustSavePreferencesToServer = true;
         }
         
         //Update options from what's in preferences
@@ -107,16 +119,6 @@ function LogonViewModel() {
         WALLET_OPTIONS_MODAL.selectedLang(PREFERENCES['selected_lang']);
         
         self.openWalletPt2(mustSavePreferencesToServer);
-      }, function(jqXHR, textStatus, errorThrown) {
-        //No server had the preferences
-        $.jqlog.log("Stored preferences NOT found on server(s). Creating new...");
-        WALLET.isNew(true);
-        
-        //no stored preferences on any server(s) in the federation, go with the default...
-        PREFERENCES = DEFAULT_PREFERENCES;
-
-        //Update options from what's in preferences (no need, as the default are fine)
-        self.openWalletPt2(true);
       });
     },
     function(jqXHR, textStatus, errorThrown, endpoint) {
@@ -172,6 +174,10 @@ function LogonViewModel() {
     failoverAPI("get_normalized_balances", [WALLET.getAddressesList()],
       function(balancesData, endpoint) {
         $.jqlog.log("Got initial balances: " + JSON.stringify(balancesData));
+        
+        if(!balancesData.length)
+          return onSuccess(); //user has no balance (i.e. first time logging in)
+        
         var i = null, j = null;
         var numBalProcessed = 0;
         var assets = [];
@@ -224,9 +230,24 @@ function LogonViewModel() {
   }
     
   self.openWalletPt4 = function() {
-    //Grab any pending BTC pays
     var addresses = WALLET.getAddressesList();
-    var filters = [];
+    var filters = null, i = null;
+
+    //Get and populate any open orders we have
+    filters = [];
+    for(i=0; i < addresses.length; i++) {
+      filters.push({'field': 'source', 'op': '==', 'value': addresses[i]});
+    }
+    failoverAPI("get_orders", {'filters': filters, 'show_empty': false, 'show_expired': false, 'filterop': 'or'},
+      function(data, endpoint) {
+        for(i=0; i < data.length; i++) {
+          OPEN_ORDER_FEED.add(data[i], i == data.length - 1); //PERF: sort on the last addition only
+        }
+      }
+    );
+
+    //Get and populate any pending BTC pays
+    filters = [];
     for(i=0; i < addresses.length; i++) {
       filters.push({'field': 'tx0_address', 'op': '==', 'value': addresses[i]});
       filters.push({'field': 'tx1_address', 'op': '==', 'value': addresses[i]});
@@ -234,14 +255,15 @@ function LogonViewModel() {
     failoverAPI("get_order_matches", {'filters': filters, 'filterop': 'or', status: 'pending'},
       function(data, endpoint) {
         for(i=0; i < data.length; i++) {
-          var btcPayData = PendingActionFeedViewModel.makeBTCPayData(data[i]);
-          PENDING_ACTION_FEED.addPendingBTCPay(btcPayData);
+          var btcPayData = WaitingBTCPayFeedViewModel.makeBTCPayData(data[i]);
+          WAITING_BTCPAY_FEED.add(btcPayData, i == data.length - 1);
         }
       }
     );
     
     //all done. load the balances screen
-    window.location.hash = 'xcp/pages/balances.html'; 
+    $.jqlog.log("Login complete. Directing to balances page...");
+    window.location.hash = 'xcp/pages/balances.html';
   }  
 }
 

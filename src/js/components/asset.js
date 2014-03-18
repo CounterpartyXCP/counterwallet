@@ -7,7 +7,8 @@ function AssetViewModel(props) {
   self.DIVISIBLE = props['divisible'] || true;
   self.owner = ko.observable(props['owner']);
   self.locked = ko.observable(props['locked'] || false);
-  self.rawBalance = ko.observable(props['rawBalance'] || 0); //raw (not normalized)
+  self.rawBalance = ko.observable(props['rawBalance'] || null);
+  //^ raw (not normalized) (default to null to show -- instead of 0, until the balance is populated) -- this matters for XCP and BTC
   self.rawTotalIssued = ko.observable(props['rawTotalIssued'] || 0); //raw
   self.description = ko.observable(props['description'] || '');
   self.CALLABLE = props['callable'] || false;
@@ -41,7 +42,8 @@ function AssetViewModel(props) {
   }, self);
 
   self.send = function () {
-    if(!self.rawBalance()) { bootbox.alert("You have no available <b>" + self.ASSET + "</b> at address <b>" + self.ADDRESS + "</b> to send."); return; }
+    if(!self.rawBalance()) { bootbox.alert("You have no available <b class='notoAssetColor'>" + self.ASSET + "</b>"
+      + " at address <b class='notoAddrColor'>" + getAddressLabel(self.ADDRESS) + "</b> to send."); return; }
     if(!WALLET.canDoTransaction(self.ADDRESS)) return false;
     SEND_MODAL.show(self.ADDRESS, self.ASSET, self.rawBalance(), self.DIVISIBLE);
   };
@@ -51,7 +53,8 @@ function AssetViewModel(props) {
   };
   
   self.testnetBurn = function () {
-    if(!self.rawBalance()) { bootbox.alert("You have no available <b>" + self.ASSET + "</b> at address <b>" + self.ADDRESS + "</b> to burn."); return; }
+    if(!self.rawBalance()) { bootbox.alert("You have no available <b class='notoAssetColor'>" + self.ASSET + "</b>"
+      + " at address <b class='notoAddrColor'>" + getAddressLabel(self.ADDRESS) + "</b> to burn."); return; }
     if(!WALLET.canDoTransaction(self.ADDRESS)) return false;
     TESTNET_BURN_MODAL.show(self.ADDRESS);
   };

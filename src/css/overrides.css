@@ -65,7 +65,7 @@ span.logoText {
     left: 20px; /* + 20px */
 }
 #header>:first-child {
-    width: 340px; /* + 100px */
+    width: 400px; /* + 160px */
 }
 .smart-style-0 #header span.logoText { /* override for a specific style */
     color: black;
@@ -117,6 +117,9 @@ span.logoText {
 }
 #openOrderFeed .ajax-dropdown {
     left: 126px;
+}
+#waitingBTCPayFeed .ajax-dropdown {
+    left: 166px;
 }
 
 

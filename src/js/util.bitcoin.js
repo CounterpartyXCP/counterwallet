@@ -2,13 +2,15 @@
 function normalizeQuantity(quantity, divisible) {
   //Converts from satoshi (int) to float (decimal form)
   if(typeof(divisible)==='undefined') divisible = true;
-  return divisible ? Decimal.round(new Decimal(quantity).div(UNIT), 8).toFloat() : parseInt(quantity);
+  return divisible && quantity !== 0 ? Decimal.round(new Decimal(quantity).div(UNIT), 8).toFloat() : parseInt(quantity);
+  //^ we have the quantity !== 0 check due to a bug in Decimal (https://github.com/hiroshi-manabe/JSDecimal/issues/2)
 }
 
 function denormalizeQuantity(quantity, divisible) {
   //Converts from float (decimal form) to satoshi (int) 
   if(typeof(divisible)==='undefined') divisible = true;
-  return divisible ? Decimal.round(new Decimal(quantity).mul(UNIT), 8).toFloat() : parseInt(quantity);
+  return divisible && quantity !== 0 ? Decimal.round(new Decimal(quantity).mul(UNIT), 8).toFloat() : parseInt(quantity);
+  //^ we have the quantity !== 0 check due to a bug in Decimal (https://github.com/hiroshi-manabe/JSDecimal/issues/2)
 }
 
 function hashToB64(content) {

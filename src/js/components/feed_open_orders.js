@@ -2,11 +2,27 @@
 function OpenOrderViewModel(order) {
   assert(order['tx_index'], "Must be a valid order object");
   var self = this;
-  self.order = order;
+  self.ORDER = order;
   //break out the dynamic (changing) fields as observables
-  self.giveRemaining = ko.observable(order['give_remaining']);
-  self.getRemaining = ko.observable(order['get_remaining']);
+  self.rawGiveRemaining = ko.observable(order['give_remaining']);
+  self.rawGetRemaining = ko.observable(order['get_remaining']);
   self.feeRemaining = ko.observable(order['fee_remaining']);
+  self.now = ko.observable(new Date()); //auto updates from the parent model every minute
+  
+  self.expiresInNumBlocks = ko.computed(function() {
+    return self.ORDER['expire_index'] - WALLET.networkBlockHeight();
+  }, self);
+  
+  self.approxExpiresInTime = ko.computed(function() {
+    return new Date((new Date()).getTime() + (self.expiresInNumBlocks() * APPROX_SECONDS_PER_BLOCK * 1000));
+  }, self);
+
+  self.displayColor = ko.computed(function() {
+    if(self.approxExpiresInTime() - self.now() > 7200 * 1000) return 'bg-color-greenLight'; //> 2 hours
+    if(self.approxExpiresInTime() - self.now() > 3600 * 1000) return 'bg-color-yellow'; //> 1 hour
+    if(self.approxExpiresInTime() - self.now() > 1800 * 1000) return 'bg-color-orange'; //> 30 min
+    return 'bg-color-red'; // < 30 min, or already expired according to our reough estimate
+  }, self);
   
   self.cancelOpenOrder = function() {
     bootbox.dialog({
@@ -15,7 +31,7 @@ function OpenOrderViewModel(order) {
       title: "Are you sure?",
       buttons: {
         success: {
-          label: "Don't Cancel Order'",
+          label: "Don't Cancel Order",
           className: "btn-default",
           callback: function() {
             //modal will disappear
@@ -23,11 +39,15 @@ function OpenOrderViewModel(order) {
         },
         danger: {
           label: "Cancel Order",
-          className: "btn-danger",
+          className: "btn-warning",
           callback: function() {
             //issue 0 to lock the asset
-            WALLET.doTransaction(self.order['source'], "create_cancel",
-              { offer_hash: self.order['tx_hash'] },
+            WALLET.doTransaction(self.ORDER['source'], "create_cancel",
+              {
+                offer_hash: self.ORDER['tx_hash'],
+                _type: 'order',
+                _tx_index: self.ORDER['tx_index']
+              },
               function() {
                 bootbox.alert("Your order cancellation has been submitted. " + ACTION_PENDING_NOTICE);
               }
@@ -41,7 +61,6 @@ function OpenOrderViewModel(order) {
 
 function OpenOrderFeedViewModel() {
   var self = this;
-  
   self.openOrders = ko.observableArray([]);
   self.lastUpdated = ko.observable(new Date());
   
@@ -49,15 +68,30 @@ function OpenOrderFeedViewModel() {
     return self.openOrders().length;
   }, self);
   
-  self.add = function(order) {
+  //Every 60 seconds, run through all openOrders and update their 'now' members
+  setInterval(function() {
+    var now = new Date();
+    for(var i=0; i < self.openOrders().length; i++) {
+      self.openOrders()[i].now(now);
+    }  
+  }, 60 * 1000); 
+  
+  self.add = function(order, resort) {
     assert(order);
-    self.openOrders.push(new OpenOrderViewModel(order));
+    if(typeof(resort)==='undefined') resort = true;
+    self.openOrders.unshift(new OpenOrderViewModel(order));
+    if(resort) {
+      //sort the pending orders so that the order most close to expiring is at top
+      self.openOrders.sort(function(left, right) {
+        return left.expiresInNumBlocks() == right.expiresInNumBlocks() ? 0 : (left.expiresInNumBlocks() < right.expiresInNumBlocks() ? -1 : 1);
+      });      
+    }
     self.lastUpdated(new Date());
   }
 
   self.remove = function(orderTxHashOrIndex) {
     self.openOrders.remove(function(item) {
-        return orderTxHashOrIndex == item.order['tx_index'] || orderTxHashOrIndex == item.order['tx_hash'];
+        return orderTxHashOrIndex == item.ORDER['tx_index'] || orderTxHashOrIndex == item.ORDER['tx_hash'];
     });
     self.lastUpdated(new Date());
   }

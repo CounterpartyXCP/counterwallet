@@ -57,6 +57,14 @@
         var USE_TESTNET = (   (location.pathname == "/" && qs("testnet") && qs("testnet") != '0')
                            || location.hostname.indexOf('testnet') == 0 ? true : false
                           );
+
+        //!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+        //!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+        //FORCE TESTNET FOR BETA PERIOD
+        console.log("TESTNET FORCED FOR BETA PERIOD");
+        USE_TESTNET = true;
+        //!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+        //!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
     
         ////////////////////////////
         //ROLLBAR SETUP
@@ -113,6 +121,17 @@
             </div> <!-- .ajax-dropdown -->
         </span>
         
+        <span id="waitingBTCPayFeed" data-bind="fadeVisible: dispCount() > 0" class="activity-parent" data-contenturl="xcp/pages/feed_waiting_btcpays.html">
+            <span class="activity-dropdown">
+                <i class="fa fa-btc"></i><b data-bind="visible: dispCount() > 0, text: dispCount" class="badge badge-error"></b>
+            </span>
+            <div class="ajax-dropdown">
+              <h2>Required BTC Pays</h2>
+              <div class="ajax-notifications custom-scroll"></div> <!-- notification content -->
+              <span><b>Last updated:</b> <span id="pendingLastUpdated" data-bind="timeago: WAITING_BTCPAY_FEED.lastUpdated()"></span></span> <!-- footer -->
+            </div> <!-- .ajax-dropdown -->
+        </span>
+        
       </div> <!-- logo-group -->
 
       <div class="pull-right"> <!-- pulled right: nav area -->
@@ -158,7 +177,7 @@
             <a href="#" id="chatLink"><i class="fa fa-lg fa-fw fa-comments-o"></i><span class="menu-item-parent">Show Chat</span></a>
           </li>
           <li class="">
-            <a href="https://forums.counterparty.co/index.php/board,2.0.html" target="_blank"><i class="fa fa-lg fa-fw fa-question"></i> <span class="menu-item-parent">Support Forums</span></a>
+            <a href="https://forums.counterparty.co/index.php?topic=188.0" target="_blank"><i class="fa fa-lg fa-fw fa-question"></i> <span class="menu-item-parent">Report Issues</span></a>
           </li>
         </ul>
       </nav>
@@ -227,7 +246,7 @@
                   If someone gets your passphrase, they can gain access to your wallet.
                 </p>
               </div>
-              <p>To log into your wallet, input your passphase in the wallet login textbox above, and press the <b>Open Wallet</b> button.</p>
+              <p>To log into your wallet, input your passphase in the wallet login textbox below, and press the <b>Open Wallet</b> button.</p>
             </div>
           </div>
         </div>
@@ -241,7 +260,7 @@
           </div>
           <div class="panel-body">
             <form class="form-inline" role="form">
-              <input id="password" data-bind="value: enteredPassphrase, valueUpdate:'afterkeydown'" placeholder="Enter your Counterwallet 12 word passphrase." class="form-control pull-left" type="password">
+              <input id="password" data-bind="value: enteredPassphrase, valueUpdate: 'input'" placeholder="Enter your Counterwallet 12 word passphrase." class="form-control pull-left" type="password">
               <div class="pull-right">
                 <button id="walletLogin" data-bind="click: openWallet, enable: isPassphraseValid(), css: { 'btn-primary': isPassphraseValid() }" type="button" class="btn btn-default" disabled>Open Wallet</button>
                 &nbsp;<button id="secureKeyboard" data-bind="click: showSecureKeyboard, enable: !isPassphraseValid(), css: { 'btn-primary': !isPassphraseValid() }" type="button" class="btn btn-default" disabled><i class="fa fa-keyboard-o"></i></button>
@@ -263,7 +282,7 @@
         <div class="row" style="margin-top:25px">
           <div class="col-sm-4 col-md-4">
             <h4 style="margin-bottom:10px"><i class="fa fa-lock"></i> Secure and predictable.</h4>
-            <p>Counterwallet is an online <a href="https://en.bitcoin.it/wiki/Deterministic_wallet">deterministic wallet</a>. 
+            <p>Counterwallet is an online <a href="https://en.bitcoin.it/wiki/Deterministic_wallet" target="_blank">deterministic wallet</a>. 
             Your passphrase is turned into a number which is then turned into Bitcoin addresses. 
             </p>
             
@@ -391,18 +410,53 @@
                 <div class="col col-sm-10">
                   <label class="checkbox">
                     <input name="autoBTCPayEnabled" type="checkbox" data-bind="checked: autoBTCPayEnabled">
-                    <i></i>Enable Automatic BTCPays
+                    <i></i>Enable Automatic BTC Payments
                   </label>
                   <div class="note">If this option is enabled, Counterwallet will automatically take care of making BTC
-                      payments for matched orders where you owe BTC.</div>
+                      payments for matched orders where you owe BTC. <b>It is highly recommended you keep this on.</b> If not
+                      enabled, you must manually settle any required BTC payments within a 10 block limit (approximately 80-100 minutes).</div>
               </div></section>
               <section><div class="row">
                 <div class="col col-sm-2">Reset State</div>
                 <div class="col col-sm-10">
-                    <button id="refresh" type="button" data-title="refresh" href="javascript:void(0);" class="btn btn-danger">Reset Widget State</button>
+                    <button id="refresh" type="button" data-title="refresh" href="javascript:void(0);" class="btn btn-danger" style="padding: 5px;">Reset Widget State</button>
                     <div class="note">Click this button to reset custom color settings, widget positioning, etc.</div>
               </div></section>
-            </fieldset></form>                    
+              <section data-bind="visible: !showInfoTable()"><div class="row">
+                <div class="col col-sm-2">Show Info</div>
+                <div class="col col-sm-10">
+                    <button type="button" data-bind="click: function() { showInfoTable(true) }" class="btn btn-default" style="padding: 5px;">Show Debugging Info</button>
+                    <div class="note">Click to show some useful information for troubleshooting wallet issues.</div>
+                </div>
+                
+              </div></section>
+              <section data-bind="fadeVisibleInOnly: showInfoTable()"><div class="row">
+                <div class="col col-sm-12">
+                    <table style="border-spacing:0;border-collapse:collapse;" class="table table-striped table-hover"><tbody>
+                        <tr>
+                            <td>Blk/MsgID</td><td><span data-bind="text: WALLET.networkBlockHeight()"></span> / <span data-bind="text: LAST_MESSAGEIDX_RECEIVED"></span></td>
+                        </tr>
+                        <tr>
+                            <td>TestNet/IsDev</td><td><span data-bind="text: USE_TESTNET"></span> / <span data-bind="text: IS_DEV"></span></td>
+                        </tr>
+                        <tr>
+                            <td>WalletID</td><td><span data-bind="text: WALLET.identifier()"></span></td>
+                        </tr>
+                        <tr>
+                            <td>Origin/MyIP/C</td><td><span data-bind="text: window.location.origin"></span> / <span data-bind="text: myIPAddr"></span> / <span data-bind="text: myCookie ? 'Present' : 'None'"></span></td>
+                        </tr>
+                        <tr>
+                            <td>MultiAPI List (FailIDX)</td><td><span data-bind="text: counterwalletd_urls ? counterwalletd_urls.join(', ') : 'UNKNOWN'"></span> <b>(<span data-bind="text: FAILOVER_CURRENT_IDX"></span>)</b></td>
+                        </tr>
+                        <tr>
+                            <td>Eng/Res</td><td><span data-bind="text: $.layout.className"></span> / <span data-bind="text: screen.width"></span>x<span data-bind="text: screen.height"></span></td>
+                        </tr>
+                        <tr>
+                            <td>Browser UA</td><td><span data-bind="text: navigator.userAgent"></span></td>
+                        </tr>
+                    </tbody></table>
+              </div></section>
+            </fieldset></form>
           </div>
           <div class="modal-footer">
             <button type="button" class="btn btn-primary" data-bind="click: hide">Close</button>
@@ -499,6 +553,7 @@
     <script src="xcp/js/components/feed_notifications.js"></script>
     <script src="xcp/js/components/feed_open_orders.js"></script>
     <script src="xcp/js/components/feed_pending_actions.js"></script>
+    <script src="xcp/js/components/feed_waiting_btcpays.js"></script>
     <script src="xcp/js/components/chatfeed.js"></script>
 
     <!-- custom app.js --> 
@@ -514,6 +569,7 @@
 
       window.CHAT_FEED = new ChatFeedViewModel();
       window.PENDING_ACTION_FEED = new PendingActionFeedViewModel();
+      window.WAITING_BTCPAY_FEED = new WaitingBTCPayFeedViewModel();
       window.OPEN_ORDER_FEED = new OpenOrderFeedViewModel();
       window.NOTIFICATION_FEED = new NotificationFeedViewModel();
 
@@ -525,6 +581,7 @@
         
         ko.applyBindings(CHAT_FEED, document.getElementById("chatPane"));
         ko.applyBindings(PENDING_ACTION_FEED, document.getElementById("pendingActionFeed"));
+        ko.applyBindings(WAITING_BTCPAY_FEED, document.getElementById("waitingBTCPayFeed"));
         ko.applyBindings(OPEN_ORDER_FEED, document.getElementById("openOrderFeed"));
         ko.applyBindings(NOTIFICATION_FEED, document.getElementById("notificationFeed"));        
                 

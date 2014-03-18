@@ -6,6 +6,7 @@ function WalletViewModel() {
   self.autoRefreshBTCBalances = true; //auto refresh BTC balances every 5 minutes
   
   self.identifier = ko.observable(null); //set when logging in
+  self.networkBlockHeight = ko.observable(null); //stores the current network block height. refreshed when we refresh the BTC balances
   self.addresses = ko.observableArray(); //AddressViewModel objects -- populated at login
   
   self.isNew = ko.observable(false); //set to true if we can't find the user's prefs when logging on. if set, we'll show some intro text on their login, etc.
@@ -67,7 +68,7 @@ function WalletViewModel() {
     var addressObj = self.getAddressObj(address);
     assert(addressObj);
     var assetObj = addressObj.getAssetObj(asset);
-    assert(assetObj);
+    if(!assetObj) return 0; //asset not in wallet
     return normalized ? assetObj.normalizedBalance() : assetObj.rawBalance();
   }
 
@@ -119,6 +120,10 @@ function WalletViewModel() {
     });
     
     self.retriveBTCAddrsInfo(addresses, function(data) {
+      //refresh the network block height (this is a bit hackish as blockHeight is embedded into each address object,
+      // and they are all the same values, but we just look at the first value...we do it this way to avoid an extra API call every 5 minutes)
+      if(data.length >= 1) self.networkBlockHeight(data[0]['blockHeight']);
+      
       for(var i=0; i < data.length; i++) {
         //if someone sends BTC using the wallet, an entire TXout is spent, and the change is routed back. During this time
         // the (confirmed) balance will be decreased by the ENTIRE quantity of that txout, even though they may be getting
@@ -142,7 +147,7 @@ function WalletViewModel() {
             // means we can remove them from that listing
             //TODO: This is not very efficient when a BTC send is pending... O(n^3)! Although the sample sets are relatively small...
             for(var j=0; j < data[i]['lastTxns'].length; j++) {
-              PENDING_ACTION_FEED.removePendingAction(data[i]['lastTxns'][j], "sends", {});
+              PENDING_ACTION_FEED.remove(data[i]['lastTxns'][j], "sends", {});
             }
           }
           
@@ -221,10 +226,6 @@ function WalletViewModel() {
   self.broadcastSignedTx = function(signedTxHex, onSuccess, onError) {
     $.jqlog.log("RAW SIGNED HEX: " + signedTxHex);
     
-    if(IS_DEV) {
-      $.jqlog.log("SKIPPING SEND AS IS_DEV == 1");
-      return;
-    }
     failoverAPI("transmit",
       {"tx_hex": signedTxHex, "is_signed": true},
       function(txHash, endpoint) {
@@ -245,7 +246,6 @@ function WalletViewModel() {
     
     var sendTx = Bitcoin.Transaction.deserialize(unsignedTxHex), i = null;
     //$.jqlog.log("RAW UNSIGNED HEX: " + unsignedTxHex);
-    //$.jqlog.log("RAW UNSIGNED Tx: " + TX.toBBE(sendTx));
     
     //Sanity check on the txn source address and destination address (if specified)
     var address = null, addr = null;
@@ -294,7 +294,7 @@ function WalletViewModel() {
       onError = function(jqXHR, textStatus, errorThrown) { return defaultErrorHandler(jqXHR, textStatus, errorThrown); };
     assert(onSuccess, "onSuccess callback must be defined");
     
-    failoverAPI("get_btc_address_info", {"addresses": addresses, "with_uxtos": true, "with_last_txn_hashes": 5},
+    failoverAPI("get_btc_address_info", {"addresses": addresses, "with_uxtos": true, "with_last_txn_hashes": 5, "with_block_height": true},
       function(data, endpoint) {
         var numSuitableUnspentTxouts = null;
         var numPrimedTxoutsIncl0Confirms = null;
@@ -315,6 +315,7 @@ function WalletViewModel() {
           }
           results.push({
             'addr': data[i]['addr'],
+            'blockHeight': data[i]['block_height'],
             'confirmedRawBal': parseInt(data[i]['info']['balanceSat'] || 0),
             'unconfirmedRawBal': parseInt(data[i]['info']['unconfirmedBalanceSat'] || 0),
             'numPrimedTxouts': Math.min(numSuitableUnspentTxouts, Math.floor(totalBalance / MIN_PRIME_BALANCE)),
@@ -340,8 +341,9 @@ function WalletViewModel() {
     assert(!address.IS_WATCH_ONLY, "Cannot perform this action on a watch only address!");
     if(address.numPrimedTxouts() == 0) { //no primed txouts
       if(self.getBalance(address, "BTC") == 0) {
-        bootbox.alert("Can't do this action as you have no BTC at this address, and Counterparty actions require a"
-          + " small balance of BTC to perform.<br/><br/>Please deposit some BTC into address <b>" + addr + "</b> and try again.");
+        bootbox.alert("Can't do this action as you have no <b class='notoAssetColor'>BTC</b> at this address, and Counterparty actions require a"
+          + " small balance of <b class='notoAssetColor'>BTC</b> to perform.<br/><br/>Please deposit some into address"
+          + " <b class='notoAddrColor'>" + getAddressLabel(addr) + "</b> and try again.");
         return false;
       }
       
@@ -359,7 +361,7 @@ function WalletViewModel() {
     data['multisig'] = WALLET.getAddressObj(address).PUBKEY;
     //find and specify the verifyDestAddr
     
-    //hacks for passing in some data that should be sent to PENDING_ACTION_FEED.addPendingAction(), but not the create_ API call
+    //hacks for passing in some data that should be sent to PENDING_ACTION_FEED.add(), but not the create_ API call
     // here we only have to worry about what we create a txn for (so not order matches, debits/credits, etc)
     var extra1 = null, extra2 = null;
     if(action == 'create_order') {
@@ -367,6 +369,11 @@ function WalletViewModel() {
       delete data['_give_divisible'];
       extra2 = data['_get_divisible'];  
       delete data['_get_divisible'];
+    } else if(action == 'create_cancel') {
+      extra1 = data['_type'];
+      delete data['_type'];
+      extra2 = data['_tx_index'];
+      delete data['_tx_index'];
     }
     
     var verifyDestAddr = data['destination'] || data['transfer_destination'] || null;
@@ -382,8 +389,11 @@ function WalletViewModel() {
           if(action == 'create_order') {
             data['_give_divisible'] = extra1;
             data['_get_divisible'] = extra2;
+          } else if(action == 'create_cancel') {
+            data['_type'] = extra1;
+            data['_tx_index'] = extra2;
           }
-          PENDING_ACTION_FEED.addPendingAction(txHash, category, data);
+          PENDING_ACTION_FEED.add(txHash, category, data);
           
           return onSuccess(data, endpoint);
         }, onError, verifyDestAddr);

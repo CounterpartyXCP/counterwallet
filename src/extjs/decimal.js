@@ -1,4 +1,5 @@
 // Decimal.js
+// FROM: https://github.com/hiroshi-manabe/JSDecimal/blob/master/lib/decimal.js
 // A class for handling decimal numbers with JavaScript.
 //
 // License: MIT (see LICENCE.md)
