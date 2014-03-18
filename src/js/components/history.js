@@ -169,8 +169,7 @@ function TransactionHistoryItemViewModel(data) {
         + numberWithCommas(normalizeQuantity(self.data['backward_quantity'], self.data['_backward_divisible']))
         + "</Am> <As>" + self.data['backward_asset'] + "</As>";
     } else if(self.rawTxType == 'btcpays') {
-      desc = "BTC Payment of <Am>" + numberWithCommas(normalizeQuantity(self.data['btc_amount']))
-        + "</Am> for Order Match <b>" + self.data['order_match_id'] + "</b>";
+      desc = "Payment for <Am>" + numberWithCommas(normalizeQuantity(self.data['btc_amount'])) + "</Am> <As>BTC</As>";
     } else if(self.rawTxType == 'issuances') {
       if(self.data['transfer']) {
         desc = "Asset <As>" + self.data['asset'] + "</As> transferred to <Ad>"

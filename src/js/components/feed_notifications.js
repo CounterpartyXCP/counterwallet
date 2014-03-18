@@ -75,8 +75,8 @@ NotificationViewModel.calcText = function(category, message) {
         + "</Ad> due to <Am>" + message['quantity_per_unit'] + "</Am> dividend being issued for asset <As>" + message['asset'] + "</As>";
     }
   } else if(category == 'issuances') {
-    var assetObj = null;
     var addresses = WALLET.getAddressesList();
+    var assetObj = null;
     var addressesWithAsset = WALLET.getAddressesWithAsset(message['asset']);
     if(addressesWithAsset.length)
       assetObj = WALLET.getAddressObj(addressesWithAsset[0]).getAssetObj(message['asset']);
@@ -89,8 +89,7 @@ NotificationViewModel.calcText = function(category, message) {
           + getLinkForCPData('address', message['source'], getAddressLabel(message['source'])) + "</Ad> to <Ad>"
           + getLinkForCPData('address', message['issuer'], getAddressLabel(message['issuer'])) + "</Ad>"; 
       }
-    } else {
-      assert(assetObj);
+    } else if(assetObj) { //the address is in the wallet
       //Detect everything else besides transfers, which we only care to see if the asset is listed in one of the wallet addresses
       if(message['locked']) {
         assert(!assetObj.locked());
@@ -114,7 +113,7 @@ NotificationViewModel.calcText = function(category, message) {
     desc = "Your order to buy <Am>" + numberWithCommas(normalizeQuantity(message['get_quantity'], message['_get_asset_divisible']))
       + "</Am> <As>" + message['get_asset'] + "</As> from <Ad>" + getAddressLabel(message['source'])
       + "</Ad> in exchange for <Am>" + numberWithCommas(normalizeQuantity(message['give_quantity'], message['_give_asset_divisible']))
-      + "</Am> <As>" + message['get_asset'] + "</As> is active";
+      + "</Am> <As>" + message['give_asset'] + "</As> is active";
   } else if(category == "order_matches" && (WALLET.getAddressObj(message['tx0_address']) || WALLET.getAddressObj(message['tx1_address']))) {
     desc = "Order matched between <Ad>" 
       + getAddressLabel(message['tx0_address']) + "</Ad> (gave <Am>"

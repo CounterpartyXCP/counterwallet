@@ -53,7 +53,7 @@ function CreateAssetModalViewModel() {
       onlyIf: function () { return (self.callable() === true); }
     }
   });
-  self.callPrice = ko.observable().extend({
+  self.callPrice = ko.observable(0).extend({
     required: {
       message: "Call price is required if the asset is callable",
       onlyIf: function () { return (self.callable() === true); }
@@ -113,9 +113,6 @@ function CreateAssetModalViewModel() {
       return false;
     }
     
-    //convert callDate + callPrice
-    var rawCallDate = self.callDate() ? parseInt(self.callDate().getTime() / 1000) : 0; //epoch ts
-
     WALLET.doTransaction(self.address(), "create_issuance",
       { source: self.address(),
         asset: self.name(),
@@ -123,8 +120,8 @@ function CreateAssetModalViewModel() {
         divisible: self.divisible(),
         description: self.description(),
         callable_: self.callable(),
-        call_date: rawCallDate,
-        call_price: parseFloat(self.callPrice()) || 0.0, //float
+        call_date: self.callDate() ? parseInt(self.callDate().getTime() / 1000) : null, //epoch ts
+        call_price: parseFloat(self.callPrice()) || null, //float
         transfer_destination: null
       },
       function() {

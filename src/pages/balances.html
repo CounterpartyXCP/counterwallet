@@ -71,7 +71,7 @@
           <div> <!-- widget div-->
             <div class="widget-body" data-bind="attr: {'id': 'address-balances-' + $data.ADDRESS}, foreach: filteredAssets"> <!-- widget content -->
               <div class="asset-item" data-bind="css: { btc: ASSET == 'BTC', xcp: ASSET == 'XCP', myasset: isMine(), othersasset: isMine() == false }">
-                <div class="btn-group" data-bind="visible: !$parent.IS_WATCH_ONLY"> <!-- asset level action button -->
+                <div class="btn-group"> <!-- asset level action button -->
                   <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown"><span class="caret"></span></button>
                   <ul class="dropdown-menu" role="menu">
                     <li><a data-bind="visible: !$parent.IS_WATCH_ONLY, click: send" href="#">Send</a></li>
@@ -149,7 +149,7 @@
 </div><!-- /.modal -->
 
 <!-- modal for send -->
-<div data-bind="showModal: shown" id="sendModal" class="modal fade" data-backdrop="static" data-keyboard="false" tabindex="-1" role="dialog" aria-labelledby="sendModal" aria-hidden="true">
+<div data-bind="showModal: shown, validationOptions: { insertMessages: false }" id="sendModal" class="modal fade" data-backdrop="static" data-keyboard="false" tabindex="-1" role="dialog" aria-labelledby="sendModal" aria-hidden="true">
   <div class="modal-dialog">
     <div class="modal-content">
       <div class="modal-header">
@@ -170,6 +170,7 @@
                 <label class="input"><i class="icon-append fa fa-tag"></i>
                     <input name="destAddress" data-bind="value: destAddress, valueUpdate: 'input', attr: {placeholder: 'Enter Bitcoin address'}" type="text"/>
                 </label>
+                <span class="invalid" data-bind="validationMessage: destAddress"></span>
             </div>
           </div></section>
           <section><div class="row">
@@ -179,9 +180,8 @@
                     <i class="icon-append fa fa-share"></i>
                     <input name="quantity" data-bind="value: quantity, valueUpdate: 'input', attr: {placeholder: 'Enter quantity'}" type="text"/>
                 </label>
-                <span>
-                    &nbsp;&nbsp;<button type="button" data-bind="click: maxAmount" class="btn btn-default btn-sm">MAX</button>
-                </span>
+                <span>&nbsp;&nbsp;<button type="button" data-bind="click: maxAmount" class="btn btn-default btn-sm">MAX</button></span>
+                <span class="invalid" data-bind="validationMessage: quantity"></span>
             </div>
           </div></section>
         </fieldset></form>

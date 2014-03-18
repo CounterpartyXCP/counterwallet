@@ -209,7 +209,7 @@ function handleMessage(eventID, category, message) {
       WALLET.getAddressObj(addressesWithAsset[i]).addOrUpdateAsset(message['asset'], message, null);
     }
     //Also, if this is a new asset creation, or a transfer to an address that doesn't have the asset yet
-    if(!addressesWithAsset.contains(message['issuer'])) {
+    if(WALLET.getAddressObj(message['issuer']) && !addressesWithAsset.contains(message['issuer'])) {
       WALLET.getAddressObj(message['issuer']).addOrUpdateAsset(message['asset'], message, null);
     }
   } else if(category == "sends") {

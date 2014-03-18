@@ -79,7 +79,7 @@ function AddressViewModel(key, address, initialLabel) {
     if (!match) {
       //add the asset if it doesn't exist. this can be triggered on login (from get_asset_info API results)
       // OR via the message feed (through receiving an asset send or ownership transfer for an asset not in the address yet)
-      $.jqlog.log("Adding asset " + asset + " to address " + self.ADDRESS);
+      $.jqlog.log("Adding asset " + asset + " to address " + self.ADDRESS + " with raw bal " + initialRawBalance + " (divisible: " + assetInfo['divisible'] + ")");
       var assetProps = {
         address: self.ADDRESS,
         asset: asset,

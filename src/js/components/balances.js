@@ -318,7 +318,7 @@ function SweepModalViewModel() {
       }
     }
     bootbox.alert("The sweep from address <b class='notoAddrColor'>" + self.addressForPrivateKey()
-      + "</b> is complete.<br/>Sweep results:<br/><br/><ul>" + assetDisplayList.join('') + "</ul><br/><br/>"
+      + "</b> is complete.<br/>Sweep results:<br/><br/><ul>" + assetDisplayList.join('') + "</ul>"
       + ACTION_PENDING_NOTICE_NO_UI);
   }
   
@@ -463,11 +463,11 @@ function SweepModalViewModel() {
       //and also record the number of primed txouts for the address
       //Note that if BTC is one of the things we're sweeping, technically we don't need a full primed output quantity
       // for that (we just need an available out of > MIN_FEE... but let's just require a primed out for a BTC send to keep things simple)
-      WALLET.retriveBTCAddrInfo(address, function(rawBalConfirmed, rawBalUnconfirmed, numPrimedTxouts, utxosData) {
-        if(rawBalConfirmed && numPrimedTxouts >= 1) {
-          self.availableAssetsToSweep.unshift(new SweepAssetInDropdownItemModel("BTC", rawBalConfirmed, normalizeQuantity(rawBalConfirmed)));
+      WALLET.retriveBTCAddrsInfo([address], function(data) {
+        if(data[0]['confirmedRawBal'] && data[0]['numPrimedTxouts'] >= 1) {
+          self.availableAssetsToSweep.unshift(new SweepAssetInDropdownItemModel("BTC", data[0]['confirmedRawBal'], normalizeQuantity(data[0]['confirmedRawBal'])));
         }
-        self.numPrimedTxoutsForPrivateKey(numPrimedTxouts);
+        self.numPrimedTxoutsForPrivateKey(data[0]['numPrimedTxouts']);
       });
     });
   });  
@@ -706,20 +706,21 @@ function TestnetBurnModalViewModel() {
 }
 
 
-//Some misc jquery event handlers
-$('#createAddress, #createWatchOnlyAddress').click(function() {
-  if(WALLET.addresses().length >= MAX_ADDRESSES) {
-    bootbox.alert("You already have the max number of addresses for a single wallet (<b>"
-      + MAX_ADDRESSES + "</b>). Please create a new wallet (i.e. different passphrase) for more.");
-    return false;
-  }
-  CREATE_NEW_ADDRESS_MODAL.show($(this).attr('id') == 'createWatchOnlyAddress');
+$(document).ready(function() {
+  //Some misc jquery event handlers
+  $('#createAddress, #createWatchOnlyAddress').click(function() {
+    if(WALLET.addresses().length >= MAX_ADDRESSES) {
+      bootbox.alert("You already have the max number of addresses for a single wallet (<b>"
+        + MAX_ADDRESSES + "</b>). Please create a new wallet (i.e. different passphrase) for more.");
+      return false;
+    }
+    CREATE_NEW_ADDRESS_MODAL.show($(this).attr('id') == 'createWatchOnlyAddress');
+  });
+  
+  $('#sweepFunds').click(function() {
+    SWEEP_MODAL.show();
+  });
 });
-
-$('#sweepFunds').click(function() {
-  SWEEP_MODAL.show();
-});
-
 
 /*NOTE: Any code here is only triggered the first time the page is visited. Put JS that needs to run on the
   first load and subsequent ajax page switches in the .html <script> tag*/

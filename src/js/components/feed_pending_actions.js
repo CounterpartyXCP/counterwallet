@@ -15,7 +15,8 @@ PendingActionViewModel.calcText = function(category, data) {
   var divisible = null;
   //The category being allowable was checked in the factory class
   if(data['source'] && data['asset'])
-    divisible = WALLET.getAddressObj(data['source']).getAssetObj(data['asset']).DIVISIBLE;
+    divisible = data['divisible'] !== undefined ? data['divisible'] : WALLET.getAddressObj(data['source']).getAssetObj(data['asset']).DIVISIBLE;
+    //^ if the asset is being created, data['divisible'] should be present, otherwise, get it from an existing asset in our wallet
 
   if(category == 'burns') {
     desc = "Pending burn of <Am>" + normalizeQuantity(data['quantity']) + "</Am> <As>BTC</As>";

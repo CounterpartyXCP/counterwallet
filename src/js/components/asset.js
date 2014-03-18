@@ -4,14 +4,14 @@ function AssetViewModel(props) {
   var self = this;
   self.ADDRESS = props['address']; //will not change
   self.ASSET = props['asset']; //assetID, will not change
-  self.DIVISIBLE = props['divisible'] || true;
+  self.DIVISIBLE = props['divisible'] !== undefined ? props['divisible'] : true;
   self.owner = ko.observable(props['owner']);
-  self.locked = ko.observable(props['locked'] || false);
+  self.locked = ko.observable(props['locked'] !== undefined ? props['locked'] : false);
   self.rawBalance = ko.observable(props['rawBalance'] || null);
   //^ raw (not normalized) (default to null to show -- instead of 0, until the balance is populated) -- this matters for XCP and BTC
   self.rawTotalIssued = ko.observable(props['rawTotalIssued'] || 0); //raw
   self.description = ko.observable(props['description'] || '');
-  self.CALLABLE = props['callable'] || false;
+  self.CALLABLE = props['callable'] !== undefined ? props['callable'] : false;
   self.CALLDATE = props['callDate'] || null;
   self.CALLPRICE = props['callPrice'] || null;
 
