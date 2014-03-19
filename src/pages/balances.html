@@ -199,7 +199,7 @@
 </div><!-- /.modal -->
 
 <!-- modal for sweep (import) -->
-<div data-bind="showModal: shown" id="sweepModal" class="modal fade" data-backdrop="static" data-keyboard="false" tabindex="-1" role="dialog" aria-labelledby="sweepModal" aria-hidden="true">
+<div data-bind="showModal: shown, validationOptions: { insertMessages: false }" id="sweepModal" class="modal fade" data-backdrop="static" data-keyboard="false" tabindex="-1" role="dialog" aria-labelledby="sweepModal" aria-hidden="true">
   <div class="modal-dialog">
     <div class="modal-content">
       <div class="modal-header">
@@ -216,6 +216,7 @@
                 <label class="input"><i class="icon-append fa fa-lock"></i>
                     <input name="privateKey" data-bind="value: privateKey, valueUpdate: 'input', attr: {placeholder: 'Enter Bitcoin private key'}" type="text"/>
                 </label>
+                <span class="invalid" data-bind="validationMessage: privateKey"></span>
                 <div class="note">Enter the unencrypted private key that cooresponds to the address with the funds you want to move.</div>
             </div>
           </div></section>
@@ -223,6 +224,7 @@
             <label class="control-label col col-sm-2">Destination Address</label>
             <div class="col col-sm-10">
                 <select style="width:100%" data-bind="options: availableAddresses, optionsValue: 'ADDRESS', optionsText: 'SELECT_LABEL', select2: { minimumResultsForSearch: 10, escapeMarkup: function(m) { return m; } }, value: destAddress"></select>
+                <span class="invalid" data-bind="validationMessage: destAddress"></span>
                 <div class="note">Select the address in your wallet that the specified assets for the private key above should be send to.</div>
             </div>
           </div></section>
@@ -231,7 +233,8 @@
             <div class="col col-sm-10">
                 <label class="input">
                     <select multiple="true" style="width:100%" data-bind="options: availableAssetsToSweep, optionsValue: 'ASSET', optionsText: 'SELECT_LABEL', select2: { minimumResultsForSearch: 10, escapeMarkup: function(m) { return m; } }, selectedOptions: selectedAssetsToSweep"></select>
-                </label>                    
+                </label>
+                <span class="invalid" data-bind="validationMessage: selectedAssetsToSweep"></span>
                 <div class="note">Select all of the assets whose total balances you want to move into the destination address.</div>
             </div>
           </div></section>
@@ -310,7 +313,7 @@
       </div>
       <div class="modal-body no-padding">
         <div class="formPadded">
-            <p class="errorColor" data-bind="fadeVisibleInOnly: showNoPrimedInputsError">
+            <p class="errorColor" style="font-weight:bold;" data-bind="fadeVisibleInOnly: showNoPrimedInputsError">
                 You need to prime your account before you can perform the selected action. Please complete this then try
                 again once the priming is complete and confirmed on the blockchain.</p>
             <p style="color: green;font-weight:bold" data-bind="fadeVisibleInOnly: autoPrime">
@@ -813,13 +816,29 @@
       ko.applyBindingsWithValidation(PAY_DIVIDEND_MODAL, document.getElementById("payDividendModal"));
       ko.applyBindingsWithValidation(CALL_ASSET_MODAL, document.getElementById("callAssetModal"));
       ko.applyBindingsWithValidation(SHOW_ASSET_INFO_MODAL, document.getElementById("showAssetInfoModal"));
-        
-      //Called on first load, and every switch back to the balances page
-      if(window._BALANCES_HAS_LOADED_ALREADY === undefined) {
-          window._BALANCES_HAS_LOADED_ALREADY = true;
-      } else {
-          WALLET.refreshBTCBalances(false);
-      }
+      
+      $(document).ready(function() {
+          //Some misc jquery event handlers
+          $('#createAddress, #createWatchOnlyAddress').click(function() {
+            if(WALLET.addresses().length >= MAX_ADDRESSES) {
+              bootbox.alert("You already have the max number of addresses for a single wallet (<b>"
+                + MAX_ADDRESSES + "</b>). Please create a new wallet (i.e. different passphrase) for more.");
+              return false;
+            }
+            CREATE_NEW_ADDRESS_MODAL.show($(this).attr('id') == 'createWatchOnlyAddress');
+          });
+          
+          $('#sweepFunds').click(function() {
+            SWEEP_MODAL.show();
+          });
+            
+          //Called on first load, and every switch back to the balances page
+          if(window._BALANCES_HAS_LOADED_ALREADY === undefined) {
+              window._BALANCES_HAS_LOADED_ALREADY = true;
+          } else {
+              WALLET.refreshBTCBalances(false);
+          }
+      });
     }
   }
 </script>

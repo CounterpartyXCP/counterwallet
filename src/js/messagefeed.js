@@ -46,15 +46,17 @@ function initMessageFeed() {
         $.jqlog.log('socket.io(messages): Connected to server: ' + url);
         socket.emit("subscribe"); //subscribe to the data feed itself
       } else if(event == 'disconnect') {
-        $.jqlog.log('socket.io(messages): The client has disconnected from server: ' + url);
+        $.jqlog.warn('socket.io(messages): The client has disconnected from server: ' + url);
       } else if(event == 'connect_failed') {
-        $.jqlog.log('socket.io(messages): Connection to server failed: ' + url);
+        $.jqlog.warn('socket.io(messages): Connection to server failed: ' + url);
         io.disconnect();
         tryNextSIOMessageFeed();
       } else if(event == 'reconnect_failed') {
-        $.jqlog.log('socket.io(messages): Reconnect to the server failed: ' + url);
+        $.jqlog.warn('socket.io(messages): Reconnect to the server failed: ' + url);
         io.disconnect();
         tryNextSIOMessageFeed();
+      } else if(event == 'error') {
+        $.jqlog.warn('socket.io(messages): Received an error: ' + url);
       } else if(['connecting', 'connect_error', 'connect_timeout', 'reconnect', 'reconnecting', 'reconnect_error'].indexOf(event) >= 0) {
         //these events currently not handled
       } else{
@@ -128,8 +130,8 @@ function handleMessage(eventID, category, message) {
   //Detect a reorg and refresh the current page if so.
   if(message['_command'] == 'reorg') {
     //Don't need to adjust the message index
-    $.jqlog.warn("feed:REORG DETECTED back to block: " + message['block_index']);
-    checkURL(); //refresh the current page to regrab the fresh data
+    $.jqlog.warn("feed:Blockchain reorganization at block: " + message['block_index']);
+    setTimeout(checkURL, 1000); //refresh the current page to regrab the fresh data (give cwd a second to sync up though)
     //TODO/BUG??: do we need to "roll back" old messages on the bad chain???
     return;
   }

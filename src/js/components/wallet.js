@@ -186,7 +186,7 @@ function WalletViewModel() {
       //insight down or spazzing, set all BTC balances out to null
       var addressObj = null;
       for(var i=0; i < addresses.length; i++) {
-        self.updateBalance(address, "BTC", null); //null = UNKNOWN
+        self.updateBalance(addresses[i], "BTC", null); //null = UNKNOWN
         addressObj = self.getAddressObj(addresses[i]);
         addressObj.numPrimedTxouts(null); //null = UNKNOWN
         addressObj.numPrimedTxoutsIncl0Confirms(null); //null = UNKNOWN
@@ -335,22 +335,22 @@ function WalletViewModel() {
   
   /////////////////////////
   //Counterparty transaction-related
-  self.canDoTransaction = function(addr) {
+  self.canDoTransaction = function(address) {
     /* ensures that the specified address can perform a counterparty transaction */
-    var address = self.getAddressObj(addr);
-    assert(!address.IS_WATCH_ONLY, "Cannot perform this action on a watch only address!");
-    if(address.numPrimedTxouts() == 0) { //no primed txouts
+    var addressObj = self.getAddressObj(address);
+    assert(!addressObj.IS_WATCH_ONLY, "Cannot perform this action on a watch only address!");
+    if(addressObj.numPrimedTxouts() == 0) { //no primed txouts
       if(self.getBalance(address, "BTC") == 0) {
         bootbox.alert("Can't do this action as you have no <b class='notoAssetColor'>BTC</b> at this address, and Counterparty actions require a"
           + " small balance of <b class='notoAssetColor'>BTC</b> to perform.<br/><br/>Please deposit some into address"
-          + " <b class='notoAddrColor'>" + getAddressLabel(addr) + "</b> and try again.");
+          + " <b class='notoAddrColor'>" + getAddressLabel(address) + "</b> and try again.");
+        return false;
+      } else {
+        //Otherwise, we DO have a balance, we just don't have any suitable primed outputs
+        PRIME_ADDRESS_MODAL.show(address);
+        PRIME_ADDRESS_MODAL.showNoPrimedInputsError(true);
         return false;
       }
-      
-      //Otherwise, we DO have a balance, we just don't have any suitable primed outputs
-      PRIME_ADDRESS_MODAL.show(addr);
-      PRIME_ADDRESS_MODAL.showNoPrimedInputsError(true);
-      return false;
     }
     return true;
   }

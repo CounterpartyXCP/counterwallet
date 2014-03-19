@@ -67,8 +67,8 @@
         //!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
     
         ////////////////////////////
-        //ROLLBAR SETUP
-        if(!IS_DEV) {
+        //ROLLBAR SETUP (only enabled if location.hostname ends in 'counterwallet.co')
+        if(location.hostname.indexOf('counterwallet.co', location.hostname.length - 'counterwallet.co'.length) !== -1) {
             var _rollbarConfig = {
                 accessToken: "30d23b5d51244169a98fc922f0d1b940",
                 captureUncaught: true,

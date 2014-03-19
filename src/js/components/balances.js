@@ -225,7 +225,8 @@ ko.validation.rules['addressHasEnoughUnspentTxoutsForSelectedAssets'] = {
     if(self.numPrimedTxoutsForPrivateKey() === null) return false; //priv key not set yet??
     return self.numPrimedTxoutsForPrivateKey() >= numAssets;
   },
-  message: 'The address for the private key specified does not have enough confirmed unspent outputs to sweep everything selected.'
+  message: ('The address for the private key specified does not have enough confirmed unspent outputs to sweep everything selected. Please send it a few '
+    + normalizeQuantity(MIN_PRIME_BALANCE) + ' BTC transactions and try again.')
 };
 ko.validation.registerExtenders();
 
@@ -234,11 +235,12 @@ var AddressInDropdownItemModel = function(address, label) {
   this.LABEL = label;
   this.SELECT_LABEL = label ? ("<b>" + label + "</b><br/>" + address) : (address);
 };
-var SweepAssetInDropdownItemModel = function(asset, rawBalance, normalizedBalance) {
+var SweepAssetInDropdownItemModel = function(asset, rawBalance, normalizedBalance, assetInfo) {
   this.ASSET = asset;
   this.RAW_BALANCE = rawBalance; //raw
   this.NORMALIZED_BALANCE = normalizedBalance; //normalized
   this.SELECT_LABEL = asset + " (bal: " + normalizedBalance + ")";
+  this.ASSET_INFO = assetInfo;
 };
 
 function SweepModalViewModel() {
@@ -305,16 +307,27 @@ function SweepModalViewModel() {
     $('#sweepModal form').submit();
   }
   
-  self._sweepCompleteDialog = function(sendsComplete) {
+  self._sweepCompleteDialog = function(opsComplete) {
     var assetDisplayList = [];
-    for(var i = 0; i < sendsComplete.length; i++) {
-      if(sendsComplete[i]['result']) {
-        assetDisplayList.push("<li><b class='notoAssetColor'>" + sendsComplete[i]['asset'] + ":</b> Sent"
-          + " <b class='notoQuantityColor'>" + sendsComplete[i]['normalized_quantity'] + "</b>"
-          + " <b class='notoAssetColor'>" + sendsComplete[i]['asset'] + "</b>"
-          + " to <b class='notoAddrColor'>" + getAddressLabel(sendsComplete[i]['to']) + "</b></li>");  
+    for(var i = 0; i < opsComplete.length; i++) {
+      if(opsComplete[i]['result']) {
+        if(opsComplete[i]['type'] == 'send') {
+          assetDisplayList.push("<li><b class='notoAssetColor'>" + opsComplete[i]['asset'] + ":</b> Sent"
+            + " <b class='notoQuantityColor'>" + opsComplete[i]['normalized_quantity'] + "</b>"
+            + " <b class='notoAssetColor'>" + opsComplete[i]['asset'] + "</b>"
+            + " to <b class='notoAddrColor'>" + getAddressLabel(opsComplete[i]['to']) + "</b></li>");  
+        } else {
+          assert(opsComplete[i]['type'] == 'transferOwnership');
+          assetDisplayList.push("<li><b class='notoAssetColor'>" + opsComplete[i]['asset'] + ":</b> Transferred ownership"
+            + " to <b class='notoAddrColor'>" + getAddressLabel(opsComplete[i]['to']) + "</b></li>");  
+        }
       } else {
-        assetDisplayList.push("<li><b class='notoAssetColor'>" + sendsComplete[i]['asset'] + "</b>: Funds not sent due to failure.</li>");  
+        if(opsComplete[i]['type'] == 'send') {
+          assetDisplayList.push("<li><b class='notoAssetColor'>" + opsComplete[i]['asset'] + "</b>: Funds not sent due to failure.</li>");
+        } else {
+          assert(opsComplete[i]['type'] == 'transferOwnership');
+          assetDisplayList.push("<li><b class='notoAssetColor'>" + opsComplete[i]['asset'] + "</b>: Ownership not transferred due to failure.</li>");
+        }  
       }
     }
     bootbox.alert("The sweep from address <b class='notoAddrColor'>" + self.addressForPrivateKey()
@@ -334,12 +347,13 @@ function SweepModalViewModel() {
     }    
   }
   
-  self._doSendAsset = function(asset, key, pubkey, sendsComplete, adjustedBTCQuantity, callback) {
+  self._doSendAsset = function(asset, key, pubkey, opsComplete, adjustedBTCQuantity, callback) {
     if(asset == 'BTC') assert(adjustedBTCQuantity !== null);
     else assert(adjustedBTCQuantity === null);
     var selectedAsset = ko.utils.arrayFirst(self.availableAssetsToSweep(), function(item) {
       return asset == item.ASSET;
     });
+    var sendTx = null, i = null;
     var quantity = adjustedBTCQuantity || selectedAsset.RAW_BALANCE;
     var normalizedQuantity = ((adjustedBTCQuantity ? normalizeQuantity(adjustedBTCQuantity) : null)
       || selectedAsset.NORMALIZED_BALANCE);
@@ -349,43 +363,108 @@ function SweepModalViewModel() {
       + normalizedQuantity + " " + selectedAsset.ASSET);
 
     //dont use WALLET.doTransaction for this...
-    multiAPIConsensus("create_send", //can send both BTC and counterparty assets
-      { source: self.addressForPrivateKey(),
-        destination: self.destAddress(),
-        quantity: quantity,
-        asset: selectedAsset.ASSET,
-        multisig: pubkey
-      },
+    var sendData = {
+      source: self.addressForPrivateKey(),
+      destination: self.destAddress(),
+      quantity: quantity,
+      asset: selectedAsset.ASSET,
+      multisig: pubkey
+    };
+    multiAPIConsensus("create_send", sendData, //can send both BTC and counterparty assets
       function(unsignedTxHex, numTotalEndpoints, numConsensusEndpoints) {
         var sendTx = Bitcoin.Transaction.deserialize(unsignedTxHex);
-        //Sign the TX inputs
-        for (var i = 0; i < sendTx.ins.length; i++) { //sign each input with the key
+        for (i = 0; i < sendTx.ins.length; i++) { //sign each input with the key
           sendTx.sign(i, key);
         }
-        WALLET.broadcastSignedTx(sendTx.serializeHex(), function(data, endpoint) { //transmit was successful
-          sendsComplete.push({
+        WALLET.broadcastSignedTx(sendTx.serializeHex(), function(sendTxHash, endpoint) { //transmit was successful
+          opsComplete.push({
+            'type': 'send',
             'result': true,
             'asset': selectedAsset.ASSET,
             'from': self.addressForPrivateKey(),
             'to': self.destAddress(),
             'normalized_quantity': normalizedQuantity
           });
-          //TODO: show this sweep in pending actions
-          return callback();
+          PENDING_ACTION_FEED.add(sendTxHash, "sends", sendData);
+          
+          //For non BTC/XCP assets, also take ownership (iif the address we are sweeping from is the asset's owner')
+          if(   selectedAsset.ASSET != 'XCP'
+             && selectedAsset.ASSET != 'BTC'
+             && selectedAsset.ASSET_INFO['owner'] == self.addressForPrivateKey()) {
+            assert(selectedAsset.ASSET && selectedAsset.ASSET_INFO);
+            var transferData = {
+              source: self.addressForPrivateKey(),
+              quantity: 0,
+              asset: selectedAsset.ASSET,
+              divisible: selectedAsset.ASSET_INFO['divisible'],
+              description: selectedAsset.ASSET_INFO['description'],
+              callable_: selectedAsset.ASSET_INFO['callable'],
+              call_date: selectedAsset.ASSET_INFO['call_date'],
+              call_price: selectedAsset.ASSET_INFO['call_price'],
+              transfer_destination: self.destAddress(),
+              multisig: pubkey
+            };
+            multiAPIConsensus("create_issuance", transferData,
+              function(unsignedTxHex, numTotalEndpoints, numConsensusEndpoints) {
+                var sendTx = Bitcoin.Transaction.deserialize(unsignedTxHex);
+                for (i = 0; i < sendTx.ins.length; i++) { //sign each input with the key
+                  sendTx.sign(i, key);
+                }
+                WALLET.broadcastSignedTx(sendTx.serializeHex(), function(issuanceTxHash, endpoint) { //transmit was successful
+                  opsComplete.push({
+                    'type': 'transferOwnership',
+                    'result': true,
+                    'asset': selectedAsset.ASSET,
+                    'from': self.addressForPrivateKey(),
+                    'to': self.destAddress()
+                  });
+                  PENDING_ACTION_FEED.add(issuanceTxHash, "issuances", transferData);
+                  return callback();
+                }, function() { //on error transmitting tx
+                  opsComplete.push({
+                    'type': 'transferOwnership',
+                    'result': false,
+                    'asset': selectedAsset.ASSET
+                  });
+                  return callback();
+                });
+              }, function(unmatchingResultsList) { //onConsensusError
+                opsComplete.push({
+                  'type': 'transferOwnership',
+                  'result': false,
+                  'asset': selectedAsset.ASSET
+                });
+                return callback();
+              }, function(jqXHR, textStatus, errorThrown, endpoint) { //onSysError
+                opsComplete.push({
+                  'type': 'transferOwnership',
+                  'result': false,
+                  'asset': selectedAsset.ASSET
+                });
+                return callback();
+              }
+            );
+            
+        } else { //no transfer, just an asset send for this asset
+            return callback();  
+          }
         }, function() { //on error transmitting tx
-          sendsComplete.push({
+          opsComplete.push({
+            'type': 'send',
             'result': false,
             'asset': selectedAsset.ASSET
           });
         });
       }, function(unmatchingResultsList) { //onConsensusError
-        sendsComplete.push({
+        opsComplete.push({
+          'type': 'send',
           'result': false,
           'asset': selectedAsset.ASSET
         });
         return callback();
       }, function(jqXHR, textStatus, errorThrown, endpoint) { //onSysError
-        sendsComplete.push({
+        opsComplete.push({
+          'type': 'send',
           'result': false,
           'asset': selectedAsset.ASSET
         });
@@ -399,7 +478,7 @@ function SweepModalViewModel() {
     assert(key.priv !== null && key.compressed !== null, "Private key not valid!"); //should have been checked already
     var pubkey = key.getPub().toHex();
     var sendsToMake = [];
-    var sendsComplete = [];
+    var opsComplete = [];
     
     var selectedAsset = null, hasBTC = false;
     for(var i = 0; i < self.selectedAssetsToSweep().length; i++) {
@@ -407,7 +486,7 @@ function SweepModalViewModel() {
       if(selectedAsset == 'BTC') {
         hasBTC = i; //send BTC last so the sweep doesn't randomly eat our primed txouts for the other assets
       } else {
-        sendsToMake.push([selectedAsset, key, pubkey, sendsComplete, null]);
+        sendsToMake.push([selectedAsset, key, pubkey, opsComplete, null]);
       }
     }
     if(hasBTC !== false) {
@@ -416,7 +495,7 @@ function SweepModalViewModel() {
       var adjustedBTCQuantity = rawBTCBalance - (self.selectedAssetsToSweep().length * MIN_PRIME_BALANCE);
       //^ the adjusted BTC balance is what we will end up sweeping out of the account.
       //  BTW...this includes the BTC fee for the BTC sweep itself as a primed TXout size (.0005 instead of .0001...no biggie (I think)
-      sendsToMake.push(["BTC", key, pubkey, sendsComplete, adjustedBTCQuantity]);
+      sendsToMake.push(["BTC", key, pubkey, opsComplete, adjustedBTCQuantity]);
     }
     
     //Make send calls sequentially
@@ -434,8 +513,8 @@ function SweepModalViewModel() {
     };
     makeSweeps().then(function() {
       self.shown(false);
-      assert(sendsComplete.length == self.selectedAssetsToSweep().length);
-      self._sweepCompleteDialog(sendsComplete);
+      assert(opsComplete.length == self.selectedAssetsToSweep().length);
+      self._sweepCompleteDialog(opsComplete);
     });    
   }
   
@@ -454,10 +533,21 @@ function SweepModalViewModel() {
     if(!address) return;
 
     //Get the balance of ALL assets at this address
-    failoverAPI("get_normalized_balances", [address], function(data, endpoint) {
-      for(var i=0; i < data.length; i++) {
-        self.availableAssetsToSweep.push(new SweepAssetInDropdownItemModel(data[i]['asset'], data[i]['quantity'], data[i]['normalized_quantity']));
+    failoverAPI("get_normalized_balances", [address], function(balancesData, endpoint) {
+      var assets = [], assetInfo = null;
+      for(var i=0; i < balancesData.length; i++) {
+        assets.push(balancesData[i]['asset']);
       }
+      //get info on the assets, since we need this for the create_issuance call during the sweep (to take ownership of the asset)
+      failoverAPI("get_asset_info", [assets], function(assetsData, endpoint) {
+        //Create an SweepAssetInDropdownItemModel item
+        for(var i=0; i < balancesData.length; i++) {
+          assetInfo = $.grep(assetsData, function(e) { return e['asset'] == balancesData[i]['asset']; }); //O(n^2)
+          assert(assetInfo);
+          self.availableAssetsToSweep.push(new SweepAssetInDropdownItemModel(
+            balancesData[i]['asset'], balancesData[i]['quantity'], balancesData[i]['normalized_quantity'], assetInfo));
+        }
+      });
       
       //Also get the BTC balance at this address and put at head of the list
       //and also record the number of primed txouts for the address
@@ -465,7 +555,10 @@ function SweepModalViewModel() {
       // for that (we just need an available out of > MIN_FEE... but let's just require a primed out for a BTC send to keep things simple)
       WALLET.retriveBTCAddrsInfo([address], function(data) {
         if(data[0]['confirmedRawBal'] && data[0]['numPrimedTxouts'] >= 1) {
-          self.availableAssetsToSweep.unshift(new SweepAssetInDropdownItemModel("BTC", data[0]['confirmedRawBal'], normalizeQuantity(data[0]['confirmedRawBal'])));
+          //We don't need to supply asset info to the SweepAssetInDropdownItemModel constructor for BTC
+          // b/c we won't be transferring any asset ownership with it
+          self.availableAssetsToSweep.unshift(new SweepAssetInDropdownItemModel(
+            "BTC", data[0]['confirmedRawBal'], normalizeQuantity(data[0]['confirmedRawBal'], null)));
         }
         self.numPrimedTxoutsForPrivateKey(data[0]['numPrimedTxouts']);
       });
@@ -704,23 +797,6 @@ function TestnetBurnModalViewModel() {
     self.shown(false);
   }  
 }
-
-
-$(document).ready(function() {
-  //Some misc jquery event handlers
-  $('#createAddress, #createWatchOnlyAddress').click(function() {
-    if(WALLET.addresses().length >= MAX_ADDRESSES) {
-      bootbox.alert("You already have the max number of addresses for a single wallet (<b>"
-        + MAX_ADDRESSES + "</b>). Please create a new wallet (i.e. different passphrase) for more.");
-      return false;
-    }
-    CREATE_NEW_ADDRESS_MODAL.show($(this).attr('id') == 'createWatchOnlyAddress');
-  });
-  
-  $('#sweepFunds').click(function() {
-    SWEEP_MODAL.show();
-  });
-});
 
 /*NOTE: Any code here is only triggered the first time the page is visited. Put JS that needs to run on the
   first load and subsequent ajax page switches in the .html <script> tag*/
