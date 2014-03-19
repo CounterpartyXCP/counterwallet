@@ -146,7 +146,11 @@ function primeAddress(address, numNewPrimedTxouts, utxosData, onSuccess) {
   //^ The remaining should be MIN_FEE, which will of course go to the miners
   
   var rawTxHex = sendTx.serializeHex();
-  WALLET.signAndBroadcastTx(address, rawTxHex, function() {
+  WALLET.signAndBroadcastTx(address, rawTxHex, function(primingTxHash, endpoint) {
+    PENDING_ACTION_FEED.add(primingTxHash, "_primeaddrs", {
+      'source': address,
+      'numNewPrimedTxouts': numNewPrimedTxouts
+    });
     return onSuccess(address, numNewPrimedTxouts);
   });
 }

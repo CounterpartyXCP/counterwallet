@@ -130,7 +130,9 @@ function handleMessage(eventID, category, message) {
   //Detect a reorg and refresh the current page if so.
   if(message['_command'] == 'reorg') {
     //Don't need to adjust the message index
-    $.jqlog.warn("feed:Blockchain reorganization at block: " + message['block_index']);
+    LAST_MESSAGEIDX_RECEIVED = message['_last_message_index'];
+    $.jqlog.warn("feed:Blockchain reorganization at block " + message['block_index']
+      + "; last message idx reset to " + LAST_MESSAGEIDX_RECEIVED);
     setTimeout(checkURL, 1000); //refresh the current page to regrab the fresh data (give cwd a second to sync up though)
     //TODO/BUG??: do we need to "roll back" old messages on the bad chain???
     return;
@@ -140,8 +142,16 @@ function handleMessage(eventID, category, message) {
   if(message['_command'] != 'insert')
     return;
     
+  //If we received an action originating from an address in our wallet that was marked invalid by the network, let the user know
+  // (do this even in cases where the entry does not exist in pendingActions, as the user could have logged out and back in)
+  if(message['_status'] && message['_status'].startsWith('invalid') && WALLET.getAddressObj(message['source'])) {
+    var actionText = PendingActionViewModel.calcText(category, message); //nice "good enough" shortcut method here
+    bootbox.alert("<b class='errorColor'>Network processing of the following action failed:</b><br/><br/>"
+      + actionText + "<br/><br/><b>Reason:</b> " + message['_status']);
+  }
+    
   //remove any pending message from the pending actions pane (we do this before we filter out invalid messages
-  // because we need to report on invalid messages)
+  // because we need to be able to remove a pending action that was marked invalid as well)
   PENDING_ACTION_FEED.remove(eventID, category, message);
 
   //filter out any invalid messages for action processing itself

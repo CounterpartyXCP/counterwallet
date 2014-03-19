@@ -81,8 +81,8 @@ var AUTOPRIME_AT_LESSTHAN_REMAINING = 10; //auto prime at less than this many tx
 var AUTOPRIME_MAX_COUNT = 10; //max number of txns to add with an autoprime
 var AUTOPRIME_MIN_CONFIRMED_BTC_BAL = 0.005; //don't autoprime if the account has less than this balance (too much churn)
 
-var ACTION_PENDING_NOTICE = "This action will appear as a Pending Action until confirmed on the network.";
-var ACTION_PENDING_NOTICE_NO_UI = "This will reflect once the network has confirmed the transaction.";
+var ACTION_PENDING_NOTICE = "<b><u>This action will take some time to complete</u></b>, and will appear as a Pending Action until"
+  + " confirmed on the network. <b class='errorColor'>Until that time, the wallet will not reflect the change. Please be patient.</b>";
 
 var DEFAULT_PREFERENCES = {
   'num_addresses_used': DEFAULT_NUM_ADDRESSES,
@@ -174,9 +174,6 @@ var TESTNET_BURN_END = 4017708;
  * PRIMARY SITE INIT
  ***********/
 $(document).ready(function() {
-  //Set up logging (jqlog)
-  $.jqlog.enabled(true);
-  
   //Set up form validation
   //$("input,select,textarea").not("[type=submit]").jqBootstrapValidation();
   
@@ -200,6 +197,13 @@ ko.validation.init({
   errorMessageClass: 'invalid',
   errorElementClass: 'invalid'
 });
+
+//Set up logging (jqlog) and monkey patch jqlog with a debug function
+$.jqlog.enabled(true);
+$.jqlog.debug = function(object, options) {
+  if(IS_DEV || USE_TESTNET) //may change to just IS_DEV in the future
+    $.jqlog.info(object, options);
+}
 
 //Allow future timestamps with timeago
 $.timeago.settings.allowFuture = true;

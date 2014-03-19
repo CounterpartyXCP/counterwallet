@@ -431,7 +431,12 @@ function BuySellWizardViewModel() {
     
     self.buyAsset.subscribe(function(newValue) {
       self.selectedAddress(''); //clear it
+      //setTimeout(function() { self.selectedAddress(''); }, 20); //clear it
       if(!newValue) return;
+      if(newValue == 'XCP' || newValue == 'BTC') {
+        self.buyAssetIsDivisible(true);
+        return;
+      }
       failoverAPI("get_asset_info", [[newValue]], function(assetsInfo, endpoint) {
         self.buyAssetIsDivisible(assetsInfo[0]['divisible']);
       });    

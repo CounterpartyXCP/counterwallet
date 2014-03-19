@@ -332,7 +332,7 @@ function SweepModalViewModel() {
     }
     bootbox.alert("The sweep from address <b class='notoAddrColor'>" + self.addressForPrivateKey()
       + "</b> is complete.<br/>Sweep results:<br/><br/><ul>" + assetDisplayList.join('') + "</ul>"
-      + ACTION_PENDING_NOTICE_NO_UI);
+      + ACTION_PENDING_NOTICE);
   }
   
   self._signInputs = function(unsignedTxHex) {
@@ -347,6 +347,64 @@ function SweepModalViewModel() {
     }    
   }
   
+  self._doTransferAsset = function(selectedAsset, key, pubkey, opsComplete, callback) {
+    assert(selectedAsset.ASSET && selectedAsset.ASSET_INFO);
+    $.jqlog.log("Transferring asset " + selectedAsset.ASSET + " from " + self.addressForPrivateKey() + " to " + self.destAddress());
+    
+    var transferData = {
+      source: self.addressForPrivateKey(),
+      quantity: 0,
+      asset: selectedAsset.ASSET,
+      divisible: selectedAsset.ASSET_INFO['divisible'],
+      description: selectedAsset.ASSET_INFO['description'],
+      callable_: selectedAsset.ASSET_INFO['callable'],
+      call_date: selectedAsset.ASSET_INFO['call_date'],
+      call_price: parseFloat(selectedAsset.ASSET_INFO['call_price']) || null,
+      transfer_destination: self.destAddress(),
+      multisig: pubkey
+    };
+    multiAPIConsensus("create_issuance", transferData,
+      function(unsignedTxHex, numTotalEndpoints, numConsensusEndpoints) {
+        var sendTx = Bitcoin.Transaction.deserialize(unsignedTxHex);
+        for (i = 0; i < sendTx.ins.length; i++) { //sign each input with the key
+          sendTx.sign(i, key);
+        }
+        WALLET.broadcastSignedTx(sendTx.serializeHex(), function(issuanceTxHash, endpoint) { //transmit was successful
+          opsComplete.push({
+            'type': 'transferOwnership',
+            'result': true,
+            'asset': selectedAsset.ASSET,
+            'from': self.addressForPrivateKey(),
+            'to': self.destAddress()
+          });
+          PENDING_ACTION_FEED.add(issuanceTxHash, "issuances", transferData);
+          return callback();
+        }, function() { //on error transmitting tx
+          opsComplete.push({
+            'type': 'transferOwnership',
+            'result': false,
+            'asset': selectedAsset.ASSET
+          });
+          return callback();
+        });
+      }, function(unmatchingResultsList) { //onConsensusError
+        opsComplete.push({
+          'type': 'transferOwnership',
+          'result': false,
+          'asset': selectedAsset.ASSET
+        });
+        return callback();
+      }, function(jqXHR, textStatus, errorThrown, endpoint) { //onSysError
+        opsComplete.push({
+          'type': 'transferOwnership',
+          'result': false,
+          'asset': selectedAsset.ASSET
+        });
+        return callback();
+      }
+    );
+  }
+  
   self._doSendAsset = function(asset, key, pubkey, opsComplete, adjustedBTCQuantity, callback) {
     if(asset == 'BTC') assert(adjustedBTCQuantity !== null);
     else assert(adjustedBTCQuantity === null);
@@ -359,6 +417,15 @@ function SweepModalViewModel() {
       || selectedAsset.NORMALIZED_BALANCE);
     assert(selectedAsset);
     
+    if(!quantity) { //if there is no quantity to send for the asset, only do the transfer
+      if(asset == 'XCP' || asset == 'BTC') { //nothing to send, and no transfer to do
+        return callback(); //my valuable work here is done!
+      } else {
+        self._doTransferAsset(selectedAsset, key, pubkey, opsComplete, callback); //will trigger callback() once done
+        return;
+      }
+    }
+
     $.jqlog.log("Sweeping from: " + self.addressForPrivateKey() + " to " + self.destAddress() + " of quantity "
       + normalizedQuantity + " " + selectedAsset.ASSET);
 
@@ -391,61 +458,10 @@ function SweepModalViewModel() {
           if(   selectedAsset.ASSET != 'XCP'
              && selectedAsset.ASSET != 'BTC'
              && selectedAsset.ASSET_INFO['owner'] == self.addressForPrivateKey()) {
-            assert(selectedAsset.ASSET && selectedAsset.ASSET_INFO);
-            var transferData = {
-              source: self.addressForPrivateKey(),
-              quantity: 0,
-              asset: selectedAsset.ASSET,
-              divisible: selectedAsset.ASSET_INFO['divisible'],
-              description: selectedAsset.ASSET_INFO['description'],
-              callable_: selectedAsset.ASSET_INFO['callable'],
-              call_date: selectedAsset.ASSET_INFO['call_date'],
-              call_price: selectedAsset.ASSET_INFO['call_price'],
-              transfer_destination: self.destAddress(),
-              multisig: pubkey
-            };
-            multiAPIConsensus("create_issuance", transferData,
-              function(unsignedTxHex, numTotalEndpoints, numConsensusEndpoints) {
-                var sendTx = Bitcoin.Transaction.deserialize(unsignedTxHex);
-                for (i = 0; i < sendTx.ins.length; i++) { //sign each input with the key
-                  sendTx.sign(i, key);
-                }
-                WALLET.broadcastSignedTx(sendTx.serializeHex(), function(issuanceTxHash, endpoint) { //transmit was successful
-                  opsComplete.push({
-                    'type': 'transferOwnership',
-                    'result': true,
-                    'asset': selectedAsset.ASSET,
-                    'from': self.addressForPrivateKey(),
-                    'to': self.destAddress()
-                  });
-                  PENDING_ACTION_FEED.add(issuanceTxHash, "issuances", transferData);
-                  return callback();
-                }, function() { //on error transmitting tx
-                  opsComplete.push({
-                    'type': 'transferOwnership',
-                    'result': false,
-                    'asset': selectedAsset.ASSET
-                  });
-                  return callback();
-                });
-              }, function(unmatchingResultsList) { //onConsensusError
-                opsComplete.push({
-                  'type': 'transferOwnership',
-                  'result': false,
-                  'asset': selectedAsset.ASSET
-                });
-                return callback();
-              }, function(jqXHR, textStatus, errorThrown, endpoint) { //onSysError
-                opsComplete.push({
-                  'type': 'transferOwnership',
-                  'result': false,
-                  'asset': selectedAsset.ASSET
-                });
-                return callback();
-              }
-            );
-            
-        } else { //no transfer, just an asset send for this asset
+            setTimeout(function() {
+              self._doTransferAsset(selectedAsset, key, pubkey, opsComplete, callback); //will trigger callback() once done
+            }, 250);
+          } else { //no transfer, just an asset send for this asset
             return callback();  
           }
         }, function() { //on error transmitting tx
@@ -504,16 +520,18 @@ function SweepModalViewModel() {
       var doSweep = function() {
         var sendParams = sendsToMake.shift();
         if(sendParams === undefined) return d.resolve();
-        self._doSendAsset(sendParams[0], sendParams[1], sendParams[2], sendParams[3], sendParams[4], function() {
-          return doSweep();
-        });
+        //delay for 250ms between each asset send to avoid -22 tx errors (I'm guessing that what causes them in this case)
+        setTimeout(function() {
+          self._doSendAsset(sendParams[0], sendParams[1], sendParams[2], sendParams[3], sendParams[4], function() {
+            return doSweep();
+          }); 
+        }, 300);
       };
       doSweep();
       return d.promise();
     };
     makeSweeps().then(function() {
       self.shown(false);
-      assert(opsComplete.length == self.selectedAssetsToSweep().length);
       self._sweepCompleteDialog(opsComplete);
     });    
   }
@@ -533,7 +551,7 @@ function SweepModalViewModel() {
     if(!address) return;
 
     //Get the balance of ALL assets at this address
-    failoverAPI("get_normalized_balances", [address], function(balancesData, endpoint) {
+    failoverAPI("get_normalized_balances", [[address]], function(balancesData, endpoint) {
       var assets = [], assetInfo = null;
       for(var i=0; i < balancesData.length; i++) {
         assets.push(balancesData[i]['asset']);
@@ -542,8 +560,7 @@ function SweepModalViewModel() {
       failoverAPI("get_asset_info", [assets], function(assetsData, endpoint) {
         //Create an SweepAssetInDropdownItemModel item
         for(var i=0; i < balancesData.length; i++) {
-          assetInfo = $.grep(assetsData, function(e) { return e['asset'] == balancesData[i]['asset']; }); //O(n^2)
-          assert(assetInfo);
+          assetInfo = $.grep(assetsData, function(e) { return e['asset'] == balancesData[i]['asset']; })[0]; //O(n^2)
           self.availableAssetsToSweep.push(new SweepAssetInDropdownItemModel(
             balancesData[i]['asset'], balancesData[i]['quantity'], balancesData[i]['normalized_quantity'], assetInfo));
         }
@@ -669,8 +686,15 @@ function PrimeAddressModalViewModel() {
       addressObj.numPrimedTxouts(data[0]['numPrimedTxouts']);
       addressObj.numPrimedTxoutsIncl0Confirms(data[0]['numPrimedTxoutsIncl0Confirms']);
       self.rawUnspentTxResponse = data[0]['rawUtxoData']; //save for later (when creating the Tx itself)
-      if(data[0]['confirmedRawBal'] == 0 || data[0]['numPrimedTxouts'] == 0) {
-        bootbox.alert("Your wallet has no available <b class='notoAssetColor'>BTC</b> to prime this account with. Please deposit some and try again.");
+      if(data[0]['unconfirmedRawBal'] != 0 && (data[0]['confirmedRawBal'] == 0 || data[0]['numPrimedTxouts'] == 0)) {
+        //no confirmed balance, but funds on their way
+        bootbox.alert("Please wait for the existing <b class='notoQuantityColor'>" + normalizeQuantity(data[0]['unconfirmedRawBal']) + "</b>"
+          + " <b class='notoAssetColor'>BTC</b> balance in your account to"
+          + " confirm on the network before attempting to prime this account.");
+      } else if(data[0]['confirmedRawBal'] == 0 || data[0]['numPrimedTxouts'] == 0) {
+        //no confirmed bal and no funds on their way
+        bootbox.alert("Your wallet has no available <b class='notoAssetColor'>BTC</b> to prime this account with."
+          + " Please deposit some and try again.");
       } else {
         self.shown(true);
       }
@@ -691,7 +715,7 @@ function PrimeAddressModalViewModel() {
       function(address, numNewPrimedTxouts) {
         self.shown(false);
         bootbox.alert("Your account has successfully been primed with <b>" + numNewPrimedTxouts
-          + "</b> additional outputs. " + ACTION_PENDING_NOTICE_NO_UI);
+          + "</b> additional outputs. " + ACTION_PENDING_NOTICE);
       }
     );
   }

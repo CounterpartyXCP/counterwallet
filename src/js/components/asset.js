@@ -7,8 +7,8 @@ function AssetViewModel(props) {
   self.DIVISIBLE = props['divisible'] !== undefined ? props['divisible'] : true;
   self.owner = ko.observable(props['owner']);
   self.locked = ko.observable(props['locked'] !== undefined ? props['locked'] : false);
-  self.rawBalance = ko.observable(props['rawBalance'] || null);
-  //^ raw (not normalized) (default to null to show -- instead of 0, until the balance is populated) -- this matters for XCP and BTC
+  self.rawBalance = ko.observable(props['rawBalance'] || (self.ASSET == 'XCP' || self.ASSET == 'BTC' ? null : 0));
+  //^ raw (not normalized) (for BTC/XCP, default to null to show '--' instead of 0, until the balance is populated)
   self.rawTotalIssued = ko.observable(props['rawTotalIssued'] || 0); //raw
   self.description = ko.observable(props['description'] || '');
   self.CALLABLE = props['callable'] !== undefined ? props['callable'] : false;

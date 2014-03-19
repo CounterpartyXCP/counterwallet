@@ -70,6 +70,8 @@ PendingActionViewModel.calcText = function(category, data) {
     desc = "Pending callback for <Am>" + (data['fraction'] * 100).toFixed(4) + "%</Am> outstanding on asset <As>" + data['asset'] + "</As>";
   } else if(category == 'btcpays') {
     desc = "Pending BTC Payment from <Ad>" + getAddressLabel(data['source']) + "</Ad>";
+  } else if(category == '_primeaddrs') {
+    desc = "Pending priming for <Ad>" + getAddressLabel(data['source']) + "</Ad> for <b>" + data['numNewPrimedTxouts'] + "</b> more unspent outputs";
   } else {
     desc = "UNHANDLED TRANSACTION CATEGORY";
   }
@@ -86,7 +88,7 @@ function PendingActionFeedViewModel() {
   self.pendingActions = ko.observableArray([]); //pending actions beyond pending BTCpays
   self.lastUpdated = ko.observable(new Date());
   self.ALLOWED_CATEGORIES = [
-    'sends', 'orders', 'issuances', 'broadcasts', 'bets', 'dividends', 'burns', 'cancels', 'callbacks', 'btcpays'
+    'sends', 'orders', 'issuances', 'broadcasts', 'bets', 'dividends', 'burns', 'cancels', 'callbacks', 'btcpays', '_primeaddrs'
     //^ pending actions are only allowed for these categories
   ];
   
@@ -116,12 +118,6 @@ function PendingActionFeedViewModel() {
       self.lastUpdated(new Date());
     } else{
       $.jqlog.log("pendingAction:NOT FOUND:" + eventID + ":" + category);
-    }
-    
-    //If the pending action is marked as invalid, then we want to let the user know (as it wont be added to their notifications)
-    if(match && data['status'] && data['status'].startsWith('invalid')) {
-      bootbox.alert("Network processing of the following action <b class='errorColor'>failed</b>:<br/><br/>"
-        + match.ACTION_TEXT + "<br/><br/><b>Reason:</b> " + data['status']);
     }
   }
 }

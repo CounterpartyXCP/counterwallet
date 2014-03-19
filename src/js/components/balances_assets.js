@@ -476,7 +476,7 @@ function PayDividendModalViewModel() {
     self.shown(true);
     
     //Get the balance of ALL assets at this address
-    failoverAPI("get_normalized_balances", [address], function(data, endpoint) {
+    failoverAPI("get_normalized_balances", [[address]], function(data, endpoint) {
       for(var i=0; i < data.length; i++) {
         if(data[i]['quantity'] !== null && data[i]['quantity'] !== 0)
           self.availableDividendAssets.push(new DividendAssetInDropdownItemModel(data[i]['asset'], data[i]['quantity'], data[i]['normalized_quantity']));

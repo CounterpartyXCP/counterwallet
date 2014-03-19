@@ -95,8 +95,17 @@ function AddressViewModel(key, address, initialLabel) {
       };
       self.assets.push(new AssetViewModel(assetProps)); //add new
     } else {
-      //update existing. this logic is really only reached from the messages feed
-      assert(initialRawBalance === null);
+      //update existing. NORMALLY this logic is really only reached from the messages feed, however, we can have the
+      // case where if we have a sweep operation for instance (which will show up as an asset transfer and credit
+      // message received on the same block, at about the same time), due to API calls that are made in the handlers for
+      // these, we could have a potential race condition where WALLET.updateBalance ends up calling this function
+      // instead of just updating the rawBalance itself. We should be able to gracefully handle that...
+      if(initialRawBalance) {
+        match.rawBalance(initialRawBalance);
+        return;
+      }
+      
+      //Now that that's out of the way, in cases after here, we should only reach this from the messages feed 
       assert(assetInfo['owner'] === undefined, "Logic should only be reached via messages feed data, not with get_asset_info data");
       
       if(assetInfo['description'] != match.description()) {

@@ -191,6 +191,7 @@ function WalletViewModel() {
         addressObj.numPrimedTxouts(null); //null = UNKNOWN
         addressObj.numPrimedTxoutsIncl0Confirms(null); //null = UNKNOWN
       }
+      bootbox.alert("Got an error when trying to sync BTC balances: " + textStatus);
       
       if(isRecurring && self.autoRefreshBTCBalances) {
         setTimeout(function() {
@@ -340,7 +341,7 @@ function WalletViewModel() {
     var addressObj = self.getAddressObj(address);
     assert(!addressObj.IS_WATCH_ONLY, "Cannot perform this action on a watch only address!");
     if(addressObj.numPrimedTxouts() == 0) { //no primed txouts
-      if(self.getBalance(address, "BTC") == 0) {
+      if(self.getBalance(address, "BTC", false) < MIN_PRIME_BALANCE) {
         bootbox.alert("Can't do this action as you have no <b class='notoAssetColor'>BTC</b> at this address, and Counterparty actions require a"
           + " small balance of <b class='notoAssetColor'>BTC</b> to perform.<br/><br/>Please deposit some into address"
           + " <b class='notoAddrColor'>" + getAddressLabel(address) + "</b> and try again.");

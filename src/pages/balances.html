@@ -28,10 +28,13 @@
     <h4 class="alert-heading" style="padding-bottom: 10px">Welcome to Counterwallet!</h4>
     We've created three addresses for you, which serve as both Bitcoin and Counterparty addresses.
     To start using the wallet, simply send some BTC or XCP to any one of them (just single click on the address string
-    itself to select it, then copy that text, which you can then give to others or use to send funds to).<br/><br/>
+    itself to select it, then copy that text, which you can then give to others or use to
+    send funds to). <span data-bind="visible: USE_TESTNET">Note that, on testnet, you can use a
+    <b><a href="https://en.bitcoin.it/wiki/Bitcoin_faucet" target="_blank">Testnet faucet</a> to get BTC to start with</b>.</span>
+    <br/><br/>
     
     One important thing to know before getting started is that when you perform an action in Counterwallet (i.e. place
-    an order, create an asset, etc), it doesn't take effect immediately as it must first be confirmed on the Bitcoin blockchain.
+    an order, create an asset, etc), <b>it doesn't take effect immediately as it must first be confirmed on the Bitcoin blockchain</b>.
     Counterwallet lets you know this by displaying your actions under the <b>Pending Actions</b> panel (the Clock icon on the top bar), and then moving
     them to the <b>Notifications</b> panel (the Checkbox icon) automatically once the network has successfully confirmed them.
     Note that depending on the speed at which blocks are solved, it could take anywhere from 2 to 40 minutes for your actions to be confirmed.<br/><br/>
@@ -87,7 +90,7 @@
                 </div>
                 <h3 class="name pull-left" style="position: relative; top: -10px;" data-bind="text: ASSET"></h3>
                 <div class="clearfix"></div>
-                <p class="balance">
+                <p class="balance" data-bind="style: { 'padding-right': locked() && CALLABLE ? '40px' : locked() || CALLABLE ? '20px' : '0px' }">
                     <span data-bind="visible: isMine()">Issued: <span data-bind="text: dispTotalIssued"></span></span><br/>
                     Bal: <span data-bind="text: normalizedBalance() === null ? '--' : smartFormat(normalizedBalance())"></span></p>
                 <div style="position:absolute;bottom:2px;right:10px">
