@@ -418,10 +418,8 @@ function nav_page_height() {
     $.root_.css('min-height', setHeight + $.navbar_height + 'px');
 
     //COUNTERWALLETD: START MOD
-    $('#chatPane').css('min-height', setHeight + 'px');
-    $('#chatPane').css('min-height', windowHeight + 'px');
+    $('#chatPane').css('height', windowHeight + 'px');
     $('#chatContentDiv').css('min-height', (windowHeight - 50 - 40) + 'px');
-    //$('#chatContentInnerDiv').slimScroll({ height: (setHeight - 50 - 32) + 'px' });
     $('#chatContentInnerDiv').slimScroll({ height: 'auto' });
     //COUNTERWALLETD: END MOD
   } else {

@@ -49,6 +49,9 @@ function LogonViewModel() {
     if (seed.charAt(0) == '0') seed = seed.substr(1);
 
     self.generatedPassphrase(mn_encode(seed));
+    
+    //select the generated passphrase text
+    selectText('generated');
   }
   
   self.showSecureKeyboard = function() {

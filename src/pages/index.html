@@ -233,12 +233,8 @@
             </div>
             <div class="panel-body">
               <p>We have created a passphrase for you in the box below.</p>
-              <form class="form-inline" role="form">
-                <input id="generated" readonly="readonly" data-bind="value: generatedPassphrase" class="input-medium form-control" type="text">
-                <div class="pull-right">
-                  <button data-bind="click: generatePassphrase, tooltip: {title: 'Click to generate another random passphrase.'}" class="btn btn-default" type="button"><i class="fa fa-repeat"></i></button>
-                </div>
-              </form>
+              <div id="generated" data-bind="text: generatedPassphrase"></div>
+              <button data-bind="click: generatePassphrase, tooltip: {title: 'Click to generate another random passphrase.'}" class="pull-right btn btn-default" type="button"><i class="fa fa-repeat"></i></button>
               <div class="alert alert-danger" style="margin-top:15px;">
                 <p style="font-weight:bold;text-align:center;font-size:1.3em">Write your passphrase down and keep it safe.</p>
                 <p style="font-weight:bold;text-decoration:underline;text-align:center;font-size:1.15em">

@@ -32,7 +32,9 @@
 
 #generated {
     width: 530px;
-    cursor: text;
+    display: inline-block;
+    padding: 6px 5px;
+    border: 1px solid #AAA;
 }
 
 #form-well .btn-success {
