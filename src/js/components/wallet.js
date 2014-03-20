@@ -215,11 +215,8 @@ function WalletViewModel() {
   //BTC-related
   self.getBTCBlockHeight = function(callback) {
     failoverAPI("get_btc_block_height", [],
-      function(data, endpoint) {
-        if(!data['caught_up']) {
-          $.jqlog.warn("Blockchain not fully synched when trying to get BTC block height: " + data['sync_percentage']);
-        }
-        return callback(data['block_height']);
+      function(blockHeight, endpoint) {
+        return callback(blockHeight);
       }
     );
   }
