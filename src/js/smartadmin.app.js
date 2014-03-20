@@ -419,7 +419,7 @@ function nav_page_height() {
 
     //COUNTERWALLETD: START MOD
     $('#chatPane').css('height', windowHeight + 'px');
-    $('#chatContentDiv').css('min-height', (windowHeight - 50 - 40) + 'px');
+    $('#chatContentDiv').css('height', (windowHeight - 50 - 40) + 'px');
     $('#chatContentInnerDiv').slimScroll({ height: 'auto' });
     //COUNTERWALLETD: END MOD
   } else {
