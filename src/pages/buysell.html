@@ -353,8 +353,8 @@
     <article class="col-xs-12 col-sm-12 col-md-12 col-lg-12"> <!-- NEW WIDGET START -->
       <div class="jarviswidget defaultWidgetColor" id="wid-id-openOrders" data-widget-editbutton="false" data-widget-deletebutton="false" data-bind="fadeVisibleInOnly: showOpenOrders">
         <header>
-            <span class="widget-icon"> <i class="fa fa-spinner"></i> </span>
-            <h2>Your <span data-bind="text: dispAssetPair"></span> Open Orders for <span data-bind="text: dispSelectedAddressWithLabel"></span></h2>
+            <span class="widget-icon"> <i class="fa fa-circle-o"></i> </span>
+            <h2>Open Orders Selling <span data-bind="text: buyAsset"></span></h2>
         </header>
         <div> <!-- widget div-->
             <div class="widget-body no-padding"> <!-- widget content -->
@@ -371,26 +371,23 @@
                             <th>Buy Qty Left</th>
                             <th>Sell Qty Left</th>
                             <th>Expires In</th>
-                            <th>Fee Provided</th>
-                            <th>Fee Required</th>
-                            <th>Operations</th>
+                            <th data-bind="visible: buyAsset() == 'BTC' || sellAsset() == 'BTC'">
+                                <span data-bind="text: sellAsset() == 'BTC' ? 'Fee Required' : 'Fee Provided'"></span>
+                            </th>
+                            <!-- ^ reverse the order here because we're looking for people on the other end of the trade to buy from -->
                         </tr>
                     </thead>
                     <tbody data-bind="foreach: openOrders">
                         <tr>
                             <td data-bind="html: getLinkForCPData('tx', tx_index)"></td>
                             <td data-bind="timeago: new Date(block_time)"></td>
-                            <td data-bind="text: derivePendingOrderAssetQuantity(get_asset, get_quantity) + ' ' + get_asset"></td>
-                            <td data-bind="text: derivePendingOrderAssetQuantity(give_asset, give_quantity) + ' ' + give_asset"></td>
-                            <td><a target="_blank" data-bind="text: derivePendingOrderAssetPrice(get_asset, get_quantity, give_asset, give_quantity)"></a></td>
-                            <td data-bind="text: derivePendingOrderAssetQuantity(get_asset, get_remaining) + ' ' + get_asset"></td>
-                            <td data-bind="text: derivePendingOrderAssetQuantity(give_asset, give_remaining) + ' ' + give_asset"></td>
-                            <td data-bind="html: derivePendingOrderExpiresIn(block_index, expiration)"></td>
-                            <td data-bind="text: fee_provided ? (normalizeQuantity(fee_provided) + ' BTC') : ''"></td>                            
-                            <td data-bind="text: fee_required ? (normalizeQuantity(fee_required) + ' BTC') : ''"></td>
-                            <td>
-                                <a href="#" data-bind="click: $parent.cancelOrder" class="btn btn-danger btn-xs">Cancel Order</a>
-                            </td>                            
+                            <td data-bind="text: $parent.derivePendingOrderAssetQuantity(get_asset, get_quantity) + ' ' + get_asset"></td>
+                            <td data-bind="text: $parent.derivePendingOrderAssetQuantity(give_asset, give_quantity) + ' ' + give_asset"></td>
+                            <td><a target="_blank" data-bind="text: $parent.derivePendingOrderAssetPrice(get_asset, get_quantity, give_asset, give_quantity)"></a></td>
+                            <td data-bind="text: $parent.derivePendingOrderAssetQuantity(get_asset, get_remaining) + ' ' + get_asset"></td>
+                            <td data-bind="text: $parent.derivePendingOrderAssetQuantity(give_asset, give_remaining) + ' ' + give_asset"></td>
+                            <td data-bind="html: $parent.derivePendingOrderExpiresIn(block_index, expiration)"></td>
+                            <td data-bind="visible: $parent.buyAsset() == 'BTC' || $parent.sellAsset() == 'BTC', text: $parent.sellAsset() == 'BTC' && fee_required ? (normalizeQuantity(fee_required) + ' BTC') : ($parent.buyAsset() == 'BTC' && fee_provided ? normalizeQuantity(fee_provided) + ' BTC' : '')"></td>                            
                         </tr>
                     </tbody>
                 </table>
@@ -404,7 +401,7 @@
     <article class="col-xs-12 col-sm-12 col-md-12 col-lg-12"> <!-- NEW WIDGET START -->
       <div class="jarviswidget defaultWidgetColor" id="wid-id-tradeChart" data-widget-editbutton="false" data-widget-deletebutton="false" data-bind="fadeVisibleInOnly: showTradeHistory && tradeHistory().length > 0">
         <header>
-            <span class="widget-icon"> <i class="fa fa-table"></i> </span>
+            <span class="widget-icon"> <i class="fa fa-circle"></i> </span>
             <h2>Completed Trades for <span data-bind="text: dispAssetPair"></span></h2>
         </header>
         <div> <!-- widget div-->

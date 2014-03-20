@@ -3,9 +3,7 @@ var MARKET_INFO_REFRESH_EVERY = 5 * 60 * 1000; //refresh market info every 5 min
 var AddressInDropdownItemModel = function(address, label, asset, balance) {
   this.ADDRESS = address;
   this.LABEL = label;
-  this.SELECT_LABEL = label ? 
-      ("<b>" + label + "</b><br/>" + address + "<br/>" + asset + " Bal: " + balance)
-    : (address + "<br/>" + asset + " Bal: " + balance);
+  this.SELECT_LABEL = (label ? ("<b>" + label + "</b><br/>" + address + "<br/>" + asset + " Bal: " + balance) : (address + "<br/>" + asset + " Bal: " + balance));
 };
 
 ko.validation.rules['isValidQtyForBuyAssetDivisibility'] = {
@@ -105,7 +103,9 @@ ko.validation.registerExtenders();
 
 function BuySellWizardViewModel() {
   var self = this;
+  self.MY_ADDRESSES = WALLET.getAddressesList();
   self._lastWindowWidth = null;
+  
   self.showPriceChart = ko.observable(false);
   self.showTradeHistory = ko.observable(false);
   self.showOpenOrders = ko.observable(false);
@@ -623,26 +623,21 @@ function BuySellWizardViewModel() {
     if(self.buyAsset() == 'BTC') args['normalized_fee_required'] = self.feeForSelectedBTCQuantity();
     if(self.sellAsset() == 'BTC') args['normalized_fee_provided'] = self.feeForSelectedBTCQuantity();
     failoverAPI("get_order_book", args, function(data, endpoint) {
-      if(!data['raw_orders'] || data['raw_orders'].length == 0) return;
-      //^ no order book, showPriceChart should end up being set to false and the order book wont show
-
-      //set up order book display
-      data['base_ask_book'].reverse(); //for display
-      self.askBook(data['base_ask_book'].slice(0,7)); //limit to 7 entries
-      self.bidBook(data['base_bid_book'].slice(0,7));
-      self.bidAskMedian(data['bid_ask_median']);
-      self.bidDepth(data['bid_depth']);
-      self.askDepth(data['ask_depth']);
-      
-      //fetch and show all my open orders for the selected address and asset pair
-      var myOrders = [];
-      for(var i=0; i < data['raw_orders']; i++) { //O(n^2)...optimize later
-        if(WALLET.getAddressObj(data['raw_orders'][i]['source']))
-          myOrders.push(data['raw_orders'][i]);
+      if(data['raw_orders'] && data['raw_orders'].length) {
+        //we have an order book, showPriceChart should end up being set to true and the order book will show
+        //set up order book display
+        data['base_ask_book'].reverse(); //for display
+        self.askBook(data['base_ask_book'].slice(0,7)); //limit to 7 entries
+        self.bidBook(data['base_bid_book'].slice(0,7));
+        self.bidAskMedian(data['bid_ask_median']);
+        self.bidDepth(data['bid_depth']);
+        self.askDepth(data['ask_depth']);
       }
-      self.openOrders(myOrders);
+      
+      //show all open orders for the selected asset pair
+      self.openOrders(data['open_sell_orders']);
       //now that we have the complete data, show the orders listing
-      if(data.length) {
+      if(self.openOrders().length) {
         runDataTables('#openOrders', true, { "aaSorting": [ [0, 'desc'] ] });
         self.showOpenOrders(true);
       } else {
