@@ -76,7 +76,7 @@ function AssetViewModel(props) {
     if(!WALLET.canDoTransaction(self.ADDRESS)) return false;
     
     bootbox.dialog({
-      message: "By locking your asset, you will not be able to issue more of it in the future.<br/><br/> \
+      message: "By locking your asset, you will not be able to issue more units of it in the future.<br/><br/> \
         <b style='color:red'>Please NOTE that this action is irreversable!</b>",
       title: "Are you sure?",
       buttons: {
@@ -105,7 +105,7 @@ function AssetViewModel(props) {
                 transfer_destination: null
               },
               function() {
-                bootbox.alert("Your asset has been locked. It may take a bit for this to reflect.");
+                bootbox.alert("Your asset has been locked and no more units of the asset may be issued. It may take a bit for this to reflect.");
               }
             );
           }

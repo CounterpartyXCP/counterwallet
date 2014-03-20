@@ -82,7 +82,7 @@
                     <li data-bind="visible: !$parent.IS_WATCH_ONLY && USE_TESTNET && ASSET == 'BTC'"><a data-bind="click: testnetBurn" href="#">Burn for XCP</a></li>
                     <li data-bind="visible: !$parent.IS_WATCH_ONLY && isMine() && !locked()"><a data-bind="click: issueAdditional" href="#">Issue Additional</a></li>
                     <li data-bind="visible: !$parent.IS_WATCH_ONLY && isMine()"><a data-bind="click: transfer" href="#">Transfer Ownership</a></li>
-                    <li data-bind="visible: !$parent.IS_WATCH_ONLY && isMine() && !locked()"><a data-bind="click: lock" href="#">Lock Asset Ownership</a></li>
+                    <li data-bind="visible: !$parent.IS_WATCH_ONLY && isMine() && !locked()"><a data-bind="click: lock" href="#">Lock Asset Issuance</a></li>
                     <li data-bind="visible: !$parent.IS_WATCH_ONLY && isMine()"><a data-bind="click: changeDescription" href="#">Change Asset Description</a></li>
                     <li data-bind="visible: !$parent.IS_WATCH_ONLY && isMine()"><a data-bind="click: payDividend" href="#">Pay Dividend</a></li>
                     <li data-bind="visible: !$parent.IS_WATCH_ONLY && isMine() && CALLABLE"><a data-bind="click: call" href="#">Call</a></li>
@@ -524,7 +524,8 @@
         <h4 class="modal-title">Transfer Asset</h4>
       </div>
       <div class="modal-body no-padding">
-        <p class="formPadded">Enter the <b>Bitcoin address</b> you would like to perminently transfer <u>ALL</u> shares of this asset to.
+        <p class="formPadded">Enter the <b>Bitcoin address</b> you would like to perminently transfer ownership of this asset to.
+            (Be aware that this will not transfer the actual units of this asset that you own to this address -- you can do that with a separate Send transaction.)
             <br/><br/><b style='color:red'>Please NOTE that this action is irreversable!</b></p>
         
         <form class="smart-form" data-bind="submit: doAction"><fieldset>
