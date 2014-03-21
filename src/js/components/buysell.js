@@ -77,9 +77,9 @@ ko.validation.rules['addressHasSellAssetBalance'] = {
 ko.validation.rules['isValidBuyOrSellQuantity'] = {
   validator: function (quantity, self) {
     if(quantity == null || quantity == '') return true; //let the required validator handle this
-    return quantity > 0;
+    return quantity.toString().match(/^[0-9]*\.?[0-9]{0,8}$/) && quantity > 0;
   },
-  message: 'Must be greater than 0'
+  message: 'Must be a valid quantity (> 0, max 8 decimal places)'
 };
 ko.validation.rules['coorespondingSellQuantityDoesNotExceedBalance'] = {
   //For the quantity the user wants to buy
@@ -268,10 +268,7 @@ function BuySellWizardViewModel() {
       message: "This field is required.",
       onlyIf: function () { return self.overrideDefaultOptions(); }
     },
-    pattern: {
-      message: 'Must be a valid amount',
-      params: '^[0-9]*\.?[0-9]{0,8}$' //not perfect ... will convert divisible assets to satoshi before sending to API
-    }
+    isValidPositiveQuantity: self
   });
   //^ if we are selling BTC, this is a fee_required override if buying BTC, and a fee_provided override if selling BTC. if neither, this is not used
   self.btcFeeAs = ko.observable('percentage');
@@ -421,13 +418,14 @@ function BuySellWizardViewModel() {
       });    
     });
 
-    //Get a list of all owned assets for this user
-    failoverAPI("get_owned_assets", { addresses: WALLET.getAddressesList() }, function(data, endpoint) {
-      var otherAssets = [];
-      for(var i = 0; i < data.length; i++) {
-        self.myAssets.push(data[i]['asset']); //asset ID (e.g. "FOOBAR")
-      }
-    });
+    //Get a list of all assets this user has balances of
+    var addresses = WALLET.getAddressesList();
+    var assets = [];
+    for(var i=0; i < addresses.length; i++) {
+        assets = assets.concat(WALLET.getAddressObj(addresses[i]).getAssetsList());
+    }
+    assets = assets.remove('XCP').remove('BTC').unique();
+    self.myAssets(assets);
     
     self.buyAsset.subscribe(function(newValue) {
       self.selectedAddress(''); //clear it
@@ -560,7 +558,7 @@ function BuySellWizardViewModel() {
             },
             function() {
               bootbox.alert("Your order for <b class='notoQuantityColor'>" + self.selectedBuyQuantity() + "</b>"
-               + " <b class='notoAssetColor'>" + self.selectedBuyAsset() + "</b> has been placed. "
+               + " <b class='notoAssetColor'>" + self.buyAsset() + "</b> has been placed. "
                + ACTION_PENDING_NOTICE);
               checkURL(); //reset the form and take the user back to the first tab by just refreshing the page
             }

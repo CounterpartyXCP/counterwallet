@@ -191,3 +191,12 @@ body.smart-style-3 .defaultWidgetColor>header { /* google skin = darkBlue (night
     background: #4C4F53;
     color: #FFF;
 }
+
+
+/* 
+ * CSS SMARTADMIN BUG FIXES
+ */
+/* this fixes the success box (Confirm & Place Order) on the last page of the Buy/Sell pane so that it displays correctly */
+.btn-success {
+    background-color: #739e73 !important;
+}

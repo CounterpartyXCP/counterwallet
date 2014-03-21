@@ -8,12 +8,17 @@ function AssetViewModel(props) {
   self.owner = ko.observable(props['owner']);
   self.locked = ko.observable(props['locked'] !== undefined ? props['locked'] : false);
   self.rawBalance = ko.observable(props['rawBalance'] || (self.ASSET == 'XCP' || self.ASSET == 'BTC' ? null : 0));
-  //^ raw (not normalized) (for BTC/XCP, default to null to show '--' instead of 0, until the balance is populated)
+  //^ raw (not normalized) (for BTC/XCP, default to null to show '??' instead of 0, until the balance is populated)
   self.rawTotalIssued = ko.observable(props['rawTotalIssued'] || 0); //raw
   self.description = ko.observable(props['description'] || '');
   self.CALLABLE = props['callable'] !== undefined ? props['callable'] : false;
   self.CALLDATE = props['callDate'] || null;
   self.CALLPRICE = props['callPrice'] || null;
+  
+  self.balanceChangePending = ko.observable(false);
+  //^ if/when set to true, will highlight the balance to show that a balance change is pending
+  self.issuanceQtyChangePending = ko.observable(false);
+  //^ similar, but for the "Issued" text on owned assets
 
   self.isMine = ko.computed(function() {
     if(self.ASSET == 'BTC' || self.ASSET == 'XCP') return null; //special value for BTC and XCP
@@ -21,10 +26,12 @@ function AssetViewModel(props) {
   }, self);
   
   self.normalizedBalance = ko.computed(function() {
+    if(self.rawBalance() === null) return null;
     return normalizeQuantity(self.rawBalance(), self.DIVISIBLE);
   }, self);
 
   self.dispBalance = ko.computed(function() {
+    if(self.normalizedBalance() === null) return "??";
     return numberWithCommas(self.normalizedBalance()); 
   }, self);
   

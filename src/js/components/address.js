@@ -61,6 +61,14 @@ function AddressViewModel(key, address, initialLabel) {
     });
   }
   
+  self.getAssetsList = function() {
+    var assets = [];
+    ko.utils.arrayForEach(self.assets(), function(asset) {
+      assets.push(asset.ASSET);
+    });
+    return assets;
+  }
+  
   self.addOrUpdateAsset = function(asset, assetInfo, initialRawBalance) {
     //Update asset property changes (ONLY establishes initial balance when logging in! -- past that, balance changes
     // come from debit and credit messages)

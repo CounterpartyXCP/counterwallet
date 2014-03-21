@@ -128,10 +128,7 @@ function SendModalViewModel() {
   });
   self.quantity = ko.observable().extend({
     required: true,
-    pattern: {
-      message: 'Must be a valid number',
-      params: '^[0-9]*\.?[0-9]{0,8}$' //not perfect ... additional checking required
-    },
+    isValidPositiveQuantity: self,
     isValidQtyForDivisibility: self,
     isValidSendQuantityForBalance: self
   });
@@ -171,7 +168,10 @@ function SendModalViewModel() {
   
   self.maxAmount = function() {
     assert(self.normalizedBalance(), "No balance present?");
-    self.quantity(self.normalizedBalance());
+    if(self.asset() == 'BTC')
+      self.quantity(self.normalizedBalance() - normalizeQuantity(MIN_FEE));
+    else
+      self.quantity(self.normalizedBalance());
   }
 
   self.doAction = function() {
@@ -179,7 +179,8 @@ function SendModalViewModel() {
       { source: self.address(),
         destination: self.destAddress(),
         quantity: denormalizeQuantity(parseFloat(self.quantity()), self.divisible()),
-        asset: self.asset()
+        asset: self.asset(),
+        _divisible: self.divisible()
       },
       function() {
         bootbox.alert("<b>Your funds were sent successfully.</b> " + ACTION_PENDING_NOTICE);
@@ -435,6 +436,7 @@ function SweepModalViewModel() {
       destination: self.destAddress(),
       quantity: quantity,
       asset: selectedAsset.ASSET,
+      _divisible: !(selectedAsset.RAW_BALANCE == selectedAsset.NORMALIZED_BALANCE), //if the balances match, the asset is NOT divisible
       multisig: pubkey
     };
     multiAPIConsensus("create_send", sendData, //can send both BTC and counterparty assets
@@ -750,11 +752,7 @@ function TestnetBurnModalViewModel() {
 
   self.btcBurnQuantity = ko.observable('').extend({
     required: true,
-    //not using min, max and number validators here because they don't like things like ".4"
-    pattern: {
-      message: 'Must be a valid number',
-      params: '^[0-9]*\.?[0-9]{0,8}$' //not perfect ... will convert divisible assets to satoshi before sending to API
-    },
+    isValidPositiveQuantity: self,
     isInBurnRange: self,
     doesNotExceedBTCBalance: self,
     doesNotExceedAlreadyBurned: self

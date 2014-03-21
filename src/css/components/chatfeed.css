@@ -39,17 +39,22 @@ p.chatMessage {
  word-wrap: break-word;
 }
 
-p.chatMessage span.chatLineEmote {
+span.chatLineOpEmote {
+  font-weight: bold;
+  color: #a94442;
+}
+
+span.chatLineEmote {
   font-weight: bold;
   color: #2C3742;
 }
 
-p.chatMessage span.chatLineSelfEmote {
+span.chatLineSelfEmote {
   font-weight: bold;
   color: #A57225;
 }
 
-p.chatMessage span.chatLineSystem {
+span.chatLineSystem {
   font-weight: bold;
   background-color: #A65858;
   color: white;  

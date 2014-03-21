@@ -95,6 +95,22 @@ function OpenOrderFeedViewModel() {
     });
     self.lastUpdated(new Date());
   }
+  
+  self.restore = function() {
+    //Get and populate any open orders we have
+    var addresses = WALLET.getAddressesList();
+    var filters = [];
+    for(var i=0; i < addresses.length; i++) {
+      filters.push({'field': 'source', 'op': '==', 'value': addresses[i]});
+    }
+    failoverAPI("get_orders", {'filters': filters, 'show_empty': false, 'show_expired': false, 'filterop': 'or'},
+      function(data, endpoint) {
+        for(i=0; i < data.length; i++) {
+          self.add(data[i], i == data.length - 1); //PERF: sort on the last addition only
+        }
+      }
+    );
+  }
 }
 
 /*NOTE: Any code here is only triggered the first time the page is visited. Put JS that needs to run on the

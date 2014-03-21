@@ -107,6 +107,71 @@ function WaitingBTCPayFeedViewModel() {
       self.lastUpdated(new Date());
     }
   }
+  
+  self.markAsInProgress = function(orderMatchID, btcPayTxHash) {
+    //locally records a BTCpay transaction as in progress (i.e. not yet confirmed on the blockchain)
+    //we add a record of this to local storage so that if the user logs out and back in again before the BTC pay is
+    // confirmed, they will NOT see this BTC pay to make, since they have already made it)
+    //Add to local storage so we can reload it if the user logs out and back in
+    var pendingBTCPayStorage = localStorage.getObject('pendingBTCPays');
+    if(pendingBTCPayStorage === null) pendingBTCPayStorage = [];
+    pendingBTCPayStorage.push([orderMatchID, btcPayTxHash]);
+    localStorage.setObject('pendingBTCPays', pendingBTCPayStorage);     
+  }
+  
+  self.restore = function() {
+    //Get and populate any waiting BTC pays, filtering out those they are marked as in progress (i.e. are not waiting
+    // for manual user payment, but waiting confirmation on the network instead -- we call these pendingBTCPays) to
+    // avoid the possibility of double payment
+    var addresses = WALLET.getAddressesList();
+    var filters = [];
+    for(var i=0; i < addresses.length; i++) {
+      filters.push({'field': 'tx0_address', 'op': '==', 'value': addresses[i]});
+      filters.push({'field': 'tx1_address', 'op': '==', 'value': addresses[i]});
+    }
+
+    var pendingBTCPayStorage = localStorage.getObject('pendingBTCPays');
+    if(pendingBTCPayStorage === null) pendingBTCPayStorage = [];
+
+    failoverAPI("get_order_matches", {'filters': filters, 'filterop': 'or', status: 'pending'},
+      function(data, endpoint) {
+        for(var i=0; i < data.length; i++) {
+          var orderMatchID = data[i]['tx0_hash'] + data[i]['tx1_hash'];
+          var match = $.grep(pendingBTCPayStorage, function(e) { return e[0] == orderMatchID; })[0];
+          if(!match) {
+            //if not already paid and awaiting confirmation, show it as a waiting BTC pay
+            var btcPayData = WaitingBTCPayFeedViewModel.makeBTCPayData(data[i]);
+            WAITING_BTCPAY_FEED.add(btcPayData, i == data.length - 1);
+          } else {
+            $.jqlog.log("pendingBTCPay:restore:not showing (awaiting network confirmation): " + match[1]);
+          }
+        }
+        
+        if(!pendingBTCPayStorage.length) return;
+        //Clear out entries in pendingBTCPays where the BTCPay itself is confirmed
+        var txHashes = [];
+        for(i=0; i < pendingBTCPayStorage.length; i++) {
+          txHashes.push(pendingBTCPayStorage[i][1]); //btcpay txhash
+        }
+        
+        //construct a new pending info storage object that doesn't include any hashes that we get no data back on
+        var newPendingBTCPayStorage = [], pendingBTCPay = null;
+        failoverAPI("get_btc_txns_status", [txHashes], function(txInfo, endpoint) {
+          for(var i=0; i < txInfo.length; i++) {
+            pendingBTCPay = $.grep(pendingBTCPayStorage, function(e) { return e[1] == txInfo[i]['tx_hash']; })[0];
+            if(pendingBTCPay && txInfo[i]['confirmations'] == 0) { //still pending
+              $.jqlog.log("pendingBTCPay:restore:load: " + txInfo[i]['tx_hash'] + ":" + pendingBTCPay[1]);
+              newPendingBTCPayStorage.push(pendingBTCPay);
+            } else {
+              //otherwise, do not load into pending actions, and do not include in updated pending actions list
+              $.jqlog.log("pendingBTCPay:restore:remove: " + txInfo[i]['tx_hash']);
+            }
+          }
+          localStorage.setObject('pendingBTCPays', newPendingBTCPayStorage);
+        });
+      }
+    );
+  }
 }
 WaitingBTCPayFeedViewModel.makeBTCPayData = function(data) {
   //data is a pending order match object (from a data feed message received, or from a get_orders API result)

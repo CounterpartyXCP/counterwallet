@@ -129,7 +129,7 @@ function WalletViewModel() {
         // the (confirmed) balance will be decreased by the ENTIRE quantity of that txout, even though they may be getting
         // some/most of it back as change. To avoid people being confused over this, with BTC in particular, we should
         // display the unconfirmed portion of the balance in addition to the confirmed balance, as it will include the change output
-        self.updateBalance(data[i]['addr'], "BTC", data[i]['confirmedRawBal'] + data[i]['unconfirmedRawBal']);
+        self.updateBalance(data[i]['addr'], "BTC", data[i]['confirmedRawBal']);
         
         addressObj = self.getAddressObj(data[i]['addr']);
         assert(addressObj, "Cannot find address in wallet for refreshing BTC balances!");
@@ -144,10 +144,10 @@ function WalletViewModel() {
             
           if(pendingActionsHasBTCSend) {
             //see if data[i]['lastTxns'] includes any hashes that exist in the Pending Actions, which
-            // means we can remove them from that listing
+            // means we MAY be able to remove them from that listing (i.e. they COULD be non-BTC send (i.e. counterparty transactions) though
             //TODO: This is not very efficient when a BTC send is pending... O(n^3)! Although the sample sets are relatively small...
             for(var j=0; j < data[i]['lastTxns'].length; j++) {
-              PENDING_ACTION_FEED.remove(data[i]['lastTxns'][j], "sends", {});
+              PENDING_ACTION_FEED.remove(data[i]['lastTxns'][j], "sends", {'source': data[i]['addr'], 'asset': 'BTC'}, true);
             }
           }
           
@@ -156,7 +156,7 @@ function WalletViewModel() {
           // we will have a situation where the thing will keep repriming the account every 5 minutes until the next block comes in :O
           if(   PREFERENCES['auto_prime']
              && !(addressObj.IS_WATCH_ONLY)
-             && data[i]['confirmedRawBal'] >= AUTOPRIME_MIN_CONFIRMED_BTC_BAL * UNIT
+             && (data[i]['unconfirmedRawBal'] < 0 ? (data[i]['confirmedRawBal'] + data[i]['unconfirmedRawBal']) : data[i]['confirmedRawBal']) >= AUTOPRIME_MIN_CONFIRMED_BTC_BAL * UNIT
              && data[i]['numPrimedTxoutsIncl0Confirms'] !== null
              && data[i]['numPrimedTxoutsIncl0Confirms'] < AUTOPRIME_AT_LESSTHAN_REMAINING) {
             var maxPrimedTxoutsPossible = parseInt((data[i]['confirmedRawBal'] - MIN_FEE) / MIN_PRIME_BALANCE);
@@ -372,6 +372,9 @@ function WalletViewModel() {
       delete data['_type'];
       extra2 = data['_tx_index'];
       delete data['_tx_index'];
+    } else if(action == 'create_send') {
+      extra1 = data['_divisible'];
+      delete data['_divisible'];
     }
     
     var verifyDestAddr = data['destination'] || data['transfer_destination'] || null;
@@ -390,6 +393,8 @@ function WalletViewModel() {
           } else if(action == 'create_cancel') {
             data['_type'] = extra1;
             data['_tx_index'] = extra2;
+          } else if(action == 'create_send') {
+            data['_divisible'] = extra1;
           }
           PENDING_ACTION_FEED.add(txHash, category, data);
           

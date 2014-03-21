@@ -37,10 +37,7 @@ function CreateAssetModalViewModel() {
   self.divisible = ko.observable(true);
   self.quantity = ko.observable().extend({
     required: true,
-    pattern: {
-      message: 'Must be a valid number',
-      params: '^[0-9]*\.?[0-9]{0,8}$' //not perfect ... will convert divisible assets to satoshi before sending to API
-    },
+    isValidPositiveQuantity: self,
     isValidQtyForDivisibility: self
   });
   self.callable = ko.observable(false);
@@ -58,10 +55,7 @@ function CreateAssetModalViewModel() {
       message: "Call price is required if the asset is callable",
       onlyIf: function () { return (self.callable() === true); }
     },
-    pattern: {
-      message: 'Must be a valid number',
-      params: '^[0-9]*\.?[0-9]{0,8}$'
-    },
+    isValidPositiveQuantity: self,
     isValidQtyForDivisibility: self
   });
   
@@ -164,10 +158,7 @@ function IssueAdditionalAssetModalViewModel() {
   
   self.additionalIssue = ko.observable('').extend({
     required: true,
-    pattern: {
-      message: 'Must be a valid quantity',
-      params: '^[0-9]*\.?[0-9]{0,8}$' //not perfect ... will convert divisible assets to satoshi before sending to API
-    },
+    isValidPositiveQuantity: self,
     isValidQtyForDivisibility: self,
     additionalIssueDoesNotExceedLimit: self
   });
@@ -403,10 +394,7 @@ function PayDividendModalViewModel() {
   
   self.quantityPerUnit = ko.observable('').extend({
     required: true,
-    pattern: {
-      message: 'Must be a valid number',
-      params: '^[0-9]*\.?[0-9]{0,8}$' //not perfect ... will convert divisible assets to satoshi before sending to API
-    },
+    isValidPositiveQuantity: self,
     quantityDoesNotExceedDividendAssetBalance: self
   });
   
@@ -450,7 +438,7 @@ function PayDividendModalViewModel() {
     console.log("Submitting form...");
     $('#payDividendModal form').submit();
   }
-
+  
   self.doAction = function() {
     //do the additional issuance (specify non-zero quantity, no transfer destination)
     WALLET.doTransaction(self.address(), "create_dividend",
@@ -515,10 +503,7 @@ function CallAssetModalViewModel() {
   
   self.percentageToCall = ko.observable(null).extend({
     required: true,
-    pattern: {
-      message: 'Must be a valid number',
-      params: '^[0-9]*\.?[0-9]{0,5}$' //will divide by 100 before sending to cpd
-    },
+    isValidPositiveQuantity: self,
     max: 100,
     min: 0.00001, 
     calledQuantityDoesNotExceedXCPBalanceRequired: self

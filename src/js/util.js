@@ -48,7 +48,7 @@ Array.prototype.contains = function(element){
     return this.indexOf(element) > -1;
 };
 
-Array.prototype.remove = function() {
+Array.prototype.remove = function() { //http://stackoverflow.com/a/3955096
     var what, a = arguments, L = a.length, ax;
     while (L && this.length) {
         what = a[--L];
@@ -58,6 +58,16 @@ Array.prototype.remove = function() {
     }
     return this;
 };
+Array.prototype.unique = function() { //modified from http://stackoverflow.com/a/9229821
+    var prim = {"boolean":{}, "number":{}, "string":{}}, obj = [];
+
+    return this.filter(function(x) {
+        var t = typeof x;
+        return (t in prim) ? 
+            !prim[t][x] && (prim[t][x] = 1) :
+            obj.indexOf(x) < 0 && obj.push(x);
+    });
+}
 
 function selectText(element) {
     var doc = document

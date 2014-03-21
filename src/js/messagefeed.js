@@ -66,20 +66,20 @@ function initMessageFeed() {
   });
 }
 
-function _getEventID(message) {
-  var eventID = message['event'] || message['tx_hash'] || (message['tx0_hash'] + message['tx1_hash']) || null;
-  if(!eventID)
-    $.jqlog.warn("Cannot derive an eventID: " + JSON.stringify(message));
-  return eventID;
+function _getTxHash(message) {
+  var txHash = message['event'] || message['tx_hash'] || (message['tx0_hash'] + message['tx1_hash']) || null;
+  if(!txHash)
+    $.jqlog.warn("Cannot derive a txHash: " + JSON.stringify(message));
+  return txHash;
 }
 
 function parseMessageWithFeedGapDetection(category, message) {
   if(!message || (message.substring && message.startswith("<html>"))) return;
   //^ sometimes nginx can trigger this via its proxy handling it seems, with a blank payload (or a html 502 Bad Gateway
   // payload) -- especially if the backend server reloads. Just ignore it.
-  var eventID = _getEventID(message);
+  var txHash = _getTxHash(message);
   $.jqlog.info("feed:RECV MESSAGE=" + category + ", IDX=" + message['_message_index'] + " (last idx: "
-    + LAST_MESSAGEIDX_RECEIVED + "), EVENTID=" + eventID + ", CONTENTS=" + JSON.stringify(message));
+    + LAST_MESSAGEIDX_RECEIVED + "), TX_HASH=" + txHash + ", CONTENTS=" + JSON.stringify(message));
 
   if((message['_message_index'] === undefined || message['_message_index'] === null) && IS_DEV) debugger; //it's an odd condition we should look into...
   assert(LAST_MESSAGEIDX_RECEIVED, "LAST_MESSAGEIDX_RECEIVED is not defined! Should have been set from is_ready on logon.");
@@ -91,7 +91,7 @@ function parseMessageWithFeedGapDetection(category, message) {
   //handle normal case that the message we received is the next in order
   if(message['_message_index'] == LAST_MESSAGEIDX_RECEIVED + 1) {
     LAST_MESSAGEIDX_RECEIVED += 1;
-    return handleMessage(eventID, category, message);
+    return handleMessage(txHash, category, message);
   }
   
   //otherwise, we have a forward gap
@@ -108,25 +108,25 @@ function parseMessageWithFeedGapDetection(category, message) {
   }
   
   failoverAPI("get_messagefeed_messages_by_index", [missingMessages], function(missingMessageData, endpoint) {
-    var missingEventID = null;
+    var missingTxHash = null;
     for(var i=0; i < missingMessageData.length; i++) {
-      missingEventID = _getEventID(message);
+      missingTxHash = _getTxHash(message);
       assert(missingMessageData[i]['_message_index'] == missingMessages[i], "Message feed resync list oddity...?");
       
       $.jqlog.info("feed:RECV GAP MESSAGE=" + missingMessageData[i]['_category'] + ", IDX=" + missingMessageData[i]['_message_index'] + " (last idx: "
-        + LAST_MESSAGEIDX_RECEIVED + "), EVENTID=" + missingEventID + ", CONTENTS=" + JSON.stringify(missingMessageData[i]));
+        + LAST_MESSAGEIDX_RECEIVED + "), TX_HASH=" + missingTxHash + ", CONTENTS=" + JSON.stringify(missingMessageData[i]));
 
-      handleMessage(missingEventID, missingMessageData[i]['_category'], missingMessageData[i]);
+      handleMessage(missingTxHash, missingMessageData[i]['_category'], missingMessageData[i]);
       
       assert(LAST_MESSAGEIDX_RECEIVED + 1 == missingMessageData[i]['_message_index'], "Message feed resync counter increment oddity...?");
       LAST_MESSAGEIDX_RECEIVED = missingMessageData[i]['_message_index']; 
     }
     //all caught up, call the callback for the original message itself
-    handleMessage(eventID, category, message);
+    handleMessage(txHash, category, message);
   });
 }
 
-function handleMessage(eventID, category, message) {
+function handleMessage(txHash, category, message) {
   //Detect a reorg and refresh the current page if so.
   if(message['_command'] == 'reorg') {
     //Don't need to adjust the message index
@@ -152,7 +152,7 @@ function handleMessage(eventID, category, message) {
     
   //remove any pending message from the pending actions pane (we do this before we filter out invalid messages
   // because we need to be able to remove a pending action that was marked invalid as well)
-  PENDING_ACTION_FEED.remove(eventID, category, message);
+  PENDING_ACTION_FEED.remove(txHash, category, message);
 
   //filter out any invalid messages for action processing itself
   assert(message['_status'].startsWith('valid')

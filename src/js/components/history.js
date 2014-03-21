@@ -140,7 +140,7 @@ function TransactionHistoryItemViewModel(data) {
   //self.fee = TODO
   
   self.dispBlockTime = function() {
-    return moment(self.blockTime * 1000).format("MMM Do YYYY, h:mm:ss a");
+    return moment(self.blockTime).format("MMM Do YYYY, h:mm:ss a");
   };
   
   self.dispTxType = function() {

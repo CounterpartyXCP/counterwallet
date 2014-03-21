@@ -233,37 +233,10 @@ function LogonViewModel() {
   }
     
   self.openWalletPt4 = function() {
-    var addresses = WALLET.getAddressesList();
-    var filters = null, i = null;
+    PENDING_ACTION_FEED.restoreFromLocalStorage();
+    OPEN_ORDER_FEED.restore();
+    WAITING_BTCPAY_FEED.restore();
 
-    //Get and populate any open orders we have
-    filters = [];
-    for(i=0; i < addresses.length; i++) {
-      filters.push({'field': 'source', 'op': '==', 'value': addresses[i]});
-    }
-    failoverAPI("get_orders", {'filters': filters, 'show_empty': false, 'show_expired': false, 'filterop': 'or'},
-      function(data, endpoint) {
-        for(i=0; i < data.length; i++) {
-          OPEN_ORDER_FEED.add(data[i], i == data.length - 1); //PERF: sort on the last addition only
-        }
-      }
-    );
-
-    //Get and populate any pending BTC pays
-    filters = [];
-    for(i=0; i < addresses.length; i++) {
-      filters.push({'field': 'tx0_address', 'op': '==', 'value': addresses[i]});
-      filters.push({'field': 'tx1_address', 'op': '==', 'value': addresses[i]});
-    }
-    failoverAPI("get_order_matches", {'filters': filters, 'filterop': 'or', status: 'pending'},
-      function(data, endpoint) {
-        for(i=0; i < data.length; i++) {
-          var btcPayData = WaitingBTCPayFeedViewModel.makeBTCPayData(data[i]);
-          WAITING_BTCPAY_FEED.add(btcPayData, i == data.length - 1);
-        }
-      }
-    );
-    
     //all done. load the balances screen
     $.jqlog.log("Login complete. Directing to balances page...");
     window.location.hash = 'xcp/pages/balances.html';

@@ -124,6 +124,12 @@ ko.validation.rules['isNotSameBitcoinAddress'] = {
     },
     message: 'Destination address cannot be equal to the source address.'
 };
+ko.validation.rules['isValidPositiveQuantity'] = {
+    validator: function (val, self) {
+      return val.toString().match(/^[0-9]*\.?[0-9]{0,8}$/) && parseFloat(val) > 0;
+    },
+    message: 'Must be a valid quantity (positive num with max 8 decimal places)'
+};
 ko.validation.registerExtenders();
 
 
