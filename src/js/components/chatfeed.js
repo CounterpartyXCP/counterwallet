@@ -88,41 +88,7 @@ function ChatFeedViewModel() {
         self._initChatFeed();
       } else {
         //handle is not stored on any server
-        bootbox.dialog({
-          message: "To use chat, you must have a handle (or nickname) you wish to use (alphanumeric/underscore/hyphen, between 4 and 12 characters). Please enter it below:<br/><br/> \
-          <input type='text' id='chat_handle' class='bootbox-input bootbox-input-text form-control'></input><br/><br/> \
-          <b style='color:red'>Please remember that people in chat may not always be who they seem. Until a verified \
-           identity system is implemented for chat, do not simply trust someone is who their handle says they are!</b>",
-          title: "Enter your chat handle",
-          buttons: {
-            cancel: {
-              label: "Cancel",
-              className: "btn-default",
-              callback: function() {
-                //modal will disappear
-              }
-            },
-            success: {
-              label: "Start Chat",
-              className: "btn-primary",
-              callback: function() {
-                handle = $('#chat_handle').val();
-                
-                //Validate handle, must be alpha numeric, less than 12 characters
-                if(!handle.match(/[A-Za-z0-9_-]{4,12}/g)) {
-                  return bootbox.alert("Invalid handle, must be between 4 and 12 characters, alphanumeric, underscore or hyphen allowed.");
-                }
-                
-                //Save the handle back at counterwalletd
-                multiAPI("store_chat_handle", [WALLET.identifier(), handle], function(data, endpoint) {
-                  self.handle(handle);
-                  self._showChatWindow();
-                  self._initChatFeed();
-                });
-              }
-            },
-          }
-        });
+        CHAT_SET_HANDLE_MODAL.show();
       }
     });
   }
@@ -312,7 +278,8 @@ function ChatFeedViewModel() {
       //gather the list of potential nicks from the last 50 lines of chat history (putting most recently spoken nicks first)
       var handles = [];
       for(var i = self.lines().length - 1; i >= Math.max(self.lines().length - 50, 0); --i) {
-        handles.push(self.lines()[i].HANDLE);
+        if(self.lines()[i].HANDLE)
+          handles.push(self.lines()[i].HANDLE);
       }
       handles = handles.unique();
       handles.remove(self.handle()); //our own handle should not be a candidate for tab completion
@@ -329,7 +296,7 @@ function ChatFeedViewModel() {
         toComplete = words.last();
         self._handleTabCompletionPrefixText = toComplete;
       }
-      var matchingHandles = handles.filter(function(e) { return e.startsWith(toComplete); });
+      var matchingHandles = handles.filter(function(e) { return e.toLowerCase().indexOf(toComplete.toLowerCase()) == 0; });
       $.jqlog.debug("Chatbox tab competion on: '" + toComplete + "', subsequent tabbing: " + subsequentTabbing
         + ", candidates: " + JSON.stringify(matchingHandles));
       if(!matchingHandles.length) return;
@@ -379,6 +346,82 @@ function ChatFeedViewModel() {
     }
   }
 }
+
+ko.validation.rules['handleIsNotInUse'] = {
+  async: true,
+  message: 'Handle is already in use',
+  validator: function (val, self, callback) {
+    failoverAPI("is_chat_handle_in_use",  {'handle': val},
+      function(isInUse, endpoint) {
+        return callback(!isInUse);
+      }
+    );   
+  }
+};
+ko.validation.rules['isValidHandle'] = {
+    validator: function (val, self) {
+      return val.match(/[A-Za-z0-9_-]{4,12}/g);
+    },
+    message: "Invalid handle, must be between 4 and 12 characters with only alphanumeric, underscore or hyphen allowed."
+};
+ko.validation.registerExtenders();
+
+function ChatSetHandleModalViewModel() {
+  var self = this;
+  self.shown = ko.observable(false);
+  
+  self.newHandle = ko.observable('').extend({
+    required: true,
+    throttle: 600,
+    isValidHandle: self,
+    handleIsNotInUse: self
+  });
+  
+  self.validationModel = ko.validatedObservable({
+    newHandle: self.newHandle
+  });
+
+  self.resetForm = function() {
+    self.newHandle('');
+    self.validationModel.errors.showAllMessages(false);
+  }
+  
+  self.submitForm = function() {
+    if(self.newHandle.isValidating()) {
+      setTimeout(function() { //wait a bit and call again
+        self.submitForm();
+      }, 50);
+      return;
+    }
+    
+    if (!self.validationModel.isValid()) {
+      self.validationModel.errors.showAllMessages();
+      return false;
+    }    
+    $('#chatSetHandleModal form').submit();
+  }
+
+  self.doAction = function() {
+    //Save the handle back at counterwalletd
+    multiAPI("store_chat_handle", [WALLET.identifier(), self.newHandle()], function(data, endpoint) {
+      CHAT_FEED.handle(self.newHandle());
+      self.hide();
+      CHAT_FEED._showChatWindow();
+      CHAT_FEED._initChatFeed();
+    });
+  }
+  
+  self.show = function(resetForm) {
+    if(typeof(resetForm)==='undefined') resetForm = true;
+    if(resetForm) self.resetForm();
+    self.shown(true);
+  }  
+
+  self.hide = function() {
+    self.shown(false);
+  }  
+}
+
 
 /*NOTE: Any code here is only triggered the first time the page is visited. Put JS that needs to run on the
   first load and subsequent ajax page switches in the .html <script> tag*/

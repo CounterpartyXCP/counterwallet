@@ -82,8 +82,9 @@
         }   
     </script>
   </head>
-  <body class="fixed-header fixed-ribbon fixed-navigation smart-style-2"> <!-- default to ultra light theme (smart-style-2) -->
-    <!-- possible classes: minified, fixed-ribbon, fixed-header, fixed-width-->
+  <body class="fixed-header fixed-ribbon fixed-navigation smart-style-2" data-bind="css: {minified: IS_MOBILE_OR_TABLET }">
+    <!-- default to ultra light theme (smart-style-2) -->
+    <!-- also default to minfied view on mobile/tablet devices -->
 
     <!-- HEADER -->
     <header id="header" style="display:none">
@@ -369,6 +370,40 @@
       </div><!-- /.modal-dialog -->
     </div><!-- /.modal -->
     
+    <!-- modal for setting chat handle window (in logged in interface) -->
+    <div data-bind="showModal: shown" id="chatSetHandleModal" class="modal fade" data-backdrop="static" data-keyboard="false" tabindex="-1" role="dialog" aria-labelledby="chatSetHandleModal" aria-hidden="true">
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <div class="modal-header">
+            <button type="button" data-bind="click: hide" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+            <h4 class="modal-title">Choose Your Handle</h4>
+          </div>
+          <div class="modal-body no-padding">
+            <div class="formPadded">
+                To use chat, you must have a handle (or nickname) you wish to use (alphanumeric/underscore/hyphen, between 4 and 12 characters).<br/><br/>
+                <b style='color:red'>Please remember that people in chat may not always be who they seem. Until a verified
+                identity system is implemented for chat, do not simply trust someone is who their handle says they are!</b>                
+            </div>
+
+            <form class="smart-form" data-bind="submit: doAction"><fieldset>
+              <section><div class="row">
+                <label class="control-label col col-sm-2">Your Handle</label>
+                <div class="col col-sm-10">
+                    <label class="input"><i class="icon-append fa fa-info"></i>
+                        <input name="newHandle" data-bind="value: newHandle, valueUpdate: 'input'" type="text"/>
+                    </label>
+                </div>
+              </div></section>
+            </fieldset></form>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-default" data-bind="click: hide">Cancel</button>
+            <button type="button" data-bind="click: submitForm" class="btn btn-primary">Start Chat</button>
+          </div>
+        </div><!-- /.modal-content -->
+      </div><!-- /.modal-dialog -->
+    </div><!-- /.modal -->
+    
     <!-- modal for options window (in logged in interface) -->
     <div data-bind="showModal: shown" id="walletOptionsModal" class="modal fade" data-backdrop="static" data-keyboard="false" tabindex="-1" role="dialog" aria-labelledby="walletOptionsModal" aria-hidden="true">
       <div class="modal-dialog">
@@ -566,6 +601,7 @@
       window.WALLET_OPTIONS_MODAL = new WalletOptionsModalViewModel();
 
       window.CHAT_FEED = new ChatFeedViewModel();
+      window.CHAT_SET_HANDLE_MODAL = new ChatSetHandleModalViewModel();
       window.PENDING_ACTION_FEED = new PendingActionFeedViewModel();
       window.WAITING_BTCPAY_FEED = new WaitingBTCPayFeedViewModel();
       window.OPEN_ORDER_FEED = new OpenOrderFeedViewModel();
@@ -578,6 +614,8 @@
         ko.applyBindingsWithValidation(WALLET_OPTIONS_MODAL, document.getElementById("walletOptionsModal"));
         
         ko.applyBindings(CHAT_FEED, document.getElementById("chatPane"));
+        ko.applyBindings(CHAT_SET_HANDLE_MODAL, document.getElementById("chatSetHandleModal"));
+        
         ko.applyBindings(PENDING_ACTION_FEED, document.getElementById("pendingActionFeed"));
         ko.applyBindings(WAITING_BTCPAY_FEED, document.getElementById("waitingBTCPayFeed"));
         ko.applyBindings(OPEN_ORDER_FEED, document.getElementById("openOrderFeed"));
