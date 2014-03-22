@@ -27,7 +27,7 @@ function WalletViewModel() {
     //^ an alias is made when a watch address is made, so this should always be found
 
     self.addresses.push(new AddressViewModel(key, address, label)); //add new
-    $.jqlog.log("Wallet address added: " + address + " -- hash: " + addressHash + " -- label: " + label);
+    $.jqlog.debug("Wallet address added: " + address + " -- hash: " + addressHash + " -- label: " + label);
   }
   
   self.addWatchOnlyAddress = function(address) {
@@ -38,7 +38,7 @@ function WalletViewModel() {
     var label = PREFERENCES.address_aliases[addressHash] || "UNKNOWN LABEL";
 
     self.addresses.push(new AddressViewModel(null, address, label)); //add new
-    $.jqlog.log("Watch-only wallet address added: " + address + " -- hash: " + addressHash + " -- label: " + label);
+    $.jqlog.debug("Watch-only wallet address added: " + address + " -- hash: " + addressHash + " -- label: " + label);
   }
 
   self.getAddressesList = function(withLabel) {
@@ -138,7 +138,7 @@ function WalletViewModel() {
           addressObj.numPrimedTxouts(data[i]['numPrimedTxouts']);
           addressObj.numPrimedTxoutsIncl0Confirms(data[i]['numPrimedTxoutsIncl0Confirms']);
           
-          $.jqlog.log("refreshBTCBalances: Address " + data[i]['addr'] + " -- confirmed bal = " +  data[i]['confirmedRawBal']
+          $.jqlog.debug("refreshBTCBalances: Address " + data[i]['addr'] + " -- confirmed bal = " +  data[i]['confirmedRawBal']
             + "; unconfirmed bal = " + data[i]['unconfirmedRawBal'] + "; numPrimedTxouts = " + data[i]['numPrimedTxouts']
             + "; numPrimedTxoutsIncl0Confirms = " + data[i]['numPrimedTxoutsIncl0Confirms']);
             
@@ -147,7 +147,7 @@ function WalletViewModel() {
             // means we MAY be able to remove them from that listing (i.e. they COULD be non-BTC send (i.e. counterparty transactions) though
             //TODO: This is not very efficient when a BTC send is pending... O(n^3)! Although the sample sets are relatively small...
             for(var j=0; j < data[i]['lastTxns'].length; j++) {
-              PENDING_ACTION_FEED.remove(data[i]['lastTxns'][j], "sends", {'source': data[i]['addr'], 'asset': 'BTC'}, true);
+              PENDING_ACTION_FEED.remove(data[i]['lastTxns'][j], "sends", true);
             }
           }
           
@@ -162,12 +162,12 @@ function WalletViewModel() {
             var maxPrimedTxoutsPossible = parseInt((data[i]['confirmedRawBal'] - MIN_FEE) / MIN_PRIME_BALANCE);
             var numPrimedTxoutsToCreate = Math.min(maxPrimedTxoutsPossible, AUTOPRIME_MAX_COUNT);
             assert(numPrimedTxoutsToCreate > 0); //shouldn't ever hit this with the earlier balanace check
-            $.jqlog.log("refreshBTCBalances: Address " + data[i]['addr'] + " has a confirmed balance of " + normalizeQuantity(data[i]['confirmedRawBal'])
+            $.jqlog.debug("refreshBTCBalances: Address " + data[i]['addr'] + " has a confirmed balance of " + normalizeQuantity(data[i]['confirmedRawBal'])
               + " BTC and only " + data[i]['numPrimedTxoutsIncl0Confirms'] + " primed utxos remaining. Creating " + numPrimedTxoutsToCreate
               + " additional utxos...");
             primeAddress(data[i]['addr'], numPrimedTxoutsToCreate, data[i]['rawUtxoData'],
               function(address, numNewPrimedTxouts) {
-                $.jqlog.log("Auto priming for address " + address + " complete!");
+                $.jqlog.debug("Auto priming for address " + address + " complete!");
               }
             );
           }
@@ -222,7 +222,7 @@ function WalletViewModel() {
   }
   
   self.broadcastSignedTx = function(signedTxHex, onSuccess, onError) {
-    $.jqlog.log("RAW SIGNED HEX: " + signedTxHex);
+    $.jqlog.debug("RAW SIGNED HEX: " + signedTxHex);
     
     failoverAPI("transmit",
       {"tx_hex": signedTxHex, "is_signed": true},
@@ -243,7 +243,7 @@ function WalletViewModel() {
     //* destAddr is optional (used with sends, bets, btcpays, issuances when transferring asset ownership, and burns)
     
     var sendTx = Bitcoin.Transaction.deserialize(unsignedTxHex), i = null;
-    //$.jqlog.log("RAW UNSIGNED HEX: " + unsignedTxHex);
+    //$.jqlog.debug("RAW UNSIGNED HEX: " + unsignedTxHex);
     
     //Sanity check on the txn source address and destination address (if specified)
     var address = null, addr = null;
@@ -339,9 +339,10 @@ function WalletViewModel() {
     assert(!addressObj.IS_WATCH_ONLY, "Cannot perform this action on a watch only address!");
     if(addressObj.numPrimedTxouts() == 0) { //no primed txouts
       if(self.getBalance(address, "BTC", false) < MIN_PRIME_BALANCE) {
-        bootbox.alert("Can't do this action as you have no <b class='notoAssetColor'>BTC</b> at this address, and Counterparty actions require a"
-          + " small balance of <b class='notoAssetColor'>BTC</b> to perform.<br/><br/>Please deposit some into address"
-          + " <b class='notoAddrColor'>" + getAddressLabel(address) + "</b> and try again.");
+        bootbox.alert("Can't do this action as you have insufficient <b class='notoAssetColor'>BTC</b> at this address, and Counterparty actions require a"
+          + " small balance of <b class='notoAssetColor'>BTC</b> to perform (approximately"
+          + " <b class='notoQuantityColor'>" + normalizeQuantity(MIN_PRIME_BALANCE) + "</b> <b class='notoAssetColor'>BTC</b> per transaction).<br/><br/>"
+          + "Please deposit some <b class='notoAssetColor'>BTC</b> into <b class='notoAddrColor'>" + getAddressLabel(address) + "</b> and try again.");
         return false;
       } else {
         //Otherwise, we DO have a balance, we just don't have any suitable primed outputs
@@ -380,7 +381,7 @@ function WalletViewModel() {
     var verifyDestAddr = data['destination'] || data['transfer_destination'] || null;
     multiAPIConsensus(action, data,
       function(unsignedTxHex, numTotalEndpoints, numConsensusEndpoints) {
-        $.jqlog.log("TXN CREATED. numTotalEndpoints="
+        $.jqlog.debug("TXN CREATED. numTotalEndpoints="
           + numTotalEndpoints + ", numConsensusEndpoints="
           + numConsensusEndpoints + ", RAW HEX=" + unsignedTxHex);
         WALLET.signAndBroadcastTx(address, unsignedTxHex, function(txHash, endpoint) {

@@ -55,7 +55,7 @@ function CreateAssetModalViewModel() {
       message: "Call price is required if the asset is callable",
       onlyIf: function () { return (self.callable() === true); }
     },
-    isValidPositiveQuantity: self,
+    isValidPositiveQuantityOrZero: self,
     isValidQtyForDivisibility: self
   });
   
@@ -89,7 +89,6 @@ function CreateAssetModalViewModel() {
     }    
     
     //data entry is valid...submit to the server
-    console.log("Submitting form...");
     $('#createAssetModal form').submit();
   }
 
@@ -187,7 +186,6 @@ function IssueAdditionalAssetModalViewModel() {
       self.validationModel.errors.showAllMessages();
       return false;
     }    
-    console.log("Submitting form...");
     $('#issueAdditionalAssetModal form').submit();
   }
 
@@ -253,7 +251,6 @@ function TransferAssetModalViewModel() {
       self.validationModel.errors.showAllMessages();
       return false;
     }    
-    console.log("Submitting form...");
     $('#transferAssetModal form').submit();
   }
 
@@ -327,7 +324,6 @@ function ChangeAssetDescriptionModalViewModel() {
       self.validationModel.errors.showAllMessages();
       return false;
     }    
-    console.log("Submitting form...");
     $('#changeAssetDescriptionModal form').submit();
   }
 
@@ -435,7 +431,6 @@ function PayDividendModalViewModel() {
       self.validationModel.errors.showAllMessages();
       return false;
     }    
-    console.log("Submitting form...");
     $('#payDividendModal form').submit();
   }
   
@@ -564,7 +559,6 @@ function CallAssetModalViewModel() {
       self.validationModel.errors.showAllMessages();
       return false;
     }    
-    console.log("Submitting form...");
     $('#callAssetModal form').submit();
   }
 

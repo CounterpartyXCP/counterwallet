@@ -1,6 +1,7 @@
 
 var LAST_MESSAGEIDX_RECEIVED = 0; //last message received from the message feed (socket.io) -- used to detect gaps
 var FAILOVER_CURRENT_IDX = 0; //last idx in the counterwalletd_base_urls tried (used for socket.io failover)
+var MESSAGE_QUEUE = [];
 
 function tryNextSIOMessageFeed() {
   if(FAILOVER_LAST_IDX_TRIED + 1 == counterwalletd_base_urls.length) {
@@ -61,28 +62,42 @@ function initMessageFeed() {
         //these events currently not handled
       } else{
         assert(data['_category'] !== undefined && event == data['_category'], "Message feed message lacks category field!");
-        parseMessageWithFeedGapDetection(event, data);
+        var txHash = _getTxHash(data);
+        MESSAGE_QUEUE.push([txHash, event, data]);
       }
   });
+  
+  //Start the message queue reading process (we don't just call the message parsing machinery directly due and use a
+  // producer/consumer queue pattern as this method allows us to effectively handle message gaps (i.e. just push them
+  // on the head of the queue and just keep running through the queue))
+  _checkMessageQueue();
 }
 
 function _getTxHash(message) {
   var txHash = message['event'] || message['tx_hash'] || (message['tx0_hash'] + message['tx1_hash']) || null;
   if(!txHash)
-    $.jqlog.warn("Cannot derive a txHash: " + JSON.stringify(message));
+    $.jqlog.warn("Cannot derive a txHash for IDX " + message['_message_index']);
   return txHash;
 }
 
-function parseMessageWithFeedGapDetection(category, message) {
+function _checkMessageQueue() {
+  var event = null;
+  while(MESSAGE_QUEUE.length) {
+    event = MESSAGE_QUEUE.shift();
+    parseMessageWithFeedGapDetection(event[0], event[1], event[2]);
+  }
+  setTimeout(function() { _checkMessageQueue(); }, 1000);
+}
+
+function parseMessageWithFeedGapDetection(txHash, category, message) {
   if(!message || (message.substring && message.startswith("<html>"))) return;
   //^ sometimes nginx can trigger this via its proxy handling it seems, with a blank payload (or a html 502 Bad Gateway
   // payload) -- especially if the backend server reloads. Just ignore it.
-  var txHash = _getTxHash(message);
-  $.jqlog.info("feed:RECV MESSAGE=" + category + ", IDX=" + message['_message_index'] + " (last idx: "
-    + LAST_MESSAGEIDX_RECEIVED + "), TX_HASH=" + txHash + ", CONTENTS=" + JSON.stringify(message));
+  assert(LAST_MESSAGEIDX_RECEIVED, "LAST_MESSAGEIDX_RECEIVED is not defined!");
 
-  if((message['_message_index'] === undefined || message['_message_index'] === null) && IS_DEV) debugger; //it's an odd condition we should look into...
-  assert(LAST_MESSAGEIDX_RECEIVED, "LAST_MESSAGEIDX_RECEIVED is not defined! Should have been set from is_ready on logon.");
+  $.jqlog.info("feed:receive IDX=" + message['_message_index']);
+
+  //Ignore old messages if they are ever thrown at us
   if(message['_message_index'] <= LAST_MESSAGEIDX_RECEIVED) {
     $.jqlog.warn("Received message_index is <= LAST_MESSAGEIDX_RECEIVED: " + JSON.stringify(message));
     return;
@@ -90,7 +105,6 @@ function parseMessageWithFeedGapDetection(category, message) {
   
   //handle normal case that the message we received is the next in order
   if(message['_message_index'] == LAST_MESSAGEIDX_RECEIVED + 1) {
-    LAST_MESSAGEIDX_RECEIVED += 1;
     return handleMessage(txHash, category, message);
   }
   
@@ -106,27 +120,28 @@ function parseMessageWithFeedGapDetection(category, message) {
   for(var i=LAST_MESSAGEIDX_RECEIVED+1; i < message['_message_index']; i++) {
     missingMessages.push(i);
   }
-  
   failoverAPI("get_messagefeed_messages_by_index", [missingMessages], function(missingMessageData, endpoint) {
     var missingTxHash = null;
+    var missingMessages = [];
     for(var i=0; i < missingMessageData.length; i++) {
-      missingTxHash = _getTxHash(message);
+      missingTxHash = _getTxHash(missingMessageData[i]);
       assert(missingMessageData[i]['_message_index'] == missingMessages[i], "Message feed resync list oddity...?");
-      
-      $.jqlog.info("feed:RECV GAP MESSAGE=" + missingMessageData[i]['_category'] + ", IDX=" + missingMessageData[i]['_message_index'] + " (last idx: "
-        + LAST_MESSAGEIDX_RECEIVED + "), TX_HASH=" + missingTxHash + ", CONTENTS=" + JSON.stringify(missingMessageData[i]));
-
-      handleMessage(missingTxHash, missingMessageData[i]['_category'], missingMessageData[i]);
-      
-      assert(LAST_MESSAGEIDX_RECEIVED + 1 == missingMessageData[i]['_message_index'], "Message feed resync counter increment oddity...?");
-      LAST_MESSAGEIDX_RECEIVED = missingMessageData[i]['_message_index']; 
+      $.jqlog.info("feed:receiveForGap IDX=" + missingMessageData[i]['_message_index']);
+      missingMessages.push([missingTxHash, missingMessageData[i]['_category'], missingMessageData[i]]);
     }
-    //all caught up, call the callback for the original message itself
-    handleMessage(txHash, category, message);
+    Array.prototype.splice.apply(MESSAGE_QUEUE, [0, 0].concat(missingMessages));
+    //^ throw at the head of the message queue, in the same order
   });
 }
 
 function handleMessage(txHash, category, message) {
+  assert(LAST_MESSAGEIDX_RECEIVED + 1 == message['_message_index'], "Message feed resync counter increment oddity...?");
+
+  $.jqlog.info("feed:PROCESS MESSAGE=" + category + ", IDX=" + message['_message_index'] + " (last idx: "
+    + LAST_MESSAGEIDX_RECEIVED + "), TX_HASH=" + txHash + ", CONTENTS=" + JSON.stringify(message));
+
+  LAST_MESSAGEIDX_RECEIVED += 1;
+    
   //Detect a reorg and refresh the current page if so.
   if(message['_command'] == 'reorg') {
     //Don't need to adjust the message index
@@ -152,7 +167,7 @@ function handleMessage(txHash, category, message) {
     
   //remove any pending message from the pending actions pane (we do this before we filter out invalid messages
   // because we need to be able to remove a pending action that was marked invalid as well)
-  PENDING_ACTION_FEED.remove(txHash, category, message);
+  PENDING_ACTION_FEED.remove(txHash, category);
 
   //filter out any invalid messages for action processing itself
   assert(message['_status'].startsWith('valid')
@@ -222,7 +237,9 @@ function handleMessage(txHash, category, message) {
     }
     //Also, if this is a new asset creation, or a transfer to an address that doesn't have the asset yet
     if(WALLET.getAddressObj(message['issuer']) && !addressesWithAsset.contains(message['issuer'])) {
-      WALLET.getAddressObj(message['issuer']).addOrUpdateAsset(message['asset'], message, null);
+      failoverAPI("get_asset_info", [[message['asset']]], function(assetsInfo, endpoint) {
+        WALLET.getAddressObj(message['issuer']).addOrUpdateAsset(message['asset'], assetsInfo[0], null); //will show with a 0 balance
+      });    
     }
   } else if(category == "sends") {
     //the effects of a send are handled based on the credit and debit messages it creates, so nothing to do here

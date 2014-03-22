@@ -17,7 +17,7 @@ function describeError(jqXHR, textStatus, errorThrown) {
         '403' : "Forbidden resouce can't be accessed",
         '500' : "Internal Server Error.",
         '503' : "Service Unavailable",
-        '525' : "The server is not fully caught up to the blockchain. Please logout try later." //custom
+        '525' : "The server is not fully caught up to the blockchain. Please logout and try later." //custom
     };
     if (jqXHR && jqXHR.status) {
         message =statusErrorMap[jqXHR.status];

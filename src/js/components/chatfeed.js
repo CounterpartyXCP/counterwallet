@@ -9,9 +9,17 @@ function ChatLineViewModel(type, handle, op, text) {
   self.text = ko.observable(text);
   
   self.lineText = ko.computed(function(){
+    //if the line is addressed to us, then we should bold it (as well as coloring our handle itself)
+    if(self.text().indexOf(CHAT_FEED.handle()) != -1) {
+      self.text("<b>" + self.text() + "</b>");
+      var regExp = new RegExp(CHAT_FEED.handle(), 'g');
+      var nickColorClass = CHAT_FEED.op() ? 'chatLineOpEmote' : 'chatLineSelfEmote'; 
+      self.text(self.text().replace(regExp, "<span class='" + nickColorClass + "'>" + CHAT_FEED.handle() + "</span>"));
+    }
+    
     if(type == 'emote') {
       if(op) {
-        return "<span class='chatLineOpEmote'>" + self.HANDLE + " (op):</span>&nbsp;&nbsp;" + self.text();  
+        return "<span class='chatLineOpEmote'>" + self.HANDLE + ":</span>&nbsp;&nbsp;" + self.text();  
       } else if(handle == CHAT_FEED.handle()) {
         return "<span class='chatLineSelfEmote'>" + self.HANDLE + ":</span>&nbsp;&nbsp;" + self.text();  
       } else {
@@ -27,6 +35,7 @@ function ChatFeedViewModel() {
   //An address has 2 or more assets (BTC, XCP, and any others)
   var self = this;
   self.lines = ko.observableArray([]);
+  self.myLines = ko.observableArray([]);
   self.lastUpdated = ko.observable(new Date());
   self.handle = ko.observable(null);
   self.op = ko.observable(false); //if this user is an op or not
@@ -34,6 +43,9 @@ function ChatFeedViewModel() {
   //self.textToSend = ko.observable('');
   self.feedConnections = [];
   self._nextMessageNotSent = false;
+  self._historyKeyIndex = 0;
+  self._handleTabCompletionIndex = null;
+  self._handleTabCompletionPrefixText = '';
   
   self.lastSetWalletIDAttempt = null;
 
@@ -71,7 +83,7 @@ function ChatFeedViewModel() {
         self.handle(data['handle']);
         self.op(data['op']);
         self.bannedUntil(data['banned_until']);
-        $.jqlog.log("Chat handle: " + self.handle() + ", op: " + self.op() + ", banned until: " + self.bannedUntil()/1000);
+        $.jqlog.debug("Chat handle: " + self.handle() + ", op: " + self.op() + ", banned until: " + self.bannedUntil()/1000);
         self._showChatWindow();
         self._initChatFeed();
       } else {
@@ -124,7 +136,7 @@ function ChatFeedViewModel() {
     var initialLineSetNumReplies = 0;
     var initialLineSet = [];
         
-    $.jqlog.log("Starting chat feeds: " + JSON.stringify(counterwalletd_base_urls));
+    $.jqlog.debug("Starting chat feeds: " + JSON.stringify(counterwalletd_base_urls));
     for(var i = 0; i < counterwalletd_base_urls.length; i++) {
       var socket = io.connect(counterwalletd_base_urls[i], {
         'max reconnection attempts': 5,
@@ -147,7 +159,7 @@ function ChatFeedViewModel() {
             
             //populate last messages into dict, and then sort by timestamp
             socket.emit('get_lastlines', function(linesList) {
-              $.jqlog.log("chat.get_lastlines(feed-"+num+"): len = " + linesList.length
+              $.jqlog.debug("chat.get_lastlines(feed-"+num+"): len = " + linesList.length
                 + "; initialLineSet.len = " + initialLineSet.length);
               initialLineSet = initialLineSet.concat(linesList);
               initialLineSetNumReplies += 1;
@@ -167,7 +179,7 @@ function ChatFeedViewModel() {
           
         });
         socket.on('emote', function (handle, op, text) {
-          $.jqlog.log("chat.emote(feed-"+num+"): handle: " + handle + ", op: " + op + ", text: " + text);
+          $.jqlog.debug("chat.emote(feed-"+num+"): handle: " + handle + ", op: " + op + ", text: " + text);
           self.addLine('emote', handle, op, text);
         });
         socket.on('oped', function (op_handle, handle) {
@@ -189,7 +201,7 @@ function ChatFeedViewModel() {
           self.addLine('system', null, null, op_handle + " has changed the chat handle for " + old_handle + " to " + new_handle);
         });
         socket.on('error', function (error_name, error_message) {
-          $.jqlog.log("chat.error(feed-"+num+"): " + error_name + " -- " + error_message);
+          $.jqlog.debug("chat.error(feed-"+num+"): " + error_name + " -- " + error_message);
           
           if(error_name == 'invalid_state') {
             self.doReconnectionAttempt(socket);
@@ -235,16 +247,102 @@ function ChatFeedViewModel() {
     var lastLines = self.lines.slice(Math.max(self.lines().length - 3, 1));
     for(var i=0; i < lastLines.length; i++) {
       if(newLine.lineText() == lastLines[i].lineText() && lastLines[i].TYPE != 'system' && !lastLines[i].OP) {
-        $.jqlog.log("chat.addLine: Line ignored (duplicate): " + newLine.lineText());
+        $.jqlog.debug("chat.addLine: Line ignored (duplicate): " + newLine.lineText());
         return;
       }
     }
+
     self.lines.push(newLine);
     //ensure only up to 200 lines max (threshold of 5 lines over before we clear for performance reasons?...if it matters...)
-    if(self.lines().length > 205) {
+    if(self.lines().length > 205)
       self.lines(self.lines.splice(0, 5));  
+    
+    //if it's from us, add it to myLines
+    if(handle == self.handle()) {
+      self.myLines.push(newLine);
+      if(self.myLines().length > 105)
+        self.myLines(self.lines.splice(0, 5));  
     }
+    
     self.scrollToBottomIfNecessary();
+  }
+  
+  self.onKeyUp = function(data, event) {
+    if(event.keyCode == 13){
+        CHAT_FEED.sendLine();
+    } else if(event.keyCode == 38) { //up arrow
+      var text = $('#chatTextBox').val();
+      if(!text) {
+        //if the line was blank when this was pressed, show the last line
+        self._historyKeyIndex = self.myLines().length - 1;
+      } else {
+        //otherwise if there was something when this was pressed, try to find that line in myLines that is currently displayed
+        // ... if we can't find the line, don't change the textbox, and if we're on the first line, then don't change it
+        // otherwise, change the textbox contents to be the previous entry in the history array
+        for(var i = self.myLines().length - 1; i >= 0; --i) {
+          if(self.myLines()[i].text() == text) break;
+        }
+        if(i == -1 || i == 0) return;
+        self._historyKeyIndex -= 1;
+      }
+      $('#chatTextBox').val(self.myLines()[self._historyKeyIndex].text());
+    } else if(event.keyCode == 40) { //down arrow
+      var text = $('#chatTextBox').val();
+      //if the line was blank when this was pressed, do nothing
+      if(!text) return;
+      
+      //otherwise, find the line that is currently displayed in myLines... if we can find it, show the next line from
+      // the history key index ... if we can't find the line, don't change the textbox
+      for(var i = self.myLines().length - 1; i >= 0; --i) {
+        if(self.myLines()[i].text() == text) break;
+      }
+      if(i != -1) {
+        if(i == self.myLines().length - 1) { //last line, just clear the textbox
+          $('#chatTextBox').val('');
+        } else { //not last line...show the next line
+          self._historyKeyIndex += 1;
+          $('#chatTextBox').val(self.myLines()[self._historyKeyIndex].text());
+        }
+      }
+    } else if(event.keyCode == 9) { //tab pressed - nick competion
+      var words = $('#chatTextBox').val().replace(/[ :]+$/g, '').split(' ');
+      //^ split without the automatic space and : our completion adds
+      if(!words.last()) return;
+      
+      //gather the list of potential nicks from the last 50 lines of chat history (putting most recently spoken nicks first)
+      var handles = [];
+      for(var i = self.lines().length - 1; i >= Math.max(self.lines().length - 50, 0); --i) {
+        handles.push(self.lines()[i].HANDLE);
+      }
+      handles = handles.unique();
+      handles.remove(self.handle()); //our own handle should not be a candidate for tab completion
+      
+      var toComplete = null;
+      var lastWord = words.last();
+      var subsequentTabbing = false;
+      if(handles.filter(function(e) { return e == lastWord; }).length && self._handleTabCompletionPrefixText) {
+        //last word was a full match, so use the stored last prefix. this will allow us to cycle through nick results
+        toComplete = self._handleTabCompletionPrefixText;
+        subsequentTabbing = true;
+      } else {
+        //last word was not a match, so update the stored prefix to be it
+        toComplete = words.last();
+        self._handleTabCompletionPrefixText = toComplete;
+      }
+      var matchingHandles = handles.filter(function(e) { return e.startsWith(toComplete); });
+      $.jqlog.debug("Chatbox tab competion on: '" + toComplete + "', subsequent tabbing: " + subsequentTabbing
+        + ", candidates: " + JSON.stringify(matchingHandles));
+      if(!matchingHandles.length) return;
+      if(self._handleTabCompletionIndex == null || self._handleTabCompletionIndex + 1 >= matchingHandles.length) {
+        self._handleTabCompletionIndex = 0; //circle around (or, start with the first entry if this is our first time 'tabbing' ;)
+      } else {
+        self._handleTabCompletionIndex += 1;
+      }
+      //otherwise we can be lazy it with...it doesn't matter if _handleTabCompletionIndex is not reset betwen competion
+      // attempts, as we circle around to the results anyhow
+      var choice = matchingHandles[self._handleTabCompletionIndex];
+      $('#chatTextBox').val(words.slice(0, -1).join(' ') + (words.length == 1 ? '' : ' ') + choice + (words.length == 1 ? ': ' : ' '));
+    }
   }
   
   self.sendLine = function() {
@@ -256,7 +354,7 @@ function ChatFeedViewModel() {
       var parts = text.replace('/', '').split(' ');
       var command = parts[0];
       var args = parts.slice(1);
-      $.jqlog.log("chat.sendLine(command): " + command + ", args: " + JSON.stringify(args));
+      $.jqlog.debug("chat.sendLine(command): " + command + ", args: " + JSON.stringify(args));
       //send to EVERY chat server, as this modifies local server state (if accepted)
       for(var i=0; i < self.feedConnections.length; i++) {
         self.feedConnections[i].emit('command', command, args); //no need for a callback as the server will broadcast to us
@@ -267,7 +365,7 @@ function ChatFeedViewModel() {
       // and will get the message
       //just grab val() (not very knockout friendly) because certain browsers (certain mobile especially)
       // can get a bit wierd with keydown vs. keypress, etc...not work messing with it
-      $.jqlog.log("chat.sendLine(emote): " + text);
+      $.jqlog.debug("chat.sendLine(emote): " + text);
       assert(self.feedConnections.length >= 1, "Not connected to any chat servers!");
       self.feedConnections[0].emit('emote', text, function(data) {
         //SUCCESS CALLBACK: post it to our window (as the servers won't broadcast it back to us)
@@ -291,9 +389,9 @@ $(document).ready(function() {
     $('#chatPane').is(':hidden') ? CHAT_FEED.showChat() : CHAT_FEED.hideChat(); 
   });
   
-  $("#chatTextBox").keyup(function(event){
-    if(event.keyCode == 13){
-        CHAT_FEED.sendLine();
-    }
-  });
+  $("#chatTextBox").keydown(function(e) { 
+    if (e.keyCode == 9) { //prevent tab from switching focus
+      e.preventDefault(); 
+    } 
+  });  
 });

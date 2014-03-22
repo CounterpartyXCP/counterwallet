@@ -104,7 +104,7 @@ function PendingActionFeedViewModel() {
     var pendingAction = new PendingActionViewModel(txHash, category, data, when);
     if(!pendingAction.ACTION_TEXT) return; //not something we need to display and/or add to the list
     self.pendingActions.unshift(pendingAction);
-    $.jqlog.log("pendingAction:add:" + txHash + ":" + category + ": " + JSON.stringify(data));
+    $.jqlog.debug("pendingAction:add:" + txHash + ":" + category + ": " + JSON.stringify(data));
 
     //Add to local storage so we can reload it if the user logs out and back in
     var pendingActionsStorage = localStorage.getObject('pendingActions');
@@ -121,7 +121,7 @@ function PendingActionFeedViewModel() {
     PendingActionFeedViewModel.modifyBalancePendingFlag(category, data, true);
   }
 
-  self.remove = function(txHash, category, data, btcRefreshSpecialLogic) {
+  self.remove = function(txHash, category, btcRefreshSpecialLogic) {
     if(typeof(btcRefreshSpecialLogic)==='undefined') btcRefreshSpecialLogic = false;
     if(!txHash) return; //if the event doesn't have an txHash, we can't do much about that. :)
     if(!self.ALLOWED_CATEGORIES.contains(category)) return; //ignore this category as we don't handle it
@@ -136,16 +136,16 @@ function PendingActionFeedViewModel() {
       // routine should NOT be deleting. This hack is a consequence of managing BTC balances synchronously like we do)
       if(btcRefreshSpecialLogic) {
         assert(category == "sends");
-        if (match.category != category || data['asset'] != 'BTC')
+        if (match['CATEGORY'] != category || match['DATA']['asset'] != 'BTC')
           return;
       } 
       
       self.pendingActions.remove(match);
-      $.jqlog.log("pendingAction:remove:" + txHash + ":" + category);
+      $.jqlog.debug("pendingAction:remove:" + txHash + ":" + category);
       self.lastUpdated(new Date());
-      PendingActionFeedViewModel.modifyBalancePendingFlag(category, data, false);
+      PendingActionFeedViewModel.modifyBalancePendingFlag(category, match['DATA'], false);
     } else{
-      $.jqlog.log("pendingAction:NOT FOUND:" + txHash + ":" + category);
+      $.jqlog.debug("pendingAction:NOT FOUND:" + txHash + ":" + category);
     }
     
     //Remove from local storage as well (if present)
@@ -173,12 +173,12 @@ function PendingActionFeedViewModel() {
       for(i=0; i < txInfo.length; i++) {
         pendingAction = $.grep(pendingActionsStorage, function(e) { return e['txHash'] == txInfo[i]['tx_hash']; })[0];
         if(pendingAction && txInfo[i]['confirmations'] == 0) { //still pending
-          $.jqlog.log("pendingAction:restoreFromStorage:load: " + txInfo[i]['tx_hash'] + ":" + pendingAction['category']);
+          $.jqlog.debug("pendingAction:restoreFromStorage:load: " + txInfo[i]['tx_hash'] + ":" + pendingAction['category']);
           newPendingActionsStorage.push(pendingAction);
           self.add(txInfo[i]['tx_hash'], pendingAction['category'], pendingAction['data'], Date.parse(pendingAction['when']));
         } else {
           //otherwise, do not load into pending actions, and do not include in updated pending actions list
-          $.jqlog.log("pendingAction:restoreFromStorage:remove: " + txInfo[i]['tx_hash']);
+          $.jqlog.debug("pendingAction:restoreFromStorage:remove: " + txInfo[i]['tx_hash']);
         }
         //sort the listing (newest to oldest)
         self.pendingActions.sort(function(left, right) {
@@ -201,8 +201,10 @@ PendingActionFeedViewModel.modifyBalancePendingFlag = function(category, data, f
     addressObj = WALLET.getAddressObj(data['source']);
     addressObj.getAssetObj(data['asset']).balanceChangePending(flagSetting);
     addressObj = WALLET.getAddressObj(data['destination']);
-    if(addressObj && addressObj.getAssetObj(data['asset'])) //if a send to another address in the wallet that has bal already
+    if(addressObj && addressObj.getAssetObj(data['asset'])) {
+      //if a send to another address in the wallet that has bal already
       addressObj.getAssetObj(data['asset']).balanceChangePending(flagSetting);
+    }
   } else if(category == 'btcpays') {
     addressObj = WALLET.getAddressObj(data['source']);
     addressObj.getAssetObj("BTC").balanceChangePending(flagSetting);

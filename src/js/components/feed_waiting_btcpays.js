@@ -143,7 +143,7 @@ function WaitingBTCPayFeedViewModel() {
             var btcPayData = WaitingBTCPayFeedViewModel.makeBTCPayData(data[i]);
             WAITING_BTCPAY_FEED.add(btcPayData, i == data.length - 1);
           } else {
-            $.jqlog.log("pendingBTCPay:restore:not showing (awaiting network confirmation): " + match[1]);
+            $.jqlog.debug("pendingBTCPay:restore:not showing (awaiting network confirmation): " + match[1]);
           }
         }
         
@@ -160,11 +160,11 @@ function WaitingBTCPayFeedViewModel() {
           for(var i=0; i < txInfo.length; i++) {
             pendingBTCPay = $.grep(pendingBTCPayStorage, function(e) { return e[1] == txInfo[i]['tx_hash']; })[0];
             if(pendingBTCPay && txInfo[i]['confirmations'] == 0) { //still pending
-              $.jqlog.log("pendingBTCPay:restore:load: " + txInfo[i]['tx_hash'] + ":" + pendingBTCPay[1]);
+              $.jqlog.debug("pendingBTCPay:restore:load: " + txInfo[i]['tx_hash'] + ":" + pendingBTCPay[1]);
               newPendingBTCPayStorage.push(pendingBTCPay);
             } else {
               //otherwise, do not load into pending actions, and do not include in updated pending actions list
-              $.jqlog.log("pendingBTCPay:restore:remove: " + txInfo[i]['tx_hash']);
+              $.jqlog.debug("pendingBTCPay:restore:remove: " + txInfo[i]['tx_hash']);
             }
           }
           localStorage.setObject('pendingBTCPays', newPendingBTCPayStorage);

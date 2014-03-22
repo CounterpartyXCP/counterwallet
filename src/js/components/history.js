@@ -26,7 +26,7 @@ function BalanceHistoryViewModel() {
   self.assetChanged = function() {
     if(self.selectedAsset() == self.ASSET_LASTCHANGE) return;
     self.ASSET_LASTCHANGE = self.selectedAsset();
-    console.log("Balance history: Asset changed: " + self.selectedAsset());
+    $.jqlog.debug("Balance history: Asset changed: " + self.selectedAsset());
     
     if(self.selectedAsset() == "BTC") { //mainnet only (as we use blockchain.info for this and they don't support testnet)
       var addresses = WALLET.getAddressesList();
@@ -58,7 +58,7 @@ function BalanceHistoryViewModel() {
         }).error(function(jqXHR, textStatus, errorThrown) {
           var address = /address%3D([A-Za-z0-9]+)%22/g.exec(jqXHR.url)[1];
           var addressHash = hashToB64(address);
-          $.jqlog.log( "Could not get BTC balance from blockchain for address " + address + ": " + errorThrown);
+          $.jqlog.debug( "Could not get BTC balance from blockchain for address " + address + ": " + errorThrown);
           var addressName = PREFERENCES['address_aliases'][addressHash] ? "<b>" + PREFERENCES['address_aliases'][addressHash] + "</b> (" + address + ")" : address; 
           self.graphData.push({'name': addressName, 'data': []});
           if(self.graphData.length == addresses.length) {
@@ -126,7 +126,6 @@ function BalanceHistoryViewModel() {
 function TransactionHistoryItemViewModel(data) {
   var self = this;
   self.data = data;
-  //console.log("data: " + self.data['tx_index'] + " -- " + JSON.stringify(self.data));
   self.txIndex = self.data['tx_index'] || self.data['tx1_index'] || '';
   self.blockIndex = self.data['block_index'] || self.data['tx1_block_index'];
   self.blockTime = self.data['_block_time'];
@@ -221,7 +220,7 @@ function TransactionHistoryItemViewModel(data) {
   };
 }
 
-var AddressInDropdownItemModel = function(address, label) {
+var HistoryAddressInDropdownItemModel = function(address, label) {
   this.ADDRESS = address;
   this.LABEL = '<b>' + label + "</b> (" + address + ")";
 };
@@ -230,7 +229,7 @@ function TransactionHistoryViewModel() {
   var self = this;
   self._lastWindowWidth = null;
   self.selectedAddress = ko.observable('');
-  self.availableAddresses = ko.observableArray([]); //stores AddressInDropdownModel objects
+  self.availableAddresses = ko.observableArray([]); //stores HistoryAddressInDropdownItemModel objects
   self.transactions = ko.observableArray([]);
   self.ADDRESS_LASTCHANGE = null;
   
@@ -238,7 +237,7 @@ function TransactionHistoryViewModel() {
     //populate addresses
     var addresses = WALLET.getAddressesList(true);
     for(var i = 0; i < addresses.length; i++) {
-      self.availableAddresses.push(new AddressInDropdownItemModel(addresses[i][0], addresses[i][1]));
+      self.availableAddresses.push(new HistoryAddressInDropdownItemModel(addresses[i][0], addresses[i][1]));
     }
     self.availableAddresses.sort(function(left, right) {
       return left.LABEL == right.LABEL ? 0 : (left.LABEL < right.LABEL ? -1 : 1)
@@ -250,7 +249,7 @@ function TransactionHistoryViewModel() {
   self.selectedAddress.subscribeChanged(function(newSelection, prevSelection) {
     if(newSelection == self.ADDRESS_LASTCHANGE) return; //just in case for screwy browsers...
     self.ADDRESS_LASTCHANGE = newSelection;
-    console.log("Recent Transactions: Address changed called: " + newSelection);
+    $.jqlog.debug("Recent Transactions: Address changed called: " + newSelection);
 
     $('#txnHistoryLoading').show();
     $('#wid-id-txnHistory header span.jarviswidget-loader').show();

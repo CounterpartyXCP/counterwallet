@@ -231,7 +231,7 @@ ko.validation.rules['addressHasEnoughUnspentTxoutsForSelectedAssets'] = {
 };
 ko.validation.registerExtenders();
 
-var AddressInDropdownItemModel = function(address, label) {
+var BalancesAddressInDropdownItemModel = function(address, label) {
   this.ADDRESS = address;
   this.LABEL = label;
   this.SELECT_LABEL = label ? ("<b>" + label + "</b><br/>" + address) : (address);
@@ -292,7 +292,7 @@ function SweepModalViewModel() {
     self.availableAddresses([]);
     var addresses = WALLET.getAddressesList(true);
     for(var i = 0; i < addresses.length; i++) {
-        self.availableAddresses.push(new AddressInDropdownItemModel(addresses[i][0], addresses[i][1]));
+        self.availableAddresses.push(new BalancesAddressInDropdownItemModel(addresses[i][0], addresses[i][1]));
     }        
     
     self.validationModel.errors.showAllMessages(false);
@@ -350,7 +350,7 @@ function SweepModalViewModel() {
   
   self._doTransferAsset = function(selectedAsset, key, pubkey, opsComplete, callback) {
     assert(selectedAsset.ASSET && selectedAsset.ASSET_INFO);
-    $.jqlog.log("Transferring asset " + selectedAsset.ASSET + " from " + self.addressForPrivateKey() + " to " + self.destAddress());
+    $.jqlog.debug("Transferring asset " + selectedAsset.ASSET + " from " + self.addressForPrivateKey() + " to " + self.destAddress());
     
     var transferData = {
       source: self.addressForPrivateKey(),
@@ -427,7 +427,7 @@ function SweepModalViewModel() {
       }
     }
 
-    $.jqlog.log("Sweeping from: " + self.addressForPrivateKey() + " to " + self.destAddress() + " of quantity "
+    $.jqlog.debug("Sweeping from: " + self.addressForPrivateKey() + " to " + self.destAddress() + " of quantity "
       + normalizedQuantity + " " + selectedAsset.ASSET);
 
     //dont use WALLET.doTransaction for this...
@@ -777,7 +777,6 @@ function TestnetBurnModalViewModel() {
       self.validationModel.errors.showAllMessages();
       return false;
     }
-    console.log("Submitting form...");
     $('#testnetBurnModal form').submit();
   }
 

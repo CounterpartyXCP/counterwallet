@@ -130,6 +130,12 @@ ko.validation.rules['isValidPositiveQuantity'] = {
     },
     message: 'Must be a valid quantity (positive num with max 8 decimal places)'
 };
+ko.validation.rules['isValidPositiveQuantityOrZero'] = {
+    validator: function (val, self) {
+      return val.toString().match(/^[0-9]*\.?[0-9]{0,8}$/) && parseFloat(val) >= 0;
+    },
+    message: 'Must be a valid quantity (num with max 8 decimal places), or zero'
+};
 ko.validation.registerExtenders();
 
 

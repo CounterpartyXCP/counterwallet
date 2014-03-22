@@ -2,7 +2,15 @@
 /***********
  * GLOBAL STATE AND SETUP
  ***********/
+var VERSION = "0.9.1 BETA";
 var PREFERENCES = {}; //set when logging in
+
+//Set up logging (jqlog) and monkey patch jqlog with a debug function
+$.jqlog.enabled(true);
+$.jqlog.debug = function(object, options) {
+  if(IS_DEV || USE_TESTNET) //may change to just IS_DEV in the future
+    $.jqlog.info(object, options);
+}
 
 //IE does not include support for location.origin ...
 if (!window.location.origin) {
@@ -21,7 +29,7 @@ if((IS_DEV || USE_TESTNET) && location.search) {
 //Setup hosts to use
 function produceCWServerList() {
   counterwalletd_urls = shuffle(counterwalletd_urls); //randomly shuffle the list to decide the server try order...
-  console.log("MultiAPI Backends: " + JSON.stringify(counterwalletd_urls));
+  $.jqlog.debug("MultiAPI Backends: " + JSON.stringify(counterwalletd_urls));
   
   counterwalletd_base_urls = jQuery.map(counterwalletd_urls, function(element) {
     return element;
@@ -197,13 +205,6 @@ ko.validation.init({
   errorMessageClass: 'invalid',
   errorElementClass: 'invalid'
 });
-
-//Set up logging (jqlog) and monkey patch jqlog with a debug function
-$.jqlog.enabled(true);
-$.jqlog.debug = function(object, options) {
-  if(IS_DEV || USE_TESTNET) //may change to just IS_DEV in the future
-    $.jqlog.info(object, options);
-}
 
 //Allow future timestamps with timeago
 $.timeago.settings.allowFuture = true;

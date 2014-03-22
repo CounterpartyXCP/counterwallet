@@ -1453,7 +1453,9 @@ function runDataTables(specificTableID, destroyOption, extraProps) {
     "sPaginationType" : "bootstrap_full"
   };
   $.extend(props, extraProps);
-  $(tableSelector+'.dt_basic').dataTable(props);
+  //try { $(tableSelector+'.datatable_basic').dataTable().fnClearTable(); } catch(err) { }
+  $(tableSelector+'.datatable_basic').dataTable(props);
+    
 
   /* END BASIC */
 
@@ -1488,7 +1490,8 @@ function runDataTables(specificTableID, destroyOption, extraProps) {
     "bSortCellsTop" : true
   };
   $.extend(props, extraProps);
-  var oTable = $(tableSelector+'.datatable_fixed_column').dataTable(props);   
+  //try { $(tableSelector+'.datatable_fixed_column').dataTable().fnClearTable(); } catch(err) { }
+  var oTable = $(tableSelector+'.datatable_fixed_column').dataTable(props);
 
   /*
    * COL ORDER
@@ -1502,6 +1505,7 @@ function runDataTables(specificTableID, destroyOption, extraProps) {
     }
   };
   $.extend(props, extraProps);
+  //try { $(tableSelector+'.datatable_col_reorder').dataTable().fnClearTable(); } catch(err) { }
   $(tableSelector+'.datatable_col_reorder').dataTable(props);
   
   /* END COL ORDER */
@@ -1525,6 +1529,7 @@ function runDataTables(specificTableID, destroyOption, extraProps) {
     }
   };
   $.extend(props, extraProps);
+  //try { $(tableSelector+'.datatable_tabletools').dataTable().fnClearTable(); } catch(err) { }
   $(tableSelector+'.datatable_tabletools').dataTable(props);
   /* END TABLE TOOLS */
 }

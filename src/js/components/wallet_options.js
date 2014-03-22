@@ -41,7 +41,7 @@ function WalletOptionsModalViewModel() {
     prevSelection = (prevSelection
       ? ko.utils.arrayFirst(self.availableThemes(), function(item) { return prevSelection === item.id; }) : self.availableThemes()[0]);
     
-    $.jqlog.log("Changing theme from " + prevSelection['name'] + " to " + newSelection['name']);
+    $.jqlog.debug("Changing theme from " + prevSelection['name'] + " to " + newSelection['name']);
     $('body').removeClass(prevSelection['styleName']);
     $('body').addClass(newSelection['styleName']);
     if(PREFERENCES['selected_theme'] != newSelection['id']) {
@@ -53,7 +53,7 @@ function WalletOptionsModalViewModel() {
     newSelection = (newSelection
       ? ko.utils.arrayFirst(self.availableLangs(), function(item) { return newSelection === item.id; }) : self.availableLangs()[0]);
 
-    $.jqlog.log("Changing lang to " + newSelection['name']);
+    $.jqlog.debug("Changing lang to " + newSelection['name']);
     //TODO: Code to change the selected language
     if(PREFERENCES['selected_lang'] != newSelection['id']) {
       PREFERENCES['selected_lang'] = newSelection['id'];

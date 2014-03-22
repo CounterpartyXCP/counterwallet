@@ -158,7 +158,7 @@ function LogonViewModel() {
 
     var progress = (i + 1) * (100 / PREFERENCES['num_addresses_used']);
     self.walletGenProgressVal(progress);
-    console.log("Progress: Address " + (i + 1) + " of " + PREFERENCES['num_addresses_used']
+    $.jqlog.debug("Progress: Address " + (i + 1) + " of " + PREFERENCES['num_addresses_used']
       + " (" + self.walletGenProgressVal() + "%) -- " + address);
 
     if(i + 1 < PREFERENCES['num_addresses_used']) {
@@ -176,7 +176,7 @@ function LogonViewModel() {
     //update all counterparty asset balances (including XCP)
     failoverAPI("get_normalized_balances", [WALLET.getAddressesList()],
       function(balancesData, endpoint) {
-        $.jqlog.log("Got initial balances: " + JSON.stringify(balancesData));
+        $.jqlog.debug("Got initial balances: " + JSON.stringify(balancesData));
         
         if(!balancesData.length)
           return onSuccess(); //user has no balance (i.e. first time logging in)
@@ -238,7 +238,7 @@ function LogonViewModel() {
     WAITING_BTCPAY_FEED.restore();
 
     //all done. load the balances screen
-    $.jqlog.log("Login complete. Directing to balances page...");
+    $.jqlog.debug("Login complete. Directing to balances page...");
     window.location.hash = 'xcp/pages/balances.html';
   }  
 }

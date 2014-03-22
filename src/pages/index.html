@@ -212,7 +212,7 @@
           <span class="input-group-btn">
             <button id="chatSendButton" data-bind="click: sendLine" class="btn btn-default" type="button">Send</button>
           </span>
-          <input id="chatTextBox" type="text" class="form-control">
+          <input id="chatTextBox" data-bind="event: { keyup: onKeyUp }" type="text" class="form-control">
         </div><!-- /input-group -->
       </div><!-- /.row -->        
     </div>    
@@ -375,7 +375,7 @@
         <div class="modal-content">
           <div class="modal-header">
             <button type="button" data-bind="click: hide" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
-            <h4 class="modal-title">Wallet Options</h4>
+            <h4 class="modal-title">Wallet Options <b class="pull-right" style="padding-right: 10px;">v<span data-bind="text: VERSION"></span></b></h4>
           </div>
           <div class="modal-body no-padding">
             
