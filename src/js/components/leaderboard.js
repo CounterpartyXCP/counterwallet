@@ -127,6 +127,15 @@ var AssetLeaderboardViewModel = CClass.create(function() {
     self.showPortfolioIn("BTC");
   }
   
+  self.showPortfolioIn.subscribeChanged(function(newValue, prevValue) {
+    if(!prevValue) return; //initial setting on initialization, ignore
+    assert(newValue == "XCP" || newValue == "BTC", "Invalid value");
+    if(newValue == prevValue) return; //no change
+    if(self.isLeaderboard) {
+      self.generateMarketCapHistoryGraph(); //regenerate for switch to different data
+    }
+  });  
+  
   self.generateAssetMiniCharts = function() {
     //Generate the asset portfolio mini charts
     var i = null, j = null;
@@ -146,6 +155,7 @@ var AssetLeaderboardViewModel = CClass.create(function() {
   }
   
   self.generateMarketCapHistoryGraph = function() {
+    assert(self.isLeaderboard);
     $('#marketCapHistoryGraph').highcharts({
         title: {
           text: null
