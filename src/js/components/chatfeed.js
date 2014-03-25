@@ -72,6 +72,7 @@ function ChatFeedViewModel() {
   self.showChat = function() {
     if(self.handle()) { //user has already opened up the chat window in this session
       self._showChatWindow();
+      self.scrollToBottomIfNecessary();
       return;
     }
     
@@ -221,7 +222,7 @@ function ChatFeedViewModel() {
     self.lines.push(newLine);
     //ensure only up to 200 lines max (threshold of 5 lines over before we clear for performance reasons?...if it matters...)
     if(self.lines().length > 205)
-      self.lines(self.lines.splice(0, 5));  
+      self.lines.splice(0, 5);
     
     //if it's from us, add it to myLines
     if(handle == self.handle()) {

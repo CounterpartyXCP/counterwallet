@@ -2,7 +2,7 @@
 /***********
  * GLOBAL STATE AND SETUP
  ***********/
-var VERSION = "0.9.1 BETA";
+var VERSION = "0.9.2 BETA";
 var IS_MOBILE_OR_TABLET = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
 var PREFERENCES = {}; //set when logging in
 

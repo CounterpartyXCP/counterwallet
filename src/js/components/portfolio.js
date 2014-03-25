@@ -1,129 +1,63 @@
 
-function AssetPortfolioViewModel() {
+var AssetPortfolioViewModel = AssetLeaderboardViewModel.extend(function() {
   var self = this;
-  self.myAssets = ko.observableArray(["XCP", "BTC"]);
-  self.totalBalanceByAsset = {};
-  self.totalXCPValueByAsset = {};
-  self.marketInfo = null;
-  self.showPortfolioIn = ko.observable('');
-  //graph data  
-  self.pctChangesInXCP = ko.observableArray([]); // % change in relative to XCP
-  self.pctChangesInBTC = ko.observableArray([]); // % change in relative to BTC
-  self.portfolioTotalXCPValueByAsset = ko.observableArray([]);
-  //market cap table data
-  self.marketCapTableRows = ko.observableArray([]);
-  self.miniChartData = ko.observable({});
-  
-  self.init = function() {
-    //Set up handler to regraph the data if the terms we place it in change
-    self.showPortfolioIn.subscribeChanged(function(newValue, prevValue) {
-      assert(newValue == "XCP" || newValue == "BTC", "Invalid value");
-      if(newValue == prevValue) return; //no change
-      //Recompose the table this has changed
-      var newRows = [];
-      if(newValue == "XCP") {
-        for(asset in self.marketInfo) {
-          if (self.marketInfo.hasOwnProperty(asset)) {
-            newRows.push({
-              asset: asset,
-              marketCapRaw: self.marketInfo[asset]['market_cap_in_xcp'],
-              marketCap: smartFormat(self.marketInfo[asset]['market_cap_in_xcp']) || '??',
-              price: self.marketInfo[asset]['aggregated_price_as_xcp'] || '??',
-              supply: smartFormat(self.marketInfo[asset]['total_supply']),
-              volume: self.marketInfo[asset]['24h_ohlc_in_xcp']['vol'] && self.marketInfo[asset]['aggregated_price_in_xcp'] 
-                ? smartFormat(self.marketInfo[asset]['24h_ohlc_in_xcp']['vol'] * self.marketInfo[asset]['aggregated_price_in_xcp']) : '??',
-              pctChange: smartFormat(self.marketInfo[asset]['24h_vol_price_change_in_xcp']) || '??',
-              history: self.marketInfo[asset]['7d_history_in_xcp']
-            });
-          }
-        }
-      } else { //BTC
-        for(asset in self.marketInfo) {
-          if (self.marketInfo.hasOwnProperty(asset)) {
-            newRows.push({
-              asset: asset,
-              marketCapRaw: self.marketInfo[asset]['market_cap_in_btc'],
-              marketCap: smartFormat(self.marketInfo[asset]['market_cap_in_btc']) || '??',
-              price: self.marketInfo[asset]['aggregated_price_as_btc'] || '??',
-              supply: smartFormat(self.marketInfo[asset]['total_supply']),
-              volume: self.marketInfo[asset]['24h_ohlc_in_btc']['vol'] && self.marketInfo[asset]['aggregated_price_in_btc'] 
-                ? smartFormat(self.marketInfo[asset]['24h_ohlc_in_btc']['vol'] * self.marketInfo[asset]['aggregated_price_in_btc']) : '??',
-              pctChange: smartFormat(self.marketInfo[asset]['24h_vol_price_change_in_btc']) || '??',
-              history: self.marketInfo[asset]['7d_history_in_btc']
-            });
-          }
-        }
-      }
-      newRows.sortBy("-marketCapRaw"); //sort newRows by marketCap descending
-      self.marketCapTableRows(newRows); // table will update
-      self.generateAssetMiniCharts();
-    });  
-    
-    //Get a list of all assets the user has
-    var addresses = WALLET.getAddressesList();
-    failoverAPI("get_owned_assets", { addresses: addresses }, function(data, endpoint) {
-      var otherAssets = [];
-      for(var i = 0; i < data.length; i++) {
-        otherAssets.push(data[i]['asset']); //asset ID (e.g. "FOOBAR")
-      }
-      otherAssets.sort();
-      self.myAssets(self.myAssets().concat(otherAssets));
-      //^ this way, XCP and BTC stay at the top, but the other assets are alphabetically sorted
-      
-      //now that we have the list of assets, fetch all the info on them
-      failoverAPI("get_market_info", { assets: self.myAssets() }, function(data, endpoint) {
-        //compose our portfolio (for the portfolio table)
-        self.marketInfo = data;
-        
-        //populate the pie graphs in the first widget
-        var bal = null, asset = null;
-        for(asset in self.marketInfo) {
-          if (self.marketInfo.hasOwnProperty(asset)) {
-            //get the total balance of all assets across all addresses in the wallet
-            for(var i = 0; i < addresses.length; i++) {
-              if(!self.totalBalanceByAsset[asset]) self.totalBalanceByAsset[asset] = 0;
-              self.totalBalanceByAsset[asset] += WALLET.getBalance(addresses[i], asset); 
-            }
-            if(asset == 'XCP' || asset == 'BTC' || data[asset]['24h_vol_price_change_in_xcp'] !== null)
-              self.pctChangesInXCP.push({ name: asset, data: [data[asset]['24h_vol_price_change_in_xcp'] || 0] });  
-            if(asset == 'XCP' || asset == 'BTC' || data[asset]['24h_vol_price_change_in_btc'] !== null)
-              self.pctChangesInBTC.push({ name: asset, data: [data[asset]['24h_vol_price_change_in_btc'] || 0] });
-            if(asset == 'XCP' || asset == 'BTC' || data[asset]['price_in_xcp'] !== null) {
-              self.totalXCPValueByAsset[asset] = self.totalBalanceByAsset[asset] / data[asset]['price_in_xcp']; 
-              self.portfolioTotalXCPValueByAsset.push([ asset, self.totalXCPValueByAsset[asset] || 0]);
-            }
-          }
-        }
-        
-        self.generateSummaryCharts();
-        self.showPortfolioIn("XCP"); //causes the table to be generated off of self.marketInfo
-      });
-    });
-  }
-  
-  self.showPortfolioInXCP = function() {
-    self.showPortfolioIn("XCP");
-  }
-  
-  self.showPortfolioInBTC = function() {
-    self.showPortfolioIn("BTC");
-  }
-  
-  self.generateAssetMiniCharts = function() {
-    //Generate the asset portfolio mini charts
-    for(var i=0; i < self.marketCapTableRows().length; i++) {
-      $('#miniChart-' + self.marketCapTableRows()[i]['asset']).highcharts({
-        title: { text: null },
-        xAxis: { type: 'datetime', title: { text: null } },
-        yAxis: { title: { text: null } },
-        credits: { enabled: false },
-        tooltip: { enabled: false },
-        legend: { enabled: false },
-        series: self.marketCapTableRows()[i]['history']
-      });
-    }
-  }
+  self._super(); //call parent class constructor
+  self.myAssets = ko.observableArray(WALLET.getAssetsInWallet());
+  self.init(self.myAssets()); //init parent class
 
+  self.balancesByAsset = {};
+  self.myGraphTables = {};
+  
+  self.showPortfolioIn.subscribeChanged(function(newValue, prevValue) {
+    //use this to hook into the parent class being done with loading its market info data
+    assert(self.marketInfo.length);
+    assert(newValue == "XCP" || newValue == "BTC", "Invalid value");
+    if(newValue == prevValue) return; //no change
+    
+    if((Object.getOwnPropertyNames(self.myGraphTables).length == 0)) {
+      var i = null, j = null;
+
+      self.myGraphTables['XCP'] = {
+        'balByAsset': ko.observableArray([]),
+        'rawValByAsset': {}, 'valByAsset': ko.observableArray([]),
+        'pctChange': ko.observableArray([])
+      };
+      self.myGraphTables['BTC'] = {
+        'balByAsset': ko.observableArray([]),
+        'rawValByAsset': {}, 'valByAsset': ko.observableArray([]),
+        'pctChange': ko.observableArray([])
+      };
+      
+      for(i=0; i < self.myAssets().length; i++) {
+        self.balancesByAsset[self.myAssets()[i]] = WALLET.getTotalBalance(self.myAssets()[i]);
+      }
+      var assetTotalBal = null, info = null;
+      for(var baseAsset in self.myGraphTables) { //XCP or BTC
+        if(self.myGraphTables.hasOwnProperty(baseAsset)) {
+          for(i=0; i < self.myAssets().length; i++) {
+            asset = self.myAssets()[i];
+            assetTotalBal = self.balancesByAsset[asset];
+
+            //Populate balance by asset data, which doesn't require the asset to have market data
+            self.myGraphTables[baseAsset]['balByAsset'].push([asset, assetTotalBal]); //normalized
+
+            //populate graph data for assets with market info
+            info = $.grep(self.marketInfo, function(e) { return e.asset == asset; })[0]; //O(n^3) --- optimize!
+            if(info) {
+              self.myGraphTables[baseAsset]['rawValByAsset'][asset] = info ? assetTotalBal / info[baseAsset == 'XCP' ? 'price_in_xcp' : 'price_in_btc'] : null;
+              self.myGraphTables[baseAsset]['valByAsset'].push([asset, self.myGraphTables[baseAsset]['rawValByAsset'][asset]])
+              self.myGraphTables[baseAsset]['pctChange'].push({
+                name: asset,
+                data: [info ? (info[ baseAsset == 'XCP' ? '24h_vol_price_change_in_xcp' : '24h_vol_price_change_in_btc' ] || 0) : null]
+              });
+            }
+          }
+        }
+      }
+    }
+    self.generateSummaryCharts();
+  });  
+  
   self.generateSummaryCharts = function() {
     $('#portfolioAssetValsPie').highcharts({
         chart: {
@@ -132,10 +66,10 @@ function AssetPortfolioViewModel() {
             plotShadow: false
         },
         title: {
-            text: 'Composition by Value (in XCP)'
+            text: 'Composition by Value (in ' + self.showPortfolioIn() + ')'
         },
         tooltip: {
-          pointFormat: '{series.name}: <b>{point.percentage:.2f}%</b><br>(<b>{point.y:.2f} XCP</b> total value)</b>'
+          pointFormat: '{series.name}: <b>{point.percentage:.2f}%</b><br>(<b>{point.y:.2f} ' + self.showPortfolioIn() + '</b> total value)</b>'
         },
         plotOptions: {
             pie: {
@@ -151,62 +85,57 @@ function AssetPortfolioViewModel() {
         series: [{
             type: 'pie',
             name: '% of Portfolio',
-            data: self.portfolioTotalXCPValueByAsset()
+            data: self.myGraphTables[self.showPortfolioIn()]['valByAsset']()
         }]
     });        
-    $('#pctChangeBarToXCP').highcharts({
+    $('#portfolioAssetBalsPie').highcharts({
+        chart: {
+            plotBackgroundColor: null,
+            plotBorderWidth: null,
+            plotShadow: false
+        },
+        title: {
+            text: 'Composition by Quantity Owned'
+        },
+        tooltip: {
+          pointFormat: '{series.name}: <b>{point.percentage:.2f}%</b>'
+        },
+        plotOptions: {
+            pie: {
+                allowPointSelect: true,
+                cursor: 'pointer',
+                dataLabels: {
+                    enabled: false
+                },
+                showInLegend: true
+            }
+        },
+        credits: { enabled: false },
+        series: [{
+            type: 'pie',
+            name: '% of Portfolio',
+            data: self.myGraphTables[self.showPortfolioIn()]['balByAsset']()
+        }]
+    });
+    $('#pctChangeBar').highcharts({
         chart: {
             type: 'column'
         },
         title: {
-            text: '24 Hour % Change vs XCP'
+            text: '24 Hour % Change vs ' + self.showPortfolioIn()
         },
         tooltip: {
-          pointFormat: '{series.name}: <b>{point.y:.2f}%</b> vs XCP'
+          pointFormat: '{series.name}: <b>{point.y:.2f}%</b> vs ' + self.showPortfolioIn()
         },
         xAxis: { labels: { enabled: false } },
         yAxis: { title: { text: null } },
         credits: { enabled: false },
-        series: self.pctChangesInXCP()
+        series: self.myGraphTables[self.showPortfolioIn()]['pctChange']()
     });
-    $('#pctChangeBarToBTC').highcharts({
-        chart: {
-            type: 'column'
-        },
-        title: {
-            text: '24 Hour % Change vs BTC'
-        },
-        tooltip: {
-          pointFormat: '{series.name}: <b>{point.y:.2f}%</b> vs BTC'
-        },
-        xAxis: { labels: { enabled: false } },
-        yAxis: { title: { text: null } },
-        credits: { enabled: false },
-        series: self.pctChangesInBTC()
-    });
+    if(!self.myGraphTables[self.showPortfolioIn()]['pctChange'].length)
+      $('#pctChangeBar').highcharts().showLoading('No data to display');
   }
-
-  self.dataTableResponsive = function(e) {
-    // Responsive design for our data tables and more on this page
-    var newWindowWidth = $(window).width();
-    
-    if(self._lastWindowWidth && newWindowWidth == self._lastWindowWidth) return;
-    self._lastWindowWidth = newWindowWidth;
-
-    if($('#txnHistory').hasClass('dataTable')) {
-      var txnHistory = $('#txnHistory').dataTable();
-      if(newWindowWidth < 1250) { //hide some...
-        txnHistory.fnSetColumnVis(1, false); //hide block
-        txnHistory.fnSetColumnVis(2, false); //hide blocktime
-      }
-      if(newWindowWidth >= 1250) { //show it all, baby
-        txnHistory.fnSetColumnVis(1, true); //show block
-        txnHistory.fnSetColumnVis(2, true); //show blocktime
-      }
-      txnHistory.fnAdjustColumnSizing();
-    }
-  }
-}
+});
 
 
 /*NOTE: Any code here is only triggered the first time the page is visited. Put JS that needs to run on the

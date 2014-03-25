@@ -1,11 +1,11 @@
 <div class="row">
   <div class="col-xs-12 col-sm-7 col-md-7 col-lg-4">
     <h1 class="page-title txt-color-blueDark">
-      <i class="fa fa-tasks fa-fw "></i> 
-        My Asset Portfolio 
+      <i class="fa fa-trophy fa-fw "></i> 
+        Top Assets 
     </h1>
   </div>
-  <div id="portfolioButtonBar" class="pull-right sectionHeaderButtonBar">
+  <div id="leaderboardButtonBar" class="pull-right sectionHeaderButtonBar">
       <div class="btn-group">
         <button class="btn dropdown-toggle btn-primary" data-toggle="dropdown"><i class="fa fa-bars"></i> Show In&nbsp;<i class="fa fa-caret-down"></i></button>                
         <ul class="dropdown-menu">
@@ -16,28 +16,23 @@
   </div>
 </div>
 
-<section id="widget-grid" class="portfolioGrid"> <!-- widget grid -->
+
+<section id="widget-grid" class="leaderboardGrid"> <!-- widget grid -->
   <div class="row"> <!-- row -->
     <article class="col-xs-12 col-sm-12 col-md-12 col-lg-12"> <!-- NEW WIDGET START -->
       <!-- Widget ID (each widget will need unique ID)-->
-      <div class="jarviswidget defaultWidgetColor" id="wid-id-portfolioAllocation" data-widget-editbutton="false" data-widget-deletebutton="false">
+      <div class="jarviswidget defaultWidgetColor" id="wid-id-marketCapHistory" data-widget-editbutton="false" data-widget-deletebutton="false">
           <header>
             <span class="widget-icon"> <i class="fa fa-bar-chart-o"></i> </span>
-            <h2>Portfolio Allocation (in <span data-bind="text: base"></span>)</h2>
+            <h2>Market Cap History (in )</h2>
           </header>
           <div> <!-- widget div-->
             <div class="widget-body no-padding"> <!-- widget content -->
-              
               <div class="row">
-                  <div class="col-lg-4">
-                      <div id="portfolioAssetValsPie"></div>
+                  <div class="col-sm-12">
+                      <div id="marketCapHistoryGraph"></div>
                   </div>
-                  <div class="col-lg-4">
-                      <div id="portfolioAssetBalsPie"></div>
-                  </div>
-                  <div class="col-lg-4">
-                    <div id="pctChangeBar"></div>
-                  </div>
+              </div>
             </div> <!-- end widget content -->
           </div> <!-- end widget div -->
       </div> <!-- end widget -->
@@ -46,19 +41,15 @@
     
   <div class="row" data-bind="foreach: marketCapTables"> <!-- row -->
     <article class="col-xs-12 col-sm-12 col-md-12 col-lg-12" data-bind="fadeVisibleInOnly: base == $parent.showPortfolioIn()"> <!-- NEW WIDGET START -->
-      <div class="jarviswidget defaultWidgetColor" id="wid-id-assetMarketInfo" data-widget-editbutton="false" data-widget-deletebutton="false">
+      <div class="jarviswidget defaultWidgetColor" data-bind="attr: {id: 'wid-id-assetMarketInfo-' + $index}" data-widget-editbutton="false" data-widget-deletebutton="false">
         <header>
             <span class="widget-icon"> <i class="fa fa-table"></i> </span>
-            <h2>Portfolio Composition (in <span data-bind="text: base"></span>)</h2>
+            <h2>Leaderboard (in <span data-bind="text: base"></span>)</h2>
             <div class="widget-toolbar">
             </div>
         </header>
         <div> <!-- widget div-->
             <div class="widget-body no-padding"> <!-- widget content -->
-                <p class="clearfix alert alert-success">
-                    <i class="fa fa-eye"></i>&nbsp;Only the assets you own with established market value (via completed
-                    trades on the Distributed Exchange) are listed here. 
-                </p>
                 <div class="widget-body-toolbar">
                 </div>
                 <table data-bind="attr: {id: 'assetMarketTable-' + base }" width="100%" class="assetMarketTable table table-striped table-hover datatable_basic">
@@ -102,18 +93,18 @@
 
 <script type="text/javascript">
   pageSetUp(); //init smartadmin featureset
-  loadScript("xcp/js/components/leaderboard.js", function() { //parent class
-      loadScript("xcp/js/components/portfolio.js", function() {
-        //This code is run on each visit to the page
-        window.ASSET_PORTFOLIO = new AssetPortfolioViewModel("Test");
-    
-        ko.applyBindings(ASSET_PORTFOLIO, document.getElementById("portfolioButtonBar"));
-        ko.applyBindings(ASSET_PORTFOLIO, document.getElementsByClassName("portfolioGrid")[0]);
-        
-        $(window).bind("resize", ASSET_PORTFOLIO.dataTableResponsive);
-        $(window).on('hashchange', function() {
-          $(window).off("resize", ASSET_PORTFOLIO.dataTableResponsive);
-        });
-      });
+  loadScript("xcp/js/components/leaderboard.js", function() {
+    //This code is run on each visit to the page
+    window.ASSET_LEADERBOARD = new AssetLeaderboardViewModel();
+
+    ko.applyBindings(ASSET_LEADERBOARD, document.getElementById("leaderboardButtonBar"));
+    ko.applyBindings(ASSET_LEADERBOARD, document.getElementsByClassName("leaderboardGrid")[0]);
+
+    ASSET_LEADERBOARD.init();
+  
+    $(window).bind("resize", ASSET_LEADERBOARD.dataTableResponsive);
+    $(window).on('hashchange', function() {
+      $(window).off("resize", ASSET_LEADERBOARD.dataTableResponsive);
+    });
   });
 </script>

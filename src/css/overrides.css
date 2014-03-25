@@ -200,3 +200,12 @@ body.smart-style-3 .defaultWidgetColor>header { /* google skin = darkBlue (night
 .btn-success {
     background-color: #739e73 !important;
 }
+
+
+/*
+ * DATA TABLES OVERRIDES
+ */
+
+.dataTables_empty {
+    display: none; /* don't show the "this table contains no data" row */
+}

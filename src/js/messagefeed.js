@@ -122,7 +122,6 @@ function parseMessageWithFeedGapDetection(txHash, category, message) {
   }
   failoverAPI("get_messagefeed_messages_by_index", [missingMessages], function(missingMessageData, endpoint) {
     var missingTxHash = null;
-    var missingMessages = [];
     for(var i=0; i < missingMessageData.length; i++) {
       missingTxHash = _getTxHash(missingMessageData[i]);
       assert(missingMessageData[i]['_message_index'] == missingMessages[i], "Message feed resync list oddity...?");
@@ -236,7 +235,7 @@ function handleMessage(txHash, category, message) {
       WALLET.getAddressObj(addressesWithAsset[i]).addOrUpdateAsset(message['asset'], message, null);
     }
     //Also, if this is a new asset creation, or a transfer to an address that doesn't have the asset yet
-    if(WALLET.getAddressObj(message['issuer']) && !addressesWithAsset.contains(message['issuer'])) {
+    if(WALLET.getAddressObj(message['issuer']) && addressesWithAsset.length && !(addressesWithAsset.contains(message['issuer']))) {
       failoverAPI("get_asset_info", [[message['asset']]], function(assetsInfo, endpoint) {
         WALLET.getAddressObj(message['issuer']).addOrUpdateAsset(message['asset'], assetsInfo[0], null); //will show with a 0 balance
       });    

@@ -19,10 +19,13 @@ function hashToB64(content) {
   return Bitcoin.convert.bytesToBase64(Bitcoin.Crypto.SHA256(content, {asBytes: true}));  
 }
 
-function smartFormat(num, truncateDecimalForLarger) { //arbitrary rules to make quantities formatted a bit more friendly
-  if(typeof(truncateDecimalForLarger)==='undefined') truncateDecimalForLarger = false;
+function smartFormat(num, truncateDecimalPlacesAtMin, truncateDecimalPlacesTo) { //arbitrary rules to make quantities formatted a bit more friendly
+  if(num === null) return '??';
+  if(typeof(truncateDecimalPlacesMin)==='undefined') truncateDecimalPlacesMin = null;
+  if(typeof(truncateDecimalPlacesTo)==='undefined') truncateDecimalPlacesTo = 4;
   //if(num > 10) num = Decimal.round(new Decimal(num), 4).toFloat();
-  if(num > 10) num = +num.toFixed(4); //use + sign to lob off any trailing zeros...
+  if(truncateDecimalPlacesAtMin !== null && num > truncateDecimalPlacesAtMin)
+    num = +num.toFixed(truncateDecimalPlacesTo); //use + sign to lob off any trailing zeros...
   return numberWithCommas(noExponents(num));
 }
 

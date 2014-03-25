@@ -179,7 +179,7 @@
                                                 <span class="buyColor" data-bind="text: buyAsset"></span></b>
                                                 will cost you <b><span class="sellColor" data-bind="text: numberWithCommas(selectedSellQuantityAtMarket())"></span>
                                                 <span class="sellColor" data-bind="text: sellAsset"></span></b>
-                                                <span data-bind="visible: sellAsset() == 'BTC' && feeForSelectedBTCQuantity() != 0">, plus a <b><span data-bind="text: feeForSelectedBTCQuantity"></span> BTC</b> (<span data-bind="text: dispFeeForSelectedBTCQuantityAsPct"></span>%) miner fee (to prevent troll orders)</span>.
+                                                <span data-bind="visible: sellAsset() == 'BTC' && feeForSelectedBTCQuantity() != 0">, plus a <b><span data-bind="text: feeForSelectedBTCQuantity"></span> BTC</b> (<span data-bind="text: feeForSelectedBTCQuantityAsPct"></span>%) miner fee (to prevent troll orders)</span>.
                                             </span>
                                             <span data-bind="fadeVisible: (currentMarketUnitPrice() == 0 || overrideMarketPrice()) && (selectedSellQuantityCustom() && selectedSellQuantityCustom() > 0) ">
                                                 The effective unit price of your <b><span data-bind="text: dispAssetPair"></span></b> order is
@@ -267,7 +267,7 @@
                                                 </b></td>
                                                 <td>
                                                     <b><span data-bind="css: {'sellColor':  sellAsset() == 'BTC', 'buyColor': buyAsset() == 'BTC'}"><span data-bind="text: feeForSelectedBTCQuantity"></span>&nbsp;BTC</span></b>
-                                                    (<span data-bind="text: dispFeeForSelectedBTCQuantityAsPct"></span>% of sale amount)
+                                                    (<span data-bind="text: feeForSelectedBTCQuantityAsPct"></span>% of sale amount)
                                                 </td>
                                             </tr>
                                         </tbody>
@@ -334,7 +334,7 @@
                                     <tr class="sellColor">
                                         <td data-bind="text: unit_price"></td>
                                         <td data-bind="text: smartFormat(quantity) + ' (' + count + ')'"></td> <!-- quantity (count) -->
-                                        <td data-bind="text: smartFormat(depth, true)"></td>
+                                        <td data-bind="text: smartFormat(depth, 10)"></td>
                                     </tr>
                                 </tbody>
                                 <tbody>
@@ -352,7 +352,7 @@
                                     <tr class="buyColor">
                                         <td data-bind="text: unit_price"></td>
                                         <td data-bind="text: smartFormat(quantity) + ' (' + count + ')'"></td>
-                                        <td data-bind="text: smartFormat(depth, true)"></td>
+                                        <td data-bind="text: smartFormat(depth, 10)"></td>
                                     </tr>
                                 </tbody>
                             </table>

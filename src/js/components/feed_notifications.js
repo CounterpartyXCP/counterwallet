@@ -121,7 +121,7 @@ NotificationViewModel.calcText = function(category, message) {
       + getAddressLabel(message['tx1_address']) + "</Ad> (gave <Am>"
       + numberWithCommas(normalizeQuantity(message['backward_quantity'], message['_backward_asset_divisible'])) + "</Ad> <As>" + message['backward_asset'] + "</As>)";
   } else if(category == "order_expirations" && WALLET.getAddressObj(message['source'])) {
-    desc = "Your order <i>" + message['order_hash'] + "</i> from address <Ad>" + getAddressLabel(message['source']) + "</Ad> has expired";
+    desc = "Your order ID <b>" + message['order_index'] + "</b> from address <Ad>" + getAddressLabel(message['source']) + "</Ad> has expired";
   } else if(category == "order_match_expirations") {
     if(WALLET.getAddressObj(message['tx0_address']) && WALLET.getAddressObj(message['tx1_address'])) {
       desc = "An order match between your addresses <Ad>" + getAddressLabel(message['tx0_address'])
@@ -133,9 +133,35 @@ NotificationViewModel.calcText = function(category, message) {
       desc = "An order match between your address <Ad>" + getAddressLabel(message['tx1_address'])
         + "</Ad> and address <Ad>" + getAddressLabel(message['tx0_address']) + "</Ad> has expired";
     }
-  } else if(category == "broadcasts") {
-    //TODO
-  }
+  } else if(category == "broadcasts" && WALLET.getAddressObj(message['source'])) {
+    if(message['locked']) {
+      desc = "You have locked the feed at address <Ad>" + getAddressLabel(message['source']) + "</Ad>";
+    } else {
+      desc = "You have broadcast value <Am>" + message['value'] + "</Am> from address <Ad>" + getAddressLabel(message['source']) + "</Ad>";
+    }
+  } else if(category == "bets" && WALLET.getAddressObj(message['source'])) {
+    desc = "You bet <Am>" + numberWithCommas(normalizeQuantity(message['wager_quantity'])) + "</Am> <As>XCP</As> on the feed @"
+      + " <Ad>" + getAddressLabel(message['source']) + "</Ad>";
+  } else if(category == "bet_matches" && (WALLET.getAddressObj(message['tx0_address']) || WALLET.getAddressObj(message['tx1_address']))) {
+    desc = "Bet @ feed <Ad>" + getAddressLabel(message['source']) + "</Ad> matched between <Ad>" 
+      + getAddressLabel(message['tx0_address']) + "</Ad> (gave <Am>"
+      + numberWithCommas(normalizeQuantity(message['forward_quantity'])) + "</Ad> <As>XCP</As>) and <Ad>"
+      + getAddressLabel(message['tx1_address']) + "</Ad> (gave <Am>"
+      + numberWithCommas(normalizeQuantity(message['backward_quantity'])) + "</Ad> <As>XCP</As>)";
+  } else if(category == "bet_expirations" && WALLET.getAddressObj(message['source'])) {
+    desc = "Your bet ID <b>" + message['bet_index'] + "</b> from address <Ad>" + getAddressLabel(message['source']) + "</Ad> has expired";
+  } else if(category == "bet_match_expirations") {
+    if(WALLET.getAddressObj(message['tx0_address']) && WALLET.getAddressObj(message['tx1_address'])) {
+      desc = "A bet match between your addresses <Ad>" + getAddressLabel(message['tx0_address'])
+        + "</Ad> and <Ad>" + getAddressLabel(message['tx1_address']) + "</Ad> has expired";
+    } else if(WALLET.getAddressObj(message['tx0_address'])) {
+      desc = "A bet match between your address <Ad>" + getAddressLabel(message['tx0_address'])
+        + "</Ad> and address <Ad>" + getAddressLabel(message['tx1_address']) + "</Ad> has expired";
+    } else if(WALLET.getAddressObj(message['tx1_address'])) {
+      desc = "A bet match between your address <Ad>" + getAddressLabel(message['tx1_address'])
+        + "</Ad> and address <Ad>" + getAddressLabel(message['tx0_address']) + "</Ad> has expired";
+    }
+  }  
 
   if(desc) {
     desc = desc.replace(/<Am>/g, '<b class="notoQuantityColor">').replace(/<\/Am>/g, '</b>');
@@ -163,7 +189,7 @@ function NotificationFeedViewModel(initialCount) {
     //^ we don't notify on these categories (since the action is covered by other categories, such as send, which makes these redundant)
     
     var noto = new NotificationViewModel(category, message);
-    if(noto.MESSAGE_TEXT == '')
+    if(!noto.MESSAGE_TEXT)
       return; //will be the case if this noto does not apply to this client or is not something this client needs to see
     
     self.notifications.unshift(noto); //add to front of array

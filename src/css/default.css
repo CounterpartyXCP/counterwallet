@@ -36,6 +36,11 @@
     color: #f89406;    
 }
 
+.sectionHeaderButtonBar {
+    padding-right: 14px;
+    padding-top: 14px;
+}
+
 /* Add back in colored badges (this was removed from Bootstrap 3 for some reason)
  * See http://stackoverflow.com/a/20591067
  */

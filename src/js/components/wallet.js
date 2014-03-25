@@ -96,12 +96,58 @@ function WalletViewModel() {
     //Grab the first asset object we can find for this asset
     var addressObj = null, assetObj = null;
     for(var i=0; i < addresses.length; i++) {
-      addressObj = WALLET.getAddressObj(addresses[i]);
+      addressObj = self.getAddressObj(addresses[i]);
       assetObj = addressObj.getAssetObj(asset);
       if(!assetObj) continue; //this address doesn't have the asset...that's fine
       addressesWithAsset.push(assetObj.ADDRESS);
     }
     return addressesWithAsset;
+  }
+
+  self.getTotalBalance = function(asset, normalized) { //gets the balance of an asset across all addresses
+    if(typeof(normalized)==='undefined') normalized = true;
+    var rawBalance = 0;
+    var divisible = null;
+    var addressObj = null, assetObj = null, i = null, j = null;
+    for(i=0; i < self.addresses().length; i++) {
+      addressObj = self.addresses()[i];
+      for(j=0; j < addressObj.assets().length; j++) {
+        assetObj = addressObj.assets()[j];
+        if(assetObj.ASSET != asset) continue;
+        rawBalance += assetObj.rawBalance();
+        if(divisible === null) divisible = assetObj.DIVISIBLE;
+      }
+    }
+    return normalized ? normalizeQuantity(rawBalance, divisible) : rawBalance;
+  }
+
+  self.getAssetsInWallet = function() { //gets assets that the user has a balance of
+    //this is not optimized... O(n^2)
+    var assets = [];
+    var addressObj = null, assetObj = null, i = null, j = null;
+    for(i=0; i < self.addresses().length; i++) {
+      addressObj = self.addresses()[i];
+      for(j=0; j < addressObj.assets().length; j++) {
+        assetObj = addressObj.assets()[j]; 
+        assets.push(assetObj.ASSET);
+      }
+    }
+    return assets.unique();
+  }
+
+  self.getAssetsOwned = function() { //gets assets the user actually owns (is issuer of)
+    //this is not optimized... O(n^2)
+    var assets = [];
+    var addressObj = null, assetObj = null, i = null, j = null;
+    for(i=0; i < self.addresses().length; i++) {
+      addressObj = self.addresses()[i];
+      for(j=0; j < addressObj.assets().length; j++) {
+        assetObj = addressObj.assets()[j]; 
+        if(assetObj.isMine())
+          assets.push(assetObj.ASSET);
+      }
+    }
+    return assets.unique();
   }
 
   self.refreshBTCBalances = function(isRecurring) {

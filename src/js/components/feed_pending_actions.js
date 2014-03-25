@@ -199,10 +199,13 @@ PendingActionFeedViewModel.modifyBalancePendingFlag = function(category, data, f
     addressObj.getAssetObj("XCP").balanceChangePending(flagSetting);
   } else if(category == 'sends') {
     addressObj = WALLET.getAddressObj(data['source']);
-    addressObj.getAssetObj(data['asset']).balanceChangePending(flagSetting);
+    if(addressObj && addressObj.getAssetObj(data['asset'])) {
+      //source addr may not exist in the wallet if we are importing funds from an outside address 
+      addressObj.getAssetObj(data['asset']).balanceChangePending(flagSetting);
+    }
     addressObj = WALLET.getAddressObj(data['destination']);
     if(addressObj && addressObj.getAssetObj(data['asset'])) {
-      //if a send to another address in the wallet that has bal already
+      //dest addr may not exist in the wallet if we are sending funds to an outside address 
       addressObj.getAssetObj(data['asset']).balanceChangePending(flagSetting);
     }
   } else if(category == 'btcpays') {

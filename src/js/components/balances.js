@@ -429,14 +429,13 @@ function SweepModalViewModel() {
 
     $.jqlog.debug("Sweeping from: " + self.addressForPrivateKey() + " to " + self.destAddress() + " of quantity "
       + normalizedQuantity + " " + selectedAsset.ASSET);
-
+      
     //dont use WALLET.doTransaction for this...
     var sendData = {
       source: self.addressForPrivateKey(),
       destination: self.destAddress(),
       quantity: quantity,
       asset: selectedAsset.ASSET,
-      _divisible: !(selectedAsset.RAW_BALANCE == selectedAsset.NORMALIZED_BALANCE), //if the balances match, the asset is NOT divisible
       multisig: pubkey
     };
     multiAPIConsensus("create_send", sendData, //can send both BTC and counterparty assets
@@ -454,6 +453,7 @@ function SweepModalViewModel() {
             'to': self.destAddress(),
             'normalized_quantity': normalizedQuantity
           });
+          sendData['_divisible'] = !(selectedAsset.RAW_BALANCE == selectedAsset.NORMALIZED_BALANCE); //if the balances match, the asset is NOT divisible
           PENDING_ACTION_FEED.add(sendTxHash, "sends", sendData);
           
           //For non BTC/XCP assets, also take ownership (iif the address we are sweeping from is the asset's owner')

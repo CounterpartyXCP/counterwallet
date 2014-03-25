@@ -362,7 +362,7 @@ function BuySellWizardViewModel() {
   // delayed to that we don't make a bunch of ajax requests WHILE the user is typing...instead, waiting until the user
   // a) finishes typing and b) the value is valid, before making changes. Subscribing to changes in delayedFeeForSelectedBTCQuantity allows us to do this
   
-  self.dispFeeForSelectedBTCQuantityAsPct = ko.computed(function() {
+  self.feeForSelectedBTCQuantityAsPct = ko.computed(function() {
     if(!self.feeForSelectedBTCQuantity()) return null;
     return self.btcFeeAs() == 'percentage'
       ? self.btcFee()
@@ -399,9 +399,9 @@ function BuySellWizardViewModel() {
     if(self.sellAsset() == 'BTC') { //include the fee if we're selling BTC
       quantityLeft = Decimal.round(new Decimal(quantityLeft).sub(self.feeForSelectedBTCQuantity()), 8).toFloat();
     }
-    console.log("1.selectedSellQuantity: " + self.selectedSellQuantity());
-    console.log("2.feeForSelectedBTCQuantity: " + self.feeForSelectedBTCQuantity());
-    console.log("3.quantityLeft: " + quantityLeft);
+    //console.log("1.selectedSellQuantity: " + self.selectedSellQuantity());
+    //console.log("2.feeForSelectedBTCQuantity: " + self.feeForSelectedBTCQuantity());
+    //console.log("3.quantityLeft: " + quantityLeft);
     return quantityLeft;
   }, self);//.extend({ notify: 'always' });
   self.dispSellQuantityRemainingAfterSale = ko.computed(function() {
@@ -681,9 +681,14 @@ function BuySellWizardViewModel() {
     if(self.currentTab() != 2) return;
     var deferred = $.Deferred();
     var args = {'buy_asset': self.buyAsset(), 'sell_asset': self.sellAsset()};
-    if(self.buyAsset() == 'BTC') args['normalized_fee_required'] = self.feeForSelectedBTCQuantity();
-    if(self.sellAsset() == 'BTC') args['normalized_fee_provided'] = self.feeForSelectedBTCQuantity();
-    failoverAPI("get_order_book", args, function(data, endpoint) {
+    //default to 0 fee (showing all orders) if no buy amount is entered into the order book
+    if(self.buyAsset() == 'BTC' && self.feeForSelectedBTCQuantityAsPct() !== null) {
+      args['pct_fee_required'] = self.feeForSelectedBTCQuantityAsPct() / 100;
+    } else if(self.sellAsset() == 'BTC' && self.feeForSelectedBTCQuantityAsPct() !== null) {
+      args['pct_fee_provided'] = self.feeForSelectedBTCQuantityAsPct() / 100; 
+    }
+    
+    failoverAPI("get_order_book_buysell", args, function(data, endpoint) {
       deferred.resolve();
       if(data['raw_orders'] && data['raw_orders'].length) {
         //we have an order book, showPriceChart should end up being set to true and the order book will show
@@ -698,7 +703,7 @@ function BuySellWizardViewModel() {
       
       //show all open orders for the selected asset pair
       try { $('#openOrders').dataTable().fnClearTable(); } catch(err) { }
-      //^ hack...rows seem to hang around and be duplicated otherwise with this one table for some reason      
+      //^ hack...rows seem to hang around and be duplicated otherwise      
       self.openOrders(data['open_sell_orders']);
       //now that we have the complete data, show the orders listing
       if(self.openOrders().length) {
@@ -864,7 +869,6 @@ function BuySellWizardViewModel() {
       [1, 2, 3, 4, 6]
     ]];
         
-    //graph.highcharts('StockChart', {
     chartDiv.highcharts('StockChart', {
         rangeSelector: {
             selected: 1
