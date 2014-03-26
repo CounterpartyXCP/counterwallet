@@ -2,3 +2,5 @@ _drafts/
 _site/
 build/
 build.orig/
+.DS_Store*
+._*
