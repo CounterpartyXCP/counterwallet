@@ -8,4 +8,3 @@ node_modules/
 src/servers.json
 dist/
 .tmp
-src/vendors
