@@ -1,10 +1,13 @@
 
 button#createNewAddress { margin: 12px; }
 
-input.addressNicknameEditable { width: 220px; } /* for the popup x-editable control */
-
 section.balancesContainer div[role=content] { padding: 5px; }
 /*section.balancesContainer div.popover { min-width: 300px; }*/
+
+span.addressLabelText {
+  text-decoration:underline;
+  cursor:pointer;
+}
 
 div#showAssetInfoModal table {
   width:95%;

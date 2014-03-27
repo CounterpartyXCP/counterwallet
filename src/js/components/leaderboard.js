@@ -9,7 +9,6 @@ var AssetLeaderboardViewModel = CClass.create(function() {
     {'base': 'XCP', 'data': ko.observableArray([])},
     {'base': 'BTC', 'data': ko.observableArray([])}
   ]);
-  self.miniChartData = ko.observable({});
   self._lastWindowWidth = null;
   
   self.init = function(assets) {
@@ -148,7 +147,11 @@ var AssetLeaderboardViewModel = CClass.create(function() {
           credits: { enabled: false },
           tooltip: { enabled: false },
           legend: { enabled: false },
-          series: self.marketCapTables()[i]['data']()[j]['history']
+          series: [{
+            name: 'data',
+            type: 'scatter',
+            data: self.marketCapTables()[i]['data']()[j]['history']
+          }]
         });
       }
     }

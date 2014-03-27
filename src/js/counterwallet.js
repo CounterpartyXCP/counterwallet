@@ -2,7 +2,7 @@
 /***********
  * GLOBAL STATE AND SETUP
  ***********/
-var VERSION = "0.9.2 BETA";
+var VERSION = "0.9.3 BETA";
 var IS_MOBILE_OR_TABLET = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
 var PREFERENCES = {}; //set when logging in
 
@@ -85,6 +85,7 @@ var MAX_ASSET_DESC_LENGTH = 41; //42, minus a null term character?
 var ORDER_DEFAULT_BTCFEE_PCT = 1; //1% of total order
 var ORDER_DEFAULT_EXPIRATION = 320; //num blocks until expiration (at ~9 min per block this is ~48hours)
 var DEFAULT_NUM_ADDRESSES = 3; //default number of addresses to generate
+var MARKET_INFO_REFRESH_EVERY = 5 * 60 * 1000; //refresh market info every 5 minutes while enabled 
 
 var AUTOPRIME_AT_LESSTHAN_REMAINING = 10; //auto prime at less than this many txouts remaining
 var AUTOPRIME_MAX_COUNT = 10; //max number of txns to add with an autoprime

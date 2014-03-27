@@ -6,6 +6,7 @@
   background: white; 
   width:      100%;
   height:     100%;
+  overflow: auto;
 }
 
 .sales-title {
@@ -21,28 +22,36 @@
 }
 
 #form-well {
-    width: 610px;
+    max-width: 610px;
     margin: 0 auto;
     padding-bottom: 0px;
 }
 
 #password {
-    width: 400px;
+    width: 100%;
 }
 
 #generated {
-    width: 530px;
-    display: inline-block;
-    padding: 6px 5px;
-    border: 1px solid #AAA;
+  width: 85%;
+  display: inline-block;
+  padding: 6px 5px;
+  border: 1px solid #AAA;
+}
+
+#generated-regenerate {
+  width: 13%;
 }
 
 #form-well .btn-success {
   width: 250px;
 }
 
-#walletLogin {
-  width: 120px;
+#walletLoginButton {
+  width: 70%;
+}
+
+#secureKeyboardButton {
+  width: 25%;
 }
 
 #extra-info {

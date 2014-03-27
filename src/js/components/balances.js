@@ -1,4 +1,67 @@
 
+function ChangeAddressLabelModalViewModel() {
+  var self = this;
+  self.shown = ko.observable(false);
+  self.address = ko.observable(null); //address string, not an Address object
+  self.existingLabel = ko.observable(null);
+  
+  self.newLabel = ko.observable('').trimmed().extend({
+    required: true,
+    validation: {
+      validator: function (val, self) {
+        return val.length <= 75;
+      },
+      message: 'Invalid label (max 75 characters)',
+      params: self
+    }    
+  });
+  
+  self.validationModel = ko.validatedObservable({
+    newLabel: self.newLabel
+  });  
+  
+  self.resetForm = function() {
+    self.newLabel('');
+    self.validationModel.errors.showAllMessages(false);
+  }
+  
+  self.submitForm = function() {
+    if (!self.validationModel.isValid()) {
+      self.validationModel.errors.showAllMessages();
+      return false;
+    }    
+    //data entry is valid...submit to the server
+    $('#changeAddressLabelModal form').submit();
+  }
+  
+  self.doAction = function() {
+    var addressHash = hashToB64(self.address());
+    PREFERENCES.address_aliases[addressHash] = self.newLabel();
+    //update the preferences on the server 
+    multiAPI("store_preferences", [WALLET.identifier(), PREFERENCES], function(data, endpoint) {
+      WALLET.getAddressObj(self.address()).label(self.newLabel()); //update was a success
+      self.shown(false);
+    });
+  }
+  
+  self.show = function(address, existingLabel, resetForm) {
+    if(typeof(resetForm)==='undefined') resetForm = true;
+    if(resetForm) self.resetForm();
+    self.address(address);
+    self.existingLabel(existingLabel);
+    
+    //set new label to existing label (to provide a default) and highlight the box
+    self.newLabel(existingLabel);
+    self.shown(true);
+    selectText('newAddressLabel');
+  }  
+
+  self.hide = function() {
+    self.shown(false);
+  }  
+}
+
+
 ko.validation.rules['isAddressSpecifiedIfRequired'] = {
     validator: function (val, self) {
       return self.forWatchOnly() ? val : true;
@@ -362,7 +425,8 @@ function SweepModalViewModel() {
       call_date: selectedAsset.ASSET_INFO['call_date'],
       call_price: parseFloat(selectedAsset.ASSET_INFO['call_price']) || null,
       transfer_destination: self.destAddress(),
-      multisig: pubkey
+      encoding: 'multisig',
+      pubkey: pubkey
     };
     multiAPIConsensus("create_issuance", transferData,
       function(unsignedTxHex, numTotalEndpoints, numConsensusEndpoints) {
@@ -436,7 +500,8 @@ function SweepModalViewModel() {
       destination: self.destAddress(),
       quantity: quantity,
       asset: selectedAsset.ASSET,
-      multisig: pubkey
+      encoding: 'multisig',
+      pubkey: pubkey
     };
     multiAPIConsensus("create_send", sendData, //can send both BTC and counterparty assets
       function(unsignedTxHex, numTotalEndpoints, numConsensusEndpoints) {

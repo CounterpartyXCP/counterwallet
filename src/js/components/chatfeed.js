@@ -213,7 +213,7 @@ function ChatFeedViewModel() {
     var newLine = new ChatLineViewModel(type, handle, op, text);
     var lastLines = self.lines.slice(Math.max(self.lines().length - 3, 1));
     for(var i=0; i < lastLines.length; i++) {
-      if(newLine.lineText() == lastLines[i].lineText() && lastLines[i].TYPE != 'system' && !lastLines[i].OP) {
+      if(newLine.lineText() == lastLines[i].lineText() && lastLines[i].TYPE != 'system') { // && !lastLines[i].OP) {
         $.jqlog.debug("chat.addLine: Line ignored (duplicate): " + newLine.lineText());
         return;
       }

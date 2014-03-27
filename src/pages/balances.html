@@ -47,8 +47,8 @@
       <article class="col-xs-12 col-sm-12 col-md-12 col-lg-12"> <!-- widget START -->
         <div class="jarviswidget defaultWidgetColor" data-bind="attr: {'id': 'address-wid-' + $data.ADDRESS}" data-widget-deletebutton="false" data-widget-editbutton="false">
           <header>
-            <span class="widget-icon"> <i class="fa" data-bind="css: { 'fa-bars': !IS_WATCH_ONLY, 'fa-eye': IS_WATCH_ONLY } "></i> </span>
-            <h2 class="jarviswidget-ctrls"><a href="#" data-bind="editable: label, editableOptions: { type: 'text', url: changeLabel, inputclass: 'addressNicknameEditable', placement: 'bottom', title: 'Enter a new nickname for this address' }" style="text-decoration:underline"></a><span data-bind="visible: IS_WATCH_ONLY">&nbsp;&nbsp;(Watch Only)</span></h2>
+            <span class="widget-icon"> <i class="fa" data-bind="css: { 'fa-arrow-circle-o-right': !IS_WATCH_ONLY, 'fa-eye': IS_WATCH_ONLY }"></i> </span>
+            <h3 class="jarviswidget-ctrls"><span class="addressLabelText" href="#" data-bind="text: label, click: changeLabel"></span><span data-bind="visible: IS_WATCH_ONLY">&nbsp;&nbsp;(Watch Only)</span></h3>
             <div class="widget-toolbar">
               <div class="btn-group">
                 <button class="btn dropdown-toggle btn-xs btn-primary" data-toggle="dropdown"><i class="fa fa-bars"></i> Address Actions <i class="fa fa-caret-down"></i></button>                
@@ -111,6 +111,38 @@
       </article> <!-- WIDGET END -->
     </div> <!-- balances container, foreach: address -->
 </section> <!-- end widget grid -->
+
+<!-- modal for change address label -->
+<div data-bind="showModal: shown" id="changeAddressLabelModal" class="modal fade" data-backdrop="static" data-keyboard="false" tabindex="-1" role="dialog" aria-labelledby="changeAddressLabelModal" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" data-bind="click: hide" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+        <h4 class="modal-title">Change Address Label</h4>
+      </div>
+      <div class="modal-body no-padding">
+        <div class="formPadded">
+            <p>Enter the new label (or, nickname) for your address <b class="notoAddressColor"><span data-bind="text: address()"></span></b>.</p>
+        </div>
+        
+        <form class="smart-form" data-bind="submit: doAction"><fieldset>
+          <section><div class="row">
+            <label class="control-label col col-sm-2">Label</label>
+            <div class="col col-sm-10">
+                <label class="input"><i class="icon-append fa fa-tag"></i>
+                    <input id="newAddressLabel" name="newLabel" data-bind="value: newLabel, valueUpdate: 'input'" type="text"/>
+                </label>
+            </div>
+          </div></section>
+        </fieldset></form>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-default" data-bind="click: hide">Cancel</button>
+        <button type="button" data-bind="click: submitForm" class="btn btn-primary">Change Label</button>
+      </div>
+    </div><!-- /.modal-content -->
+  </div><!-- /.modal-dialog -->
+</div><!-- /.modal -->
   
 <!-- modal for new address -->
 <div data-bind="showModal: shown" id="createNewAddressModal" class="modal fade" data-keyboard="false" tabindex="-1" role="dialog" aria-labelledby="createNewAddressModal" aria-hidden="true">
@@ -794,6 +826,7 @@
     }
     function b_3() {
       //balances.js
+      window.CHANGE_ADDRESS_LABEL_MODAL = new ChangeAddressLabelModalViewModel();
       window.CREATE_NEW_ADDRESS_MODAL = new CreateNewAddressModalViewModel();
       window.SEND_MODAL = new SendModalViewModel();
       window.SWEEP_MODAL = new SweepModalViewModel();
@@ -802,6 +835,7 @@
       window.TESTNET_BURN_MODAL = new TestnetBurnModalViewModel();
       
       ko.applyBindings({}, document.getElementById("gettingStartedNotice"));
+      ko.applyBindingsWithValidation(CHANGE_ADDRESS_LABEL_MODAL, document.getElementById("changeAddressLabelModal"));
       ko.applyBindingsWithValidation(CREATE_NEW_ADDRESS_MODAL, document.getElementById("createNewAddressModal"));
       ko.applyBindingsWithValidation(SEND_MODAL, document.getElementById("sendModal"));
       ko.applyBindingsWithValidation(SWEEP_MODAL, document.getElementById("sweepModal"));

@@ -201,6 +201,25 @@ body.smart-style-3 .defaultWidgetColor>header { /* google skin = darkBlue (night
     background-color: #739e73 !important;
 }
 
+/*
+ * JARVIS WIDGET OVERRIDES
+ */
+/* with this, do not use h2 for widget header text, as jarvis widget .js source will use that as a selector to save the
+ * widget header title into localstorage, which we do NOT want (as it messes with our saved address headers, headers
+ * that use knockout, etc). So copy their h2 style for h3 and use h3 instead
+ */
+.jarviswidget>header h3 {
+padding-left: 10px;
+float: left;
+height: 100%;
+width: auto;
+display: inline-block;
+font-size: 14px;
+position: relative;
+margin: 0;
+line-height: 34px;
+font-weight: 400;
+letter-spacing: 0;
 
 /*
  * DATA TABLES OVERRIDES

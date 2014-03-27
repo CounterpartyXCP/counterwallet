@@ -243,15 +243,26 @@ function handleMessage(txHash, category, message) {
   } else if(category == "sends") {
     //the effects of a send are handled based on the credit and debit messages it creates, so nothing to do here
   } else if(category == "orders") {
-    if(WALLET.getAddressObj(message['source'])) {
-      //List the order in our open orders list (activities feed)
+    //update the give/get remaining numbers in the open orders listing, if it already exists
+    var match = ko.utils.arrayFirst(OPEN_ORDER_FEED.openOrders(), function(item) {
+        return item.ORDER['tx_index'] == message['tx_index'];
+    });
+    if(match) {
+      if(message['_status'] == 'filled' || message['give_quantity'] <= 0 || message['get_quantity'] <= 0) {
+        //order is filled, remove it from the listing
+        OPEN_ORDER_FEED.remove(message['tx_index']);
+      } else { //order is not filled, but the quantities are updating
+        match.rawGiveRemaining(match.rawGiveRemaining() - message['give_quantity']);
+        match.rawGetRemaining(match.rawGetRemaining() - message['get_quantity']);
+      }
+    } else if(WALLET.getAddressObj(message['source'])) {
+      //order is not in the open orders listing, but should be
       OPEN_ORDER_FEED.add(message);
-      //Also list the order on open orders if we're viewing the dex page
-      /*if (typeof BUY_SELL !== 'undefined') {
-        BUY_SELL.openOrders.push(message);
-      }*/
     }
   } else if(category == "order_matches") {
+    //Look to order matches when determining to do a BTCpay
+    //If the order_matches message doesn't have a tx0_address/tx1_address field, then we don't need to do anything with it
+    
     if(   (WALLET.getAddressObj(message['tx0_address']) && message['forward_asset'] == 'BTC')
        || (WALLET.getAddressObj(message['tx1_address']) && message['backward_asset'] == 'BTC')) {
       //If here, we got an order match where an address in our wallet owes BTC.
@@ -335,19 +346,6 @@ function handleMessage(txHash, category, message) {
       }
     } else if(WALLET.getAddressObj(message['tx0_address']) || WALLET.getAddressObj(message['tx1_address'])) {
       //If here, we got an order match for one of our addresses, but where no BTCpay is necessary from us
-
-      //update the give/get remaining numbers in the open orders listing
-      var match = ko.utils.arrayFirst(OPEN_ORDER_FEED.openOrders(), function(item) {
-          return item.ORDER['tx_index'] == message['tx0_index'] || item.ORDER['tx_index'] == message['tx1_index'];
-      });
-      if(match && match.ORDER['tx_index'] == message['tx0_index']) {
-        match.rawGiveRemaining(match.rawGiveRemaining() - message['forward_quantity']);
-        match.rawGetRemaining(match.rawGetRemaining() - message['backward_quantity']);
-      } else if(match) {
-        assert(match.ORDER['tx_index'] == message['tx1_index']);
-        match.rawGiveRemaining(match.rawGiveRemaining() - message['backward_quantity']);
-        match.rawGetRemaining(match.rawGetRemaining() - message['forward_quantity']);
-      }
       //no need to update for the buy/sell page's pending orders list as that is updated via synchronous data refresh
     }
   } else if(category == "order_expirations") {

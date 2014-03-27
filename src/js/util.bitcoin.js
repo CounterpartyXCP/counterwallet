@@ -24,7 +24,7 @@ function smartFormat(num, truncateDecimalPlacesAtMin, truncateDecimalPlacesTo) {
   if(typeof(truncateDecimalPlacesMin)==='undefined') truncateDecimalPlacesMin = null;
   if(typeof(truncateDecimalPlacesTo)==='undefined') truncateDecimalPlacesTo = 4;
   //if(num > 10) num = Decimal.round(new Decimal(num), 4).toFloat();
-  if(truncateDecimalPlacesAtMin !== null && num > truncateDecimalPlacesAtMin)
+  if(truncateDecimalPlacesAtMin === null || num > truncateDecimalPlacesAtMin)
     num = +num.toFixed(truncateDecimalPlacesTo); //use + sign to lob off any trailing zeros...
   return numberWithCommas(noExponents(num));
 }

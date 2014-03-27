@@ -153,12 +153,7 @@ function AddressViewModel(key, address, initialLabel) {
   /////////////////////////
   //Address-panel-related
   self.changeLabel = function(params) {
-    var addressHash = hashToB64(self.ADDRESS);
-    PREFERENCES.address_aliases[addressHash] = params.value;
-    //update the preferences on the server 
-    multiAPI("store_preferences", [WALLET.identifier(), PREFERENCES], function(data, endpoint) {
-      self.label(params.value); //update was a success
-    });
+    CHANGE_ADDRESS_LABEL_MODAL.show(self.ADDRESS, self.label());
   }
   
   self.prime = function() {

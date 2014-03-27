@@ -402,8 +402,10 @@ function WalletViewModel() {
   
   self.doTransaction = function(address, action, data, onSuccess, onError) {
     //specify the pubkey for a multisig tx
-    assert(data['multisig'] === undefined);
-    data['multisig'] = WALLET.getAddressObj(address).PUBKEY;
+    assert(data['encoding'] === undefined);
+    assert(data['pubkey'] === undefined);
+    data['encoding'] = 'multisig';
+    data['pubkey'] = WALLET.getAddressObj(address).PUBKEY;
     //find and specify the verifyDestAddr
     
     //hacks for passing in some data that should be sent to PENDING_ACTION_FEED.add(), but not the create_ API call

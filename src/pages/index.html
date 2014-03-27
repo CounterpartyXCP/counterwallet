@@ -165,19 +165,22 @@
         -->
         <ul>
           <li class="">
-            <a href="xcp/pages/balances.html"><i class="fa fa-lg fa-fw fa-user"></i> <span class="menu-item-parent">Balances &amp; Assets</span></a>
+            <a href="xcp/pages/balances.html"><i class="fa fa-lg fa-fw fa-user"></i> <span class="menu-item-parent">My Balances</span></a>
           </li>
           <li class="">
             <a href="xcp/pages/buysell.html"><i class="fa fa-lg fa-fw fa-exchange"></i> <span class="menu-item-parent">Buy &amp; Sell</span></a>
           </li>
           <li class="">
-            <a href="xcp/pages/history.html"><i class="fa fa-lg fa-fw fa-sort-amount-asc"></i> <span class="menu-item-parent">History</span></a>
+            <a href="xcp/pages/orders.html"><i class="fa fa-lg fa-fw fa-bar-chart-o"></i> <span class="menu-item-parent">View Prices</span></a>
           </li>
           <li class="">
             <a href="xcp/pages/portfolio.html"><i class="fa fa-lg fa-fw fa-tasks"></i> <span class="menu-item-parent">My Portfolio</span></a>
           </li>
           <li class="">
             <a href="xcp/pages/leaderboard.html"><i class="fa fa-lg fa-fw fa-trophy"></i> <span class="menu-item-parent">Top Assets</span></a>
+          </li>
+          <li class="">
+            <a href="xcp/pages/history.html"><i class="fa fa-lg fa-fw fa-book"></i> <span class="menu-item-parent">History</span></a>
           </li>
           <li>
             <a href="#" id="chatLink"><i class="fa fa-lg fa-fw fa-comments-o"></i><span class="menu-item-parent">Show Chat</span></a>
@@ -237,12 +240,14 @@
             </div>
             <div class="panel-body">
               <p>We have created a passphrase for you in the box below.</p>
-              <div id="generated" data-bind="text: generatedPassphrase"></div>
-              <button data-bind="click: generatePassphrase, tooltip: {title: 'Click to generate another random passphrase.'}" class="pull-right btn btn-default" type="button"><i class="fa fa-repeat"></i></button>
+              <div style="width:100%">
+                <span id="generated" data-bind="text: generatedPassphrase"></span>
+                <button id="generated-regenerate" data-bind="click: generatePassphrase, tooltip: {title: 'Click to generate another random passphrase.'}" class="pull-right btn btn-default" type="button"><i class="fa fa-repeat"></i></button>
+              </div>
               <div class="alert alert-danger" style="margin-top:15px;">
                 <p style="font-weight:bold;text-align:center;font-size:1.3em">Write your passphrase down and keep it safe.</p>
                 <p style="font-weight:bold;text-decoration:underline;text-align:center;font-size:1.15em">
-                  If you lose this passphrase, you will loose access to your wallet.
+                  If you lose this passphrase, you will lose access to your wallet.
                 </p>
                 <p style="font-weight:bold;text-decoration:underline;text-align:center;font-size:1.15em">
                   If someone gets your passphrase, they can gain access to your wallet.
@@ -260,12 +265,14 @@
               <span data-bind="fadeVisibleInOnly: USE_TESTNET" class="label label-info pull-right" style="display:none;margin-left:5px;padding: 5px;"><i class="fa-fw fa fa-info"></i>&nbsp;Testnet In Use</span>
             </h3>
           </div>
-          <div class="panel-body">
+          <div class="panel-body" style="padding-left:5px;padding-right:5px">
             <form class="form-inline" role="form">
-              <input id="password" data-bind="value: enteredPassphrase, valueUpdate: 'input'" placeholder="Enter your Counterwallet 12 word passphrase." class="form-control pull-left" type="password">
-              <div class="pull-right">
-                <button id="walletLogin" data-bind="click: openWallet, enable: isPassphraseValid(), css: { 'btn-primary': isPassphraseValid() }" type="button" class="btn btn-default" disabled>Open Wallet</button>
-                &nbsp;<button id="secureKeyboard" data-bind="click: showSecureKeyboard, enable: !isPassphraseValid(), css: { 'btn-primary': !isPassphraseValid() }" type="button" class="btn btn-default" disabled><i class="fa fa-keyboard-o"></i></button>
+              <div class="col-sm-8">
+                <input id="password" data-bind="value: enteredPassphrase, valueUpdate: 'input'" placeholder="Enter your 12 word passphrase." class="form-control" type="password">
+              </div>
+              <div class="col-sm-4">
+                <button id="walletLoginButton" data-bind="click: openWallet, enable: isPassphraseValid(), css: { 'btn-primary': isPassphraseValid() }" type="button" class="btn btn-default" disabled>Open Wallet</button>
+                &nbsp;<button id="secureKeyboardButton" data-bind="click: showSecureKeyboard, enable: !isPassphraseValid(), css: { 'btn-primary': !isPassphraseValid() }" type="button" class="btn btn-default" disabled><i class="fa fa-keyboard-o"></i></button>
               </div>
             </form>
             <div class="clearfix"></div>
@@ -525,7 +532,6 @@
     <script src="js/plugin/select2/select2.min.js"></script> <!-- JQUERY SELECT2 INPUT -->
     <script src="js/plugin/msie-fix/jquery.mb.browser.min.js"></script> <!-- browser msie issue fix -->
     <script src="js/plugin/fastclick/fastclick.js"></script> <!-- FastClick: For mobile devices: you can disable this in app.js -->
-    <script src="js/plugin/x-editable/x-editable.min.js"></script> <!-- x-editable (popup editable) -->
     <script src="js/plugin/bootstrap-wizard/jquery.bootstrap.wizard.min.js"></script> <!-- bootstrap wizard -->
     <!-- datatables -->
     <script src="js/plugin/datatables/jquery.dataTables-cust.min.js"></script>
@@ -564,7 +570,6 @@
     <!-- knockout.js -->
     <script src="xcp/extjs/knockout.js"></script>
     <script src="xcp/extjs/knockout-bootstrap.js"></script>
-    <script src="xcp/extjs/knockout.x-editable.js"></script>
     <script src="xcp/extjs/knockout.validation.js"></script>
     <!-- highstock (which also includes highcharts) (minified)-->
     <script src="xcp/extjs/highstock.js"></script>

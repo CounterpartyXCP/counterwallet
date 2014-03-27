@@ -1,4 +1,3 @@
-var MARKET_INFO_REFRESH_EVERY = 5 * 60 * 1000; //refresh market info every 5 minutes while on tab 2 
 
 var BuySellAddressInDropdownItemModel = function(address, label, asset, balance) {
   this.ADDRESS = address;
@@ -306,7 +305,14 @@ function BuySellWizardViewModel() {
     isValidPositiveQuantity: {
       params: self,
       onlyIf: function () { self.customSellAs() == "unitprice"; }
-    }
+    },
+    validation: {
+      validator: function (val, self) {
+        return self.sellQuantityRemainingAfterSale() >= 0;
+      },
+      message: 'Exceeds available balance',
+      params: self
+    }    
   });
   self.customSellAsEntry.subscribe(function(newValue) {
     if(!self.assetPair() || isNaN(parseFloat(newValue)) || parseFloat(newValue) <= 0 || !self.selectedBuyQuantity()) return;
@@ -368,7 +374,7 @@ function BuySellWizardViewModel() {
       ? self.btcFee()
       : Decimal.round(new Decimal(100).mul(self.feeForSelectedBTCQuantity()).div(self.selectedSellQuantity()), 2).toFloat();
   }, self);
-  
+
   self.unitPriceCustom = ko.computed(function() {
     if(!self.assetPair() || !isNumber(self.selectedBuyQuantity()) || !isNumber(self.selectedSellQuantityCustom())) return null;
     //^ only valid when the market unit price doesn't exist or is overridden
@@ -527,7 +533,13 @@ function BuySellWizardViewModel() {
           self.btcFee(ORDER_DEFAULT_BTCFEE_PCT);
           self.btcFeeAs('percentage');
           self.tradeHistory([]);
-          self.openOrders([]);
+    
+          if(self.openOrders()) {
+            try { $('#openOrders').dataTable().fnClearTable(); } catch(err) { }
+            //^ hack...rows seem to hang around and be duplicated otherwise
+            self.openOrders([]);
+          }
+
           self.askBook([]);
           self.bidBook([]);
           self.bidAskMedian(null);
@@ -649,7 +661,7 @@ function BuySellWizardViewModel() {
       deferred.resolve();
       if(data.length) {
         self.showPriceChart(true);
-        self.doChart($('#priceHistory'), data);
+        OrdersViewModel.doChart(self.dispAssetPair(), $('#priceHistory'), data); //does what we want
       } else {
         self.showPriceChart(false);
       }
@@ -676,7 +688,7 @@ function BuySellWizardViewModel() {
       return defaultErrorHandler(jqXHR, textStatus, errorThrown, endpoint);
     });
   }
-
+  
   self.tab2RefreshOrderBook = function() {
     if(self.currentTab() != 2) return;
     var deferred = $.Deferred();
@@ -703,8 +715,9 @@ function BuySellWizardViewModel() {
       
       //show all open orders for the selected asset pair
       try { $('#openOrders').dataTable().fnClearTable(); } catch(err) { }
-      //^ hack...rows seem to hang around and be duplicated otherwise      
-      self.openOrders(data['open_sell_orders']);
+      //^ hack...rows seem to hang around and be duplicated otherwise
+      self.openOrders(data['raw_orders']);
+      
       //now that we have the complete data, show the orders listing
       if(self.openOrders().length) {
         runDataTables('#openOrders', true, { "aaSorting": [ [0, 'desc'] ] });
@@ -730,7 +743,7 @@ function BuySellWizardViewModel() {
     return maxAfford;
   }
   
-  self.derivePendingOrderAssetQuantity = function(asset, quantity) {
+  self.deriveOpenOrderAssetQuantity = function(asset, quantity) {
     //helper function for showing pending trades
     assert(asset && quantity, "Asset and/or quantity not present");
     if(asset == self.buyAsset()) {
@@ -741,12 +754,12 @@ function BuySellWizardViewModel() {
     }
   }
 
-  self.derivePendingOrderAssetPrice = function(asset1, quantity1, asset2, quantity2) {
+  self.deriveOpenOrderAssetPrice = function(asset1, quantity1, asset2, quantity2) {
     //helper function for showing pending trades
     assert(asset1 && quantity1, "Asset1 and/or quantity1 not present");
     assert(asset2 && quantity2, "Asset2 and/or quantity2 not present");
-    var derivedQuantity1 = self.derivePendingOrderAssetQuantity(asset1, quantity1);
-    var derivedQuantity2 = self.derivePendingOrderAssetQuantity(asset2, quantity2);
+    var derivedQuantity1 = self.deriveOpenOrderAssetQuantity(asset1, quantity1);
+    var derivedQuantity2 = self.deriveOpenOrderAssetQuantity(asset2, quantity2);
     
     if(asset1 == self.baseAsset()) {
       return smartFormat(Decimal.round(new Decimal(derivedQuantity2).div(derivedQuantity1), 8).toFloat());
@@ -756,35 +769,16 @@ function BuySellWizardViewModel() {
     }
   }
   
-  self.derivePendingOrderExpiresIn = function(blockIndexCreatedAt, expiration) {
-    assert(WALLET.networkBlockHeight());
-    //Outputs HTML
-    var blockLifetime = WALLET.networkBlockHeight() - blockIndexCreatedAt;
-    var timeLeft = expiration - blockLifetime;
-    var labelType = null;
-
-    if(timeLeft < 0) {
-      labelType = 'danger'; //red
-    } else if(timeLeft > 5) { // > 5
-      labelType = 'success'; //green
-    } else if(timeLeft >= 3) { //5, 4, 3
-      labelType = 'warning'; //yellow
-    } else { //2, 1, 0
-      labelType = 'danger'; //red
-    }
-    return '<span class="label label-' + labelType + '">' + (timeLeft >= 0 ? 'In ' + timeLeft + (timeLeft == 1 ? ' block' : ' blocks') : 'EXPIRED') + '</span>';
-  }
-  
   self._afterSelectedAnOpenOrder = ko.observable(false);
   self.buySelectedOpenOrder = function(order) {
     //called when a user clicks on an open order they would like to buy. should fill in the details for them on the buy page
     self.overrideMarketPrice(true);
     self.customSellAs('unitprice');
-    var unitPrice = self.derivePendingOrderAssetPrice(
+    var unitPrice = self.deriveOpenOrderAssetPrice(
       order['get_asset'], order['get_quantity'], order['give_asset'], order['give_quantity'])
     self.customSellAsEntry(unitPrice);
     var maxAfford = self.getMaxAfford(unitPrice);
-    var totalSaleAmount = self.derivePendingOrderAssetQuantity(order['give_asset'], order['give_remaining']);
+    var totalSaleAmount = self.deriveOpenOrderAssetQuantity(order['give_asset'], order['give_remaining']);
     var buyAmount = Math.min(maxAfford, totalSaleAmount);
     self.selectedBuyQuantity(buyAmount);
 
@@ -802,115 +796,6 @@ function BuySellWizardViewModel() {
     setTimeout(function() { $.jqlog.debug("Deactivating _afterSelectedAnOpenOrder guard"); self._afterSelectedAnOpenOrder(false); }, 2500);
 
     $("body").animate({ scrollTop: 0 }, "fast"); //scroll to top of screen
-  }
-  
-  self.cancelOrder = function(order) {
-    assert(order['tx_index'], "Order is invalid");
-    
-    //pop up a confirmation dialog
-    bootbox.dialog({
-      message: "Are you sure that you want to cancel this order?<br/><br/> \
-        <b style='color:red'>Please NOTE that this action is irreversable!</b>",
-      title: "Are you sure?",
-      buttons: {
-        success: {
-          label: "Don't Cancel Order'",
-          className: "btn-default",
-          callback: function() {
-            //modal will disappear
-          }
-        },
-        danger: {
-          label: "Cancel Order",
-          className: "btn-danger",
-          callback: function() {
-            //issue 0 to lock the asset
-            WALLET.doTransaction(self.selectedAddress(), "create_cancel",
-              {
-                offer_hash: item['tx_hash'],
-                _type: 'order',
-                _tx_index: item['tx_index']
-              },
-              function() {
-                bootbox.alert("Your order cancellation has been submitted. " + ACTION_PENDING_NOTICE);
-              }
-            );
-          }
-        },
-      }
-    });    
-  }
-  
-  self.doChart = function(chartDiv, data) {
-    // split the data set into ohlc and volume
-    var ohlc = [];
-    var volume = [];
-    
-    for(var i = 0; i < data.length; i++) {
-      ohlc.push([
-        data[i][0], // the date
-        data[i][1], // open
-        data[i][2], // high
-        data[i][3], // low
-        data[i][4]  // close
-      ]);
-      volume.push([
-        data[i][0], // the date
-        data[i][5]  // the volume
-      ])
-    }
-
-    // set the allowed units for data grouping
-    var groupingUnits = [[
-      'week',                         // unit name
-      [1]                             // allowed multiples
-    ], [
-      'month',
-      [1, 2, 3, 4, 6]
-    ]];
-        
-    chartDiv.highcharts('StockChart', {
-        rangeSelector: {
-            selected: 1
-        },
-        title: {
-            text: self.dispAssetPair()
-        },
-        yAxis: [{
-            title: {
-                text: 'Price'
-            },
-            height: 200,
-            lineWidth: 2
-        }, {
-            title: {
-                text: 'Volume'
-            },
-            top: 300,
-            height: 100,
-            offset: 0,
-            lineWidth: 2
-        }],
-        series: [{
-            type: 'candlestick',
-            name: self.dispAssetPair(),
-            data: ohlc,
-            dataGrouping: {
-              units: groupingUnits
-            }
-        }, {
-            type: 'column',
-            name: 'Volume',
-            data: volume,
-            yAxis: 1,
-            dataGrouping: {
-              units: groupingUnits
-            }
-        }],
-        credits: {
-          enabled: false
-        }
-    });
   }
   
   self.dataTableResponsive = function(e) {

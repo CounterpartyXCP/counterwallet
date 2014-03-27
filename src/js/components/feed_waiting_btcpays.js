@@ -139,9 +139,13 @@ function WaitingBTCPayFeedViewModel() {
           var orderMatchID = data[i]['tx0_hash'] + data[i]['tx1_hash'];
           var match = $.grep(pendingBTCPayStorage, function(e) { return e[0] == orderMatchID; })[0];
           if(!match) {
-            //if not already paid and awaiting confirmation, show it as a waiting BTC pay
-            var btcPayData = WaitingBTCPayFeedViewModel.makeBTCPayData(data[i]);
-            WAITING_BTCPAY_FEED.add(btcPayData, i == data.length - 1);
+            //if not already paid and awaiting confirmation, show it as a waiting BTC
+            // pay, but only if we're the ones that should pay the BTC
+            if(   WALLET.getAddressObj(data['tx0_address']) && data['forward_asset'] == 'BTC'
+               || WALLET.getAddressObj(data['tx1_address']) && data['backward_asset'] == 'BTC') {
+              var btcPayData = WaitingBTCPayFeedViewModel.makeBTCPayData(data[i]);
+              WAITING_BTCPAY_FEED.add(btcPayData, i == data.length - 1);
+            }
           } else {
             $.jqlog.debug("pendingBTCPay:restore:not showing (awaiting network confirmation): " + match[1]);
           }
@@ -173,9 +177,10 @@ function WaitingBTCPayFeedViewModel() {
     );
   }
 }
+
 WaitingBTCPayFeedViewModel.makeBTCPayData = function(data) {
   //data is a pending order match object (from a data feed message received, or from a get_orders API result)
-  var firstInPair = WALLET.getAddressObj(data['tx0_address']) && data['forward_asset'] == 'BTC' ? true : false;
+  var firstInPair = (WALLET.getAddressObj(data['tx0_address']) && data['forward_asset'] == 'BTC') ? true : false;
   if(!firstInPair) assert(WALLET.getAddressObj(data['tx1_address']) && data['backward_asset'] == 'BTC');
   
   return {
