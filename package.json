@@ -1,15 +1,15 @@
-json 
 {
   "name": "counterwallet",
   "description": "Counterwallet",
   "author": "Counterparty development team",
   "dependencies": {
-    "grunt": "0.x.x",
-    "grunt-usemin": "2.0.x",
+    "grunt": "0.4.1",
+    "grunt-usemin": "2.1.x",
     "grunt-contrib-clean": "0.5.x",
     "grunt-contrib-connect": "0.4.x",
     "grunt-contrib-copy": "0.4.x",
     "grunt-contrib-cssmin": "0.6.x",
+    "grunt-contrib-concat": "0.3.x",
     "grunt-contrib-jshint": "0.6.x",
     "grunt-contrib-uglify": "0.2.x",
     "grunt-contrib-watch": "0.5.x"

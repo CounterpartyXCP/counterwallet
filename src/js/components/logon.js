@@ -251,7 +251,7 @@ function LogonViewModel() {
 
     //all done. load the balances screen
     $.jqlog.debug("Login complete. Directing to balances page...");
-    window.location.hash = 'xcp/pages/balances.html';
+    window.location.hash = 'pages/balances.html';
   }  
 }
 
