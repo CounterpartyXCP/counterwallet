@@ -245,7 +245,7 @@ function SendModalViewModel() {
         asset: self.asset(),
         _divisible: self.divisible()
       },
-      function() {
+      function(txHash, data, endpoint) {
         bootbox.alert("<b>Your funds were sent successfully.</b> " + ACTION_PENDING_NOTICE);
       }
     );
@@ -851,7 +851,7 @@ function TestnetBurnModalViewModel() {
       { source: self.address(),
         quantity: denormalizeQuantity(self.btcBurnQuantity()),
       },
-      function() {
+      function(txHash, data, endpoint) {
         self.shown(false);
         bootbox.alert("You have burned <b class='notoQuantityColor'>" + self.btcBurnQuantity() + "</b>"
           + " <b class='notoAssetColor'>BTC</b> for approximately"

@@ -48,8 +48,12 @@ function OpenOrderViewModel(order) {
                 _type: 'order',
                 _tx_index: self.ORDER['tx_index']
               },
-              function() {
+              function(txHash, data, endpoint) {
                 bootbox.alert("Your order cancellation has been submitted. " + ACTION_PENDING_NOTICE);
+                
+                if(self.ORDER['give_asset'] == 'BTC') {
+                  multiAPI("cancel_btc_open_order", [WALLET.identifier(), self.ORDER['tx_hash']]);
+                }
               }
             );
           }
@@ -105,9 +109,24 @@ function OpenOrderFeedViewModel() {
     }
     failoverAPI("get_orders", {'filters': filters, 'show_empty': false, 'show_expired': false, 'filterop': 'or'},
       function(data, endpoint) {
+        //get divisibility for assets (this is slow and unoptimized)
+        var assets = [];
         for(i=0; i < data.length; i++) {
-          self.add(data[i], i == data.length - 1); //PERF: sort on the last addition only
+          if(!assets.contains(data[i]['give_asset'])) assets.push(data[i]['give_asset']);
+          if(!assets.contains(data[i]['get_asset'])) assets.push(data[i]['get_asset']);
         }
+        failoverAPI("get_asset_info", [assets], function(assetsInfo, endpoint) {
+          var assetMappings = {};
+          for(i=0; i < assetsInfo.length; i++) {
+            assetMappings[assetsInfo[i]['asset']] = assetsInfo[i]['divisible'];
+          }
+          
+          for(i=0; i < data.length; i++) {
+            data[i]['_give_asset_divisible'] = assetMappings[data[i]['give_asset']];
+            data[i]['_get_asset_divisible'] = assetMappings[data[i]['get_asset']];
+            self.add(data[i], i == data.length - 1); //PERF: sort on the last addition only
+          }
+        });
       }
     );
   }

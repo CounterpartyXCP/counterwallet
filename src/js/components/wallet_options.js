@@ -15,11 +15,11 @@ function WalletOptionsModalViewModel() {
   ]);
   
   //set these properties to null as PREFERENCES is not available until login happens (they will be formally set on login)
-  self.autoPrimeEnabled = ko.observable(true); //enabled by default
-  self.autoBTCPayEnabled = ko.observable(true); //enabled by default
-  self.selectedTheme = ko.observable(self.availableThemes()[0]['id']);
-  self.selectedLang = ko.observable(self.availableLangs()[0]['id']);
-  self.ORIG_PREFERENCES = null;
+  self.autoPrimeEnabled = ko.observable(null);
+  self.autoBTCPayEnabled = ko.observable(null);
+  self.selectedTheme = ko.observable(null);
+  self.selectedLang = ko.observable(null);
+  self.ORIG_PREFERENCES_JSON = null;
   
   //Info table related props
   self.showInfoTable = ko.observable(false);
@@ -62,7 +62,13 @@ function WalletOptionsModalViewModel() {
   
   self.show = function(resetForm) {
     if(typeof(resetForm) === 'undefined') resetForm = true;
-    self.ORIG_PREFERENCES = JSON.stringify(PREFERENCES);
+    self.ORIG_PREFERENCES_JSON = JSON.stringify(PREFERENCES); //store to be able to tell if we need to update prefs on the server
+
+    //display current settings into the options UI
+    self.autoPrimeEnabled(PREFERENCES['auto_prime']);
+    self.autoBTCPayEnabled(PREFERENCES['auto_btcpay']);
+    self.selectedTheme(PREFERENCES['selected_theme']);
+    self.selectedLang(PREFERENCES['selected_lang']);
     
     //ghetto ass hack -- select2 will not set itself properly when using the 'optionsValue' option, but it will
     // not fire off events when NOT using this option. wtf... o_O
@@ -78,7 +84,7 @@ function WalletOptionsModalViewModel() {
   }  
 
   self.hide = function() {
-    if(self.ORIG_PREFERENCES != JSON.stringify(PREFERENCES)) { //only update the preferences if they have changed
+    if(self.ORIG_PREFERENCES_JSON != JSON.stringify(PREFERENCES)) { //only update the preferences if they have changed
       multiAPI("store_preferences", [WALLET.identifier(), PREFERENCES]);  
     }
     self.shown(false);

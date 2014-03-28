@@ -117,7 +117,7 @@ function CreateAssetModalViewModel() {
         call_price: parseFloat(self.callPrice()) || null, //float
         transfer_destination: null
       },
-      function() {
+      function(txHash, data, endpoint) {
         bootbox.alert("Your asset <b class='notoAssetColor'>" + self.name() + "</b>"
           + " has been created.<br/><br/>It will automatically appear under the appropriate address once the network"
           + " has confirmed it, and your address <b class='notoAddrColor'>" + getAddressLabel(self.address())
@@ -202,7 +202,7 @@ function IssueAdditionalAssetModalViewModel() {
         call_price: self.asset().CALLPRICE,
         transfer_destination: null
       },
-      function() {
+      function(txHash, data, endpoint) {
         self.shown(false);
         bootbox.alert("You have issued <b class='notoQuantityColor'>" + self.additionalIssue() + "</b> additional"
           + " quantity on your asset <b class='notoAssetColor'>" + self.asset().ASSET + "</b>. "
@@ -267,7 +267,7 @@ function TransferAssetModalViewModel() {
         call_price: self.asset().CALLPRICE,
         transfer_destination: self.destAddress()
       },
-      function() {
+      function(txHash, data, endpoint) {
         self.shown(false);
         bootbox.alert("<b class='notoAssetColor'>" + self.asset().ASSET + "</b> has been transferred to "
           + " <b class='notoAddressColor'>" + self.destAddress() + "</b>. "
@@ -340,7 +340,7 @@ function ChangeAssetDescriptionModalViewModel() {
         call_price: self.asset().CALLPRICE,
         transfer_destination: null
       },
-      function() {
+      function(txHash, data, endpoint) {
         self.shown(false);
         bootbox.alert("The description for asset <b class='notoAssetColor'>" + self.asset().ASSET + "</b> has been"
           + " changed to <b>" + self.newDescription() + "</b>. " + ACTION_PENDING_NOTICE);
@@ -442,7 +442,7 @@ function PayDividendModalViewModel() {
         asset: self.asset().ASSET,
         dividend_asset: self.selectedDividendAsset()
       },
-      function() {
+      function(txHash, data, endpoint) {
         self.shown(false);
         bootbox.alert("You have paid a dividend of <b class='notoQuantityColor'>" + self.quantityPerUnit() + "</b>"
           + " <b class='notoAssetColor'>" + self.selectedDividendAsset() + "</b> per outstanding unit to holders of asset"
@@ -569,7 +569,7 @@ function CallAssetModalViewModel() {
         fraction: Decimal.round(new Decimal(self.percentageToCall()).div(100), 8).toFloat(),
         asset: self.asset()
       },
-      function() {
+      function(txHash, data, endpoint) {
         self.shown(false);
         bootbox.alert("You have called back <b class='notoQuantityColor'>" + self.percentageToCall() + "%</b>"
           + " of asset <b class='notoAssetColor'>" + self.asset() + "</b>"

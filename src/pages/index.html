@@ -477,7 +477,7 @@
                 <div class="col col-sm-12">
                     <table style="border-spacing:0;border-collapse:collapse;" class="table table-striped table-hover"><tbody>
                         <tr>
-                            <td>Blk/MsgID</td><td><span data-bind="text: WALLET.networkBlockHeight()"></span> / <span data-bind="text: LAST_MESSAGEIDX_RECEIVED"></span></td>
+                            <td>Blk/MsgID</td><td><span data-bind="text: WALLET.networkBlockHeight()"></span> / <span data-bind="text: MESSAGE_FEED.LAST_MESSAGEIDX_RECEIVED"></span></td>
                         </tr>
                         <tr>
                             <td>TestNet/IsDev</td><td><span data-bind="text: USE_TESTNET"></span> / <span data-bind="text: IS_DEV"></span></td>
@@ -489,7 +489,7 @@
                             <td>Origin/MyIP/C</td><td><span data-bind="text: window.location.origin"></span> / <span data-bind="text: myIPAddr"></span> / <span data-bind="text: myCookie ? 'Present' : 'None'"></span></td>
                         </tr>
                         <tr>
-                            <td>MultiAPI List (FailIDX)</td><td><span data-bind="text: counterwalletd_urls ? counterwalletd_urls.join(', ') : 'UNKNOWN'"></span> <b>(<span data-bind="text: FAILOVER_CURRENT_IDX"></span>)</b></td>
+                            <td>MultiAPI List (FailIDX)</td><td><span data-bind="text: counterwalletd_urls ? counterwalletd_urls.join(', ') : 'UNKNOWN'"></span> <b>(<span data-bind="text: MESSAGE_FEED.FAILOVER_CURRENT_IDX"></span>)</b></td>
                         </tr>
                         <tr>
                             <td>Eng/Res</td><td><span data-bind="text: $.layout.className"></span> / <span data-bind="text: screen.width"></span>x<span data-bind="text: screen.height"></span></td>
@@ -608,6 +608,7 @@
       window.WALLET = new WalletViewModel();
       window.WALLET_OPTIONS_MODAL = new WalletOptionsModalViewModel();
 
+      window.MESSAGE_FEED = new MessageFeed();
       window.CHAT_FEED = new ChatFeedViewModel();
       window.CHAT_SET_HANDLE_MODAL = new ChatSetHandleModalViewModel();
       window.PENDING_ACTION_FEED = new PendingActionFeedViewModel();

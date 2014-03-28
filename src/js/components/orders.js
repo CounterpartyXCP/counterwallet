@@ -16,9 +16,6 @@ function OrdersViewModel() {
   self.MY_ADDRESSES = WALLET.getAddressesList();
   self._lastWindowWidth = null;
   
-  self.showPriceChart = ko.observable(false);
-  self.showTradeHistory = ko.observable(false);
-
   self.allAssets = ko.observableArray([]);
   //^ a list of all existing assets (for choosing which asset to buy)
   self.tradeHistory = ko.observableArray([]);
@@ -29,13 +26,11 @@ function OrdersViewModel() {
   self.bidDepth = ko.observable(null);
   self.askDepth = ko.observable(null);
 
-  self.helper = ko.observableArray(['1', '2']);
+  self.openBuyOrdersHelper = ko.observableArray(['1', '2']);
   self.asset1IsDivisible = ko.observable(null);
   self.asset2IsDivisible = ko.observable(null);
   self.asset1OpenBuyOrders = ko.observableArray([]);
   self.asset2OpenBuyOrders = ko.observableArray([]);
-  self.showAsset1OpenBuyOrders = ko.observable(false);
-  self.showAsset2OpenBuyOrders = ko.observable(false);
   
   self.MARKET_DATA_REFRESH_TIMERID = null;
   self.recievedMarketData = ko.observable(false); 
@@ -191,10 +186,7 @@ function OrdersViewModel() {
     failoverAPI("get_market_price_history", [self.asset1(), self.asset2()], function(data, endpoint) {
       deferred.resolve();
       if(data.length) {
-        self.showPriceChart(true);
         OrdersViewModel.doChart(self.dispAssetPair(), $('#priceHistory'), data);
-      } else {
-        self.showPriceChart(false);
       }
     }, function(jqXHR, textStatus, errorThrown, endpoint) {
       deferred.resolve();
@@ -209,9 +201,6 @@ function OrdersViewModel() {
       self.tradeHistory(data);
       if(data.length) {
         runDataTables('#tradeHistory', true, { "aaSorting": [ [0, 'desc'] ] });
-        self.showTradeHistory(true);
-      } else {
-        self.showTradeHistory(false);
       }
     }, function(jqXHR, textStatus, errorThrown, endpoint) {
       deferred.resolve();
@@ -230,7 +219,6 @@ function OrdersViewModel() {
 
     failoverAPI("get_order_book_simple", args, function(data, endpoint) {
       deferred.resolve();
-      //we have an order book, showPriceChart should end up being set to true and the order book will show
       //set up order book display
       data['base_ask_book'].reverse(); //for display
       self.askBook(data['base_ask_book'].slice(0,7)); //limit to 7 entries
@@ -254,16 +242,10 @@ function OrdersViewModel() {
       self.asset1OpenBuyOrders(asset1BuyOrders);
       if(self.asset1OpenBuyOrders().length) {
         runDataTables('#asset1OpenBuyOrders', true, { "aaSorting": [ [0, 'desc'] ] });
-        self.showAsset1OpenBuyOrders(true);
-      } else {
-        self.showAsset1OpenBuyOrders(false);
       }
       self.asset2OpenBuyOrders(asset2BuyOrders);
       if(self.asset2OpenBuyOrders().length) {
         runDataTables('#asset2OpenBuyOrders', true, { "aaSorting": [ [0, 'desc'] ] });
-        self.showAsset2OpenBuyOrders(true);
-      } else {
-        self.showAsset2OpenBuyOrders(false);
       }
     }, function(jqXHR, textStatus, errorThrown, endpoint) {
       deferred.resolve();
@@ -275,7 +257,7 @@ function OrdersViewModel() {
     //helper function for showing pending trades
     if(!self.validationModelBaseOrders.isValid()) return;
     if(asset != self.asset1() && asset != self.asset2()) return; //in process of changing assets
-    if(!self.currentMarketUnitPrice()) return; //no market data
+    //if(!self.currentMarketUnitPrice()) return; //no market data
     assert(asset && quantity, "Asset and/or quantity not present");
     if(asset == self.asset1()) {
       return smartFormat(normalizeQuantity(quantity, self.asset1IsDivisible()));
@@ -288,8 +270,7 @@ function OrdersViewModel() {
   self.deriveOpenOrderAssetPrice = function(asset1, quantity1, asset2, quantity2) {
     //helper function for showing pending trades
     if(!self.validationModelBaseOrders.isValid()) return;
-    if(!self.currentMarketUnitPrice()) return; //no market data
-    //if((asset1 != self.asset1() && asset1 != self.asset2()) || (asset2 != self.asset1() && asset2 != self.asset2())) return; //in process of changing assets
+    if((asset1 != self.asset1() && asset1 != self.asset2()) || (asset2 != self.asset1() && asset2 != self.asset2())) return; //in process of changing assets
     assert(asset1 && quantity1, "Asset1 and/or quantity1 not present");
     assert(asset2 && quantity2, "Asset2 and/or quantity2 not present");
     var derivedQuantity1 = self.deriveOpenOrderAssetQuantity(asset1, quantity1);
@@ -365,6 +346,11 @@ OrdersViewModel.deriveOpenOrderBuySellLeft = function(whole, part) {
     labelType = 'red'; 
   }
   return '<span style="opacity: .7" class="pull-right label bg-color-' + labelType + '">' + smartFormat(pctLeft * 100, null, 0) + '%</span>';
+}
+
+OrdersViewModel.deriveIsOnlineForBTCPayment = function(give_asset, _is_online) {
+  if(give_asset != 'BTC') return '';
+  return '<span style="padding-left: 4px;" class="fa fa-circle txt-color-' + (_is_online ? 'green' : 'yellow') + ' pull-left" title="' + (_is_online ? 'User is online for BTC payment' : 'User is offline or unknown') + '"></span>';
 }
 
 OrdersViewModel.doChart = function(dispAssetPair, chartDiv, data) {

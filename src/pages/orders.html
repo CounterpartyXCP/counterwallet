@@ -54,11 +54,13 @@
     </article> <!-- WIDGET END -->
   </div> <!-- end row -->
 
-  <div class="alert alert-danger" data-bind="fadeVisibleInOnly: validationModelBaseOrders.isValid() && recievedMarketData && currentMarketUnitPrice() == 0" style="font-size: 1.3em;"><i class="fa-fw fa fa-times"></i>&nbsp;No market data exists for this asset pair.</div>  
+  <div class="alert alert-danger" data-bind="fadeVisibleInOnly: validationModelBaseOrders.isValid() && recievedMarketData() && currentMarketUnitPrice() == 0" style="font-size: 1.3em;">
+      <i class="fa-fw fa fa-times"></i>&nbsp;No market price data exists for this asset pair.
+  </div>  
 
-  <div data-bind="fadeVisibleInOnly: showPriceChart" class="row"> <!-- row -->
+  <div class="row"> <!-- row -->
     <article class="col-xs-12 col-sm-12 col-md-12 col-lg-12"> <!-- NEW WIDGET START -->
-      <div class="jarviswidget defaultWidgetColor" id="wid-id-priceChart" data-widget-editbutton="false" data-widget-deletebutton="false" data-bind="fadeVisibleInOnly: showPriceChart">
+      <div class="jarviswidget defaultWidgetColor" id="wid-id-priceChart" data-widget-editbutton="false" data-widget-deletebutton="false" data-bind="fadeVisibleInOnly: validationModelBaseOrders.isValid() && recievedMarketData() && currentMarketUnitPrice() != 0">
         <header>
             <span class="widget-icon"> <i class="fa fa-bar-chart-o"></i> </span>
             <h3>Price History for <span data-bind="text: dispAssetPair"></span></h3>
@@ -114,10 +116,10 @@
     </article> <!-- WIDGET END -->
   </div> <!-- end row -->
   
-  <!-- ko foreach: helper -->
-  <div data-bind="fadeVisibleInOnly: $data == '1' ? $root.showAsset1OpenBuyOrders() : $root.showAsset2OpenBuyOrders()" class="row"> <!-- row -->
+  <!-- ko foreach: openBuyOrdersHelper -->
+  <div data-bind="fadeVisibleInOnly: $root.validationModelBaseOrders.isValid() && $root.recievedMarketData() && ($data == '1' ? $root.asset1OpenBuyOrders().length : $root.asset2OpenBuyOrders().length)" class="row"> <!-- row -->
     <article class="col-xs-12 col-sm-12 col-md-12 col-lg-12"> <!-- NEW WIDGET START -->
-      <div class="jarviswidget defaultWidgetColor" data-widget-editbutton="false" data-widget-deletebutton="false" data-bind="attr: {id: 'wid-id-openOrders-asset' + $data}, visible: $data == '1' ? $root.showAsset1OpenBuyOrders() : $root.showAsset2OpenBuyOrders()">
+      <div class="jarviswidget defaultWidgetColor" data-widget-editbutton="false" data-widget-deletebutton="false" data-bind="attr: {id: 'wid-id-openOrders-asset' + $data}">
         <header>
             <span class="widget-icon"> <i class="fa fa-circle-o"></i> </span>
             <h3>Open Orders Buying <span data-bind="text: $data == '1' ? $root.asset1() : $root.asset2()"></span></h3>
@@ -141,7 +143,7 @@
                     </thead>
                     <tbody data-bind="foreach: $data == '1' ? $root.asset1OpenBuyOrders : $root.asset2OpenBuyOrders">
                         <tr data-bind="style: {cursor: $root.isOrdersView ? 'auto' : 'pointer' }, click: $root.isOrdersView ? null : $root.buySelectedOpenOrder">
-                            <td data-bind="html: getLinkForCPData('tx', tx_index)"></td>
+                            <td data-bind="html: getLinkForCPData('tx', tx_index) + OrdersViewModel.deriveIsOnlineForBTCPayment(give_asset, _is_online)"></td>
                             <td data-bind="timeago: new Date(block_time)"></td>
                             <td data-bind="text: $root.deriveOpenOrderAssetPrice(get_asset, get_quantity, give_asset, give_quantity)"></td>
                             <td data-bind="html: $root.deriveOpenOrderAssetQuantity(get_asset, get_remaining) + ' ' + get_asset + ' ' + OrdersViewModel.deriveOpenOrderBuySellLeft(get_quantity, get_remaining)"></td>
@@ -159,9 +161,9 @@
   </div> <!-- end row -->
   <!-- /ko -->
   
-  <div data-bind="fadeVisibleInOnly: showTradeHistory && tradeHistory().length > 0" class="row"> <!-- row -->
+  <div data-bind="fadeVisibleInOnly: validationModelBaseOrders.isValid() && recievedMarketData() && tradeHistory().length > 0" class="row"> <!-- row -->
     <article class="col-xs-12 col-sm-12 col-md-12 col-lg-12"> <!-- NEW WIDGET START -->
-      <div class="jarviswidget defaultWidgetColor" id="wid-id-tradeChart" data-widget-editbutton="false" data-widget-deletebutton="false" data-bind="fadeVisibleInOnly: showTradeHistory && tradeHistory().length > 0">
+      <div class="jarviswidget defaultWidgetColor" id="wid-id-tradeChart" data-widget-editbutton="false" data-widget-deletebutton="false">
         <header>
             <span class="widget-icon"> <i class="fa fa-circle"></i> </span>
             <h3>Completed Trades for <span data-bind="text: dispAssetPair"></span></h3>

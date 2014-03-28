@@ -10,15 +10,19 @@ function LogonViewModel() {
   self.USE_TESTNET = USE_TESTNET;
   self.IS_DEV = IS_DEV;
 
+  self.sanitizedEnteredPassphrase = ko.computed(function(){ //cleans whitespace and gunk off the passphrase
+    return $.trim(self.enteredPassphrase());
+  }, self);
+
   self.walletGenProgressWidth = ko.computed(function(){
     return self.walletGenProgressVal() + '%';
   }, self);
 
   self.isPassphraseValid = ko.computed(function() {
-     if(self.enteredPassphrase().split(' ').length != 12) return false;
+     if(self.sanitizedEnteredPassphrase().split(' ').length != 12) return false;
      
      var valid = true;
-     self.enteredPassphrase().split(' ').forEach(function (word) {
+     self.sanitizedEnteredPassphrase().split(' ').forEach(function (word) {
        if (mn_words.indexOf(word) == -1) {
          valid = false;
        }
@@ -64,11 +68,8 @@ function LogonViewModel() {
       assert(data['caught_up'], "Invalid is_ready result"); //otherwise we should have gotten a 525 error
       assert(USE_TESTNET == data['testnet'], "USE_TESTNET is " + USE_TESTNET + " from URL-based detection, but the server API disagrees!");
       
-      //set the "starting" message_index, under which we will ignore if received on the messages feed
-      LAST_MESSAGEIDX_RECEIVED = data['last_message_index']; //LAST_MESSAGEIDX_RECEIVED defined in messagefeed.js
-
-      $.jqlog.log("Backend is ready. Testnet status: " + USE_TESTNET + ". Last message feed index: " + LAST_MESSAGEIDX_RECEIVED);
-      assert(LAST_MESSAGEIDX_RECEIVED > 0);
+      $.jqlog.log("Backend is ready. Testnet status: " + USE_TESTNET + ". Last message feed index: " + data['last_message_index']);
+      assert(data['last_message_index'] > 0);
 
       //User is logging in...
       self.walletGenProgressVal(0); //reset so the progress bar hides again...
@@ -76,15 +77,19 @@ function LogonViewModel() {
       $('#createNewAcctBtnPane').animate({opacity:0}); //fade out the new account button pane if visible
       $('#extra-info').animate({opacity:0});
       
-      //Initialize the socket.io event feed (notifies us in realtime of new events, as counterparty processes confirmed blocks)
-      initMessageFeed();
+      //Initialize the socket.io-driven event feed (notifies us in realtime of new events, as counterparty processes confirmed blocks)
+      MESSAGE_FEED.init(data['last_message_index']);
+      //^ set the "starting" message_index, under which we will ignore if received on the messages feed
+      
+      //Initialize chat feeds (even through the chat pane will remain closed by default and the user has not started chatting)
+      CHAT_FEED.init();
       
       //generate the wallet ID from a double SHA256 hash of the passphrase and the network (if testnet)
-      //var hash1 = Bitcoin.Crypto.SHA256(self.enteredPassphrase() + (USE_TESTNET ? '_testnet' : ''));
+      //var hash1 = Bitcoin.Crypto.SHA256(self.sanitizedEnteredPassphrase() + (USE_TESTNET ? '_testnet' : ''));
       //var hash2 = Bitcoin.Crypto.SHA256(hash1).toString(Bitcoin.Crypto.enc.Base64);
       //WALLET.identifier(hash2);
       WALLET.identifier(Bitcoin.convert.bytesToBase64(Bitcoin.Crypto.SHA256(
-        Bitcoin.Crypto.SHA256(self.enteredPassphrase() + (USE_TESTNET ? '_testnet' : ''),
+        Bitcoin.Crypto.SHA256(self.sanitizedEnteredPassphrase() + (USE_TESTNET ? '_testnet' : ''),
         {asBytes: true}), {asBytes: true})));
       $.jqlog.log("My wallet ID: " + WALLET.identifier());
     
@@ -132,7 +137,7 @@ function LogonViewModel() {
   
   self.openWalletPt2 = function(mustSavePreferencesToServer) {
       //generate the appropriate number of addresses
-      var seed = mn_decode(self.enteredPassphrase());
+      var seed = mn_decode(self.sanitizedEnteredPassphrase());
       WALLET.BITCOIN_WALLET = Bitcoin.Wallet(seed, {
         network: USE_TESTNET ? "testnet" : "mainnet",
         derivationMethod: 'private'

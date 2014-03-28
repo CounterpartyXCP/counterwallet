@@ -225,7 +225,8 @@ function _getDestTypeFromMethod(method) {
       'get_raw_transactions', 'get_balance_history',
       'get_owned_assets', 'get_asset_history',
       'get_market_price_summary', 'get_market_price_history', 'get_market_info', 'get_market_info_leaderboard', 'get_market_cap_history',
-      'get_order_book_simple', 'get_order_book_buysell', 'get_trade_history', 'get_trade_history_within_dates'].indexOf(method) >= 0) {
+      'get_order_book_simple', 'get_order_book_buysell', 'get_trade_history', 'get_trade_history_within_dates',
+      'record_btc_open_order', 'cancel_btc_open_order'].indexOf(method) >= 0) {
     destType = "counterwalletd";
   }
   return destType;
@@ -265,7 +266,8 @@ function _multiAPIPrimative(method, params, onFinished) {
           }
         }
         if(allNotCaughtUp) {
-          alert("The server(s) are currently updating and/or not caught up to the blockchain. Logging you out. Please try logging in again later.")
+          alert("The server(s) are currently updating and/or not caught up to the blockchain. Logging you out."
+            + " Please try logging in again later. (Most likely this message is due to the server being updated.)")
           location.reload(false); //log the user out to avoid ruckus
           return;
         }

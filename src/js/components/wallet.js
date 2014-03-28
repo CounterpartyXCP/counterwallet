@@ -447,7 +447,7 @@ function WalletViewModel() {
           }
           PENDING_ACTION_FEED.add(txHash, category, data);
           
-          return onSuccess(data, endpoint);
+          return onSuccess(txHash, data, endpoint);
         }, onError, verifyDestAddr);
     });
   }

@@ -1,11 +1,10 @@
 
-function ChatLineViewModel(type, handle, op, text) {
+function ChatLineViewModel(handle, text, is_op, is_private) {
   var self = this;
   self.HANDLE = handle;
-  self.TYPE = type;
-  self.OP = op;
-  //^ Valid chat types are: 'emote' (for a user saying something) and 'system' (for a system message)
-  //If type is system, handle should be blank
+  //^ May be text (for a user saying something) or null (for a system message)
+  self.IS_OP = is_op || false;
+  self.IS_PRIVATE = is_private || false;
   self.text = ko.observable(text);
   
   self.lineText = ko.computed(function(){
@@ -13,19 +12,20 @@ function ChatLineViewModel(type, handle, op, text) {
     if(self.text().indexOf(CHAT_FEED.handle()) != -1) {
       self.text("<b>" + self.text() + "</b>");
       var regExp = new RegExp(CHAT_FEED.handle(), 'g');
-      var nickColorClass = CHAT_FEED.op() ? 'chatLineOpEmote' : 'chatLineSelfEmote'; 
+      var nickColorClass = CHAT_FEED.is_op() ? 'chatLineOpEmote' : 'chatLineSelfEmote'; 
       self.text(self.text().replace(regExp, "<span class='" + nickColorClass + "'>" + CHAT_FEED.handle() + "</span>"));
     }
     
-    if(type == 'emote') {
-      if(op) {
-        return "<span class='chatLineOpEmote'>" + self.HANDLE + ":</span>&nbsp;&nbsp;" + self.text();  
-      } else if(handle == CHAT_FEED.handle()) {
+    if(self.HANDLE) {
+      if(self.IS_OP) {
+        return "<span class='chatLineOpEmote'>" + self.HANDLE + (self.IS_PRIVATE ? '(PRIVATE)' : '') + ":</span>&nbsp;&nbsp;" + self.text();  
+      } else if(self.HANDLE == CHAT_FEED.handle()) {
         return "<span class='chatLineSelfEmote'>" + self.HANDLE + ":</span>&nbsp;&nbsp;" + self.text();  
       } else {
-        return "<span class='chatLineEmote'>" + self.HANDLE + ":</span>&nbsp;&nbsp;" + self.text();  
+        return "<span class='chatLineEmote'>" + self.HANDLE + (self.IS_PRIVATE ? '(PRIVATE)' : '') + ":</span>&nbsp;&nbsp;" + self.text();  
       }
     } else { //system
+      assert(self.HANDLE === null);
       return "<span class='chatLineSystem'>SYSTEM:</span>&nbsp;&nbsp;<b>" + self.text() + "</b>";
     }
   }, self);
@@ -38,7 +38,7 @@ function ChatFeedViewModel() {
   self.myLines = ko.observableArray([]);
   self.lastUpdated = ko.observable(new Date());
   self.handle = ko.observable(null);
-  self.op = ko.observable(false); //if this user is an op or not
+  self.is_op = ko.observable(false); //if this user is an op or not
   self.bannedUntil = ko.observable(null);
   //self.textToSend = ko.observable('');
   self.feedConnections = [];
@@ -51,58 +51,20 @@ function ChatFeedViewModel() {
 
   self.headerText = ko.computed(function(){
     var header = "<b>Chatbox</b>";
-    if(self.handle() && self.op()) header += " (<span class='chatLineOpEmote'>" + self.handle() + "</span>)"; 
-    if(self.handle() && !self.op()) header += " (<span class='chatLineSelfEmote'>" + self.handle() + "</span>)";
+    if(self.handle() && self.is_op()) header += " (<span class='chatLineOpEmote'>" + self.handle() + "</span>)"; 
+    if(self.handle() && !self.is_op()) header += " (<span class='chatLineSelfEmote'>" + self.handle() + "</span>)";
     return header; 
   });
   
-  self._showChatWindow = function() {
-    $('#chatLink span').text("Hide Chat");
-    $('#main').animate({ marginRight : "280px"},600);      
-    $('#chatPane').show('slide',{direction:'right'},600);
-  }
-  
-  self._hideChatWindow = function() {
-    //Collapse chat window
-    $('#chatLink span').text("Show Chat");
-    $('#main').animate({ marginRight : "0px"},600);
-    $('#chatPane').hide('slide',{direction:'right'},600);
-  }
-  
-  self.showChat = function() {
-    if(self.handle()) { //user has already opened up the chat window in this session
-      self._showChatWindow();
-      self.scrollToBottomIfNecessary();
-      return;
-    }
-    
-    //pop up a dialog box to gather and set user's chat handle, and save to preferences
-    multiAPINewest("get_chat_handle", [WALLET.identifier()], 'last_updated', function(data, endpoint) {
-      if(data) {
-        assert(data && data.hasOwnProperty('handle'));
-        //handle already set, just pop up chat window
-        self.handle(data['handle']);
-        self.op(data['op']);
-        self.bannedUntil(data['banned_until']);
-        $.jqlog.debug("Chat handle: " + self.handle() + ", op: " + self.op() + ", banned until: " + self.bannedUntil()/1000);
-        self._showChatWindow();
-        self._initChatFeed();
-      } else {
-        //handle is not stored on any server
-        CHAT_SET_HANDLE_MODAL.show();
-      }
-    });
-  }
-  
-  self._initChatFeed = function() {
+  self.init = function() {
     //Start up the chat feed if necessary
+    //Called at login time (we do it then instead of when displaying the chat window, so that we can use it to track
+    //which wallet IDs are online, which we use for showing orders with BTCPays that have a higher chance of being
+    //paid more quickly, for instance)
     if(self.feedConnections.length) { //already initialized
       return;
     }
     
-    var initialLineSetNumReplies = 0;
-    var initialLineSet = [];
-        
     $.jqlog.debug("Starting chat feeds: " + JSON.stringify(counterwalletd_base_urls));
     for(var i = 0; i < counterwalletd_base_urls.length; i++) {
       var socket = io.connect(counterwalletd_base_urls[i], {
@@ -113,19 +75,52 @@ function ChatFeedViewModel() {
         //'max reconnection attempts': Infinity,
         'resource': USE_TESTNET ? '_t_chat' : '_chat'
       });
-      
-      function _chatSIOCallbacks(num) {
-        socket.on('connect', function() {
-          $.jqlog.log('socket.io(chat): Connected to server: ' + counterwalletd_base_urls[num]);
-          
-          if(socket.chatFeed_hasInitialized === undefined) {
-            //for each feed, we need to call over to "set_walletid"
-            socket.emit('set_walletid', WALLET.identifier(), function(data) {
-              self.feedConnections.push(socket); //must be done before we do any chatting...
-            });
-            
+      self.feedConnections.push(socket); //must be done before we do any chatting...
+      self._registerConnectCallback(i);
+    }
+  }
+  
+  self._showChatWindow = function() {
+    $('#chatLink span').text("Hide Chat");
+    $('#main').animate({ marginRight : "280px"},600);
+    self.scrollToBottomIfNecessary(); //initially show the div scrolled to the bottom as the animation happens      
+    $('#chatPane').show('slide', {direction:'right'}, 600, function() {
+      self.scrollToBottomIfNecessary(); //prevent the scroll from slamming back to the top of the div 
+    });
+  }
+  
+  self._hideChatWindow = function() {
+    //Collapse chat window
+    $('#chatLink span').text("Show Chat");
+    $('#main').animate({ marginRight : "0px"},600);
+    $('#chatPane').hide('slide', {direction:'right'}, 600);
+  }
+  
+  self.showChat = function() {
+    if(self.handle()) { //user has already opened up the chat window in this session
+      self._showChatWindow();
+      return;
+    }
+    
+    //pop up a dialog box to gather and set user's chat handle, and save to preferences
+    multiAPINewest("get_chat_handle", [WALLET.identifier()], 'last_updated', function(data, endpoint) {
+      if(data) {
+        assert(data && data.hasOwnProperty('handle'));
+        //handle already set, just pop up chat window
+        self.handle(data['handle']);
+        self.is_op(data['is_op']);
+        self.bannedUntil(data['banned_until']);
+        $.jqlog.debug("Chat handle: " + self.handle() + ", op: " + self.is_op() + ", banned until: " + self.bannedUntil()/1000);
+        self._showChatWindow();
+        
+        var initialLineSetNumReplies = 0;
+        var initialLineSet = [];
+        
+        function _startChattingAndGetLastLines(num) {
+          self._registerCallbacks(num);
+          self.feedConnections[num].emit('start_chatting', WALLET.identifier(), num == 0, function(data) {
             //populate last messages into dict, and then sort by timestamp
-            socket.emit('get_lastlines', function(linesList) {
+            self.feedConnections[num].emit('get_lastlines', function(linesList) {
               $.jqlog.debug("chat.get_lastlines(feed-"+num+"): len = " + linesList.length
                 + "; initialLineSet.len = " + initialLineSet.length);
               initialLineSet = initialLineSet.concat(linesList);
@@ -136,70 +131,89 @@ function ChatFeedViewModel() {
                 initialLineSet.sort(function (a, b){ return ((a.when < b.when) ? -1 : ((a.when > b.when) ? 1 : 0)); })
                 //then add the lot to the chat window          
                 for(var i = 0; i < initialLineSet.length; i++) {
-                  self.addLine('emote', initialLineSet[i]['handle'], initialLineSet[i]['op'], initialLineSet[i]['text']);
+                  self.addLine(initialLineSet[i]['handle'], initialLineSet[i]['text'], initialLineSet[i]['is_op'], false);
                 }
                 self.scrollToBottomIfNecessary();
               }
             });
-            socket.chatFeed_hasInitialized = true;
-          }
-          
-        });
-        socket.on('emote', function (handle, op, text) {
-          $.jqlog.debug("chat.emote(feed-"+num+"): handle: " + handle + ", op: " + op + ", text: " + text);
-          self.addLine('emote', handle, op, text);
-        });
-        socket.on('oped', function (op_handle, handle) {
-          if(handle == self.handle()) self.op(true);
-          self.addLine('system', null, null, op_handle + " has oped " + handle);
-        });
-        socket.on('unoped', function (op_handle, handle) {
-          if(handle == self.handle()) self.op(false);
-          self.addLine('system', null, null, op_handle + " has unoped " + handle);
-        });
-        socket.on('banned', function (op_handle, handle, time, until_ts) {
-          self.addLine('system', null, null, op_handle + " has banned " + handle + (time == -1 ? " permanently :o" : (" for " + time + " seconds")));
-        });
-        socket.on('unbanned', function (op_handle, handle) {
-          self.addLine('system', null, null, op_handle + " has unbanned " + handle);
-        });
-        socket.on('handle_changed', function (op_handle, old_handle, new_handle) {
-          if(old_handle == self.handle()) self.handle(new_handle);
-          self.addLine('system', null, null, op_handle + " has changed the chat handle for " + old_handle + " to " + new_handle);
-        });
-        socket.on('error', function (error_name, error_message) {
-          $.jqlog.debug("chat.error(feed-"+num+"): " + error_name + " -- " + error_message);
-          
-          if(error_name == 'invalid_state') {
-            self.doReconnectionAttempt(socket);
-          } else {
-            if(error_name == 'too_fast')
-              self._nextMessageNotSent = true; //as the success callback is triggered after receiving the error callback
-            
-            self.addLine('system', null, null, error_message);  
-          }
-        });
+          });
+        }
+        
+        for(var i=0; i < self.feedConnections.length; i++) {
+          //for each feed, we need to call over to "register"
+          _startChattingAndGetLastLines(i);
+        }
+      } else {
+        //handle is not stored on any server
+        CHAT_SET_HANDLE_MODAL.show();
       }
-      _chatSIOCallbacks(i); //closure
-    }
+    });
   }
-    
+  
+  self._registerConnectCallback = function(num) {
+    var socket = self.feedConnections[num];
+    socket.on('connect', function() {
+      $.jqlog.log('socket.io(chat): Connected to server: ' + counterwalletd_base_urls[num]);
+      //Chat handle would be set when the user actually opens up the chat panel
+      
+      //For now, just send a "ping" so that the server sees us as online
+      socket.emit('ping', WALLET.identifier());
+    });
+  }
+  
+  self._registerCallbacks = function(num) {
+    var socket = self.feedConnections[num];
+    socket.on('emote', function (handle, text, is_op, is_private) { //handle may be null, to print a SYSTEM message
+      $.jqlog.debug("chat.emote(feed-"+num+"): handle: " + handle + ", is_op: " + is_op + ", text: " + text);
+      self.addLine(handle, text, is_op, is_private);
+    });
+    socket.on('oped', function (op_handle, handle) {
+      if(handle == self.handle()) self.is_op(true);
+      self.addLine(null, op_handle + " has oped " + handle, null, null);
+    });
+    socket.on('unoped', function (op_handle, handle) {
+      if(handle == self.handle()) self.is_op(false);
+      self.addLine(null, op_handle + " has unoped " + handle, null, null);
+    });
+    socket.on('banned', function (op_handle, handle, time, until_ts) {
+      self.addLine(null, op_handle + " has banned " + handle + (time == -1 ? " permanently :o" : (" for " + time + " seconds")), null, null);
+    });
+    socket.on('unbanned', function (op_handle, handle) {
+      self.addLine(null, op_handle + " has unbanned " + handle, null, null);
+    });
+    socket.on('handle_changed', function (op_handle, old_handle, new_handle) {
+      if(old_handle == self.handle()) self.handle(new_handle);
+      self.addLine(null, op_handle + " has changed the chat handle for " + old_handle + " to " + new_handle, null, null);
+    });
+    socket.on('online_status', function (handle, is_online) { //response to /online command
+      self.addLine(null, handle + (is_online ? " is online" : " is not online"), null, null);
+    });
+    socket.on('error', function (error_name, error_message) {
+      $.jqlog.debug("chat.error(feed-"+num+"): " + error_name + " -- " + error_message);
+      
+      if(error_name == 'invalid_state') {
+        //attempt to self correct for this one....
+        if(!self.lastSetWalletIDAttempt || ((new Date).getTime() / 1000) - self.lastSetWalletIDAttempt > 10) {
+          // ^ avoid infinite loops :)
+          socket.emit('start_chatting', WALLET.identifier(), num == 0, function(data) {
+            self.lastSetWalletIDAttempt = (new Date).getTime() / 1000;
+            self.addLine(null,
+              "Lost chat feed link and attempted to correct. Please try sending your chat line again.", null, null);  
+          });
+        }
+      } else {
+        if(error_name == 'too_fast')
+          self._nextMessageNotSent = true; //as the success callback is triggered after receiving the error callback
+        
+        self.addLine(null, error_message, null, null);  
+      }
+    });
+  }
+  
   self.hideChat = function() {
       self._hideChatWindow();
   }
   
-  self.doReconnectionAttempt = function(socket) {
-    //attempt to self correct for this one....
-    if(!self.lastSetWalletIDAttempt || ((new Date).getTime() / 1000) - self.lastSetWalletIDAttempt > 10) {
-      // ^ avoid infinite loops :)
-      socket.emit('set_walletid', WALLET.identifier(), function(data) {
-        self.lastSetWalletIDAttempt = (new Date).getTime() / 1000;
-        self.addLine('system', null, null,
-          "Lost chat feed link and attempted to correct. Please try sending your chat line again.");  
-      });
-    }
-  }
-
   self.scrollToBottomIfNecessary = function() {
     //scroll to bottom if need be
     if($('#chatContentInnerDiv').prop('scrollHeight') >= $('#chatContentInnerDiv').height()) {
@@ -208,12 +222,12 @@ function ChatFeedViewModel() {
     }
   }
   
-  self.addLine = function(type, handle, op, text) {
+  self.addLine = function(handle, text, is_op, is_private) {
     //check for a dupe line in the last 3 lines and do not post if so
-    var newLine = new ChatLineViewModel(type, handle, op, text);
+    var newLine = new ChatLineViewModel(handle, text, is_op, is_private);
     var lastLines = self.lines.slice(Math.max(self.lines().length - 3, 1));
     for(var i=0; i < lastLines.length; i++) {
-      if(newLine.lineText() == lastLines[i].lineText() && lastLines[i].TYPE != 'system') { // && !lastLines[i].OP) {
+      if(newLine.lineText() == lastLines[i].lineText() && lastLines[i].HANDLE != null) { // && !lastLines[i].IS_OP) {
         $.jqlog.debug("chat.addLine: Line ignored (duplicate): " + newLine.lineText());
         return;
       }
@@ -317,6 +331,7 @@ function ChatFeedViewModel() {
     //see if this is a chat command or not
     var text = $('#chatTextBox').val();
     if(!text) return; //no empty lines
+    assert(self.feedConnections.length >= 1, "Not connected to any chat servers!");
     
     if(text.startsWith('/')) { //chat command
       var parts = text.replace('/', '').split(' ');
@@ -334,16 +349,24 @@ function ChatFeedViewModel() {
       //just grab val() (not very knockout friendly) because certain browsers (certain mobile especially)
       // can get a bit wierd with keydown vs. keypress, etc...not work messing with it
       $.jqlog.debug("chat.sendLine(emote): " + text);
-      assert(self.feedConnections.length >= 1, "Not connected to any chat servers!");
-      self.feedConnections[0].emit('emote', text, function(data) {
-        //SUCCESS CALLBACK: post it to our window (as the servers won't broadcast it back to us)
-        if(self._nextMessageNotSent) {
-          self._nextMessageNotSent = false;
-        } else {
-          self.addLine('emote', self.handle(), self.op(), text);
-          $('#chatTextBox').val('');
-        }
-      });
+      
+      function _doChatEmote(num) {
+        self.feedConnections[num].emit('emote', text, function(data) {
+          //SUCCESS CALLBACK: post it to our window (as the servers won't broadcast it back to us)
+          if(num==0) {
+            if(self._nextMessageNotSent) {
+              self._nextMessageNotSent = false;
+            } else {
+              self.addLine(self.handle(), text, self.is_op(), false);
+              $('#chatTextBox').val('');
+            }
+          }
+        });
+      } 
+      
+      for(var i=0; i < self.feedConnections.length; i++) {
+        _doChatEmote(i);
+      }
     }
   }
 }
@@ -408,7 +431,6 @@ function ChatSetHandleModalViewModel() {
       CHAT_FEED.handle(self.newHandle());
       self.hide();
       CHAT_FEED._showChatWindow();
-      CHAT_FEED._initChatFeed();
     });
   }
   

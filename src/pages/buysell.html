@@ -393,13 +393,13 @@
                     </thead>
                     <tbody data-bind="foreach: openOrders">
                         <tr style="cursor:pointer;" data-bind="click: $parent.buySelectedOpenOrder">
-                            <td data-bind="html: getLinkForCPData('tx', tx_index)"></td>
+                            <td data-bind="html: getLinkForCPData('tx', tx_index) + OrdersViewModel.deriveIsOnlineForBTCPayment(give_asset, _is_online)"></td>
                             <td data-bind="timeago: new Date(block_time)"></td>
                             <td data-bind="text: $parent.deriveOpenOrderAssetPrice(get_asset, get_quantity, give_asset, give_quantity)"></td>
                             <td data-bind="html: $parent.deriveOpenOrderAssetQuantity(get_asset, get_remaining) + ' ' + get_asset + ' ' + OrdersViewModel.deriveOpenOrderBuySellLeft(get_quantity, get_remaining)"></td>
                             <td data-bind="html: $parent.deriveOpenOrderAssetQuantity(give_asset, give_remaining) + ' ' + give_asset + ' ' + OrdersViewModel.deriveOpenOrderBuySellLeft(give_quantity, give_remaining)"></td>
                             <td data-bind="html: OrdersViewModel.deriveOpenOrderExpiresIn(block_index, expiration)"></td>
-                            <td data-bind="visible: $parent.buyAsset() == 'BTC' || $parent.sellAsset() == 'BTC', text: ($parent.sellAsset() == 'BTC' && fee_required) ? (smartFormat(normalizeQuantity(fee_required)) + ' BTC ' + OrdersViewModel.deriveOpenOrderBuySellLeft(fee_required, fee_required_remaining)) : (($parent.buyAsset() == 'BTC' && fee_provided) ? smartFormat(normalizeQuantity(fee_provided)) + ' BTC ' + OrdersViewModel.deriveOpenOrderBuySellLeft(fee_provided, fee_provided_remaining) : '')"></td>
+                            <td data-bind="visible: $parent.buyAsset() == 'BTC' || $parent.sellAsset() == 'BTC', html: ($parent.sellAsset() == 'BTC' && fee_required) ? (smartFormat(normalizeQuantity(fee_required)) + ' BTC ' + OrdersViewModel.deriveOpenOrderBuySellLeft(fee_required, fee_required_remaining)) : (($parent.buyAsset() == 'BTC' && fee_provided) ? smartFormat(normalizeQuantity(fee_provided)) + ' BTC ' + OrdersViewModel.deriveOpenOrderBuySellLeft(fee_provided, fee_provided_remaining) : '')"></td>
                         </tr>
                     </tbody>
                 </table>

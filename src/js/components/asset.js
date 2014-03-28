@@ -111,7 +111,7 @@ function AssetViewModel(props) {
                 call_price: self.CALLPRICE,
                 transfer_destination: null
               },
-              function() {
+              function(txHash, data, endpoint) {
                 bootbox.alert("Your asset has been locked and no more units of the asset may be issued. It may take a bit for this to reflect.");
               }
             );

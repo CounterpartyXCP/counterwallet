@@ -521,7 +521,7 @@ function BuySellWizardViewModel() {
           self.showOpenOrders(false);
           self.overrideMarketPrice(false);
           self.overrideDefaultOptions(false);
-          $('a[href="#tab2"] span.title').text("Select Quantitys");
+          $('a[href="#tab2"] span.title').text("Select Amounts");
           $('#tradeHistory').dataTable().fnClearTable(); //otherwise we get duplicate rows for some reason...
           
           //reset the fields on tab 2
@@ -549,7 +549,7 @@ function BuySellWizardViewModel() {
           assert(self.assetPair(), "Asset pair is not set");
           self.selectedBuyQuantity.isModified(false);
           self.customSellAsEntry.isModified(false);
-          $('a[href="#tab2"] span.title').text("Select Quantitys (" + self.dispAssetPair() + ")");
+          $('a[href="#tab2"] span.title').text("Select Amounts (" + self.dispAssetPair() + ")");
 
           //Set up the timer to refresh market data (this will immediately refresh and display data as well)
           self._tab2AutoRefresh(function() { self.allTradeDataRetrieved(true); });
@@ -607,10 +607,17 @@ function BuySellWizardViewModel() {
              fee_provided: self.sellAsset() == 'BTC' ? denormalizeQuantity(self.feeForSelectedBTCQuantity()) : null,
              expiration: parseInt(self.numBlocksUntilExpiration())
             },
-            function() {
+            function(txHash, data, endpoint) {
               bootbox.alert("Your order for <b class='notoQuantityColor'>" + self.selectedBuyQuantity() + "</b>"
                + " <b class='notoAssetColor'>" + self.buyAsset() + "</b> has been placed. "
                + ACTION_PENDING_NOTICE);
+               
+              //if the order involes selling BTC, then we want to notify the servers of our wallet_id so folks can see if our
+              // wallet is "online", in order to determine if we'd be able to best make the necessary BTCpay
+              if(self.sellAsset() == 'BTC') {
+                multiAPI("record_btc_open_order", [WALLET.identifier(), txHash]);
+              }
+               
               checkURL(); //reset the form and take the user back to the first tab by just refreshing the page
             }
           );
