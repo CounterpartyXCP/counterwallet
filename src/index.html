@@ -16,9 +16,9 @@
     <link rel="stylesheet" type="text/css" media="screen" href="vendors/smartadmin/css/smartadmin-production.css">
     <link rel="stylesheet" type="text/css" media="screen" href="vendors/smartadmin/css/smartadmin-skins.css">
     <!-- Counterwallet plugin styles -->
-    <link rel="stylesheet" type="text/css" href="vendors/extcss/jquery.reject.css">
-    <link rel="stylesheet" type="text/css" href="vendors/extcss/jquery.keyboard.css">
-    <link rel="stylesheet" type="text/css" href="vendors/extcss/bootstrap-datetimepicker.css">
+    <link rel="stylesheet" type="text/css" href="vendors/jReject/css/jquery.reject.css">
+    <link rel="stylesheet" type="text/css" href="vendors/keyboard/css/keyboard.css">
+    <link rel="stylesheet" type="text/css" href="vendors/bootstrap-datetimepicker/build/css/bootstrap-datetimepicker.min.css">
     <!-- Counterwallet custom styles -->
     <link rel="stylesheet" type="text/css" media="screen" href="css/default.css">
     <link rel="stylesheet" type="text/css" media="screen" href="css/overrides.css">
@@ -548,43 +548,47 @@
 
     <!-- COUNTERWALLET SPECIFIC JS INCLUDES -->    
     <!-- bitcoinjs-lib: The following library is required for bitcon addresses and signing. -->
-    <script src="vendors/extjs/bitcoinjs-min.js"></script>
-    <script src="vendors/extjs/jsbn-prng4.js"></script>
-    <script src="vendors/extjs/jsbn-rng.js"></script>
+    
+    <script src="vendors/cryptojs/rollups/sha256.js"></script>
+    <script src="vendors/cryptojs/components/enc-base64.js"></script>
+    <script src="js/bitcoinjs-min.js"></script> <!-- need update to use vendors/bitcoinjs-lib -->
+    <script src="vendors/jsbn/prng4.js"></script>
+    <script src="vendors/jsbn/rng.js"></script>
     <!-- <script src="extjs/sjcl.min.js"></script> -->
      
     <!-- JQuery extras -->
-    <script src="vendors/extjs/jquery.jqlog.js"></script>
-    <script src="vendors/extjs/jquery.reject.js"></script>
-    <script src="vendors/extjs/jquery.xdomainrequest.js"></script> <!-- add support for CORS for IE 9 via $.ajax() -->
-    <script src="vendors/extjs/jquery.yql.js"></script> <!-- YQL queries for calls that don't support CORS -->
-    <script src="vendors/extjs/jquery.timeago.js"></script>
-    <script src="vendors/extjs/jquery.slimscroll.js"></script>
-    <script src="vendors/extjs/jquery.keyboard.js"></script>
-    <script src="vendors/extjs/jquery.keyboard.extension-autocomplete.js"></script>
+    <script src="vendors/jqlog/jquery.jqlog-1.3.js"></script>
+    <script src="vendors/jReject/js/jquery.reject.js"></script>
+    <script src="vendors/jquery-xdomainrequest/jQuery.XDomainRequest.js"></script> <!-- add support for CORS for IE 9 via $.ajax() -->
+    <script src="vendors/jquery-yql/jquery.yql.js"></script> <!-- YQL queries for calls that don't support CORS -->
+    <script src="vendors/jquery-timeago/jquery.timeago.js"></script>
+    <script src="vendors/jquery.slimscroll/jquery.slimscroll.js"></script>
+    <script src="vendors/keyboard/js/jquery.keyboard.js"></script>
+    <script src="vendors/keyboard/js/jquery.keyboard.extension-autocomplete.js"></script>
 
     <!-- Bootstrap -->
     <!--<script src="extjs/jqBootstrapValidation.js"></script>-->
-    <script src="vendors/extjs/bootbox.js"></script>
-    <script src="vendors/extjs/moment.js"></script> <!-- time processing for datetimepicker -->
-    <script src="vendors/extjs/bootstrap-datetimepicker.js"></script>
-    <script src="vendors/extjs/typeahead.bundle.js"></script>
+    <script src="vendors/bootbox/bootbox.js"></script>
+    <script src="vendors/moment/moment.js"></script> <!-- time processing for datetimepicker -->
+    <script src="vendors/bootstrap-datetimepicker/build/js/bootstrap-datetimepicker.min.js"></script>
+    <script src="vendors/typeahead.js/dist/typeahead.bundle.js"></script>
     <!-- socket.io -->
-    <script src="vendors/extjs/socket.io.min.js"></script>
+    <script src="vendors/socket.io-client/dist/socket.io.js"></script>
     <!-- knockout.js -->
-    <script src="vendors/extjs/knockout.js"></script>
-    <script src="vendors/extjs/knockout-bootstrap.js"></script>
-    <script src="vendors/extjs/knockout.validation.js"></script>
+    <script src="vendors/knockoutjs/build/output/knockout-latest.debug.js"></script>
+    <script src="vendors/knockout-bootstrap/build/knockout-bootstrap.min.js"></script>
+    <script src="vendors/knockout-validation/Dist/knockout.validation.js"></script>
 
     <!-- highstock (which also includes highcharts) (minified)-->
-    <script src="vendors/extjs/highstock.js"></script>
+    <script src="vendors/highstock/js/highstock.src.js"></script>
 
     <!-- Other external libraries. -->
-    <script src="vendors/extjs/qrcode.js"></script> 
-    <script src="vendors/extjs/mnemonic.js"></script> 
-    <script src="vendors/extjs/decimal.js"></script> <!-- for accurate arithmetic price operations -->
+    <script src="vendors/qrcode/lib/qrcode.js"></script> 
+    
+    <script src="vendors/jsdecimal/lib/decimal.js"></script> <!-- for accurate arithmetic price operations -->
     
     <!-- JavaScript created specifically for Counterwallet. -->
+    <script src="js/mnemonic.js"></script> <!-- can not find official source -->
     <script src="js/util.js"></script>
     <script src="js/counterwallet.js"></script>
     <script src="js/util.api.js"></script>

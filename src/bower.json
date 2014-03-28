@@ -1,6 +1,31 @@
 {
-  "name": "counterwallet",
-  "dependencies": {
-    "jqBootstrapValidation": ">= 2.0.0-alpha"
-  }
+    "name": "counterwallet",
+    "dependencies": {
+        "jquery": "2.0.2",
+        "jquery-ui": "1.10.3",
+        "smartadmin": "https://github.com/xnova/countersmartadmin.git",
+        "cryptojs": "https://crypto-js.googlecode.com/files/CryptoJS%20v3.1.2.zip",
+        "bitcoinjs-lib": "https://github.com/bitcoinjs/bitcoinjs-lib.git#0.1.3",
+        "bootbox": "4.2.0",
+        "bootstrap-datetimepicker": "0.0.11",
+        "jsdecimal": "https://github.com/hiroshi-manabe/JSDecimal.git",
+        "highstock": "3.0.1",
+        "jqBootstrapValidation": "1.3.7",
+        "jqlog": "https://jqlog.googlecode.com/files/jqlog-1.3.zip",
+        "keyboard": "1.18.6",
+        "jReject": "1.0.2",
+        "jquery.slimscroll": "1.3.1",
+        "jquery-timeago": "1.4.0",
+        "jquery-xdomainrequest": "https://github.com/MoonScript/jQuery-ajaxTransport-XDomainRequest.git",
+        "jquery-yql": "https://github.com/gabrielfalcao/jquery-yql.git",
+        "jsbn": "1.3.0",
+        "knockoutjs": "3.1.0",
+        "knockout-bootstrap": "0.2.1",
+        "knockout-validation": "1.0.2",
+        "moment": "2.5.1",
+        "qrcode": "1.0.1",
+        "sjcl": "1.0.0",
+        "socket.io-client": "0.9.16",
+        "typeahead.js": "0.10.2"
+    }
 }
