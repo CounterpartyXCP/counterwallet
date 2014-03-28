@@ -7,7 +7,7 @@
         "cryptojs": "https://crypto-js.googlecode.com/files/CryptoJS%20v3.1.2.zip",
         "bitcoinjs-lib": "https://github.com/bitcoinjs/bitcoinjs-lib.git#0.1.3",
         "bootbox": "4.2.0",
-        "bootstrap-datetimepicker": "0.0.11",
+        "bootstrap-datetimepicker": "https://github.com/Eonasdan/bootstrap-datetimepicker.git#3.0.0",
         "jsdecimal": "https://github.com/hiroshi-manabe/JSDecimal.git",
         "highstock": "3.0.1",
         "jqBootstrapValidation": "1.3.7",
