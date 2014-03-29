@@ -525,7 +525,7 @@
       }
     </script>
 
-    <!-- build:js combined.js -->
+    <!-- build:js counterwallet-deps.js -->
     <!-- SmartAdmin JS includes -->
     <script src="vendors/smartadmin/js/bootstrap/bootstrap.min.js"></script> <!-- BOOTSTRAP JS -->
     <script src="vendors/smartadmin/js/notification/SmartNotification.min.js"></script> <!-- CUSTOM NOTIFICATION -->
@@ -545,16 +545,12 @@
     <script src="vendors/smartadmin/js/plugin/datatables/ZeroClipboard.js"></script>
     <script src="vendors/smartadmin/js/plugin/datatables/media/js/TableTools.min.js"></script>
     <script src="vendors/smartadmin/js/plugin/datatables/DT_bootstrap.js"></script>
-
-    <!-- COUNTERWALLET SPECIFIC JS INCLUDES -->    
-    <!-- bitcoinjs-lib: The following library is required for bitcon addresses and signing. -->
+  
     
     <script src="vendors/cryptojs/rollups/sha256.js"></script>
     <script src="vendors/cryptojs/components/enc-base64.js"></script>
-    <script src="js/bitcoinjs-min.js"></script> <!-- need update to use vendors/bitcoinjs-lib -->
     <script src="vendors/jsbn/prng4.js"></script>
     <script src="vendors/jsbn/rng.js"></script>
-    <!-- <script src="extjs/sjcl.min.js"></script> -->
      
     <!-- JQuery extras -->
     <script src="vendors/jqlog/jquery.jqlog-1.3.js"></script>
@@ -567,7 +563,6 @@
     <script src="vendors/keyboard/js/jquery.keyboard.extension-autocomplete.js"></script>
 
     <!-- Bootstrap -->
-    <!--<script src="extjs/jqBootstrapValidation.js"></script>-->
     <script src="vendors/bootbox/bootbox.js"></script>
     <script src="vendors/moment/moment.js"></script> <!-- time processing for datetimepicker -->
     <script src="vendors/bootstrap-datetimepicker/build/js/bootstrap-datetimepicker.min.js"></script>
@@ -586,8 +581,14 @@
     <script src="vendors/qrcode/lib/qrcode.js"></script> 
     
     <script src="vendors/jsdecimal/lib/decimal.js"></script> <!-- for accurate arithmetic price operations -->
-    
+    <!-- endbuild -->
+
+
+    <!-- COUNTERWALLET SPECIFIC JS INCLUDES --> 
     <!-- JavaScript created specifically for Counterwallet. -->
+    <!-- bitcoinjs-lib: The following library is required for bitcon addresses and signing. -->
+    <!-- build:js counterwallet.js -->
+    <script src="js/bitcoinjs-min.js"></script> <!-- need update to use vendors/bitcoinjs-lib -->
     <script src="js/mnemonic.js"></script> <!-- can not find official source -->
     <script src="js/util.js"></script>
     <script src="js/counterwallet.js"></script>
@@ -605,7 +606,6 @@
     <script src="js/components/feed_pending_actions.js"></script>
     <script src="js/components/feed_waiting_btcpays.js"></script>
     <script src="js/components/chatfeed.js"></script>
-
     <!-- custom app.js --> 
     <script src="js/smartadmin.app.js"></script>
     <!-- ^ unfortunately we have to mod the file itself, instead of dynamically override :( -->
