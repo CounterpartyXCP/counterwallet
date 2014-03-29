@@ -2,6 +2,7 @@ module.exports = function (grunt) {
 
     var Crypto = require('cryptojs').Crypto
     var File = require('grunt-usemin/lib/file');
+    var Uglify = require("uglify-js");
 
     grunt.initConfig({
         pkg: grunt.file.readJSON('package.json'),
@@ -66,9 +67,12 @@ module.exports = function (grunt) {
                 blockdest = block.dest.split("/").pop();
                 if (config.html[filename][blockdest]) {
                     for (var b in block.src) {
-                        grunt.log.writeln('blockfile:'+block.src[b]);
+                        grunt.log.writeln('generating hash: '+block.src[b]);
                         var path = root+block.src[b]
-                        var content = grunt.file.read(path);
+                        var content = grunt.file.read(path);                   
+                        var ast = Uglify.parser.parse(content); // parse code and get the initial AST
+                        ast = Uglify.uglify.ast_squeeze(ast); // get an AST with compression optimizations
+                        content = Uglify.uglify.gen_code(ast); // compressed code here
                         var hash = Crypto.SHA256(content);
                         hashes[path] = hash;
                     }
@@ -81,7 +85,7 @@ module.exports = function (grunt) {
     grunt.registerTask('checkdeps', 'Check dependencies checksums', function() {
         currenthashes = generateHashes();
         savedhashes = grunt.file.readJSON("bowerchecksum.json");
-        
+
         // We do not check if a file is missing
         for (filename in currenthashes) {
             currenthash = currenthashes[filename];
@@ -96,10 +100,11 @@ module.exports = function (grunt) {
     });
 
     grunt.registerTask('writechecksum', 'Generate dependencies checksums', function() {
-        hashesjs = generateHashes();
+        hashes = generateHashes();
         hashesjs = JSON.stringify(hashes, null, 4);
+        grunt.log.writeln("generating bowerchecksum.json");
         grunt.file.write("bowerchecksum.json", hashesjs);
-        grunt.log.writeln("generateHashes: "+hashesjs);
+        
     });
 
     grunt.registerTask('default', ['checkdeps', 'useminPrepare', 'cssmin', 'uglify', 'copy', 'usemin']);
