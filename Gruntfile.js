@@ -17,7 +17,7 @@ module.exports = function (grunt) {
         genassetsfolder: {
             options: {
                 buildDir: buildDir,
-                assetsHome: '/assets/',
+                assetsHome: 'assets/',
             },
             html: 'src/index.html'
         },
@@ -29,6 +29,19 @@ module.exports = function (grunt) {
                     {cwd: 'src/pages/', src: '**', dest: buildDir+'pages/', expand: true, flatten: true}
                 ]
             }
+        },
+
+        relativeRoot: {
+            files: {
+                options: {
+                    root: 'build'
+                },
+                files: [{
+                    expand: true,
+                    cwd: '<%= relativeRoot.yourTarget.options.root %>',
+                    src: ['*.css', '*.html']
+                }]
+            },
         }
     });
 
@@ -41,7 +54,7 @@ module.exports = function (grunt) {
     var CleanCSS = require('clean-css');
     var Uglify = require("uglify-js");
 
-    var processUrl = function(url, filedir, config) {
+    var processUrl = function(url, filedir, config, destfile) {
         grunt.log.writeln("Original url: "+url);
         var newUrl = url;
         // procession only relatve urls
@@ -77,6 +90,10 @@ module.exports = function (grunt) {
             if (anchor) {
                 newUrl += "#"+anchor;
             }
+
+            var from = Path.dirname('/'+destfile);
+            var to = '/'+newUrl;
+            newUrl = Path.relative(from, to);
             grunt.log.writeln("New url: "+newUrl);
 
             var newUrlPath = Path.resolve(config.assetsDir+newFilename);
@@ -97,7 +114,7 @@ module.exports = function (grunt) {
             root = config.root;
         }
         config.assetsDir =  config.buildDir+config.assetsHome;
-        
+
         if (grunt.file.exists(config.assetsDir)) {
             grunt.file.delete(config.assetsDir);
         }
@@ -133,7 +150,7 @@ module.exports = function (grunt) {
                                 var newcontent = content.replace(/url\s*\(\s*(['"]?)([^"'\)]*)\1\s*\)/gi, function(match, location) {
 
                                     var url = match.replace(/\s/g, '').slice(4, -1).replace(/"|'/g, '');
-                                    var newUrl = processUrl(url, cssfiledir, config);
+                                    var newUrl = processUrl(url, cssfiledir, config, block.dest);
                                     return 'url("'+newUrl+'")';
 
                                 });
@@ -176,7 +193,9 @@ module.exports = function (grunt) {
                     }
                 });
 
-                // html parsing          
+                // html parsing     
+                var destpath = config.buildDir+filename.split("/").pop();
+
                 var newhtmlcontent = htmlcontent.replace(/(src|href)=['"]([^"']+)["']/gi, function(match, location) {
                     
                     var urlParts = match.replace(/\s/g, '').replace(/"|'/g, '').split("=");
@@ -184,12 +203,12 @@ module.exports = function (grunt) {
                     var url = urlParts.join("=");
                     var exclude = url.match(/(\.js)|(\.html)|(\.css)|(;)|(#)|$/gi)!="";
                     if (!exclude) {
-                        url = processUrl(url, filedir, config);
+                        url = processUrl(url, filedir, config, "");
                     } 
                     return attr+'="'+url+'"';
 
                 });
-                var destpath = config.buildDir+filename.split("/").pop();
+                
                 grunt.file.write(destpath, newhtmlcontent);
                 
 
