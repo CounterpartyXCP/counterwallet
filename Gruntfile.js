@@ -176,7 +176,7 @@ module.exports = function (grunt) {
                             grunt.log.writeln('preparing js: '+block.src[b]);
                             var filepath = filedir+'/'+block.src[b];
                             var content = grunt.file.read(filepath);
-                            combinedjs += content+"\n";
+                            combinedjs += content+grunt.util.linefeed;
                         }
                         var ast = Uglify.parser.parse(combinedjs); // parse code and get the initial AST
                         ast = Uglify.uglify.ast_squeeze(ast); // get an AST with compression optimizations
