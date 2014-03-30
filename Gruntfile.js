@@ -31,7 +31,8 @@ module.exports = function (grunt) {
         copy: {
             main: {
                 files: [
-                    {src: 'src/robots.txt', dest: buildDir+'robots.txt'}
+                    {src: 'src/robots.txt', dest: buildDir+'robots.txt'},
+                    {cwd: 'src/assets/', src: '*', dest: buildDir+'assets/', expand: true}
                 ]
             }
         }
@@ -238,6 +239,6 @@ module.exports = function (grunt) {
         grunt.file.mkdir(buildDir);
     });
 
-    grunt.registerTask('build', ['checkdeps', 'cleandist', 'genassetsfolder', 'copy']);
+    grunt.registerTask('build', ['cleandist', 'checkdeps', 'genassetsfolder', 'copy']);
     grunt.registerTask('default', ['build']);
 };

@@ -200,7 +200,7 @@ $(document).ready(function() {
       firefox1: true,
       firefox2: true
     },
-    imagePath: './images/jquery.reject/', // Path where images are located    
+    imagePath: 'assets/', // Path where images are located    
   }); // Customized Text
 });
 
