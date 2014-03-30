@@ -1,4 +1,6 @@
 {
+    "src/vendors/smartadmin/js/libs/jquery-2.0.2.min.js": "3558f7ba20898221ec2e8009435d5777bba35e64ab31efe2070e40286e0fd00b",
+    "src/vendors/smartadmin/js/libs/jquery-ui-1.10.3.min.js": "953d27ce7add7c3593011b68104a861e9e0211933759e3400c1c7229775bb779",
     "src/vendors/smartadmin/js/bootstrap/bootstrap.min.js": "96a2d416b5a10298e698cd0a397514fe6fb5dbd1731cd702de6ee06ff440b3fe",
     "src/vendors/smartadmin/js/notification/SmartNotification.min.js": "837486c2452830ba24f162b7c8940dc36a9e5ecd9ad5c0888e04f404cf11d64c",
     "src/vendors/smartadmin/js/smartwidgets/jarvis.widget.min.js": "276fe5c9f51996246f915fc30fe48b82d0eed724a50d0e6b7cba89cc1d332376",

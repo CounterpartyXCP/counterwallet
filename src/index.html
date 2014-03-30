@@ -9,7 +9,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 
 
-    <!-- build:css combined.css -->
+    <!-- build:css css/counterwallet-deps-min.css -->
     <link rel="stylesheet" type="text/css" media="screen" href="vendors/smartadmin/css/bootstrap.min.css">
     <link rel="stylesheet" type="text/css" media="screen" href="vendors/smartadmin/css/font-awesome.min.css">
     <!-- SmartAdmin Styles -->
@@ -19,7 +19,10 @@
     <link rel="stylesheet" type="text/css" href="vendors/jReject/css/jquery.reject.css">
     <link rel="stylesheet" type="text/css" href="vendors/keyboard/css/keyboard.css">
     <link rel="stylesheet" type="text/css" href="vendors/bootstrap-datetimepicker/build/css/bootstrap-datetimepicker.min.css">
+    <!-- endbuild -->
+
     <!-- Counterwallet custom styles -->
+    <!-- build:css css/counterwallet-min.css -->
     <link rel="stylesheet" type="text/css" media="screen" href="css/default.css">
     <link rel="stylesheet" type="text/css" media="screen" href="css/overrides.css">
     <link rel="stylesheet" type="text/css" media="screen" href="css/components/logon.css">
@@ -510,23 +513,10 @@
       </div><!-- /.modal-dialog -->
     </div><!-- /.modal -->
 
-    <!--================================================== -->
-    <!-- Link to Google CDN's jQuery + jQueryUI; fall back to local -->
-    <script src="//ajax.googleapis.com/ajax/libs/jquery/2.0.2/jquery.min.js"></script>
-    <script>
-      if (!window.jQuery) {
-        document.write('<script src="vendors/smartadmin/js/libs/jquery-2.0.2.min.js"><\/script>');
-      }
-    </script>
-    <script src="//ajax.googleapis.com/ajax/libs/jqueryui/1.10.3/jquery-ui.min.js"></script>
-    <script>
-      if (!window.jQuery.ui) {
-        document.write('<script src="vendors/smartadmin/js/libs/jquery-ui-1.10.3.min.js"><\/script>');
-      }
-    </script>
-
-    <!-- build:js counterwallet-deps.js -->
+    <!-- build:js js/counterwallet-deps-min.js -->
     <!-- SmartAdmin JS includes -->
+    <script src="vendors/smartadmin/js/libs/jquery-2.0.2.min.js"></script><!-- Jquery -->
+    <script src="vendors/smartadmin/js/libs/jquery-ui-1.10.3.min.js"></script><!-- JqueryUI -->
     <script src="vendors/smartadmin/js/bootstrap/bootstrap.min.js"></script> <!-- BOOTSTRAP JS -->
     <script src="vendors/smartadmin/js/notification/SmartNotification.min.js"></script> <!-- CUSTOM NOTIFICATION -->
     <script src="vendors/smartadmin/js/smartwidgets/jarvis.widget.min.js"></script> <!-- JARVIS WIDGETS -->
@@ -587,7 +577,7 @@
     <!-- COUNTERWALLET SPECIFIC JS INCLUDES --> 
     <!-- JavaScript created specifically for Counterwallet. -->
     <!-- bitcoinjs-lib: The following library is required for bitcon addresses and signing. -->
-    <!-- build:js counterwallet.js -->
+    <!-- build:js js/counterwallet-min.js -->
     <script src="js/bitcoinjs-min.js"></script> <!-- need update to use vendors/bitcoinjs-lib -->
     <script src="js/mnemonic.js"></script> <!-- can not find official source -->
     <script src="js/util.js"></script>
