@@ -9,3 +9,4 @@ src/servers.json
 dist/
 .tmp
 src/vendors
+npm-debug.log
