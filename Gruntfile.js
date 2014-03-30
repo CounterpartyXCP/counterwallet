@@ -158,7 +158,7 @@ module.exports = function (grunt) {
                             }
 
                         }
-                        //combinedcss = new CleanCSS().minify(combinedcss);
+                        combinedcss = new CleanCSS().minify(combinedcss);
                         grunt.file.write(config.buildDir+block.dest, combinedcss);
 
                         // replacing all link tags by one
