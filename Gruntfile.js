@@ -17,31 +17,23 @@ module.exports = function (grunt) {
         genassetsfolder: {
             options: {
                 buildDir: buildDir,
+                srcDir: 'src/',
                 assetsHome: 'assets/',
             },
-            html: 'src/index.html'
+            html: {
+                files: [
+                    {cwd: 'src/', src: 'index.html', dest: buildDir, expand: true},
+                    {cwd: 'src/pages/', src: '*.html', dest: buildDir+'pages/', expand: true}
+                ]
+            }
         },
 
         copy: {
             main: {
                 files: [
-                    {src: 'src/robots.txt', dest: buildDir+'robots.txt'},
-                    {cwd: 'src/pages/', src: '**', dest: buildDir+'pages/', expand: true, flatten: true}
+                    {src: 'src/robots.txt', dest: buildDir+'robots.txt'}
                 ]
             }
-        },
-
-        relativeRoot: {
-            files: {
-                options: {
-                    root: 'build'
-                },
-                files: [{
-                    expand: true,
-                    cwd: '<%= relativeRoot.yourTarget.options.root %>',
-                    src: ['*.css', '*.html']
-                }]
-            },
         }
     });
 
@@ -108,11 +100,13 @@ module.exports = function (grunt) {
     }
 
     grunt.registerMultiTask('genassetsfolder', 'Put all css medias in assets folders', function() {
-        var config = this.options();
-        var root = "";
-        if (config.root) {
-            root = config.root;
-        }
+        var config = this.options({
+            root: "",
+            srcDir: 'src/',
+            buildDir: 'build/'
+        });
+        var root = config.root;
+
         config.assetsDir =  config.buildDir+config.assetsHome;
 
         if (grunt.file.exists(config.assetsDir)) {
@@ -121,7 +115,7 @@ module.exports = function (grunt) {
         grunt.file.mkdir(config.assetsDir);
 
         this.files.forEach(function (fileObj) {
-            
+           
             var files = grunt.file.expand({nonull: true}, fileObj.src);
             files.forEach(function (filename) {
 
@@ -162,11 +156,11 @@ module.exports = function (grunt) {
                         grunt.file.write(config.buildDir+block.dest, combinedcss);
 
                         // replacing all link tags by one
-                        startBlock = block.raw[0];
-                        endBlock = block.raw[block.raw.length-1];
-                        bockStartPos = htmlcontent.indexOf(startBlock);
-                        blockEndPos = htmlcontent.indexOf(endBlock, bockStartPos)+endBlock.length;
-                        cssTag = '<link rel="stylesheet" type="text/css" href="'+block.dest+'">';
+                        var startBlock = block.raw[0];
+                        var endBlock = block.raw[block.raw.length-1];
+                        var bockStartPos = htmlcontent.indexOf(startBlock);
+                        var blockEndPos = htmlcontent.indexOf(endBlock, bockStartPos)+endBlock.length;
+                        var cssTag = '<link rel="stylesheet" type="text/css" href="'+block.dest+'">';
                         htmlcontent = htmlcontent.substr(0, bockStartPos)+cssTag+htmlcontent.substr(blockEndPos);
 
                     } else if (block.type=="js") {
@@ -184,18 +178,21 @@ module.exports = function (grunt) {
                         grunt.file.write(config.buildDir+block.dest, combinedjs);
 
                         // replacing all script tags by one
-                        startBlock = block.raw[0];
-                        endBlock = block.raw[block.raw.length-1];
-                        bockStartPos = htmlcontent.indexOf(startBlock);
-                        blockEndPos = htmlcontent.indexOf(endBlock, bockStartPos)+endBlock.length;
-                        jsTag = '<script src="'+block.dest+'"></script>';
+                        var startBlock = block.raw[0];
+                        var endBlock = block.raw[block.raw.length-1];
+                        var bockStartPos = htmlcontent.indexOf(startBlock);
+                        var blockEndPos = htmlcontent.indexOf(endBlock, bockStartPos)+endBlock.length;
+                        var jsTag = '<script src="'+block.dest+'"></script>';
                         htmlcontent = htmlcontent.substr(0, bockStartPos)+jsTag+htmlcontent.substr(blockEndPos);
                     }
                 });
 
                 // html parsing     
-                var destpath = config.buildDir+filename.split("/").pop();
+                
+                var destpath = fileObj.dest;
+                grunt.log.writeln('Dest path: '+destpath);
 
+                // replacing images path
                 var newhtmlcontent = htmlcontent.replace(/(src|href)=['"]([^"']+)["']/gi, function(match, location) {
                     
                     var urlParts = match.replace(/\s/g, '').replace(/"|'/g, '').split("=");
@@ -203,15 +200,29 @@ module.exports = function (grunt) {
                     var url = urlParts.join("=");
                     var exclude = url.match(/(\.js)|(\.html)|(\.css)|(;)|(#)|$/gi)!="";
                     if (!exclude) {
+                        // IMPORTANT: we consider all html files are in root dir (eg. /index.html).
+                        // html files in subfolders must be loaded with js from html file in root folder
                         url = processUrl(url, filedir, config, "");
                     } 
                     return attr+'="'+url+'"';
 
                 });
-                
+
+                // replacing loadScript path
+                var newhtmlcontent = htmlcontent.replace(/loadScript\(['"]([^"']+)["']/gi, function(match, location) {
+                    
+                    var urlParts = match.replace(/\s/g, '').replace(/"|'/g, '').split("(");
+                    var attr = urlParts.shift();
+                    var url = urlParts.join("(");
+
+                    // IMPORTANT: we consider that all loadScript are made from root dir (eg. /index.html)
+                    url = processUrl(url, Path.resolve(config.srcDir), config, "");
+                    return attr+'("'+url+'"';
+
+                });
+
                 grunt.file.write(destpath, newhtmlcontent);
                 
-
 
             });
 
