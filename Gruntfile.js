@@ -1,5 +1,7 @@
 module.exports = function (grunt) {
 
+    var buildDir = 'build/';
+
     grunt.initConfig({
         pkg: grunt.file.readJSON('package.json'),
 
@@ -14,9 +16,8 @@ module.exports = function (grunt) {
 
         genassetsfolder: {
             options: {
-                assetsDir: 'dist/assets/',
-                buildDir: 'dist/',
-                assetsHome: 'assets/',
+                buildDir: buildDir,
+                assetsHome: '/assets/',
             },
             html: 'src/index.html'
         },
@@ -24,8 +25,8 @@ module.exports = function (grunt) {
         copy: {
             main: {
                 files: [
-                    {src: 'src/robots.txt', dest: 'dist/robots.txt'},
-                    {cwd: 'src/pages/', src: '**', dest: 'dist/pages/', expand: true, flatten: true}
+                    {src: 'src/robots.txt', dest: buildDir+'robots.txt'},
+                    {cwd: 'src/pages/', src: '**', dest: buildDir+'pages/', expand: true, flatten: true}
                 ]
             }
         }
@@ -95,6 +96,7 @@ module.exports = function (grunt) {
         if (config.root) {
             root = config.root;
         }
+        config.assetsDir =  config.buildDir+config.assetsHome;
         
         if (grunt.file.exists(config.assetsDir)) {
             grunt.file.delete(config.assetsDir);
@@ -199,11 +201,11 @@ module.exports = function (grunt) {
     });
 
     //TODO: put dist in config
-    grunt.registerTask('cleandist', 'Delete all files in dist/', function() {
-        if (grunt.file.exists('dist')) {
-            grunt.file.delete('dist');
+    grunt.registerTask('cleandist', 'Delete all files in build directory', function() {
+        if (grunt.file.exists(buildDir)) {
+            grunt.file.delete(buildDir);
         }
-        grunt.file.mkdir('dist');
+        grunt.file.mkdir(buildDir);
     });
 
     grunt.registerTask('build', ['checkdeps', 'cleandist', 'genassetsfolder', 'copy']);
