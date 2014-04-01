@@ -175,7 +175,7 @@ NotificationViewModel.calcText = function(category, message) {
 function NotificationFeedViewModel(initialCount) {
   var self = this;
   
-  self.notifications = ko.observableArray([]);
+  self.entries = ko.observableArray([]);
   self.lastUpdated = ko.observable(new Date());
   self.count = ko.observable(initialCount || 0);
   self.unackedCount = ko.observable(initialCount || 0);
@@ -192,10 +192,10 @@ function NotificationFeedViewModel(initialCount) {
     if(!noto.MESSAGE_TEXT)
       return; //will be the case if this noto does not apply to this client or is not something this client needs to see
     
-    self.notifications.unshift(noto); //add to front of array
+    self.entries.unshift(noto); //add to front of array
     self.unackedCount(self.unackedCount() + 1);
-    //if the number of notifications are over 40, remove the oldest one
-    if(self.notifications().length > 40) self.notifications.pop();
+    //if the number of entries are over 40, remove the oldest one
+    if(self.entries().length > 40) self.entries.pop();
     self.lastUpdated(new Date());
   }
 }

@@ -242,13 +242,13 @@ function _multiAPIPrimative(method, params, onFinished) {
   var gatheredResults = [];
   var destType = _getDestTypeFromMethod(method);
 
-  for(var i=0;i < counterwalletd_api_urls.length; i++) {
+  for(var i=0;i < cwAPIUrls().length; i++) {
     //make multiple _makeJSONAPICall calls in parallel, one call for each API endpoint, and collect results...
-    _makeJSONAPICall(destType, counterwalletd_api_urls[i], method, params, TIMEOUT_MULTI_API,
+    _makeJSONAPICall(destType, cwAPIUrls()[i], method, params, TIMEOUT_MULTI_API,
     function(data, endpoint) { //success callback
       gatheredResults.push({'success': true, 'endpoint': endpoint, 'data': data});
       
-      if(gatheredResults.length == counterwalletd_api_urls.length) {
+      if(gatheredResults.length == cwAPIUrls().length) {
         onFinished(gatheredResults);
       }
     },
@@ -256,7 +256,7 @@ function _multiAPIPrimative(method, params, onFinished) {
       gatheredResults.push({'success': false, 'endpoint': endpoint, 'jqXHR': jqXHR, 'textStatus': textStatus, 'errorThrown': errorThrown});
       
       //525 DETECTION (needed here and in failoverAPI() as failoverAPI() doesn't use this primative)
-      if(method != "is_ready" && gatheredResults.length == counterwalletd_api_urls.length) {
+      if(method != "is_ready" && gatheredResults.length == cwAPIUrls().length) {
         //detect a special case of all servers returning code 525, which would mean counterpartyd had a reorg and/or we are upgrading
         var allNotCaughtUp = true;
         for(var j=0;j < gatheredResults.length; j++) {
@@ -319,7 +319,7 @@ function failoverAPI(method, params, onSuccess, onError) {
   }
 
   var destType = _getDestTypeFromMethod(method);
-  _makeJSONAPICall(destType, counterwalletd_api_urls, method, params, TIMEOUT_FAILOVER_API, onSuccess, onErrorOverride);
+  _makeJSONAPICall(destType, cwAPIUrls(), method, params, TIMEOUT_FAILOVER_API, onSuccess, onErrorOverride);
 }
   
 function multiAPI(method, params, onSuccess, onError) {
@@ -399,7 +399,7 @@ function multiAPIConsensus(method, params, onSuccess, onConsensusError, onSysErr
     
     //if here, all is well
     if(onSuccess) {
-      onSuccess(successResults[successResults.length-1], counterwalletd_api_urls.length, successResults.length);
+      onSuccess(successResults[successResults.length-1], cwAPIUrls().length, successResults.length);
     } 
   });
 }

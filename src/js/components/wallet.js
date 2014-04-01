@@ -161,7 +161,7 @@ function WalletViewModel() {
     
     //See if we have any pending BTC send transactions listed in Pending Actions, and if so, enable some extra functionality
     // to clear them out if we sense the txn as processed
-    var pendingActionsHasBTCSend = ko.utils.arrayFirst(PENDING_ACTION_FEED.pendingActions(), function(item) {
+    var pendingActionsHasBTCSend = ko.utils.arrayFirst(PENDING_ACTION_FEED.entries(), function(item) {
       return item.CATEGORY == 'sends' && item.DATA['asset'] == 'BTC'; //there is a pending BTC send
     });
     
@@ -259,14 +259,6 @@ function WalletViewModel() {
   
   /////////////////////////
   //BTC-related
-  self.getBTCBlockHeight = function(callback) {
-    failoverAPI("get_btc_block_height", [],
-      function(blockHeight, endpoint) {
-        return callback(blockHeight);
-      }
-    );
-  }
-  
   self.broadcastSignedTx = function(signedTxHex, onSuccess, onError) {
     $.jqlog.debug("RAW SIGNED HEX: " + signedTxHex);
     

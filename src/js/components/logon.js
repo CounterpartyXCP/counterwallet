@@ -11,7 +11,7 @@ function LogonViewModel() {
   self.IS_DEV = IS_DEV;
 
   self.sanitizedEnteredPassphrase = ko.computed(function(){ //cleans whitespace and gunk off the passphrase
-    return $.trim(self.enteredPassphrase());
+    return $.trim(self.enteredPassphrase().toLowerCase());
   }, self);
 
   self.walletGenProgressWidth = ko.computed(function(){
@@ -76,6 +76,9 @@ function LogonViewModel() {
       $('#newAccountInfoPane').animate({opacity:0}); //fade out the new account pane if visible
       $('#createNewAcctBtnPane').animate({opacity:0}); //fade out the new account button pane if visible
       $('#extra-info').animate({opacity:0});
+      
+      //Set initial block height (will be updated again on each periodic refresh of BTC account balances)
+      WALLET.networkBlockHeight(data['block_height']);
       
       //Initialize the socket.io-driven event feed (notifies us in realtime of new events, as counterparty processes confirmed blocks)
       MESSAGE_FEED.init(data['last_message_index']);
@@ -240,7 +243,7 @@ function LogonViewModel() {
   self.openWalletPt4 = function() {
     PENDING_ACTION_FEED.restoreFromLocalStorage();
     OPEN_ORDER_FEED.restore();
-    WAITING_BTCPAY_FEED.restore();
+    WAITING_BTCPAY_FEED.restore(); //must come after PENDING_ACTION_FEED.restoreFromLocalStorage()
 
     //all done. load the balances screen
     $.jqlog.debug("Login complete. Directing to balances page...");

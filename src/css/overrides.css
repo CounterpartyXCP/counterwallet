@@ -118,7 +118,7 @@ span.logoText {
 #openOrderFeed .ajax-dropdown {
     left: 126px;
 }
-#waitingBTCPayFeed .ajax-dropdown {
+#btcPayFeed .ajax-dropdown {
     left: 166px;
 }
 

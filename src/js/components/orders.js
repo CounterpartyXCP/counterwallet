@@ -257,8 +257,7 @@ function OrdersViewModel() {
     //helper function for showing pending trades
     if(!self.validationModelBaseOrders.isValid()) return;
     if(asset != self.asset1() && asset != self.asset2()) return; //in process of changing assets
-    //if(!self.currentMarketUnitPrice()) return; //no market data
-    assert(asset && quantity, "Asset and/or quantity not present");
+    assert(asset && quantity, "Asset and/or quantity not present, or quantity is zero: " + quantity);
     if(asset == self.asset1()) {
       return smartFormat(normalizeQuantity(quantity, self.asset1IsDivisible()));
     } else {
@@ -356,6 +355,7 @@ OrdersViewModel.deriveIsOnlineForBTCPayment = function(give_asset, _is_online) {
 OrdersViewModel.doChart = function(dispAssetPair, chartDiv, data) {
   // split the data set into ohlc and volume
   var ohlc = [];
+  var movavg_7s = [];
   var volume = [];
   
   for(var i = 0; i < data.length; i++) {
@@ -366,6 +366,10 @@ OrdersViewModel.doChart = function(dispAssetPair, chartDiv, data) {
       data[i][3], // low
       data[i][4]  // close
     ]);
+    movavg_7s.push([
+      data[i][0], // the date
+      data[i][7]  // the 7 sample moving average
+    ])
     volume.push([
       data[i][0], // the date
       data[i][5]  // the volume
@@ -404,14 +408,24 @@ OrdersViewModel.doChart = function(dispAssetPair, chartDiv, data) {
           offset: 0,
           lineWidth: 2
       }],
-      series: [{
+      series: [
+      {
           type: 'candlestick',
           name: dispAssetPair,
           data: ohlc,
           dataGrouping: {
             units: groupingUnits
           }
-      }, {
+      }, 
+      {
+        name: '7 Sample MA',
+        type: 'line',
+        data: movavg_7s,
+        dataGrouping: {
+          units: groupingUnits
+        }
+      },      
+      {
           type: 'column',
           name: 'Volume',
           data: volume,

@@ -5,15 +5,6 @@ var BuySellAddressInDropdownItemModel = function(address, label, asset, balance)
   this.SELECT_LABEL = (label ? ("<b>" + label + "</b><br/>" + address + "<br/>" + asset + " Bal: " + balance) : (address + "<br/>" + asset + " Bal: " + balance));
 };
 
-ko.validation.rules['isValidQtyForBuyAssetDivisibility'] = {
-    validator: function (val, self) {
-      if(!self.buyAssetIsDivisible() && numberHasDecimalPlace(parseFloat(val))) {
-        return false;
-      }
-      return true;
-    },
-    message: 'The quantity entered must be a whole number, since this is a non-divisible asset.'
-};
 ko.validation.rules['isValidQtyForSellAssetDivisibility'] = {
     validator: function (val, self) {
       if(!self.params.sellAssetIsDivisible() && numberHasDecimalPlace(parseFloat(val))) {
@@ -23,55 +14,6 @@ ko.validation.rules['isValidQtyForSellAssetDivisibility'] = {
     },
     message: 'The quantity entered must be a whole number, since this is a non-divisible asset.'
 };
-ko.validation.rules['doesNotMatchSelectedBuyAsset'] = {
-  validator: function (asset, self) {
-    if(!asset) return null;
-    if(asset == "BTC" && self.selectedBuyAsset() == "BTC") return false;
-    if(asset == "XCP" && self.selectedBuyAsset() == "XCP") return false;
-    if(   asset == "Other"
-       && self.selectedBuyAsset() == "Other"
-       && self.selectedBuyAssetOther() == self.selectedSellAssetOther() ) return false;
-    return true;
-  },
-  message: 'You cannot buy and sell the same asset.'
-};
-ko.validation.rules['isExistingBuyAssetName'] = {
-  validator: function (asset, self) {
-    if(self.selectedBuyAsset() != "Other") return true; //this validator doesn't apply
-    if(asset == 'XCP' || asset == 'BTC') return false; //shouldn't be in this list
-    var match = ko.utils.arrayFirst(self.allAssets(), function(item) {
-      return item == asset;
-    });
-    return match;
-  },
-  message: 'The asset specified does not exist.'
-};
-ko.validation.rules['isExistingSellAssetName'] = {
-  validator: function (asset, self) {
-    if(self.selectedSellAsset() != "Other") return true; //this validator doesn't apply
-    if(asset == 'XCP' || asset == 'BTC') return false; //shouldn't be in this list
-    var match = ko.utils.arrayFirst(self.allAssets(), function(item) {
-      return item == asset;
-    });
-    return match;
-  },
-  message: 'The asset specified does not exist.'
-};
-
-ko.validation.rules['addressHasPrimedTxouts'] = {
-  validator: function (address, self) {
-    if(!address) return true; //leave it alone for blank addresses
-    return WALLET.getAddressObj(address).numPrimedTxouts() > 0;
-  },
-  message: 'This address has no BTC and/or no primed outputs. Please prime the address first.'
-};
-ko.validation.rules['addressHasSellAssetBalance'] = {
-  validator: function (address, self) {
-    if(!address) return true; //leave it alone for blank addresses
-    return WALLET.getBalance(address, self.sellAsset());
-  },
-  message: 'You have no available balance for the sell asset at this address.'
-};
 ko.validation.rules['isValidBuyOrSellQuantity'] = {
   validator: function (quantity, self) {
     if(self.params && self.onlyIf !== undefined) self = self.params; //allows use as a conditional requirement
@@ -79,24 +21,6 @@ ko.validation.rules['isValidBuyOrSellQuantity'] = {
     return quantity.toString().match(/^[0-9]*\.?[0-9]{0,8}$/) && quantity > 0;
   },
   message: 'Must be a valid quantity (> 0, max 8 decimal places)'
-};
-ko.validation.rules['coorespondingSellQuantityDoesNotExceedBalance'] = {
-  //For the quantity the user wants to buy
-  validator: function (buyQuantity, self) {
-    if(self.selectedSellQuantity() == null) return true; //don't complain yet until the user fills something in
-    if(self.selectedSellQuantityCustom()) return true; //this field is not used for custom orders (we do validation on the customBuy field instead)
-    if(!self.selectedAddress() || buyQuantity == null || buyQuantity == '') return false;
-    return self.sellQuantityRemainingAfterSale() >= 0;
-    //return self.selectedSellQuantity() <= self.totalBalanceAvailForSale();
-  },
-  message: 'You are trying to buy more than you can afford.'
-};
-ko.validation.rules['customSellQuantityDoesNotExceedBalance'] = {
-  validator: function (quantity, self) {
-    if(self.selectedSellQuantityCustom() == null) return true; //don't complain yet until the user fills something in
-    return quantity <= WALLET.getBalance(self.selectedAddress(), self.sellAsset());
-  },
-  message: 'You have no available balance for the sell asset at this address.'
 };
 ko.validation.registerExtenders();
 
@@ -138,11 +62,34 @@ function BuySellWizardViewModel() {
       message: "Asset required.",
       onlyIf: function () { return (self.selectedBuyAsset() == 'Other'); }
     },
-    isExistingBuyAssetName: self
+    validation: {
+      validator: function (asset, self) {
+        if(self.selectedBuyAsset() != "Other") return true; //this validator doesn't apply
+        if(asset == 'XCP' || asset == 'BTC') return false; //shouldn't be in this list
+        var match = ko.utils.arrayFirst(self.allAssets(), function(item) {
+          return item == asset;
+        });
+        return match;
+      },
+      message: 'The asset specified does not exist.',
+      params: self
+    }
   });
   self.selectedSellAsset = ko.observable('').extend({
     required: true,
-    doesNotMatchSelectedBuyAsset: self
+    validation: {
+      validator: function (asset, self) {
+        if(!asset) return null;
+        if(asset == "BTC" && self.selectedBuyAsset() == "BTC") return false;
+        if(asset == "XCP" && self.selectedBuyAsset() == "XCP") return false;
+        if(   asset == "Other"
+           && self.selectedBuyAsset() == "Other"
+           && self.selectedBuyAssetOther() == self.selectedSellAssetOther() ) return false;
+        return true;
+      },
+      message: 'You cannot buy and sell the same asset.',
+      params: self
+    }    
   });
   self.selectedSellAssetOther = ko.observable('').extend({
      //if the "Other" radio button is selected
@@ -150,7 +97,18 @@ function BuySellWizardViewModel() {
       message: "Asset required.",
       onlyIf: function () { return (self.selectedSellAsset() == 'Other'); }
     },
-    isExistingSellAssetName: self
+    validation: {
+      validator: function (asset, self) {
+        if(self.selectedSellAsset() != "Other") return true; //this validator doesn't apply
+        if(asset == 'XCP' || asset == 'BTC') return false; //shouldn't be in this list
+        var match = ko.utils.arrayFirst(self.allAssets(), function(item) {
+          return item == asset;
+        });
+        return match;
+      },
+      message: 'The asset specified does not exist.',
+      params: self
+    }
   });
   self.buyAsset = ko.computed(function() {
     if(self.selectedBuyAsset() == 'Other') return self.selectedBuyAssetOther();
@@ -172,8 +130,21 @@ function BuySellWizardViewModel() {
       message: "This field is required.",
       onlyIf: function () { return (self.selectedBuyAsset() && self.selectedSellAsset()); }
     },
-    addressHasPrimedTxouts: self,
-    addressHasSellAssetBalance: self
+    validation: [{
+      validator: function (address, self) {
+        if(!address) return true; //leave it alone for blank addresses
+        return WALLET.getAddressObj(address).numPrimedTxouts() > 0;
+      },
+      message: 'This address has no BTC and/or no primed outputs. Please prime the address first.',
+      params: self
+    }, {
+      validator: function (address, self) {
+        if(!address) return true; //leave it alone for blank addresses
+        return WALLET.getBalance(address, self.sellAsset());
+      },
+      message: 'You have no available balance for the sell asset at this address.',
+      params: self
+    }]
   });
   self.dispSelectedAddress = ko.computed(function() {
     if(!self.selectedAddress()) return null;
@@ -242,8 +213,27 @@ function BuySellWizardViewModel() {
   self.selectedBuyQuantity = ko.observable().extend({
     required: true,
     isValidBuyOrSellQuantity: self,
-    coorespondingSellQuantityDoesNotExceedBalance: self,
-    isValidQtyForBuyAssetDivisibility: self
+    validation: [{
+      //For the quantity the user wants to buy
+      validator: function (buyQuantity, self) {
+        if(self.selectedSellQuantity() == null) return true; //don't complain yet until the user fills something in
+        if(self.selectedSellQuantityCustom()) return true; //this field is not used for custom orders (we do validation on the customBuy field instead)
+        if(!self.selectedAddress() || buyQuantity == null || buyQuantity == '') return false;
+        return self.sellQuantityRemainingAfterSale() >= 0;
+        //return self.selectedSellQuantity() <= self.totalBalanceAvailForSale();
+      },
+      message: 'You are trying to buy more than you can afford.',
+      params: self
+    },{
+      validator: function (val, self) {
+        if(!self.buyAssetIsDivisible() && numberHasDecimalPlace(parseFloat(val))) {
+          return false;
+        }
+        return true;
+      },
+      message: 'The quantity entered must be a whole number, since this is a non-divisible asset.',
+      params: self
+    }]
   });
   self.currentMarketUnitPrice = ko.observable();
   // ^ quote / base (per 1 base unit). May be null if there is no established market rate
@@ -283,7 +273,8 @@ function BuySellWizardViewModel() {
     }
   }, self);
   self.selectedSellQuantity = ko.computed(function() {
-    return (self.selectedSellQuantityCustom() || self.selectedSellQuantityAtMarket());
+    if(self.overrideMarketPrice()) return self.selectedSellQuantityCustom();
+    return self.selectedSellQuantityAtMarket();
   }, self);
   
   self.customSellAs = ko.observable('unitprice'); //unitprice or quantity (default to unitprice)
@@ -315,7 +306,11 @@ function BuySellWizardViewModel() {
     }    
   });
   self.customSellAsEntry.subscribe(function(newValue) {
-    if(!self.assetPair() || isNaN(parseFloat(newValue)) || parseFloat(newValue) <= 0 || !self.selectedBuyQuantity()) return;
+    if(!self.assetPair() || !self.overrideMarketPrice()) return;
+    if(isNaN(parseFloat(newValue)) || parseFloat(newValue) <= 0 || !self.selectedBuyQuantity()) {
+      self.selectedSellQuantityCustom(null); //blank it out
+      return;
+    }
     if(self.customSellAs() == "unitprice") {
       var val = null;
       if(self.assetPair()[0] == self.buyAsset()) //buy asset is the base
@@ -331,8 +326,8 @@ function BuySellWizardViewModel() {
       self.selectedSellQuantityCustom(newValue); //easy
     }
   });
-  self.customSellAs.subscribe(function(newValue) {
-    self.customSellAsEntry.valueHasMutated(); //update the value when the button setting changes
+  self.customSellAs.subscribe(function(newValue) { //triggered when the user switches between "As Unit Price" and "As Quantity"
+    self.customSellAsEntry(''); //clear the value to prevent user mistakes
   });
   self.selectedBuyQuantity.subscribe(function(newValue) {
     self.customSellAsEntry.valueHasMutated(); //update the value when the button setting changes
@@ -752,7 +747,7 @@ function BuySellWizardViewModel() {
   
   self.deriveOpenOrderAssetQuantity = function(asset, quantity) {
     //helper function for showing pending trades
-    assert(asset && quantity, "Asset and/or quantity not present");
+    assert(asset && quantity, "Asset and/or quantity not present, or quantity is zero: " + quantity);
     if(asset == self.buyAsset()) {
       return smartFormat(normalizeQuantity(quantity, self.buyAssetIsDivisible()));
     } else {

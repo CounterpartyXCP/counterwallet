@@ -65,9 +65,9 @@ function ChatFeedViewModel() {
       return;
     }
     
-    $.jqlog.debug("Starting chat feeds: " + JSON.stringify(counterwalletd_base_urls));
-    for(var i = 0; i < counterwalletd_base_urls.length; i++) {
-      var socket = io.connect(counterwalletd_base_urls[i], {
+    $.jqlog.debug("Starting chat feeds: " + JSON.stringify(cwBaseURLs()));
+    for(var i = 0; i < cwBaseURLs().length; i++) {
+      var socket = io.connect(cwBaseURLs()[i], {
         'max reconnection attempts': 5,
         'try multiple transports': false,
         'force new connection': true, /* needed, otherwise socket.io will reuse the feed connection */
@@ -126,7 +126,7 @@ function ChatFeedViewModel() {
               initialLineSet = initialLineSet.concat(linesList);
               initialLineSetNumReplies += 1;
               
-              if(initialLineSetNumReplies == counterwalletd_base_urls.length)  { //got lines for final feed
+              if(initialLineSetNumReplies == cwBaseURLs().length)  { //got lines for final feed
                 //collate linesets, ordered by when object property
                 initialLineSet.sort(function (a, b){ return ((a.when < b.when) ? -1 : ((a.when > b.when) ? 1 : 0)); })
                 //then add the lot to the chat window          
@@ -153,7 +153,7 @@ function ChatFeedViewModel() {
   self._registerConnectCallback = function(num) {
     var socket = self.feedConnections[num];
     socket.on('connect', function() {
-      $.jqlog.log('socket.io(chat): Connected to server: ' + counterwalletd_base_urls[num]);
+      $.jqlog.log('socket.io(chat): Connected to server: ' + cwBaseURLs()[num]);
       //Chat handle would be set when the user actually opens up the chat panel
       
       //For now, just send a "ping" so that the server sees us as online

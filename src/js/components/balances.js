@@ -62,40 +62,37 @@ function ChangeAddressLabelModalViewModel() {
 }
 
 
-ko.validation.rules['isAddressSpecifiedIfRequired'] = {
-    validator: function (val, self) {
-      return self.forWatchOnly() ? val : true;
-    },
-    message: 'This field is required.'
-};
-ko.validation.rules['isValidAddressDescription'] = {
-    validator: function (val, self) {
-      return val.length <= 70; //arbitrary
-    },
-    message: 'Address description is more than 70 characters long.'
-};
-ko.validation.rules['addressIsNotInWallet'] = {
-    validator: function (val, self) {
-      if(!val) return true; //isAddressSpecifiedIfRequired will cover it
-      return !WALLET.getAddressObj(val);
-    },
-    message: 'This address is already in your wallet.'
-};
-ko.validation.registerExtenders();
-
 function CreateNewAddressModalViewModel() {
   var self = this;
   self.shown = ko.observable(false);
 
   self.forWatchOnly = ko.observable(null);
   self.watchAddress = ko.observable('').extend({
-    isAddressSpecifiedIfRequired: self,
+    validation: [{
+      validator: function (val, self) {
+        return self.forWatchOnly() ? val : true;
+      },
+      message: 'This field is required.',
+      params: self
+    },{
+      validator: function (val, self) {
+        if(!val) return true; //the check above will cover it
+        return !WALLET.getAddressObj(val);
+      },
+      message: 'This address is already in your wallet.',
+      params: self
+    }],    
     isValidBitcoinAddressIfSpecified: self,
-    addressIsNotInWallet: self
   });
   self.description = ko.observable('').extend({
     required: true,
-    isValidAddressDescription: self,
+    validation: {
+      validator: function (val, self) {
+        return val.length <= 70; //arbitrary
+      },
+      message: 'Address description is more than 70 characters long.',
+      params: self
+    }    
   });
   
   self.validationModel = ko.validatedObservable({
@@ -165,17 +162,6 @@ function CreateNewAddressModalViewModel() {
 }
 
 
-ko.validation.rules['isValidSendQuantityForBalance'] = {
-    validator: function (val, self) {
-      if(normalizeQuantity(self.rawBalance(), self.divisible()) - parseFloat(val) < 0) {
-        return false;
-      }
-      return true;
-    },
-    message: 'Quantity entered exceeds your current balance.'
-};
-ko.validation.registerExtenders();
-
 function SendModalViewModel() {
   var self = this;
   self.shown = ko.observable(false);
@@ -193,7 +179,16 @@ function SendModalViewModel() {
     required: true,
     isValidPositiveQuantity: self,
     isValidQtyForDivisibility: self,
-    isValidSendQuantityForBalance: self
+    validation: {
+      validator: function (val, self) {
+        if(normalizeQuantity(self.rawBalance(), self.divisible()) - parseFloat(val) < 0) {
+          return false;
+        }
+        return true;
+      },
+      message: 'Quantity entered exceeds your current balance.',
+      params: self
+    }    
   });
   
   self.normalizedBalance = ko.computed(function() {
@@ -274,26 +269,6 @@ function SendModalViewModel() {
 }
 
 
-ko.validation.rules['isValidPrivateKey'] = {
-  validator: function (val, self) {
-    var key = new Bitcoin.ECKey(self.privateKey());
-    var doesVersionMatch = key.version == (USE_TESTNET ?
-      Bitcoin.network.testnet.addressVersion : Bitcoin.network.mainnet.addressVersion);
-    return key.priv !== null && key.compressed !== null && key.version !== null && doesVersionMatch;
-  },
-  message: 'Not a valid' + (USE_TESTNET ? ' TESTNET ' : ' ') + 'private key.'
-};
-ko.validation.rules['addressHasEnoughUnspentTxoutsForSelectedAssets'] = {
-  validator: function (val, self, callback) {
-    var numAssets = val.length;
-    if(self.numPrimedTxoutsForPrivateKey() === null) return false; //priv key not set yet??
-    return self.numPrimedTxoutsForPrivateKey() >= numAssets;
-  },
-  message: ('The address for the private key specified does not have enough confirmed unspent outputs to sweep everything selected. Please send it a few '
-    + normalizeQuantity(MIN_PRIME_BALANCE) + ' BTC transactions and try again.')
-};
-ko.validation.registerExtenders();
-
 var BalancesAddressInDropdownItemModel = function(address, label) {
   this.ADDRESS = address;
   this.LABEL = label;
@@ -306,19 +281,36 @@ var SweepAssetInDropdownItemModel = function(asset, rawBalance, normalizedBalanc
   this.SELECT_LABEL = asset + " (bal: " + normalizedBalance + ")";
   this.ASSET_INFO = assetInfo;
 };
-
 function SweepModalViewModel() {
   var self = this;
   self.shown = ko.observable(false);
   self.privateKey = ko.observable('').trimmed().extend({
     required: true,
-    isValidPrivateKey: self
+    validation: {
+      validator: function (val, self) {
+        var key = new Bitcoin.ECKey(self.privateKey());
+        var doesVersionMatch = key.version == (USE_TESTNET ?
+          Bitcoin.network.testnet.addressVersion : Bitcoin.network.mainnet.addressVersion);
+        return key.priv !== null && key.compressed !== null && key.version !== null && doesVersionMatch;
+      },
+      message: 'Not a valid' + (USE_TESTNET ? ' TESTNET ' : ' ') + 'private key.',
+      params: self
+    }    
   });
   self.availableAssetsToSweep = ko.observableArray([]);
   //^ used for select box entries (composed dynamically on privateKey update)
   self.selectedAssetsToSweep = ko.observableArray([]).extend({
     required: true,
-    addressHasEnoughUnspentTxoutsForSelectedAssets: self
+    validation: {
+      validator: function (val, self, callback) {
+        var numAssets = val.length;
+        if(self.numPrimedTxoutsForPrivateKey() === null) return false; //priv key not set yet??
+        return self.numPrimedTxoutsForPrivateKey() >= numAssets;
+      },
+      message: ('The address for the private key specified does not have enough confirmed unspent outputs to sweep everything selected. Please send it a few '
+        + normalizeQuantity(MIN_PRIME_BALANCE) + ' BTC transactions and try again.'),
+      params: self
+    }    
   });
   self.destAddress = ko.observable('').trimmed().extend({
     required: true,
@@ -650,6 +642,7 @@ function SweepModalViewModel() {
   });  
 }
 
+
 function SignMessageModalViewModel() {
   var self = this;
   self.shown = ko.observable(false);
@@ -702,6 +695,7 @@ function SignMessageModalViewModel() {
     //Keep the form up after signing, the user will manually press Close to close it...
   }
 }
+
 
 function PrimeAddressModalViewModel() {
   var self = this;
@@ -789,26 +783,6 @@ function PrimeAddressModalViewModel() {
 }
 
 
-ko.validation.rules['isInBurnRange'] = {
-    validator: function (val, self) {
-      return parseFloat(val) > 0 && parseFloat(val) <= 1;
-    },
-    message: 'Quantity entered must be between 0 and 1 BTC.'
-};
-ko.validation.rules['doesNotExceedBTCBalance'] = {
-    validator: function (val, self) {
-      return parseFloat(val) <= WALLET.getBalance(self.address(), 'BTC') - normalizeQuantity(MIN_FEE);
-    },
-    message: 'The quantity of BTC entered exceeds your available balance.'
-};
-ko.validation.rules['doesNotExceedAlreadyBurned'] = {
-    validator: function (val, self) {
-      return !(parseFloat(val) > 1 - self.btcAlreadyBurned());
-    },
-    message: 'You can only burn <b>1 BTC</b> total for any given address. Even over multiple burns, the total quantity must be less than <b>1 BTC</b>.'
-};
-ko.validation.registerExtenders();
-
 function TestnetBurnModalViewModel() {
   var self = this;
   self.shown = ko.observable(false);
@@ -818,14 +792,35 @@ function TestnetBurnModalViewModel() {
   self.btcBurnQuantity = ko.observable('').extend({
     required: true,
     isValidPositiveQuantity: self,
-    isInBurnRange: self,
-    doesNotExceedBTCBalance: self,
-    doesNotExceedAlreadyBurned: self
+    validation: [{
+      validator: function (val, self) {
+        return parseFloat(val) > 0 && parseFloat(val) <= 1;
+      },
+      message: 'Quantity entered must be between 0 and 1 BTC.',
+      params: self
+    },{
+      validator: function (val, self) {
+        return parseFloat(val) <= WALLET.getBalance(self.address(), 'BTC') - normalizeQuantity(MIN_FEE);
+      },
+      message: 'The quantity of BTC entered exceeds your available balance.',
+      params: self
+    },{
+      validator: function (val, self) {
+        return !(parseFloat(val) > 1 - self.btcAlreadyBurned());
+      },
+      message: 'You can only burn <b>1 BTC</b> total for any given address. Even over multiple burns, the total quantity must be less than <b>1 BTC</b>.',
+      params: self
+    }]
   });
   
   self.quantityXCPToBeCreated = ko.computed(function() { //normalized
     if(!self.btcBurnQuantity() || !parseFloat(self.btcBurnQuantity())) return null;
     return testnetBurnDetermineEarned(WALLET.networkBlockHeight(), self.btcBurnQuantity());
+  }, self);
+  
+  self.maxPossibleBurn = ko.computed(function() { //normalized
+    if(self.btcAlreadyBurned() === null) return null;
+    return Math.min(1 - self.btcAlreadyBurned(), WALLET.getAddressObj(self.address()).getAssetObj('BTC').normalizedBalance()) 
   }, self);
   
   self.validationModel = ko.validatedObservable({

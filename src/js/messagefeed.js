@@ -1,24 +1,24 @@
 
 function MessageFeed() {
   var self = this;
-  self.LAST_MESSAGEIDX_RECEIVED = 0; //last message received from the message feed (socket.io) -- used to detect gaps
-  self.FAILOVER_CURRENT_IDX = 0; //last idx in the counterwalletd_base_urls tried (used for socket.io failover)
+  self.lastMessageIndexReceived = ko.observable(0); //last message received from the message feed (socket.io) -- used to detect gaps
+  self.failoverCurrentIndex = ko.observable(0); //last idx in the cwBaseURLs tried (used for socket.io failover)
   self.MESSAGE_QUEUE = [];
   
   self.tryNextSIOMessageFeed = function() {
-    if(self.FAILOVER_CURRENT_IDX + 1 == counterwalletd_base_urls.length) {
-      self.FAILOVER_CURRENT_IDX = 0;
+    if(self.failoverCurrentIndex() + 1 == cwBaseURLs().length) {
+      self.failoverCurrentIndex(0);
     } else {
-      self.FAILOVER_CURRENT_IDX += 1;
+      self.failoverCurrentIndex(self.failoverCurrentIndex() + 1);
     }
-    $.jqlog.log('socket.io: Trying next server: ' + url[self.FAILOVER_CURRENT_IDX]);
+    $.jqlog.log('socket.io: Trying next server: ' + url[self.failoverCurrentIndex()]);
     self.init();
   }
   
   self.init = function(last_message_index) {
-    self.LAST_MESSAGEIDX_RECEIVED = last_message_index;
+    self.lastMessageIndexReceived(last_message_index);
     //set up a connection to the server event feed via socket.io and handle messages
-    var url = counterwalletd_base_urls[self.FAILOVER_CURRENT_IDX];
+    var url = cwBaseURLs()[self.failoverCurrentIndex()];
     $.jqlog.log("socket.io: Connecting to: " + url);
     //https://github.com/LearnBoost/Socket.IO/wiki/Configuring-Socket.IO
     var socket = io.connect(url, {
@@ -96,31 +96,31 @@ function MessageFeed() {
     if(!message || (message.substring && message.startswith("<html>"))) return;
     //^ sometimes nginx can trigger this via its proxy handling it seems, with a blank payload (or a html 502 Bad Gateway
     // payload) -- especially if the backend server reloads. Just ignore it.
-    assert(self.LAST_MESSAGEIDX_RECEIVED, "LAST_MESSAGEIDX_RECEIVED is not defined!");
+    assert(self.lastMessageIndexReceived(), "lastMessageIndexReceived is not defined!");
   
     $.jqlog.info("feed:receive IDX=" + message['_message_index']);
   
     //Ignore old messages if they are ever thrown at us
-    if(message['_message_index'] <= self.LAST_MESSAGEIDX_RECEIVED) {
-      $.jqlog.warn("Received message_index is <= LAST_MESSAGEIDX_RECEIVED: " + JSON.stringify(message));
+    if(message['_message_index'] <= self.lastMessageIndexReceived()) {
+      $.jqlog.warn("Received message_index is <= lastMessageIndexReceived: " + JSON.stringify(message));
       return;
     }
     
     //handle normal case that the message we received is the next in order
-    if(message['_message_index'] == self.LAST_MESSAGEIDX_RECEIVED + 1) {
+    if(message['_message_index'] == self.lastMessageIndexReceived() + 1) {
       return self.handleMessage(txHash, category, message);
     }
     
     //otherwise, we have a forward gap
-    $.jqlog.warn("feed:MESSAGE GAP DETECTED: our last msgidx = " + self.LAST_MESSAGEIDX_RECEIVED + " --  server sent msgidx = " + message['_message_index']);
+    $.jqlog.warn("feed:MESSAGE GAP DETECTED: our last msgidx = " + self.lastMessageIndexReceived() + " --  server sent msgidx = " + message['_message_index']);
     
     //sanity check
-    assert(message['_message_index'] - self.LAST_MESSAGEIDX_RECEIVED <= 30, "Waay too many missing messages, IDX="
-      + message['_message_index'] + " (last idx: " + self.LAST_MESSAGEIDX_RECEIVED + ")");
+    assert(message['_message_index'] - self.lastMessageIndexReceived() <= 30, "Waay too many missing messages, IDX="
+      + message['_message_index'] + " (last idx: " + self.lastMessageIndexReceived() + ")");
   
     //request the missing messages from the feed and replay them...
     var missingMessages = [];
-    for(var i=self.LAST_MESSAGEIDX_RECEIVED+1; i < message['_message_index']; i++) {
+    for(var i=self.lastMessageIndexReceived()+1; i < message['_message_index']; i++) {
       missingMessages.push(i);
     }
     failoverAPI("get_messagefeed_messages_by_index", [missingMessages], function(missingMessageData, endpoint) {
@@ -137,23 +137,28 @@ function MessageFeed() {
   }
   
   self.handleMessage = function(txHash, category, message) {
-    assert(self.LAST_MESSAGEIDX_RECEIVED + 1 == message['_message_index'], "Message feed resync counter increment oddity...?");
+    assert(self.lastMessageIndexReceived() + 1 == message['_message_index'], "Message feed resync counter increment oddity...?");
   
     $.jqlog.info("feed:PROCESS MESSAGE=" + category + ", IDX=" + message['_message_index'] + " (last idx: "
-      + self.LAST_MESSAGEIDX_RECEIVED + "), TX_HASH=" + txHash + ", CONTENTS=" + JSON.stringify(message));
+      + self.lastMessageIndexReceived() + "), TX_HASH=" + txHash + ", CONTENTS=" + JSON.stringify(message));
   
-    self.LAST_MESSAGEIDX_RECEIVED += 1;
+    self.lastMessageIndexReceived(self.lastMessageIndexReceived() + 1);
       
     //Detect a reorg and refresh the current page if so.
     if(message['_command'] == 'reorg') {
       //Don't need to adjust the message index
-      self.LAST_MESSAGEIDX_RECEIVED = message['_last_message_index'];
+      self.lastMessageIndexReceived(message['_last_message_index']);
       $.jqlog.warn("feed:Blockchain reorganization at block " + message['block_index']
-        + "; last message idx reset to " + self.LAST_MESSAGEIDX_RECEIVED);
+        + "; last message idx reset to " + self.lastMessageIndexReceived());
       setTimeout(checkURL, 1000); //refresh the current page to regrab the fresh data (give cwd a second to sync up though)
       //TODO/BUG??: do we need to "roll back" old messages on the bad chain???
       return;
     }
+
+    //increment stored networkBlockHeight off of the feed, if possible (allows us to more quickly update this then
+    // just relying on 5 minute polling for new BTC balances)
+    if(message['block_index'])
+      WALLET.networkBlockHeight(message['block_index']);
     
     //filter out non insert messages for now
     if(message['_command'] != 'insert')
@@ -174,8 +179,10 @@ function MessageFeed() {
     //filter out any invalid messages for action processing itself
     assert(message['_status'].startsWith('valid')
       || message['_status'].startsWith('invalid')
-      || message['_status'].startsWith('pending')
-      || message['_status'].startsWith('completed')
+      || message['_status'].startsWith('pending') //order matches for BTC
+      || message['_status'].startsWith('open') //orders and bets
+      || message['_status'].startsWith('cancelled') //orders and bets
+      || message['_status'].startsWith('completed') //order match (non-BTC, or BTC match where BTCPay has been made)
       || message['_status'].startsWith('expired'));
     if(message['_status'].startsWith('invalid'))
       return; //ignore message
@@ -216,12 +223,7 @@ function MessageFeed() {
     } else if(category == "burns") {
     } else if(category == "cancels") {
       if(WALLET.getAddressObj(message['source'])) {
-        //If for an order (and we are on the DEx page), refresh the order book if the orders page is displayed
-        // and if the cooresponding order is for one of the assets that is being displayed
-        if (typeof BUY_SELL !== 'undefined') {
-          BUY_SELL.openOrders.remove(function(item) { return item.tx_index == message['offer_hash']});
-        } 
-        //Also remove the canceled order from the open orders list
+        //Remove the canceled order from the open orders list
         // NOTE: this does not apply as a pending action because in order for us to issue a cancellation,
         // it would need to be confirmed on the blockchain in the first place
         OPEN_ORDER_FEED.remove(message['offer_hash']);
@@ -246,17 +248,31 @@ function MessageFeed() {
     } else if(category == "sends") {
       //the effects of a send are handled based on the credit and debit messages it creates, so nothing to do here
     } else if(category == "orders") {
+      //valid order statuses: open, filled, invalid, cancelled, and expired
       //update the give/get remaining numbers in the open orders listing, if it already exists
-      var match = ko.utils.arrayFirst(OPEN_ORDER_FEED.openOrders(), function(item) {
-          return item.ORDER['tx_index'] == message['tx_index'];
+      var match = ko.utils.arrayFirst(OPEN_ORDER_FEED.entries(), function(item) {
+          return item.ORDER['tx_hash'] == message['tx_hash'];
       });
       if(match) {
-        if(message['_status'] == 'filled' || message['give_quantity'] <= 0 || message['get_quantity'] <= 0) {
-          //order is filled, remove it from the listing
-          OPEN_ORDER_FEED.remove(message['tx_index']);
-        } else { //order is not filled, but the quantities are updating
-          match.rawGiveRemaining(match.rawGiveRemaining() - message['give_quantity']);
-          match.rawGetRemaining(match.rawGetRemaining() - message['get_quantity']);
+        if(message['_status'] != 'open') { //order is filled, expired, or cancelled, remove it from the listing
+          OPEN_ORDER_FEED.remove(message['tx_hash']);
+        } else { //order is still open, but the quantities are updating
+          match.rawGiveRemaining(message['give_quantity_remaining']);
+          match.rawGetRemaining(message['get_quantity_remaining']);
+          
+          //if the order is for BTC and the qty remaining on either side is negative (but not on BOTH sides,
+          // as it would be fully satified then and canceling would be pointless), auto cancel the order
+          if(   (match.ORDER['get_asset'] == 'BTC' || match.ORDER['give_asset'] == 'BTC')
+             && (match.rawGiveRemaining() <= 0 || match.rawGetRemaining() <= 0)
+             && !(match.rawGiveRemaining() <= 0 && match.rawGetRemaining() <= 0)) {
+            $.jqlog.debug("Auto cancelling BTC order " + match.ORDER['tx_hash']
+              + " as the give_remaining xor get_remaining <= 0 ...");
+            WALLET.doTransaction(match.ORDER['source'], "create_cancel", {
+              offer_hash: match.ORDER['tx_hash'],
+              _type: 'order',
+              _tx_index: match.ORDER['tx_index']
+            });
+          }
         }
       } else if(WALLET.getAddressObj(message['source'])) {
         //order is not in the open orders listing, but should be
@@ -265,91 +281,11 @@ function MessageFeed() {
     } else if(category == "order_matches") {
       //Look to order matches when determining to do a BTCpay
       //If the order_matches message doesn't have a tx0_address/tx1_address field, then we don't need to do anything with it
-      
-      if(   (WALLET.getAddressObj(message['tx0_address']) && message['forward_asset'] == 'BTC')
-         || (WALLET.getAddressObj(message['tx1_address']) && message['backward_asset'] == 'BTC')) {
-        //If here, we got an order match where an address in our wallet owes BTC.
-        // This being the case, we must settle up with a BTCPay
-        var btcPayData = WaitingBTCPayFeedViewModel.makeBTCPayData(message);
-        
-        //If automatic BTC pays are enabled, just take care of the BTC pay right now
-        if(PREFERENCES['auto_btcpay']) {
-          if(WALLET.getBalance(btcPayData['myAddr'], 'BTC', false) >= (btcPayData['btcQuantityRaw']) + MIN_PRIME_BALANCE) {
-            //user has the sufficient balance
-            WALLET.doTransaction(btcPayData['myAddr'], "create_btcpay",
-              { order_match_id: btcPayData['orderMatchID'] },
-              function(txHash, data, endpoint) {
-                //notify the user of the automatic BTC payment
-                bootbox.alert("Automatic <b class='notoAssetColor'>BTC</b> payment of "
-                  + "<b class='notoQuantityColor'>" + btcPayData['btcQuantity'] + "</b>"
-                  + " <b class='notoAssetColor'>BTC</b> made from address"
-                  + " <b class='notoAddrColor'>" + btcPayData['myAddr'] + "</b> for"
-                  + " <b class='notoQuantityColor'>" + btcPayData['otherOrderQuantity'] + "</b> "
-                  + " <b class='notoAssetColor'>" + btcPayData['otherOrderAsset'] + "</b>. " + ACTION_PENDING_NOTICE);
-              }, function() {
-                WAITING_BTCPAY_FEED.add(btcPayData);
-                bootbox.alert("There was an error processing an automatic <b class='notoAssetColor'>BTC</b> payment."
-                  + " This payment has been placed in a pending state. Please try again manually.");
-              }
-            );
-          } else {
-            //The user doesn't have the necessary balance on the address... let them know and add the BTC as pending
-            WAITING_BTCPAY_FEED.add(btcPayData);
-            bootbox.alert("A payment on a matched order for "
-              + "<b class='notoQuantityColor'>" + btcPayData['btcQuantity'] + "</b>"
-              + "<b class='notoAssetColor'>BTC</b> is required, however, the address that made the order ("
-              + "<b class='notoAddrColor'>" + getAddressLabel(btcPayData['myAddr']) + "</b>"
-              + ") lacks the balance necessary to do this automatically. This order has been placed in a pending state."
-              + "<br/><br/>Please deposit the necessary <b class='notoAssetColor'>BTC</b> into this address and"
-              + "manually make the payment from the Bitcoin icon in the top bar of the site.");  
-          }
-        } else {
-          //Otherwise, prompt the user to make the BTC pay
-          var prompt = "An order match for <b class='notoQuantityColor'>" + btcPayData['otherOrderQuantity'] + "</b>"
-            + " <b class='notoAssetColor'>" + btcPayData['otherOrderAsset'] + "</b> was successfully made. "
-            + " To finalize, this requires payment of <b class='notoQuantityColor'>"+ btcPayData['btcQuantity'] + "</b>"
-            + " <b class='notoAssetColor'>BTC</b>" + " from address"
-            + " <b class='notoAddressColor'>" + getAddressLabel(btcPayData['myAddr']) + "</b>."
-            + "<br/><br/><b>You must pay within 10 blocks time, or lose the purchase. Pay now?</b>";          
-          bootbox.dialog({
-            message: prompt,
-            title: "Order Settlement (BTC Pay)",
-            buttons: {
-              success: {
-                label: "No, hold off",
-                className: "btn-danger",
-                callback: function() {
-                  //If the user says no, then throw the BTC pay in pending BTC pays
-                  WAITING_BTCPAY_FEED.add(btcPayData);
-                }
-              },
-              danger: {
-                label: "Yes",
-                className: "btn-success",
-                callback: function() {
-                  WALLET.doTransaction(btcPayData['myAddr'], "create_btcpay",
-                    { order_match_id: btcPayData['orderMatchID'] },
-                    function(txHash, data, endpoint) {
-                      //notify the user of the automatic BTC payment
-                      bootbox.alert("Automatic <b class='notoAssetColor'>BTC</b> payment of"
-                        + " <b class='notoQuantityColor'>" + btcPayData['btcQuantity'] + "</b> <b class='notoAssetColor'>BTC</b>"
-                        + " made from address <b class='notoAddressColor'>" + getAddressLabel(btcPayData['myAddr']) + "</b>"
-                        + " for <b class='notoQuantityColor'>" + btcPayData['otherOrderQuantity'] + "</b>"
-                        + " <b class='notoAssetColor'>" + btcPayData['otherOrderAsset'] + "</b>. " + ACTION_PENDING_NOTICE);
-                    }, function() {
-                      WAITING_BTCPAY_FEED.add(btcPayData);
-                      bootbox.alert("There was an error processing an automatic <b class='notoAssetColor'>BTC</b> payment."
-                        + "<br/><br/><b>Please manually make the payment from the Bitcoin icon in the top bar of the site.</b>");
-                    }
-                  );
-                }
-              },
-            }
-          });    
-        }
-      } else if(WALLET.getAddressObj(message['tx0_address']) || WALLET.getAddressObj(message['tx1_address'])) {
-        //If here, we got an order match for one of our addresses, but where no BTCpay is necessary from us
-        //no need to update for the buy/sell page's pending orders list as that is updated via synchronous data refresh
+      if(   (WALLET.getAddressObj(message['tx0_address']) && message['forward_asset'] == 'BTC' && message['_status'] == 'pending')
+         || (WALLET.getAddressObj(message['tx1_address']) && message['backward_asset'] == 'BTC' && message['_status'] == 'pending')) {
+        //Register this as an "upcoming" BTCpay
+        var btcPayData = WaitingBTCPayFeedViewModel.makeBTCPayData(message);        
+        UPCOMING_BTCPAY_FEED.add(btcPayData);
       }
     } else if(category == "order_expirations") {
       //Remove the order from the open orders list
@@ -358,7 +294,7 @@ function MessageFeed() {
     } else if(category == "order_match_expirations") {
       //Would happen if the user didn't make a BTC payment in time
       WAITING_BTCPAY_FEED.remove(message['order_match_id']);
-      OPEN_ORDER_FEED.remove(message['order_match_id']); //just in case we had a BTC payment required for this order match when it expired
+      //^ just in case we had a BTC payment required for this order match when it expired
     } else if(category == "bets") {
       //TODO
     } else if(category == "bet_matches") {

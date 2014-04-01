@@ -48,11 +48,16 @@ var AssetLeaderboardViewModel = CClass.create(function() {
       self.marketCapTables()[0]['data'].push({
         position: marketInfo[i]['position_xcp'],
         asset: marketInfo[i]['asset'],
+        dispAsset: AssetLeaderboardViewModel.formulateExtendedAssetInfo(marketInfo[i]['asset'],
+          marketInfo[i]['extended_image'], marketInfo[i]['extended_website']),
         marketCap: marketInfo[i]['market_cap_in_xcp'] ? (smartFormat(marketInfo[i]['market_cap_in_xcp'], 100, 0) + ' XCP') : '',
         price: marketInfo[i]['aggregated_price_as_xcp'] ? (smartFormat(marketInfo[i]['aggregated_price_as_xcp'], 10, 4) + ' XCP') : '',
         supply: smartFormat(marketInfo[i]['total_supply'], 100, 4) + ' ' + marketInfo[i]['asset'],
-        volume: (marketInfo[i]['24h_ohlc_in_xcp']['vol'] && marketInfo[i]['aggregated_price_in_xcp']) 
-          ? (smartFormat(marketInfo[i]['24h_ohlc_in_xcp']['vol'] * marketInfo[i]['aggregated_price_in_xcp'], 0, 4) + ' XCP') : '',
+        //volume: marketInfo[i]['24h_summary']['vol'] ? (smartFormat(marketInfo[i]['24h_summary']['vol'], 100, 4) + ' ' + marketInfo[i]['asset']) : '',
+        //volume: (marketInfo[i]['24h_ohlc_in_xcp']['vol'] && marketInfo[i]['aggregated_price_in_xcp']) 
+        //  ? (smartFormat(marketInfo[i]['24h_ohlc_in_xcp']['vol'] * marketInfo[i]['aggregated_price_in_xcp'], 0, 4) + ' XCP') : '',
+        volume: (marketInfo[i]['24h_summary']['vol'] && marketInfo[i]['aggregated_price_in_xcp']) 
+          ? (smartFormat(marketInfo[i]['24h_summary']['vol'] * marketInfo[i]['aggregated_price_in_xcp'], 10, 4) + ' XCP') : '',
         pctChange: marketInfo[i]['24h_vol_price_change_in_xcp'] ? (smartFormat(marketInfo[i]['24h_vol_price_change_in_xcp'], 0, 2) + ' %') : '',
         history: marketInfo[i]['7d_history_in_xcp'],
 
@@ -80,11 +85,16 @@ var AssetLeaderboardViewModel = CClass.create(function() {
       self.marketCapTables()[1]['data'].push({
         position: marketInfo[i]['position_btc'],
         asset: marketInfo[i]['asset'],
+        dispAsset: AssetLeaderboardViewModel.formulateExtendedAssetInfo(marketInfo[i]['asset'],
+          marketInfo[i]['extended_image'], marketInfo[i]['extended_website']),
         marketCap: marketInfo[i]['market_cap_in_btc'] ? (smartFormat(marketInfo[i]['market_cap_in_btc'], 100, 0) + ' BTC') : '',
         price: marketInfo[i]['aggregated_price_as_btc'] ? (smartFormat(marketInfo[i]['aggregated_price_as_btc'], 10, 4) + ' BTC') : '',
         supply: smartFormat(marketInfo[i]['total_supply'], 100, 4) + ' ' + marketInfo[i]['asset'],
-        volume: (marketInfo[i]['24h_ohlc_in_btc']['vol'] && marketInfo[i]['aggregated_price_in_btc']) 
-          ? (smartFormat(marketInfo[i]['24h_ohlc_in_btc']['vol'] * marketInfo[i]['aggregated_price_in_btc'], 0, 4) + ' BTC') : '',
+        //volume: marketInfo[i]['24h_summary']['vol'] ? (smartFormat(marketInfo[i]['24h_summary']['vol'], 100, 4) + ' ' + marketInfo[i]['asset']) : '',
+        //volume: (marketInfo[i]['24h_ohlc_in_btc']['vol'] && marketInfo[i]['aggregated_price_in_btc']) 
+        //  ? (smartFormat(marketInfo[i]['24h_ohlc_in_btc']['vol'] * marketInfo[i]['aggregated_price_in_btc'], 0, 4) + ' BTC') : '',
+        volume: (marketInfo[i]['24h_summary']['vol'] && marketInfo[i]['aggregated_price_in_btc']) 
+          ? (smartFormat(marketInfo[i]['24h_summary']['vol'] * marketInfo[i]['aggregated_price_in_btc'], 10, 4) + ' BTC') : '',
         pctChange: marketInfo[i]['24h_vol_price_change_in_btc'] ? (smartFormat(marketInfo[i]['24h_vol_price_change_in_btc'], 0, 2) + ' %') : '',
         history: marketInfo[i]['7d_history_in_btc'],
 
@@ -203,7 +213,19 @@ var AssetLeaderboardViewModel = CClass.create(function() {
     }
   }
 });
-
+AssetLeaderboardViewModel.formulateExtendedAssetInfo = function(asset, hasImage, website) {
+  //determine asset image
+  var dispAsset = asset;
+  if(asset == 'XCP' || asset == 'BTC') {
+    dispAsset = '<img src="/xcp/images/builtin_asset_img/' + asset + '.png" />&nbsp;';
+    var website = asset == 'XCP' ? "http://www.counterparty.co" : "http://www.bitcoin.org";
+    dispAsset += '<a href="' + website + '" target="_blank">' + asset + '</a>';
+  } else if(hasImage) {
+    dispAsset = '<img src="' + (USE_TESTNET ? '/_t_asset_img/' : '/_asset_img/') + asset + '.png" />&nbsp;';
+    dispAsset += website ? ('<a href="' + website + '" target="_blank">' + asset + '</a>') : asset;
+  }
+  return dispAsset;
+}
 
 /*NOTE: Any code here is only triggered the first time the page is visited. Put JS that needs to run on the
   first load and subsequent ajax page switches in the .html <script> tag*/

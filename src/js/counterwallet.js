@@ -2,7 +2,7 @@
 /***********
  * GLOBAL STATE AND SETUP
  ***********/
-var VERSION = "0.9.4 BETA";
+var VERSION = "0.9.5 BETA";
 var IS_MOBILE_OR_TABLET = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
 var PREFERENCES = {}; //set when logging in
 
@@ -29,37 +29,37 @@ if((IS_DEV || USE_TESTNET) && location.search) {
 
 //Setup hosts to use
 function produceCWServerList() {
-  counterwalletd_urls = shuffle(counterwalletd_urls); //randomly shuffle the list to decide the server try order...
-  $.jqlog.debug("MultiAPI Backends: " + JSON.stringify(counterwalletd_urls));
+  cwURLs(shuffle(cwURLs())); //randomly shuffle the list to decide the server try order...
+  $.jqlog.debug("MultiAPI Backends: " + JSON.stringify(cwURLs()));
   
-  counterwalletd_base_urls = jQuery.map(counterwalletd_urls, function(element) {
+  cwBaseURLs(jQuery.map(cwURLs(), function(element) {
     return element;
-  });
-  counterwalletd_api_urls = jQuery.map(counterwalletd_urls, function(element) {
+  }));
+  cwAPIUrls(jQuery.map(cwURLs(), function(element) {
     return element + (USE_TESTNET ? '/_t_api' : '/_api');
-  });
-  counterwalletd_insight_api_urls = jQuery.map(counterwalletd_urls, function(element) {
-    return element + (USE_TESTNET ? '/_t_insight_api' : '/_insight_api');
-  });
+  }));
 }
 
-var counterwalletd_urls = null, counterwalletd_base_urls = null, counterwalletd_api_urls = null, counterwalletd_insight_api_urls = null;
+
+var cwURLs = ko.observableArray([]);
+var cwBaseURLs = ko.observableArray([]);
+var cwAPIUrls = ko.observableArray([]);
 //Note that with the socket.io feeds, we supply the path in the socketio connect() call
 if(location.hostname.endsWith('counterwallet.co')) { //Main counterwallet setup
   document.domain = "counterwallet.co"; //allow cross-subdomain access (e.g. www.counterwallet.co can AJAX to cw01.counterwallet.co)
-  //counterwalletd_urls = [ "https://cw01.counterwallet.co", "https://cw02.counterwallet.co",
-  // "https://cw03.counterwallet.co", "https://cw04.counterwallet.co", "https://cw05.counterwallet.co" ];
-  counterwalletd_urls = [ "https://cw01.counterwallet.co" ];
+  //cwURLs([ "https://cw01.counterwallet.co", "https://cw02.counterwallet.co",
+  // "https://cw03.counterwallet.co", "https://cw04.counterwallet.co", "https://cw05.counterwallet.co" ]);
+  cwURLs([ "https://cw01.counterwallet.co" ]);
   produceCWServerList();
 } else {
   //Request for the servers.json file, which should contain an array of API backends for us to use
   $.getJSON("servers.json", function( data ) {
     assert(data && data instanceof Array, "Returned servers.json file is not an array");
-    counterwalletd_urls = data;
+    cwURLs(data);
     produceCWServerList();
   }).fail(function() {
     //File not found, just use the local box as the API server
-    counterwalletd_urls = [ location.origin ];
+    cwURLs([ location.origin ]);
     produceCWServerList();
   });
 }
@@ -86,6 +86,9 @@ var ORDER_DEFAULT_BTCFEE_PCT = 1; //1% of total order
 var ORDER_DEFAULT_EXPIRATION = 320; //num blocks until expiration (at ~9 min per block this is ~48hours)
 var DEFAULT_NUM_ADDRESSES = 3; //default number of addresses to generate
 var MARKET_INFO_REFRESH_EVERY = 5 * 60 * 1000; //refresh market info every 5 minutes while enabled 
+
+//var NUM_BLOCKS_TO_WAIT_FOR_BTCPAY = 6; //number of blocks to wait until the user can make a BTCpay on an order match where they owe BTC
+var NUM_BLOCKS_TO_WAIT_FOR_BTCPAY = 1;
 
 var AUTOPRIME_AT_LESSTHAN_REMAINING = 10; //auto prime at less than this many txouts remaining
 var AUTOPRIME_MAX_COUNT = 10; //max number of txns to add with an autoprime

@@ -87,7 +87,7 @@ PendingActionViewModel.calcText = function(category, data) {
 
 function PendingActionFeedViewModel() {
   var self = this;
-  self.pendingActions = ko.observableArray([]); //pending actions beyond pending BTCpays
+  self.entries = ko.observableArray([]); //pending actions beyond pending BTCpays
   self.lastUpdated = ko.observable(new Date());
   self.ALLOWED_CATEGORIES = [
     'sends', 'orders', 'issuances', 'broadcasts', 'bets', 'dividends', 'burns', 'cancels', 'callbacks', 'btcpays', '_primeaddrs'
@@ -95,7 +95,7 @@ function PendingActionFeedViewModel() {
   ];
   
   self.dispCount = ko.computed(function() {
-    return self.pendingActions().length;
+    return self.entries().length;
   }, self);
 
   self.add = function(txHash, category, data, when) {
@@ -103,7 +103,7 @@ function PendingActionFeedViewModel() {
     assert(self.ALLOWED_CATEGORIES.contains(category), "Illegal pending action category");
     var pendingAction = new PendingActionViewModel(txHash, category, data, when);
     if(!pendingAction.ACTION_TEXT) return; //not something we need to display and/or add to the list
-    self.pendingActions.unshift(pendingAction);
+    self.entries.unshift(pendingAction); //place at top (i.e. newest at top)
     $.jqlog.debug("pendingAction:add:" + txHash + ":" + category + ": " + JSON.stringify(data));
 
     //Add to local storage so we can reload it if the user logs out and back in
@@ -125,7 +125,7 @@ function PendingActionFeedViewModel() {
     if(typeof(btcRefreshSpecialLogic)==='undefined') btcRefreshSpecialLogic = false;
     if(!txHash) return; //if the event doesn't have an txHash, we can't do much about that. :)
     if(!self.ALLOWED_CATEGORIES.contains(category)) return; //ignore this category as we don't handle it
-    var match = ko.utils.arrayFirst(self.pendingActions(), function(item) {
+    var match = ko.utils.arrayFirst(self.entries(), function(item) {
       return item.TX_HASH == txHash;
       //item.CATEGORY == category
     });
@@ -140,7 +140,7 @@ function PendingActionFeedViewModel() {
           return;
       } 
       
-      self.pendingActions.remove(match);
+      self.entries.remove(match);
       $.jqlog.debug("pendingAction:remove:" + txHash + ":" + category);
       self.lastUpdated(new Date());
       PendingActionFeedViewModel.modifyBalancePendingFlag(category, match['DATA'], false);
@@ -181,7 +181,7 @@ function PendingActionFeedViewModel() {
           $.jqlog.debug("pendingAction:restoreFromStorage:remove: " + txInfo[i]['tx_hash']);
         }
         //sort the listing (newest to oldest)
-        self.pendingActions.sort(function(left, right) {
+        self.entries.sort(function(left, right) {
           return left.WHEN == right.WHEN ? 0 : (left.WHEN < right.WHEN ? 1 : -1)
         });
       }

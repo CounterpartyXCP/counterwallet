@@ -54,7 +54,7 @@
     </article> <!-- WIDGET END -->
   </div> <!-- end row -->
 
-  <div class="alert alert-danger" data-bind="fadeVisibleInOnly: validationModelBaseOrders.isValid() && recievedMarketData() && currentMarketUnitPrice() == 0" style="font-size: 1.3em;">
+  <div class="alert alert-danger" data-bind="fadeVisibleInOnly: validationModelBaseOrders.isValid() && recievedMarketData() && currentMarketUnitPrice() == 0" style="font-size: 1.3em;display:none">
       <i class="fa-fw fa fa-times"></i>&nbsp;No market price data exists for this asset pair.
   </div>  
 
@@ -137,7 +137,7 @@
                             <th>Buy Qty Left</th>
                             <th>Sell Qty Left</th>
                             <th>Expires In</th>
-                            <th data-bind="visible: ($data == '2' && $root.asset2() == 'BTC') || ($data == '1' && $root.asset1() == 'BTC')">Fee Requried Left</th>
+                            <th data-bind="visible: ($data == '2' && $root.asset2() == 'BTC') || ($data == '1' && $root.asset1() == 'BTC')">Fee Required Left</th>
                             <th data-bind="visible: ($data == '2' && $root.asset1() == 'BTC') || ($data == '1' && $root.asset2() == 'BTC')">Fee Provided Left</th>
                         </tr>
                     </thead>

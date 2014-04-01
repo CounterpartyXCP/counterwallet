@@ -163,7 +163,7 @@
                                                 <input type="radio" name="customSellAs" value="unitprice" data-bind="btnGroupChecked: customSellAs">As Unit Price</label>
                                                 <!-- , attr: {disabled: selectedSellAsset() == 'XCP' ? 'disabled' : null }" -->
                                               <label class="radioBtn btn btn-lg" data-bind="css: { 'btn-success': customSellAs() == 'quantity' }">
-                                                <input type="radio" name="customSellAs" value="quantity" data-bind="btnGroupChecked: customSellAs">As Sell Qty</label>
+                                                <input type="radio" name="customSellAs" value="quantity" data-bind="btnGroupChecked: customSellAs">As Quantity</label>
                                             </div>
                                         </div>
                                     </div>
@@ -174,17 +174,17 @@
                                     <!-- PURCHASE SUMMARY -->
                                     <div class="row" data-bind="fadeVisibleInOnly: currentTab() == 2 && unitPrice() && selectedBuyQuantity()" style="display:none;margin-top:15px;">
                                         <div class="col-sm-12" style="max-width: 1000px;">
-                                            <span data-bind="fadeVisible: currentMarketUnitPrice() && !overrideMarketPrice()">At the market rate,
-                                                your purchase of <b><span class="buyColor" data-bind="text: numberWithCommas(selectedBuyQuantity())"></span>
-                                                <span class="buyColor" data-bind="text: buyAsset"></span></b>
-                                                will cost you <b><span class="sellColor" data-bind="text: numberWithCommas(selectedSellQuantityAtMarket())"></span>
-                                                <span class="sellColor" data-bind="text: sellAsset"></span></b>
-                                                <span data-bind="visible: sellAsset() == 'BTC' && feeForSelectedBTCQuantity() != 0">, plus a <b><span data-bind="text: feeForSelectedBTCQuantity"></span> BTC</b> (<span data-bind="text: feeForSelectedBTCQuantityAsPct"></span>%) miner fee (to prevent troll orders)</span>.
-                                            </span>
                                             <span data-bind="fadeVisible: (currentMarketUnitPrice() == 0 || overrideMarketPrice()) && (selectedSellQuantityCustom() && selectedSellQuantityCustom() > 0) ">
                                                 The effective unit price of your <b><span data-bind="text: dispAssetPair"></span></b> order is
                                                 <b><span data-bind="text: dispUnitPrice"></span></b>
                                                 <b><span data-bind="text: quoteAsset"></span></b> per each <b><span data-bind="text: baseAsset"></span></b>.
+                                            </span>
+                                            <span>
+                                                Your purchase of <b><span class="buyColor" data-bind="text: numberWithCommas(selectedBuyQuantity())"></span>
+                                                <span class="buyColor" data-bind="text: buyAsset"></span></b>
+                                                will cost you <b><span class="sellColor" data-bind="text: numberWithCommas(selectedSellQuantity())"></span>
+                                                <span class="sellColor" data-bind="text: sellAsset"></span></b>
+                                                <span data-bind="visible: sellAsset() == 'BTC' && feeForSelectedBTCQuantity() != 0">, plus a <b><span data-bind="text: feeForSelectedBTCQuantity"></span> BTC</b> (<span data-bind="text: feeForSelectedBTCQuantityAsPct"></span>%) miner fee (to prevent troll orders)</span>.
                                             </span>
                                             <span data-bind="fadeVisibleInOnly: currentTab() == 2 && sellQuantityRemainingAfterSale() != null && sellQuantityRemainingAfterSale() >= 0">
                                                 After the sale, you will have <b><span class="sellColor" data-bind="text: dispSellQuantityRemainingAfterSale"></span>
@@ -385,9 +385,8 @@
                             <th>Buy Qty Left</th>
                             <th>Sell Qty Left</th>
                             <th>Expires In</th>
-                            <th data-bind="visible: buyAsset() == 'BTC' || sellAsset() == 'BTC'">
-                                <span data-bind="text: sellAsset() == 'BTC' ? 'Fee Required Left' : 'Fee Provided Left'"></span>
-                            </th>
+                            <th data-bind="visible: sellAsset() == 'BTC'">Fee Required Left</th>
+                            <th data-bind="visible: buyAsset() == 'BTC'">Fee Provided Left</th>
                             <!-- ^ reverse the order here because we're looking for people on the other end of the trade to buy from -->
                         </tr>
                     </thead>
@@ -399,7 +398,8 @@
                             <td data-bind="html: $parent.deriveOpenOrderAssetQuantity(get_asset, get_remaining) + ' ' + get_asset + ' ' + OrdersViewModel.deriveOpenOrderBuySellLeft(get_quantity, get_remaining)"></td>
                             <td data-bind="html: $parent.deriveOpenOrderAssetQuantity(give_asset, give_remaining) + ' ' + give_asset + ' ' + OrdersViewModel.deriveOpenOrderBuySellLeft(give_quantity, give_remaining)"></td>
                             <td data-bind="html: OrdersViewModel.deriveOpenOrderExpiresIn(block_index, expiration)"></td>
-                            <td data-bind="visible: $parent.buyAsset() == 'BTC' || $parent.sellAsset() == 'BTC', html: ($parent.sellAsset() == 'BTC' && fee_required) ? (smartFormat(normalizeQuantity(fee_required)) + ' BTC ' + OrdersViewModel.deriveOpenOrderBuySellLeft(fee_required, fee_required_remaining)) : (($parent.buyAsset() == 'BTC' && fee_provided) ? smartFormat(normalizeQuantity(fee_provided)) + ' BTC ' + OrdersViewModel.deriveOpenOrderBuySellLeft(fee_provided, fee_provided_remaining) : '')"></td>
+                            <td data-bind="visible: $parent.sellAsset() == 'BTC', html: smartFormat(normalizeQuantity(fee_required_remaining)) + ' BTC ' + OrdersViewModel.deriveOpenOrderBuySellLeft(fee_required, fee_required_remaining)"></td>                            
+                            <td data-bind="visible: $parent.buyAsset() == 'BTC', html: smartFormat(normalizeQuantity(fee_provided_remaining)) + ' BTC ' + OrdersViewModel.deriveOpenOrderBuySellLeft(fee_provided, fee_provided_remaining)"></td>                            
                         </tr>
                     </tbody>
                 </table>

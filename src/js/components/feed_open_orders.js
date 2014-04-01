@@ -65,37 +65,37 @@ function OpenOrderViewModel(order) {
 
 function OpenOrderFeedViewModel() {
   var self = this;
-  self.openOrders = ko.observableArray([]);
+  self.entries = ko.observableArray([]);
   self.lastUpdated = ko.observable(new Date());
   
   self.dispCount = ko.computed(function() {
-    return self.openOrders().length;
+    return self.entries().length;
   }, self);
   
-  //Every 60 seconds, run through all openOrders and update their 'now' members
+  //Every 60 seconds, run through all entries and update their 'now' members
   setInterval(function() {
     var now = new Date();
-    for(var i=0; i < self.openOrders().length; i++) {
-      self.openOrders()[i].now(now);
+    for(var i=0; i < self.entries().length; i++) {
+      self.entries()[i].now(now);
     }  
   }, 60 * 1000); 
   
   self.add = function(order, resort) {
     assert(order);
     if(typeof(resort)==='undefined') resort = true;
-    self.openOrders.unshift(new OpenOrderViewModel(order));
+    self.entries.unshift(new OpenOrderViewModel(order));
     if(resort) {
       //sort the pending orders so that the order most close to expiring is at top
-      self.openOrders.sort(function(left, right) {
+      self.entries.sort(function(left, right) {
         return left.expiresInNumBlocks() == right.expiresInNumBlocks() ? 0 : (left.expiresInNumBlocks() < right.expiresInNumBlocks() ? -1 : 1);
       });      
     }
     self.lastUpdated(new Date());
   }
 
-  self.remove = function(orderTxHashOrIndex) {
-    self.openOrders.remove(function(item) {
-        return orderTxHashOrIndex == item.ORDER['tx_index'] || orderTxHashOrIndex == item.ORDER['tx_hash'];
+  self.remove = function(orderTxHash) {
+    self.entries.remove(function(item) {
+        return orderTxHash == item.ORDER['tx_hash'];
     });
     self.lastUpdated(new Date());
   }
@@ -107,8 +107,30 @@ function OpenOrderFeedViewModel() {
     for(var i=0; i < addresses.length; i++) {
       filters.push({'field': 'source', 'op': '==', 'value': addresses[i]});
     }
-    failoverAPI("get_orders", {'filters': filters, 'show_empty': false, 'show_expired': false, 'filterop': 'or'},
+    failoverAPI("get_orders", {'filters': filters, 'show_expired': false, 'filterop': 'or'},
       function(data, endpoint) {
+        //if the order is for BTC and the qty remaining on either side is negative (but not on BOTH sides,
+        // as it would be fully satified then and canceling would be pointless), auto cancel the order
+        //BUG: logging back in and out again before this txn is confirmed will create a second cancellation request here (which will be rejected, but still)
+        //TODO: maybe look at pending operations to make sure that we don't reissue a cancel call that is currently pending
+        var openBTCOrdersToCancel = $.grep(data, function(e) {
+          return    e['status'] == 'open'
+                 && (e['get_asset'] == 'BTC' || e['give_asset'] == 'BTC')
+                 && (e['get_remaining'] <= 0 || e['give_remaining'] <= 0)
+                 && !(e['get_remaining'] <= 0 && e['give_remaining'] <= 0);
+        });
+        for(i=0; i < openBTCOrdersToCancel.length; i++) {
+          $.jqlog.debug("Auto cancelling BTC order " + openBTCOrdersToCancel[i]['tx_hash']
+            + " as the give_remaining and/or get_remaining <= 0 ...");
+          WALLET.doTransaction(openBTCOrdersToCancel[i]['source'], "create_cancel", {
+            offer_hash: openBTCOrdersToCancel[i]['tx_hash'],
+            _type: 'order',
+            _tx_index: openBTCOrdersToCancel[i]['tx_index']
+          });
+        }
+        
+        //do not show empty/filled orders, including open BTC orders that have 0/neg give/get remaining (as we auto cancelled them above)
+        var openOrders = $.grep(data, function(e) { return e['status'] == 'open' && e['get_remaining'] > 0 && e['give_remaining'] > 0; });
         //get divisibility for assets (this is slow and unoptimized)
         var assets = [];
         for(i=0; i < data.length; i++) {
@@ -121,10 +143,10 @@ function OpenOrderFeedViewModel() {
             assetMappings[assetsInfo[i]['asset']] = assetsInfo[i]['divisible'];
           }
           
-          for(i=0; i < data.length; i++) {
-            data[i]['_give_asset_divisible'] = assetMappings[data[i]['give_asset']];
-            data[i]['_get_asset_divisible'] = assetMappings[data[i]['get_asset']];
-            self.add(data[i], i == data.length - 1); //PERF: sort on the last addition only
+          for(i=0; i < openOrders.length; i++) {
+            openOrders[i]['_give_asset_divisible'] = assetMappings[data[i]['give_asset']];
+            openOrders[i]['_get_asset_divisible'] = assetMappings[data[i]['get_asset']];
+            self.add(data[i], i == openOrders.length - 1); //PERF: sort on the last addition only
           }
         });
       }

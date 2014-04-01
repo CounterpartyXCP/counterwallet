@@ -140,14 +140,6 @@ function CreateAssetModalViewModel() {
 }
 
 
-ko.validation.rules['additionalIssueDoesNotExceedLimit'] = {
-    validator: function (val, self) {
-      return self.rawAdditionalIssue() + self.asset().rawTotalIssued() <= MAX_INT;
-    },
-    message: 'This issuance would exceed the hard limit for maximum quantity.'
-};
-ko.validation.registerExtenders();
-
 function IssueAdditionalAssetModalViewModel() {
   var self = this;
   self.shown = ko.observable(false);
@@ -159,7 +151,13 @@ function IssueAdditionalAssetModalViewModel() {
     required: true,
     isValidPositiveQuantity: self,
     isValidQtyForDivisibility: self,
-    additionalIssueDoesNotExceedLimit: self
+    validation: {
+      validator: function (val, self) {
+        return self.rawAdditionalIssue() + self.asset().rawTotalIssued() <= MAX_INT;
+      },
+      message: 'This issuance would exceed the hard limit for maximum quantity.',
+      params: self
+    }    
   });
   
   self.dispTotalIssued = ko.computed(function() {
@@ -224,6 +222,7 @@ function IssueAdditionalAssetModalViewModel() {
     self.shown(false);
   }  
 }
+
 
 function TransferAssetModalViewModel() {
   var self = this;
@@ -290,14 +289,6 @@ function TransferAssetModalViewModel() {
 }
 
 
-ko.validation.rules['newDescIsNotSameAsCurrentDesc'] = {
-    validator: function (val, self) {
-      return self.newDescription() != self.asset().description();
-    },
-    message: 'This description is the same as the current description.'
-};
-ko.validation.registerExtenders();
-
 function ChangeAssetDescriptionModalViewModel() {
   var self = this;
   self.shown = ko.observable(false);
@@ -307,9 +298,21 @@ function ChangeAssetDescriptionModalViewModel() {
   self.newDescription = ko.observable('').extend({
     required: true,
     isValidAssetDescription: self,
+    validation: {
+      validator: function (val, self) {
+        return self.newDescription() != self.asset().description();
+      },
+      message: 'This description is the same as the current description.',
+      params: self
+    },    
     newDescIsNotSameAsCurrentDesc: self
   });
-  
+
+  self.dispCharactersRemaining = ko.computed(function() {
+    if(!self.newDescription() || self.newDescription().length > MAX_ASSET_DESC_LENGTH) return '';
+    return ' (<b>' + (MAX_ASSET_DESC_LENGTH - byteCount(self.newDescription())) + '</b> bytes remaining)'
+  }, self);
+    
   self.validationModel = ko.validatedObservable({
     newDescription: self.newDescription
   });
@@ -362,15 +365,6 @@ function ChangeAssetDescriptionModalViewModel() {
 }
 
 
-ko.validation.rules['quantityDoesNotExceedDividendAssetBalance'] = {
-    validator: function (val, self) {
-      if(self.dividendAssetBalRemainingPostPay() === null) return true; //wait until dividend asset chosen to validate
-      return self.dividendAssetBalRemainingPostPay() >= 0;
-    },
-    message: 'The total dividend would exceed the address\' balance for the selected Dividend Asset.'
-};
-ko.validation.registerExtenders();
-
 var DividendAssetInDropdownItemModel = function(asset, rawBalance, normalizedBalance) {
   this.ASSET = asset;
   this.RAW_BALANCE = rawBalance; //raw
@@ -391,7 +385,14 @@ function PayDividendModalViewModel() {
   self.quantityPerUnit = ko.observable('').extend({
     required: true,
     isValidPositiveQuantity: self,
-    quantityDoesNotExceedDividendAssetBalance: self
+    validation: {
+      validator: function (val, self) {
+        if(self.dividendAssetBalRemainingPostPay() === null) return true; //wait until dividend asset chosen to validate
+        return self.dividendAssetBalRemainingPostPay() >= 0;
+      },
+      message: 'The total dividend would exceed the address\' balance for the selected Dividend Asset.',
+      params: self
+    }    
   });
   
   self.assetName = ko.computed(function() {
@@ -480,15 +481,6 @@ function PayDividendModalViewModel() {
 }
 
 
-ko.validation.rules['calledQuantityDoesNotExceedXCPBalanceRequired'] = {
-    validator: function (val, self) {
-      if(self.xcpBalRemainingPostCall() === null) return true; //wait until dividend asset chosen to validate
-      return self.xcpBalRemainingPostCall() >= 0;
-    },
-    message: 'The total dividend would exceed the address\' balance for the selected Dividend Asset.'
-};
-ko.validation.registerExtenders();
-
 function CallAssetModalViewModel() {
   var self = this;
   self.shown = ko.observable(false);
@@ -500,8 +492,15 @@ function CallAssetModalViewModel() {
     required: true,
     isValidPositiveQuantity: self,
     max: 100,
-    min: 0.00001, 
-    calledQuantityDoesNotExceedXCPBalanceRequired: self
+    min: 0.00001,
+    validation: {
+      validator: function (val, self) {
+        if(self.xcpBalRemainingPostCall() === null) return true; //wait until dividend asset chosen to validate
+        return self.xcpBalRemainingPostCall() >= 0;
+      },
+      message: 'The total dividend would exceed the address\' balance for the selected Dividend Asset.',
+      params: self
+    }    
   });
 
   self.dispCallDate = ko.computed(function() {

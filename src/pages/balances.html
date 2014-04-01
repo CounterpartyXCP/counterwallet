@@ -399,7 +399,7 @@
       <div class="modal-body no-padding">
         <p class="formPadded">
          Create XCP on Testnet by "burning" your test BTC. Please note that you can only burn up to <b>1 BTC total</b> for any given address.<br/><br/>
-         <span data-bind="visible: 1 - btcAlreadyBurned() > 0"><b>You may currently burn up to <span class="sellColor"><span data-bind="text: 1 - btcAlreadyBurned()"></span> BTC</span> from this address.</b></span>
+         <span data-bind="visible: 1 - btcAlreadyBurned() > 0"><b>You may currently burn up to <span class="sellColor"><span data-bind="text: maxPossibleBurn()"></span> BTC</span> from this address.</b></span>
          <span data-bind="visible: 1 - btcAlreadyBurned() <= 0"><b style="color: errorColor">You have already burned the maximum allowed BTC from this address.</b></span>
        </p>
        <form class="smart-form" data-bind="submit: doAction"><fieldset>
@@ -452,7 +452,7 @@
                 <label class="input"><i class="icon-append fa fa-tag"></i>
                     <input name="assetName" data-bind="value: name, valueUpdate : 'input'" type="text"/>
                 </label>
-                <div class="note">The asset's trading symbol (also known as the Asset ID).</div>
+                <div class="note">The asset's trading symbol.</div>
             </div>
           </div></section>
           <section><div class="row">
@@ -595,7 +595,7 @@
       <div class="modal-body no-padding">
         <div class="formPadded">
             <p>The asset's current description is: <b><span data-bind="text: asset() ? asset().description : ''"></span></b></p>
-            <p>Enter the new description for this asset:</p>
+            <p>Enter the new description for this asset<span data-bind="html: dispCharactersRemaining"></span>:</p>
         </div>
         
         <form class="smart-form" data-bind="submit: doAction"><fieldset>
@@ -608,6 +608,9 @@
             </div>
           </div></section>
         </fieldset></form>
+        <div class="formPaddedBot">Want to give your asset an image, enahnced description text, or more? See
+            <a href="https://wiki.counterparty.co/w/Enhanced_Asset_Info_in_Counterwallet" target="_blank">this link</a>.
+        </div>
       </div>
       <div class="modal-footer">
         <button type="button" class="btn btn-default" data-bind="click: hide">Cancel</button>
