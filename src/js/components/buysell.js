@@ -273,7 +273,7 @@ function BuySellWizardViewModel() {
     }
   }, self);
   self.selectedSellQuantity = ko.computed(function() {
-    if(self.overrideMarketPrice()) return self.selectedSellQuantityCustom();
+    if(self.overrideMarketPrice() || self.currentMarketUnitPrice() == 0) return self.selectedSellQuantityCustom();
     return self.selectedSellQuantityAtMarket();
   }, self);
   
@@ -283,7 +283,7 @@ function BuySellWizardViewModel() {
      //only set if there is no market data, or market data is overridden
     required: {
       message: "This field is required.",
-      onlyIf: function () { return (!self.currentMarketUnitPrice() || self.overrideMarketPrice()); }
+      onlyIf: function () { return (self.currentMarketUnitPrice() == 0 || self.overrideMarketPrice()); }
     },
     isValidBuyOrSellQuantity: {
       params: self,
@@ -299,6 +299,7 @@ function BuySellWizardViewModel() {
     },
     validation: {
       validator: function (val, self) {
+        if(self.selectedSellQuantity() == null) return true; //don't complain yet until the user fills something in
         return self.sellQuantityRemainingAfterSale() >= 0;
       },
       message: 'Exceeds available balance',
@@ -306,7 +307,7 @@ function BuySellWizardViewModel() {
     }    
   });
   self.customSellAsEntry.subscribe(function(newValue) {
-    if(!self.assetPair() || !self.overrideMarketPrice()) return;
+    if(!self.assetPair() || (self.currentMarketUnitPrice() != 0 && !self.overrideMarketPrice())) return;
     if(isNaN(parseFloat(newValue)) || parseFloat(newValue) <= 0 || !self.selectedBuyQuantity()) {
       self.selectedSellQuantityCustom(null); //blank it out
       return;
