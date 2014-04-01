@@ -203,14 +203,14 @@ module.exports = function (grunt) {
                     if (!exclude) {
                         // IMPORTANT: we consider all html files are in root dir (eg. /index.html).
                         // html files in subfolders must be loaded with js from html file in root folder
-                        url = processUrl(url, filedir, config, "");
+                        url = processUrl(url, Path.resolve(config.srcDir), config, "");
                     } 
                     return attr+'="'+url+'"';
 
                 });
 
                 // replacing loadScript path
-                var newhtmlcontent = htmlcontent.replace(/loadScript\(['"]([^"']+)["']/gi, function(match, location) {
+                newhtmlcontent = newhtmlcontent.replace(/loadScript\(['"]([^"']+)["']/gi, function(match, location) {
                     
                     var urlParts = match.replace(/\s/g, '').replace(/"|'/g, '').split("(");
                     var attr = urlParts.shift();
@@ -220,6 +220,13 @@ module.exports = function (grunt) {
                     url = processUrl(url, Path.resolve(config.srcDir), config, "");
                     return attr+'("'+url+'"';
 
+                });
+
+                // replacing inline background image
+                newhtmlcontent = newhtmlcontent.replace(/url\s*\(\s*(['"]?)([^"'\)]*)\1\s*\)/gi, function(match, location) {
+                    var url = match.replace(/\s/g, '').slice(4, -1).replace(/"|'/g, '');
+                    var newUrl = processUrl(url, Path.resolve(config.srcDir), config, "");
+                    return 'url("'+newUrl+'")';
                 });
 
                 grunt.file.write(destpath, newhtmlcontent);
