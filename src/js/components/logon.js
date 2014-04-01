@@ -241,9 +241,13 @@ function LogonViewModel() {
   }
     
   self.openWalletPt4 = function() {
-    PENDING_ACTION_FEED.restoreFromLocalStorage();
+    PENDING_ACTION_FEED.restoreFromLocalStorage(function() {
+      //load the waiting btc feed after the pending action feed is all done loading, as we look at the pending action
+      // feed to determine whether a btcpay process is in progress (pending) or not
+      WAITING_BTCPAY_FEED.restore();   
+    });
     OPEN_ORDER_FEED.restore();
-    WAITING_BTCPAY_FEED.restore(); //must come after PENDING_ACTION_FEED.restoreFromLocalStorage()
+    
 
     //all done. load the balances screen
     $.jqlog.debug("Login complete. Directing to balances page...");

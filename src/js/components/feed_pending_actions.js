@@ -157,7 +157,7 @@ function PendingActionFeedViewModel() {
     localStorage.setObject('pendingActions', pendingActionsStorage);
   }
   
-  self.restoreFromLocalStorage = function() {
+  self.restoreFromLocalStorage = function(onSuccess) {
     //restore the list of any pending transactions from local storage (removing those entries for txns that have been confirmed)
     var pendingActionsStorage = localStorage.getObject('pendingActions');
     var txHashes = [], i = null;
@@ -186,6 +186,7 @@ function PendingActionFeedViewModel() {
         });
       }
       localStorage.setObject('pendingActions', newPendingActionsStorage);
+      if(onSuccess) onSuccess();
     });
   }
 }
