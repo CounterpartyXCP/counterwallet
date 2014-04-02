@@ -199,7 +199,7 @@ function SendModalViewModel() {
   self.normalizedBalRemaining = ko.computed(function() {
     if(!isNumber(self.quantity())) return null;
     var curBalance = normalizeQuantity(self.rawBalance(), self.divisible());
-    var balRemaining = Decimal.round(new Decimal(curBalance).sub(parseFloat(self.quantity()))).toFloat();
+    var balRemaining = Decimal.round(new Decimal(curBalance).sub(parseFloat(self.quantity())), 8, Decimal.MidpointRounding.ToEven).toFloat();
     if(balRemaining < 0) return null;
     return balRemaining;
   }, self);

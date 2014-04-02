@@ -2,14 +2,14 @@
 function normalizeQuantity(quantity, divisible) {
   //Converts from satoshi (int) to float (decimal form)
   if(typeof(divisible)==='undefined') divisible = true;
-  return divisible && quantity !== 0 ? Decimal.round(new Decimal(quantity).div(UNIT), 8).toFloat() : parseInt(quantity);
+  return divisible && quantity !== 0 ? Decimal.round(new Decimal(quantity).div(UNIT), 8, Decimal.MidpointRounding.ToEven).toFloat() : parseInt(quantity);
   //^ we have the quantity !== 0 check due to a bug in Decimal (https://github.com/hiroshi-manabe/JSDecimal/issues/2)
 }
 
 function denormalizeQuantity(quantity, divisible) {
   //Converts from float (decimal form) to satoshi (int) 
   if(typeof(divisible)==='undefined') divisible = true;
-  return divisible && quantity !== 0 ? Decimal.round(new Decimal(quantity).mul(UNIT), 8).toFloat() : parseInt(quantity);
+  return divisible && quantity !== 0 ? Decimal.round(new Decimal(quantity).mul(UNIT), 8, Decimal.MidpointRounding.ToEven).toFloat() : parseInt(quantity);
   //^ we have the quantity !== 0 check due to a bug in Decimal (https://github.com/hiroshi-manabe/JSDecimal/issues/2)
 }
 
@@ -23,9 +23,9 @@ function smartFormat(num, truncateDecimalPlacesAtMin, truncateDecimalPlacesTo) {
   if(num === null) return '??';
   if(typeof(truncateDecimalPlacesMin)==='undefined') truncateDecimalPlacesMin = null;
   if(typeof(truncateDecimalPlacesTo)==='undefined') truncateDecimalPlacesTo = 4;
-  //if(num > 10) num = Decimal.round(new Decimal(num), 4).toFloat();
-  if(truncateDecimalPlacesAtMin === null || num > truncateDecimalPlacesAtMin)
-    num = +num.toFixed(truncateDecimalPlacesTo); //use + sign to lob off any trailing zeros...
+  if(truncateDecimalPlacesAtMin === null || num > truncateDecimalPlacesAtMin) {
+    num = Decimal.round(new Decimal(num), truncateDecimalPlacesTo, Decimal.MidpointRounding.ToEven).toFloat();
+  }
   return numberWithCommas(noExponents(num));
 }
 
@@ -112,7 +112,7 @@ function testnetBurnDetermineEarned(blockHeight, burned) {
   var total_time = TESTNET_BURN_END - TESTNET_BURN_START;
   var partial_time = TESTNET_BURN_END - blockHeight;
   var multiplier = 1000 * (1 + .5 * (partial_time / total_time)); //will be approximate
-  var earned = Decimal.round(new Decimal(burned).mul(multiplier), 8).toFloat();
+  var earned = Decimal.round(new Decimal(burned).mul(multiplier), 8, Decimal.MidpointRounding.ToEven).toFloat();
   return normalizeQuantity(earned);
 }
 

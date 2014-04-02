@@ -277,11 +277,11 @@ function OrdersViewModel() {
     
     if(asset1 == self.baseAsset()) {
       if(!derivedQuantity1) return; //in process of changing assets
-      return smartFormat(Decimal.round(new Decimal(derivedQuantity2).div(derivedQuantity1), 8).toFloat());
+      return smartFormat(Decimal.round(new Decimal(derivedQuantity2).div(derivedQuantity1), 8, Decimal.MidpointRounding.ToEven).toFloat());
     } else {
       assert(asset2 == self.baseAsset());
       if(!derivedQuantity2) return; //in process of changing assets
-      return smartFormat(Decimal.round(new Decimal(derivedQuantity1).div(derivedQuantity2), 8).toFloat());
+      return smartFormat(Decimal.round(new Decimal(derivedQuantity1).div(derivedQuantity2), 8, Decimal.MidpointRounding.ToEven).toFloat());
     }
   }
   

@@ -265,11 +265,11 @@ function BuySellWizardViewModel() {
     if(parseFloat(self.selectedBuyQuantity()) == 0) return 0;
     if(self.assetPair()[0] == self.buyAsset()) //buy asset is the base
       //self.selectedBuyQuantity * self.currentMarketUnitPrice
-      return Decimal.round(new Decimal(self.selectedBuyQuantity()).mul(self.currentMarketUnitPrice()), 8).toFloat();
+      return Decimal.round(new Decimal(self.selectedBuyQuantity()).mul(self.currentMarketUnitPrice()), 8, Decimal.MidpointRounding.ToEven).toFloat();
     else { // sell asset is the base
       assert(self.assetPair()[0] == self.sellAsset(), "Asset pair is what we thought it should be");
       //self.selectedBuyQuantity / self.currentMarketUnitPrice
-      return Decimal.round(new Decimal(self.selectedBuyQuantity()).div(self.currentMarketUnitPrice()), 8).toFloat();
+      return Decimal.round(new Decimal(self.selectedBuyQuantity()).div(self.currentMarketUnitPrice()), 8, Decimal.MidpointRounding.ToEven).toFloat();
     }
   }, self);
   self.selectedSellQuantity = ko.computed(function() {
@@ -315,10 +315,10 @@ function BuySellWizardViewModel() {
     if(self.customSellAs() == "unitprice") {
       var val = null;
       if(self.assetPair()[0] == self.buyAsset()) //buy asset is the base
-        val = Decimal.round(new Decimal(self.selectedBuyQuantity()).mul(newValue), 8).toFloat();
+        val = Decimal.round(new Decimal(self.selectedBuyQuantity()).mul(newValue), 8, Decimal.MidpointRounding.ToEven).toFloat();
       else { // sell asset is the base
         assert(self.assetPair()[0] == self.sellAsset());
-        val = Decimal.round(new Decimal(self.selectedBuyQuantity()).div(newValue), 8).toFloat();
+        val = Decimal.round(new Decimal(self.selectedBuyQuantity()).div(newValue), 8, Decimal.MidpointRounding.ToEven).toFloat();
       }
       assert(val !== null); 
       self.selectedSellQuantityCustom(val);
@@ -346,13 +346,13 @@ function BuySellWizardViewModel() {
       if(!isNumber(quantity) || parseFloat(quantity) == 0) return 0; //no quantity == zero fee (since there is nothing to get e.g. 1% from)
       
       if(!self.btcFee())
-        return Decimal.round(new Decimal(quantity).mul(ORDER_DEFAULT_BTCFEE_PCT / 100), 8).toFloat();
+        return Decimal.round(new Decimal(quantity).mul(ORDER_DEFAULT_BTCFEE_PCT / 100), 8, Decimal.MidpointRounding.ToEven).toFloat();
       //^ default percentage fee (depends on btcFeeAs() defaulting to 'percentage')
       
       if(self.btcFeeAs() == 'percentage') {
         if(!parseFloat(self.btcFee())) return 0;
         //^ avoid decimal round bug giving undefined if fee specified is zero, or any nonnumber garbage
-        fee = Decimal.round(new Decimal(quantity).mul(self.btcFee() / 100), 8).toFloat(); 
+        fee = Decimal.round(new Decimal(quantity).mul(self.btcFee() / 100), 8, Decimal.MidpointRounding.ToEven).toFloat(); 
       } else { //the quantity itself
         fee = parseFloat(self.btcFee());
       }
@@ -368,20 +368,24 @@ function BuySellWizardViewModel() {
     if(!self.feeForSelectedBTCQuantity()) return null;
     return self.btcFeeAs() == 'percentage'
       ? self.btcFee()
-      : Decimal.round(new Decimal(100).mul(self.feeForSelectedBTCQuantity()).div(self.selectedSellQuantity()), 2).toFloat();
+      : Decimal.round(new Decimal(100).mul(self.feeForSelectedBTCQuantity()).div(self.selectedSellQuantity()), 2, Decimal.MidpointRounding.ToEven).toFloat();
   }, self);
 
   self.unitPriceCustom = ko.computed(function() {
     if(!self.assetPair() || !isNumber(self.selectedBuyQuantity()) || !isNumber(self.selectedSellQuantityCustom())) return null;
     //^ only valid when the market unit price doesn't exist or is overridden
     if(parseFloat(self.selectedSellQuantityCustom()) == 0 || parseFloat(self.selectedBuyQuantity()) == 0) return null;
+    //Round to 6 decimal places instead of 8 below below to avoid unit price display inconsistencies with repeating decimals
+    // (i.e. if we override unit price and manually display that, if we rounded to 8 places, the unit price displayed
+    // may not always be the unit price we entered, as we actually still derive the unit price from setting the sale quantity, 
+    // and don't use the unit price we enter directly, in order to reduce complexity and utilizing existing reactive control logic)
     if(self.assetPair()[0] == self.buyAsset()) //buy asset is the base
       //self.selectedSellQuantityCustom / self.selectedBuyQuantity
-      return Decimal.round(new Decimal(self.selectedSellQuantityCustom()).div(self.selectedBuyQuantity()), 8).toFloat();
+      return Decimal.round(new Decimal(self.selectedSellQuantityCustom()).div(self.selectedBuyQuantity()), 6, Decimal.MidpointRounding.ToEven).toFloat();
     else { // sell asset is the base
       assert(self.assetPair()[0] == self.sellAsset());
       //self.selectedBuyQuantity / self.selectedSellQuantityCustom
-      return Decimal.round(new Decimal(self.selectedBuyQuantity()).div(self.selectedSellQuantityCustom()), 8).toFloat();
+      return Decimal.round(new Decimal(self.selectedBuyQuantity()).div(self.selectedSellQuantityCustom()), 6, Decimal.MidpointRounding.ToEven).toFloat();
     }
   }, self);
   self.unitPrice = ko.computed(function() {
@@ -397,9 +401,9 @@ function BuySellWizardViewModel() {
     if(!self.selectedSellQuantity()) return null;
     var curBalance = WALLET.getBalance(self.selectedAddress(), self.sellAsset());
     //curBalance - self.selectedSellQuantity
-    var quantityLeft = Decimal.round(new Decimal(curBalance).sub(self.selectedSellQuantity()), 8).toFloat();
+    var quantityLeft = Decimal.round(new Decimal(curBalance).sub(self.selectedSellQuantity()), 8, Decimal.MidpointRounding.ToEven).toFloat();
     if(self.sellAsset() == 'BTC') { //include the fee if we're selling BTC
-      quantityLeft = Decimal.round(new Decimal(quantityLeft).sub(self.feeForSelectedBTCQuantity()), 8).toFloat();
+      quantityLeft = Decimal.round(new Decimal(quantityLeft).sub(self.feeForSelectedBTCQuantity()), 8, Decimal.MidpointRounding.ToEven).toFloat();
     }
     //console.log("1.selectedSellQuantity: " + self.selectedSellQuantity());
     //console.log("2.feeForSelectedBTCQuantity: " + self.feeForSelectedBTCQuantity());
@@ -738,10 +742,10 @@ function BuySellWizardViewModel() {
     var pair = self.assetPair();
     if(self.buyAsset() == pair[0]) { //buy asset is the base asset
       //self.totalBalanceAvailForSale / self.currentMarketUnitPrice
-      var maxAfford = Decimal.round(new Decimal(self.totalBalanceAvailForSale()).div(unitPrice), 8).toFloat();
+      var maxAfford = Decimal.round(new Decimal(self.totalBalanceAvailForSale()).div(unitPrice), 8, Decimal.MidpointRounding.ToEven).toFloat();
     } else { //sell asset is the base asset
       //self.totalBalanceAvailForSale * self.currentMarketUnitPrice
-      var maxAfford = Decimal.round(new Decimal(self.totalBalanceAvailForSale()).mul(unitPrice), 8).toFloat();
+      var maxAfford = Decimal.round(new Decimal(self.totalBalanceAvailForSale()).mul(unitPrice), 8, Decimal.MidpointRounding.ToEven).toFloat();
     }
     return maxAfford;
   }
@@ -765,10 +769,10 @@ function BuySellWizardViewModel() {
     var derivedQuantity2 = self.deriveOpenOrderAssetQuantity(asset2, quantity2);
     
     if(asset1 == self.baseAsset()) {
-      return smartFormat(Decimal.round(new Decimal(derivedQuantity2).div(derivedQuantity1), 8).toFloat());
+      return smartFormat(Decimal.round(new Decimal(derivedQuantity2).div(derivedQuantity1), 8, Decimal.MidpointRounding.ToEven).toFloat());
     } else {
       assert(asset2 == self.baseAsset());
-      return smartFormat(Decimal.round(new Decimal(derivedQuantity1).div(derivedQuantity2), 8).toFloat());
+      return smartFormat(Decimal.round(new Decimal(derivedQuantity1).div(derivedQuantity2), 8, Decimal.MidpointRounding.ToEven).toFloat());
     }
   }
   
