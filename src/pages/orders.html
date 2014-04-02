@@ -20,28 +20,28 @@
             <div class="widget-body" data-bind="validationOptions: { insertMessages: false }" style="min-height:0;"> <!-- widget content -->
                 <div class="row">
                     <section class="col col-lg-3 col-sm-6">
-                        <label class="control-label" style="font-size:1.3em;">First Asset</label>
+                        <label for="asset1" class="control-label" style="font-size:1.3em;">First Asset</label>
                         <label class="input">
                             <input type="text" id="asset1" name="asset1" class="form-control input-lg" type="text" placeholder="Asset name" data-bind="value: asset1">
                         </label>
                         <br/><span class="errorColor" data-bind="validationMessage: asset1"></span>
                     </section>
                     <section class="col col-lg-3 col-sm-6">
-                        <label class="control-label" style="font-size:1.3em;">Second Asset</label>
+                        <label for="asset2" class="control-label" style="font-size:1.3em;">Second Asset</label>
                         <label class="input">
                             <input type="text" id="asset2" name="asset2" class="form-control input-lg" type="text" placeholder="Asset name" data-bind="value: asset2">
                         </label>
                         <br/><span class="errorColor" data-bind="validationMessage: asset2"></span>
                     </section>
                     <section data-bind="visible: asset1() == 'BTC' || asset2() == 'BTC'" class="col col-lg-3 col-sm-6">
-                        <label class="control-label" style="font-size:1.3em;">Min BTC % Fee Provided</label>
+                        <label for="minBTCFeeProvidedPct" class="control-label" style="font-size:1.3em;">Min BTC % Fee Provided</label>
                         <label class="input">
                             <input type="text" name="minBTCFeeProvidedPct" class="form-control input-lg" type="text" data-bind="value: minBTCFeeProvidedPct, valueUpdate: 'input'">
                         </label>
                         <br/><span class="errorColor" data-bind="validationMessage: minBTCFeeProvidedPct"></span>
                     </section>
                     <section data-bind="visible: asset1() == 'BTC' || asset2() == 'BTC'" class="col col-lg-3 col-sm-6">
-                        <label class="control-label" style="font-size:1.3em;">Max BTC % Fee Required</label>
+                        <label for="maxBTCFeeRequiredPct" class="control-label" style="font-size:1.3em;">Max BTC % Fee Required</label>
                         <label class="input">
                             <input type="text" name="maxBTCFeeRequiredPct" class="form-control input-lg" type="text" data-bind="value: maxBTCFeeRequiredPct, valueUpdate: 'input'">
                         </label>
@@ -54,8 +54,8 @@
     </article> <!-- WIDGET END -->
   </div> <!-- end row -->
 
-  <div class="alert alert-danger" data-bind="fadeVisibleInOnly: validationModelBaseOrders.isValid() && recievedMarketData() && currentMarketUnitPrice() == 0" style="font-size: 1.3em;display:none">
-      <i class="fa-fw fa fa-times"></i>&nbsp;No market price data exists for this asset pair.
+  <div class="alert alert-info" data-bind="fadeVisibleInOnly: validationModelBaseOrders.isValid() && recievedMarketData() && currentMarketUnitPrice() == 0" style="font-size: 1.3em;display:none">
+      <i class="fa-fw fa fa-times"></i>&nbsp;No market price data exists for this asset pair yet (more trade data is required to construct price charts).
   </div>  
 
   <div class="row"> <!-- row -->

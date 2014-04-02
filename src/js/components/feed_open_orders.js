@@ -129,13 +129,14 @@ function OpenOrderFeedViewModel() {
           });
         }
         
-        //do not show empty/filled orders, including open BTC orders that have 0/neg give/get remaining (as we auto cancelled them above)
+        //do not show empty/filled orders, including open BTC orders that have 0/neg give/get remaining (as we auto
+        // cancelled them above or they are fully satisfied and do not need to be shown, or need cancellation)
         var openOrders = $.grep(data, function(e) { return e['status'] == 'open' && e['get_remaining'] > 0 && e['give_remaining'] > 0; });
         //get divisibility for assets (this is slow and unoptimized)
         var assets = [];
-        for(i=0; i < data.length; i++) {
-          if(!assets.contains(data[i]['give_asset'])) assets.push(data[i]['give_asset']);
-          if(!assets.contains(data[i]['get_asset'])) assets.push(data[i]['get_asset']);
+        for(i=0; i < openOrders.length; i++) {
+          if(!assets.contains(openOrders[i]['give_asset'])) assets.push(openOrders[i]['give_asset']);
+          if(!assets.contains(openOrders[i]['get_asset'])) assets.push(openOrders[i]['get_asset']);
         }
         failoverAPI("get_asset_info", [assets], function(assetsInfo, endpoint) {
           var assetMappings = {};
@@ -144,9 +145,9 @@ function OpenOrderFeedViewModel() {
           }
           
           for(i=0; i < openOrders.length; i++) {
-            openOrders[i]['_give_asset_divisible'] = assetMappings[data[i]['give_asset']];
-            openOrders[i]['_get_asset_divisible'] = assetMappings[data[i]['get_asset']];
-            self.add(data[i], i == openOrders.length - 1); //PERF: sort on the last addition only
+            openOrders[i]['_give_asset_divisible'] = assetMappings[openOrders[i]['give_asset']];
+            openOrders[i]['_get_asset_divisible'] = assetMappings[openOrders[i]['get_asset']];
+            self.add(openOrders[i], i == openOrders.length - 1); //PERF: sort on the last addition only
           }
         });
       }

@@ -97,6 +97,10 @@ function PendingActionFeedViewModel() {
   self.dispCount = ko.computed(function() {
     return self.entries().length;
   }, self);
+  
+  self.getLocalStorageKey = function() {
+    return 'pendingActions_' + WALLET.identifier();
+  }
 
   self.add = function(txHash, category, data, when) {
     if(typeof(when)==='undefined') when = new Date();
@@ -107,7 +111,7 @@ function PendingActionFeedViewModel() {
     $.jqlog.debug("pendingAction:add:" + txHash + ":" + category + ": " + JSON.stringify(data));
 
     //Add to local storage so we can reload it if the user logs out and back in
-    var pendingActionsStorage = localStorage.getObject('pendingActions');
+    var pendingActionsStorage = localStorage.getObject(self.getLocalStorageKey());
     if(pendingActionsStorage === null) pendingActionsStorage = [];
     pendingActionsStorage.unshift({
       'txHash': txHash,
@@ -115,7 +119,7 @@ function PendingActionFeedViewModel() {
       'data': data,
       'when': when //serialized to string, need to use Date.parse to deserialize
     });
-    localStorage.setObject('pendingActions', pendingActionsStorage);     
+    localStorage.setObject(self.getLocalStorageKey(), pendingActionsStorage);     
     
     self.lastUpdated(new Date());
     PendingActionFeedViewModel.modifyBalancePendingFlag(category, data, true);
@@ -149,17 +153,17 @@ function PendingActionFeedViewModel() {
     }
     
     //Remove from local storage as well (if present)
-    var pendingActionsStorage = localStorage.getObject('pendingActions');
+    var pendingActionsStorage = localStorage.getObject(self.getLocalStorageKey());
     if(pendingActionsStorage === null) pendingActionsStorage = [];
     pendingActionsStorage = pendingActionsStorage.filter(function(item) {
         return item['txHash'] !== txHash;
     });    
-    localStorage.setObject('pendingActions', pendingActionsStorage);
+    localStorage.setObject(self.getLocalStorageKey(), pendingActionsStorage);
   }
   
   self.restoreFromLocalStorage = function(onSuccess) {
     //restore the list of any pending transactions from local storage (removing those entries for txns that have been confirmed)
-    var pendingActionsStorage = localStorage.getObject('pendingActions');
+    var pendingActionsStorage = localStorage.getObject(self.getLocalStorageKey());
     var txHashes = [], i = null;
     if(pendingActionsStorage === null) pendingActionsStorage = [];
     for(var i=0; i < pendingActionsStorage.length; i++) {
@@ -185,7 +189,7 @@ function PendingActionFeedViewModel() {
           return left.WHEN == right.WHEN ? 0 : (left.WHEN < right.WHEN ? 1 : -1)
         });
       }
-      localStorage.setObject('pendingActions', newPendingActionsStorage);
+      localStorage.setObject(self.getLocalStorageKey(), newPendingActionsStorage);
       if(onSuccess) onSuccess();
     });
   }

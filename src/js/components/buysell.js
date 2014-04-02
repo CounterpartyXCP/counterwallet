@@ -304,7 +304,7 @@ function BuySellWizardViewModel() {
       },
       message: 'Exceeds available balance',
       params: self
-    }    
+    }
   });
   self.customSellAsEntry.subscribe(function(newValue) {
     if(!self.assetPair() || (self.currentMarketUnitPrice() != 0 && !self.overrideMarketPrice())) return;
