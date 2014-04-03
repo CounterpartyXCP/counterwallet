@@ -10,3 +10,4 @@ dist/
 .tmp
 src/vendors/
 npm-debug.log
+servers.json

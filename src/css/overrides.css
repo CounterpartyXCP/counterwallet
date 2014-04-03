@@ -269,7 +269,14 @@ letter-spacing: 0;
 /*
  * DATA TABLES OVERRIDES
  */
-
+.dataTable {
+    width: 100% !Important; /* otherwise the datatables clump up on firefox (and probably other browsers) and don't consume the full space */
+}
 .dataTables_empty {
     display: none; /* don't show the "this table contains no data" row */
+}
+
+
+.bootbox-body {
+    word-wrap: break-word; /* good for long walks on the beach and the soothing music of Enya */
 }

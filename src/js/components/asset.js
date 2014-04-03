@@ -132,6 +132,12 @@ function AssetViewModel(props) {
   };
   
   self.call = function() {
+    ///////////////////
+    //TEMP DISABLE
+    bootbox.alert("Asset callbacks are temporarily disabled.");
+    return false;
+    ///////////////////
+    
     if(!WALLET.canDoTransaction(self.ADDRESS)) return false;
     CALL_ASSET_MODAL.show(self.ADDRESS, self.ASSET);
   }
