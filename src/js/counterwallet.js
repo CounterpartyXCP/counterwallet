@@ -2,7 +2,7 @@
 /***********
  * GLOBAL STATE AND SETUP
  ***********/
-var VERSION = "0.9.5 BETA";
+var VERSION = "0.9.5.2 BETA";
 var IS_MOBILE_OR_TABLET = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
 var PREFERENCES = {}; //set when logging in
 
@@ -87,8 +87,7 @@ var ORDER_DEFAULT_EXPIRATION = 320; //num blocks until expiration (at ~9 min per
 var DEFAULT_NUM_ADDRESSES = 3; //default number of addresses to generate
 var MARKET_INFO_REFRESH_EVERY = 5 * 60 * 1000; //refresh market info every 5 minutes while enabled 
 
-//var NUM_BLOCKS_TO_WAIT_FOR_BTCPAY = 6; //number of blocks to wait until the user can make a BTCpay on an order match where they owe BTC
-var NUM_BLOCKS_TO_WAIT_FOR_BTCPAY = 1;
+var NUM_BLOCKS_TO_WAIT_FOR_BTCPAY = 6; //number of blocks to wait until the user can make a BTCpay on an order match where they owe BTC
 
 var AUTOPRIME_AT_LESSTHAN_REMAINING = 10; //auto prime at less than this many txouts remaining
 var AUTOPRIME_MAX_COUNT = 10; //max number of txns to add with an autoprime

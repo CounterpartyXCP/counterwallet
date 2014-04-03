@@ -412,7 +412,7 @@ function PayDividendModalViewModel() {
 
   self.dividendAssetBalRemainingPostPay = ko.computed(function() {
     if(!self.asset() || self.dividendAssetBalance() === null) return null;
-    return Decimal.round(new Decimal(self.dividendAssetBalance()).sub(self.totalPay()), 8).toFloat();
+    return Decimal.round(new Decimal(self.dividendAssetBalance()).sub(self.totalPay()), 8, Decimal.MidpointRounding.ToEven).toFloat();
   }, self);
   
   self.validationModel = ko.validatedObservable({
@@ -526,7 +526,7 @@ function CallAssetModalViewModel() {
 
   self.dispUnitsToCallback = ko.computed(function() {
     if(!self.dispTotalOutstanding() || !self.percentageToCall()) return null;
-    return +(self.dispTotalOutstanding() * Decimal.round(new Decimal(self.percentageToCall()).div(100), 8).toFloat()).toFixed(4); 
+    return +(self.dispTotalOutstanding() * Decimal.round(new Decimal(self.percentageToCall()).div(100), 8, Decimal.MidpointRounding.ToEven).toFloat()).toFixed(4); 
   }, self); 
 
   self.dispUnitsAfterCallback = ko.computed(function() {
@@ -541,7 +541,7 @@ function CallAssetModalViewModel() {
 
   self.xcpBalRemainingPostCall = ko.computed(function() {
     if(self.totalXCPPay() === null) return null;
-    return +(Decimal.round(new Decimal(WALLET.getBalance(self.address(), 'XCP')).sub(self.totalXCPPay()), 8).toFloat()).toFixed(4);
+    return +(Decimal.round(new Decimal(WALLET.getBalance(self.address(), 'XCP')).sub(self.totalXCPPay()), 8, Decimal.MidpointRounding.ToEven).toFloat()).toFixed(4);
   }, self);
   
   self.validationModel = ko.validatedObservable({
@@ -565,7 +565,7 @@ function CallAssetModalViewModel() {
     //do the additional issuance (specify non-zero quantity, no transfer destination)
     WALLET.doTransaction(self.address(), "create_callback",
       { source: self.address(),
-        fraction: Decimal.round(new Decimal(self.percentageToCall()).div(100), 8).toFloat(),
+        fraction: Decimal.round(new Decimal(self.percentageToCall()).div(100), 8, Decimal.MidpointRounding.ToEven).toFloat(),
         asset: self.asset()
       },
       function(txHash, data, endpoint) {

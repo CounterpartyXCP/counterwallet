@@ -77,6 +77,15 @@ function LogonViewModel() {
       $('#createNewAcctBtnPane').animate({opacity:0}); //fade out the new account button pane if visible
       $('#extra-info').animate({opacity:0});
       
+      //generate the wallet ID from a double SHA256 hash of the passphrase and the network (if testnet)
+      //var hash1 = Bitcoin.Crypto.SHA256(self.sanitizedEnteredPassphrase() + (USE_TESTNET ? '_testnet' : ''));
+      //var hash2 = Bitcoin.Crypto.SHA256(hash1).toString(Bitcoin.Crypto.enc.Base64);
+      //WALLET.identifier(hash2);
+      WALLET.identifier(Bitcoin.convert.bytesToBase64(Bitcoin.Crypto.SHA256(
+        Bitcoin.Crypto.SHA256(self.sanitizedEnteredPassphrase() + (USE_TESTNET ? '_testnet' : ''),
+        {asBytes: true}), {asBytes: true})));
+      $.jqlog.log("My wallet ID: " + WALLET.identifier());
+
       //Set initial block height (will be updated again on each periodic refresh of BTC account balances)
       WALLET.networkBlockHeight(data['block_height']);
       
@@ -87,15 +96,6 @@ function LogonViewModel() {
       //Initialize chat feeds (even through the chat pane will remain closed by default and the user has not started chatting)
       CHAT_FEED.init();
       
-      //generate the wallet ID from a double SHA256 hash of the passphrase and the network (if testnet)
-      //var hash1 = Bitcoin.Crypto.SHA256(self.sanitizedEnteredPassphrase() + (USE_TESTNET ? '_testnet' : ''));
-      //var hash2 = Bitcoin.Crypto.SHA256(hash1).toString(Bitcoin.Crypto.enc.Base64);
-      //WALLET.identifier(hash2);
-      WALLET.identifier(Bitcoin.convert.bytesToBase64(Bitcoin.Crypto.SHA256(
-        Bitcoin.Crypto.SHA256(self.sanitizedEnteredPassphrase() + (USE_TESTNET ? '_testnet' : ''),
-        {asBytes: true}), {asBytes: true})));
-      $.jqlog.log("My wallet ID: " + WALLET.identifier());
-    
       //Grab preferences
       multiAPINewest("get_preferences", [WALLET.identifier()], 'last_updated', function(data) {
         var mustSavePreferencesToServer = false;
