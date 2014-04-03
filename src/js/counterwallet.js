@@ -1,11 +1,6 @@
-
 /***********
- * GLOBAL STATE AND SETUP
+ * GLOBAL INITALIZATION
  ***********/
-var VERSION = "0.9.6 BETA";
-var IS_MOBILE_OR_TABLET = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
-var PREFERENCES = {}; //set when logging in
-
 //Set up logging (jqlog) and monkey patch jqlog with a debug function
 $.jqlog.enabled(true);
 $.jqlog.debug = function(object, options) {
@@ -27,7 +22,24 @@ if((IS_DEV || USE_TESTNET) && location.search) {
   history.replaceState({}, '', '/');
 }
 
-//Setup hosts to use
+//Knockout validation defaults (https://github.com/ericmbarnard/Knockout-Validation/wiki/Configuration)
+ko.validation.init({
+  decorateElement: true,
+  errorMessageClass: 'invalid',
+  errorElementClass: 'invalid'
+});
+
+//Allow future timestamps with timeago
+$.timeago.settings.allowFuture = true;
+
+
+/***********
+ * SERVERS.JSON LOADING AND SERVICES INITIALIZATION
+ ***********/
+var cwURLs = ko.observableArray([]);
+var cwBaseURLs = ko.observableArray([]);
+var cwAPIUrls = ko.observableArray([]);
+
 function produceCWServerList() {
   cwURLs(shuffle(cwURLs())); //randomly shuffle the list to decide the server try order...
   $.jqlog.debug("MultiAPI Backends: " + JSON.stringify(cwURLs()));
@@ -40,23 +52,31 @@ function produceCWServerList() {
   }));
 }
 
+function initRollbar() {
+  /* TODO: Try to load rollbar earlier, possibly... (However, as we get the accessToken from servers.json, we'd have
+   * to put all of that logic in <head> for instance to be able to do that. So this should hopefully work fine.) 
+   */
+  if(!ROLLBAR_ACCESS_TOKEN) return;
+  var _rollbarConfig = {
+      accessToken: ROLLBAR_ACCESS_TOKEN,
+      captureUncaught: true,
+      payload: {
+          environment: USE_TESTNET ? "testnet" : "mainnet"
+      }
+  };
+  !function(a,b){function c(b){this.shimId=++f,this.notifier=null,this.parentShim=b,this.logger=function(){},a.console&&void 0===a.console.shimId&&(this.logger=a.console.log)}function d(b){var d=c;return e(function(){if(this.notifier)return this.notifier[b].apply(this.notifier,arguments);var c=this,e="scope"===b;e&&(c=new d(this));var f=Array.prototype.slice.call(arguments,0),g={shim:c,method:b,args:f,ts:new Date};return a._rollbarShimQueue.push(g),e?c:void 0})}function e(a,b){return b=b||this.logger,function(){try{return a.apply(this,arguments)}catch(c){b("Rollbar internal error:",c)}}}var f=0;c.init=function(a,b){var d=b.globalAlias||"Rollbar";if("object"==typeof a[d])return a[d];a._rollbarShimQueue=[],b=b||{};var f=new c;return e(function(){if(f.configure(b),b.captureUncaught){var c=a.onerror;a.onerror=function(){f.uncaughtError.apply(f,arguments),c&&c.apply(a,arguments)}}return a[d]=f,f},f.logger)()},c.prototype.loadFull=function(a,b,c,d){var f=e(function(){var a=b.createElement("script"),e=b.getElementsByTagName("script")[0];a.src=d.rollbarJsUrl,a.async=!c,a.onload=g,e.parentNode.insertBefore(a,e)},this.logger),g=e(function(){if(void 0===a._rollbarPayloadQueue)for(var b,c,d,e,f=new Error("rollbar.js did not load");b=a._rollbarShimQueue.shift();)for(d=b.args,e=0;e<d.length;++e)if(c=d[e],"function"==typeof c){c(f);break}},this.logger);e(function(){c?f():a.addEventListener?a.addEventListener("load",f,!1):a.attachEvent("onload",f)},this.logger)()};for(var g="log,debug,info,warn,warning,error,critical,global,configure,scope,uncaughtError".split(","),h=0;h<g.length;++h)c.prototype[g[h]]=d(g[h]);var i="//d37gvrvc0wt4s1.cloudfront.net/js/v1.0/rollbar.min.js";_rollbarConfig.rollbarJsUrl=_rollbarConfig.rollbarJsUrl||i;var j=c.init(a,_rollbarConfig);j.loadFull(a,b,!1,_rollbarConfig)}(window,document);
+}
 
-var cwURLs = ko.observableArray([]);
-var cwBaseURLs = ko.observableArray([]);
-var cwAPIUrls = ko.observableArray([]);
-//Note that with the socket.io feeds, we supply the path in the socketio connect() call
-if(location.hostname.endsWith('counterwallet.co')) { //Main counterwallet setup
-  document.domain = "counterwallet.co"; //allow cross-subdomain access (e.g. www.counterwallet.co can AJAX to cw01.counterwallet.co)
-  //cwURLs([ "https://cw01.counterwallet.co", "https://cw02.counterwallet.co",
-  // "https://cw03.counterwallet.co", "https://cw04.counterwallet.co", "https://cw05.counterwallet.co" ]);
-  cwURLs([ "https://cw01.counterwallet.co" ]);
-  produceCWServerList();
-} else {
+function loadServersListAndSettings() {
   //Request for the servers.json file, which should contain an array of API backends for us to use
-  $.getJSON("servers.json", function( data ) {
-    assert(data && data instanceof Array, "Returned servers.json file is not an array");
-    cwURLs(data);
+  $.getJSON("/servers.json", function(data) {
+    assert(data && typeof data == "object" && data.hasOwnProperty("servers"), "Returned servers.json file does not contain valid JSON object");
+    assert(data['servers'] && data['servers'] instanceof Array, "'servers' field in returned servers.json file is not an array");
+    ROLLBAR_ACCESS_TOKEN = data['rollbarAccessToken'] || ''; 
+    GOOGLE_ANALYTICS_UAID = (USE_TESTNET ? data['googleAnalyticsUA'] : data['googleAnalyticsUA-testnet']) || '';
+    cwURLs(data['servers']);
     produceCWServerList();
+    initRollbar();
   }).fail(function() {
     //File not found, just use the local box as the API server
     cwURLs([ location.origin ]);
@@ -64,126 +84,11 @@ if(location.hostname.endsWith('counterwallet.co')) { //Main counterwallet setup
   });
 }
 
-var BLOCKEXPLORER_URL = "http://live.bitcore.io";
-if(USE_TESTNET) {
-  BLOCKEXPLORER_URL = "http://test.bitcore.io";
-}
+loadServersListAndSettings();
 
 
 /***********
- * GLOBAL CONSTANTS
- ***********/
-var GOOGLE_ANALYTICS_UAID = !IS_DEV ? (!USE_TESTNET ? 'UA-47404711-2' : 'UA-47404711-4') : null;
-var MAX_ADDRESSES = 20; //totall arbitrary :)
-var MAX_INT = Math.pow(2, 63) - 1;
-var UNIT = 100000000; //# satoshis in whole
-var MIN_FEE = 10000; // in satoshis (== .0001 BTC)
-var APPROX_SECONDS_PER_BLOCK = 8 * 60; //a *rough* estimate on how many seconds per each block (used for estimating open order time left until expiration, etc)
-var MIN_PRIME_BALANCE = 50000; //in satoshis ... == .0005
-var ASSET_CREATION_FEE_XCP = 0.5; //in normalized XCP
-var MAX_ASSET_DESC_LENGTH = 41; //42, minus a null term character?
-var ORDER_DEFAULT_BTCFEE_PCT = 1; //1% of total order
-var ORDER_DEFAULT_EXPIRATION = 320; //num blocks until expiration (at ~9 min per block this is ~48hours)
-var DEFAULT_NUM_ADDRESSES = 3; //default number of addresses to generate
-var MARKET_INFO_REFRESH_EVERY = 5 * 60 * 1000; //refresh market info every 5 minutes while enabled 
-
-var NUM_BLOCKS_TO_WAIT_FOR_BTCPAY = 6; //number of blocks to wait until the user can make a BTCpay on an order match where they owe BTC
-
-var AUTOPRIME_AT_LESSTHAN_REMAINING = 10; //auto prime at less than this many txouts remaining
-var AUTOPRIME_MAX_COUNT = 10; //max number of txns to add with an autoprime
-var AUTOPRIME_MIN_CONFIRMED_BTC_BAL = 0.005; //don't autoprime if the account has less than this balance (too much churn)
-
-var ACTION_PENDING_NOTICE = "<b><u>This action will take some time to complete</u></b>, and will appear as a Pending Action until"
-  + " confirmed on the network. <b class='errorColor'>Until that time, the wallet will not reflect the change. Please be patient.</b>";
-
-var DEFAULT_PREFERENCES = {
-  'num_addresses_used': DEFAULT_NUM_ADDRESSES,
-  'address_aliases': {},
-  'selected_theme': 'ultraLight',
-  'selected_lang': 'en-us',
-  'watch_only_addresses': [],
-  'auto_prime': true, //default to auto prime being enabled
-  'auto_btcpay': true //default to auto BTC payments being enabled
-};
-
-var ENTITY_NAMES = {
-  'burns': 'Burn',
-  'debits': 'Debit',
-  'credits': 'Credit',
-  'sends': 'Send',
-  'orders': 'Order',
-  'order_matches': 'Order Match',
-  'btcpays': 'BTCPay',
-  'issuances': 'Issuance',
-  'broadcasts': 'Broadcast',
-  'bets': 'Bet',
-  'bet_matches': 'Bet Match',
-  'dividends': 'Dividend',
-  'cancels': 'Cancel',
-  'callbacks': 'Callback',
-  'bet_expirations': 'Bet Expired',
-  'order_expirations': 'Order Expired',
-  'bet_match_expirations': 'Bet Match Exp',
-  'order_match_expirations': 'Order Match Exp'
-};
-
-var ENTITY_ICONS = {
-  'burns': 'fa-fire',
-  'debits': 'fa-minus',
-  'credits': 'fa-plus',
-  'sends': 'fa-share',
-  'orders': 'fa-bar-chart-o',
-  'order_matches': 'fa-exchange',
-  'btcpays': 'fa-btc',
-  'issuances': 'fa-magic',
-  'broadcasts': 'fa-rss',
-  'bets': 'fa-bullseye',
-  'bet_matches': 'fa-exchange',
-  'dividends': 'fa-ticket',
-  'cancels': 'fa-times',
-  'callbacks': 'fa-retweet',
-  'bet_expirations': 'fa-clock-o',
-  'order_expirations': 'fa-clock-o',
-  'bet_match_expirations': 'fa-clock-o',
-  'order_match_expirations': 'fa-clock-o'
-};
-
-var ENTITY_NOTO_COLORS = {
-  'burns': 'bg-color-yellow',
-  'debits': 'bg-color-red',
-  'credits': 'bg-color-green',
-  'sends': 'bg-color-orangeDark',
-  'orders': 'bg-color-blue',
-  'order_matches': 'bg-color-blueLight',
-  'btcpays': 'bg-color-orange',
-  'issuances': 'bg-color-pinkDark',
-  'broadcasts': 'bg-color-magenta',
-  'bets': 'bg-color-teal',
-  'bet_matches': 'bg-color-teal',
-  'dividends': 'bg-color-pink',
-  'cancels': 'bg-color-red',
-  'callbacks': 'bg-color-pink',
-  'bet_expirations': 'bg-color-grayDark',
-  'order_expirations': 'bg-color-grayDark',
-  'bet_match_expirations': 'bg-color-grayDark',
-  'order_match_expirations': 'bg-color-grayDark'
-};
-
-var BET_TYPES = {
-  0: "Bullish CFD",
-  1: "Bearish CFD",
-  2: "Equal",
-  3: "Not Equal"
-};
-
-var MAINNET_UNSPENDABLE = '1CounterpartyXXXXXXXXXXXXXXXUWLpVr';
-var TESTNET_UNSPENDABLE = 'mvCounterpartyXXXXXXXXXXXXXXW24Hef';
-var TESTNET_BURN_START = 154908;
-var TESTNET_BURN_END = 4017708;
-
-
-/***********
- * PRIMARY SITE INIT
+ * POST-JQUERY INIT
  ***********/
 $(document).ready(function() {
   //Set up form validation
@@ -202,14 +107,3 @@ $(document).ready(function() {
     imagePath: 'assets/', // Path where images are located    
   }); // Customized Text
 });
-
-//Knockout validation defaults (https://github.com/ericmbarnard/Knockout-Validation/wiki/Configuration)
-ko.validation.init({
-  decorateElement: true,
-  errorMessageClass: 'invalid',
-  errorElementClass: 'invalid'
-});
-
-//Allow future timestamps with timeago
-$.timeago.settings.allowFuture = true;
-

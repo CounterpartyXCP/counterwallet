@@ -48,44 +48,6 @@
     <!-- iOS web-app metas : hides Safari UI Components and Changes Status Bar Appearance -->
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black">
-    
-    <script>
-        function qs(key) {
-          //http://stackoverflow.com/a/7732379
-          key = key.replace(/[*+?^$.\[\]{}()|\\\/]/g, "\\$&"); // escape RegEx meta chars
-          var match = location.search.match(new RegExp("[?&]"+key+"=([^&]+)(&|$)"));
-          return match && decodeURIComponent(match[1].replace(/\+/g, " "));
-        }
-    
-        //Allow the site root to specify "dev" and "testnet" parameters...
-        //IS_DEV is enabled if the initial (root) URL access has ?isdev=1
-        //USE_TESTNET is enabled if the initial (root) URL access has ?testnet=1, OR the hostname visited starts with 'testnet' (e.g. testnet.myhost.com)
-        var IS_DEV = (location.pathname == "/" && qs("dev") && qs("dev") != '0' ? true : false);
-        var USE_TESTNET = (   (location.pathname == "/" && qs("testnet") && qs("testnet") != '0')
-                           || location.hostname.indexOf('testnet') == 0 ? true : false
-                          );
-
-        //!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-        //!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-        //FORCE TESTNET FOR BETA PERIOD
-        console.log("TESTNET FORCED FOR BETA PERIOD");
-        USE_TESTNET = true;
-        //!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-        //!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-    
-        ////////////////////////////
-        //ROLLBAR SETUP (only enabled if location.hostname ends in 'counterwallet.co')
-        if(location.hostname.indexOf('counterwallet.co', location.hostname.length - 'counterwallet.co'.length) !== -1) {
-            var _rollbarConfig = {
-                accessToken: "30d23b5d51244169a98fc922f0d1b940",
-                captureUncaught: true,
-                payload: {
-                    environment: USE_TESTNET ? "testnet" : "mainnet"
-                }
-            };
-            !function(a,b){function c(b){this.shimId=++f,this.notifier=null,this.parentShim=b,this.logger=function(){},a.console&&void 0===a.console.shimId&&(this.logger=a.console.log)}function d(b){var d=c;return e(function(){if(this.notifier)return this.notifier[b].apply(this.notifier,arguments);var c=this,e="scope"===b;e&&(c=new d(this));var f=Array.prototype.slice.call(arguments,0),g={shim:c,method:b,args:f,ts:new Date};return a._rollbarShimQueue.push(g),e?c:void 0})}function e(a,b){return b=b||this.logger,function(){try{return a.apply(this,arguments)}catch(c){b("Rollbar internal error:",c)}}}var f=0;c.init=function(a,b){var d=b.globalAlias||"Rollbar";if("object"==typeof a[d])return a[d];a._rollbarShimQueue=[],b=b||{};var f=new c;return e(function(){if(f.configure(b),b.captureUncaught){var c=a.onerror;a.onerror=function(){f.uncaughtError.apply(f,arguments),c&&c.apply(a,arguments)}}return a[d]=f,f},f.logger)()},c.prototype.loadFull=function(a,b,c,d){var f=e(function(){var a=b.createElement("script"),e=b.getElementsByTagName("script")[0];a.src=d.rollbarJsUrl,a.async=!c,a.onload=g,e.parentNode.insertBefore(a,e)},this.logger),g=e(function(){if(void 0===a._rollbarPayloadQueue)for(var b,c,d,e,f=new Error("rollbar.js did not load");b=a._rollbarShimQueue.shift();)for(d=b.args,e=0;e<d.length;++e)if(c=d[e],"function"==typeof c){c(f);break}},this.logger);e(function(){c?f():a.addEventListener?a.addEventListener("load",f,!1):a.attachEvent("onload",f)},this.logger)()};for(var g="log,debug,info,warn,warning,error,critical,global,configure,scope,uncaughtError".split(","),h=0;h<g.length;++h)c.prototype[g[h]]=d(g[h]);var i="//d37gvrvc0wt4s1.cloudfront.net/js/v1.0/rollbar.min.js";_rollbarConfig.rollbarJsUrl=_rollbarConfig.rollbarJsUrl||i;var j=c.init(a,_rollbarConfig);j.loadFull(a,b,!1,_rollbarConfig)}(window,document);
-        }   
-    </script>
   </head>
   <body class="fixed-header fixed-ribbon fixed-navigation smart-style-2" data-bind="css: {minified: IS_MOBILE_OR_TABLET }">
     <!-- default to ultra light theme (smart-style-2) -->
@@ -578,10 +540,11 @@
     <!-- JavaScript created specifically for Counterwallet. -->
     <!-- bitcoinjs-lib: The following library is required for bitcon addresses and signing. -->
     <!-- build:js js/counterwallet-min.js -->
+    <script src="js/consts.js"></script>
+    <script src="js/counterwallet.js"></script>
     <script src="js/bitcoinjs-min.js"></script> <!-- need update to use vendors/bitcoinjs-lib -->
     <script src="js/mnemonic.js"></script> <!-- can not find official source -->
     <script src="js/util.js"></script>
-    <script src="js/counterwallet.js"></script>
     <script src="js/util.api.js"></script>
     <script src="js/util.bitcoin.js"></script>
     <script src="js/util.knockout.js"></script>
