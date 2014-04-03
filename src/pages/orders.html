@@ -209,18 +209,18 @@
 
 <script type="text/javascript">
   pageSetUp(); //init smartadmin featureset
-  loadScript("js/components/orders.js", function() {
-    //This code is run on each visit to the page
-    window.ORDERS = new OrdersViewModel();
 
-    ko.applyBindings(ORDERS, document.getElementsByClassName("ordersGrid")[0]);
-    
-    ORDERS.init(true);
-  
-    $(window).resize(ORDERS.dataTableResponsive);
-    $(window).on('hashchange', function() {
-      ORDERS.metricsStopAutoRefresh(); //just in case
-      $(window).off("resize", ORDERS.dataTableResponsive);
-    });
+  //This code is run on each visit to the page
+  window.ORDERS = new OrdersViewModel();
+
+  ko.applyBindings(ORDERS, document.getElementsByClassName("ordersGrid")[0]);
+
+  ORDERS.init(true);
+
+  $(window).resize(ORDERS.dataTableResponsive);
+  $(window).on('hashchange', function() {
+    ORDERS.metricsStopAutoRefresh(); //just in case
+    $(window).off("resize", ORDERS.dataTableResponsive);
   });
+
 </script>
