@@ -357,6 +357,8 @@ function ChatFeedViewModel() {
             if(self._nextMessageNotSent) {
               self._nextMessageNotSent = false;
             } else {
+              text = $("<div/>").html(text).text();
+              //^ sanitize html text out to match how the server will bcast it to other clients
               self.addLine(self.handle(), text, self.is_op(), false);
               $('#chatTextBox').val('');
             }

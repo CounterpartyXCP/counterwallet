@@ -426,9 +426,8 @@ function nav_page_height() {
     $.left_panel.css('min-height', windowHeight + 'px');
     $.root_.css('min-height', windowHeight + 'px');
     //COUNTERWALLETD: START MOD
-    $('#chatPane').css('min-height', windowHeight + 'px');
-    $('#chatContentDiv').css('min-height', (windowHeight - 50 - 40) + 'px');
-    //$('#chatContentInnerDiv').slimScroll({ height: (windowHeight - 50 - 32) + 'px' });
+    $('#chatPane').css('height', windowHeight + 'px');
+    $('#chatContentDiv').css('height', (windowHeight - 50 - 40) + 'px');
     $('#chatContentInnerDiv').slimScroll({ height: 'auto' });
     //COUNTERWALLETD: END MOD
   }
