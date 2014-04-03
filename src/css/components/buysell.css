@@ -35,16 +35,10 @@
     padding-bottom: 0;
 }
 
-table#orderBook {
+/*table.orderBook {
     max-height: 500px;
-}
+}*/
 
-table#orderBook td {
+table.orderBook td {
     text-align: right;
-}
-
-table#orderBook td.median {
-    border-color: #9cb4c5;
-    color: #346597;
-    background: #d6dde7;
 }

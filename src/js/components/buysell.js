@@ -32,6 +32,7 @@ function BuySellWizardViewModel() {
   self.allTradeDataRetrieved = ko.observable(false);
   self.showPriceChart = ko.observable(false);
   self.showTradeHistory = ko.observable(false);
+  self.showOrderBook = ko.observable(false);
   self.showOpenOrders = ko.observable(false);
   self.currentTab = ko.observable(1);
   self.overrideMarketPrice = ko.observable(false);
@@ -252,7 +253,7 @@ function BuySellWizardViewModel() {
       message: "This field is required.",
       onlyIf: function () { return self.overrideDefaultOptions(); }
     },
-    isValidPositiveQuantity: self
+    isValidPositiveQuantityOrZero: self
   });
   //^ if we are selling BTC, this is a fee_required override if buying BTC, and a fee_provided override if selling BTC. if neither, this is not used
   self.btcFeeAs = ko.observable('percentage');
@@ -390,7 +391,8 @@ function BuySellWizardViewModel() {
   }, self);
   self.unitPrice = ko.computed(function() {
     //if we've overridden the unit price, return that, otherwise go with the market rate (if there is one)
-    return(self.unitPriceCustom() || self.currentMarketUnitPrice());
+    if(self.overrideMarketPrice() || self.currentMarketUnitPrice() == 0) return self.unitPriceCustom();
+    return self.currentMarketUnitPrice();
   }, self);
   self.dispUnitPrice = ko.computed(function() {
     if(!self.unitPrice()) return null;
@@ -518,6 +520,7 @@ function BuySellWizardViewModel() {
           self.allTradeDataRetrieved(false);
           self.showPriceChart(false);
           self.showTradeHistory(false);
+          self.showOrderBook(false);
           self.showOpenOrders(false);
           self.overrideMarketPrice(false);
           self.overrideDefaultOptions(false);
@@ -555,6 +558,7 @@ function BuySellWizardViewModel() {
           self._tab2AutoRefresh(function() { self.allTradeDataRetrieved(true); });
         } else {
           assert(current == 3, "Unknown wizard tab change!");
+          //leave the price chart and order book up
           self.showTradeHistory(false);
           self.showOpenOrders(false);
           $('#tradeHistory').dataTable().fnClearTable(); //otherwise we get duplicate rows for some reason...
@@ -709,15 +713,17 @@ function BuySellWizardViewModel() {
     
     failoverAPI("get_order_book_buysell", args, function(data, endpoint) {
       deferred.resolve();
-      if(data['raw_orders'] && data['raw_orders'].length) {
+      if(data['base_ask_book'].length || data['base_bid_book'].length) {
         //we have an order book, showPriceChart should end up being set to true and the order book will show
         //set up order book display
-        data['base_ask_book'].reverse(); //for display
-        self.askBook(data['base_ask_book'].slice(0,7)); //limit to 7 entries
-        self.bidBook(data['base_bid_book'].slice(0,7));
+        self.showOrderBook(true);
+        self.askBook(data['base_ask_book'].slice(0,10)); //limit to 10 entries
+        self.bidBook(data['base_bid_book'].slice(0,10));
         self.bidAskMedian(data['bid_ask_median']);
         self.bidDepth(data['bid_depth']);
         self.askDepth(data['ask_depth']);
+      } else {
+        self.showOrderBook(false);
       }
       
       //show all open orders for the selected asset pair

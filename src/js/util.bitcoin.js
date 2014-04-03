@@ -20,7 +20,8 @@ function hashToB64(content) {
 }
 
 function smartFormat(num, truncateDecimalPlacesAtMin, truncateDecimalPlacesTo) { //arbitrary rules to make quantities formatted a bit more friendly
-  if(num === null) return '??';
+  if(num === null || isNaN(num)) return '??';
+  if(num === 0) return num; //avoid Decimal class issue dealing with 0
   if(typeof(truncateDecimalPlacesMin)==='undefined') truncateDecimalPlacesMin = null;
   if(typeof(truncateDecimalPlacesTo)==='undefined') truncateDecimalPlacesTo = 4;
   if(truncateDecimalPlacesAtMin === null || num > truncateDecimalPlacesAtMin) {

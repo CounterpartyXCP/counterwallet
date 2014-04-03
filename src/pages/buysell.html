@@ -312,50 +312,17 @@
         <header>
             <span class="widget-icon"> <i class="fa fa-bar-chart-o"></i> </span>
             <h3>Price History for <span data-bind="text: dispAssetPair"></span></h3>
+            <div class="widget-toolbar" role="menu" data-bind="visible: bidAskMedian"> 
+                <div class="label label-success">
+                    <i class="fa fa-retweet"></i>&nbsp;Market Price: <span data-bind="text: bidAskMedian"></span>
+                </div>
+            </div>
         </header>
         <div> <!-- widget div-->
             <div class="widget-body no-padding"> <!-- widget content -->
                 <div class="row">
-                    <div class="col-lg-9">
+                    <div class="col-md-12">
                         <div id="priceHistory" style="height: 500px; min-width: 500px"></div>
-                    </div>
-                    <div class="col-lg-3">
-                        <div>
-                            <table id="orderBook" class="table table-striped table-bordered table-condensed">
-                                <thead>
-                                    <tr>
-                                        <th>Unit Price</th>
-                                        <th>Quantity (Count)</th>
-                                        <th>Depth</th>
-                                    </tr>
-                                </thead>
-                                <tbody data-bind="foreach: askBook"> <!-- descending order -->
-                                    <tr class="sellColor">
-                                        <td data-bind="text: unit_price"></td>
-                                        <td data-bind="text: smartFormat(quantity) + ' (' + count + ')'"></td> <!-- quantity (count) -->
-                                        <td data-bind="text: smartFormat(depth, 10)"></td>
-                                    </tr>
-                                </tbody>
-                                <tbody>
-                                    <tr>
-                                        <td class="median"> <!-- median within the spread -->
-                                            <center><span style="font-weight:bold;font-size: 14px;"
-                                                  data-bind="text: bidAskMedian()">
-                                            </span></center>
-                                        </td>
-                                        <td class="median"><center><b>--</b></center></td>
-                                        <td class="median"><center><b>--</b></center></td>
-                                    </tr>
-                                </tbody>
-                                <tbody data-bind="foreach: bidBook"> <!-- descending order -->
-                                    <tr class="buyColor">
-                                        <td data-bind="text: unit_price"></td>
-                                        <td data-bind="text: smartFormat(quantity) + ' (' + count + ')'"></td>
-                                        <td data-bind="text: smartFormat(depth, 10)"></td>
-                                    </tr>
-                                </tbody>
-                            </table>
-                        </div>
                     </div>
                 </div>
             </div> <!-- end widget content -->
@@ -363,6 +330,70 @@
       </div> <!-- end widget -->
     </article> <!-- WIDGET END -->
   </div> <!-- end row -->
+
+  <div class="row"> <!-- row -->
+    <article class="col-xs-12 col-sm-12 col-md-12 col-lg-12"> <!-- NEW WIDGET START -->
+      <div class="jarviswidget defaultWidgetColor" id="wid-id-orderBook" data-widget-editbutton="false" data-widget-deletebutton="false" data-bind="fadeVisibleInOnly: showOrderBook">
+        <header>
+            <span class="widget-icon"> <i class="fa fa-sort-amount-desc"></i> </span>
+            <h3>Order book for <span data-bind="text: dispAssetPair"></span></h3>
+            <div class="widget-toolbar" role="menu" data-bind="visible: bidAskMedian"> 
+                <div class="label label-success">
+                    <i class="fa fa-retweet"></i>&nbsp;Market Price: <span data-bind="text: bidAskMedian"></span>
+                </div>
+            </div>
+        </header>
+        <div> <!-- widget div-->
+            <div class="widget-body"> <!-- widget content -->
+                <div class="row">
+                    <div class="col-md-6">
+                        <table class="orderBook table table-striped table-bordered table-condensed">
+                            <thead>
+                                <tr class="info">
+                                    <th colspan="3"><center><b>Selling <span data-bind="text: baseAsset"></span></b></center></th>
+                                </tr>
+                                <tr>
+                                    <th>Unit Price</th>
+                                    <th>Quantity (Count)</th>
+                                    <th>Depth</th>
+                                </tr>
+                            </thead>
+                            <tbody data-bind="foreach: askBook"> <!-- ascending order -->
+                                <tr>
+                                    <td data-bind="text: unit_price"></td>
+                                    <td data-bind="text: smartFormat(quantity) + ' (' + count + ')'"></td> <!-- quantity (count) -->
+                                    <td data-bind="text: smartFormat(depth, 10)"></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    <div class="col-md-6">
+                        <table class="orderBook table table-striped table-bordered table-condensed">
+                            <thead>
+                                <tr class="success">
+                                    <th colspan="3"><center><b>Buying <span data-bind="text: baseAsset"></span></b></center></th>
+                                </tr>
+                                <tr>
+                                    <th>Unit Price</th>
+                                    <th>Quantity (Count)</th>
+                                    <th>Depth</th>
+                                </tr>
+                            </thead>
+                            <tbody data-bind="foreach: bidBook"> <!-- descending order -->
+                                <tr>
+                                    <td data-bind="text: unit_price"></td>
+                                    <td data-bind="text: smartFormat(quantity) + ' (' + count + ')'"></td>
+                                    <td data-bind="text: smartFormat(depth, 10)"></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div> <!-- end widget content -->
+        </div> <!-- end widget div -->
+      </div> <!-- end widget -->
+    </article> <!-- WIDGET END -->
+  </div> <!-- end row -->  
 
   <div data-bind="fadeVisibleInOnly: showOpenOrders" class="row"> <!-- row -->
     <article class="col-xs-12 col-sm-12 col-md-12 col-lg-12"> <!-- NEW WIDGET START -->
