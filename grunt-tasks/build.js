@@ -17,12 +17,21 @@ module.exports = function(grunt) {
     }
 
     var generateHash = function(path) {
-        grunt.log.writeln('generating hash: '+path);              
-        var content = grunt.file.read(path);                         
-        var ast = Uglify.parser.parse(content); // parse code and get the initial AST
-        ast = Uglify.uglify.ast_squeeze(ast); // get an AST with compression optimizations
-        content = Uglify.uglify.gen_code(ast); // compressed code here
-        return Crypto.SHA256(content);
+        var content = path;
+        grunt.log.writeln('generating hash: '+path);   
+        if (grunt.file.exists(path)) {       
+            if (path.split('.').pop()=='js') {
+                content = grunt.file.read(path);
+                var ast = Uglify.parser.parse(content); // parse code and get the initial AST
+                ast = Uglify.uglify.ast_squeeze(ast); // get an AST with compression optimizations
+                content = Uglify.uglify.gen_code(ast); // compressed code here
+            } else {
+                content = grunt.file.read(path, {encoding:null});
+            }
+        }
+        var hash = Crypto.SHA256(content);
+        grunt.log.writeln(hash);
+        return hash;
     }
 
     var generateHashes = function(fileList, config) {
@@ -35,16 +44,13 @@ module.exports = function(grunt) {
                 file.blocks.forEach(function(block) {
                     if (block.type=='js') {
                         for (var b in block.src) {
-                            var path = config.srcDir+block.src[b];
-                            
+                            var path = config.srcDir+block.src[b];                          
                             if (path.indexOf(config.depsDir)==0) {
                                 var hash = generateHash(path);
                                 hashes[path] = hash;
-                                grunt.log.writeln(hash);
                             }                  
                         }
-                    }
-                    
+                    }                   
                 });
             });
         });
@@ -80,8 +86,10 @@ module.exports = function(grunt) {
 
             var ext = urlPath.split(".").pop();
             // TODO: 12 chars seems enough, but check collisions for cleanliness
-            var newFilename = Crypto.SHA256(urlPath).substr(0,12)+"."+ext;
+            var newFilename = generateHash(urlPath).substr(0,12)+"."+ext;
             
+            grunt.log.writeln("newFilename: "+newFilename);
+
             newUrl = config.assetsHome+newFilename;
             if (params) {
                 newUrl += "?"+params;
@@ -142,13 +150,12 @@ module.exports = function(grunt) {
     }
 
     var replaceBuildBlock = function(htmlcontent, block) {
-        var packageJson = grunt.file.readJSON('package.json');
         var startBlock = block.raw[0];
         var endBlock = block.raw[block.raw.length-1];
         var bockStartPos = htmlcontent.indexOf(startBlock);
         var blockEndPos = htmlcontent.indexOf(endBlock, bockStartPos)+endBlock.length;
         var tag = '';
-        var tagurl = block.dest+'?v='+packageJson.version;
+        var tagurl = block.dest+'?v='+block.version;
         if (block.type=='css') {
             tag = '<link rel="stylesheet" type="text/css" href="'+tagurl+'">';
         } else if (block.type=='js') {
@@ -220,6 +227,7 @@ module.exports = function(grunt) {
                 file.blocks.forEach(function(block) {
                     var combinedcontent = mergeContent(root, block, config);
                     grunt.file.write(config.buildDir+block.dest, combinedcontent);
+                    block.version = Crypto.SHA256(combinedcontent).substr(0, 12);
                     htmlcontent = replaceBuildBlock(htmlcontent, block);
                 });
 
