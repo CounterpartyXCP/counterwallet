@@ -231,6 +231,12 @@ body.smart-style-3 .defaultWidgetColor>header { /* google skin = darkBlue (night
 }
 
 
+/* Fix widget header height for low resolution */
+section.balancesContainer .jarviswidget>header,
+section.ordersGrid .jarviswidget>header {
+  height: auto !important;
+}
+
 
 /* 
  * CSS SMARTADMIN BUG FIXES

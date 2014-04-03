@@ -69,7 +69,8 @@
               </div>
             </div>
             <div data-bind="visible: !IS_WATCH_ONLY" class="widget-toolbar"><span id="" data-bind="click: prime, html: dispNumPrimedTxouts"></span></div>  
-            <div class="widget-toolbar"><span id="" data-bind="attr: {'id': 'address-text-' + $data.ADDRESS}, click: function(data, event) { return selectText('address-text-' + $data.ADDRESS); }, text: ADDRESS"></span></div>  
+            <div class="widget-toolbar"><span id="" data-bind="attr: {'id': 'address-text-' + $data.ADDRESS}, click: function(data, event) { return selectText('address-text-' + $data.ADDRESS); }, text: ADDRESS"></span></div>
+            <div class="clearfix"></div>  
           </header>
           <div> <!-- widget div-->
             <div class="widget-body" data-bind="attr: {'id': 'address-balances-' + $data.ADDRESS}, foreach: filteredAssets"> <!-- widget content -->
