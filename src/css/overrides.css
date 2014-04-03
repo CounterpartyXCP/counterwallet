@@ -204,7 +204,11 @@ body.smart-style-3 .defaultWidgetColor>header { /* google skin = darkBlue (night
   }
 
   #logo {
-    width:50px !important;
+    width:35px !important;
+  }
+
+  #logo img {
+    bottom:2px !important;
   }
 
   #logo-group {
