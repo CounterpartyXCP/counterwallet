@@ -192,6 +192,10 @@ body.smart-style-3 .defaultWidgetColor>header { /* google skin = darkBlue (night
     color: #FFF;
 }
 
+/* FIX bug left menu in low resolution */
+#left-panel {
+  left: 0 !important;
+}
 
 /* 
  * CSS SMARTADMIN BUG FIXES
