@@ -1,6 +1,8 @@
 /***********
  * GLOBAL INITALIZATION
  ***********/
+function assert(condition, message) { if (!condition) throw message || "Assertion failed"; }
+
 //Set up logging (jqlog) and monkey patch jqlog with a debug function
 $.jqlog.enabled(true);
 $.jqlog.debug = function(object, options) {
@@ -84,16 +86,11 @@ function loadServersListAndSettings() {
   });
 }
 
-loadServersListAndSettings();
-
 
 /***********
  * POST-JQUERY INIT
  ***********/
 $(document).ready(function() {
-  //Set up form validation
-  //$("input,select,textarea").not("[type=submit]").jqBootstrapValidation();
-  
   //Reject cruddy old browsers (we need IE v9 and higher!)
   $.reject({  
     reject: {
@@ -105,5 +102,7 @@ $(document).ready(function() {
       firefox2: true
     },
     imagePath: 'assets/', // Path where images are located    
-  }); // Customized Text
+  });
+  
+  loadServersListAndSettings();
 });
