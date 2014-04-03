@@ -21,7 +21,7 @@ if((IS_DEV || USE_TESTNET) && location.search) {
   //history.replaceState is NOT supported on IE 9...ehh
   assert($.layout.className !== 'trident9',
     "Use of 'dev' or 'testnet' flags NOT supported on IE 9, due to lack of history.replaceState() support.");
-  history.replaceState({}, '', '/');
+  history.replaceState({}, '', location.pathname);
 }
 
 //Knockout validation defaults (https://github.com/ericmbarnard/Knockout-Validation/wiki/Configuration)
