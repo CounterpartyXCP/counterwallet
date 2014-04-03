@@ -2,3 +2,11 @@ _drafts/
 _site/
 build/
 build.orig/
+.DS_Store*
+._*
+node_modules/
+src/servers.json
+dist/
+.tmp
+src/vendors/
+npm-debug.log

@@ -8,37 +8,42 @@
 
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 
-    <!-- Basic Stylessheets -->
-    <link rel="stylesheet" type="text/css" media="screen" href="css/bootstrap.min.css">
-    <link rel="stylesheet" type="text/css" media="screen" href="css/font-awesome.min.css">
+
+    <!-- build:css css/counterwallet-deps-min.css -->
+    <link rel="stylesheet" type="text/css" media="screen" href="vendors/smartadmin/css/bootstrap.min.css">
+    <link rel="stylesheet" type="text/css" media="screen" href="vendors/smartadmin/css/font-awesome.min.css">
     <!-- SmartAdmin Styles -->
-    <link rel="stylesheet" type="text/css" media="screen" href="css/smartadmin-production.css">
-    <link rel="stylesheet" type="text/css" media="screen" href="css/smartadmin-skins.css">
+    <link rel="stylesheet" type="text/css" media="screen" href="vendors/smartadmin/css/smartadmin-production.css">
+    <link rel="stylesheet" type="text/css" media="screen" href="vendors/smartadmin/css/smartadmin-skins.css">
     <!-- Counterwallet plugin styles -->
-    <link rel="stylesheet" type="text/css" href="xcp/extcss/jquery.reject.css">
-    <link rel="stylesheet" type="text/css" href="xcp/extcss/jquery.keyboard.css">
-    <link rel="stylesheet" type="text/css" href="xcp/extcss/bootstrap-datetimepicker.css">
+    <link rel="stylesheet" type="text/css" href="vendors/jReject/css/jquery.reject.css">
+    <link rel="stylesheet" type="text/css" href="vendors/keyboard/css/keyboard.css">
+    <link rel="stylesheet" type="text/css" href="vendors/bootstrap-datetimepicker/build/css/bootstrap-datetimepicker.min.css">
+    <!-- endbuild -->
+
     <!-- Counterwallet custom styles -->
-    <link rel="stylesheet" type="text/css" media="screen" href="xcp/css/default.css">
-    <link rel="stylesheet" type="text/css" media="screen" href="xcp/css/overrides.css">
-    <link rel="stylesheet" type="text/css" media="screen" href="xcp/css/components/logon.css">
-    <link rel="stylesheet" type="text/css" media="screen" href="xcp/css/components/chatfeed.css">
-    <link rel="stylesheet" type="text/css" media="screen" href="xcp/css/components/balances.css">
-    <link rel="stylesheet" type="text/css" media="screen" href="xcp/css/components/buysell.css">
+    <!-- build:css css/counterwallet-min.css -->
+    <link rel="stylesheet" type="text/css" media="screen" href="css/default.css">
+    <link rel="stylesheet" type="text/css" media="screen" href="css/overrides.css">
+    <link rel="stylesheet" type="text/css" media="screen" href="css/components/logon.css">
+    <link rel="stylesheet" type="text/css" media="screen" href="css/components/chatfeed.css">
+    <link rel="stylesheet" type="text/css" media="screen" href="css/components/balances.css">
+    <link rel="stylesheet" type="text/css" media="screen" href="css/components/buysell.css">
+    <!-- endbuild -->
 
     <!-- FAVICONS -->
-    <link rel="shortcut icon" href="xcp/images/favicon.ico">
-    <link rel="icon" href="xcp/images/favicon.ico">
+    <link rel="shortcut icon" href="images/favicon.ico">
+    <link rel="icon" href="images/favicon.ico">
 
     <!-- GOOGLE FONT -->
     <link rel="stylesheet" href="//fonts.googleapis.com/css?family=Open+Sans:400italic,700italic,300,400,700">
     
     <!-- Specifying a Webpage Icon for Web Clip 
          Ref: https://developer.apple.com/library/ios/documentation/AppleApplications/Reference/SafariWebContent/ConfiguringWebApplications/ConfiguringWebApplications.html -->
-    <link rel="apple-touch-icon" href="xcp/images/touch-icon-57.png"> <!-- 57 x 57 -->
-    <link rel="apple-touch-icon" sizes="76x76" href="xcp/images/touch-icon-76.png">
-    <link rel="apple-touch-icon" sizes="120x120" href="xcp/images/touch-icon-120.png">
-    <link rel="apple-touch-icon" sizes="152x152" href="xcp/images/touch-icon-152.png">
+    <link rel="apple-touch-icon" href="images/touch-icon-57.png"> <!-- 57 x 57 -->
+    <link rel="apple-touch-icon" sizes="76x76" href="images/touch-icon-76.png">
+    <link rel="apple-touch-icon" sizes="120x120" href="images/touch-icon-120.png">
+    <link rel="apple-touch-icon" sizes="152x152" href="images/touch-icon-152.png">
     
     <!-- iOS web-app metas : hides Safari UI Components and Changes Status Bar Appearance -->
     <meta name="apple-mobile-web-app-capable" content="yes">
@@ -89,9 +94,9 @@
     <!-- HEADER -->
     <header id="header" style="display:none">
       <div id="logo-group">
-        <span id="logo"><img src="xcp/images/logo-small.png" alt="" /><span class="logoText">Counterwallet</span></span>
+        <span id="logo"><img src="images/logo-small.png" alt="" /><span class="logoText">Counterwallet</span></span>
         
-        <span id="notificationFeed" class="activity-parent" data-contenturl="xcp/pages/feed_notifications.html", data-bind="click: ack">
+        <span id="notificationFeed" class="activity-parent" data-contenturl="pages/feed_notifications.html", data-bind="click: ack">
             <span class="activity-dropdown">
                 <i class="fa fa-check"></i><b data-bind="fadeVisible: unackedCount() > 0, text: unackedCount" class="badge"></b>
             </span>
@@ -102,7 +107,7 @@
             </div> <!-- .ajax-dropdown -->
         </span>
         
-        <span id="pendingActionFeed" class="activity-parent" data-contenturl="xcp/pages/feed_pending_actions.html">
+        <span id="pendingActionFeed" class="activity-parent" data-contenturl="pages/feed_pending_actions.html">
             <span class="activity-dropdown">
                 <i class="fa fa-clock-o"></i><b data-bind="visible: dispCount() > 0, text: dispCount" class="badge"></b>
             </span>
@@ -113,7 +118,7 @@
             </div> <!-- .ajax-dropdown -->
         </span>
 
-        <span id="openOrderFeed" class="activity-parent" data-contenturl="xcp/pages/feed_open_orders.html">
+        <span id="openOrderFeed" class="activity-parent" data-contenturl="pages/feed_open_orders.html">
             <span class="activity-dropdown">
                 <i class="fa fa-exchange"></i><b data-bind="visible: dispCount() > 0, text: dispCount" class="badge"></b>
             </span>
@@ -123,8 +128,8 @@
               <span><b>Last updated:</b> <span id="openOrdersLastUpdated" data-bind="timeago: lastUpdated()"></span></span> <!-- footer -->
             </div> <!-- .ajax-dropdown -->
         </span>
-        
-        <span id="btcPayFeed" data-bind="fadeVisible: dispCount()" class="activity-parent" data-contenturl="xcp/pages/feed_btcpays.html">
+
+        <span id="btcPayFeed" data-bind="fadeVisible: dispCount()" class="activity-parent" data-contenturl="pages/feed_btcpays.html">
             <span class="activity-dropdown">
                 <i class="fa fa-btc"></i><b data-bind="text: dispCount()" class="badge badge-error"></b>
             </span>
@@ -139,7 +144,7 @@
 
       <div class="pull-right"> <!-- pulled right: nav area -->
         <div id="logout" class="btn-header transparent pull-right"> <!-- logout button -->
-          <span> <a href="xcp/pages/logon.html" title="Sign Out"><i class="fa fa-sign-out"></i></a> </span>
+          <span> <a href="pages/logon.html" title="Sign Out"><i class="fa fa-sign-out"></i></a> </span>
         </div> <!-- end logout button -->
 
         <div id="fullscreen" class="btn-header transparent pull-right"> <!-- fullscreen button -->
@@ -165,22 +170,22 @@
         -->
         <ul>
           <li class="">
-            <a href="xcp/pages/balances.html"><i class="fa fa-lg fa-fw fa-user"></i> <span class="menu-item-parent">My Balances</span></a>
+            <a href="pages/balances.html"><i class="fa fa-lg fa-fw fa-user"></i> <span class="menu-item-parent">My Balances</span></a>
           </li>
           <li class="">
-            <a href="xcp/pages/buysell.html"><i class="fa fa-lg fa-fw fa-exchange"></i> <span class="menu-item-parent">Buy &amp; Sell</span></a>
+            <a href="pages/buysell.html"><i class="fa fa-lg fa-fw fa-exchange"></i> <span class="menu-item-parent">Buy &amp; Sell</span></a>
           </li>
           <li class="">
-            <a href="xcp/pages/orders.html"><i class="fa fa-lg fa-fw fa-bar-chart-o"></i> <span class="menu-item-parent">View Prices</span></a>
+            <a href="pages/orders.html"><i class="fa fa-lg fa-fw fa-bar-chart-o"></i> <span class="menu-item-parent">View Prices</span></a>
           </li>
           <li class="">
-            <a href="xcp/pages/portfolio.html"><i class="fa fa-lg fa-fw fa-tasks"></i> <span class="menu-item-parent">My Portfolio</span></a>
+            <a href="pages/portfolio.html"><i class="fa fa-lg fa-fw fa-tasks"></i> <span class="menu-item-parent">My Portfolio</span></a>
           </li>
           <li class="">
-            <a href="xcp/pages/leaderboard.html"><i class="fa fa-lg fa-fw fa-trophy"></i> <span class="menu-item-parent">Top Assets</span></a>
+            <a href="pages/leaderboard.html"><i class="fa fa-lg fa-fw fa-trophy"></i> <span class="menu-item-parent">Top Assets</span></a>
           </li>
           <li class="">
-            <a href="xcp/pages/history.html"><i class="fa fa-lg fa-fw fa-book"></i> <span class="menu-item-parent">History</span></a>
+            <a href="pages/history.html"><i class="fa fa-lg fa-fw fa-book"></i> <span class="menu-item-parent">History</span></a>
           </li>
           <li>
             <a href="#" id="chatLink"><i class="fa fa-lg fa-fw fa-comments-o"></i><span class="menu-item-parent">Show Chat</span></a>
@@ -508,98 +513,101 @@
       </div><!-- /.modal-dialog -->
     </div><!-- /.modal -->
 
-    <!--================================================== -->
-    <!-- Link to Google CDN's jQuery + jQueryUI; fall back to local -->
-    <script src="//ajax.googleapis.com/ajax/libs/jquery/2.0.2/jquery.min.js"></script>
-    <script>
-      if (!window.jQuery) {
-        document.write('<script src="js/libs/jquery-2.0.2.min.js"><\/script>');
-      }
-    </script>
-    <script src="//ajax.googleapis.com/ajax/libs/jqueryui/1.10.3/jquery-ui.min.js"></script>
-    <script>
-      if (!window.jQuery.ui) {
-        document.write('<script src="js/libs/jquery-ui-1.10.3.min.js"><\/script>');
-      }
-    </script>
-
+    <!-- build:js js/counterwallet-deps-min.js -->
     <!-- SmartAdmin JS includes -->
-    <script src="js/bootstrap/bootstrap.min.js"></script> <!-- BOOTSTRAP JS -->
-    <script src="js/notification/SmartNotification.min.js"></script> <!-- CUSTOM NOTIFICATION -->
-    <script src="js/smartwidgets/jarvis.widget.min.js"></script> <!-- JARVIS WIDGETS -->
-    <script src="js/plugin/jquery-form/jquery-form.min.js"></script> <!-- JQUERY FORM -->
-    <script src="js/plugin/jquery-validate/jquery.validate.min.js"></script> <!-- JQUERY VALIDATE -->
-    <script src="js/plugin/select2/select2.min.js"></script> <!-- JQUERY SELECT2 INPUT -->
-    <script src="js/plugin/msie-fix/jquery.mb.browser.min.js"></script> <!-- browser msie issue fix -->
-    <script src="js/plugin/fastclick/fastclick.js"></script> <!-- FastClick: For mobile devices: you can disable this in app.js -->
-    <script src="js/plugin/bootstrap-wizard/jquery.bootstrap.wizard.min.js"></script> <!-- bootstrap wizard -->
-    <!-- datatables -->
-    <script src="js/plugin/datatables/jquery.dataTables-cust.min.js"></script>
-    <script src="js/plugin/datatables/ColReorder.min.js"></script>
-    <script src="js/plugin/datatables/FixedColumns.min.js"></script>
-    <script src="js/plugin/datatables/ColVis.min.js"></script>
-    <script src="js/plugin/datatables/ZeroClipboard.js"></script>
-    <script src="js/plugin/datatables/media/js/TableTools.min.js"></script>
-    <script src="js/plugin/datatables/DT_bootstrap.js"></script>
+    <script src="vendors/smartadmin/js/libs/jquery-2.0.2.min.js"></script><!-- Jquery -->
+    <script src="vendors/smartadmin/js/libs/jquery-ui-1.10.3.min.js"></script><!-- JqueryUI -->
+    <script src="vendors/smartadmin/js/bootstrap/bootstrap.min.js"></script> <!-- BOOTSTRAP JS -->
+    <script src="vendors/smartadmin/js/notification/SmartNotification.min.js"></script> <!-- CUSTOM NOTIFICATION -->
+    <script src="vendors/smartadmin/js/smartwidgets/jarvis.widget.min.js"></script> <!-- JARVIS WIDGETS -->
+    <script src="vendors/smartadmin/js/plugin/jquery-form/jquery-form.min.js"></script> <!-- JQUERY FORM -->
+    <script src="vendors/smartadmin/js/plugin/jquery-validate/jquery.validate.min.js"></script> <!-- JQUERY VALIDATE -->
+    <script src="vendors/smartadmin/js/plugin/select2/select2.min.js"></script> <!-- JQUERY SELECT2 INPUT -->
+    <script src="vendors/smartadmin/js/plugin/msie-fix/jquery.mb.browser.min.js"></script> <!-- browser msie issue fix -->
+    <script src="vendors/smartadmin/js/plugin/fastclick/fastclick.js"></script> <!-- FastClick: For mobile devices: you can disable this in app.js -->
+    <script src="vendors/smartadmin/js/plugin/bootstrap-wizard/jquery.bootstrap.wizard.min.js"></script> <!-- bootstrap wizard -->
 
-    <!-- COUNTERWALLET SPECIFIC JS INCLUDES -->    
-    <!-- bitcoinjs-lib: The following library is required for bitcon addresses and signing. -->
-    <script src="xcp/extjs/bitcoinjs-min.js"></script>
-    <script src="xcp/extjs/jsbn-prng4.js"></script>
-    <script src="xcp/extjs/jsbn-rng.js"></script>
-    <!-- <script src="xcp/extjs/sjcl.min.js"></script> -->
+    <!-- datatables -->
+    <script src="vendors/smartadmin/js/plugin/datatables/jquery.dataTables-cust.min.js"></script>
+    <script src="vendors/smartadmin/js/plugin/datatables/ColReorder.min.js"></script>
+    <script src="vendors/smartadmin/js/plugin/datatables/FixedColumns.min.js"></script>
+    <script src="vendors/smartadmin/js/plugin/datatables/ColVis.min.js"></script>
+    <script src="vendors/smartadmin/js/plugin/datatables/ZeroClipboard.js"></script>
+    <script src="vendors/smartadmin/js/plugin/datatables/media/js/TableTools.min.js"></script>
+    <script src="vendors/smartadmin/js/plugin/datatables/DT_bootstrap.js"></script>
+  
+    
+    <script src="vendors/cryptojs/rollups/sha256.js"></script>
+    <script src="vendors/cryptojs/components/enc-base64.js"></script>
+    <script src="vendors/jsbn/prng4.js"></script>
+    <script src="vendors/jsbn/rng.js"></script>
      
     <!-- JQuery extras -->
-    <script src="xcp/extjs/jquery.jqlog.js"></script>
-    <script src="xcp/extjs/jquery.reject.js"></script>
-    <script src="xcp/extjs/jquery.xdomainrequest.js"></script> <!-- add support for CORS for IE 9 via $.ajax() -->
-    <script src="xcp/extjs/jquery.yql.js"></script> <!-- YQL queries for calls that don't support CORS -->
-    <script src="xcp/extjs/jquery.timeago.js"></script>
-    <script src="xcp/extjs/jquery.slimscroll.js"></script>
-    <script src="xcp/extjs/jquery.keyboard.js"></script>
-    <script src="xcp/extjs/jquery.keyboard.extension-autocomplete.js"></script>
+    <script src="vendors/jqlog/jquery.jqlog-1.3.js"></script>
+    <script src="vendors/jReject/js/jquery.reject.js"></script>
+    <script src="vendors/jquery-xdomainrequest/jQuery.XDomainRequest.js"></script> <!-- add support for CORS for IE 9 via $.ajax() -->
+    <script src="vendors/jquery-yql/jquery.yql.js"></script> <!-- YQL queries for calls that don't support CORS -->
+    <script src="vendors/jquery-timeago/jquery.timeago.js"></script>
+    <script src="vendors/jquery.slimscroll/jquery.slimscroll.js"></script>
+    <script src="vendors/keyboard/js/jquery.keyboard.js"></script>
+    <script src="vendors/keyboard/js/jquery.keyboard.extension-autocomplete.js"></script>
 
     <!-- Bootstrap -->
-    <!--<script src="xcp/extjs/jqBootstrapValidation.js"></script>-->
-    <script src="xcp/extjs/bootbox.js"></script>
-    <script src="xcp/extjs/moment.js"></script> <!-- time processing for datetimepicker -->
-    <script src="xcp/extjs/bootstrap-datetimepicker.js"></script>
-    <script src="xcp/extjs/typeahead.bundle.js"></script>
+    <script src="vendors/bootbox/bootbox.js"></script>
+    <script src="vendors/moment/moment.js"></script> <!-- time processing for datetimepicker -->
+    <script src="vendors/bootstrap-datetimepicker/build/js/bootstrap-datetimepicker.min.js"></script>
+    <script src="vendors/typeahead.js/dist/typeahead.bundle.js"></script>
     <!-- socket.io -->
-    <script src="xcp/extjs/socket.io.min.js"></script>
+    <script src="vendors/socket.io-client/dist/socket.io.js"></script>
     <!-- knockout.js -->
-    <script src="xcp/extjs/knockout.js"></script>
-    <script src="xcp/extjs/knockout-bootstrap.js"></script>
-    <script src="xcp/extjs/knockout.validation.js"></script>
+    <script src="vendors/knockoutjs/build/output/knockout-latest.debug.js"></script>
+    <script src="vendors/knockout-bootstrap/build/knockout-bootstrap.min.js"></script>
+    <script src="vendors/knockout-validation/Dist/knockout.validation.js"></script>
+
     <!-- highstock (which also includes highcharts) (minified)-->
-    <script src="xcp/extjs/highstock.js"></script>
+    <script src="vendors/highstock/js/highstock.src.js"></script>
 
     <!-- Other external libraries. -->
-    <script src="xcp/extjs/qrcode.js"></script> 
-    <script src="xcp/extjs/mnemonic.js"></script> 
-    <script src="xcp/extjs/decimal.js"></script> <!-- for accurate arithmetic price operations -->
+    <script src="vendors/qrcode/lib/qrcode.js"></script> 
     
-    <!-- JavaScript created specifically for Counterwallet. -->
-    <script src="xcp/js/util.js"></script>
-    <script src="xcp/js/counterwallet.js"></script>
-    <script src="xcp/js/util.api.js"></script>
-    <script src="xcp/js/util.bitcoin.js"></script>
-    <script src="xcp/js/util.knockout.js"></script>
-    <script src="xcp/js/messagefeed.js"></script>
-    <script src="xcp/js/components/wallet.js"></script>
-    <script src="xcp/js/components/wallet_options.js"></script>
-    <script src="xcp/js/components/address.js"></script>
-    <script src="xcp/js/components/asset.js"></script>
-    <script src="xcp/js/components/logon.js"></script>
-    <script src="xcp/js/components/feed_notifications.js"></script>
-    <script src="xcp/js/components/feed_open_orders.js"></script>
-    <script src="xcp/js/components/feed_pending_actions.js"></script>
-    <script src="xcp/js/components/feed_btcpays.js"></script>
-    <script src="xcp/js/components/chatfeed.js"></script>
+    <script src="vendors/jsdecimal/lib/decimal.js"></script> <!-- for accurate arithmetic price operations -->
+    <!-- endbuild -->
 
+
+    <!-- COUNTERWALLET SPECIFIC JS INCLUDES --> 
+    <!-- JavaScript created specifically for Counterwallet. -->
+    <!-- bitcoinjs-lib: The following library is required for bitcon addresses and signing. -->
+    <!-- build:js js/counterwallet-min.js -->
+    <script src="js/bitcoinjs-min.js"></script> <!-- need update to use vendors/bitcoinjs-lib -->
+    <script src="js/mnemonic.js"></script> <!-- can not find official source -->
+    <script src="js/util.js"></script>
+    <script src="js/counterwallet.js"></script>
+    <script src="js/util.api.js"></script>
+    <script src="js/util.bitcoin.js"></script>
+    <script src="js/util.knockout.js"></script>
+    <script src="js/messagefeed.js"></script>
+    <script src="js/components/wallet.js"></script>
+    <script src="js/components/wallet_options.js"></script>
+    <script src="js/components/address.js"></script>
+    <script src="js/components/asset.js"></script>
+    <script src="js/components/logon.js"></script>
+    <script src="js/components/feed_notifications.js"></script>
+    <script src="js/components/feed_open_orders.js"></script>
+    <script src="js/components/feed_pending_actions.js"></script>
+    <script src="js/components/feed_btcpays.js"></script>
+    <script src="js/components/chatfeed.js"></script>
+    
+    <script src="js/components/balances.js"></script>
+    <script src="js/components/balances_assets.js"></script>
+    <script src="js/components/orders.js"></script>
+    <script src="js/components/buysell.js"></script>
+    <script src="js/components/history.js"></script>
+    <script src="js/components/leaderboard.js"></script>
+    <script src="js/components/portfolio.js"></script>
     <!-- custom app.js --> 
-    <script src="xcp/js/smartadmin.app.js"></script>
+    <script src="js/smartadmin.app.js"></script>
     <!-- ^ unfortunately we have to mod the file itself, instead of dynamically override :( -->
+    <!-- endbuild -->
 
     <script type="text/javascript">
       window.LOGON_VIEW_MODEL = new LogonViewModel();

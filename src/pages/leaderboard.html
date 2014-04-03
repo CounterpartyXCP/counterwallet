@@ -93,18 +93,18 @@
 
 <script type="text/javascript">
   pageSetUp(); //init smartadmin featureset
-  loadScript("xcp/js/components/leaderboard.js", function() {
-    //This code is run on each visit to the page
-    window.ASSET_LEADERBOARD = new AssetLeaderboardViewModel();
 
-    ko.applyBindings(ASSET_LEADERBOARD, document.getElementById("leaderboardButtonBar"));
-    ko.applyBindings(ASSET_LEADERBOARD, document.getElementsByClassName("leaderboardGrid")[0]);
+  //This code is run on each visit to the page
+  window.ASSET_LEADERBOARD = new AssetLeaderboardViewModel();
 
-    ASSET_LEADERBOARD.init();
-  
-    $(window).bind("resize", ASSET_LEADERBOARD.dataTableResponsive);
-    $(window).on('hashchange', function() {
-      $(window).off("resize", ASSET_LEADERBOARD.dataTableResponsive);
-    });
+  ko.applyBindings(ASSET_LEADERBOARD, document.getElementById("leaderboardButtonBar"));
+  ko.applyBindings(ASSET_LEADERBOARD, document.getElementsByClassName("leaderboardGrid")[0]);
+
+  ASSET_LEADERBOARD.init();
+
+  $(window).bind("resize", ASSET_LEADERBOARD.dataTableResponsive);
+  $(window).on('hashchange', function() {
+    $(window).off("resize", ASSET_LEADERBOARD.dataTableResponsive);
   });
+  
 </script>

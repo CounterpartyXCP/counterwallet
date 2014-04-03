@@ -487,20 +487,18 @@
 
 <script type="text/javascript">
   pageSetUp(); //init smartadmin featureset
-  loadScript("xcp/js/components/orders.js", function() { //we use some shared functions in orders.js
-    loadScript("xcp/js/components/buysell.js", function() {
-      //This code is run on each visit to the page
-      window.BUY_SELL = new BuySellWizardViewModel();
+
+  //This code is run on each visit to the page
+  window.BUY_SELL = new BuySellWizardViewModel();
+
+  ko.applyBindings(BUY_SELL, document.getElementsByClassName("buySellGrid")[0]);
     
-      ko.applyBindings(BUY_SELL, document.getElementsByClassName("buySellGrid")[0]);
-        
-      BUY_SELL.init();
-      
-      $(window).resize(BUY_SELL.dataTableResponsive);
-      $(window).on('hashchange', function() {
-        BUY_SELL._tab2StopAutoRefresh(); //just in case
-        $(window).off("resize", BUY_SELL.dataTableResponsive);
-      });
-    });
+  BUY_SELL.init();
+  
+  $(window).resize(BUY_SELL.dataTableResponsive);
+  $(window).on('hashchange', function() {
+    BUY_SELL._tab2StopAutoRefresh(); //just in case
+    $(window).off("resize", BUY_SELL.dataTableResponsive);
   });
+
 </script>
