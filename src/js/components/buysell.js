@@ -346,14 +346,16 @@ function BuySellWizardViewModel() {
       
       if(!isNumber(quantity) || parseFloat(quantity) == 0) return 0; //no quantity == zero fee (since there is nothing to get e.g. 1% from)
       
-      if(!self.btcFee())
-        return Decimal.round(new Decimal(quantity).mul(ORDER_DEFAULT_BTCFEE_PCT / 100), 8, Decimal.MidpointRounding.ToEven).toFloat();
-      //^ default percentage fee (depends on btcFeeAs() defaulting to 'percentage')
-      
       if(self.btcFeeAs() == 'percentage') {
         if(!parseFloat(self.btcFee())) return 0;
-        //^ avoid decimal round bug giving undefined if fee specified is zero, or any nonnumber garbage
-        fee = Decimal.round(new Decimal(quantity).mul(self.btcFee() / 100), 8, Decimal.MidpointRounding.ToEven).toFloat(); 
+        fee = Decimal.round(new Decimal(quantity).mul((self.btcFee() ? self.btcFee() : ORDER_DEFAULT_BTCFEE_PCT) / 100), 8, Decimal.MidpointRounding.ToEven);
+        if(fee.toString().replace(/.*?\./, '').length == 8)
+          fee = fee.add(0.00000001).toFloat();
+        else
+          fee = fee.toFloat();
+        //^ default percentage fee (depends on btcFeeAs() defaulting to 'percentage')
+        //if the number has 8 digits after the decimal place, we add .00000001 to it to compensate for rounding error, so
+        // that it will satisfy the intended threshold with order book fee minimums, for instance 
       } else { //the quantity itself
         fee = parseFloat(self.btcFee());
       }

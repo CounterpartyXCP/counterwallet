@@ -34,10 +34,10 @@
     "src/vendors/bootstrap-datetimepicker/build/js/bootstrap-datetimepicker.min.js": "d4255575970bfec191a233bd3eaa90d305eaa7876a40fe7c90e7cdf2718b9c81",
     "src/vendors/typeahead.js/dist/typeahead.bundle.js": "c9bc48f2123c0e40189302dfa98b2ac511c73bf6736e4c27f3e03fd0eb497c04",
     "src/vendors/socket.io-client/dist/socket.io.js": "0997643c9836f5cf0446c71d769647386a0a97666b9987c5b4ad8a767c4d92e6",
-    "src/vendors/knockoutjs/build/output/knockout-latest.debug.js": "eadc0f6915bc5a00cedb6f4c00708c756f98c68d954413f9d73fafb586216122",
+    "src/vendors/knockoutjs/index.js": "c3f84651d8c804a0b9e5e8500ac1c8afd05ae04a134b36e32c55716f4075458e",
     "src/vendors/knockout-bootstrap/build/knockout-bootstrap.min.js": "3d253ef8aec822390231333008ce43cecb08d885446dac6edb4cc666990686d5",
     "src/vendors/knockout-validation/Dist/knockout.validation.js": "854b9bc6288a232937267308daf9f06312763252c4e500b50a224448921a8cd4",
-    "src/vendors/highstock/js/highstock.src.js": "d24e61e4bdd9e01fd2576d3acc93db0db0075cda0551ae934c10f00cb7157615",
+    "src/vendors/highstock/highstock.src.js": "1257bab7ca686ce0ea60c598a0838700ad73ac3a42f2d8d0c1022fd3739d91a4",
     "src/vendors/qrcode/lib/qrcode.js": "e3d54316c1902f115a29521c31f79f05905efd6e0cb84334350a1bcb6964ea9c",
     "src/vendors/jsdecimal/lib/decimal.js": "ba0b975987a7ac1d74727f5edcb49bfb69d42be08d7682b5328aaee1eb1da7de"
 }
