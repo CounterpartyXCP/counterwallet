@@ -2,8 +2,8 @@
   "name": "counterwallet",
   "description": "Counterwallet",
   "author": "Counterparty development team",
-  "repository": "",
   "version": "0.9.52",
+  "main": "build/index.html",
   "repository": { 
     "type" : "git",
     "url" : "https://github.com/xnova/counterwallet.git"
@@ -15,6 +15,9 @@
     "cryptojs": "2.5.3",
     "uglify-js": "1.3.5",
     "clean-css": "2.1.8"
+  },
+  "scripts": {
+    "prepublish": "grunt"
   },
   "engine": "node >= 0.10"
 }

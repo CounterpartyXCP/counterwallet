@@ -142,15 +142,17 @@ module.exports = function(grunt) {
     }
 
     var replaceBuildBlock = function(htmlcontent, block) {
+        var packageJson = grunt.file.readJSON('package.json');
         var startBlock = block.raw[0];
         var endBlock = block.raw[block.raw.length-1];
         var bockStartPos = htmlcontent.indexOf(startBlock);
         var blockEndPos = htmlcontent.indexOf(endBlock, bockStartPos)+endBlock.length;
         var tag = '';
+        var tagurl = block.dest+'?v='+packageJson.version;
         if (block.type=='css') {
-            tag = '<link rel="stylesheet" type="text/css" href="'+block.dest+'">';
+            tag = '<link rel="stylesheet" type="text/css" href="'+tagurl+'">';
         } else if (block.type=='js') {
-            tag = '<script src="'+block.dest+'"></script>';
+            tag = '<script src="'+tagurl+'"></script>';
         }
         return htmlcontent.substr(0, bockStartPos)+tag+htmlcontent.substr(blockEndPos);
     }
@@ -203,6 +205,7 @@ module.exports = function(grunt) {
     }
 
     var minifyApp = function(fileList, config) {
+
         fileList.forEach(function (fileObj) {         
             var files = grunt.file.expand({nonull: true}, fileObj.src);
             files.forEach(function (filename) {
