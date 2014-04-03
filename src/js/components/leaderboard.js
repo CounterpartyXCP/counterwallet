@@ -217,7 +217,7 @@ AssetLeaderboardViewModel.formulateExtendedAssetInfo = function(asset, hasImage,
   //determine asset image
   var dispAsset = asset;
   if(asset == 'XCP' || asset == 'BTC') {
-    dispAsset = '<img src="/xcp/images/builtin_asset_img/' + asset + '.png" />&nbsp;';
+    dispAsset = '<img src="assets/' + asset + '.png" />&nbsp;';
     var website = asset == 'XCP' ? "http://www.counterparty.co" : "http://www.bitcoin.org";
     dispAsset += '<a href="' + website + '" target="_blank">' + asset + '</a>';
   } else if(hasImage) {
