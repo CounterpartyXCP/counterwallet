@@ -212,6 +212,22 @@ body.smart-style-3 .defaultWidgetColor>header { /* google skin = darkBlue (night
   }
 }
 
+/* Action buttons under the heading for low resolution. */
+@media only screen and (max-width : 860px) {
+  div.pull-right.sectionHeaderButtonBar {
+    clear: both !important;
+    float: left !important;
+    padding: 0 0 14px 14px !important;
+  }
+}
+@media only screen and (max-width : 460px) {
+  div.pull-right.sectionHeaderButtonBar #sweepFunds {
+    margin-top:2px;
+  }
+}
+
+
+
 /* 
  * CSS SMARTADMIN BUG FIXES
  */
