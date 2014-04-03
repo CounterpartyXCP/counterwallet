@@ -197,6 +197,21 @@ body.smart-style-3 .defaultWidgetColor>header { /* google skin = darkBlue (night
   left: 0 !important;
 }
 
+/* Make Counterwallet word invisible in black top bar for low resolution */
+@media only screen and (max-width : 570px) {
+  #logo span.logoText {
+    display: none !important;
+  }
+
+  #logo {
+    width:50px !important;
+  }
+
+  #logo-group {
+    width: auto !important;
+  }
+}
+
 /* 
  * CSS SMARTADMIN BUG FIXES
  */
