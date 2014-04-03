@@ -88,7 +88,7 @@
                     <li data-bind="visible: !$parent.IS_WATCH_ONLY && isMine() && CALLABLE"><a data-bind="click: call" href="#">Call</a></li>
                   </ul>
                 </div>
-                <h3 class="name pull-left" style="position: relative; top: -10px;" data-bind="text: ASSET"></h3>
+                <h3 class="name pull-left" data-bind="text: ASSET"></h3>
                 <div class="clearfix"></div>
                 <p class="balance" data-bind="style: { 'padding-right': locked() && CALLABLE ? '40px' : locked() || CALLABLE ? '20px' : '0px' }">
                     <span data-bind="visible: isMine()">Issued: <span data-bind="text: dispTotalIssued"></span>

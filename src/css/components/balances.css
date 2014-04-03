@@ -24,12 +24,26 @@ div#showAssetInfoModal table tbody {
   position: relative;
   float: left;
   min-width: 100px;
+  max-width: 95%;
   height: 100px;
   margin: 5px;
-  padding: 12px 8px 8px 8px;
+  padding: 12px 53px 8px 8px;
   border-style:solid;
   border-width: 1px;  
-  border-radius: 3px;  
+  border-radius: 3px; 
+  overflow: hidden; 
+}
+
+.asset-item div.btn-group {
+  position:absolute !important;
+  top:11px;
+  right:15px;
+  z-index: 999 !important;
+}
+
+.asset-item h3 {
+  position: relative;
+  top:-10px;
 }
 
 .asset-item > * {
