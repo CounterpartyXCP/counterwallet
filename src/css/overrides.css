@@ -197,6 +197,47 @@ body.smart-style-3 .defaultWidgetColor>header { /* google skin = darkBlue (night
   left: 0 !important;
 }
 
+/* Make Counterwallet word invisible in black top bar for low resolution */
+@media only screen and (max-width : 570px) {
+  #logo span.logoText {
+    display: none !important;
+  }
+
+  #logo {
+    width:35px !important;
+  }
+
+  #logo img {
+    bottom:2px !important;
+  }
+
+  #logo-group {
+    width: auto !important;
+  }
+}
+
+/* Action buttons under the heading for low resolution. */
+@media only screen and (max-width : 860px) {
+  div.pull-right.sectionHeaderButtonBar {
+    clear: both !important;
+    float: left !important;
+    padding: 0 0 14px 14px !important;
+  }
+}
+@media only screen and (max-width : 460px) {
+  div.pull-right.sectionHeaderButtonBar #sweepFunds {
+    margin-top:2px;
+  }
+}
+
+
+/* Fix widget header height for low resolution */
+section.balancesContainer .jarviswidget>header,
+section.ordersGrid .jarviswidget>header {
+  height: auto !important;
+}
+
+
 /* 
  * CSS SMARTADMIN BUG FIXES
  */
