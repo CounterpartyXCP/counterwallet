@@ -130,16 +130,8 @@ span.logoText {
     padding: 15px 5px;
 }
 
-aside {
-    width: 180px;
-}
-
 .fixed-ribbon #content {
     padding-top: 10px;
-}
-
-#main {
-    margin-left: 180px;
 }
 
 
@@ -192,13 +184,9 @@ body.smart-style-3 .defaultWidgetColor>header { /* google skin = darkBlue (night
     color: #FFF;
 }
 
-/* FIX bug left menu in low resolution */
-#left-panel {
-  left: 0 !important;
-}
 
 /* Make Counterwallet word invisible in black top bar for low resolution */
-@media only screen and (max-width : 570px) {
+@media only screen and (max-width : 665px) {
   #logo span.logoText {
     display: none !important;
   }
@@ -224,12 +212,6 @@ body.smart-style-3 .defaultWidgetColor>header { /* google skin = darkBlue (night
     padding: 0 0 14px 14px !important;
   }
 }
-@media only screen and (max-width : 460px) {
-  div.pull-right.sectionHeaderButtonBar #sweepFunds {
-    margin-top:2px;
-  }
-}
-
 
 /* Fix widget header height for low resolution */
 section.balancesContainer .jarviswidget>header,

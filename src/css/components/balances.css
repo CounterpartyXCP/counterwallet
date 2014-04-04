@@ -20,11 +20,6 @@ div#showAssetInfoModal table tbody {
   overflow: scroll;    
 }
 
-section.balancesContainer .jarviswidget>header,
-section.ordersGrid .jarviswidget>header {
-  height: auto !important;
-}
-
 .asset-item {
   position: relative;
   float: left;

@@ -13,7 +13,8 @@ module.exports = function(grunt) {
         assetsHome: 'assets/',
         checkDeps: true,
         depsDir: 'vendors/',
-        depsHashesFile: '.bowerhashes'
+        depsHashesFile: '.bowerhashes',
+        cdn: null
     }
 
     var generateHash = function(path) {
@@ -57,8 +58,38 @@ module.exports = function(grunt) {
         return hashes;
     }
 
+    // generate number between 0 and max from arbitratry string
+    var stringToInt = function(str, max) {
+        var hash = 0;
+        for (var i = 0; i < str.length; i++) {
+           hash = hash+str.charCodeAt(i);
+        }
+        return hash % (max+1);
+    }
+
+    // generate url relative to destfile or cdn url if cdn config is present
+    var generateFinalUrl = function(url, destfile, config) {
+        var dir = url.split('/').shift();
+        
+        if (config.cdn && config.cdn.hosts && config.cdn.hosts[dir]) {
+
+            var hosts = config.cdn.hosts[dir];
+            var cdnNum = stringToInt(url, hosts.length-1);
+            url = hosts[cdnNum]+'/'+url;
+
+        } else {
+
+            var from = Path.dirname('/'+destfile);
+            var to = '/'+url;
+            url = Path.relative(from, to);    
+
+        }
+        return url;
+    }
+
     // prepare url from file in srcfiledir, to destfile
     // put asset in assets/ folder
+    // IMPORTANT: absolute url are not processing
     var processUrl = function(url, srcfiledir, destfile, config) {
         grunt.log.writeln("Original url: "+url);
         var newUrl = url;
@@ -98,9 +129,9 @@ module.exports = function(grunt) {
                 newUrl += "#"+anchor;
             }
 
-            var from = Path.dirname('/'+destfile);
-            var to = '/'+newUrl;
-            newUrl = Path.relative(from, to);
+            newUrl = generateFinalUrl(newUrl, destfile, config);
+            
+
             grunt.log.writeln("New url: "+newUrl);
 
             var newUrlPath = Path.resolve(config.assetsDir+newFilename);
@@ -149,13 +180,18 @@ module.exports = function(grunt) {
         });
     }
 
-    var replaceBuildBlock = function(htmlcontent, block) {
+    var replaceBuildBlock = function(htmlcontent, block, config) {
         var startBlock = block.raw[0];
         var endBlock = block.raw[block.raw.length-1];
         var bockStartPos = htmlcontent.indexOf(startBlock);
         var blockEndPos = htmlcontent.indexOf(endBlock, bockStartPos)+endBlock.length;
         var tag = '';
-        var tagurl = block.dest+'?v='+block.version;
+        // destifle are always in document root folder
+        var tagurl = generateFinalUrl(block.dest, "index.html", config);
+        tagurl = tagurl+'?v='+block.version;
+
+        grunt.log.writeln("Tag url: "+tagurl);
+
         if (block.type=='css') {
             tag = '<link rel="stylesheet" type="text/css" href="'+tagurl+'">';
         } else if (block.type=='js') {
@@ -228,7 +264,7 @@ module.exports = function(grunt) {
                     var combinedcontent = mergeContent(root, block, config);
                     grunt.file.write(config.buildDir+block.dest, combinedcontent);
                     block.version = Crypto.SHA256(combinedcontent).substr(0, 12);
-                    htmlcontent = replaceBuildBlock(htmlcontent, block);
+                    htmlcontent = replaceBuildBlock(htmlcontent, block, config);
                 });
 
                 // html parsing
