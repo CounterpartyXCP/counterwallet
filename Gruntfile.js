@@ -11,7 +11,14 @@ module.exports = function (grunt) {
                 srcDir: 'src/',
                 assetsHome: 'assets/',
                 checkDeps: true,
-                depsDir: 'vendors/'
+                depsDir: 'vendors/',
+                /*cdn: {
+                    hosts: {
+                        'css': ['https://css1.counterwallet.dev', 'https://css2.counterwallet.dev'],
+                        'js': ['https://js1.counterwallet.dev', 'https://js2.counterwallet.dev'],
+                        'assets': ['https://assets1.counterwallet.dev', 'https://assets2.counterwallet.dev']
+                    }
+                }*/
             },
             process: {
                 files: [

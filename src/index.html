@@ -116,9 +116,15 @@
         <div id="fullscreen" class="btn-header transparent pull-right"> <!-- options button -->
             <span> <a href="javascript:void(0);" onclick="WALLET_OPTIONS_MODAL.show();" title="Show Options"><i class="fa fa-gear"></i></a> </span>
         </div> <!-- end options button -->
+
+        <div id="hide-menu" class="btn-header pull-right">
+          <span> <a href="javascript:void(0);" title="Collapse Menu"><i class="fa fa-reorder"></i></a> </span>
+        </div>
         
         <span id="noticeDevMode" data-bind="visible: IS_DEV" class="label label-warning pull-right" style="display:none;margin-left:10px;padding: 5px;position:relative;top:15px"><i class="fa-fw fa fa-warning"></i>&nbsp;Dev Mode Enabled</span>
         <span id="noticeTestnet" data-bind="visible: USE_TESTNET" class="label label-info pull-right" style="display:none;margin-left:10px;padding: 5px;position:relative;top:15px"><i class="fa-fw fa fa-info"></i>&nbsp;Testnet In Use</span>
+
+
       </div> <!-- end pulled right: nav area -->
     </header> <!-- END HEADER -->
 
