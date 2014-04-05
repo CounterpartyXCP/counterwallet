@@ -65,6 +65,10 @@ Array.prototype.unique = function() { //modified from http://stackoverflow.com/a
     });
 }
 
+function randomIntFromInterval(min, max) {
+    return Math.floor(Math.random()*(max-min+1)+min);
+}
+
 function selectText(element) {
     var doc = document
         , text = doc.getElementById(element)

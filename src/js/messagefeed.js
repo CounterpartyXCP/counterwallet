@@ -150,7 +150,9 @@ function MessageFeed() {
       self.lastMessageIndexReceived(message['_last_message_index']);
       $.jqlog.warn("feed:Blockchain reorganization at block " + message['block_index']
         + "; last message idx reset to " + self.lastMessageIndexReceived());
-      setTimeout(checkURL, 1000); //refresh the current page to regrab the fresh data (give cwd a second to sync up though)
+      setTimeout(function() { WALLET.refreshCounterpartyBalances(WALLET.getAddressesList(), checkURL); }, randomIntFromInterval(1, 5) * 1000);
+      //^ refresh the current page to regrab the fresh data (give cwd a second to sync up though)
+      // also, wait a random interval to do this between 1 and 5 seconds, to avoid dog-piling the server
       //TODO/BUG??: do we need to "roll back" old messages on the bad chain???
       return;
     }
