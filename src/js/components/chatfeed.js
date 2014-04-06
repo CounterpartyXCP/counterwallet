@@ -89,7 +89,7 @@ function ChatFeedViewModel() {
       $('#main').animate({marginRight : "280px"}, {duration: 600, queue: false});  
       $('#chatPane').css('width', '280px'); 
     } else {
-      $('#chatPane').css('width', ($('#content').width()+5)+'px');
+      $('#chatPane').css('width', ($('#main').width()-5)+'px');
     }
     
     self.scrollToBottomIfNecessary(); //initially show the div scrolled to the bottom as the animation happens 
