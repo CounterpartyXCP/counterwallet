@@ -502,53 +502,51 @@
     <script src="vendors/smartadmin/js/plugin/datatables/ColVis.min.js"></script>
     <script src="vendors/smartadmin/js/plugin/datatables/ZeroClipboard.js"></script>
     <script src="vendors/smartadmin/js/plugin/datatables/media/js/TableTools.min.js"></script>
-    <script src="vendors/smartadmin/js/plugin/datatables/DT_bootstrap.js"></script>
-  
+    <script src="vendors/smartadmin/js/plugin/datatables/DT_bootstrap.js"></script>    
+   
+    <!-- cryptojs -->
+    <script src="vendors/cryptojs/components/core-min.js"></script>
+    <script src="vendors/cryptojs/components/sha256-min.js"></script>
+    <script src="vendors/cryptojs/components/enc-base64-min.js"></script>
     
-    <script src="vendors/cryptojs/rollups/sha256.js"></script>
-    <script src="vendors/cryptojs/components/enc-base64.js"></script>
-    <script src="vendors/jsbn/prng4.js"></script>
-    <script src="vendors/jsbn/rng.js"></script>
-     
     <!-- JQuery extras -->
-    <script src="vendors/jqlog/jquery.jqlog-1.3.js"></script>
     <script src="vendors/jReject/js/jquery.reject.js"></script>
-    <script src="vendors/jquery-xdomainrequest/jQuery.XDomainRequest.js"></script> <!-- add support for CORS for IE 9 via $.ajax() -->
+    <script src="vendors/jquery-xdomainrequest/jquery.xdomainrequest.min.js"></script> <!-- add support for CORS for IE 9 via $.ajax() -->
     <script src="vendors/jquery-yql/jquery.yql.js"></script> <!-- YQL queries for calls that don't support CORS -->
     <script src="vendors/jquery-timeago/jquery.timeago.js"></script>
-    <script src="vendors/jquery.slimscroll/jquery.slimscroll.js"></script>
-    <script src="vendors/keyboard/js/jquery.keyboard.js"></script>
-    <script src="vendors/keyboard/js/jquery.keyboard.extension-autocomplete.js"></script>
+    <script src="vendors/jquery.slimscroll/jquery.slimscroll.min.js"></script>
+    <script src="vendors/keyboard/js/jquery.keyboard.min.js"></script>
+    <script src="vendors/keyboard/js/jquery.keyboard.extension-autocomplete.min.js"></script>
 
     <!-- Bootstrap -->
     <script src="vendors/bootbox/bootbox.js"></script>
-    <script src="vendors/moment/moment.js"></script> <!-- time processing for datetimepicker -->
+    <script src="vendors/moment/min/moment-with-langs.min.js"></script> <!-- time processing for datetimepicker -->
     <script src="vendors/bootstrap-datetimepicker/build/js/bootstrap-datetimepicker.min.js"></script>
-    <script src="vendors/typeahead.js/dist/typeahead.bundle.js"></script>
-    <!-- socket.io -->
-    <script src="vendors/socket.io-client/dist/socket.io.js"></script>
+    <script src="vendors/typeahead.js/dist/typeahead.bundle.min.js"></script>
+    
     <!-- knockout.js -->
     <script src="vendors/knockoutjs/index.js"></script>
     <script src="vendors/knockout-bootstrap/build/knockout-bootstrap.min.js"></script>
-    <script src="vendors/knockout-validation/Dist/knockout.validation.js"></script>
+    <script src="vendors/knockout-validation/Dist/knockout.validation.min.js"></script>
 
     <!-- highstock (which also includes highcharts) (minified)-->
     <script src="vendors/highstock/highstock.src.js"></script>
 
     <!-- Other external libraries. -->
-    <script src="vendors/qrcode/lib/qrcode.js"></script> 
-    
+    <script src="vendors/qrcode/lib/qrcode.min.js"></script>     
     <script src="vendors/jsdecimal/lib/decimal.js"></script> <!-- for accurate arithmetic price operations -->
-    <!-- endbuild -->
 
+    <!-- socket.io -->
+    <script src="vendors/socket.io-client/dist/socket.io.min.js"></script>
+    <script src="vendors/jqlog/jquery.jqlog-1.3.min.js"></script>
+    <!-- endbuild -->
 
     <!-- COUNTERWALLET SPECIFIC JS INCLUDES --> 
     <!-- JavaScript created specifically for Counterwallet. -->
-    <!-- bitcoinjs-lib: The following library is required for bitcon addresses and signing. -->
     <!-- build:js js/counterwallet-min.js -->
     <script src="js/consts.js"></script>
     <script src="js/counterwallet.js"></script>
-    <script src="js/bitcoinjs-min.js"></script> <!-- need update to use vendors/bitcoinjs-lib -->
+    <script src="js/bitcoinjs-min.js"></script><!-- need update to use vendors/bitcoinjs-lib -->
     <script src="js/mnemonic.js"></script> <!-- can not find official source -->
     <script src="js/util.js"></script>
     <script src="js/util.api.js"></script>
