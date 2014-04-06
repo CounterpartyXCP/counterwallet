@@ -98,8 +98,21 @@ $(document).ready(function() {
   });
 
   // HIDE MENU
+  // Using minified menu if body has class mobile-view-activated
   $('#hide-menu >:first-child > a').click(function(e) {
-    $('body').toggleClass("hidden-menu");
+    //alert('BODY WITH: '+$('body').width());
+    if ($('body').hasClass('mobile-view-activated')) {
+      $('body').toggleClass("minified");
+      if ($('body').hasClass("minified")) {
+        $('body').removeClass("hidden-menu");
+      }
+    } else {
+      $('body').toggleClass("hidden-menu");
+      if ($('body').hasClass("hidden-menu")) {
+        $('body').removeClass("minified");
+      }
+    }
+    
     e.preventDefault();
   });
   
