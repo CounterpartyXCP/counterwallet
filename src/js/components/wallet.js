@@ -322,7 +322,8 @@ function WalletViewModel() {
       address = sendTx.outs[i].address;
       address.version = !USE_TESTNET ? Bitcoin.network.mainnet.addressVersion : Bitcoin.network.testnet.addressVersion;
       addr = address.toString();
-      if(addr[0] != '1' && addr[0] != 'm' && addr[0] != 'n') continue; //not a pubkey hash address, skip
+      if(addr[0] != '1' && addr[0] != 'm' && addr[0] != 'n') continue; //not a pubkeyhash (i.e. address), skip
+      if(addr.length != 33 && addr.length != 34 && addr.length != 35) continue; //not a pubkeyhash (i.e. address), skip
       //if an address is present, it must be either destAddress, or sourceAddress (i.e. for getting change)
       if(addr != verifySourceAddr && (verifyDestAddr && addr != verifyDestAddr)) {
         bootbox.alert("Client-side transaction validation FAILED. Transaction will be aborted and NOT broadcast."
