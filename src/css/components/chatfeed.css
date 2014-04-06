@@ -19,6 +19,7 @@
   background: linear-gradient(to right,#F7F7F7 99%,#CACACA 100%);
   color: #202427;
   border-color: rgb(148, 152, 160);
+  z-index: 1000;
 }
 
 #chatContentDiv {

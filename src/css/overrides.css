@@ -245,6 +245,10 @@ section.ordersGrid .jarviswidget>header {
   color: #fff !important;
 }
 
+#left-panel {
+  z-index: 9999 !important;
+}
+
 /* 
  * CSS SMARTADMIN BUG FIXES
  */
