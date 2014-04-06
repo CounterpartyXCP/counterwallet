@@ -20,6 +20,8 @@
     "src/vendors/cryptojs/components/core-min.js": "28c1ab26fabd75b7cc54c136a81584ef32adb4e978123dc645742c1cd5f75d8c",
     "src/vendors/cryptojs/components/sha256-min.js": "47213870c70226255209b3e828a44040bbc60a047bbb0343ed0d3d3dbde36904",
     "src/vendors/cryptojs/components/enc-base64-min.js": "893491ca18f2e0a77fec98bbf1e461d43ea6b36bd88199c98804d2ba63c1aba2",
+    "src/vendors/jsbn/prng4.js": "f71989c098238695de7b7f60f891c282c2ff2ee3156fbf1132caf49d1ed39d49",
+    "src/vendors/jsbn/rng.js": "1ae726b618256cd41bad21beb5f6caac39632f2ccf753802e9b4d5c6511377ec",
     "src/vendors/jReject/js/jquery.reject.js": "3df535b258480e54a37685dc59b77d02869b5ac8c6d90274ce8c2e51b9a298a8",
     "src/vendors/jquery-xdomainrequest/jquery.xdomainrequest.min.js": "c70ec9dc6dc525f45e3369a5c699fdefb796688b53c7c20e58d2303225f6f981",
     "src/vendors/jquery-yql/jquery.yql.js": "ee170c396c15c2ddde1dd0145121fed9a9d50aa4e0fbf89cf2b90f42d3651b6a",
