@@ -42,23 +42,61 @@ p.formPaddedBot, div.formPaddedBot {
 span.logoText {
     font-size: 1.6em;
     color: white;
-    position: relative;
-    bottom: 4px;
+    
 }
 
 #logo img { /* need to use !important here because the google skin has its own logo img style that borks things up */
     width: auto !important;
     height: auto !important;
     position: relative !important;
-    bottom: 8px !important;    
+    /*bottom: 8px !important;  */  
+    vertical-align: middle !important;
 }
 
 #logo {
-    width: 195px; /* + 20px */
-    margin-top: 13px !important;
+    width: auto  !important; /* + 20px */
+    /*margin-top: 13px !important;*/
+    height: 49px !important;
+    line-height: 49px !important;
+    margin: 0 !important;
+    background: url(../images/logo-small.png) no-repeat 10px 8px;
+    padding-left: 50px;
 }
 #logo span.logoText {
-    padding-left: 4px;
+  
+    height: 49px !important;
+    line-height: 49px !important;
+    display: inline-block !important;
+    margin: 0 !important;
+}
+
+/* Make Counterwallet word invisible in black top bar for low resolution */
+@media only screen and (max-width : 665px) {
+  #logo span.logoText {
+    display: none !important;
+  }
+
+  
+
+  #logo img {
+    /*bottom:5px !important;*/
+  }
+
+  #logo-group {
+    width: auto !important;
+  }
+
+  .ajax-dropdown:after, 
+  .ajax-dropdown:before {
+    left: 17px !important;
+  }
+}
+
+@media only screen and (min-width : 665px) and (max-width: 767px) {
+  .ajax-dropdown:after, 
+  .ajax-dropdown:before {
+    left: 177px !important;
+  }
 }
 
 #logo-group span#activity {
@@ -186,37 +224,6 @@ body.smart-style-3 .defaultWidgetColor>header { /* google skin = darkBlue (night
 }
 
 
-/* Make Counterwallet word invisible in black top bar for low resolution */
-@media only screen and (max-width : 665px) {
-  #logo span.logoText {
-    display: none !important;
-  }
-
-  #logo {
-    width:35px !important;
-  }
-
-  #logo img {
-    bottom:0 !important;
-  }
-
-  #logo-group {
-    width: auto !important;
-  }
-
-  .ajax-dropdown:after, 
-  .ajax-dropdown:before {
-    left: 17px !important;
-  }
-}
-
-@media only screen and (min-width : 665px) and (max-width: 767px) {
-  .ajax-dropdown:after, 
-  .ajax-dropdown:before {
-    left: 177px !important;
-  }
-}
-
 /* Action buttons under the heading for low resolution. */
 @media only screen and (max-width : 860px) {
   div.pull-right.sectionHeaderButtonBar {
@@ -263,6 +270,12 @@ section.ordersGrid .jarviswidget>header {
 }
 #header {
   z-index:1004 !important;
+}
+
+#header > div.pull-right {
+  position: absolute;
+  right: 0;
+  top:0;
 }
 /* 
  * CSS SMARTADMIN BUG FIXES
