@@ -125,10 +125,10 @@ function qs(key) {
 }
 
 //Allow the site root to specify "dev" and "testnet" parameters...
-// IS_DEV is enabled if the initial (root) URL access has ?isdev=1
+// IS_DEV is enabled if the initial (root) URL access has ?dev=1
 // USE_TESTNET is enabled if the initial (root) URL access has ?testnet=1, OR the hostname visited starts with 'testnet' (e.g. testnet.myhost.com)
 var IS_DEV = (location.pathname == "/" && qs("dev") && qs("dev") != '0' ? true : false);
-var USE_TESTNET = (   ((location.pathname == "/" || location.pathname == "/src/") && qs("testnet") && qs("testnet") != '0')
+var USE_TESTNET = (   ((location.pathname == "/" || location.pathname == "/src/" || location.pathname == "/build/") && qs("testnet") && qs("testnet") != '0')
                    || location.hostname.indexOf('testnet') == 0 ? true : false
                   );
 

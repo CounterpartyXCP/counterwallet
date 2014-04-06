@@ -219,6 +219,31 @@ section.ordersGrid .jarviswidget>header {
   height: auto !important;
 }
 
+/* Using toggle menu button also for munified menu */
+.minified #hide-menu {
+  display: block !important;
+}
+
+.minified #hide-menu>:first-child>a, 
+.hidden-menu #hide-menu>:first-child>a {
+  background-color: #e8e8e8;
+  background-image: -moz-linear-gradient(top,#5a5a5a 0,#686868 100%);
+  background-image: -webkit-gradient(linear,left top,left bottom,color-stop(0,#5a5a5a),color-stop(100%,#686868));
+  background-image: -webkit-linear-gradient(to bottom,#5a5a5a 0,#686868 100%);
+  background-image: -o-linear-gradient(to bottom,#5a5a5a 0,#686868 100%);
+  background-image: -ms-linear-gradient(to bottom,#5a5a5a 0,#686868 100%);
+  background-image: linear-gradient(to bottom,#5a5a5a 0,#686868 100%);
+  filter: progid:DXImageTransform.Microsoft.gradient(startColorstr='#5A5A5A', endColorstr='#686868', GradientType=0);
+  -webkit-box-shadow: inset 0 0 3px 1px rgba(0,0,0,.15);
+  box-shadow: inset 0 0 3px 1px rgba(0,0,0,.15);
+  color: #fff !important;
+  border-color: #494949;
+}
+
+.minified #hide-menu i, 
+.hidden-menu #hide-menu i {
+  color: #fff !important;
+}
 
 /* 
  * CSS SMARTADMIN BUG FIXES

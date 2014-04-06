@@ -200,13 +200,16 @@ module.exports = function(grunt) {
         return htmlcontent.substr(0, bockStartPos)+tag+htmlcontent.substr(blockEndPos);
     }
 
-    var minifyContent = function(content, type) {
-        if (type=='css') {
+    var minifyContent = function(content, type, path) {
+        if (type=='css' && path.match(/min\.css$/i)==null) {
             content = new CleanCSS().minify(content);
         } else if (type=='js') {
-            var ast = Uglify.parser.parse(content); // parse code and get the initial AST
-            ast = Uglify.uglify.ast_squeeze(ast); // get an AST with compression optimizations
-            content = Uglify.uglify.gen_code(ast);
+            if (path.match(/min\.js$/i)==null) {
+                var ast = Uglify.parser.parse(content); // parse code and get the initial AST
+                ast = Uglify.uglify.ast_squeeze(ast); // get an AST with compression optimizations
+                content = Uglify.uglify.gen_code(ast);
+            }
+            content = content+';'; // this semicolon for Firefox
         }
         return content;
     }
@@ -242,9 +245,10 @@ module.exports = function(grunt) {
             grunt.log.writeln('preparing file: '+root+'/'+block.src[b]);
             var filepath = root+'/'+block.src[b];
             var content = processFile(filepath, block, config);
-            combinedcontent += content+grunt.util.linefeed;
+            content = minifyContent(content, block.type, block.src[b]);
+            combinedcontent += grunt.util.linefeed+'/*----------------'+block.src[b]+'---------------*/'+grunt.util.linefeed+content;
         }
-        return minifyContent(combinedcontent, block.type);
+        return combinedcontent;
     }
 
     var minifyApp = function(fileList, config) {
