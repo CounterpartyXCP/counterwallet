@@ -181,35 +181,7 @@ function LogonViewModel() {
     WALLET.refreshBTCBalances(true);
     //^ specify true here to start a recurring get BTC balances timer chain 
 
-    //update all counterparty asset balances (including XCP)
-    failoverAPI("get_normalized_balances", [WALLET.getAddressesList()],
-      function(balancesData, endpoint) {
-        $.jqlog.debug("Got initial balances: " + JSON.stringify(balancesData));
-        
-        if(!balancesData.length)
-          return onSuccess(); //user has no balance (i.e. first time logging in)
-        
-        var i = null, j = null;
-        var numBalProcessed = 0;
-        var assets = [];
-        //Make a unique list of assets
-        for(i=0; i < balancesData.length; i++) {
-          if(!assets.contains(balancesData[i]['asset']))
-          assets.push(balancesData[i]['asset']);
-        }
-        failoverAPI("get_asset_info", [assets], function(assetsInfo, endpoint) {
-          for(i=0; i < assetsInfo.length; i++) {
-            for(j=0; j < balancesData.length; j++) {
-              if(balancesData[j]['asset'] != assetsInfo[i]['asset']) continue;
-              WALLET.getAddressObj(balancesData[j]['address']).addOrUpdateAsset(
-                assetsInfo[i]['asset'], assetsInfo[i], balancesData[j]['quantity']);
-              numBalProcessed += 1;
-              if(numBalProcessed == balancesData.length) return onSuccess();
-            }
-          }
-        });
-      }
-    );
+    WALLET.refreshCounterpartyBalances(WALLET.getAddressesList(), onSuccess);
   }
   
   self.openWalletPt3 = function(mustSavePreferencesToServer) {

@@ -145,7 +145,15 @@ function CreateNewAddressModalViewModel() {
     //save prefs to server
     multiAPI("store_preferences", [WALLET.identifier(), PREFERENCES], function(data, endpoint) {
       self.shown(false);
-      setTimeout(checkURL, 400); //necessary to use setTimeout so that the modal properly hides before we refresh the page
+      
+      if(self.forWatchOnly()) {
+        //If we created a watch address, refresh the counterparty balances with this new address
+        //btc address balances will refresh on the refresh of the balances page itself
+        setTimeout(function() { WALLET.refreshCounterpartyBalances([newAddress], checkURL)});
+      } else {
+        //Otherwise (a new non-watch address), just refresh the page
+        setTimeout(checkURL, 400); //necessary to use setTimeout so that the modal properly hides before we refresh the page
+      }
     });
   }
   

@@ -41,6 +41,12 @@
     padding-top: 14px;
 }
 
+.emptyFeedContainer {
+    text-align: center;
+    position: relative;
+    top: 160px;
+}
+
 /* Add back in colored badges (this was removed from Bootstrap 3 for some reason)
  * See http://stackoverflow.com/a/20591067
  */

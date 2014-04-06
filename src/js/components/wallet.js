@@ -149,6 +149,40 @@ function WalletViewModel() {
     }
     return assets.unique();
   }
+  
+  self.refreshCounterpartyBalances = function(addresses, onSuccess) {
+    //update all counterparty asset balances for the specified address (including XCP)
+    //Note: after login, this normally never needs to be called (except when adding a watch address),
+    // as counterparty asset balances are updated automatically via the messages feed
+    failoverAPI("get_normalized_balances", [addresses],
+      function(balancesData, endpoint) {
+        $.jqlog.debug("Got initial balances: " + JSON.stringify(balancesData));
+        
+        if(!balancesData.length)
+          return onSuccess(); //user has no balance (i.e. first time logging in)
+        
+        var i = null, j = null;
+        var numBalProcessed = 0;
+        var assets = [];
+        //Make a unique list of assets
+        for(i=0; i < balancesData.length; i++) {
+          if(!assets.contains(balancesData[i]['asset']))
+          assets.push(balancesData[i]['asset']);
+        }
+        failoverAPI("get_asset_info", [assets], function(assetsInfo, endpoint) {
+          for(i=0; i < assetsInfo.length; i++) {
+            for(j=0; j < balancesData.length; j++) {
+              if(balancesData[j]['asset'] != assetsInfo[i]['asset']) continue;
+              WALLET.getAddressObj(balancesData[j]['address']).addOrUpdateAsset(
+                assetsInfo[i]['asset'], assetsInfo[i], balancesData[j]['quantity']);
+              numBalProcessed += 1;
+              if(numBalProcessed == balancesData.length) return onSuccess();
+            }
+          }
+        });
+      }
+    );
+  }
 
   self.refreshBTCBalances = function(isRecurring) {
     if(typeof(isRecurring)==='undefined') isRecurring = false;
