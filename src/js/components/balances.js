@@ -36,10 +36,12 @@ function ChangeAddressLabelModalViewModel() {
   
   self.doAction = function() {
     var addressHash = hashToB64(self.address());
-    PREFERENCES.address_aliases[addressHash] = self.newLabel();
-    //update the preferences on the server 
+    var label = $("<div/>").html(self.newLabel()).text();
+    //^ remove any HTML tags from the text
+    PREFERENCES.address_aliases[addressHash] = label;
+    //^ update the preferences on the server 
     multiAPI("store_preferences", [WALLET.identifier(), PREFERENCES], function(data, endpoint) {
-      WALLET.getAddressObj(self.address()).label(self.newLabel()); //update was a success
+      WALLET.getAddressObj(self.address()).label(label); //update was a success
       self.shown(false);
     });
   }
@@ -434,7 +436,7 @@ function SweepModalViewModel() {
         for (i = 0; i < sendTx.ins.length; i++) { //sign each input with the key
           sendTx.sign(i, key);
         }
-        WALLET.broadcastSignedTx(sendTx.serializeHex(), function(issuanceTxHash, endpoint) { //transmit was successful
+        WALLET.broadcastSignedTx(sendTx.serializeHex(), function(issuanceTxHash, endpoint) { //broadcast was successful
           opsComplete.push({
             'type': 'transferOwnership',
             'result': true,
@@ -444,7 +446,7 @@ function SweepModalViewModel() {
           });
           PENDING_ACTION_FEED.add(issuanceTxHash, "issuances", transferData);
           return callback();
-        }, function() { //on error transmitting tx
+        }, function() { //on error broadcasting tx
           opsComplete.push({
             'type': 'transferOwnership',
             'result': false,
@@ -509,7 +511,7 @@ function SweepModalViewModel() {
         for (i = 0; i < sendTx.ins.length; i++) { //sign each input with the key
           sendTx.sign(i, key);
         }
-        WALLET.broadcastSignedTx(sendTx.serializeHex(), function(sendTxHash, endpoint) { //transmit was successful
+        WALLET.broadcastSignedTx(sendTx.serializeHex(), function(sendTxHash, endpoint) { //broadcast was successful
           opsComplete.push({
             'type': 'send',
             'result': true,
@@ -531,7 +533,7 @@ function SweepModalViewModel() {
           } else { //no transfer, just an asset send for this asset
             return callback();  
           }
-        }, function() { //on error transmitting tx
+        }, function() { //on error broadcasting tx
           opsComplete.push({
             'type': 'send',
             'result': false,

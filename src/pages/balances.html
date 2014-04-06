@@ -664,9 +664,9 @@
             </div>
           </div></section>
         </fieldset></form>
-        <div class="formPaddedBot" data-bind="fadeVisibleInOnly: quantityPerUnit() && selectedDividendAsset()">
+        <div class="formPaddedBot" data-bind="fadeVisibleInOnly: quantityPerUnit() && selectedDividendAsset() && totalPay()">
             <p>This dividend payment would cost you a total of 
-            <b class="sellColor"><span data-bind="text: numberWithCommas(totalPay())"></span> <span data-bind="html: selectedDividendAsset"></span></b>.</p>
+            <b class="sellColor"><span data-bind="text: smartFormat(totalPay())"></span> <span data-bind="html: selectedDividendAsset"></span></b>.</p>
             <p>After dividend payment this address would have a remaining balance of
             <b data-bind="css: {errorColor: dividendAssetBalRemainingPostPay() < 0, sellColor:  dividendAssetBalRemainingPostPay() >= 0}">
                 <span data-bind="text: numberWithCommas(dividendAssetBalRemainingPostPay())"></span> <span data-bind="html: selectedDividendAsset"></span></b>.</p>

@@ -401,8 +401,9 @@ function PayDividendModalViewModel() {
   }, self);
   
   self.totalPay = ko.computed(function() {
-    if(!self.asset()) return null;
-    return self.quantityPerUnit() * self.asset().normalizedTotalIssued();
+    if(!self.asset() || !isNumber(self.quantityPerUnit()) || !parseFloat(self.quantityPerUnit())) return null;
+    return Decimal.round(new Decimal(self.quantityPerUnit()).mul(self.asset().normalizedTotalIssued()),
+      8, Decimal.MidpointRounding.ToEven).toFloat();
   }, self);
 
   self.dividendAssetBalance = ko.computed(function() {
@@ -411,7 +412,7 @@ function PayDividendModalViewModel() {
   }, self);
 
   self.dividendAssetBalRemainingPostPay = ko.computed(function() {
-    if(!self.asset() || self.dividendAssetBalance() === null) return null;
+    if(!self.asset() || self.dividendAssetBalance() === null || self.totalPay() === null) return null;
     return Decimal.round(new Decimal(self.dividendAssetBalance()).sub(self.totalPay()), 8, Decimal.MidpointRounding.ToEven).toFloat();
   }, self);
   

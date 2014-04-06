@@ -199,11 +199,11 @@
 
     <!-- Logged out cover div -->
     <div id="logon">
-      <h1 style="font-size: 3em; text-align: center">Welcome to Your Secure Web Wallet</h1>
+      <h1 style="font-size: 3em; text-align: center">Welcome to Counterwallet</h1>
       <h2 style="font-size: 2em; text-align: center; padding-bottom: 5px; color: #333">Powered by Counterparty</h2>
       <div id="form-well" style="margin-top:40px">
         <div id="createNewAcctBtnPane" data-bind="visible: generatedPassphrase().length == 0" style="text-align:center;display:block;margin-bottom: 35px;">
-          <button data-bind="click: generatePassphrase" type="button" class="btn btn-success btn-lg" style="font-size: 21px;">Create a new wallet</button>
+          <button data-bind="click: generatePassphrase" type="button" class="btn btn-success btn-lg" style="font-size: 21px;">Create New Wallet</button>
         </div>
         <div id="newAccountInfoPane" data-bind="fadeVisible: generatedPassphrase().length > 0" style="display:none">
           <br/>
@@ -258,31 +258,23 @@
       </div> <!-- form-well -->
       
       <div id="extra-info" class="container" data-bind="visible: !(generatedPassphrase().length > 0)">
-        <h3 class="sales-title">Why use Counterwallet?</h3>
-        <h4 class="sales-subtitle">We're a rapidly evolving online wallet with a goal of supporting all <a href="http://www.counterparty.co" target="_blank">Counterparty</a> functionality.</h4>
-        <h4 class="sales-subtitle">Create and access your wallet with a single passphrase, with no funds stored locally or on our servers.</h4>
-        <div class="row" style="margin-top:25px">
+        <h4 class="sales-title" style="margin-top:20px">Counterwallet is fully compatible with the <a href="http://www.counterparty.co" target="_blank">Counterparty</a> protocol and XCP, Counterparty's native currency.</h4>
+        <h4 class="sales-title">Trade bitcoin on Counterparty's decentralized exchange or create and trade your own digital assets with ease.</h4>
+        <div class="row" style="margin-top:25px;margin-bottom:20px;">
           <div class="col-sm-4 col-md-4">
-            <h4 style="margin-bottom:10px"><i class="fa fa-lock"></i> Secure and predictable.</h4>
-            <p>Counterwallet is an online <a href="https://en.bitcoin.it/wiki/Deterministic_wallet" target="_blank">deterministic wallet</a>. 
-            Your passphrase is turned into a number which is then turned into Bitcoin addresses. 
-            </p>
-            
-            <p>Your passphrase is your wallet access and wallet backup.</p> 
+            <h4 style="margin-bottom:10px"><i class="fa fa-lock"></i> Secure</h4>
+            <p>Counterwallet turns your passphrase is turned into a number which is then turned into Bitcoin addresses.</p>
+            <p>Your passphrase is your wallet access and wallet backup. Easy, simple, secure.</p>
           </div>
           <div class="col-sm-4 col-md-4">
-            <h4 style="margin-bottom:10px"><i class="fa fa-circle-o"></i> We are a zero footprint wallet.</h4>
-            <p>
-              We don't store your funds (or your passphrase) locally or on our servers, only in your browser memory. 
-              No trace is left on your device once you logout of your session.</p> 
-            <p> 
-            Thieves have fewer angles of attack with Counterwallet.
-            </p>
+            <h4 style="margin-bottom:10px"><i class="fa fa-cloud"></i> No backups</h4>
+            <p>With Counterwallet, there is no wallet files to backup or store. Your wallet is your passphase.</p>
+            <p>Access Counterwallet securely from any trusted machine with Internet access.</p> 
           </div>
           <div class="col-sm-4 col-md-4">
-            <h4 style="margin-bottom:10px"><i class="fa fa-bolt"></i> No backups required. Use from anywhere.</h4>
-            <p>Because your wallet is your passphase, you don't have to worry about encrypting or backing up any files.</p>
-            <p>You can use Counterwallet from any secure, trusted PC with Internet access.</p> 
+            <h4 style="margin-bottom:10px"><i class="fa fa-circle-o"></i> Zero footprint</h4>
+            <p>Counterwallet does not store your funds or passphrase and your funds are under your control at all times.</p>
+            <p>Once logged out, there is no trace of your session, which gives fewer angles of attack.</p>
           </div>
         </div>
       </div>

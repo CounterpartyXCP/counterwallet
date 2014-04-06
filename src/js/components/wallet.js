@@ -296,10 +296,9 @@ function WalletViewModel() {
   self.broadcastSignedTx = function(signedTxHex, onSuccess, onError) {
     $.jqlog.debug("RAW SIGNED HEX: " + signedTxHex);
     
-    failoverAPI("transmit",
-      {"tx_hex": signedTxHex, "is_signed": true},
+    failoverAPI("broadcast", {"signed_tx_hex": signedTxHex},
       function(txHash, endpoint) {
-        $.jqlog.log("transmit:" + txHash + ": endpoint=" + endpoint);
+        $.jqlog.log("broadcast:" + txHash + ": endpoint=" + endpoint);
         return onSuccess(txHash, endpoint);
       },
       onError
