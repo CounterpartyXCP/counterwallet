@@ -1,6 +1,6 @@
 #chatPane {
-  position: absolute;
-  /*position: fixed;*/
+  /*position: absolute;*/
+  position: fixed;
   top: 49px;
   right: 0;
   /*height: 100%;*/
@@ -16,7 +16,14 @@
   color: #FFF;*/
   /*border-color: #222;*/
   /* For ultralight theme */
-  background: linear-gradient(to right,#F7F7F7 99%,#CACACA 100%);
+
+  background-color: #F7F7F7;
+  background-image: -webkit-gradient(linear, left top, left bottom, from(#F7F7F7), to(#CACACA));
+  background-image: -webkit-linear-gradient(left, #F7F7F7 99%, #CACACA 100%);
+  background-image:    -moz-linear-gradient(left, #F7F7F7 99%, #CACACA 100%);
+  background-image:      -o-linear-gradient(left, #F7F7F7 99%, #CACACA 100%);
+  background-image:         linear-gradient(to right, #F7F7F7 99%, #CACACA 100%);
+
   color: #202427;
   border-color: rgb(148, 152, 160);
   z-index: 1000;

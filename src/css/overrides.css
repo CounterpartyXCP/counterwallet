@@ -55,6 +55,7 @@ span.logoText {
 
 #logo {
     width: 195px; /* + 20px */
+    margin-top: 13px !important;
 }
 #logo span.logoText {
     padding-left: 4px;
@@ -196,11 +197,23 @@ body.smart-style-3 .defaultWidgetColor>header { /* google skin = darkBlue (night
   }
 
   #logo img {
-    bottom:2px !important;
+    bottom:0 !important;
   }
 
   #logo-group {
     width: auto !important;
+  }
+
+  .ajax-dropdown:after, 
+  .ajax-dropdown:before {
+    left: 17px !important;
+  }
+}
+
+@media only screen and (min-width : 665px) and (max-width: 767px) {
+  .ajax-dropdown:after, 
+  .ajax-dropdown:before {
+    left: 177px !important;
   }
 }
 
@@ -246,9 +259,11 @@ section.ordersGrid .jarviswidget>header {
 }
 
 #left-panel {
-  z-index: 9999 !important;
+  z-index:1003 !important;
 }
-
+#header {
+  z-index:1004 !important;
+}
 /* 
  * CSS SMARTADMIN BUG FIXES
  */
