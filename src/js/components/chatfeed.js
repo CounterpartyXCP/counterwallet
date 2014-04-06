@@ -82,18 +82,29 @@ function ChatFeedViewModel() {
   
   self._showChatWindow = function() {
     $('#chatLink span').text("Hide Chat");
-    $('#main').animate({ marginRight : "280px"},600);
-    self.scrollToBottomIfNecessary(); //initially show the div scrolled to the bottom as the animation happens      
-    $('#chatPane').show('slide', {direction:'right'}, 600, function() {
+  
+    // TODO: improve to really synchronize two animations (queue=false don't work well)
+    // TODO: remove margin on windows resize
+    if ($('body').width()>680) {
+      $('#main').animate({marginRight : "280px"}, {duration: 600, queue: false});  
+      $('#chatPane').css('width', '280px'); 
+    } else {
+      $('#chatPane').css('width', ($('#main').width()-5)+'px');
+    }
+    
+    self.scrollToBottomIfNecessary(); //initially show the div scrolled to the bottom as the animation happens 
+    $('#chatPane').show('slide', {direction:'right', queue: false}, 600, function() {
       self.scrollToBottomIfNecessary(); //prevent the scroll from slamming back to the top of the div 
     });
+
+         
   }
   
   self._hideChatWindow = function() {
     //Collapse chat window
     $('#chatLink span').text("Show Chat");
-    $('#main').animate({ marginRight : "0px"},600);
-    $('#chatPane').hide('slide', {direction:'right'}, 600);
+    $('#main').animate({marginRight : "0px"}, {duration: 600, queue: false});
+    $('#chatPane').hide('slide', {direction:'right', queue: false}, 600);
   }
   
   self.showChat = function() {
