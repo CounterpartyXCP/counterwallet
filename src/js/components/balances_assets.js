@@ -153,7 +153,7 @@ function IssueAdditionalAssetModalViewModel() {
     isValidQtyForDivisibility: self,
     validation: {
       validator: function (val, self) {
-        return self.rawAdditionalIssue() + self.asset().rawTotalIssued() <= MAX_INT;
+        return self.rawAdditionalIssue() + self.asset().rawSupply() <= MAX_INT;
       },
       message: 'This issuance would exceed the hard limit for maximum quantity.',
       params: self

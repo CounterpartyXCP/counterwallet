@@ -9,7 +9,7 @@ function AssetViewModel(props) {
   self.locked = ko.observable(props['locked'] !== undefined ? props['locked'] : false);
   self.rawBalance = ko.observable(props['rawBalance'] || (self.ASSET == 'BTC' ? null : 0));
   //^ raw (not normalized) (for BTC/XCP, default to null to show '??' instead of 0, until the balance is populated)
-  self.rawTotalIssued = ko.observable(props['rawTotalIssued'] || 0); //raw
+  self.rawSupply = ko.observable(props['rawSupply'] || 0); //raw
   self.description = ko.observable(props['description'] || '');
   self.CALLABLE = props['callable'] !== undefined ? props['callable'] : false;
   self.CALLDATE = props['callDate'] || null;
@@ -36,7 +36,7 @@ function AssetViewModel(props) {
   }, self);
   
   self.normalizedTotalIssued = ko.computed(function() {
-    return normalizeQuantity(self.rawTotalIssued(), self.DIVISIBLE);
+    return normalizeQuantity(self.rawSupply(), self.DIVISIBLE);
   }, self);
 
   self.dispTotalIssued = ko.computed(function() {

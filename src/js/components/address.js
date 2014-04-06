@@ -96,7 +96,7 @@ function AddressViewModel(key, address, initialLabel) {
         owner: assetInfo['owner'] || assetInfo['issuer'],
         locked: assetInfo['locked'],
         rawBalance: initialRawBalance,
-        rawTotalIssued: assetInfo['total_issued'] || assetInfo['quantity'],
+        rawSupply: assetInfo['supply'] || assetInfo['quantity'],
         description: assetInfo['description'], 
         callable: assetInfo['callable'],
         callDate: assetInfo['call_date'],
@@ -136,10 +136,10 @@ function AddressViewModel(key, address, initialLabel) {
         assert(match.description() == assetInfo['description']); //description change was handled earlier
         assert(match.owner() == (assetInfo['issuer'])); //transfer change was handled earlier
         assert(!assetInfo['locked']); //lock change was handled earlier
-        assert(match.rawTotalIssued() != assetInfo['quantity']);
+        assert(match.rawSupply() != assetInfo['quantity']);
         $.jqlog.debug("Updating asset " + asset + " @ " + self.ADDRESS + " # issued units. Orig #: "
-          + match.rawTotalIssued() + ", new #: " + assetInfo['quantity']);
-        match.rawTotalIssued(assetInfo['quantity']);
+          + match.rawSupply() + ", new #: " + assetInfo['quantity']);
+        match.rawSupply(assetInfo['quantity']);
       }
     }
   }
