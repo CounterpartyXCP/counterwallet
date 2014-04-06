@@ -257,24 +257,25 @@
         </div>
       </div> <!-- form-well -->
       
-      <div id="extra-info" class="container" data-bind="visible: !(generatedPassphrase().length > 0)">
-        <h4 class="sales-title" style="margin-top:20px">Counterwallet is fully compatible with the <a href="http://www.counterparty.co" target="_blank">Counterparty</a> protocol and XCP, Counterparty's native currency.</h4>
-        <h4 class="sales-title">Trade bitcoin on Counterparty's decentralized exchange or create and trade your own digital assets with ease.</h4>
+      <div id="extra-info" class="container" data-bind="isible: !(generatedPassphrase().length > 0)">
+        <h4 class="sales-title" style="margin-top:20px">Counterwallet is a web-wallet for <a href="http://www.counterparty.co" target="_blank">Counterparty</a>, which is the world’s first peer-to-peer digital asset exchange.</h4>
+        <h4 class="sales-title">All transactions made with Counterwallet use an automatic escrow system to keep them secure, atomic and trustless, so no middleman is ever needed.</h4>
         <div class="row" style="margin-top:25px;margin-bottom:20px;">
           <div class="col-sm-4 col-md-4">
             <h4 style="margin-bottom:10px"><i class="fa fa-lock"></i> Secure</h4>
-            <p>Counterwallet turns your passphrase is turned into a number which is then turned into Bitcoin addresses.</p>
-            <p>Your passphrase is your wallet access and wallet backup. Easy, simple, secure.</p>
+            <p>All encryption is handled client-side. Neither your passphrase nor any of your private information ever leaves your browser.</p>
+            <p>Counterwallet passhrases are highly secure, so you know that your wallet is safe from all brute
+               force attacks. They are also easy to learn and hard to mistype.</p>
           </div>
           <div class="col-sm-4 col-md-4">
-            <h4 style="margin-bottom:10px"><i class="fa fa-cloud"></i> No backups</h4>
-            <p>With Counterwallet, there is no wallet files to backup or store. Your wallet is your passphase.</p>
-            <p>Access Counterwallet securely from any trusted machine with Internet access.</p> 
+            <h4 style="margin-bottom:10px"><i class="fa fa-cloud"></i> Simple</h4>
+            <p>With Counterwallet, your passphrase is your wallet, and all of your addresses and keys are generated on-the-fly when you log in.</p>
+            <p>There are no wallet files to backup or keep private, and with your pass phrase you can access your wallet from any trusted machine with a web browser.</p> 
           </div>
           <div class="col-sm-4 col-md-4">
-            <h4 style="margin-bottom:10px"><i class="fa fa-circle-o"></i> Zero footprint</h4>
-            <p>Counterwallet does not store your funds or passphrase and your funds are under your control at all times.</p>
-            <p>Once logged out, there is no trace of your session, which gives fewer angles of attack.</p>
+            <h4 style="margin-bottom:10px"><i class="fa fa-globe"></i> Open-Source</h4>
+            <p>Counterwallet and Counterwalletd are entirely open-source, so you know that they work exactly the way that they are supposed to.</p>
+            <p>If you like, you may also even run your own Counterwallet server.</p>
           </div>
         </div>
       </div>
