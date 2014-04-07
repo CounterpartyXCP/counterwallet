@@ -277,6 +277,10 @@ section.ordersGrid .jarviswidget>header {
   right: 0;
   top:0;
 }
+
+b.notoAddrColor > a {
+  display: inline !important;
+}
 /* 
  * CSS SMARTADMIN BUG FIXES
  */
