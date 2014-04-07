@@ -316,10 +316,14 @@ function BuySellWizardViewModel() {
     if(self.customSellAs() == "unitprice") {
       var val = null;
       if(self.assetPair()[0] == self.buyAsset()) //buy asset is the base
-        val = Decimal.round(new Decimal(self.selectedBuyQuantity()).mul(newValue), 8, Decimal.MidpointRounding.ToEven).toFloat();
+        val = Decimal.round(new Decimal(self.selectedBuyQuantity()).mul(newValue), 8, Decimal.MidpointRounding.ToEven);
       else { // sell asset is the base
         assert(self.assetPair()[0] == self.sellAsset());
-        val = Decimal.round(new Decimal(self.selectedBuyQuantity()).div(newValue), 8, Decimal.MidpointRounding.ToEven).toFloat();
+        val = Decimal.round(new Decimal(self.selectedBuyQuantity()).div(newValue), 8, Decimal.MidpointRounding.ToEven);
+      }
+      if (String(val)=="undefined") {
+        val = new Decimal(0);
+        val = val.toFloat();
       }
       assert(val !== null); 
       self.selectedSellQuantityCustom(val);
@@ -406,12 +410,21 @@ function BuySellWizardViewModel() {
     var curBalance = WALLET.getBalance(self.selectedAddress(), self.sellAsset());
     //curBalance - self.selectedSellQuantity
     var quantityLeft = Decimal.round(new Decimal(curBalance).sub(self.selectedSellQuantity()), 8, Decimal.MidpointRounding.ToEven).toFloat();
+
+    //$.jqlog.debug("1.selectedSellQuantity: " + self.selectedSellQuantity());
+    //$.jqlog.debug("2.feeForSelectedBTCQuantity: " + self.feeForSelectedBTCQuantity());
+    //$.jqlog.debug("3.quantityLeft: " + quantityLeft);
+
     if(self.sellAsset() == 'BTC') { //include the fee if we're selling BTC
-      quantityLeft = Decimal.round(new Decimal(quantityLeft).sub(self.feeForSelectedBTCQuantity()), 8, Decimal.MidpointRounding.ToEven).toFloat();
+      quantityLeft = Decimal.round(new Decimal(quantityLeft).sub(self.feeForSelectedBTCQuantity()), 8, Decimal.MidpointRounding.ToEven);
+      // Decimal.round(new Decimal(0).sub(0), 8) return undefined
+      // https://github.com/xnova/counterwallet/issues/39
+      if (String(quantityLeft) == "undefined") {
+        quantityLeft = new Decimal(0);
+      }
+      quantityLeft = quantityLeft.toFloat();
     }
-    //console.log("1.selectedSellQuantity: " + self.selectedSellQuantity());
-    //console.log("2.feeForSelectedBTCQuantity: " + self.feeForSelectedBTCQuantity());
-    //console.log("3.quantityLeft: " + quantityLeft);
+    
     return quantityLeft;
   }, self);//.extend({ notify: 'always' });
   self.dispSellQuantityRemainingAfterSale = ko.computed(function() {
@@ -783,6 +796,24 @@ function BuySellWizardViewModel() {
       return smartFormat(Decimal.round(new Decimal(derivedQuantity1).div(derivedQuantity2), 8, Decimal.MidpointRounding.ToEven).toFloat());
     }
   }
+
+
+  self.setBtcFeeFromOrder = function(order) {
+    var fee = 0, quantity = 0;
+    if (order['get_asset']=='BTC') {
+      fee = order['fee_required'];
+      quantity = order['get_quantity'];
+    } else if (order['give_asset']=='BTC') {
+      fee = order['fee_provided'];
+      quantity = order['give_quantity'];
+    }
+    if (fee!=0) {
+      fee = (fee/quantity)*100;
+      fee = smartFormat(Decimal.round(new Decimal(fee), 8, Decimal.MidpointRounding.ToEven).toFloat());
+      $.jqlog.debug("Auto set fee: "+fee);
+      self.btcFee(fee);
+    }
+  }
   
   self._afterSelectedAnOpenOrder = ko.observable(false);
   self.buySelectedOpenOrder = function(order) {
@@ -796,6 +827,7 @@ function BuySellWizardViewModel() {
     var totalSaleAmount = self.deriveOpenOrderAssetQuantity(order['give_asset'], order['give_remaining']);
     var buyAmount = Math.min(maxAfford, totalSaleAmount);
     self.selectedBuyQuantity(buyAmount);
+    self.setBtcFeeFromOrder(order);      
 
     //The below is an awful, horrible hack because for some reason, the "invalid balance" message will get triggered and
     // not receive updated obervable notifications (which DO change value)....when it should even't be visible in the first
