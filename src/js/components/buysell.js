@@ -316,10 +316,14 @@ function BuySellWizardViewModel() {
     if(self.customSellAs() == "unitprice") {
       var val = null;
       if(self.assetPair()[0] == self.buyAsset()) //buy asset is the base
-        val = Decimal.round(new Decimal(self.selectedBuyQuantity()).mul(newValue), 8, Decimal.MidpointRounding.ToEven).toFloat();
+        val = Decimal.round(new Decimal(self.selectedBuyQuantity()).mul(newValue), 8, Decimal.MidpointRounding.ToEven);
       else { // sell asset is the base
         assert(self.assetPair()[0] == self.sellAsset());
-        val = Decimal.round(new Decimal(self.selectedBuyQuantity()).div(newValue), 8, Decimal.MidpointRounding.ToEven).toFloat();
+        val = Decimal.round(new Decimal(self.selectedBuyQuantity()).div(newValue), 8, Decimal.MidpointRounding.ToEven);
+      }
+      if (String(val)=="undefined") {
+        val = new Decimal(0);
+        val = val.toFloat();
       }
       assert(val !== null); 
       self.selectedSellQuantityCustom(val);
