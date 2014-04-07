@@ -111,6 +111,7 @@ function WaitingBTCPayFeedViewModel() {
   self.add = function(btcPayData, resort) {
     assert(btcPayData && btcPayData['orderMatchID']);
     //^ must be a BTCPayData structure, not a plain message from the feed or result from the API
+    
     if(typeof(resort)==='undefined') resort = true;
     self.entries.unshift(new WaitingBTCPayViewModel(btcPayData));
     if(resort) self.sort();
@@ -252,6 +253,7 @@ function UpcomingBTCPayFeedViewModel() {
   self.add = function(btcPayData, resort) {
     assert(btcPayData && btcPayData['orderMatchID']);
     //^ must be a BTCPayData structure, not a plain message from the feed or result from the API
+
     if(typeof(resort)==='undefined') resort = true;
     self.entries.unshift(new UpcomingBTCPayViewModel(btcPayData));
     if(resort) self.sort();
@@ -287,8 +289,10 @@ function UpcomingBTCPayFeedViewModel() {
         
     //If automatic BTC pays are enabled, just take care of the BTC pay right now
     if(PREFERENCES['auto_btcpay']) {
+
       if(WALLET.getBalance(btcPayData['myAddr'], 'BTC', false) >= (btcPayData['btcQuantityRaw']) + MIN_PRIME_BALANCE) {
-        //user has the sufficient balance
+        
+         //user has the sufficient balance
         WALLET.doTransaction(btcPayData['myAddr'], "create_btcpay",
           { order_match_id: btcPayData['orderMatchID'] },
           function(txHash, data, endpoint) {
@@ -305,7 +309,9 @@ function UpcomingBTCPayFeedViewModel() {
               + " This payment has been placed in a pending state. Please try again manually.");
           }
         );
+
       } else {
+
         //The user doesn't have the necessary balance on the address... let them know and add the BTC as pending
         WAITING_BTCPAY_FEED.add(btcPayData);
         bootbox.alert("A payment on a matched order for "
@@ -316,6 +322,7 @@ function UpcomingBTCPayFeedViewModel() {
           + "<br/><br/>Please deposit the necessary <b class='notoAssetColor'>BTC</b> into this address and"
           + "manually make the payment from the Bitcoin icon in the top bar of the site.");  
       }
+
     } else {
       //Otherwise, prompt the user to make the BTC pay
       var prompt = "An order match for <b class='notoQuantityColor'>" + btcPayData['otherOrderQuantity'] + "</b>"
@@ -361,6 +368,9 @@ function UpcomingBTCPayFeedViewModel() {
       });    
     }
   }
+
+
+
 }
 
 

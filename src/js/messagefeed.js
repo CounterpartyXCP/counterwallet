@@ -286,8 +286,14 @@ function MessageFeed() {
       if(   (WALLET.getAddressObj(message['tx0_address']) && message['forward_asset'] == 'BTC' && message['_status'] == 'pending')
          || (WALLET.getAddressObj(message['tx1_address']) && message['backward_asset'] == 'BTC' && message['_status'] == 'pending')) {
         //Register this as an "upcoming" BTCpay
-        var btcPayData = WaitingBTCPayFeedViewModel.makeBTCPayData(message);        
-        UPCOMING_BTCPAY_FEED.add(btcPayData);
+        var btcPayData = WaitingBTCPayFeedViewModel.makeBTCPayData(message); 
+        //Don't include in UPCOMING_BTCPAY_FEED BTCpays which are for less than the current (multisig) dust amount
+        if (btcPayData['btcQuantityRaw']>=MULTISIG_DUST_SIZE) {
+          UPCOMING_BTCPAY_FEED.add(btcPayData);
+        } else {
+          $.jqlog.debug("dust order_matches "+btcPayData['orderMatchID']+" : "+btcPayData['btcQuantityRaw']);
+        }  
+        
       }
     } else if(category == "order_expirations") {
       //Remove the order from the open orders list
