@@ -405,13 +405,25 @@ function BuySellWizardViewModel() {
     if(!self.selectedSellQuantity()) return null;
     var curBalance = WALLET.getBalance(self.selectedAddress(), self.sellAsset());
     //curBalance - self.selectedSellQuantity
+    
+    
+
     var quantityLeft = Decimal.round(new Decimal(curBalance).sub(self.selectedSellQuantity()), 8, Decimal.MidpointRounding.ToEven).toFloat();
+
+    $.jqlog.debug("1.selectedSellQuantity: " + self.selectedSellQuantity());
+    $.jqlog.debug("2.feeForSelectedBTCQuantity: " + self.feeForSelectedBTCQuantity());
+    $.jqlog.debug("3.quantityLeft: " + quantityLeft);
+
     if(self.sellAsset() == 'BTC') { //include the fee if we're selling BTC
-      quantityLeft = Decimal.round(new Decimal(quantityLeft).sub(self.feeForSelectedBTCQuantity()), 8, Decimal.MidpointRounding.ToEven).toFloat();
+      quantityLeft = Decimal.round(new Decimal(quantityLeft).sub(self.feeForSelectedBTCQuantity()), 8, Decimal.MidpointRounding.ToEven);
+      // Decimal.round(new Decimal(0).sub(0), 8) return undefined
+      // https://github.com/xnova/counterwallet/issues/39
+      if (String(quantityLeft) == "undefined") {
+        quantityLeft = new Decimal(0);
+      }
+      quantityLeft = quantityLeft.toFloat();
     }
-    //console.log("1.selectedSellQuantity: " + self.selectedSellQuantity());
-    //console.log("2.feeForSelectedBTCQuantity: " + self.feeForSelectedBTCQuantity());
-    //console.log("3.quantityLeft: " + quantityLeft);
+    
     return quantityLeft;
   }, self);//.extend({ notify: 'always' });
   self.dispSellQuantityRemainingAfterSale = ko.computed(function() {
