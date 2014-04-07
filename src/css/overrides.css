@@ -76,8 +76,6 @@ span.logoText {
     display: none !important;
   }
 
-  
-
   #logo img {
     /*bottom:5px !important;*/
   }
@@ -86,18 +84,28 @@ span.logoText {
     width: auto !important;
   }
 
+}
+
+/* Fix notification windows "nipples" */
+.ajax-dropdown:after, 
+.ajax-dropdown:before {
+  left: 165px !important;
+}
+
+@media only screen and (max-width : 479px) {
   .ajax-dropdown:after, 
   .ajax-dropdown:before {
-    left: 17px !important;
+    left: 34px !important;
   }
 }
 
-@media only screen and (min-width : 665px) and (max-width: 767px) {
+@media only screen and (min-width : 480px) and (max-width : 665px) {
   .ajax-dropdown:after, 
   .ajax-dropdown:before {
-    left: 177px !important;
+    left: 28px !important;
   }
 }
+
 
 #logo-group span#activity {
     position:relative;
