@@ -405,9 +405,6 @@ function BuySellWizardViewModel() {
     if(!self.selectedSellQuantity()) return null;
     var curBalance = WALLET.getBalance(self.selectedAddress(), self.sellAsset());
     //curBalance - self.selectedSellQuantity
-    
-    
-
     var quantityLeft = Decimal.round(new Decimal(curBalance).sub(self.selectedSellQuantity()), 8, Decimal.MidpointRounding.ToEven).toFloat();
 
     //$.jqlog.debug("1.selectedSellQuantity: " + self.selectedSellQuantity());
@@ -795,6 +792,24 @@ function BuySellWizardViewModel() {
       return smartFormat(Decimal.round(new Decimal(derivedQuantity1).div(derivedQuantity2), 8, Decimal.MidpointRounding.ToEven).toFloat());
     }
   }
+
+
+  self.setBtcFeeFromOrder = function(order) {
+    var fee = 0, quantity = 0;
+    if (order['get_asset']=='BTC') {
+      fee = order['fee_required'];
+      quantity = order['get_quantity'];
+    } else if (order['give_asset']=='BTC') {
+      fee = order['fee_provided'];
+      quantity = order['give_quantity'];
+    }
+    if (fee!=0) {
+      fee = (fee/quantity)*100;
+      fee = smartFormat(Decimal.round(new Decimal(fee), 8, Decimal.MidpointRounding.ToEven).toFloat());
+      $.jqlog.debug("Auto set fee: "+fee);
+      self.btcFee(fee);
+    }
+  }
   
   self._afterSelectedAnOpenOrder = ko.observable(false);
   self.buySelectedOpenOrder = function(order) {
@@ -808,6 +823,7 @@ function BuySellWizardViewModel() {
     var totalSaleAmount = self.deriveOpenOrderAssetQuantity(order['give_asset'], order['give_remaining']);
     var buyAmount = Math.min(maxAfford, totalSaleAmount);
     self.selectedBuyQuantity(buyAmount);
+    self.setBtcFeeFromOrder(order);      
 
     //The below is an awful, horrible hack because for some reason, the "invalid balance" message will get triggered and
     // not receive updated obervable notifications (which DO change value)....when it should even't be visible in the first
