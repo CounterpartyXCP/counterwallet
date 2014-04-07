@@ -410,9 +410,9 @@ function BuySellWizardViewModel() {
 
     var quantityLeft = Decimal.round(new Decimal(curBalance).sub(self.selectedSellQuantity()), 8, Decimal.MidpointRounding.ToEven).toFloat();
 
-    $.jqlog.debug("1.selectedSellQuantity: " + self.selectedSellQuantity());
-    $.jqlog.debug("2.feeForSelectedBTCQuantity: " + self.feeForSelectedBTCQuantity());
-    $.jqlog.debug("3.quantityLeft: " + quantityLeft);
+    //$.jqlog.debug("1.selectedSellQuantity: " + self.selectedSellQuantity());
+    //$.jqlog.debug("2.feeForSelectedBTCQuantity: " + self.feeForSelectedBTCQuantity());
+    //$.jqlog.debug("3.quantityLeft: " + quantityLeft);
 
     if(self.sellAsset() == 'BTC') { //include the fee if we're selling BTC
       quantityLeft = Decimal.round(new Decimal(quantityLeft).sub(self.feeForSelectedBTCQuantity()), 8, Decimal.MidpointRounding.ToEven);
