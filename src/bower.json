@@ -23,7 +23,6 @@
         "knockout-bootstrap": "0.2.1",
         "knockout-validation": "1.0.2",
         "moment": "2.5.1",
-        "qrcode": "1.0.1",
         "sjcl": "1.0.0",
         "socket.io-client": "0.9.16",
         "typeahead.js": "0.10.2"

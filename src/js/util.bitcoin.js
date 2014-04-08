@@ -48,11 +48,15 @@ function assetsToAssetPair(asset1, asset2) {
 }
 
 function makeQRCode(addr) {
-  var qr = qrcode(3, 'M');
+  $.jqlog.debug('Generate Qrcode: '+addr);
+
   addr = addr.replace(/^[\s\u3000]+|[\s\u3000]+$/g, '');
+
+  var qr = qrcode(3, 'M');
   qr.addData(addr);
   qr.make();
-  return qr.createImgTag(4);
+
+  return qr.createImgTag(4);  
 }
 
 function getLinkForCPData(type, dataID, dataTitle, htmlize) {
