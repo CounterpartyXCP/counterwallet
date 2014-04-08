@@ -495,9 +495,21 @@ function BuySellWizardViewModel() {
         self.buyAssetIsDivisible(true);
         return;
       }
-      failoverAPI("get_asset_info", [[newValue]], function(assetsInfo, endpoint) {
-        self.buyAssetIsDivisible(assetsInfo[0]['divisible']);
+
+      // we don't check divisibility is asset don't exists
+      // TODO: check error on otherBuyAsset instead another loop
+      var match = ko.utils.arrayFirst(self.allAssets(), function(item) {
+          return item == newValue;
       });    
+      if (match) {
+        failoverAPI("get_asset_info", [[newValue]], function(assetsInfo, endpoint) {
+          $.jqlog.debug(newValue+" divisibility: "+assetsInfo[0]['divisible']);
+          self.buyAssetIsDivisible(assetsInfo[0]['divisible']);
+        });
+      } else {
+        $.jqlog.debug(newValue+" is not an asset");
+      }
+          
     });
 
     self.sellAsset.subscribe(function(newValue) {
