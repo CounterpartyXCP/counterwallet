@@ -163,3 +163,11 @@ function primeAddress(address, numNewPrimedTxouts, utxosData, onSuccess) {
     return onSuccess(address, numNewPrimedTxouts);
   });
 }
+
+function isWifKey(privateKey) {
+  if (USE_TESTNET) {
+    return privateKey.length==52 && (privateKey[0]=='c');
+  } else {
+    return privateKey.length==52 && (privateKey[0]=='L' || privateKey[0]=='K');
+  }
+}

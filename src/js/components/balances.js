@@ -291,6 +291,7 @@ var SweepAssetInDropdownItemModel = function(asset, rawBalance, normalizedBalanc
   this.SELECT_LABEL = asset + " (bal: " + normalizedBalance + ")";
   this.ASSET_INFO = assetInfo;
 };
+
 function SweepModalViewModel() {
   var self = this;
   self.shown = ko.observable(false);
@@ -299,9 +300,11 @@ function SweepModalViewModel() {
     validation: {
       validator: function (val, self) {
         var key = new Bitcoin.ECKey(self.privateKey());
+        
         var doesVersionMatch = key.version == (USE_TESTNET ?
           Bitcoin.network.testnet.addressVersion : Bitcoin.network.mainnet.addressVersion);
-        return key.priv !== null && key.compressed !== null && key.version !== null && doesVersionMatch;
+
+        return isWifKey(self.privateKey()) && key.priv !== null && key.compressed !== null && key.version !== null && doesVersionMatch;
       },
       message: 'Not a valid' + (USE_TESTNET ? ' TESTNET ' : ' ') + 'private key.',
       params: self
