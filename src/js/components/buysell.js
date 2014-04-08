@@ -623,7 +623,7 @@ function BuySellWizardViewModel() {
              get_asset: self.buyAsset(),
              _get_divisible: self.buyAssetIsDivisible(),
              fee_required: self.buyAsset() == 'BTC' ? denormalizeQuantity(self.feeForSelectedBTCQuantity()) : null,
-             fee_provided: self.sellAsset() == 'BTC' ? denormalizeQuantity(self.feeForSelectedBTCQuantity()) : null,
+             fee_provided: self.sellAsset() == 'BTC' ? denormalizeQuantity(self.feeForSelectedBTCQuantity()) : MIN_FEE,
              expiration: parseInt(self.numBlocksUntilExpiration())
             },
             function(txHash, data, endpoint) {
