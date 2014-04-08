@@ -1,25 +1,27 @@
-<ul id="openOrderFeedContent" data-bind="foreach: entries" class="notification-body">
-    <li>
-      <span class="padding-10">
-        <em data-bind="css: displayColor" class="padding-5 no-border-radius pull-left margin-right-5">
-          <i class="fa fa-fw fa-exchange fa-2x"></i>
-        </em>
-        <span>
-           Order <b><span data-bind="text: ORDER['tx_index']"></span></b> @ <b class="notoAddrColor"><span data-bind="text: getAddressLabel(ORDER['source'])"></span></b><br/>
-           <b>Buy:</b> <b class="notoQuantityColor"><span data-bind="text: smartFormat(normalizeQuantity(ORDER['get_quantity'], ORDER['_get_asset_divisible']))"></span></b>
-               <b class="notoAssetColor"><span data-bind="text: ORDER['get_asset']"></span></b>
-               (remaining: <b class="notoQuantityColor"><span data-bind="text: smartFormat(normalizeQuantity(rawGetRemaining(), ORDER['_get_asset_divisible']))"></span></b> <b class="notoAssetColor"><span data-bind="text: ORDER['get_asset']"></span></b>)<br/>
-           <b>Sell:</b> <b class="notoQuantityColor"><span data-bind="text: smartFormat(normalizeQuantity(ORDER['give_quantity'], ORDER['_give_asset_divisible']))"></span></b>
-               <b class="notoAssetColor"><span data-bind="text: ORDER['give_asset']"></span></b>
-               (remaining: <b class="notoQuantityColor"><span data-bind="text: smartFormat(normalizeQuantity(rawGiveRemaining(), ORDER['_give_asset_divisible']))"></span></b> <b class="notoAssetColor"><span data-bind="text: ORDER['give_asset']"></span></b>)<br/>
-           <span class="pull-right"><button class="btn btn-xs btn-default margin-top-5" data-bind="click: cancelOpenOrder">Cancel</button></span>
-           <span class="pull-left font-xs text-muted"><i>Expires ~<span data-bind="timeago: approxExpiresInTime"></span> (@ block <span data-bind="text: ORDER['expire_index']"></span>)</i>
+<div id="openOrderFeedContent">
+  <ul data-bind="foreach: entries" class="notification-body">
+      <li>
+        <span class="padding-10">
+          <em data-bind="css: displayColor" class="padding-5 no-border-radius pull-left margin-right-5">
+            <i class="fa fa-fw fa-exchange fa-2x"></i>
+          </em>
+          <span>
+             Order <b><span data-bind="text: ORDER['tx_index']"></span></b> @ <b class="notoAddrColor"><span data-bind="text: getAddressLabel(ORDER['source'])"></span></b><br/>
+             <b>Buy:</b> <b class="notoQuantityColor"><span data-bind="text: smartFormat(normalizeQuantity(ORDER['get_quantity'], ORDER['_get_asset_divisible']))"></span></b>
+                 <b class="notoAssetColor"><span data-bind="text: ORDER['get_asset']"></span></b>
+                 (remaining: <b class="notoQuantityColor"><span data-bind="text: smartFormat(normalizeQuantity(rawGetRemaining(), ORDER['_get_asset_divisible']))"></span></b> <b class="notoAssetColor"><span data-bind="text: ORDER['get_asset']"></span></b>)<br/>
+             <b>Sell:</b> <b class="notoQuantityColor"><span data-bind="text: smartFormat(normalizeQuantity(ORDER['give_quantity'], ORDER['_give_asset_divisible']))"></span></b>
+                 <b class="notoAssetColor"><span data-bind="text: ORDER['give_asset']"></span></b>
+                 (remaining: <b class="notoQuantityColor"><span data-bind="text: smartFormat(normalizeQuantity(rawGiveRemaining(), ORDER['_give_asset_divisible']))"></span></b> <b class="notoAssetColor"><span data-bind="text: ORDER['give_asset']"></span></b>)<br/>
+             <span class="pull-right"><button class="btn btn-xs btn-default margin-top-5" data-bind="click: cancelOpenOrder">Cancel</button></span>
+             <span class="pull-left font-xs text-muted"><i>Expires ~<span data-bind="timeago: approxExpiresInTime"></span> (@ block <span data-bind="text: ORDER['expire_index']"></span>)</i>
+          </span>
         </span>
-      </span>
-    </li>
-</ul>
-<div data-bind="visible: !entries().length" class="emptyFeedContainer">
-    <i class="fa fa-2x fa-inbox"></i>&nbsp;<span class="font-xl">No entries</span>
+      </li>
+  </ul>
+  <div data-bind="visible: !dispCount" class="emptyFeedContainer">
+      <i class="fa fa-2x fa-inbox"></i>&nbsp;<span class="font-xl">No entries</span>
+  </div>
 </div>
 
 <script type="text/javascript">
