@@ -9,7 +9,7 @@ var PREFERENCES = {}; //set when logging in
 var MAX_ADDRESSES = 20; //totall arbitrary :)
 var MAX_INT = Math.pow(2, 63) - 1;
 var UNIT = 100000000; //# satoshis in whole
-var MIN_FEE = 10000; // in satoshis (== .0001 BTC)
+var MIN_FEE = 20000; // in satoshis (== .0001 BTC)
 var REGULAR_DUST_SIZE = 5430;
 var MULTISIG_DUST_SIZE = 5430 * 2;
 var APPROX_SECONDS_PER_BLOCK = 8 * 60; //a *rough* estimate on how many seconds per each block (used for estimating open order time left until expiration, etc)
