@@ -390,6 +390,9 @@ ko.validation.rules['handleIsNotInUse'] = {
   validator: function (val, self, callback) {
     failoverAPI("is_chat_handle_in_use",  {'handle': val},
       function(isInUse, endpoint) {
+        $.jqlog.debug("Handle in use: "+isInUse);
+        CHAT_SET_HANDLE_MODAL.startEnable(!isInUse);
+        $('#startChatBtn').prop("disabled", isInUse); //not correctly set by knockout
         return callback(!isInUse);
       }
     );   
@@ -406,6 +409,7 @@ ko.validation.registerExtenders();
 function ChatSetHandleModalViewModel() {
   var self = this;
   self.shown = ko.observable(false);
+  self.startEnable = ko.observable(false);
   
   self.newHandle = ko.observable('').extend({
     required: true,
@@ -424,6 +428,9 @@ function ChatSetHandleModalViewModel() {
   }
   
   self.submitForm = function() {
+    if ($('#startChatBtn').prop("disabled")) {
+      return;
+    }
     if(self.newHandle.isValidating()) {
       setTimeout(function() { //wait a bit and call again
         self.submitForm();
@@ -439,6 +446,9 @@ function ChatSetHandleModalViewModel() {
   }
 
   self.doAction = function() {
+    if ($('#startChatBtn').prop("disabled")) {
+      return;
+    }
     //Save the handle back at counterwalletd
     multiAPI("store_chat_handle", [WALLET.identifier(), self.newHandle()], function(data, endpoint) {
       CHAT_FEED.handle(self.newHandle());
@@ -473,4 +483,14 @@ $(document).ready(function() {
       e.preventDefault(); 
     } 
   });  
+
+  // we disable the form until handle is verified
+  $('input[name=newHandle]').keydown(function(e) {
+    if (e.keyCode != 13) {
+      $('#startChatBtn').prop("disabled", true);
+    }    
+  })
+  $('#chatSetHandleModal form').submit(function(event) {
+    return !$('#startChatBtn').prop("disabled");
+  });
 });

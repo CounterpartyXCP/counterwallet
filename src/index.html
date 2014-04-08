@@ -378,7 +378,7 @@
           </div>
           <div class="modal-footer">
             <button type="button" class="btn btn-default" data-bind="click: hide">Cancel</button>
-            <button type="button" data-bind="click: submitForm" class="btn btn-primary">Start Chat</button>
+            <button id="startChatBtn" type="button" data-bind="click: submitForm, enable: startEnable" class="btn btn-primary">Start Chat</button>
           </div>
         </div><!-- /.modal-content -->
       </div><!-- /.modal-dialog -->
