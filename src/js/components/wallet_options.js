@@ -15,7 +15,6 @@ function WalletOptionsModalViewModel() {
   ]);
   
   //set these properties to null as PREFERENCES is not available until login happens (they will be formally set on login)
-  self.autoPrimeEnabled = ko.observable(null);
   self.autoBTCPayEnabled = ko.observable(null);
   self.selectedTheme = ko.observable(null);
   self.selectedLang = ko.observable(null);
@@ -25,11 +24,6 @@ function WalletOptionsModalViewModel() {
   self.showInfoTable = ko.observable(false);
   self.myIPAddr = ko.observable('');
   self.myCookie = ko.observable('');
-
-  self.autoPrimeEnabled.subscribeChanged(function(newVal, prevVal) {
-    assert(newVal === true || newVal === false);
-    PREFERENCES['auto_prime'] = newVal;
-  });
 
   self.autoBTCPayEnabled.subscribeChanged(function(newVal, prevVal) {
     assert(newVal === true || newVal === false);
@@ -65,7 +59,6 @@ function WalletOptionsModalViewModel() {
     self.ORIG_PREFERENCES_JSON = JSON.stringify(PREFERENCES); //store to be able to tell if we need to update prefs on the server
 
     //display current settings into the options UI
-    self.autoPrimeEnabled(PREFERENCES['auto_prime']);
     self.autoBTCPayEnabled(PREFERENCES['auto_btcpay']);
     self.selectedTheme(PREFERENCES['selected_theme']);
     self.selectedLang(PREFERENCES['selected_lang']);

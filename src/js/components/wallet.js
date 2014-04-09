@@ -231,26 +231,6 @@ function WalletViewModel() {
             }
           }
           
-          //see if we should auto auto prime
-          //NOTE: when deciding whether to auto-prime or not, look at # primed txouts with 0 confirms. otherwise, if we use the txouts with >= 1 confirm
-          // we will have a situation where the thing will keep repriming the account every 5 minutes until the next block comes in :O
-          if(   PREFERENCES['auto_prime']
-             && !(addressObj.IS_WATCH_ONLY)
-             && (data[i]['unconfirmedRawBal'] < 0 ? (data[i]['confirmedRawBal'] + data[i]['unconfirmedRawBal']) : data[i]['confirmedRawBal']) >= AUTOPRIME_MIN_CONFIRMED_BTC_BAL * UNIT
-             && data[i]['numPrimedTxoutsIncl0Confirms'] !== null
-             && data[i]['numPrimedTxoutsIncl0Confirms'] < AUTOPRIME_AT_LESSTHAN_REMAINING) {
-            var maxPrimedTxoutsPossible = parseInt((data[i]['confirmedRawBal'] - MIN_FEE) / MIN_PRIME_BALANCE);
-            var numPrimedTxoutsToCreate = Math.min(maxPrimedTxoutsPossible, AUTOPRIME_MAX_COUNT);
-            assert(numPrimedTxoutsToCreate > 0); //shouldn't ever hit this with the earlier balanace check
-            $.jqlog.debug("refreshBTCBalances: Address " + data[i]['addr'] + " has a confirmed balance of " + normalizeQuantity(data[i]['confirmedRawBal'])
-              + " BTC and only " + data[i]['numPrimedTxoutsIncl0Confirms'] + " primed utxos remaining. Creating " + numPrimedTxoutsToCreate
-              + " additional utxos...");
-            primeAddress(data[i]['addr'], numPrimedTxoutsToCreate, data[i]['rawUtxoData'],
-              function(address, numNewPrimedTxouts) {
-                $.jqlog.debug("Auto priming for address " + address + " complete!");
-              }
-            );
-          }
         } else { //non-watch only with a zero balance == no primed txouts (no need to even try and get a 500 error)
           addressObj.numPrimedTxouts(0);
           addressObj.numPrimedTxoutsIncl0Confirms(0);

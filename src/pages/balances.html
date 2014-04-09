@@ -78,7 +78,6 @@
                 </ul>
               </div>
             </div>
-            <div data-bind="visible: !IS_WATCH_ONLY" class="widget-toolbar"><span id="" data-bind="click: prime, html: dispNumPrimedTxouts"></span></div>  
             <div class="widget-toolbar"><span id="" data-bind="attr: {'id': 'address-text-' + $data.ADDRESS}, click: function(data, event) { return selectText('address-text-' + $data.ADDRESS); }, text: ADDRESS"></span></div>
             <div class="clearfix"></div>  
           </header>
@@ -349,51 +348,6 @@
       <div class="modal-footer">
         <button type="button" class="btn btn-default" data-bind="click: hide">Close</button>
         <button type="button" data-bind="click: submitForm" class="btn btn-primary">Sign</button>
-      </div>
-    </div><!-- /.modal-content -->
-  </div><!-- /.modal-dialog -->
-</div><!-- /.modal -->
-
-<!-- modal for priming address -->
-<div data-bind="showModal: shown" id="primeAddressModal" class="modal fade" data-backdrop="static" data-keyboard="false" tabindex="-1" role="dialog" aria-labelledby="primeAddressModal" aria-hidden="true">
-  <div class="modal-dialog">
-    <div class="modal-content">
-      <div class="modal-header">
-        <button type="button" data-bind="click: hide" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
-        <h4 class="modal-title">"Prime" Address <b></b><span data-bind="text: address"></span></b></h4>
-      </div>
-      <div class="modal-body no-padding">
-        <div class="formPadded">
-            <p class="errorColor" style="font-weight:bold;" data-bind="fadeVisibleInOnly: showNoPrimedInputsError">
-                You need to prime your account before you can perform the selected action. Please complete this then try
-                again once the priming is complete and confirmed on the blockchain.</p>
-            <p style="color: green;font-weight:bold" data-bind="fadeVisibleInOnly: autoPrime">
-                As auto-priming is enabled for your wallet, you shouldn't have to use this.</p>
-            <p>In order to do things with Counterparty, your address needs to
-                contain at least one confirmed <a href="http://bitcoin.stackexchange.com/questions/4301/what-is-an-unspent-output" target="_blank">"unspent output"</a>
-                for each action you want to do (e.g. send, create asset, etc).</p>
-            <p>This form allows you to take one or more larger unspent outputs that you may have at
-                your address and split it into many smaller ones, allowing you to perform multiple Counterparty actions without
-                having to wait between each one. We call this <b>"priming"</b> the address.</p>
-            <p>You currently have <b><span data-bind="text: dispNumPrimedTxouts"></span> unspent outputs</b> for address <b><span data-bind="text: address"></span></b>.
-                We recommend you try to keep between 5 and 15 unspent outputs. Note that this operation won't add, remove or delete any funds.
-                It simply changes how those funds are structured on the blockchain.</p>
-        </div>
-        <form class="smart-form" data-bind="submit: doAction"><fieldset>
-          <section><div class="row">
-            <label class="control-label col col-sm-2">Create Additional</label>
-            <div class="col col-sm-10">
-                <label class="input"><i class="icon-append fa fa-plus"></i>
-                    <input name="numNewPrimedTxouts" data-bind="value: numNewPrimedTxouts, valueUpdate: 'input'" type="text"/>
-                </label>
-                <div class="note">The number of additional unspent outputs you want to prime the account with.</div>
-            </div>
-          </div></section>
-        </fieldset></form>
-      </div>
-      <div class="modal-footer">
-        <button type="button" class="btn btn-default" data-bind="click: hide">Cancel</button>
-        <button type="button" data-bind="click: submitForm" class="btn btn-warning">Prime</button>
       </div>
     </div><!-- /.modal-content -->
   </div><!-- /.modal-dialog -->
@@ -838,7 +792,6 @@
   window.SEND_MODAL = new SendModalViewModel();
   window.SWEEP_MODAL = new SweepModalViewModel();
   window.SIGN_MESSAGE_MODAL = new SignMessageModalViewModel();
-  window.PRIME_ADDRESS_MODAL = new PrimeAddressModalViewModel();
   window.TESTNET_BURN_MODAL = new TestnetBurnModalViewModel();
   
   ko.applyBindings({}, document.getElementById("gettingStartedNotice"));
@@ -847,7 +800,6 @@
   ko.applyBindingsWithValidation(SEND_MODAL, document.getElementById("sendModal"));
   ko.applyBindingsWithValidation(SWEEP_MODAL, document.getElementById("sweepModal"));
   ko.applyBindingsWithValidation(SIGN_MESSAGE_MODAL, document.getElementById("signMessageModal"));
-  ko.applyBindingsWithValidation(PRIME_ADDRESS_MODAL, document.getElementById("primeAddressModal"));
   ko.applyBindingsWithValidation(TESTNET_BURN_MODAL, document.getElementById("testnetBurnModal"));
     
   //balances_assets.js

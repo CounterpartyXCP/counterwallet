@@ -23,10 +23,6 @@ var MARKET_INFO_REFRESH_EVERY = 5 * 60 * 1000; //refresh market info every 5 min
 
 var NUM_BLOCKS_TO_WAIT_FOR_BTCPAY = 6; //number of blocks to wait until the user can make a BTCpay on an order match where they owe BTC
 
-var AUTOPRIME_AT_LESSTHAN_REMAINING = 10; //auto prime at less than this many txouts remaining
-var AUTOPRIME_MAX_COUNT = 10; //max number of txns to add with an autoprime
-var AUTOPRIME_MIN_CONFIRMED_BTC_BAL = 0.005; //don't autoprime if the account has less than this balance (too much churn)
-
 var ACTION_PENDING_NOTICE = "<b><u>This action will take some time to complete</u></b>, and will appear as a Pending Action until"
   + " confirmed on the network. <b class='errorColor'>Until that time, the wallet will not reflect the change. Please be patient.</b>";
 
@@ -36,7 +32,6 @@ var DEFAULT_PREFERENCES = {
   'selected_theme': 'ultraLight',
   'selected_lang': 'en-us',
   'watch_only_addresses': [],
-  'auto_prime': true, //default to auto prime being enabled
   'auto_btcpay': true //default to auto BTC payments being enabled
 };
 

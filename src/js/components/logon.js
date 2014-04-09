@@ -124,8 +124,6 @@ function LogonViewModel() {
           mustSavePreferencesToServer = true;
         }
         
-        //Update options from what's in preferences
-        WALLET_OPTIONS_MODAL.autoPrimeEnabled(PREFERENCES['auto_prime']);
         WALLET_OPTIONS_MODAL.selectedTheme(PREFERENCES['selected_theme']);
         WALLET_OPTIONS_MODAL.selectedLang(PREFERENCES['selected_lang']);
         

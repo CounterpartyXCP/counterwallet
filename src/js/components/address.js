@@ -42,18 +42,6 @@ function AddressViewModel(key, address, initialLabel) {
     }
   }, self);
   
-  self.dispNumPrimedTxouts = ko.computed(function(){
-    var txo = self.numPrimedTxouts();
-    var priming = txo != self.numPrimedTxoutsIncl0Confirms();
-    if(txo === null || self.numPrimedTxoutsIncl0Confirms() === null)
-      return 'Primed:&nbsp;<span class="badge">??</span>'; 
-    if(txo < 3)
-      return 'Primed:&nbsp;<span class="badge ' + (priming ? 'badge-orange' : 'badge-error') + '">'+txo+'</span>'; 
-    if(txo < 5)
-      return 'Primed:&nbsp;<span class="badge ' + (priming ? 'badge-orange' : 'badge-warning') + '">'+txo+'</span>';
-    return 'Primed:&nbsp;<span class="badge ' + (priming ? 'badge-orange' : 'badge-success') + '">'+txo+'</span>'; 
-  }, self);
-  
   self.getAssetObj = function(asset) {
     //given an asset string, return a reference to the cooresponding AssetViewModel object
     return ko.utils.arrayFirst(self.assets(), function(a) {
@@ -154,11 +142,6 @@ function AddressViewModel(key, address, initialLabel) {
   //Address-panel-related
   self.changeLabel = function(params) {
     CHANGE_ADDRESS_LABEL_MODAL.show(self.ADDRESS, self.label());
-  }
-  
-  self.prime = function() {
-    //No need for WALLET.canDoTransaction here, as PRIME_ADDRESS_MODAL checks for 0 BTC balance
-    PRIME_ADDRESS_MODAL.show(self.ADDRESS);
   }
   
   self.showQRCode = function() {

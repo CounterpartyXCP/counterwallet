@@ -121,49 +121,6 @@ function testnetBurnDetermineEarned(blockHeight, burned) {
   return normalizeQuantity(earned);
 }
 
-function primeAddress(address, numNewPrimedTxouts, utxosData, onSuccess) {
-  //construct a transaction
-  var sendTx = new Bitcoin.Transaction();
-  var inputQuantity = (numNewPrimedTxouts * MIN_PRIME_BALANCE) + MIN_FEE; //in satoshi
-  var inputQuantityRemaining = inputQuantity;
-  var txHash = null, txOutputN = null, txIn = null;
-  //Create inputs, using smallest quantity of the highest value UTXOs possible (to avoid
-  // consuming our small primed inputs, which would be counterproductive :)
-  utxosData.sort(function(a, b) { return b['amount'] - a['amount']; }); //sort descending on output value  
-  for(var i=0; i < utxosData.length; i++) {
-      txIn = new Bitcoin.TransactionIn({
-        outpoint: {
-          hash: utxosData[i]['txid'],
-          index: utxosData[i]['vout']
-        }
-      });
-      sendTx.addInput(txIn);
-      sendTx.ins[i].script = Bitcoin.Script.fromHex(utxosData[i]['scriptPubKey']);
-      inputQuantityRemaining -= denormalizeQuantity(utxosData[i]['amount']);
-      if(inputQuantityRemaining <= 0)
-        break;
-  } 
-  assert(inputQuantityRemaining <= 0, "Insufficient confirmed bitcoin balance to prime account: " + address);
-  
-  //Create outputs for the priming itself (x MIN_PRIME_BALANCE BTC outputs)
-  for(var i=0; i < numNewPrimedTxouts; i++) {
-    sendTx.addOutput(address, MIN_PRIME_BALANCE);
-  }
-  //Create an output for change
-  var changeQuantity = Math.abs(inputQuantityRemaining);
-  sendTx.addOutput(address, changeQuantity);
-  //^ The remaining should be MIN_FEE, which will of course go to the miners
-  
-  var rawTxHex = sendTx.serializeHex();
-  WALLET.signAndBroadcastTx(address, rawTxHex, function(primingTxHash, endpoint) {
-    PENDING_ACTION_FEED.add(primingTxHash, "_primeaddrs", {
-      'source': address,
-      'numNewPrimedTxouts': numNewPrimedTxouts
-    });
-    return onSuccess(address, numNewPrimedTxouts);
-  });
-}
-
 function isWifKey(privateKey) {
   if (USE_TESTNET) {
     return privateKey.length==52 && (privateKey[0]=='c');
