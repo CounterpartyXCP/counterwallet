@@ -11,8 +11,8 @@
   // Note: You will also need to change this variable in the "variable.less" file.
   $.navbar_height = 49; 
 
-  // Override soud path defined src/vendors/smartadmin/js/notification/SmartNotification.js
-  $.sound_path="sound/";
+  // Override soud path defined in src/vendors/smartadmin/js/notification/SmartNotification.js
+  $.sound_path="assets/";
   /*
    * APP DOM REFERENCES
    * Description: Obj DOM reference, please try to avoid changing these
