@@ -95,6 +95,13 @@ function PendingActionFeedViewModel() {
   self.dispCount = ko.computed(function() {
     return self.entries().length;
   }, self);
+
+  self.pendingSellBTCOrdersCount = ko.computed(function() {
+    return $.map(self.entries(), function(item) { 
+        var sellingBTC = ('orders' == item.CATEGORY && 'BTC' == item.DATA.give_asset) || ('btcpays' == item.CATEGORY);
+        return sellingBTC ? item : null;
+    }).length;
+  }, self);
   
   self.getLocalStorageKey = function() {
     return 'pendingActions_' + WALLET.identifier();
