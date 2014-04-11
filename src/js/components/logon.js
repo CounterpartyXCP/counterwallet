@@ -139,28 +139,30 @@ function LogonViewModel() {
   self.openWalletPt2 = function(mustSavePreferencesToServer) {
       //generate the appropriate number of addresses
       var seed = mn_decode(self.sanitizedEnteredPassphrase());
-      WALLET.BITCOIN_WALLET = Bitcoin.Wallet(seed, {
+      var options = {
         network: USE_TESTNET ? "testnet" : "mainnet",
         derivationMethod: 'private'
-      });
+      }
       
+      WALLET.BITCOIN_WALLET = Bitcoin.Wallet(seed, options);
+
       //kick off address generation (we have to take this hacky approach of using setTimeout, otherwise the
       // progress bar does not update correctly through the HD wallet build process....)
       setTimeout(function() { self.genAddress(mustSavePreferencesToServer) }, 1);
   }
   
   self.genAddress = function(mustSavePreferencesToServer) {
-    WALLET.BITCOIN_WALLET.generateAddress();
-    var i = WALLET.BITCOIN_WALLET.getPrivateKeys().length - 1;
-    var hd = WALLET.BITCOIN_WALLET.getPrivateKey(i);
-    var address = hd.priv.getBitcoinAddress().toString();
-    var addressHash = hashToB64(address);
     
+    var address = WALLET.BITCOIN_WALLET.generateAddress();
+    var i = WALLET.BITCOIN_WALLET.addresses.length - 1;
+    var privkey = WALLET.BITCOIN_WALLET.getPrivateKey(i);
+    var addressHash = hashToB64(address);
+
     if(PREFERENCES.address_aliases[addressHash] === undefined) { //no existing label. we need to set one
       mustSavePreferencesToServer = true; //if not already true
       PREFERENCES.address_aliases[addressHash] = "My Address #" + (WALLET.addresses().length + 1).toString();
     }
-    WALLET.addAddress(hd.priv);
+    WALLET.addAddress(privkey);
 
     var progress = (i + 1) * (100 / PREFERENCES['num_addresses_used']);
     self.walletGenProgressVal(progress);

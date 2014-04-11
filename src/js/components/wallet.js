@@ -17,7 +17,7 @@ function WalletViewModel() {
     //also, a label should already exist for the address in PREFERENCES.address_aliases by the time this is called
 
     //derive an address from the key (for the appropriate network)
-    var address = key.getBitcoinAddress().toString();
+    var address = key.getAddress(NETWORK_VERSION).toString();
     //Make sure this address doesn't already exist in the wallet (sanity check)
     assert(!self.getAddressObj(address), "Cannot addAddress: address already exists in wallet!");
     //see if there's a label already for this address that's stored in PREFERENCES, and use that if so

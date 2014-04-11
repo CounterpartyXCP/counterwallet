@@ -531,15 +531,17 @@
     <!-- socket.io -->
     <script src="vendors/socket.io-client/dist/socket.io.min.js"></script>
     <script src="vendors/jqlog/jquery.jqlog-1.3.min.js"></script>
+
+    <!--  bitcoinjs lib -->
+    <script src="vendors/bitcoinjs-lib/bitcoinjs-min.js"></script>
     <!-- endbuild -->
 
     <!-- COUNTERWALLET SPECIFIC JS INCLUDES --> 
     <!-- JavaScript created specifically for Counterwallet. -->
     <!-- build:js js/counterwallet-min.js -->
+    <script src="js/mnemonic.js"></script> <!-- can not find official source -->
     <script src="js/consts.js"></script>
     <script src="js/counterwallet.js"></script>
-    <script src="js/bitcoinjs-min.js"></script><!-- need update to use vendors/bitcoinjs-lib -->
-    <script src="js/mnemonic.js"></script> <!-- can not find official source -->
     <script src="js/util.js"></script>
     <script src="js/util.api.js"></script>
     <script src="js/util.bitcoin.js"></script>
