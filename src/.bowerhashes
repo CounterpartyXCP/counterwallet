@@ -20,6 +20,8 @@
     "src/vendors/cryptojs/components/core-min.js": "28c1ab26fabd75b7cc54c136a81584ef32adb4e978123dc645742c1cd5f75d8c",
     "src/vendors/cryptojs/components/sha256-min.js": "47213870c70226255209b3e828a44040bbc60a047bbb0343ed0d3d3dbde36904",
     "src/vendors/cryptojs/components/enc-base64-min.js": "893491ca18f2e0a77fec98bbf1e461d43ea6b36bd88199c98804d2ba63c1aba2",
+    "src/vendors/jsbn/jsbn.js": "83ef81a7b16b11b224e1c8f8bcbcf117fc89aeaa2e95ed63a6b95bb11fb4da94",
+    "src/vendors/jsbn/jsbn2.js": "9438fd6b4fd1799eaba2f47358e90939bcde4cd7419a9b63e260fa0d0fcf6111",
     "src/vendors/jsbn/prng4.js": "f71989c098238695de7b7f60f891c282c2ff2ee3156fbf1132caf49d1ed39d49",
     "src/vendors/jsbn/rng.js": "1ae726b618256cd41bad21beb5f6caac39632f2ccf753802e9b4d5c6511377ec",
     "src/vendors/jReject/js/jquery.reject.js": "3df535b258480e54a37685dc59b77d02869b5ac8c6d90274ce8c2e51b9a298a8",
@@ -37,7 +39,6 @@
     "src/vendors/knockout-bootstrap/build/knockout-bootstrap.min.js": "3d253ef8aec822390231333008ce43cecb08d885446dac6edb4cc666990686d5",
     "src/vendors/knockout-validation/Dist/knockout.validation.min.js": "46347e6ebb9d8d909b0840713118ca0f2cdcd9526767025b9fa7d5483a4af94e",
     "src/vendors/highstock/highstock.src.js": "1257bab7ca686ce0ea60c598a0838700ad73ac3a42f2d8d0c1022fd3739d91a4",
-    "src/vendors/qrcode/lib/qrcode.min.js": "f2f65a806b91f2c52d98e8c86a4ac0d2da925a8a47c5ded8db8f35d3b8c46d04",
     "src/vendors/jsdecimal/lib/decimal.js": "ba0b975987a7ac1d74727f5edcb49bfb69d42be08d7682b5328aaee1eb1da7de",
     "src/vendors/socket.io-client/dist/socket.io.min.js": "17f4c075ad907cb0fb38bf76de5d0af7832a95cddf1bf642e75daadf8d1e5201",
     "src/vendors/jqlog/jquery.jqlog-1.3.min.js": "15bdd1693ad39873922e017c5570c49233c5d5e7c2f209ec32145b3badf36291"
