@@ -298,12 +298,16 @@ function SweepModalViewModel() {
     required: true,
     validation: {
       validator: function (val, self) {
-        var key = new Bitcoin.ECKey(self.privateKey());
-        
-        var doesVersionMatch = key.version == (USE_TESTNET ?
-          Bitcoin.network.testnet.addressVersion : Bitcoin.network.mainnet.addressVersion);
+  
+        var key = BitcoinECKey(self.privateKey());      
+        var doesVersionMatch = key.version == NETWORK_VERSION;
 
-        return isWifKey(self.privateKey()) && key.priv !== null && key.compressed !== null && key.version !== null && doesVersionMatch;
+        /*$.jqlog.debug('adress:'+key.getBitcoinAddress());
+        $.jqlog.debug('compressed:'+key.compressed);
+        $.jqlog.debug('version:'+key.version);
+        $.jqlog.debug('priv:'+key.priv);*/
+
+        return key.priv !== null && key.compressed !== null && key.version !== null && doesVersionMatch;
       },
       message: 'Not a valid' + (USE_TESTNET ? ' TESTNET ' : ' ') + 'private key.',
       params: self
@@ -337,7 +341,7 @@ function SweepModalViewModel() {
   self.addressForPrivateKey = ko.computed(function() {
     if(!self.privateKeyValidated.isValid()) return null;
     //Get the address for this privatekey
-    var key = new Bitcoin.ECKey(self.privateKey());
+    var key = BitcoinECKey(self.privateKey());
     assert(key.priv !== null && key.compressed !== null, "Private key not valid!"); //should have been checked already
     return key.getAddress(NETWORK_VERSION).toString();
   }, self);
@@ -406,7 +410,7 @@ function SweepModalViewModel() {
   self._signInputs = function(unsignedTxHex) {
     var sendTx = Bitcoin.Transaction.deserialize(unsignedTxHex);
     var txInHash = null, signature = null, SIGHASH_ALL = 1;
-    var key = new Bitcoin.ECKey(self.privateKey());
+    var key = new BitcoinECKey(self.privateKey());
     for(var i = 0; i < sendTx.ins.length; i++) {
       txInHash = txIn.hashTransactionForSignature(sendTx.ins[i].script, i, SIGHASH_ALL);
       signature = key.sign(txInHash);
@@ -561,7 +565,7 @@ function SweepModalViewModel() {
   }
   
   self.doAction = function() {
-    var key = new Bitcoin.ECKey(self.privateKey());
+    var key = new BitcoinECKey(self.privateKey());
     assert(key.priv !== null && key.compressed !== null, "Private key not valid!"); //should have been checked already
     var pubkey = key.getPub().toHex();
     var sendsToMake = [];

@@ -17,7 +17,7 @@ var MIN_PRIME_BALANCE = 50000; //in satoshis ... == .0005
 var ASSET_CREATION_FEE_XCP = 0.5; //in normalized XCP
 var MAX_ASSET_DESC_LENGTH = 41; //42, minus a null term character?
 var ORDER_DEFAULT_BTCFEE_PCT = 1; //1% of total order
-var ORDER_DEFAULT_EXPIRATION = 320; //num blocks until expiration (at ~9 min per block this is ~48hours)
+var ORDER_DEFAULT_EXPIRATION = 1080; //num blocks until expiration (at ~9 min per block this is ~6.75 days)
 var DEFAULT_NUM_ADDRESSES = 3; //default number of addresses to generate
 var MARKET_INFO_REFRESH_EVERY = 5 * 60 * 1000; //refresh market info every 5 minutes while enabled 
 
@@ -128,6 +128,7 @@ var IS_DEV = (location.pathname == "/" && qs("dev") && qs("dev") != '0' ? true :
 var USE_TESTNET = (   ((location.pathname == "/" || location.pathname == "/src/" || location.pathname == "/build/") && qs("testnet") && qs("testnet") != '0')
                    || location.hostname.indexOf('testnet') == 0 ? true : false
                   );
+var NETWORK_VERSION = USE_TESTNET ? Bitcoin.network.testnet.addressVersion : Bitcoin.network.mainnet.addressVersion;
 
 //CONSTANTS THAT DEPEND ON IS_DEV / USE_TESTNET
 var BLOCKEXPLORER_URL = USE_TESTNET ? "http://test.bitcore.io" : "http://live.bitcore.io";

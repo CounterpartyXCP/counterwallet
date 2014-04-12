@@ -71,6 +71,12 @@ function OpenOrderFeedViewModel() {
   self.dispCount = ko.computed(function() {
     return self.entries().length;
   }, self);
+
+  self.sellBTCOrdersCount = ko.computed(function() {
+    return $.map(self.entries(), function(item) {       
+        return ('BTC' == item.ORDER['give_asset']) ? item : null;
+    }).length;
+  }, self);
   
   //Every 60 seconds, run through all entries and update their 'now' members
   setInterval(function() {
