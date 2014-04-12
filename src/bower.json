@@ -5,7 +5,7 @@
         "jquery-ui": "1.10.3",
         "smartadmin": "https://github.com/xnova/countersmartadmin.git",
         "cryptojs": "https://crypto-js.googlecode.com/files/CryptoJS%20v3.1.2.zip",
-        "bitcoinjs-lib": "https://github.com/bitcoinjs/bitcoinjs-lib.git#2e26a137d504857fb3708624da26ab002aff1737",
+        "bitcoinjs-lib": "https://github.com/bitcoinjs/bitcoinjs-lib.git#97575e8f460215fa660850d66f85c2b8f6d17f2c",
         "bootbox": "4.2.0",
         "bootstrap-datetimepicker": "https://github.com/Eonasdan/bootstrap-datetimepicker.git#3.0.0",
         "jsdecimal": "https://github.com/hiroshi-manabe/JSDecimal.git",
