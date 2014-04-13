@@ -99,6 +99,10 @@ function WaitingBTCPayFeedViewModel() {
   var self = this;
   self.entries = ko.observableArray([]);
   self.lastUpdated = ko.observable(new Date());
+  
+  self.entries.subscribe(function() {
+    WALLET.isSellingBTC(self.entries().length + UPCOMING_BTCPAY_FEED.entries().length ? true : false);
+  });
 
   //Every 60 seconds, run through all entries and update their 'now' members
   setInterval(function() {
@@ -237,6 +241,10 @@ function UpcomingBTCPayFeedViewModel() {
   var self = this;
   self.entries = ko.observableArray([]);
   self.lastUpdated = ko.observable(new Date());
+  
+  self.entries.subscribe(function() {
+    WALLET.isSellingBTC(WAITING_BTCPAY_FEED.entries().length + self.entries().length ? true : false);
+  });
   
   //Every 60 seconds, run through all entries and update their 'now' members
   setInterval(function() {
