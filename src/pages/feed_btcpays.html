@@ -6,7 +6,7 @@
         </em>
         <span>
            A payment of
-           <b class="notoQuantityColor"><span data-bind="text: BTCPAY_DATA['btcQuantity']"></span></b>
+           <b class="notoQuantityColor"><span data-bind="text: smartFormat(BTCPAY_DATA['btcQuantity'])"></span></b>
            <b class="notoAssetColor">BTC</b> is required from 
            <b class="notoAddrColor"><span data-bind="text: getAddressLabel(BTCPAY_DATA['myAddr'])"></span></b> to settle payment for
            matched order <b><span data-bind="html: getLinkForCPData('tx', BTCPAY_DATA['myOrderTxIndex'])"></span></b>.
@@ -25,8 +25,8 @@
         </em>
         <span>
            <span data-bind="text: numBlocksUntilEligible"></span> block(s) (~<span data-bind="timeago: approxTimeUntilEligible"></span>)
-           remaining until order <b><span data-bind="html: getLinkForCPData('tx', BTCPAY_DATA['myOrderTxIndex'])"></span></b>
-           is eligible for <b class="notoQuantityColor"><span data-bind="text: BTCPAY_DATA['btcQuantity']"></span></b>
+           left until order <b><span data-bind="html: getLinkForCPData('tx', BTCPAY_DATA['myOrderTxIndex'])"></span></b>
+           is eligible for <b class="notoQuantityColor"><span data-bind="text: smartFormat(BTCPAY_DATA['btcQuantity'])"></span></b>
            <b class="notoAssetColor">BTC</b> payment.
         </span>
       </span>
@@ -37,4 +37,3 @@
   ko.applyBindings(WAITING_BTCPAY_FEED, document.getElementById("waitingBTCPayFeedContent"));
   ko.applyBindings(UPCOMING_BTCPAY_FEED, document.getElementById("upcomingBTCPayFeedContent"));
 </script>
- 

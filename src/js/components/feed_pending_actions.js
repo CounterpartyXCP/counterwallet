@@ -174,7 +174,7 @@ function PendingActionFeedViewModel() {
     for(var i=0; i < pendingActionsStorage.length; i++) {
       txHashes.push(pendingActionsStorage[i]['txHash']);
     }
-    if(!txHashes.length) return;
+    if(!txHashes.length) return onSuccess ? onSuccess() : null;
 
     //construct a new pending info storage object that doesn't include any hashes that we get no data back on
     var newPendingActionsStorage = [], pendingAction = null;
@@ -191,7 +191,7 @@ function PendingActionFeedViewModel() {
         }
         //sort the listing (newest to oldest)
         self.entries.sort(function(left, right) {
-          return left.WHEN == right.WHEN ? 0 : (left.WHEN < right.WHEN ? 1 : -1)
+          return left.WHEN == right.WHEN ? 0 : (left.WHEN < right.WHEN ? 1 : -1);
         });
       }
       localStorage.setObject(self.getLocalStorageKey(), newPendingActionsStorage);

@@ -40,25 +40,25 @@ NotificationViewModel.calcText = function(category, message) {
   
   if(category == "sends") {
     if(WALLET.getAddressObj(message['source']) && WALLET.getAddressObj(message['destination'])) {
-      desc = "You transferred <Am>" + numberWithCommas(normalizeQuantity(message['quantity'], message['_divisible']))
+      desc = "You transferred <Am>" + smartFormat(normalizeQuantity(message['quantity'], message['_divisible']))
         + "</Am> <As>" + message['asset'] + "</As> from <Ad>" + getAddressLabel(message['source'])
         + "</Ad> to <Ad>" + getAddressLabel(message['destination']) + "</Ad>";
     } else if(WALLET.getAddressObj(message['source'])) { //we sent funds
-      desc = "You sent <Am>" + numberWithCommas(normalizeQuantity(message['quantity'], message['_divisible']))
+      desc = "You sent <Am>" + smartFormat(normalizeQuantity(message['quantity'], message['_divisible']))
         + "</Am> <As>" + message['asset'] + "</As> from <Ad>" + getAddressLabel(message['source'])
         + "</Ad> to address <Ad>" +  getAddressLabel(message['destination']) + "</Ad>";
     } else if(WALLET.getAddressObj(message['destination'])) { //we received funds
       desc = "You received <Am>"
-        + numberWithCommas(normalizeQuantity(message['quantity'], message['_divisible'])) + "</Am> <As>" + message['asset']
+        + smartFormat(normalizeQuantity(message['quantity'], message['_divisible'])) + "</Am> <As>" + message['asset']
         + "</As> from <Ad>" +  getAddressLabel(message['source'])
         + "</Ad> to your address <Ad>" +  getAddressLabel(message['destination']) + "</Ad>";
     }
   } else if(category == "btcpays" && (WALLET.getAddressObj(message['source']) || WALLET.getAddressObj(message['destination']))) {
     desc = "BTCPay from <Ad>" + getAddressLabel(message['source']) + "</Ad> to <Ad>" + getAddressLabel(message['destination'])
-      + "</Ad> for <Am>" + normalizeQuantity(message['btc_amount']) + "</Am> <As>BTC</As>";
+      + "</Ad> for <Am>" + smartFormat(normalizeQuantity(message['btc_amount'])) + "</Am> <As>BTC</As>";
   } else if(category == "burns" && WALLET.getAddressObj(message['source'])) {
-    desc = "Your address <Ad>" + getAddressLabel(message['source']) + "</Ad> has burned <Am>" + normalizeQuantity(message['burned'])
-      + "</Am> <As>BTC</As> for <Am>" + normalizeQuantity(message['earned']) + "</Am> <As>XCP</As>";
+    desc = "Your address <Ad>" + getAddressLabel(message['source']) + "</Ad> has burned <Am>" + smartFormat(normalizeQuantity(message['burned']))
+      + "</Am> <As>BTC</As> for <Am>" + smartFormat(normalizeQuantity(message['earned'])) + "</Am> <As>XCP</As>";
   } else if(category == "cancels" && WALLET.getAddressObj(message['source'])) {
     desc = "Order/Bid ID <b>" + message['tx_index'] + "</b> for your address <Ad>" + getAddressLabel(message['source']) + "</Ad> was cancelled";
   } else if(category == "callbacks" || category == "dividend") {
@@ -100,26 +100,26 @@ NotificationViewModel.calcText = function(category, message) {
       } else {
         var additionalQuantity = message['quantity'] - assetObj.rawSupply();
         if(additionalQuantity) {
-          desc = "Additional <Am>" + numberWithCommas(normalizeQuantity(additionalQuantity, assetObj.DIVISIBLE))
+          desc = "Additional <Am>" + smartFormat(normalizeQuantity(additionalQuantity, assetObj.DIVISIBLE))
             + "</Am> units issued for asset <As>" + message['asset'] + "</As>";
         } else {
           //this is not a transfer, but it is not in our wallet as well we can assume it's an issuance of a totally new asset
           desc = "Asset <As>" + message['asset'] + "</As> was issued with an initial quantity of <Am>"
-            + numberWithCommas(normalizeQuantity(message['quantity'], message['divisible'])) + "</Am> units";
+            + smartFormat(normalizeQuantity(message['quantity'], message['divisible'])) + "</Am> units";
         }
       }
     }
   } else if(category == "orders" && WALLET.getAddressObj(message['source'])) {
-    desc = "Your order to buy <Am>" + numberWithCommas(normalizeQuantity(message['get_quantity'], message['_get_asset_divisible']))
+    desc = "Your order to buy <Am>" + smartFormat(normalizeQuantity(message['get_quantity'], message['_get_asset_divisible']))
       + "</Am> <As>" + message['get_asset'] + "</As> from <Ad>" + getAddressLabel(message['source'])
-      + "</Ad> in exchange for <Am>" + numberWithCommas(normalizeQuantity(message['give_quantity'], message['_give_asset_divisible']))
+      + "</Ad> in exchange for <Am>" + smartFormat(normalizeQuantity(message['give_quantity'], message['_give_asset_divisible']))
       + "</Am> <As>" + message['give_asset'] + "</As> is active";
   } else if(category == "order_matches" && (WALLET.getAddressObj(message['tx0_address']) || WALLET.getAddressObj(message['tx1_address']))) {
     desc = "Order matched between <Ad>" 
       + getAddressLabel(message['tx0_address']) + "</Ad> (gave <Am>"
-      + numberWithCommas(normalizeQuantity(message['forward_quantity'], message['_forward_asset_divisible'])) + "</Ad> <As>" + message['forward_asset'] + "</As>) and <Ad>"
+      + smartFormat(normalizeQuantity(message['forward_quantity'], message['_forward_asset_divisible'])) + "</Ad> <As>" + message['forward_asset'] + "</As>) and <Ad>"
       + getAddressLabel(message['tx1_address']) + "</Ad> (gave <Am>"
-      + numberWithCommas(normalizeQuantity(message['backward_quantity'], message['_backward_asset_divisible'])) + "</Ad> <As>" + message['backward_asset'] + "</As>)";
+      + smartFormat(normalizeQuantity(message['backward_quantity'], message['_backward_asset_divisible'])) + "</Ad> <As>" + message['backward_asset'] + "</As>)";
   } else if(category == "order_expirations" && WALLET.getAddressObj(message['source'])) {
     desc = "Your order ID <b>" + message['order_index'] + "</b> from address <Ad>" + getAddressLabel(message['source']) + "</Ad> has expired";
   } else if(category == "order_match_expirations") {
@@ -140,14 +140,14 @@ NotificationViewModel.calcText = function(category, message) {
       desc = "You have broadcast value <Am>" + message['value'] + "</Am> from address <Ad>" + getAddressLabel(message['source']) + "</Ad>";
     }
   } else if(category == "bets" && WALLET.getAddressObj(message['source'])) {
-    desc = "You bet <Am>" + numberWithCommas(normalizeQuantity(message['wager_quantity'])) + "</Am> <As>XCP</As> on the feed @"
+    desc = "You bet <Am>" + smartFormat(normalizeQuantity(message['wager_quantity'])) + "</Am> <As>XCP</As> on the feed @"
       + " <Ad>" + getAddressLabel(message['source']) + "</Ad>";
   } else if(category == "bet_matches" && (WALLET.getAddressObj(message['tx0_address']) || WALLET.getAddressObj(message['tx1_address']))) {
     desc = "Bet @ feed <Ad>" + getAddressLabel(message['source']) + "</Ad> matched between <Ad>" 
       + getAddressLabel(message['tx0_address']) + "</Ad> (gave <Am>"
-      + numberWithCommas(normalizeQuantity(message['forward_quantity'])) + "</Ad> <As>XCP</As>) and <Ad>"
+      + smartFormat(normalizeQuantity(message['forward_quantity'])) + "</Ad> <As>XCP</As>) and <Ad>"
       + getAddressLabel(message['tx1_address']) + "</Ad> (gave <Am>"
-      + numberWithCommas(normalizeQuantity(message['backward_quantity'])) + "</Ad> <As>XCP</As>)";
+      + smartFormat(normalizeQuantity(message['backward_quantity'])) + "</Ad> <As>XCP</As>)";
   } else if(category == "bet_expirations" && WALLET.getAddressObj(message['source'])) {
     desc = "Your bet ID <b>" + message['bet_index'] + "</b> from address <Ad>" + getAddressLabel(message['source']) + "</Ad> has expired";
   } else if(category == "bet_match_expirations") {

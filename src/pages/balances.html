@@ -21,17 +21,15 @@
     </div>
     <button id="sweepFunds" type="button" class="btn btn-primary">Import Funds</button>
   </div>
-  
-  <div class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
-    <div class="alert alert-warning">
-        <i class="fa-fw fa fa-warning"></i>
-        <strong>Warning:</strong> Counterwallet is <b>BETA</b> software and is still under heavy development. Please
-        <b>take caution</b> in your use of it for storing and transferring funds, and
-        <a href="https://forums.counterparty.co/index.php/topic,188.0.html" target="_blank">report any/all bugs</a>.
-        Please note the Counterparty team cannot be held responsible for lost or stolen funds.
-    </div>    
-  </div>
 </div>
+
+<div class="alert alert-warning">
+    <i class="fa-fw fa fa-warning"></i>
+    <strong>Warning:</strong> Counterwallet is <b>BETA</b> software and is still under heavy development. Please
+    <b>take caution</b> in your use of it for storing and transferring funds, and
+    <a href="https://forums.counterparty.co/index.php/topic,188.0.html" target="_blank">report any/all bugs</a>.
+    Please note the Counterparty team cannot be held responsible for lost or stolen funds.
+</div>    
 
 <div id="gettingStartedNotice" data-bind="fadeVisibleInOnly: WALLET.isNew()" class="alert alert-success alert-block" style="display:none">
     <a class="close" data-dismiss="alert" href="#">×</a>
@@ -48,8 +46,11 @@
     Counterwallet lets you know this by displaying your actions under the <b>Pending Actions</b> panel (the Clock icon on the top bar), and then moving
     them to the <b>Notifications</b> panel (the Checkbox icon) automatically once the network has successfully confirmed them.
     Note that depending on the speed at which blocks are solved, it could take anywhere from 2 to 40 minutes for your actions to be confirmed.<br/><br/>
-     
-    Beyond this, please check out our <a href="#" target="_blank">Counterwallet Getting Started guide</a> <b>(coming soon)</b> to learn more.
+</div>
+
+<div id="pendingBTCPayNotice" data-bind="fadeVisibleInOnly: WALLET.isSellingBTC()" class="alert alert-info alert-block" style="display:none">
+    <i class="fa-fw fa fa-btc"></i>
+    <strong>BTCPay Pending:</strong> As you have one or more open sell orders for BTC, please stay logged in so that the order(s) can be properly filled.
 </div>
 
 <section id="widget-grid" class="balancesContainer" data-bind="foreach: addresses"> <!-- widget grid -->
@@ -784,6 +785,7 @@
 <script type="text/javascript">
   //Bind the WALLET object to balancesGrid (this MUST go before pageSetUp on this page or Wierd Things Will Happen!)
   ko.applyBindingsWithValidation(WALLET, document.getElementsByClassName("balancesContainer")[0]);
+  pendingBTCPayNotice
   pageSetUp(); //init smartadmin featureset
    
   //balances.js
@@ -795,6 +797,7 @@
   window.TESTNET_BURN_MODAL = new TestnetBurnModalViewModel();
   
   ko.applyBindings({}, document.getElementById("gettingStartedNotice"));
+  ko.applyBindings({}, document.getElementById("pendingBTCPayNotice"));
   ko.applyBindingsWithValidation(CHANGE_ADDRESS_LABEL_MODAL, document.getElementById("changeAddressLabelModal"));
   ko.applyBindingsWithValidation(CREATE_NEW_ADDRESS_MODAL, document.getElementById("createNewAddressModal"));
   ko.applyBindingsWithValidation(SEND_MODAL, document.getElementById("sendModal"));
