@@ -245,7 +245,7 @@ function BuySellWizardViewModel() {
     },
     digit: true,
     min: 1,
-    max: 1000 //arbitrary
+    max: ORDER_DEFAULT_EXPIRATION*2 //arbitrary
   });
   //^ default to expiration in this many blocks
   self.btcFee = ko.observable(ORDER_DEFAULT_BTCFEE_PCT).extend({
