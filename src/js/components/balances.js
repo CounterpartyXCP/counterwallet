@@ -322,10 +322,14 @@ function SweepModalViewModel() {
       validator: function (val, self, callback) {
         var numAssets = val.length;
         if(self.numPrimedTxoutsForPrivateKey() === null) return false; //priv key not set yet??
-        return self.numPrimedTxoutsForPrivateKey() >= numAssets;
+        if(self.numPrimedTxoutsForPrivateKey() < numAssets) {
+          this.message = "We're not able to sweep all of the assets you selected. Please send "
+            + (numAssets - self.numPrimedTxoutsForPrivateKey()) + " " + normalizeQuantity(MIN_PRIME_BALANCE)
+            + " BTC transactions to address " + self.addressForPrivateKey() + " and try again."
+          return false;
+        }
+        return true;
       },
-      message: ('The address for the private key specified does not have enough confirmed unspent outputs to sweep everything selected. Please send it a few '
-        + normalizeQuantity(MIN_PRIME_BALANCE) + ' BTC transactions and try again.'),
       params: self
     }    
   });
