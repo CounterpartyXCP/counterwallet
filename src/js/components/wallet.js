@@ -416,8 +416,7 @@ function WalletViewModel() {
     data['pubkey'] = WALLET.getAddressObj(address).PUBKEY;
     //find and specify the verifyDestAddr
 
-    // we assume here that only counterpartd api have methods with prefix create_
-    if (UNCONFIRMED_CHANGE && action.split("_").shift()=="create") {
+    if (UNCONFIRMED_CHANGE && supportUnconfirmedChangeParam(action)) {
       data['unconfirmed_change'] = true;
     }    
     
