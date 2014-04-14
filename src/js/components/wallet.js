@@ -416,8 +416,8 @@ function WalletViewModel() {
     data['pubkey'] = WALLET.getAddressObj(address).PUBKEY;
     //find and specify the verifyDestAddr
 
-    if (UNCONFIRMED_CHANGE && supportUnconfirmedChangeParam(action)) {
-      data['unconfirmed_change'] = true;
+    if (ALLOW_UNCONFIRMED_INPUTS && supportUnconfirmedChangeParam(action)) {
+      data['allow_unconfirmed_inputs'] = true;
     }    
     
     //hacks for passing in some data that should be sent to PENDING_ACTION_FEED.add(), but not the create_ API call

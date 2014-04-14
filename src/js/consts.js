@@ -28,7 +28,7 @@ var MARKET_INFO_REFRESH_EVERY = 5 * 60 * 1000; //refresh market info every 5 min
 
 var NUM_BLOCKS_TO_WAIT_FOR_BTCPAY = 6; //number of blocks to wait until the user can make a BTCpay on an order match where they owe BTC
 
-var UNCONFIRMED_CHANGE = true; // allow use unconfirmed unspents
+var ALLOW_UNCONFIRMED_INPUTS = true;  // allow use unconfirmed unspents
 
 var ACTION_PENDING_NOTICE = "<b><u>This action will take some time to complete</u></b>, and will appear as a Pending Action until"
   + " confirmed on the network. <b class='errorColor'>Until that time, the wallet will not reflect the change. Please be patient.</b>";
