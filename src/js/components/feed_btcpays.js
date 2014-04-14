@@ -81,7 +81,7 @@ function WaitingBTCPayViewModel(btcPayData) {
             callback: function() {
               //complete the BTCpay. Start by getting the current BTC balance for the address
               WALLET.doTransaction(self.BTCPAY_DATA['myAddr'], "create_btcpay",
-                { order_match_id: self.BTCPAY_DATA['orderMatchID'] },
+                { order_match_id: self.BTCPAY_DATA['orderMatchID'], source: self.BTCPAY_DATA['myAddr'] },
                 function(txHash, data, endpoint) { 
                   //remove the BTC payment from the notifications
                   WAITING_BTCPAY_FEED.remove(self.BTCPAY_DATA['orderMatchID']);
@@ -302,7 +302,7 @@ function UpcomingBTCPayFeedViewModel() {
         
          //user has the sufficient balance
         WALLET.doTransaction(btcPayData['myAddr'], "create_btcpay",
-          { order_match_id: btcPayData['orderMatchID'] },
+          { order_match_id: btcPayData['orderMatchID'], source: btcPayData['myAddr'] },
           function(txHash, data, endpoint) {
             //notify the user of the automatic BTC payment
             bootbox.alert("Automatic <b class='notoAssetColor'>BTC</b> payment of "
@@ -356,7 +356,7 @@ function UpcomingBTCPayFeedViewModel() {
             className: "btn-success",
             callback: function() {
               WALLET.doTransaction(btcPayData['myAddr'], "create_btcpay",
-                { order_match_id: btcPayData['orderMatchID'] },
+                { order_match_id: btcPayData['orderMatchID'], source: btcPayData['myAddr'] },
                 function(txHash, data, endpoint) {
                   //notify the user of the automatic BTC payment
                   bootbox.alert("Automatic <b class='notoAssetColor'>BTC</b> payment of"

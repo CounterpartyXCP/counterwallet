@@ -45,6 +45,7 @@ function OpenOrderViewModel(order) {
             WALLET.doTransaction(self.ORDER['source'], "create_cancel",
               {
                 offer_hash: self.ORDER['tx_hash'],
+                source: self.ORDER['source'],
                 _type: 'order',
                 _tx_index: self.ORDER['tx_index']
               },
@@ -130,6 +131,7 @@ function OpenOrderFeedViewModel() {
             + " as the give_remaining and/or get_remaining <= 0 ...");
           WALLET.doTransaction(openBTCOrdersToCancel[i]['source'], "create_cancel", {
             offer_hash: openBTCOrdersToCancel[i]['tx_hash'],
+            source: openBTCOrdersToCancel[i]['source'],
             _type: 'order',
             _tx_index: openBTCOrdersToCancel[i]['tx_index']
           });
