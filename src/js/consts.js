@@ -17,7 +17,12 @@ var MIN_PRIME_BALANCE = 50000; //in satoshis ... == .0005
 var ASSET_CREATION_FEE_XCP = 0.5; //in normalized XCP
 var MAX_ASSET_DESC_LENGTH = 41; //42, minus a null term character?
 var ORDER_DEFAULT_BTCFEE_PCT = 1; //1% of total order
-var ORDER_DEFAULT_EXPIRATION = 1080; //num blocks until expiration (at ~9 min per block this is ~6.75 days)
+
+//Order expiration
+var ORDER_DEFAULT_EXPIRATION = 1000; //num blocks until expiration (at ~9 min per block this is ~6.75 days)
+var ORDER_BTCSELL_DEFAULT_EXPIRATION = 2000; //num blocks until expiration for selling BTC order
+var ORDER_MAX_EXPIRATION = 3000; //max expiration for order
+
 var DEFAULT_NUM_ADDRESSES = 3; //default number of addresses to generate
 var MARKET_INFO_REFRESH_EVERY = 5 * 60 * 1000; //refresh market info every 5 minutes while enabled 
 
