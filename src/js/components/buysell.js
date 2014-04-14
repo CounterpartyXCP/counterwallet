@@ -245,7 +245,7 @@ function BuySellWizardViewModel() {
     },
     digit: true,
     min: 1,
-    max: 2000 //arbitrary
+    max: ORDER_MAX_EXPIRATION //arbitrary
   });
   //^ default to expiration in this many blocks
   self.btcFee = ko.observable(ORDER_DEFAULT_BTCFEE_PCT).extend({
@@ -514,6 +514,8 @@ function BuySellWizardViewModel() {
 
     self.sellAsset.subscribe(function(newValue) {
       self.selectedAddress(''); //clear it
+      // Set order default expiration
+      self.numBlocksUntilExpiration(newValue=='BTC' ? ORDER_BTCSELL_DEFAULT_EXPIRATION : ORDER_DEFAULT_EXPIRATION);
     });
     
     self.selectedAddress.subscribe(function(newValue) {
