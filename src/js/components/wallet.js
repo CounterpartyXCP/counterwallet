@@ -415,6 +415,11 @@ function WalletViewModel() {
     data['encoding'] = 'multisig';
     data['pubkey'] = WALLET.getAddressObj(address).PUBKEY;
     //find and specify the verifyDestAddr
+
+    // we assume here that only counterpartd api have methods with prefix create_
+    if (UNCONFIRMED_CHANGE && action.split("_").shift()=="create") {
+      data['unconfirmed_change'] = true;
+    }    
     
     //hacks for passing in some data that should be sent to PENDING_ACTION_FEED.add(), but not the create_ API call
     // here we only have to worry about what we create a txn for (so not order matches, debits/credits, etc)
