@@ -134,7 +134,7 @@ function isBase58BlockchainInfoKey(privateKey) {
 function BitcoinECKey(privateKey) {
   if (isBase58BlockchainInfoKey(privateKey)) {
     privateKey = Bitcoin.base58.decode(privateKey);
-    return Bitcoin.ECKey(privateKey, false, NETWORK_VERSION);
+    return Bitcoin.ECKey(privateKey);
   }
   return Bitcoin.ECKey(privateKey);
 }
