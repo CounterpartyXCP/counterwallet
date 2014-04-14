@@ -68,14 +68,18 @@
                   <li><a data-bind="visible: !IS_WATCH_ONLY, click: signMessage" href="#">Sign Message</a></li>
                   <li><a data-bind="visible: !IS_WATCH_ONLY, click: createAsset" href="#">Create Asset</a></li>
                   <li><a data-bind="visible: IS_WATCH_ONLY, click: removeWatch" href="#">Remove Address</a></li>
+                  <li><a data-bind="click: showPrivateKey" href="#">Show Private Key</a></li>
+
                   <li class="divider"></li><li class="dropdown-header">Sort by...</li>
-                    <li><a data-bind="click: sortAssetsByName" href="#">Name</a></li>
-                    <li><a data-bind="click: sortAssetsByBalance" href="#">Balance</a></li>
+                  <li><a data-bind="click: sortAssetsByName" href="#">Name</a></li>
+                  <li><a data-bind="click: sortAssetsByBalance" href="#">Balance</a></li>
+                  
                   <li class="divider"></li><li class="dropdown-header">Filter by...</li>
-                    <li><a data-bind="click: showAllAssets" href="#">Show All</a></li>
-                    <li><a data-bind="click: showBaseAssetsOnly" href="#">Show XCP &amp; BTC Only</a></li>
-                    <li><a data-bind="click: showMyAssetsOnly" href="#">Show My Assets Only</a></li>
-                    <li><a data-bind="click: showOthersAssetsOnly" href="#">Show Other Assets Only</a></li>
+                  <li><a data-bind="click: showAllAssets" href="#">Show All</a></li>
+                  <li><a data-bind="click: showBaseAssetsOnly" href="#">Show XCP &amp; BTC Only</a></li>
+                  <li><a data-bind="click: showMyAssetsOnly" href="#">Show My Assets Only</a></li>
+                  <li><a data-bind="click: showOthersAssetsOnly" href="#">Show Other Assets Only</a></li>
+
                 </ul>
               </div>
             </div>
