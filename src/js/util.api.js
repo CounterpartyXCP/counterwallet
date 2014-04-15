@@ -232,6 +232,10 @@ function _getDestTypeFromMethod(method) {
   return destType;
 }
 
+function supportUnconfirmedChangeParam(method) {
+  return method.split("_").shift()=="create" && _getDestTypeFromMethod(method)=="counterpartyd";
+}
+
 function _multiAPIPrimative(method, params, onFinished) {
   /*Make request to all servers (parallelized), returning results from all servers into a list.
     (This is a primative and is not normally called directly outside of this module.)

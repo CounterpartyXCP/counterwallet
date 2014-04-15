@@ -73,7 +73,7 @@
                     </thead>
                     <tbody data-bind="foreach: transactions">
                         <tr>
-                            <td data-bind="html: getLinkForCPData('tx', txIndex)"></td> 
+                            <td data-bind="html: getTxHashLink(txHash)"></td> 
                             <td data-bind="html: getLinkForBlock(blockIndex)"></td>
                             <td data-bind="text: dispBlockTime()"></td>
                             <td data-bind="html: getLinkForCPData('address', source, dispSource())"></td>

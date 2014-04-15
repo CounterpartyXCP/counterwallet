@@ -124,9 +124,14 @@ function BalanceHistoryViewModel() {
 }
 
 function TransactionHistoryItemViewModel(data) {
+  if (data['status'] && data['status']=='expired') {
+    $.jqlog.debug(data);
+  }
+  
   var self = this;
   self.data = data;
   self.txIndex = self.data['tx_index'] || self.data['tx1_index'] || '';
+  self.txHash = self.data['tx_hash'] || self.data['order_hash'] || self.data['tx1_hash'] || '';
   self.blockIndex = self.data['block_index'] || self.data['tx1_block_index'];
   self.blockTime = self.data['_block_time'];
   self.rawTxType = self.data['_entity'];

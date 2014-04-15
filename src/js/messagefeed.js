@@ -271,6 +271,7 @@ function MessageFeed() {
               + " as the give_remaining xor get_remaining <= 0 ...");
             WALLET.doTransaction(match.ORDER['source'], "create_cancel", {
               offer_hash: match.ORDER['tx_hash'],
+              source: match.ORDER['source'],
               _type: 'order',
               _tx_index: match.ORDER['tx_index']
             });

@@ -422,7 +422,7 @@
                     </thead>
                     <tbody data-bind="foreach: openOrders">
                         <tr style="cursor:pointer;" data-bind="click: $parent.buySelectedOpenOrder">
-                            <td data-bind="html: getLinkForCPData('tx', tx_index) + OrdersViewModel.deriveIsOnlineForBTCPayment(give_asset, _is_online)"></td>
+                            <td data-bind="html: getTxHashLink(tx_hash) + OrdersViewModel.deriveIsOnlineForBTCPayment(give_asset, _is_online)"></td>
                             <td data-bind="timeago: new Date(block_time)"></td>
                             <td data-bind="text: $parent.deriveOpenOrderAssetPrice(get_asset, get_quantity, give_asset, give_quantity)"></td>
                             <td data-bind="html: $parent.deriveOpenOrderAssetQuantity(get_asset, get_remaining) + ' ' + get_asset + ' ' + OrdersViewModel.deriveOpenOrderBuySellLeft(get_quantity, get_remaining)"></td>
@@ -468,9 +468,9 @@
                         <tr>
                             <td data-bind="html: getLinkForBlock(block_index)"></td>
                             <td data-bind="text: moment(block_time).format('MMM Do YYYY, h:mm:ss a')"></td>
-                            <td data-bind="html: getLinkForCPData('tx', order_match_tx0_index)"></td> 
+                            <td data-bind="html: getTxHashLink(order_match_id.substr(0,64))"></td> 
                             <td data-bind="html: getLinkForCPData('address', order_match_tx0_address)"></td>
-                            <td data-bind="html: getLinkForCPData('tx', order_match_tx1_index)"></td>
+                            <td data-bind="html: getTxHashLink(order_match_id.substr(64, 64))"></td>
                             <td data-bind="html: getLinkForCPData('address', order_match_tx1_address)"></td>
                             <td data-bind="text: smartFormat(base_quantity_normalized) + ' ' + base_asset"></td>
                             <td data-bind="text: smartFormat(quote_quantity_normalized) + ' ' + quote_asset"></td>
