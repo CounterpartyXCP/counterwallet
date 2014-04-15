@@ -81,9 +81,14 @@ function LogonViewModel() {
       //var hash1 = Bitcoin.Crypto.SHA256(self.sanitizedEnteredPassphrase() + (USE_TESTNET ? '_testnet' : ''));
       //var hash2 = Bitcoin.Crypto.SHA256(hash1).toString(Bitcoin.Crypto.enc.Base64);
       //WALLET.identifier(hash2);
-      WALLET.identifier(Bitcoin.convert.bytesToBase64(Bitcoin.Crypto.SHA256(
-        Bitcoin.Crypto.SHA256(self.sanitizedEnteredPassphrase() + (USE_TESTNET ? '_testnet' : ''),
-        {asBytes: true}), {asBytes: true})));
+      var ident;
+      ident = self.sanitizedEnteredPassphrase() + (USE_TESTNET ? '_testnet' : '');
+      ident = Bitcoin.Crypto.SHA256(ident).toString();
+      ident = Bitcoin.Crypto.SHA256(ident).toString();
+      ident = Bitcoin.convert.stringToBytes(ident);
+      ident = Bitcoin.convert.bytesToBase64(ident);
+      WALLET.identifier(ident);
+
       $.jqlog.log("My wallet ID: " + WALLET.identifier());
 
       //Set initial block height (will be updated again on each periodic refresh of BTC account balances)
