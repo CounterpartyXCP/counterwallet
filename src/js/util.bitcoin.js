@@ -79,6 +79,14 @@ function getLinkForCPData(type, dataID, dataTitle, htmlize) {
   }
 }
 
+// TODO: add link to blockscan when possible
+function getTxHashLink(hash) {
+  var shortHash = hash.substr(hash.length-5);
+  var link = '<a href="#" rel="tooltip" title="'+hash+'" data-placement="top" data-container="body" class="shortHash" onclick="return false">'+shortHash+'</a>';
+
+  return link;
+}
+
 function getLinkForBlock(blockIndex, dataTitle, htmlize) {
   if(typeof(dataTitle)==='undefined' || dataTitle === null) dataTitle = blockIndex;
   if(typeof(htmlize)==='undefined' || htmlize === null) htmlize = true;
