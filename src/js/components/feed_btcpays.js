@@ -81,7 +81,7 @@ function WaitingBTCPayViewModel(btcPayData) {
             callback: function() {
               //complete the BTCpay. Start by getting the current BTC balance for the address
               WALLET.doTransaction(self.BTCPAY_DATA['myAddr'], "create_btcpay",
-                { order_match_id: self.BTCPAY_DATA['orderMatchID'] },
+                { order_match_id: self.BTCPAY_DATA['orderMatchID'], source: self.BTCPAY_DATA['myAddr'] },
                 function(txHash, data, endpoint) { 
                   //remove the BTC payment from the notifications
                   WAITING_BTCPAY_FEED.remove(self.BTCPAY_DATA['orderMatchID']);
@@ -209,6 +209,7 @@ WaitingBTCPayFeedViewModel.makeBTCPayData = function(data) {
     btcQuantity: normalizeQuantity(firstInPair ? data['forward_quantity'] : data['backward_quantity'], true), //normalized
     btcQuantityRaw: firstInPair ? data['forward_quantity'] : data['backward_quantity'],
     myOrderTxIndex: firstInPair ? data['tx0_index'] : data['tx1_index'],
+    myOrderTxHash: firstInPair ? data['tx0_hash'] : data['tx1_hash'],
     otherOrderTxIndex: firstInPair ? data['tx1_index'] : data['tx0_index'],
     otherOrderAsset: firstInPair ? data['backward_asset'] : data['forward_asset'],
     otherOrderQuantity: normalizeQuantity(firstInPair ? data['backward_quantity'] : data['forward_quantity'],
@@ -302,7 +303,7 @@ function UpcomingBTCPayFeedViewModel() {
         
          //user has the sufficient balance
         WALLET.doTransaction(btcPayData['myAddr'], "create_btcpay",
-          { order_match_id: btcPayData['orderMatchID'] },
+          { order_match_id: btcPayData['orderMatchID'], source: btcPayData['myAddr'] },
           function(txHash, data, endpoint) {
             //notify the user of the automatic BTC payment
             bootbox.alert("Automatic <b class='notoAssetColor'>BTC</b> payment of "
@@ -356,7 +357,7 @@ function UpcomingBTCPayFeedViewModel() {
             className: "btn-success",
             callback: function() {
               WALLET.doTransaction(btcPayData['myAddr'], "create_btcpay",
-                { order_match_id: btcPayData['orderMatchID'] },
+                { order_match_id: btcPayData['orderMatchID'], source: btcPayData['myAddr'] },
                 function(txHash, data, endpoint) {
                   //notify the user of the automatic BTC payment
                   bootbox.alert("Automatic <b class='notoAssetColor'>BTC</b> payment of"

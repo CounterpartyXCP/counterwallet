@@ -235,6 +235,14 @@
           </div>
         </div>
         <div class="panel panel-info">
+          <div class="alert alert-warning" style="margin-bottom:0">
+            <p>
+              <b>IMPORTANT:</b> This Counterwallet server is running an updated version of the Bitcoin deterministic wallet implementation for Javascript (i.e. the bitcoinjs-lib BIP32 HDWallet). This updated version corrects a spec compliance issue with the previous version (which did not impact or lessen security or funds safety in any way, but led to wallet addresses being created that were not 100% compliant with the deterministic wallet spec).
+            </p>
+            <p>
+              <b style="font-size:15px">If you had an existing account, you will need to create a new account on this system, and then log into <a href="">https://old.counterwallet.co</a> to transfer over your existing balance to your new account created on this system.</b> The <a href="">old.counterwallet.co</a> system provides you the ability to view your private keys, so you can use the "sweep" feature to easily move the balances over. We will keep this <a href="">old.counterwallet.co</a> system running for a few weeks to allow individuals to transfer their balances, however, please move over to the new system (i.e. this site) as soon as possible.
+            </p>
+          </div>
           <div class="panel-heading">
             <h3 class="panel-title">
               <b>Log Into Your Wallet</b>
@@ -489,18 +497,12 @@
     <script src="vendors/smartadmin/js/plugin/datatables/ColVis.min.js"></script>
     <script src="vendors/smartadmin/js/plugin/datatables/ZeroClipboard.js"></script>
     <script src="vendors/smartadmin/js/plugin/datatables/media/js/TableTools.min.js"></script>
-    <script src="vendors/smartadmin/js/plugin/datatables/DT_bootstrap.js"></script>    
+    <script src="vendors/smartadmin/js/plugin/datatables/DT_bootstrap.js"></script>   
    
     <!-- cryptojs -->
     <script src="vendors/cryptojs/components/core-min.js"></script>
     <script src="vendors/cryptojs/components/sha256-min.js"></script>
     <script src="vendors/cryptojs/components/enc-base64-min.js"></script>
-
-    <!-- jsbn -->
-    <script src="vendors/jsbn/jsbn.js"></script>
-    <script src="vendors/jsbn/jsbn2.js"></script>
-    <script src="vendors/jsbn/prng4.js"></script>
-    <script src="vendors/jsbn/rng.js"></script>
     
     <!-- JQuery extras -->
     <script src="vendors/jReject/js/jquery.reject.js"></script>
@@ -533,15 +535,17 @@
     <!-- socket.io -->
     <script src="vendors/socket.io-client/dist/socket.io.min.js"></script>
     <script src="vendors/jqlog/jquery.jqlog-1.3.min.js"></script>
+
+    <!--  bitcoinjs lib -->
+    <script src="vendors/bitcoinjs-lib/bitcoinjs-min.js"></script>
     <!-- endbuild -->
 
     <!-- COUNTERWALLET SPECIFIC JS INCLUDES --> 
     <!-- JavaScript created specifically for Counterwallet. -->
     <!-- build:js js/counterwallet-min.js -->
-    <script src="js/bitcoinjs-min.js"></script><!-- need update to use vendors/bitcoinjs-lib -->
     <script src="js/mnemonic.js"></script> <!-- can not find official source -->
     <script src="js/consts.js"></script>
-    <script src="js/counterwallet.js"></script> 
+    <script src="js/counterwallet.js"></script>
     <script src="js/util.js"></script>
     <script src="js/util.api.js"></script>
     <script src="js/util.bitcoin.js"></script>

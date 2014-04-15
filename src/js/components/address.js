@@ -150,6 +150,18 @@ function AddressViewModel(key, address, initialLabel) {
     //Pop up a modal with this code
     bootbox.alert('<center><h4>QR Code for <b>' + self.ADDRESS + '</b></h4><br/>' + qrcode + '</center>');
   }
+
+  self.showPrivateKey = function() {
+    //Show the private key code for this address
+    var privateKey = WALLET.getAddressObj(self.ADDRESS).KEY.toWif();
+    //Pop up a modal with this private
+    var html = '<center>';
+    html += '<h4>Private Key (WIF) for <b>' + self.ADDRESS + '</b></h4><br/>';
+    html += '<h5>Make sure nobody can look over your shoulder or see your screen.</h5>';
+    html += '<button onclick="$(this).hide().next().show();">Show Private Key</button><div style="display:none">'+privateKey+'</div>';
+    html += '</center>';
+    bootbox.alert('<center>' + html + '</center>');
+  }
   
   self.removeWatch = function() { //possible for watch only addresses only
     assert(self.IS_WATCH_ONLY, 'Only watch-only addresses can be removed.');

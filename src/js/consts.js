@@ -17,11 +17,18 @@ var MIN_PRIME_BALANCE = 50000; //in satoshis ... == .0005
 var ASSET_CREATION_FEE_XCP = 0.5; //in normalized XCP
 var MAX_ASSET_DESC_LENGTH = 41; //42, minus a null term character?
 var ORDER_DEFAULT_BTCFEE_PCT = 1; //1% of total order
-var ORDER_DEFAULT_EXPIRATION = 1080; //num blocks until expiration (at ~9 min per block this is ~6.75 days)
+
+//Order expiration
+var ORDER_DEFAULT_EXPIRATION = 1000; //num blocks until expiration (at ~9 min per block this is ~6.75 days)
+var ORDER_BTCSELL_DEFAULT_EXPIRATION = 2000; //num blocks until expiration for selling BTC order
+var ORDER_MAX_EXPIRATION = 3000; //max expiration for order
+
 var DEFAULT_NUM_ADDRESSES = 3; //default number of addresses to generate
 var MARKET_INFO_REFRESH_EVERY = 5 * 60 * 1000; //refresh market info every 5 minutes while enabled 
 
 var NUM_BLOCKS_TO_WAIT_FOR_BTCPAY = 6; //number of blocks to wait until the user can make a BTCpay on an order match where they owe BTC
+
+var ALLOW_UNCONFIRMED_INPUTS = true;  // allow use unconfirmed unspents
 
 var ACTION_PENDING_NOTICE = "<b><u>This action will take some time to complete</u></b>, and will appear as a Pending Action until"
   + " confirmed on the network. <b class='errorColor'>Until that time, the wallet will not reflect the change. Please be patient.</b>";
@@ -134,4 +141,6 @@ var NETWORK_VERSION = USE_TESTNET ? Bitcoin.network.testnet.addressVersion : Bit
 var BLOCKEXPLORER_URL = USE_TESTNET ? "http://test.bitcore.io" : "http://live.bitcore.io";
 var GOOGLE_ANALYTICS_UAID = null; //will be set in counterwallet.js
 var ROLLBAR_ACCESS_TOKEN = null; //will be set in counterwallet.js
+
+var NETWORK_VERSION = USE_TESTNET ? Bitcoin.network.testnet.addressVersion : Bitcoin.network.mainnet.addressVersion;
 

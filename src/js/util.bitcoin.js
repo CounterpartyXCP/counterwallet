@@ -15,8 +15,7 @@ function denormalizeQuantity(quantity, divisible) {
 
 function hashToB64(content) {
   //used for storing address alias data, for instance
-  //return Bitcoin.Crypto.SHA256(content).toString(Bitcoin.Crypto.enc.Base64);
-  return Bitcoin.convert.bytesToBase64(Bitcoin.Crypto.SHA256(content, {asBytes: true}));  
+  return Bitcoin.Crypto.SHA256(content).toString(Bitcoin.Crypto.enc.Base64);  
 }
 
 function smartFormat(num, truncateDecimalPlacesAtMin, truncateDecimalPlacesTo) { //arbitrary rules to make quantities formatted a bit more friendly
@@ -80,6 +79,14 @@ function getLinkForCPData(type, dataID, dataTitle, htmlize) {
   }
 }
 
+// TODO: add link to blockscan when possible
+function getTxHashLink(hash) {
+  var shortHash = hash.substr(hash.length-5);
+  var link = '<a href="#" rel="tooltip" title="'+hash+'" data-placement="top" data-container="body" class="shortHash" onclick="return false">'+shortHash+'</a>';
+
+  return link;
+}
+
 function getLinkForBlock(blockIndex, dataTitle, htmlize) {
   if(typeof(dataTitle)==='undefined' || dataTitle === null) dataTitle = blockIndex;
   if(typeof(htmlize)==='undefined' || htmlize === null) htmlize = true;
@@ -135,7 +142,7 @@ function isBase58BlockchainInfoKey(privateKey) {
 function BitcoinECKey(privateKey) {
   if (isBase58BlockchainInfoKey(privateKey)) {
     privateKey = Bitcoin.base58.decode(privateKey);
-    return Bitcoin.ECKey(privateKey, false, NETWORK_VERSION);
+    return Bitcoin.ECKey(privateKey);
   }
   return Bitcoin.ECKey(privateKey);
 }
