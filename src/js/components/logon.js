@@ -78,12 +78,9 @@ function LogonViewModel() {
       $('#extra-info').animate({opacity:0});
       
       //generate the wallet ID from a double SHA256 hash of the passphrase and the network (if testnet)
-      //var hash1 = Bitcoin.Crypto.SHA256(self.sanitizedEnteredPassphrase() + (USE_TESTNET ? '_testnet' : ''));
-      //var hash2 = Bitcoin.Crypto.SHA256(hash1).toString(Bitcoin.Crypto.enc.Base64);
-      //WALLET.identifier(hash2);
-      WALLET.identifier(Bitcoin.convert.bytesToBase64(Bitcoin.Crypto.SHA256(
-        Bitcoin.Crypto.SHA256(self.sanitizedEnteredPassphrase() + (USE_TESTNET ? '_testnet' : ''),
-        {asBytes: true}), {asBytes: true})));
+      var hash1 = Bitcoin.Crypto.SHA256(self.sanitizedEnteredPassphrase() + (USE_TESTNET ? '_testnet' : ''));
+      var hash2 = Bitcoin.Crypto.SHA256(hash1).toString(Bitcoin.Crypto.enc.Base64);
+      WALLET.identifier(hash2);
       $.jqlog.log("My wallet ID: " + WALLET.identifier());
 
       //Set initial block height (will be updated again on each periodic refresh of BTC account balances)
