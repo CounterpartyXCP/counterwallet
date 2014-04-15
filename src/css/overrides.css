@@ -335,3 +335,8 @@ letter-spacing: 0;
 .bootbox-body {
     word-wrap: break-word; /* good for long walks on the beach and the soothing music of Enya */
 }
+
+
+div.tooltip-inner {
+  word-wrap: break-word !important;
+}

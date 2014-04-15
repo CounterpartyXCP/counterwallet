@@ -44,6 +44,7 @@ function BuySellWizardViewModel() {
   //^ a list of all existing assets (for choosing which asset to buy)
   self.tradeHistory = ko.observableArray([]);
   //^ a list of the last X trades for the specified asset pair (once selected and tab 2 is showing)
+
   self.openOrders = ko.observableArray([]);
   //^ a list of open orders for the selected asset pair and address
   self.askBook = ko.observableArray([]);
@@ -717,6 +718,7 @@ function BuySellWizardViewModel() {
     failoverAPI("get_trade_history_within_dates", [self.buyAsset(), self.sellAsset()], function(data, endpoint) {
       deferred.resolve();
       self.tradeHistory(data);
+      $.jqlog.debug(data);
       if(data.length) {
         runDataTables('#tradeHistory', true, { "aaSorting": [ [0, 'desc'] ] });
         self.showTradeHistory(true);
@@ -745,6 +747,7 @@ function BuySellWizardViewModel() {
       if(data['base_ask_book'].length || data['base_bid_book'].length) {
         //we have an order book, showPriceChart should end up being set to true and the order book will show
         //set up order book display
+        //$.jqlog.debug(data);
         self.showOrderBook(true);
         self.askBook(data['base_ask_book'].slice(0,10)); //limit to 10 entries
         self.bidBook(data['base_bid_book'].slice(0,10));

@@ -1558,6 +1558,9 @@ function runDataTables(specificTableID, destroyOption, extraProps) {
   $.extend(props, extraProps);
   //try { $(tableSelector+'.datatable_tabletools').dataTable().fnClearTable(); } catch(err) { }
   $(tableSelector+'.datatable_tabletools').dataTable(props);
+
+  //activate tooltips
+  $(tableSelector+' a[rel=tooltip]').tooltip();
   /* END TABLE TOOLS */
 }
 //COUNTERWALLET: END MOD

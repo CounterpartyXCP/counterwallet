@@ -209,6 +209,7 @@ WaitingBTCPayFeedViewModel.makeBTCPayData = function(data) {
     btcQuantity: normalizeQuantity(firstInPair ? data['forward_quantity'] : data['backward_quantity'], true), //normalized
     btcQuantityRaw: firstInPair ? data['forward_quantity'] : data['backward_quantity'],
     myOrderTxIndex: firstInPair ? data['tx0_index'] : data['tx1_index'],
+    myOrderTxHash: firstInPair ? data['tx0_hash'] : data['tx1_hash'],
     otherOrderTxIndex: firstInPair ? data['tx1_index'] : data['tx0_index'],
     otherOrderAsset: firstInPair ? data['backward_asset'] : data['forward_asset'],
     otherOrderQuantity: normalizeQuantity(firstInPair ? data['backward_quantity'] : data['forward_quantity'],
