@@ -227,11 +227,12 @@ $(document).ready(function() {
 
   // LOGOUT BUTTON
   $('#logout a').click(function(e) {
+
     //get the link
     var $this = $(this);
     $.loginURL = $this.attr('href');
     
-    if (window.WALLET && WALLET.sellingBTC()) {
+    if (window.WALLET && WALLET.isSellingBTC()) {
       $.logoutMSG = "<span style='color:red;font-weight:bold'>If you log out, any Bitcoin sell orders you have open will probably not be filled.</span>";
     } else {
       $.logoutMSG = $this.data('logout-msg');
@@ -250,7 +251,9 @@ $(document).ready(function() {
       }
 
     });
+
     e.preventDefault();
+
   });
 
   /*
