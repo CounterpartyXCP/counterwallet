@@ -222,7 +222,8 @@ AssetLeaderboardViewModel.formulateExtendedAssetInfo = function(asset, hasImage,
     dispAsset += '<a href="' + website + '" target="_blank">' + asset + '</a>';
   } else if(hasImage) {
     dispAsset = '<img src="' + (USE_TESTNET ? '/_t_asset_img/' : '/_asset_img/') + asset + '.png" />&nbsp;';
-    dispAsset += website ? ('<a href="' + website + '" target="_blank">' + asset + '</a>') : asset;
+    //dispAsset += website ? ('<a href="' + website + '" target="_blank">' + asset + '</a>') : asset;
+    dispAsset += asset; //keep it simple for now for avoid XSS
   }
   return dispAsset;
 }

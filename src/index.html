@@ -188,7 +188,7 @@
       <h2 data-bind="html: headerText"></h2>
       <div id="chatContentDiv">
         <div id="chatContentInnerDiv" data-bind="foreach: lines">
-          <p class="chatMessage" data-bind="html: lineText"></p>
+          <p class="chatMessage"><span data-bind="html: lineHead"></span><span data-bind="text: text"></span></p>
         </div>
       </div>
       <div id="chatControlDiv" class="row">
