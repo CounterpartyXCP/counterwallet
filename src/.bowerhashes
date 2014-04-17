@@ -35,7 +35,7 @@
     "src/vendors/knockout-bootstrap/build/knockout-bootstrap.min.js": "3d253ef8aec822390231333008ce43cecb08d885446dac6edb4cc666990686d5",
     "src/vendors/knockout-validation/Dist/knockout.validation.min.js": "46347e6ebb9d8d909b0840713118ca0f2cdcd9526767025b9fa7d5483a4af94e",
     "src/vendors/highstock/highstock.src.js": "1257bab7ca686ce0ea60c598a0838700ad73ac3a42f2d8d0c1022fd3739d91a4",
-    "src/vendors/jsdecimal/lib/decimal.js": "ba0b975987a7ac1d74727f5edcb49bfb69d42be08d7682b5328aaee1eb1da7de",
+    "src/vendors/jsdecimal/lib/decimal.js": "6f9e7a19a414fec2b9925d516ff3d805cadc1ec19bc6e840f3fe4d2f2d6d0c3b",
     "src/vendors/socket.io-client/dist/socket.io.min.js": "17f4c075ad907cb0fb38bf76de5d0af7832a95cddf1bf642e75daadf8d1e5201",
     "src/vendors/jqlog/jquery.jqlog-1.3.min.js": "15bdd1693ad39873922e017c5570c49233c5d5e7c2f209ec32145b3badf36291",
     "src/vendors/bitcoinjs-lib/bitcoinjs-min.js": "3202969219516ae776d276e50178dcae57ef1469309d5a707a5cb55f35dc1436"

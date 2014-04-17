@@ -8,7 +8,7 @@
         "bitcoinjs-lib": "https://github.com/bitcoinjs/bitcoinjs-lib.git#97575e8f460215fa660850d66f85c2b8f6d17f2c",
         "bootbox": "4.2.0",
         "bootstrap-datetimepicker": "https://github.com/Eonasdan/bootstrap-datetimepicker.git#3.0.0",
-        "jsdecimal": "https://github.com/hiroshi-manabe/JSDecimal.git",
+        "jsdecimal": "https://github.com/hiroshi-manabe/JSDecimal.git#2950032445113a4456581837b25de5622fbd9438",
         "highstock": "https://github.com/highslide-software/highstock-release.git#1.3.10",
         "jqBootstrapValidation": "1.3.7",
         "jqlog": "https://jqlog.googlecode.com/files/jqlog-1.3.zip",
