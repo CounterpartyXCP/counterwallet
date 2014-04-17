@@ -147,6 +147,10 @@ function PendingActionFeedViewModel() {
         assert(category == "sends");
         if (match['CATEGORY'] != category || match['DATA']['asset'] != 'BTC')
           return;
+          
+        //Also, with this logic, since we found the entry as a pending action, add a completed send action
+        // to the notifications feed (yes, this is a bit hackish)
+        NOTIFICATION_FEED.add("sends", match['DATA']);
       } 
       
       self.entries.remove(match);

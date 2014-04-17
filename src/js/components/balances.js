@@ -653,7 +653,7 @@ function SweepModalViewModel() {
           //We don't need to supply asset info to the SweepAssetInDropdownItemModel constructor for BTC
           // b/c we won't be transferring any asset ownership with it
           self.availableAssetsToSweep.unshift(new SweepAssetInDropdownItemModel(
-            "BTC", data[0]['confirmedRawBal'], normalizeQuantity(data[0]['confirmedRawBal'], null)));
+            "BTC", data[0]['confirmedRawBal'], normalizeQuantity(data[0]['confirmedRawBal'])));
         }
         self.numPrimedTxoutsForPrivateKey(data[0]['numPrimedTxouts']);
       });
