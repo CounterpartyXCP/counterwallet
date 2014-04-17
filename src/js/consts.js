@@ -135,12 +135,12 @@ var IS_DEV = (location.pathname == "/" && qs("dev") && qs("dev") != '0' ? true :
 var USE_TESTNET = (   ((location.pathname == "/" || location.pathname == "/src/" || location.pathname == "/build/") && qs("testnet") && qs("testnet") != '0')
                    || location.hostname.indexOf('testnet') == 0 ? true : false
                   );
-var NETWORK_VERSION = USE_TESTNET ? Bitcoin.network.testnet.addressVersion : Bitcoin.network.mainnet.addressVersion;
 
 //CONSTANTS THAT DEPEND ON IS_DEV / USE_TESTNET
 var BLOCKEXPLORER_URL = USE_TESTNET ? "http://test.bitcore.io" : "http://live.bitcore.io";
 var GOOGLE_ANALYTICS_UAID = null; //will be set in counterwallet.js
 var ROLLBAR_ACCESS_TOKEN = null; //will be set in counterwallet.js
 
+//var NETWORK_VERSION = USE_TESTNET ? Bitcoin.network.testnet.pubKeyHash : Bitcoin.network.bitcoin.pubKeyHash;
 var NETWORK_VERSION = USE_TESTNET ? Bitcoin.network.testnet.addressVersion : Bitcoin.network.mainnet.addressVersion;
 

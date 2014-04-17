@@ -23,7 +23,7 @@ function LogonViewModel() {
      
      var valid = true;
      self.sanitizedEnteredPassphrase().split(' ').forEach(function (word) {
-       if (mn_words.indexOf(word) == -1) {
+       if (Mnemonic.words.indexOf(word) == -1) {
          valid = false;
        }
      });
@@ -31,29 +31,19 @@ function LogonViewModel() {
   }, self);
   
   self.generatePassphrase = function() {
-    //Generate (or regenerate) a random, new passphrase
-    var pk = randomGetBytes(32);
-    var seed = null;
-    try { //Eh, this is hackish...
-      seed = pk.subarray(0,16);
-      var convSeed = Array(16);
-      for(var i=0; i < seed.length; i++) { convSeed[i] = seed[i]; }
-      seed = Bitcoin.convert.bytesToHex(convSeed);
-    } catch(err) {
-      seed = Bitcoin.convert.bytesToHex(pk.slice(0,16));  
-    }
-
-    // Original node:
-    // "nb! electrum doesn't handle leading zeros very well
-    // and we want to stay compatible."
-    // 
-    // (Counterwallet addendum: this probably doesn't
-    // apply to BIP0032 wallets, but I'll leave it in here for
-    // now until an audit clears it to be removed)
-    if (seed.charAt(0) == '0') seed = seed.substr(1);
-
-    self.generatedPassphrase(mn_encode(seed));
+    var m = new Mnemonic(128); //128 bits of entropy (12 word passphrase)
     
+    //inject some additional entropy with 100 rounds of SHA256
+    /*var randomSeed = Bitcoin.convert.bytesToHex(Bitcoin.convert.wordsToBytes(m.random));
+    for(var i=0;i<100;i++) {
+      randomSeed = Bitcoin.Crypto.SHA256(randomSeed).toString();
+      console.log(randomSeed);  
+    }
+    m.random = Bitcoin.convert.bytesToWords(Bitcoin.convert.hexToBytes(randomSeed).slice(0,16)); //leftmost 16 bytes of last hash's output*/
+    
+    var words = m.toWords();
+    self.generatedPassphrase(words);
+
     //select the generated passphrase text
     selectText('generated');
   }
@@ -78,9 +68,11 @@ function LogonViewModel() {
       $('#extra-info').animate({opacity:0});
       
       //generate the wallet ID from a double SHA256 hash of the passphrase and the network (if testnet)
-      var hash1 = Bitcoin.Crypto.SHA256(self.sanitizedEnteredPassphrase() + (USE_TESTNET ? '_testnet' : ''));
-      var hash2 = Bitcoin.Crypto.SHA256(hash1).toString(Bitcoin.Crypto.enc.Base64);
-      WALLET.identifier(hash2);
+      var hashBase = Bitcoin.Crypto.SHA256(self.sanitizedEnteredPassphrase() + (USE_TESTNET ? '_testnet' : ''));
+      var hash = Bitcoin.Crypto.SHA256(hashBase).toString(Bitcoin.Crypto.enc.Base64);
+      //var hashBase = self.sanitizedEnteredPassphrase() + (USE_TESTNET ? '_testnet' : '');
+      //var hash = Bitcoin.convert.bytesToBase64(Bitcoin.crypto.sha256(Bitcoin.crypto.sha256(hashBase)));
+      WALLET.identifier(hash);
       $.jqlog.log("My wallet ID: " + WALLET.identifier());
 
       //Set initial block height (will be updated again on each periodic refresh of BTC account balances)
@@ -135,12 +127,13 @@ function LogonViewModel() {
   
   self.openWalletPt2 = function(mustSavePreferencesToServer) {
       //generate the appropriate number of addresses
-      var seed = mn_decode(self.sanitizedEnteredPassphrase());
+      var m = new Mnemonic(self.sanitizedEnteredPassphrase().split(' '));
+      var seed = m.toHex();
+      
       var options = {
         network: USE_TESTNET ? "testnet" : "mainnet",
         derivationMethod: 'private'
       }
-      
       WALLET.BITCOIN_WALLET = Bitcoin.Wallet(seed, options);
 
       //kick off address generation (we have to take this hacky approach of using setTimeout, otherwise the
@@ -152,6 +145,7 @@ function LogonViewModel() {
     
     var address = WALLET.BITCOIN_WALLET.generateAddress();
     var i = WALLET.BITCOIN_WALLET.addresses.length - 1;
+    //assert(WALLET.BITCOIN_WALLET.getPrivateKey(i).toString() == WALLET.BITCOIN_WALLET.getPrivateKeyForAddress(address).toString());
     var privkey = WALLET.BITCOIN_WALLET.getPrivateKey(i);
     var addressHash = hashToB64(address);
 
@@ -226,7 +220,7 @@ function LogonViewModel() {
 
 ko.validation.rules['isValidPassphrasePart'] = {
     validator: function (val, self) {
-      return mn_words.contains(val);
+      return Mnemonic.words.contains(val);
     },
     message: 'Invalid phrase word.'
 };
@@ -327,10 +321,10 @@ function LogonPasswordModalViewModel() {
       preventPaste: true
       /*acceptValue: true,
       validate: function(keyboard, value, isClosing) {
-        return mn_words.contains(value);
+        return Mnemonic.words.contains(value);
       }*/
     }).autocomplete({
-      source: mn_words
+      source: Mnemonic.words
     }).addAutocomplete();
     
     // Overrides the default autocomplete filter function to search only from the beginning of the string

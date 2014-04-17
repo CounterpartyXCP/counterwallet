@@ -15,7 +15,8 @@ function denormalizeQuantity(quantity, divisible) {
 
 function hashToB64(content) {
   //used for storing address alias data, for instance
-  return Bitcoin.Crypto.SHA256(content).toString(Bitcoin.Crypto.enc.Base64);  
+  //return Bitcoin.Crypto.SHA256(content).toString(Bitcoin.Crypto.enc.Base64);  
+  return Bitcoin.convert.bytesToBase64(Bitcoin.crypto.sha256(content));
 }
 
 function smartFormat(num, truncateDecimalPlacesAtMin, truncateDecimalPlacesTo) { //arbitrary rules to make quantities formatted a bit more friendly
@@ -97,24 +98,6 @@ function getLinkForBlock(blockIndex, dataTitle, htmlize) {
 function getAddressLabel(address) {
   //gets the address label if the address is in this wallet
   return PREFERENCES['address_aliases'][hashToB64(address)] || address;
-}
-
-function randomGetBytes(numBytes) {
-     var randomBytes = null;
-    if (window.crypto && window.crypto.getRandomValues) {
-        // First we're going to try to use a built-in CSPRNG (newer Chrome, Firefox, etc)
-        randomBytes = new Uint8Array(numBytes);
-        window.crypto.getRandomValues(randomBytes);
-    } else if (window.msCrypto && window.msCrypto.getRandomValues) {
-        // Because of course IE calls it msCrypto instead of being standard
-        randomBytes = new Uint8Array(numBytes);
-        window.msCrypto.getRandomValues(randomBytes);
-    } else {
-        //Fallback to SecureRandom, for older browsers
-        randomBytes = new Array(numBytes);
-        rng_get_bytes(randomBytes);
-    }
-    return randomBytes;
 }
 
 function testnetBurnDetermineEarned(blockHeight, burned) {
