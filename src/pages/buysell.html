@@ -119,7 +119,7 @@
                                     </div>
                                     
                                     <!-- CUSTOM PRICING -->
-                                    <div class="row" data-bind="fadeVisibleInOnly: currentTab() == 2 && (currentMarketUnitPrice() == 0 || overrideMarketPrice())">
+                                    <div class="row" data-bind="fadeVisibleInOnly: currentTab() == 2 && isMarketPriceMissingOrOverridden()">
                                         <div class="col-md-12 buySellRow">
                                             <span data-bind="visible: !overrideMarketPrice()">There is currently insufficient data to determine a fair market price for your purchase.</span>
                                             <span data-bind="visible: overrideMarketPrice()">The current market unit price to be overridden is
@@ -130,7 +130,7 @@
                                             <span class="sellColor" data-bind="text: sellAsset"></span></b> at the selected address.                                                
                                         </div>
                                     </div>
-                                    <div class="row buySellRow" data-bind="visible: currentTab() == 2 && (currentMarketUnitPrice() == 0 || overrideMarketPrice())">
+                                    <div class="row buySellRow" data-bind="visible: currentTab() == 2 && isMarketPriceMissingOrOverridden()">
                                         <div class="col-md-4">Quantity <b class="buyColor"><span data-bind="text: buyAsset"></span></b> to buy:</div>
                                         <div class="col-md-8">
                                             <div class="input-group">
@@ -141,7 +141,7 @@
                                             <span class="invalid" data-bind="validationMessage: selectedBuyQuantity"></span>
                                         </div>
                                     </div>
-                                    <div class="row buySellRow" data-bind="visible: currentTab() == 2 && (currentMarketUnitPrice() == 0 || overrideMarketPrice())">
+                                    <div class="row buySellRow" data-bind="visible: currentTab() == 2 && isMarketPriceMissingOrOverridden()">
                                         <div class="col-md-4">
                                             <span data-bind="visible: customSellAs() == 'unitprice'"><b><span data-bind="text: dispAssetPair"></span></b> unit price:</span>
                                             <span data-bind="visible: customSellAs() == 'quantity'">Quantity <b class="sellColor"><span data-bind="text: sellAsset"></span></b> to sell:</span>
@@ -164,14 +164,14 @@
                                             </div>
                                         </div>
                                     </div>
-                                    <div class="row buySellRow" data-bind="visible: currentTab() == 2 && (currentMarketUnitPrice() == 0 || overrideMarketPrice()) && !overrideDefaultOptions()">
+                                    <div class="row buySellRow" data-bind="visible: currentTab() == 2 && isMarketPriceMissingOrOverridden() && !overrideDefaultOptions()">
                                         <a href="#" data-bind="click: setOverrideDefaultOptions" class="font-xs">Override Trade Options</a>
                                     </div>
                                     
                                     <!-- PURCHASE SUMMARY -->
                                     <div class="row margin-top-10" data-bind="fadeVisibleInOnly: currentTab() == 2 && unitPrice() && selectedBuyQuantity()">
                                         <div class="col-sm-12 buySellRow">
-                                            <span data-bind="fadeVisible: (currentMarketUnitPrice() == 0 || overrideMarketPrice()) && (selectedSellQuantityCustom() && selectedSellQuantityCustom() > 0) ">
+                                            <span data-bind="fadeVisible: isMarketPriceMissingOrOverridden() && selectedSellQuantityCustom() && selectedSellQuantityCustom() > 0 ">
                                                 The effective unit price of your <b><span data-bind="text: dispAssetPair"></span></b> order is
                                                 <b><span data-bind="text: dispUnitPrice"></span></b>
                                                 <b><span data-bind="text: quoteAsset"></span></b> per each <b><span data-bind="text: baseAsset"></span></b>.
@@ -183,7 +183,7 @@
                                                 <span class="sellColor" data-bind="text: sellAsset"></span></b>
                                                 <span data-bind="visible: sellAsset() == 'BTC' && feeForSelectedBTCQuantity() != 0">, plus a <b><span data-bind="text: feeForSelectedBTCQuantity"></span> BTC</b> (<span data-bind="text: feeForSelectedBTCQuantityAsPct"></span>%) miner fee (to prevent troll orders)</span>.
                                             </span>
-                                            <span data-bind="fadeVisibleInOnly: currentTab() == 2 && sellQuantityRemainingAfterSale() != null && sellQuantityRemainingAfterSale() >= 0">
+                                            <span data-bind="fadeVisibleInOnly: currentTab() == 2 && sellQuantityRemainingAfterSaleIsNotNull() && sellQuantityRemainingAfterSale() >= 0">
                                                 After the sale, you will have <b><span class="sellColor" data-bind="text: dispSellQuantityRemainingAfterSale"></span>
                                                 <span class="sellColor" data-bind="text: sellAsset"></span></b> remaining at
                                                 your address <b class='notoAddrColor'><span data-bind="text: dispSelectedAddressWithLabel"></span></b>.
@@ -437,9 +437,9 @@
     </article> <!-- WIDGET END -->
   </div> <!-- end row -->
   
-  <div data-bind="fadeVisibleInOnly: showTradeHistory && tradeHistory().length > 0" class="row"> <!-- row -->
+  <div data-bind="fadeVisibleInOnly: showTradeHistory" class="row"> <!-- row -->
     <article class="col-xs-12 col-sm-12 col-md-12 col-lg-12"> <!-- NEW WIDGET START -->
-      <div class="jarviswidget defaultWidgetColor" id="wid-id-tradeChart" data-widget-editbutton="false" data-widget-deletebutton="false" data-bind="fadeVisibleInOnly: showTradeHistory && tradeHistory().length > 0">
+      <div class="jarviswidget defaultWidgetColor" id="wid-id-tradeChart" data-widget-editbutton="false" data-widget-deletebutton="false" data-bind="fadeVisibleInOnly: showTradeHistory">
         <header>
             <span class="widget-icon"> <i class="fa fa-circle"></i> </span>
             <h3>Completed Trades for <span data-bind="text: dispAssetPair"></span></h3>
@@ -482,5 +482,3 @@
     </article> <!-- WIDGET END -->
   </div> <!-- end row -->
 </section>
-
-<script src="js/init/buysell.js"></script>

@@ -564,6 +564,10 @@ function CallAssetModalViewModel() {
     if(self.totalXCPPay() === null) return null;
     return Decimal.round(new Decimal(WALLET.getBalance(self.address(), 'XCP')).sub(self.totalXCPPay()), 8, Decimal.MidpointRounding.ToEven).toFloat();
   }, self);
+  
+  self.xcpBalRemainingPostCallIsSet = ko.computed(function() {
+    return self.xcpBalRemainingPostCall() !== null;
+  }, self);
 
   self.dispXCPBalRemainingPostCall = ko.computed(function() {
     return smartFormat(self.xcpBalRemainingPostCall(), null, 4);
@@ -683,6 +687,10 @@ function ShowAssetInfoModalViewModel() {
   self.callPrice = ko.observable(null);
   self.history = ko.observableArray([]);
   
+  self.dispTotalIssued = ko.computed(function() {
+    return smartFormat(self.totalIssued()); 
+  }, self); 
+
   self.showHistory = ko.computed(function() {
     return self.history().length ? true : false; 
   }, self); 

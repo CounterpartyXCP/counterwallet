@@ -80,13 +80,13 @@ div#logon div#form-well {
   margin-bottom: 35px;
 }
 
-p#logonWarningLine1 {
+p.logonWarningLine1 {
   font-weight:bold;
   text-align:center;
   font-size:1.3em;
 }
 
-p#logonWarningOtherLines {
+p.logonWarningOtherLines {
   font-weight:bold;
   text-decoration:underline;
   text-align:center;

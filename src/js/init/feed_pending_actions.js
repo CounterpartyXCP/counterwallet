@@ -1,1 +1,0 @@
-ko.applyBindings(PENDING_ACTION_FEED, document.getElementById("pendingActionFeedContent"));

@@ -42,7 +42,7 @@ function LogonViewModel() {
     m.random = Bitcoin.convert.bytesToWords(Bitcoin.convert.hexToBytes(randomSeed).slice(0,16)); //leftmost 16 bytes of last hash's output*/
     
     var words = m.toWords();
-    self.generatedPassphrase(words);
+    self.generatedPassphrase(words.join(' '));
 
     //select the generated passphrase text
     selectText('generated');

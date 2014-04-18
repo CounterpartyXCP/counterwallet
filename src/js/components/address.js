@@ -153,14 +153,7 @@ function AddressViewModel(key, address, initialLabel) {
 
   self.showPrivateKey = function() {
     //Show the private key code for this address
-    var privateKey = WALLET.getAddressObj(self.ADDRESS).KEY.toWif();
-    //Pop up a modal with this private
-    var html = '<center>';
-    html += '<h4>Private Key (WIF) for <b>' + self.ADDRESS + '</b></h4><br/>';
-    html += '<h5>Make sure nobody can look over your shoulder or see your screen.</h5>';
-    html += '<button onclick="$(this).hide().next().show();">Show Private Key</button><div class="display-none">'+privateKey+'</div>';
-    html += '</center>';
-    bootbox.alert('<center>' + html + '</center>');
+    DISPLAY_PRIVATE_KEY_MODAL.show(self.ADDRESS);
   }
   
   self.removeWatch = function() { //possible for watch only addresses only

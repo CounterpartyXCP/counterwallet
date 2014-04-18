@@ -449,6 +449,12 @@ function BuySellWizardViewModel() {
     return numberWithCommas(noExponents(Math.abs(self.sellQuantityRemainingAfterSale())));
   }, self);
   
+  self.isMarketPriceMissingOrOverridden = ko.computed(function() {
+    return self.currentMarketUnitPrice() == 0 || self.overrideMarketPrice();
+  }, self);
+  self.sellQuantityRemainingAfterSaleIsNotNull = ko.computed(function() {
+    return self.sellQuantityRemainingAfterSale() !== null;
+  }, self);
 
   //VALIDATION MODELS  
   self.validationModelTab1 = ko.validatedObservable({

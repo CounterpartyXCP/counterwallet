@@ -87,12 +87,12 @@
           </header>
           <div> <!-- widget div-->
             <div class="widget-body" data-bind="attr: {'id': 'address-balances-' + ADDRESS}, foreach: filteredAssets"> <!-- widget content -->
-              <div class="asset-item" data-bind="css: { btc: ASSET === 'BTC', xcp: ASSET === 'XCP', myasset: isMine(), othersasset: isMine() === false }">
+              <div class="asset-item" data-bind="css: { btc: ASSET === 'BTC', xcp: ASSET === 'XCP', myasset: isMine(), othersasset: !isMine() && (ASSET !== 'BTC' && ASSET !== 'XCP') }">
                 <div class="btn-group"> <!-- asset level action button -->
                   <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown"><span class="caret"></span></button>
                   <ul class="dropdown-menu" role="menu">
                     <li><a data-bind="visible: !$parent.IS_WATCH_ONLY, click: send" href="#">Send</a></li>
-                    <li><a data-bind="visible: isMine() !== null, click: showInfo" href="#">Show Info</a></li>
+                    <li><a data-bind="visible: ASSET !== 'BTC' && ASSET !== 'XCP', click: showInfo" href="#">Show Info</a></li>
                     <li data-bind="visible: !$parent.IS_WATCH_ONLY && USE_TESTNET && ASSET === 'BTC'"><a data-bind="click: testnetBurn" href="#">Burn for XCP</a></li>
                     <li data-bind="visible: !$parent.IS_WATCH_ONLY && isMine() && !locked()"><a data-bind="click: issueAdditional" href="#">Issue Additional</a></li>
                     <li data-bind="visible: !$parent.IS_WATCH_ONLY && isMine()"><a data-bind="click: transfer" href="#">Transfer Ownership</a></li>
@@ -164,7 +164,7 @@
     <div class="modal-content">
       <div class="modal-header">
         <button type="button" data-bind="click: hide" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
-        <h4 class="modal-title" data-bind="text: forWatchOnly() ? 'Add Watch Address' : 'Create New Address'"></h4>
+        <h4 class="modal-title" data-bind="text: dispWindowTitle"></h4>
       </div>
       <div class="modal-body no-padding">
         <div data-bind="visible: !forWatchOnly()">
@@ -239,7 +239,7 @@
             </div>
           </div></section>
         </fieldset></form>
-        <p class="formPaddedBot" data-bind="fadeVisibleInOnly: normalizedBalRemaining() !== null">
+        <p class="formPaddedBot" data-bind="fadeVisibleInOnly: normalizedBalRemainingIsSet">
             After sending, you will have <b><span class="sellColor" data-bind="text: dispNormalizedBalRemaining"></span>
             <span class="sellColor" data-bind="text: asset"></span> remaining</b> at this address (minus fees).
         </p>
@@ -389,6 +389,31 @@
       <div class="modal-footer">
         <button type="button" class="btn btn-default" data-bind="click: hide">Cancel</button>
         <button type="button" data-bind="click: submitForm" class="btn btn-success">Burn</button>
+      </div>
+    </div><!-- /.modal-content -->
+  </div><!-- /.modal-dialog -->
+</div><!-- /.modal -->
+
+<!-- modal for display private key -->
+<div data-bind="showModal: shown" id="displayPrivateKeyModal" class="modal fade" data-backdrop="static" data-keyboard="false" tabindex="-1" role="dialog" aria-labelledby="displayPrivateKeyModal" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" data-bind="click: hide" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+        <h4 class="modal-title">Private Key (WIF) for <b data-bind="text: ADDRESS"></b></h4>
+      </div>
+      <div class="modal-body no-padding">
+        <div class="formPadded">
+            <div class="alert alert-warning"><i class="fa-fw fa fa-info"></i>Please make sure nobody can look over your shoulder or see your screen.</div>
+        
+            <center>
+                <a href="#" class="font-lg" data-bind="visible: !privateKeyText(), click: displayPrivateKey">Show Private Key</a>
+                <span class="font-medlg" data-bind="visible: privateKeyText, text: privateKeyText"></span>
+            </center>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-default" data-bind="click: hide">Close</button>
       </div>
     </div><!-- /.modal-content -->
   </div><!-- /.modal-dialog -->
@@ -660,7 +685,7 @@
             </div>
           </div></section>
         </fieldset></form>
-        <div class="formPaddedBot" data-bind="fadeVisibleInOnly: xcpBalRemainingPostCall() !== null">
+        <div class="formPaddedBot" data-bind="fadeVisibleInOnly: xcpBalRemainingPostCallIsSet">
             <p>At the given call price of <b><span data-bind="text: dispCallPrice"></span> XCP</b> per unit
                 of <b><span data-bind="text: asset"></span></b> (which has <b><span data-bind="text: dispTotalIssued"></span></b> units issued
                 and <b class="sellColor"><span data-bind="text: dispTotalOutstanding"></span></b> units outstanding),
@@ -713,7 +738,7 @@
             <label class="control-label col col-sm-2">Total Issued</label>
             <div class="col col-sm-10">
                 <label class="input"><i class="icon-append fa fa-plus"></i>
-                    <input name="assetQuantity"  data-bind="value: numberWithCommas(totalIssued())" type="text" readonly="readonly"/>                        
+                    <input name="assetQuantity"  data-bind="value: dispTotalIssued" type="text" readonly="readonly"/>                        
                 </label>
             </div>
           </div></section>
@@ -784,5 +809,3 @@
     </div><!-- /.modal-content -->
   </div><!-- /.modal-dialog -->
 </div><!-- /.modal -->
-
-<script src="js/init/balances.js"></script>

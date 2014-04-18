@@ -101,6 +101,10 @@ function CreateNewAddressModalViewModel() {
     description: self.description,
     watchAddress: self.watchAddress
   });
+  
+  self.dispWindowTitle = ko.computed(function() {
+    return self.forWatchOnly() ? 'Add Watch Address' : 'Create New Address';
+  }, self);
 
   self.resetForm = function() {
     self.forWatchOnly(null);
@@ -219,6 +223,10 @@ function SendModalViewModel() {
 
   self.dispNormalizedBalRemaining = ko.computed(function() {
     return smartFormat(self.normalizedBalRemaining());
+  }, self);
+  
+  self.normalizedBalRemainingIsSet = ko.computed(function() {
+    return self.normalizedBalRemaining() !== null;
   }, self);
   
   self.validationModel = ko.validatedObservable({
@@ -822,6 +830,33 @@ function TestnetBurnModalViewModel() {
   self.hide = function() {
     self.shown(false);
   }  
+}
+
+function DisplayPrivateKeyModalViewModel() {
+  var self = this;
+  self.shown = ko.observable(false);
+  self.address = ko.observable(null); //address string, not an Address object
+  self.privateKeyText = ko.observable(null);
+  
+  self.resetForm = function() {
+    self.address(null);
+    self.privateKeyText(null);
+  }
+  
+  self.show = function(address, resetForm) {
+    if(typeof(resetForm)==='undefined') resetForm = true;
+    if(resetForm) self.resetForm();
+    self.address(address);
+    self.shown(true);
+  }  
+
+  self.hide = function() {
+    self.shown(false);
+  }
+  
+  self.displayPrivateKey = function() {
+    self.privateKeyText(WALLET.getAddressObj(self.address()).KEY.toWif());
+  }
 }
 
 /*NOTE: Any code here is only triggered the first time the page is visited. Put JS that needs to run on the
