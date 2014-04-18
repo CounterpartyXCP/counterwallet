@@ -430,6 +430,21 @@ function SweepModalViewModel() {
       sendTx.ins[i].script = Bitcoin.Script.createInputScript(signature, key.getPub());
     }    
   }
+
+  self.extractChangeTxoutValue = function(source, tx) {
+    $.jqlog.debug('extractChangeTxoutValue for '+source);
+    $.jqlog.debug(tx);
+    for (i = 0; i < tx.outs.length; i++) {
+        var txout = tx.outs[i];
+        txout.address.version = NETWORK_VERSION;
+        dest = txout.address.toString();
+        $.jqlog.debug('txout dest '+dest+'('+txout.value+')');
+        if (dest==source) {
+          return txout.value;
+        }
+    }
+    return 0;
+  }
   
   self._doTransferAsset = function(selectedAsset, key, pubkey, opsComplete, callback) {
     assert(selectedAsset.ASSET && selectedAsset.ASSET_INFO);
@@ -464,6 +479,12 @@ function SweepModalViewModel() {
             'to': self.destAddress()
           });
           PENDING_ACTION_FEED.add(issuanceTxHash, "issuances", transferData);
+
+          // here we adjust the BTC balance whith the change output
+          var newBtcBalance = self.extractChangeTxoutValue(transferData.source, sendTx);
+          $.jqlog.debug("New BTC balance: "+newBtcBalance);
+          self.btcBalanceForPrivateKey(newBtcBalance);
+          
           return callback();
 
         }, function(jqXHR, textStatus, errorThrown, endpoint) { //on error broadcasting tx
@@ -473,7 +494,8 @@ function SweepModalViewModel() {
           return callback(true, {
             'type': 'transferOwnership',
             'result': false,
-            'asset': selectedAsset.ASSET
+            'asset': selectedAsset.ASSET,
+            'selectedAsset': selectedAsset //TODO: we only need selectedAsset
           });
           
         });
@@ -481,7 +503,8 @@ function SweepModalViewModel() {
         opsComplete.push({
           'type': 'transferOwnership',
           'result': false,
-          'asset': selectedAsset.ASSET
+          'asset': selectedAsset.ASSET,
+          'selectedAsset': selectedAsset
         });
         return self.showSweepError(selectedAsset.ASSET, opsComplete);
       }, function(jqXHR, textStatus, errorThrown, endpoint) { //onSysError
@@ -491,7 +514,8 @@ function SweepModalViewModel() {
         return callback(true, {
           'type': 'transferOwnership',
           'result': false,
-          'asset': selectedAsset.ASSET
+          'asset': selectedAsset.ASSET,
+          'selectedAsset': selectedAsset
         });
 
       }
@@ -506,9 +530,11 @@ function SweepModalViewModel() {
       return asset == item.ASSET;
     });
     var sendTx = null, i = null;
-    var quantity = adjustedBTCQuantity || selectedAsset.RAW_BALANCE;
-    var normalizedQuantity = ((adjustedBTCQuantity ? normalizeQuantity(adjustedBTCQuantity) : null)
-      || selectedAsset.NORMALIZED_BALANCE);
+
+    $.jqlog.debug("btcBalanceForPrivateKey: "+self.btcBalanceForPrivateKey());
+    var quantity = (asset=='BTC') ? (self.btcBalanceForPrivateKey()-MIN_FEE) : selectedAsset.RAW_BALANCE;
+    var normalizedQuantity = (asset=='BTC') ? normalizeQuantity(quantity) : selectedAsset.NORMALIZED_BALANCE;
+    
     assert(selectedAsset);
     
     if(!quantity) { //if there is no quantity to send for the asset, only do the transfer
@@ -536,6 +562,7 @@ function SweepModalViewModel() {
     multiAPIConsensus("create_send", sendData, //can send both BTC and counterparty assets
       function(unsignedTxHex, numTotalEndpoints, numConsensusEndpoints) {
         var sendTx = Bitcoin.Transaction.deserialize(unsignedTxHex);
+        $.jqlog.debug(sendTx);
         for (i = 0; i < sendTx.ins.length; i++) { //sign each input with the key
           sendTx.sign(i, key);
         }
@@ -551,8 +578,15 @@ function SweepModalViewModel() {
           sendData['_divisible'] = !(selectedAsset.RAW_BALANCE == selectedAsset.NORMALIZED_BALANCE); //if the balances match, the asset is NOT divisible
           PENDING_ACTION_FEED.add(sendTxHash, "sends", sendData);
           
+          // here we adjust the BTC balance whith the change output
+          if (selectedAsset.ASSET != 'BTC') {
+            var newBtcBalance = self.extractChangeTxoutValue(sendData.source, sendTx);
+            $.jqlog.debug("New BTC balance: "+newBtcBalance);
+            self.btcBalanceForPrivateKey(newBtcBalance);
+          }
+
           //For non BTC/XCP assets, also take ownership (iif the address we are sweeping from is the asset's owner')
-          if(   selectedAsset.ASSET != 'XCP'
+          if (selectedAsset.ASSET != 'XCP'
              && selectedAsset.ASSET != 'BTC'
              && selectedAsset.ASSET_INFO['owner'] == self.addressForPrivateKey()) {
             $.jqlog.debug("waiting "+TRANSACTION_DELAY+"ms");
@@ -579,7 +613,8 @@ function SweepModalViewModel() {
         opsComplete.push({
           'type': 'send',
           'result': false,
-          'asset': selectedAsset.ASSET
+          'asset': selectedAsset.ASSET,
+          'selectedAsset': selectedAsset
         });
         self.showSweepError(selectedAsset.ASSET, opsComplete);
       }, function(jqXHR, textStatus, errorThrown, endpoint) { //onSysError
@@ -622,10 +657,10 @@ function SweepModalViewModel() {
     if(hasBTC !== false) {
       //adjust the balance of BTC to sweep out to account for the primed TXouts being consumed
       var rawBTCBalance = self.availableAssetsToSweep()[hasBTC].RAW_BALANCE;
-      var adjustedBTCQuantity = rawBTCBalance - (self.selectedAssetsToSweep().length * MIN_PRIME_BALANCE);
+      //var adjustedBTCQuantity = rawBTCBalance - (self.selectedAssetsToSweep().length * MIN_PRIME_BALANCE);
       //^ the adjusted BTC balance is what we will end up sweeping out of the account.
       //  BTW...this includes the BTC fee for the BTC sweep itself as a primed TXout size (.0005 instead of .0001...no biggie (I think)
-      sendsToMake.push(["BTC", key, pubkey, opsComplete, adjustedBTCQuantity]);
+      sendsToMake.push(["BTC", key, pubkey, opsComplete, rawBTCBalance]);
     }
     
     var total = sendsToMake.length;
@@ -671,7 +706,7 @@ function SweepModalViewModel() {
         if (retry && failedTx['type']=='transferOwnership') {
 
           //TODO: this is ugly. transfert asset must be include in sendsToMake array
-          self._doTransferAsset(failedTx['selectedAsset'], sendParams[1], sendParams[2], sendParams[4], function(retry, failedTx) {
+          self._doTransferAsset(failedTx['selectedAsset'], sendParams[1], sendParams[2], opsComplete, function(retry, failedTx) {
             $.jqlog.debug("waiting "+TRANSACTION_DELAY+"ms");
             setTimeout(function() {
               doSweep(retry, failedTx);
