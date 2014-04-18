@@ -10,8 +10,8 @@
 
 
     <!-- build:css css/counterwallet-deps-min.css -->
-    <link rel="stylesheet" type="text/css" media="screen" href="vendors/smartadmin/css/bootstrap.min.css">
-    <link rel="stylesheet" type="text/css" media="screen" href="vendors/smartadmin/css/font-awesome.min.css">
+    <link rel="stylesheet" type="text/css" media="screen" href="vendors/bootstrap/dist/css/bootstrap.min.css">
+    <link rel="stylesheet" type="text/css" media="screen" href="vendors/font-awesome/css/font-awesome.min.css">
     <!-- SmartAdmin Styles -->
     <link rel="stylesheet" type="text/css" media="screen" href="vendors/smartadmin/css/smartadmin-production.css">
     <link rel="stylesheet" type="text/css" media="screen" href="vendors/smartadmin/css/smartadmin-skins.css">
@@ -115,7 +115,7 @@
         </div> <!-- end logout button -->
 
         <div id="fullscreen" class="btn-header transparent pull-right"> <!-- fullscreen button -->
-            <span> <a href="#" title="Full Screen"><i class="fa fa-fullscreen"></i></a> </span>
+            <span> <a href="#" title="Full Screen"><i class="fa fa-arrows-alt"></i></a> </span>
         </div> <!-- end fullscreen button -->
 
         <div id="showOptions" class="btn-header transparent pull-right"> <!-- options button -->
@@ -123,7 +123,7 @@
         </div> <!-- end options button -->
 
         <div id="hide-menu" class="btn-header pull-right">
-          <span> <a href="#" title="Collapse Menu"><i class="fa fa-reorder"></i></a> </span>
+          <span> <a href="#" title="Collapse Menu"><i class="fa fa-minus-square"></i></a> </span>
         </div>
         
         <span id="noticeDevMode" data-bind="visible: IS_DEV" class="label label-warning pull-right modeIndicator"><i class="fa-fw fa fa-warning"></i>&nbsp;Dev Mode Enabled</span>
@@ -480,7 +480,6 @@
 
     <!-- build:js js/counterwallet-deps-min.js -->
     <script src="vendors/jquery/jquery.min.js"></script><!-- Jquery -->
-    <!--<script src="vendors/jquery-ui/ui/minified/jquery-ui.min.js"></script>--><!-- JqueryUI -->
     <script src="vendors/jquery-ui/ui/minified/jquery.ui.core.min.js"></script>
     <script src="vendors/jquery-ui/ui/minified/jquery.ui.widget.min.js"></script>
     <script src="vendors/jquery-ui/ui/minified/jquery.ui.mouse.min.js"></script>
@@ -504,11 +503,6 @@
     <script src="vendors/smartadmin/js/plugin/datatables/media/js/TableTools.min.js"></script>
     <script src="vendors/smartadmin/js/plugin/datatables/DT_bootstrap.js"></script>   
 
-    <!-- cryptojs -->
-    <!--<script src="vendors/cryptojs/components/core-min.js"></script>
-    <script src="vendors/cryptojs/components/sha256-min.js"></script>
-    <script src="vendors/cryptojs/components/enc-base64-min.js"></script>-->
-    
     <!-- JQuery extras -->
     <script src="vendors/jReject/js/jquery.reject.js"></script>
     <script src="vendors/jquery-yql/jquery.yql.js"></script> <!-- YQL queries for calls that don't support CORS -->
@@ -535,7 +529,6 @@
 
     <!-- Other external libraries. -->
     <script src="js/qrcode.js"></script>  <!-- from http://d-project.googlecode.com/svn/trunk/misc/qrcode/js/ -->
-    <!-- todo: replace by a library available in github -->    
     <script src="vendors/jsdecimal/lib/decimal.js"></script> <!-- for accurate arithmetic price operations -->
     <script src="vendors/select2/select2.min.js"></script> <!-- JQUERY SELECT2 INPUT -->
 
@@ -547,8 +540,8 @@
     <script src="vendors/bitcoinjs-lib/bitcoinjs-min.js"></script>
     <!-- endbuild -->
 
-    <!-- COUNTERWALLET SPECIFIC JS INCLUDES --> 
-    <!-- JavaScript created specifically for Counterwallet. -->
+    <!-- COUNTERWALLET JS INCLUDES -->
+    <!-- build:js js/counterwallet-min.js --> 
     <script src="js/mnemonic.js"></script>
     <script src="js/consts.js"></script>
     <script src="js/counterwallet.js"></script>
@@ -575,8 +568,8 @@
     <script src="js/components/history.js"></script>
     <script src="js/components/leaderboard.js"></script>
     <script src="js/components/portfolio.js"></script>
-    <!-- custom app.js --> 
-    <script src="js/smartadmin.app.js"></script>
+
+    <script src="js/smartadmin.app.js"></script> <!-- custom app.js -->
     <!-- ^ unfortunately we have to mod the file itself, instead of dynamically override :( -->
 
     <script src="js/pages.init.js"></script>        
