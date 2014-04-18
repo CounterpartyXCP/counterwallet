@@ -3,12 +3,17 @@ Counterwallet
 
 Online Webwallet for [Counterparty](http://www.counterparty.co).
 
-Originally based off of [Carbonwallet](http://www.carbonwallet.com) (however more than 90% of the original code has been removed or rewritten).
+Originally based off of [Carbonwallet](http://www.carbonwallet.com) (however virtually all the original code has been removed or rewritten).
 
-Website (mainnet): https://counterwallet.co
-Website (testnet): https://testnet.counterwallet.co
 
-Features:
+[counterwallet.co](https://www.counterwallet.co/)
+----------------------------------------------------
+
+[testnet.counterwallet.co](https://testnet.counterwallet.co/)
+----------------------------------------------------
+
+Features
+----------
 
 - Deterministic wallet addresses (BIP 32-based)
 - Supports the majority of Counterparty functionality
