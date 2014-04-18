@@ -76,20 +76,20 @@
                     </thead>
                     <tbody data-bind="foreach: data">
                         <tr>
-                            <td style="font-weight: bold; font-size: 1.15em" data-bind="text: position"></td>
-                            <td style="font-weight: bold; font-size: 1.15em" data-bind="html: dispAsset"></td>
+                            <td class="leaderboardAssetText" data-bind="text: position"></td>
+                            <td class="leaderboardAssetText" data-bind="html: dispAsset"></td>
                             <td data-bind="text: marketCap"></td>
                             <td data-bind="text: price"></td>
                             <td data-bind="text: supply"></td>
                             <td data-bind="text: volume"></td>
-                            <td data-bind="text: pctChange, style: { color: pctChangeRaw > 0 ? 'green' : (pctChangeRaw < 0 ? 'red' : 'initial') }"></td>
-                            <td data-bind="attr: { id: 'miniChart-' + $parent.base + '-' + asset }" style="width:180px;height:60px"></td>
+                            <td data-bind="text: pctChange, class: pctChangeColorClass"></td>
+                            <td data-bind="attr: { id: 'miniChart-' + $parent.base + '-' + asset }" class="leaderboardMiniChart"></td>
                             
-                            <td data-bind="text: marketCapRaw" style="display:none"></td>
-                            <td data-bind="text: priceRaw" style="display:none"></td>
-                            <td data-bind="text: supplyRaw" style="display:none"></td>
-                            <td data-bind="text: volumeRaw" style="display:none"></td>
-                            <td data-bind="text: pctChangeRaw" style="display:none"></td>
+                            <td data-bind="text: marketCapRaw" class="display-none"></td>
+                            <td data-bind="text: priceRaw" class="display-none"></td>
+                            <td data-bind="text: supplyRaw" class="display-none"></td>
+                            <td data-bind="text: volumeRaw" class="display-none"></td>
+                            <td data-bind="text: pctChangeRaw" class="display-none"></td>
                         </tr>
                     </tbody>
                 </table>
@@ -100,18 +100,4 @@
   </div> <!-- end row -->
 </section>
 
-<script type="text/javascript">
-  pageSetUp(); //init smartadmin featureset
-
-  //This code is run on each visit to the page
-  window.ASSET_PORTFOLIO = new AssetPortfolioViewModel("Test");
-
-  ko.applyBindings(ASSET_PORTFOLIO, document.getElementById("portfolioButtonBar"));
-  ko.applyBindings(ASSET_PORTFOLIO, document.getElementsByClassName("portfolioGrid")[0]);
-  
-  $(window).bind("resize", ASSET_PORTFOLIO.dataTableResponsive);
-  $(window).on('hashchange', function() {
-    $(window).off("resize", ASSET_PORTFOLIO.dataTableResponsive);
-  });
-
-</script>
+<script src="js/init/portfolio.js"></script>

@@ -1,16 +1,66 @@
 /* 
- * Logged in site specific
+ * Generic helper styles
  */
-#qr {
-    width: 185px;
-    height: 185px;
-    display: inline-block;
+.display-none {
+  display: none;
 }
 
-#qr_addr {
-    position: relative;
-    z-index: 1;
+.min-height-0 {
+  min-height:0;
 }
+
+.width-max {
+  width: 100%;
+}
+
+.opacity-70pct {
+  opacity: .7;
+}
+
+.padding-left-5 {
+  padding-left: 5px;
+}
+
+.padding-left-5 {
+  padding-left: 5px;
+}
+
+.padding-right-5 {
+  padding-right: 5px;
+}
+
+.padding-right-10 {
+  padding-right: 10px;
+}
+
+.margin-top-15 {
+  margin-top: 15px;
+}
+
+.margin-bottom-0 {
+  margin-bottom: 0;
+}
+
+.margin-left-5 {
+  margin-left: 5px;
+}
+
+.inline-block {
+  display: inline-block;
+}
+
+.bold {
+  font-weight: bold;
+}
+
+.table-border-spacing-0 {
+  border-spacing:0;
+}
+
+.table-border-collapse {
+  border-collapse:collapse;
+}
+
 
 .errorColor {
     color: #D56161;
@@ -36,15 +86,8 @@
     color: #f89406;    
 }
 
-.sectionHeaderButtonBar {
-    padding-right: 14px;
-    padding-top: 14px;
-}
-
-.emptyFeedContainer {
-    text-align: center;
-    position: relative;
-    top: 160px;
+.font-medlg {
+    font-size: 115%!important;
 }
 
 /* Add back in colored badges (this was removed from Bootstrap 3 for some reason)

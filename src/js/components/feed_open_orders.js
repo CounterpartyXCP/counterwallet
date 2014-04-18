@@ -27,7 +27,7 @@ function OpenOrderViewModel(order) {
   self.cancelOpenOrder = function() {
     bootbox.dialog({
       message: "Are you sure that you want to cancel this order?<br/><br/> \
-        <b style='color:red'>Please NOTE that this action is irreversable!</b>",
+        <b class='errorColor'>Please NOTE that this action is irreversable!</b>",
       title: "Are you sure?",
       buttons: {
         success: {

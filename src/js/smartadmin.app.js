@@ -212,7 +212,7 @@ $(document).ready(function() {
     $.widresetMSG = $this.data('reset-msg');
     
     $.SmartMessageBox({
-      title : "<i class='fa fa-refresh' style='color:green'></i> Clear Local Storage",
+      title : "<i class='fa fa-refresh txt-color-green'></i> Clear Local Storage",
       content : $.widresetMSG || "Would you like to RESET all your saved widgets and clear LocalStorage?",
       buttons : '[No][Yes]'
     }, function(ButtonPressed) {
@@ -233,7 +233,7 @@ $(document).ready(function() {
     $.loginURL = $this.attr('href');
     
     if (window.WALLET && WALLET.isSellingBTC()) {
-      $.logoutMSG = "<span style='color:red;font-weight:bold'>If you log out, any Bitcoin sell orders you have open will probably not be filled.</span>";
+      $.logoutMSG = "<span class='bold txt-color-red'>If you log out, any Bitcoin sell orders you have open will probably not be filled.</span>";
     } else {
       $.logoutMSG = $this.data('logout-msg');
     }

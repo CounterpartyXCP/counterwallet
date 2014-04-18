@@ -205,12 +205,20 @@ function SendModalViewModel() {
     return normalizeQuantity(self.rawBalance(), self.divisible());
   }, self);
   
+  self.dispNormalizedBalance = ko.computed(function() {
+    return smartFormat(self.normalizedBalance());
+  }, self);
+  
   self.normalizedBalRemaining = ko.computed(function() {
     if(!isNumber(self.quantity())) return null;
     var curBalance = normalizeQuantity(self.rawBalance(), self.divisible());
     var balRemaining = Decimal.round(new Decimal(curBalance).sub(parseFloat(self.quantity())), 8, Decimal.MidpointRounding.ToEven).toFloat();
     if(balRemaining < 0) return null;
     return balRemaining;
+  }, self);
+
+  self.dispNormalizedBalRemaining = ko.computed(function() {
+    return smartFormat(self.normalizedBalRemaining());
   }, self);
   
   self.validationModel = ko.validatedObservable({
@@ -749,6 +757,10 @@ function TestnetBurnModalViewModel() {
   self.quantityXCPToBeCreated = ko.computed(function() { //normalized
     if(!self.btcBurnQuantity() || !parseFloat(self.btcBurnQuantity())) return null;
     return testnetBurnDetermineEarned(WALLET.networkBlockHeight(), self.btcBurnQuantity());
+  }, self);
+  
+  self.dispQuantityXCPToBeCreated = ko.computed(function() { 
+    return numberWithCommas(self.quantityXCPToBeCreated());
   }, self);
   
   self.maxPossibleBurn = ko.computed(function() { //normalized

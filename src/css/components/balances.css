@@ -86,3 +86,13 @@ div#showAssetInfoModal table tbody {
 .asset-item.xcp          { color: #3c763d; background-color: #d6e9c6; border-color: #b2c2a5; }
 .asset-item.myasset     { color: #8a6d3b; background-color: #f4dbab; border-color: #cfb991; }
 .asset-item.othersasset { color: #31708f; background-color: #bce8f1; border-color: #9fc4cc; }
+
+
+.balancesAssetIcons {
+  position:absolute;bottom:2px;right:10px
+}
+
+.balancesAssetIcon {
+  float:right;
+  padding-left:5px;
+}

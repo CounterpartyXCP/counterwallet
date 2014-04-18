@@ -1,0 +1,1 @@
+ko.applyBindings(NOTIFICATION_FEED, document.getElementById("notificationFeedContent"));

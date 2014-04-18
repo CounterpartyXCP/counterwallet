@@ -1,3 +1,32 @@
+var OrderBookEntryItemModel = function(entry) {
+  this.UNIT_PRICE = entry['unit_price'];
+  this.QTY_AND_COUNT = smartFormat(entry['quantity']) + ' (' + entry['count'] + ')';
+  this.DEPTH = smartFormat(entry['depth'], 10);
+};
+
+var OpenOrderItemModel = function(entry, isBuySell) {
+  this.PARENT = isBuySell ? BUY_SELL : ORDERS;
+  this.TX_ID = getTxHashLink(entry['tx_hash']) + OrdersViewModel.deriveIsOnlineForBTCPayment(entry['give_asset'], entry['_is_online']);
+  this.WHEN_CREATED = new Date(entry['block_time']);
+  this.PRICE = this.PARENT.deriveOpenOrderAssetPrice(entry['get_asset'], entry['get_quantity'], entry['give_asset'], entry['give_quantity']);
+  this.BUY_QTY_LEFT = this.PARENT.deriveOpenOrderAssetQuantity(entry['get_asset'], entry['get_remaining']) + ' ' + entry['get_asset'] + ' ' + OrdersViewModel.deriveOpenOrderBuySellLeft(entry['get_quantity'], entry['get_remaining']);
+  this.SELL_QTY_LEFT = this.PARENT.deriveOpenOrderAssetQuantity(entry['give_asset'], entry['give_remaining']) + ' ' + entry['give_asset'] + ' ' + OrdersViewModel.deriveOpenOrderBuySellLeft(entry['give_quantity'], entry['give_remaining']);
+  this.EXPIRES_IN = OrdersViewModel.deriveOpenOrderExpiresIn(entry['block_index'], entry['expiration']);
+  this.FEE_REQUIRED_LEFT = smartFormat(normalizeQuantity(entry['fee_required_remaining'])) + ' BTC ' + OrdersViewModel.deriveOpenOrderBuySellLeft(entry['fee_required'], entry['fee_required_remaining']);
+  this.FEE_PROVIDED_LEFT = smartFormat(normalizeQuantity(entry['fee_provided_remaining'])) + ' BTC ' + OrdersViewModel.deriveOpenOrderBuySellLeft(entry['fee_provided'], entry['fee_provided_remaining']);
+};
+
+var TradeHistoryItemModel = function(entry) {
+  this.BLOCK = getLinkForBlock(entry['block_index']);
+  this.BLOCK_TIME = moment(entry['block_time']).format('MMM Do YYYY, h:mm:ss a');
+  this.ORDER_1 = getTxHashLink(entry['order_match_id'].substr(0,64));
+  this.ADDRESS_1 = getLinkForCPData('address', entry['order_match_tx0_address']);
+  this.ORDER_2 = getTxHashLink(entry['order_match_id'].substr(64));
+  this.ADDRESS_2 = getLinkForCPData('address', entry['order_match_tx1_address']);
+  this.QUANTITY_BASE = smartFormat(entry['base_quantity_normalized']) + ' ' + entry['base_asset'];
+  this.QUANTITY_QUOTE = smartFormat(entry['quote_quantity_normalized']) + ' ' + entry['quote_asset'];
+  this.UNIT_PRICE = entry['unit_price'];
+}
 
 ko.validation.rules['ordersIsExistingAssetName'] = {
   validator: function (asset, self) {
@@ -198,8 +227,11 @@ function OrdersViewModel() {
     var deferred = $.Deferred();
     failoverAPI("get_trade_history_within_dates", [self.asset1(), self.asset2()], function(data, endpoint) {
       deferred.resolve();
-      self.tradeHistory(data);
-      if(data.length) {
+      self.tradeHistory([]);
+      for(var i=0; i < data.length; i++) {
+        self.tradeHistory.push(new TradeHistoryItemModel(data[i]));
+      }
+      if(self.tradeHistory().length) {
         runDataTables('#tradeHistory', true, { "aaSorting": [ [0, 'desc'] ] });
       }
     }, function(jqXHR, textStatus, errorThrown, endpoint) {
@@ -220,8 +252,13 @@ function OrdersViewModel() {
     failoverAPI("get_order_book_simple", args, function(data, endpoint) {
       deferred.resolve();
       //set up order book display
-      self.askBook(data['base_ask_book'].slice(0,10)); //limit to 10 entries
-      self.bidBook(data['base_bid_book'].slice(0,10));
+      var i = null;
+      for(i=0; i < Math.min(10, data['base_ask_book'].length); i++) { //limit to 10 entries
+        self.askBook.push(new OrderBookEntryItemModel(data['base_ask_book'][i]));  
+      }
+      for(i=0; i < Math.min(10, data['base_bid_book'].length); i++) { //limit to 10 entries
+        self.bidBook.push(new OrderBookEntryItemModel(data['base_bid_book'][i]));  
+      }
       self.bidAskMedian(data['bid_ask_median']);
       self.bidDepth(data['bid_depth']);
       self.askDepth(data['ask_depth']);
@@ -229,20 +266,17 @@ function OrdersViewModel() {
       try { $('#asset1OpenBuyOrders').dataTable().fnClearTable(); } catch(err) { }
       try { $('#asset2OpenBuyOrders').dataTable().fnClearTable(); } catch(err) { }
       //split raw_orders into buy orders for asset1 and asset2
-      var asset1BuyOrders = [], asset2BuyOrders = [];
       for(var i=0; i < data['raw_orders'].length; i++) {
         if(data['raw_orders'][i]['get_asset'] == self.asset1())
-          asset1BuyOrders.push(data['raw_orders'][i]);
+          self.asset1OpenBuyOrders.push(new OpenOrderItemModel(data['raw_orders'][i], false));
         else {
           assert(data['raw_orders'][i]['get_asset'] == self.asset2());
-          asset2BuyOrders.push(data['raw_orders'][i]);
+          self.asset2OpenBuyOrders.push(new OpenOrderItemModel(data['raw_orders'][i], false));
         }
       }
-      self.asset1OpenBuyOrders(asset1BuyOrders);
       if(self.asset1OpenBuyOrders().length) {
         runDataTables('#asset1OpenBuyOrders', true, { "aaSorting": [ [0, 'desc'] ] });
       }
-      self.asset2OpenBuyOrders(asset2BuyOrders);
       if(self.asset2OpenBuyOrders().length) {
         runDataTables('#asset2OpenBuyOrders', true, { "aaSorting": [ [0, 'desc'] ] });
       }
@@ -343,12 +377,12 @@ OrdersViewModel.deriveOpenOrderBuySellLeft = function(whole, part) {
   } else { //less than 10%
     labelType = 'red'; 
   }
-  return '<span style="opacity: .7" class="pull-right label bg-color-' + labelType + '">' + smartFormat(pctLeft * 100, null, 0) + '%</span>';
+  return '<span class="pull-right label opacity-70pct padding-5 bg-color-' + labelType + '">' + smartFormat(pctLeft * 100, null, 0) + '%</span>';
 }
 
 OrdersViewModel.deriveIsOnlineForBTCPayment = function(give_asset, _is_online) {
   if(give_asset != 'BTC') return '';
-  return '<span style="padding-left: 4px;" class="fa fa-circle txt-color-' + (_is_online ? 'green' : 'yellow') + ' pull-left" title="' + (_is_online ? 'User is online for BTC payment' : 'User is offline or unknown') + '"></span>';
+  return '<span class="padding-left-5" class="fa fa-circle txt-color-' + (_is_online ? 'green' : 'yellow') + ' pull-left" title="' + (_is_online ? 'User is online for BTC payment' : 'User is offline or unknown') + '"></span>';
 }
 
 OrdersViewModel.doChart = function(dispAssetPair, chartDiv, data) {

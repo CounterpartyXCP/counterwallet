@@ -63,6 +63,7 @@ function ChatFeedViewModel() {
         'max reconnection attempts': 5,
         'try multiple transports': false,
         'force new connection': true, /* needed, otherwise socket.io will reuse the feed connection */
+        //'transports': ['websocket', 'htmlfile', 'xhr-multipart', 'xhr-polling', 'jsonp-polling'],
         //'reconnection limit': 100000,
         //'max reconnection attempts': Infinity,
         'resource': USE_TESTNET ? '_t_chat' : '_chat'

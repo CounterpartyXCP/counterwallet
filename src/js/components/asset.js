@@ -32,7 +32,7 @@ function AssetViewModel(props) {
 
   self.dispBalance = ko.computed(function() {
     if(self.normalizedBalance() === null) return "??";
-    return numberWithCommas(self.normalizedBalance()); 
+    return smartFormat(self.normalizedBalance()); 
   }, self);
   
   self.normalizedTotalIssued = ko.computed(function() {
@@ -40,12 +40,20 @@ function AssetViewModel(props) {
   }, self);
 
   self.dispTotalIssued = ko.computed(function() {
-    return numberWithCommas(self.normalizedTotalIssued()); 
+    return smartFormat(self.normalizedTotalIssued()); 
   }, self);
   
   self.dispCallDate = ko.computed(function() {
     if(!self.CALLDATE) return null;
     return moment(self.CALLDATE * 1000).format("MMM Do YYYY, h:mm:ss a");
+  }, self);
+  
+  self.dispBalance = ko.computed(function() {
+    return self.normalizedBalance() === null ? '??' : smartFormat(self.normalizedBalance(), true);
+  }, self);
+  
+  self.dispBalancePadding = ko.computed(function() {
+    return self.locked() && self.CALLABLE ? '40px' : (self.locked() || self.CALLABLE ? '20px' : '0px');    
   }, self);
 
   self.send = function () {
@@ -84,7 +92,7 @@ function AssetViewModel(props) {
     
     bootbox.dialog({
       message: "By locking your asset, you will not be able to issue more units of it in the future.<br/><br/> \
-        <b style='color:red'>Please NOTE that this action is irreversable!</b>",
+        <b class='errorRed'>Please NOTE that this action is irreversable!</b>",
       title: "Are you sure?",
       buttons: {
         success: {

@@ -18,31 +18,31 @@
             <div class="clearfix"></div>
           </header>
           <div> <!-- widget div-->
-            <div class="widget-body" data-bind="validationOptions: { insertMessages: false }" style="min-height:0;"> <!-- widget content -->
+            <div class="widget-body min-height-0" data-bind="validationOptions: { insertMessages: false }"> <!-- widget content -->
                 <div class="row">
                     <section class="col col-lg-3 col-sm-6">
-                        <label for="asset1" class="control-label" style="font-size:1.3em;">First Asset</label>
+                        <label for="asset1" class="control-label font-medlg">First Asset</label>
                         <label class="input">
                             <input type="text" id="asset1" name="asset1" class="form-control input-lg" type="text" placeholder="Asset name" data-bind="value: asset1" />
                         </label>
                         <br/><span class="errorColor" data-bind="validationMessage: asset1"></span>
                     </section>
                     <section class="col col-lg-3 col-sm-6">
-                        <label for="asset2" class="control-label" style="font-size:1.3em;">Second Asset</label>
+                        <label for="asset2" class="control-label font-medlg">Second Asset</label>
                         <label class="input">
                             <input type="text" id="asset2" name="asset2" class="form-control input-lg" type="text" placeholder="Asset name" data-bind="value: asset2" />
                         </label>
                         <br/><span class="errorColor" data-bind="validationMessage: asset2"></span>
                     </section>
                     <section data-bind="visible: asset1() == 'BTC' || asset2() == 'BTC'" class="col col-lg-3 col-sm-6">
-                        <label for="minBTCFeeProvidedPct" class="control-label" style="font-size:1.3em;">Min BTC % Fee Provided</label>
+                        <label for="minBTCFeeProvidedPct" class="control-label font-medlg">Min BTC % Fee Provided</label>
                         <label class="input">
                             <input type="text" name="minBTCFeeProvidedPct" class="form-control input-lg" type="text" data-bind="value: minBTCFeeProvidedPct, valueUpdate: 'input'" />
                         </label>
                         <br/><span class="errorColor" data-bind="validationMessage: minBTCFeeProvidedPct"></span>
                     </section>
                     <section data-bind="visible: asset1() == 'BTC' || asset2() == 'BTC'" class="col col-lg-3 col-sm-6">
-                        <label for="maxBTCFeeRequiredPct" class="control-label" style="font-size:1.3em;">Max BTC % Fee Required</label>
+                        <label for="maxBTCFeeRequiredPct" class="control-label font-medlg">Max BTC % Fee Required</label>
                         <label class="input">
                             <input type="text" name="maxBTCFeeRequiredPct" class="form-control input-lg" type="text" data-bind="value: maxBTCFeeRequiredPct, valueUpdate: 'input'" />
                         </label>
@@ -55,7 +55,7 @@
     </article> <!-- WIDGET END -->
   </div> <!-- end row -->
 
-  <div class="alert alert-info" data-bind="fadeVisibleInOnly: validationModelBaseOrders.isValid() && recievedMarketData() && currentMarketUnitPrice() == 0" style="font-size: 1.3em;display:none">
+  <div class="alert alert-info font-medlg" data-bind="fadeVisibleInOnly: validationModelBaseOrders.isValid() && recievedMarketData() && currentMarketUnitPrice() == 0">
       <i class="fa-fw fa fa-times"></i>&nbsp;No market price data exists for this asset pair yet (more trade data is required to construct price charts).
   </div>  
 
@@ -76,7 +76,7 @@
             <div class="widget-body no-padding"> <!-- widget content -->
                 <div class="row">
                     <div class="col-md-12">
-                        <div id="priceHistory" style="height: 500px; min-width: 500px"></div>
+                        <div id="priceHistory" class="buySellPriceHistory"></div>
                     </div>
                 </div>
             </div> <!-- end widget content -->
@@ -115,9 +115,9 @@
                             </thead>
                             <tbody data-bind="foreach: askBook"> <!-- ascending order -->
                                 <tr>
-                                    <td data-bind="text: unit_price"></td>
-                                    <td data-bind="text: smartFormat(quantity) + ' (' + count + ')'"></td> <!-- quantity (count) -->
-                                    <td data-bind="text: smartFormat(depth, 10)"></td>
+                                    <td data-bind="text: UNIT_PRICE"></td>
+                                    <td data-bind="text: QTY_AND_COUNT"></td> <!-- quantity (count) -->
+                                    <td data-bind="text: DEPTH"></td>
                                 </tr>
                             </tbody>
                         </table>
@@ -136,9 +136,9 @@
                             </thead>
                             <tbody data-bind="foreach: bidBook"> <!-- descending order -->
                                 <tr>
-                                    <td data-bind="text: unit_price"></td>
-                                    <td data-bind="text: smartFormat(quantity) + ' (' + count + ')'"></td>
-                                    <td data-bind="text: smartFormat(depth, 10)"></td>
+                                    <td data-bind="text: UNIT_PRICE"></td>
+                                    <td data-bind="text: QTY_AND_COUNT"></td> <!-- quantity (count) -->
+                                    <td data-bind="text: DEPTH"></td>
                                 </tr>
                             </tbody>
                         </table>
@@ -173,20 +173,20 @@
                             <th>Buy Qty Left</th>
                             <th>Sell Qty Left</th>
                             <th>Expires In</th>
-                            <th data-bind="visible: $root.asset1() == 'BTC'">Fee Required Left</th>
-                            <th data-bind="visible: $root.asset2() == 'BTC'">Fee Provided Left</th>
+                            <th data-bind="visible: $root.asset1() === 'BTC'">Fee Required Left</th>
+                            <th data-bind="visible: $root.asset2() === 'BTC'">Fee Provided Left</th>
                         </tr>
                     </thead>
                     <tbody data-bind="foreach: $root.asset1OpenBuyOrders">
-                        <tr data-bind="style: {cursor: $root.isOrdersView ? 'auto' : 'pointer' }, click: $root.isOrdersView ? null : $root.buySelectedOpenOrder">
-                            <td data-bind="html: getTxHashLink(tx_hash) + OrdersViewModel.deriveIsOnlineForBTCPayment(give_asset, _is_online)"></td>
-                            <td data-bind="timeago: new Date(block_time)"></td>
-                            <td data-bind="text: $root.deriveOpenOrderAssetPrice(get_asset, get_quantity, give_asset, give_quantity)"></td>
-                            <td data-bind="html: $root.deriveOpenOrderAssetQuantity(get_asset, get_remaining) + ' ' + get_asset + ' ' + OrdersViewModel.deriveOpenOrderBuySellLeft(get_quantity, get_remaining)"></td>
-                            <td data-bind="html: $root.deriveOpenOrderAssetQuantity(give_asset, give_remaining) + ' ' + give_asset + ' ' + OrdersViewModel.deriveOpenOrderBuySellLeft(give_quantity, give_remaining)"></td>
-                            <td data-bind="html: OrdersViewModel.deriveOpenOrderExpiresIn(block_index, expiration)"></td>
-                            <td data-bind="visible: $root.asset1() == 'BTC', html: smartFormat(normalizeQuantity(fee_required_remaining)) + ' BTC ' + OrdersViewModel.deriveOpenOrderBuySellLeft(fee_required, fee_required_remaining)"></td>                            
-                            <td data-bind="visible: $root.asset2() == 'BTC', html: smartFormat(normalizeQuantity(fee_provided_remaining)) + ' BTC ' + OrdersViewModel.deriveOpenOrderBuySellLeft(fee_provided, fee_provided_remaining)"></td>                            
+                        <tr>
+                            <td data-bind="html: TX_ID"></td>
+                            <td data-bind="timeago: WHEN_CREATED"></td>
+                            <td data-bind="text: PRICE"></td>
+                            <td data-bind="html: BUY_QTY_LEFT"></td>
+                            <td data-bind="html: SELL_QTY_LEFT"></td>
+                            <td data-bind="html: EXPIRES_IN"></td>
+                            <td data-bind="visible: $root.asset1() === 'BTC', html: FEE_REQUIRED_LEFT"></td>                            
+                            <td data-bind="visible: $root.asset2() === 'BTC', html: FEE_PROVIDED_LEFT"></td>
                         </tr>
                     </tbody>
                 </table>
@@ -222,15 +222,15 @@
                         </tr>
                     </thead>
                     <tbody data-bind="foreach: $root.asset2OpenBuyOrders">
-                        <tr data-bind="style: {cursor: $root.isOrdersView ? 'auto' : 'pointer' }, click: $root.isOrdersView ? null : $root.buySelectedOpenOrder">
-                            <td data-bind="html: getTxHashLink(tx_hash) + OrdersViewModel.deriveIsOnlineForBTCPayment(give_asset, _is_online)"></td>
-                            <td data-bind="timeago: new Date(block_time)"></td>
-                            <td data-bind="text: $root.deriveOpenOrderAssetPrice(get_asset, get_quantity, give_asset, give_quantity)"></td>
-                            <td data-bind="html: $root.deriveOpenOrderAssetQuantity(get_asset, get_remaining) + ' ' + get_asset + ' ' + OrdersViewModel.deriveOpenOrderBuySellLeft(get_quantity, get_remaining)"></td>
-                            <td data-bind="html: $root.deriveOpenOrderAssetQuantity(give_asset, give_remaining) + ' ' + give_asset + ' ' + OrdersViewModel.deriveOpenOrderBuySellLeft(give_quantity, give_remaining)"></td>
-                            <td data-bind="html: OrdersViewModel.deriveOpenOrderExpiresIn(block_index, expiration)"></td>
-                            <td data-bind="visible: $root.asset2() == 'BTC', html: smartFormat(normalizeQuantity(fee_required_remaining)) + ' BTC ' + OrdersViewModel.deriveOpenOrderBuySellLeft(fee_required, fee_required_remaining)"></td>                            
-                            <td data-bind="visible: $root.asset1() == 'BTC', html: smartFormat(normalizeQuantity(fee_provided_remaining)) + ' BTC ' + OrdersViewModel.deriveOpenOrderBuySellLeft(fee_provided, fee_provided_remaining)"></td>                            
+                        <tr>
+                            <td data-bind="html: TX_ID"></td>
+                            <td data-bind="timeago: WHEN_CREATED"></td>
+                            <td data-bind="text: PRICE"></td>
+                            <td data-bind="html: BUY_QTY_LEFT"></td>
+                            <td data-bind="html: SELL_QTY_LEFT"></td>
+                            <td data-bind="html: EXPIRES_IN"></td>
+                            <td data-bind="visible: $root.asset2() === 'BTC', html: FEE_REQUIRED_LEFT"></td>                            
+                            <td data-bind="visible: $root.asset1() === 'BTC', html: FEE_PROVIDED_LEFT"></td>
                         </tr>
                     </tbody>
                 </table>
@@ -268,15 +268,15 @@
                     </thead>
                     <tbody data-bind="foreach: tradeHistory">
                         <tr>
-                            <td data-bind="html: getLinkForBlock(block_index)"></td>
-                            <td data-bind="text: moment(block_time).format('MMM Do YYYY, h:mm:ss a')"></td>
-                            <td data-bind="html: getTxHashLink(order_match_id.substr(0,64))"></td> 
-                            <td data-bind="html: getLinkForCPData('address', order_match_tx0_address)"></td>
-                            <td data-bind="html: getTxHashLink(order_match_id.substr(0,64))"></td>
-                            <td data-bind="html: getLinkForCPData('address', order_match_tx1_address)"></td>
-                            <td data-bind="text: smartFormat(base_quantity_normalized) + ' ' + base_asset"></td>
-                            <td data-bind="text: smartFormat(quote_quantity_normalized) + ' ' + quote_asset"></td>
-                            <td data-bind="text: unit_price"></td>
+                            <td data-bind="html: BLOCK"></td>
+                            <td data-bind="text: BLOCK_TIME"></td>
+                            <td data-bind="html: ORDER_1"></td> 
+                            <td data-bind="html: ADDRESS_1"></td>
+                            <td data-bind="html: ORDER_2"></td>
+                            <td data-bind="html: ADDRESS_2"></td>
+                            <td data-bind="text: QUANTITY_BASE"></td>
+                            <td data-bind="text: QUANTITY_QUOTE"></td>
+                            <td data-bind="text: UNIT_PRICE"></td>
                         </tr>
                     </tbody>
                 </table>
@@ -287,19 +287,4 @@
   </div> <!-- end row -->
 </section>
 
-<script type="text/javascript">
-  pageSetUp(); //init smartadmin featureset
-
-  //This code is run on each visit to the page
-  window.ORDERS = new OrdersViewModel();
-  ko.applyBindings(ORDERS, document.getElementsByClassName("ordersGrid")[0]);
-  
-  ORDERS.init(true);
-
-  $(window).resize(ORDERS.dataTableResponsive);
-  $(window).on('hashchange', function() {
-    ORDERS.metricsStopAutoRefresh(); //just in case
-    $(window).off("resize", ORDERS.dataTableResponsive);
-  });
-
-</script>
+<script src="js/init/orders.js"></script>

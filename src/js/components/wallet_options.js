@@ -21,9 +21,17 @@ function WalletOptionsModalViewModel() {
   self.ORIG_PREFERENCES_JSON = null;
   
   //Info table related props
-  self.showInfoTable = ko.observable(false);
+  self.infoTableShown = ko.observable(false);
   self.myIPAddr = ko.observable('');
   self.myCookie = ko.observable('');
+  
+  self.dispMyCookiePresent = ko.computed(function() {
+    return self.myCookie() ? 'Present' : 'None';
+  }, self);
+  
+  self.dispCWURLS = ko.computed(function() {
+    return cwURLs() ? cwURLs().join(', ') : 'UNKNOWN';
+  }, self);
 
   self.autoBTCPayEnabled.subscribeChanged(function(newVal, prevVal) {
     assert(newVal === true || newVal === false);
@@ -75,6 +83,10 @@ function WalletOptionsModalViewModel() {
     
     self.shown(true);
   }  
+
+  self.showInfoTable = function() {
+    self.infoTableShown(true);
+  }
 
   self.hide = function() {
     if(self.ORIG_PREFERENCES_JSON != JSON.stringify(PREFERENCES)) { //only update the preferences if they have changed

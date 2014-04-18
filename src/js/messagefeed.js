@@ -29,6 +29,7 @@ function MessageFeed() {
       'max reconnection attempts': 5,
       'force new connection': true,
       'try multiple transports': false,
+      //'transports': ['websocket', 'htmlfile', 'xhr-multipart', 'xhr-polling', 'jsonp-polling'],
       'resource': USE_TESTNET ? '_t_feed' : '_feed'
     });
   

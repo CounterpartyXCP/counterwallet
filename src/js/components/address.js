@@ -158,7 +158,7 @@ function AddressViewModel(key, address, initialLabel) {
     var html = '<center>';
     html += '<h4>Private Key (WIF) for <b>' + self.ADDRESS + '</b></h4><br/>';
     html += '<h5>Make sure nobody can look over your shoulder or see your screen.</h5>';
-    html += '<button onclick="$(this).hide().next().show();">Show Private Key</button><div style="display:none">'+privateKey+'</div>';
+    html += '<button onclick="$(this).hide().next().show();">Show Private Key</button><div class="display-none">'+privateKey+'</div>';
     html += '</center>';
     bootbox.alert('<center>' + html + '</center>');
   }
@@ -191,6 +191,10 @@ function AddressViewModel(key, address, initialLabel) {
     }
 
     CREATE_ASSET_MODAL.show(self.ADDRESS);
+  }
+  
+  self.selectAddressText = function() {
+    return selectText('address-text-' + self.ADDRESS);    
   }
 
   self.sortAssetsByName = function() {

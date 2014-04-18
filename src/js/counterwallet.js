@@ -24,6 +24,15 @@ if((IS_DEV || USE_TESTNET) && location.search) {
   history.replaceState({}, '', location.pathname);
 }
 
+//Knockout secure binding drop-in initialization
+var options = {
+   attribute: "data-bind",        // default "data-sbind"
+   globals: window,               // default {}
+   bindings: ko.bindingHandlers,  // default ko.bindingHandlers
+   noVirtualElements: false       // default true
+};
+ko.bindingProvider.instance = new ko.secureBindingsProvider(options);
+
 //Knockout validation defaults (https://github.com/ericmbarnard/Knockout-Validation/wiki/Configuration)
 ko.validation.init({
   decorateElement: true,
@@ -106,10 +115,27 @@ $(document).ready(function() {
       msie6: true, //die die die!
       msie7: true, //die die die!
       msie8: true, //die die die!
+      msie9: true, //require IE11
+      msie10: true, //require IE11
       firefox1: true,
       firefox2: true
     },
-    imagePath: 'assets/', // Path where images are located    
+    imagePath: 'assets/', // Path where images are located
+    display: ['chrome', 'firefox', 'safari', 'opera', 'msie'],
+    browserInfo: { // Settings for which browsers to display
+      safari: {
+        text: 'Safari',
+        url: 'http://www.apple.com/safari/download/'
+      },
+      opera: {
+        text: 'Opera',
+        url: 'http://www.opera.com/download/'
+      },      
+      msie: {
+        text: 'Internet Explorer (11+)',
+        url: 'http://windows.microsoft.com/en-us/internet-explorer/download-ie'
+      }
+    }        
   });
   
   loadServersListAndSettings();

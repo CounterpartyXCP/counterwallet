@@ -32,6 +32,7 @@
     "src/vendors/bootstrap-datetimepicker/build/js/bootstrap-datetimepicker.min.js": "d4255575970bfec191a233bd3eaa90d305eaa7876a40fe7c90e7cdf2718b9c81",
     "src/vendors/typeahead.js/dist/typeahead.bundle.min.js": "259dff63e4ad5a4b7568aedb770c4aa7e0100fae88a23685053f382f8b22aebb",
     "src/vendors/knockoutjs/index.js": "c3f84651d8c804a0b9e5e8500ac1c8afd05ae04a134b36e32c55716f4075458e",
+    "src/vendors/knockout-secure-binding/dist/knockout-secure-binding.min.js": "511a2bb9fbb30f7e06eb4af09783d519f268bd972cb2b494ca9d4c70363d9897",
     "src/vendors/knockout-bootstrap/build/knockout-bootstrap.min.js": "3d253ef8aec822390231333008ce43cecb08d885446dac6edb4cc666990686d5",
     "src/vendors/knockout-validation/Dist/knockout.validation.min.js": "46347e6ebb9d8d909b0840713118ca0f2cdcd9526767025b9fa7d5483a4af94e",
     "src/vendors/highstock/highstock.src.js": "1257bab7ca686ce0ea60c598a0838700ad73ac3a42f2d8d0c1022fd3739d91a4",

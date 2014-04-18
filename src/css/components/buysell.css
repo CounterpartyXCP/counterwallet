@@ -42,3 +42,50 @@
 table.orderBook td {
     text-align: right;
 }
+
+.buySellRow {
+   max-width: 1000px;
+}
+
+.buySellAddressRow {
+   min-width:300px;
+   max-width: 1000px;
+   padding-bottom: 0px;
+}
+
+.buySellBtnGroup {
+   min-width: 300px;
+}
+
+.buySellRestrictedWidthControl {
+   max-width: 300px;
+}
+
+.buySellBuyAssetSel {
+   min-width: 280px;
+   max-width: 350px;
+}
+
+.buySellSellAssetSel {
+   min-width: 335px;
+   max-width: 405px;
+}
+
+.buySellSummaryTable {
+  max-width: 800px;
+}
+
+.buySellOverrideTextPos1 {
+  position:relative;
+  bottom:5px;
+}
+
+.buySellOverrideTextPos2 {
+  position:relative;
+  bottom:10px;
+}
+
+.buySellPriceHistory {
+  height: 500px;
+  min-width: 500px;
+}

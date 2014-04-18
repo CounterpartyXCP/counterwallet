@@ -172,6 +172,12 @@ ko.bindingHandlers.select2 = {
       var obj = valueAccessor(),
           allBindings = allBindingsAccessor(),
           lookupKey = allBindings.lookupKey;
+      
+      //modify to work with knockout-secure-bindings
+      if(obj.hasOwnProperty('escapeMarkup') && obj['escapeMarkup'] === 'direct') {
+        obj['escapeMarkup'] = function(m) { return m; };
+      }
+          
       $(element).select2(obj);
       if (lookupKey) {
           var value = ko.utils.unwrapObservable(allBindings.value);

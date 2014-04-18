@@ -50,7 +50,52 @@
 #extra-info {
   background-color:#EEE;
   border:1px solid #CCC;
-  margin-top: 80px;  
+  margin-top: 80px;
+  padding-top: 20px;  
+}
+
+div#logon h1 {
+  font-size: 3em;
+  text-align: center;
+}
+
+div#logon h2 {
+  font-size: 2em;
+  text-align: center;
+  padding-bottom: 5px;
+  color: #333;
+}
+
+div#logon div#form-well {
+  margin-top:40px;
+}
+
+#newWalletButton {
+  font-size: 21px;
+}
+
+#createNewAcctBtnPane {
+  text-align:center;
+  display:block;
+  margin-bottom: 35px;
+}
+
+p#logonWarningLine1 {
+  font-weight:bold;
+  text-align:center;
+  font-size:1.3em;
+}
+
+p#logonWarningOtherLines {
+  font-weight:bold;
+  text-decoration:underline;
+  text-align:center;
+  font-size:1.15em;
+}
+
+#extra-info div.row {
+  margin-top:25px;
+  margin-bottom:20px;
 }
 
 .ui-keyboard-accept {
