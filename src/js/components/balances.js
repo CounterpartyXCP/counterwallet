@@ -101,6 +101,10 @@ function CreateNewAddressModalViewModel() {
     description: self.description,
     watchAddress: self.watchAddress
   });
+  
+  self.dispWindowTitle = ko.computed(function() {
+    return self.forWatchOnly() ? 'Add Watch Address' : 'Create New Address';
+  }, self);
 
   self.resetForm = function() {
     self.forWatchOnly(null);
@@ -205,12 +209,24 @@ function SendModalViewModel() {
     return normalizeQuantity(self.rawBalance(), self.divisible());
   }, self);
   
+  self.dispNormalizedBalance = ko.computed(function() {
+    return smartFormat(self.normalizedBalance());
+  }, self);
+  
   self.normalizedBalRemaining = ko.computed(function() {
     if(!isNumber(self.quantity())) return null;
     var curBalance = normalizeQuantity(self.rawBalance(), self.divisible());
     var balRemaining = Decimal.round(new Decimal(curBalance).sub(parseFloat(self.quantity())), 8, Decimal.MidpointRounding.ToEven).toFloat();
     if(balRemaining < 0) return null;
     return balRemaining;
+  }, self);
+
+  self.dispNormalizedBalRemaining = ko.computed(function() {
+    return smartFormat(self.normalizedBalRemaining());
+  }, self);
+  
+  self.normalizedBalRemainingIsSet = ko.computed(function() {
+    return self.normalizedBalRemaining() !== null;
   }, self);
   
   self.validationModel = ko.validatedObservable({
@@ -939,6 +955,10 @@ function TestnetBurnModalViewModel() {
     return testnetBurnDetermineEarned(WALLET.networkBlockHeight(), self.btcBurnQuantity());
   }, self);
   
+  self.dispQuantityXCPToBeCreated = ko.computed(function() { 
+    return numberWithCommas(self.quantityXCPToBeCreated());
+  }, self);
+  
   self.maxPossibleBurn = ko.computed(function() { //normalized
     if(self.btcAlreadyBurned() === null) return null;
     return Math.min(1 - self.btcAlreadyBurned(), WALLET.getAddressObj(self.address()).getAssetObj('BTC').normalizedBalance()) 
@@ -998,6 +1018,33 @@ function TestnetBurnModalViewModel() {
   self.hide = function() {
     self.shown(false);
   }  
+}
+
+function DisplayPrivateKeyModalViewModel() {
+  var self = this;
+  self.shown = ko.observable(false);
+  self.address = ko.observable(null); //address string, not an Address object
+  self.privateKeyText = ko.observable(null);
+  
+  self.resetForm = function() {
+    self.address(null);
+    self.privateKeyText(null);
+  }
+  
+  self.show = function(address, resetForm) {
+    if(typeof(resetForm)==='undefined') resetForm = true;
+    if(resetForm) self.resetForm();
+    self.address(address);
+    self.shown(true);
+  }  
+
+  self.hide = function() {
+    self.shown(false);
+  }
+  
+  self.displayPrivateKey = function() {
+    self.privateKeyText(WALLET.getAddressObj(self.address()).KEY.toWif());
+  }
 }
 
 /*NOTE: Any code here is only triggered the first time the page is visited. Put JS that needs to run on the

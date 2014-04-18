@@ -5,28 +5,20 @@ function ChatLineViewModel(handle, text, is_op, is_private) {
   //^ May be text (for a user saying something) or null (for a system message)
   self.IS_OP = is_op || false;
   self.IS_PRIVATE = is_private || false;
+
   self.text = ko.observable(text);
-  
-  self.lineText = ko.computed(function(){
-    //if the line is addressed to us, then we should bold it (as well as coloring our handle itself)
-    if(self.text().indexOf(CHAT_FEED.handle()) != -1) {
-      self.text("<b>" + self.text() + "</b>");
-      var regExp = new RegExp(CHAT_FEED.handle(), 'g');
-      var nickColorClass = CHAT_FEED.is_op() ? 'chatLineOpEmote' : 'chatLineSelfEmote'; 
-      self.text(self.text().replace(regExp, "<span class='" + nickColorClass + "'>" + CHAT_FEED.handle() + "</span>"));
-    }
-    
+  self.lineHead = ko.computed(function(){
     if(self.HANDLE) {
       if(self.IS_OP) {
-        return "<span class='chatLineOpEmote'>" + self.HANDLE + (self.IS_PRIVATE ? '(PRIVATE)' : '') + ":</span>&nbsp;&nbsp;" + self.text();  
+        return "<span class='chatLineOpEmote'>" + self.HANDLE + (self.IS_PRIVATE ? '(PRIVATE)' : '') + ":</span>&nbsp;&nbsp;";  
       } else if(self.HANDLE == CHAT_FEED.handle()) {
         return "<span class='chatLineSelfEmote'>" + self.HANDLE + ":</span>&nbsp;&nbsp;" + self.text();  
       } else {
-        return "<span class='chatLineEmote'>" + self.HANDLE + (self.IS_PRIVATE ? '(PRIVATE)' : '') + ":</span>&nbsp;&nbsp;" + self.text();  
+        return "<span class='chatLineEmote'>" + self.HANDLE + (self.IS_PRIVATE ? '(PRIVATE)' : '') + ":</span>&nbsp;&nbsp;";  
       }
     } else { //system
       assert(self.HANDLE === null);
-      return "<span class='chatLineSystem'>SYSTEM:</span>&nbsp;&nbsp;<b>" + self.text() + "</b>";
+      return "<span class='chatLineSystem'>SYSTEM:</span>&nbsp;&nbsp;";
     }
   }, self);
 }
@@ -71,6 +63,7 @@ function ChatFeedViewModel() {
         'max reconnection attempts': 5,
         'try multiple transports': false,
         'force new connection': true, /* needed, otherwise socket.io will reuse the feed connection */
+        //'transports': ['websocket', 'htmlfile', 'xhr-multipart', 'xhr-polling', 'jsonp-polling'],
         //'reconnection limit': 100000,
         //'max reconnection attempts': Infinity,
         'resource': USE_TESTNET ? '_t_chat' : '_chat'
@@ -238,8 +231,8 @@ function ChatFeedViewModel() {
     var newLine = new ChatLineViewModel(handle, text, is_op, is_private);
     var lastLines = self.lines.slice(Math.max(self.lines().length - 3, 1));
     for(var i=0; i < lastLines.length; i++) {
-      if(newLine.lineText() == lastLines[i].lineText() && lastLines[i].HANDLE != null) { // && !lastLines[i].IS_OP) {
-        $.jqlog.debug("chat.addLine: Line ignored (duplicate): " + newLine.lineText());
+      if(newLine.text() == lastLines[i].text() && lastLines[i].HANDLE != null) { // && !lastLines[i].IS_OP) {
+        $.jqlog.debug("chat.addLine: Line ignored (duplicate): " + newLine.text());
         return;
       }
     }

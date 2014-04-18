@@ -37,10 +37,10 @@
                             </div>
                             <div class="tab-content">
                                 <div class="tab-pane active" id="tab1">
-                                    <div class="row" style="max-width: 1000px;">
+                                    <div class="row buySellRow">
                                         <div class="col-md-2"><span>I want to buy:</span></div>
                                         <div class="col-md-4">
-                                            <div class="btn-group" data-toggle="buttons" style="min-width: 300px;">
+                                            <div class="btn-group buySellBtnGroup" data-toggle="buttons">
                                               <label class="radioBtn btn btn-lg" data-bind="css: { 'btn-success': selectedBuyAsset() == 'XCP' }">
                                                 <input type="radio" name="buyAsset" id="buyXCP" value="XCP" data-bind="btnGroupChecked: selectedBuyAsset">XCP</label>
                                                 <!-- , attr: {disabled: selectedSellAsset() == 'XCP' ? 'disabled' : null }" -->
@@ -54,16 +54,16 @@
                                         <div class="col-md-6">
                                             <div class="input-group" data-bind="fadeVisible: selectedBuyAsset() == 'Other'">
                                                 <input id="otherBuyAssetName" class="form-control input-lg" type="text"
-                                                 placeholder="Enter asset name" style="min-width: 280px;max-width: 350px;"
+                                                 placeholder="Enter asset name" class="buySellBuyAssetSel"
                                                  data-bind="value: selectedBuyAssetOther"/>
                                             </div>
                                             <span class="invalid" data-bind="validationMessage: selectedBuyAssetOther"></span>
                                         </div>
                                     </div>
-                                    <div class="row" style="max-width: 1000px;">
+                                    <div class="row buySellRow">
                                         <div class="col-md-2"><span>I want to sell:</span></div>
                                         <div class="col-md-4">
-                                            <div class="btn-group" data-toggle="buttons" style="min-width: 300px;">
+                                            <div class="btn-group buySellBtnGroup" data-toggle="buttons">
                                               <label class="radioBtn btn btn-lg" data-bind="css: { 'btn-primary': selectedSellAsset() == 'XCP' }">
                                                 <input type="radio" name="sellAsset" id="sellXCP" value="XCP" data-bind="btnGroupChecked: selectedSellAsset">XCP</label>
                                               <label class="radioBtn btn btn-lg" data-bind="css: { 'btn-primary': selectedSellAsset() == 'BTC' }">
@@ -75,43 +75,43 @@
                                         </div>
                                         <div class="col-md-6">
                                             <div class="input-group" data-bind="fadeVisible: selectedSellAsset() == 'Other'">
-                                                <select class="form-control input-lg" style="min-width: 335px;max-width: 405px;"
+                                                <select class="form-control input-lg buySellSellAssetSel"
                                                     data-bind="options: myAssets, optionsCaption: 'Choose...', value: selectedSellAssetOther">
                                                 </select>
                                                 <span class="invalid" data-bind="validationMessage: selectedSellAssetOther"></span>
                                             </div>
                                         </div>
                                     </div>
-                                    <div class="row" style="min-width:300px;max-width: 1000px;padding-bottom: 0px;">
+                                    <div class="row buySellAddressRow">
                                         <div class="col-md-2"><span>From address:</span></div>
                                         <div class="col-md-10">
-                                            <select id="buySellFromAddress" data-bind="options: availableAddressesWithBalance, optionsValue: 'ADDRESS', optionsCaption: 'Select an Address...', optionsText: 'SELECT_LABEL', select2: {  minimumResultsForSearch: 10, containerCssClass: 'addressSelect', escapeMarkup: function(m) { return m; } }, value: selectedAddress" data-placeholder="Enter address"></select>
+                                            <select id="buySellFromAddress" data-bind="options: availableAddressesWithBalance, optionsValue: 'ADDRESS', optionsCaption: 'Select an Address...', optionsText: 'SELECT_LABEL', select2: {  minimumResultsForSearch: 10, containerCssClass: 'addressSelect', escapeMarkup: 'direct' }, value: selectedAddress" data-placeholder="Enter address"></select>
                                             <span class="invalid" data-bind="validationMessage: selectedAddress"></span>
                                         </div>
                                     </div>
                                 </div>
-                                <div class="tab-pane" id="tab2" data-bind="visible: allTradeDataRetrieved" style="display:none">
+                                <div class="tab-pane" id="tab2" data-bind="visible: allTradeDataRetrieved">
                                     
                                     <!-- MARKET PRICING -->
-                                    <div class="row" data-bind="visible: currentTab() == 2 && currentMarketUnitPrice() && !overrideMarketPrice()"  style="display:none;">
-                                        <div class="col-md-12" style="max-width: 1000px;">
+                                    <div class="row" data-bind="visible: currentTab() == 2 && currentMarketUnitPrice() && !overrideMarketPrice()">
+                                        <div class="col-md-12 buySellRow">
                                             <span>You have <b><span class="sellColor" data-bind="text: totalBalanceAvailForSale"></span>
                                             <span class="sellColor" data-bind="text: sellAsset"></span></b> at the selected address.
                                             At the current market rate of <b><span data-bind="text: currentMarketUnitPrice"></span>
                                             <span data-bind="text: quoteAsset"></span> per each <span data-bind="text: baseAsset"></span></b>,
-                                            you can afford up to <b><span class="buyColor" data-bind="text: numberWithCommas(maxAfford())"></span> <span class="buyColor" data-bind="text: buyAsset"></span><span data-bind="visible: sellAsset() == 'BTC'"> (not including any fees paid)</span>.</b>
+                                            you can afford up to <b><span class="buyColor" data-bind="text: dispMaxAfford"></span> <span class="buyColor" data-bind="text: buyAsset"></span><span data-bind="visible: sellAsset() == 'BTC'"> (not including any fees paid)</span>.</b>
                                             </span>
                                         </div>
                                     </div>
-                                    <div class="row" data-bind="visible: currentTab() == 2 && currentMarketUnitPrice() && !overrideMarketPrice()" style="display:none;max-width: 1000px;">
+                                    <div class="row buySellRow" data-bind="visible: currentTab() == 2 && currentMarketUnitPrice() && !overrideMarketPrice()">
                                         <div class="col-md-4">Quantity <b class="buyColor"><span data-bind="text: buyAsset"></span></b> to buy:
-                                            <br/><a href="#" data-bind="click: function() { overrideMarketPrice(true); }" style="font-size:11px;position:relative;bottom:5px">Override Market Rate</a>
-                                            <br/><a href="#" data-bind="visible: !overrideDefaultOptions(), click: function() { overrideDefaultOptions(true); }" style="font-size:11px;position:relative;bottom:10px">Override Trade Options</a>
+                                            <br/><a href="#" data-bind="click: setOverrideMarketPrice" class="buySellOverrideTextPos1 font-xs">Override Market Rate</a>
+                                            <br/><a href="#" data-bind="visible: !overrideDefaultOptions(), click: setOverrideDefaultOptions" class="buySellOverrideTextPos2 font-xs">Override Trade Options</a>
                                         </div>
                                         <div class="col-md-8">
                                             <div class="input-group">
                                                 <span class="input-group-addon"><i class="fa fa-arrow-circle-o-down fa-lg fa-fw"></i></span>
-                                                <input class="form-control input-lg" type="text" style="max-width: 300px"
+                                                <input class="form-control input-lg buySellRestrictedWidthControl" type="text"
                                                  data-bind="value: selectedBuyQuantity, attr: {placeholder: 'Quantity ' + buyAsset()}, valueUpdate: 'input'" />
                                             </div>
                                             <span class="invalid" data-bind="validationMessage: selectedBuyQuantity"></span>
@@ -119,8 +119,8 @@
                                     </div>
                                     
                                     <!-- CUSTOM PRICING -->
-                                    <div class="row" data-bind="fadeVisibleInOnly: currentTab() == 2 && (currentMarketUnitPrice() == 0 || overrideMarketPrice())" style="display:none">
-                                        <div class="col-md-12" style="max-width: 1000px;">
+                                    <div class="row" data-bind="fadeVisibleInOnly: currentTab() == 2 && isMarketPriceMissingOrOverridden()">
+                                        <div class="col-md-12 buySellRow">
                                             <span data-bind="visible: !overrideMarketPrice()">There is currently insufficient data to determine a fair market price for your purchase.</span>
                                             <span data-bind="visible: overrideMarketPrice()">The current market unit price to be overridden is
                                                  <b><span data-bind="text: currentMarketUnitPrice"></span>
@@ -130,19 +130,18 @@
                                             <span class="sellColor" data-bind="text: sellAsset"></span></b> at the selected address.                                                
                                         </div>
                                     </div>
-                                    <div class="row" data-bind="visible: currentTab() == 2 && (currentMarketUnitPrice() == 0 || overrideMarketPrice())" style="display:none;max-width: 1000px;">
+                                    <div class="row buySellRow" data-bind="visible: currentTab() == 2 && isMarketPriceMissingOrOverridden()">
                                         <div class="col-md-4">Quantity <b class="buyColor"><span data-bind="text: buyAsset"></span></b> to buy:</div>
                                         <div class="col-md-8">
                                             <div class="input-group">
                                                 <span class="input-group-addon"><i class="fa fa-arrow-circle-o-down fa-lg fa-fw"></i></span>
-                                                <input class="form-control input-lg" type="text"
-                                                    data-bind="value: selectedBuyQuantity, attr: {placeholder: 'Quantity ' + buyAsset()}, valueUpdate: 'input'"
-                                                    style="max-width: 300px;" />
+                                                <input class="form-control input-lg buySellRestrictedWidthControl" type="text"
+                                                    data-bind="value: selectedBuyQuantity, attr: {placeholder: 'Quantity ' + buyAsset()}, valueUpdate: 'input'" />
                                             </div>
                                             <span class="invalid" data-bind="validationMessage: selectedBuyQuantity"></span>
                                         </div>
                                     </div>
-                                    <div class="row" data-bind="visible: currentTab() == 2 && (currentMarketUnitPrice() == 0 || overrideMarketPrice())" style="display:none;max-width: 1000px;">
+                                    <div class="row buySellRow" data-bind="visible: currentTab() == 2 && isMarketPriceMissingOrOverridden()">
                                         <div class="col-md-4">
                                             <span data-bind="visible: customSellAs() == 'unitprice'"><b><span data-bind="text: dispAssetPair"></span></b> unit price:</span>
                                             <span data-bind="visible: customSellAs() == 'quantity'">Quantity <b class="sellColor"><span data-bind="text: sellAsset"></span></b> to sell:</span>
@@ -150,9 +149,8 @@
                                         <div class="col-md-4">
                                             <div class="input-group">
                                                 <span class="input-group-addon"><i class="fa fa-arrow-circle-o-up fa-lg fa-fw"></i></span>
-                                                <input class="form-control input-lg" type="text"
-                                                    data-bind="value: customSellAsEntry, attr: {placeholder: customSellAs() == 'unitprice' ? 'Unit price' : ('Quantity ' + sellAsset())}, valueUpdate: 'input'"
-                                                    style="max-width: 300px;" />
+                                                <input class="form-control input-lg buySellRestrictedWidthControl" type="text"
+                                                    data-bind="value: customSellAsEntry, attr: {placeholder: dispCustomSellAsEntryPlaceholderText }, valueUpdate: 'input'" />
                                             </div>
                                             <span class="invalid" data-bind="validationMessage: customSellAsEntry"></span>
                                         </div>
@@ -166,26 +164,26 @@
                                             </div>
                                         </div>
                                     </div>
-                                    <div class="row" data-bind="visible: currentTab() == 2 && (currentMarketUnitPrice() == 0 || overrideMarketPrice()) && !overrideDefaultOptions()" style="display:none;max-width: 1000px;">
-                                        <a href="#" data-bind="click: function() { overrideDefaultOptions(true) }" style="font-size:11px;">Override Trade Options</a>
+                                    <div class="row buySellRow" data-bind="visible: currentTab() == 2 && isMarketPriceMissingOrOverridden() && !overrideDefaultOptions()">
+                                        <a href="#" data-bind="click: setOverrideDefaultOptions" class="font-xs">Override Trade Options</a>
                                     </div>
                                     
                                     <!-- PURCHASE SUMMARY -->
-                                    <div class="row" data-bind="fadeVisibleInOnly: currentTab() == 2 && unitPrice() && selectedBuyQuantity()" style="display:none;margin-top:15px;">
-                                        <div class="col-sm-12" style="max-width: 1000px;">
-                                            <span data-bind="fadeVisible: (currentMarketUnitPrice() == 0 || overrideMarketPrice()) && (selectedSellQuantityCustom() && selectedSellQuantityCustom() > 0) ">
+                                    <div class="row margin-top-10" data-bind="fadeVisibleInOnly: currentTab() == 2 && unitPrice() && selectedBuyQuantity()">
+                                        <div class="col-sm-12 buySellRow">
+                                            <span data-bind="fadeVisible: isMarketPriceMissingOrOverridden() && selectedSellQuantityCustom() && selectedSellQuantityCustom() > 0 ">
                                                 The effective unit price of your <b><span data-bind="text: dispAssetPair"></span></b> order is
                                                 <b><span data-bind="text: dispUnitPrice"></span></b>
                                                 <b><span data-bind="text: quoteAsset"></span></b> per each <b><span data-bind="text: baseAsset"></span></b>.
                                             </span>
                                             <span>
-                                                Your purchase of <b><span class="buyColor" data-bind="text: numberWithCommas(selectedBuyQuantity())"></span>
+                                                Your purchase of <b><span class="buyColor" data-bind="text: dispSelectedBuyQuantity"></span>
                                                 <span class="buyColor" data-bind="text: buyAsset"></span></b>
-                                                will cost you <b><span class="sellColor" data-bind="text: numberWithCommas(selectedSellQuantity())"></span>
+                                                will cost you <b><span class="sellColor" data-bind="text: dispSelectedSellQuantity"></span>
                                                 <span class="sellColor" data-bind="text: sellAsset"></span></b>
                                                 <span data-bind="visible: sellAsset() == 'BTC' && feeForSelectedBTCQuantity() != 0">, plus a <b><span data-bind="text: feeForSelectedBTCQuantity"></span> BTC</b> (<span data-bind="text: feeForSelectedBTCQuantityAsPct"></span>%) miner fee (to prevent troll orders)</span>.
                                             </span>
-                                            <span data-bind="fadeVisibleInOnly: currentTab() == 2 && sellQuantityRemainingAfterSale() != null && sellQuantityRemainingAfterSale() >= 0">
+                                            <span data-bind="fadeVisibleInOnly: currentTab() == 2 && sellQuantityRemainingAfterSaleIsNotNull() && sellQuantityRemainingAfterSale() >= 0">
                                                 After the sale, you will have <b><span class="sellColor" data-bind="text: dispSellQuantityRemainingAfterSale"></span>
                                                 <span class="sellColor" data-bind="text: sellAsset"></span></b> remaining at
                                                 your address <b class='notoAddrColor'><span data-bind="text: dispSelectedAddressWithLabel"></span></b>.
@@ -199,18 +197,18 @@
                                     </div>
                                     
                                     <!-- TRADE PARAMETER OVERRIDES -->
-                                    <div class="row" data-bind="fadeVisibleInOnly: currentTab() == 2 && overrideDefaultOptions()" style="display:none;max-width: 1000px;">
+                                    <div class="row buySellRow" data-bind="fadeVisibleInOnly: currentTab() == 2 && overrideDefaultOptions()">
                                         <div class="col-md-4"># Blocks until Expiration:</div>
                                         <div class="col-md-8">
                                             <div class="input-group">
                                                 <span class="input-group-addon"><i class="fa fa-clock-o fa-lg fa-fw"></i></span>
-                                                <input class="form-control input-lg" type="text" style="max-width: 300px"
+                                                <input class="form-control input-lg buySellRestrictedWidthControl" type="text"
                                                  data-bind="value: numBlocksUntilExpiration, valueUpdate: 'input'" />
                                             </div>
                                             <span class="invalid" data-bind="validationMessage: numBlocksUntilExpiration"></span>
                                         </div>
                                     </div>
-                                    <div class="row" data-bind="fadeVisibleInOnly: currentTab() == 2 && overrideDefaultOptions() && (buyAsset() == 'BTC' || sellAsset() == 'BTC')" style="display:none;max-width: 1000px;">
+                                    <div class="row buySellRow" data-bind="fadeVisibleInOnly: currentTab() == 2 && overrideDefaultOptions() && (buyAsset() == 'BTC' || sellAsset() == 'BTC')">
                                         <div class="col-md-4">
                                             <span data-bind="visible: buyAsset() == 'BTC'">BTC Fee Required:</span>
                                             <span data-bind="visible: sellAsset() == 'BTC'">BTC Fee Provided:</span>
@@ -218,7 +216,7 @@
                                         <div class="col-md-4">
                                             <div class="input-group">
                                                 <span class="input-group-addon"><i class="fa fa-btc fa-lg fa-fw"></i></span>
-                                                <input class="form-control input-lg" type="text" style="max-width: 300px"
+                                                <input class="form-control input-lg buySellRestrictedWidthControl" type="text"
                                                  data-bind="value: btcFee, valueUpdate: 'input'" />
                                             </div>
                                             <span class="invalid" data-bind="validationMessage: btcFee"></span>
@@ -235,17 +233,17 @@
                                     </div>
                                 </div>
                                 <div class="tab-pane" id="tab3">
-                                    <table class="table table-bordered" style="max-width: 800px;">​
+                                    <table class="table table-bordered buySellSummaryTable">​
                                         <thead></thead>
                                         <tbody>
                                             <tr>
                                                 <td><b>Buy:</b></td>
-                                                <td><b><span class="buyColor" data-bind="text: numberWithCommas(selectedBuyQuantity())"></span>&nbsp;
+                                                <td><b><span class="buyColor" data-bind="text: dispSelectedBuyQuantity"></span>&nbsp;
                                                     <span class="buyColor" data-bind="text: buyAsset"></span></b></td>
                                             </tr>
                                             <tr>
                                                 <td><b>Sell:</b></td>
-                                                <td><b><span class="sellColor" data-bind="text: numberWithCommas(selectedSellQuantity())"></span>&nbsp;
+                                                <td><b><span class="sellColor" data-bind="text: dispSelectedSellQuantity"></span>&nbsp;
                                                     <span class="sellColor" data-bind="text: sellAsset" placeholder="Enter quantity"></span></b></td>
                                             </tr>
                                             <tr>
@@ -271,7 +269,7 @@
                                             </tr>
                                         </tbody>
                                     </table>
-                                    <span style="max-width: 1000px;">
+                                    <span class="buySellRow">
                                         After the sale, you will have <b><span class="sellColor" data-bind="text: dispSellQuantityRemainingAfterSale"></span>
                                         <span class="sellColor" data-bind="text: sellAsset"></span></b> remaining at
                                         your address <b><span data-bind="text: dispSelectedAddressWithLabel"></span></b>.
@@ -283,13 +281,13 @@
                                         <div class="col-sm-12">
                                             <ul class="pager wizard no-margin">
                                                 <li class="previous disabled">
-                                                    <a href="javascript:void(0);" class="btn btn-lg btn-default"> Previous </a>
+                                                    <a href="#" class="btn btn-lg btn-default"> Previous </a>
                                                 </li>
                                                 <li class="next">
-                                                    <a href="javascript:void(0);" class="btn btn-lg txt-color-darken"> Next </a>
+                                                    <a href="#" class="btn btn-lg txt-color-darken"> Next </a>
                                                 </li>
-                                                <li class="next finish" style="display:none;">
-                                                    <a href="javascript:void(0);" class="btn btn-lg btn-success">Confirm &amp; Place Order</a>
+                                                <li class="next finish">
+                                                    <a href="#" class="btn btn-lg btn-success">Confirm &amp; Place Order</a>
                                                 </li>
                                             </ul>
                                         </div>
@@ -322,7 +320,7 @@
             <div class="widget-body no-padding"> <!-- widget content -->
                 <div class="row">
                     <div class="col-md-12">
-                        <div id="priceHistory" style="height: 500px; min-width: 500px"></div>
+                        <div id="priceHistory" class="buySellPriceHistory"></div>
                     </div>
                 </div>
             </div> <!-- end widget content -->
@@ -360,9 +358,9 @@
                             </thead>
                             <tbody data-bind="foreach: askBook"> <!-- ascending order -->
                                 <tr>
-                                    <td data-bind="text: unit_price"></td>
-                                    <td data-bind="text: smartFormat(quantity) + ' (' + count + ')'"></td> <!-- quantity (count) -->
-                                    <td data-bind="text: smartFormat(depth, 10)"></td>
+                                    <td data-bind="text: UNIT_PRICE"></td>
+                                    <td data-bind="text: QTY_AND_COUNT"></td> <!-- quantity (count) -->
+                                    <td data-bind="text: DEPTH"></td>
                                 </tr>
                             </tbody>
                         </table>
@@ -381,9 +379,9 @@
                             </thead>
                             <tbody data-bind="foreach: bidBook"> <!-- descending order -->
                                 <tr>
-                                    <td data-bind="text: unit_price"></td>
-                                    <td data-bind="text: smartFormat(quantity) + ' (' + count + ')'"></td>
-                                    <td data-bind="text: smartFormat(depth, 10)"></td>
+                                    <td data-bind="text: UNIT_PRICE"></td>
+                                    <td data-bind="text: QTY_AND_COUNT"></td> <!-- quantity (count) -->
+                                    <td data-bind="text: DEPTH"></td>
                                 </tr>
                             </tbody>
                         </table>
@@ -415,21 +413,21 @@
                             <th>Buy Qty Left</th>
                             <th>Sell Qty Left</th>
                             <th>Expires In</th>
-                            <th data-bind="visible: sellAsset() == 'BTC'">Fee Required Left</th>
-                            <th data-bind="visible: buyAsset() == 'BTC'">Fee Provided Left</th>
+                            <th data-bind="visible: sellAsset() === 'BTC'">Fee Required Left</th>
+                            <th data-bind="visible: buyAsset() === 'BTC'">Fee Provided Left</th>
                             <!-- ^ reverse the order here because we're looking for people on the other end of the trade to buy from -->
                         </tr>
                     </thead>
                     <tbody data-bind="foreach: openOrders">
-                        <tr style="cursor:pointer;" data-bind="click: $parent.buySelectedOpenOrder">
-                            <td data-bind="html: getTxHashLink(tx_hash) + OrdersViewModel.deriveIsOnlineForBTCPayment(give_asset, _is_online)"></td>
-                            <td data-bind="timeago: new Date(block_time)"></td>
-                            <td data-bind="text: $parent.deriveOpenOrderAssetPrice(get_asset, get_quantity, give_asset, give_quantity)"></td>
-                            <td data-bind="html: $parent.deriveOpenOrderAssetQuantity(get_asset, get_remaining) + ' ' + get_asset + ' ' + OrdersViewModel.deriveOpenOrderBuySellLeft(get_quantity, get_remaining)"></td>
-                            <td data-bind="html: $parent.deriveOpenOrderAssetQuantity(give_asset, give_remaining) + ' ' + give_asset + ' ' + OrdersViewModel.deriveOpenOrderBuySellLeft(give_quantity, give_remaining)"></td>
-                            <td data-bind="html: OrdersViewModel.deriveOpenOrderExpiresIn(block_index, expiration)"></td>
-                            <td data-bind="visible: $parent.sellAsset() == 'BTC', html: smartFormat(normalizeQuantity(fee_required_remaining)) + ' BTC ' + OrdersViewModel.deriveOpenOrderBuySellLeft(fee_required, fee_required_remaining)"></td>                            
-                            <td data-bind="visible: $parent.buyAsset() == 'BTC', html: smartFormat(normalizeQuantity(fee_provided_remaining)) + ' BTC ' + OrdersViewModel.deriveOpenOrderBuySellLeft(fee_provided, fee_provided_remaining)"></td>                            
+                        <tr class="cursor-pointer" data-bind="click: $parent.buySelectedOpenOrder">
+                            <td data-bind="html: TX_ID"></td>
+                            <td data-bind="timeago: WHEN_CREATED"></td>
+                            <td data-bind="text: PRICE"></td>
+                            <td data-bind="html: BUY_QTY_LEFT"></td>
+                            <td data-bind="html: SELL_QTY_LEFT"></td>
+                            <td data-bind="html: EXPIRES_IN"></td>
+                            <td data-bind="visible: $parent.sellAsset() === 'BTC', html: FEE_REQUIRED_LEFT"></td>                            
+                            <td data-bind="visible: $parent.buyAsset() === 'BTC', html: FEE_PROVIDED_LEFT"></td>
                         </tr>
                     </tbody>
                 </table>
@@ -439,9 +437,9 @@
     </article> <!-- WIDGET END -->
   </div> <!-- end row -->
   
-  <div data-bind="fadeVisibleInOnly: showTradeHistory && tradeHistory().length > 0" class="row"> <!-- row -->
+  <div data-bind="fadeVisibleInOnly: showTradeHistory" class="row"> <!-- row -->
     <article class="col-xs-12 col-sm-12 col-md-12 col-lg-12"> <!-- NEW WIDGET START -->
-      <div class="jarviswidget defaultWidgetColor" id="wid-id-tradeChart" data-widget-editbutton="false" data-widget-deletebutton="false" data-bind="fadeVisibleInOnly: showTradeHistory && tradeHistory().length > 0">
+      <div class="jarviswidget defaultWidgetColor" id="wid-id-tradeChart" data-widget-editbutton="false" data-widget-deletebutton="false" data-bind="fadeVisibleInOnly: showTradeHistory">
         <header>
             <span class="widget-icon"> <i class="fa fa-circle"></i> </span>
             <h3>Completed Trades for <span data-bind="text: dispAssetPair"></span></h3>
@@ -466,15 +464,15 @@
                     </thead>
                     <tbody data-bind="foreach: tradeHistory">
                         <tr>
-                            <td data-bind="html: getLinkForBlock(block_index)"></td>
-                            <td data-bind="text: moment(block_time).format('MMM Do YYYY, h:mm:ss a')"></td>
-                            <td data-bind="html: getTxHashLink(order_match_id.substr(0,64))"></td> 
-                            <td data-bind="html: getLinkForCPData('address', order_match_tx0_address)"></td>
-                            <td data-bind="html: getTxHashLink(order_match_id.substr(64, 64))"></td>
-                            <td data-bind="html: getLinkForCPData('address', order_match_tx1_address)"></td>
-                            <td data-bind="text: smartFormat(base_quantity_normalized) + ' ' + base_asset"></td>
-                            <td data-bind="text: smartFormat(quote_quantity_normalized) + ' ' + quote_asset"></td>
-                            <td data-bind="text: unit_price"></td>
+                            <td data-bind="html: BLOCK"></td>
+                            <td data-bind="text: BLOCK_TIME"></td>
+                            <td data-bind="html: ORDER_1"></td> 
+                            <td data-bind="html: ADDRESS_1"></td>
+                            <td data-bind="html: ORDER_2"></td>
+                            <td data-bind="html: ADDRESS_2"></td>
+                            <td data-bind="text: QUANTITY_BASE"></td>
+                            <td data-bind="text: QUANTITY_QUOTE"></td>
+                            <td data-bind="text: UNIT_PRICE"></td>
                         </tr>
                     </tbody>
                 </table>
@@ -484,21 +482,3 @@
     </article> <!-- WIDGET END -->
   </div> <!-- end row -->
 </section>
-
-<script type="text/javascript">
-  pageSetUp(); //init smartadmin featureset
-
-  //This code is run on each visit to the page
-  window.BUY_SELL = new BuySellWizardViewModel();
-
-  ko.applyBindings(BUY_SELL, document.getElementsByClassName("buySellGrid")[0]);
-    
-  BUY_SELL.init();
-  
-  $(window).resize(BUY_SELL.dataTableResponsive);
-  $(window).on('hashchange', function() {
-    BUY_SELL._tab2StopAutoRefresh(); //just in case
-    $(window).off("resize", BUY_SELL.dataTableResponsive);
-  });
-
-</script>

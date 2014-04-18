@@ -59,6 +59,7 @@ var AssetLeaderboardViewModel = CClass.create(function() {
         volume: (marketInfo[i]['24h_summary']['vol'] && marketInfo[i]['aggregated_price_in_xcp']) 
           ? (smartFormat(marketInfo[i]['24h_summary']['vol'] * marketInfo[i]['aggregated_price_in_xcp'], 10, 4) + ' XCP') : '',
         pctChange: marketInfo[i]['24h_vol_price_change_in_xcp'] ? (smartFormat(marketInfo[i]['24h_vol_price_change_in_xcp'], 0, 2) + ' %') : '',
+        pctChangeColorClass: marketInfo[i]['24h_vol_price_change_in_xcp'] > 0 ? 'txt-color-green' : (marketInfo[i]['24h_vol_price_change_in_xcp'] < 0 ? 'txt-color-red' : 'initial'),
         history: marketInfo[i]['7d_history_in_xcp'],
 
         marketCapRaw: marketInfo[i]['market_cap_in_xcp'],
@@ -96,6 +97,7 @@ var AssetLeaderboardViewModel = CClass.create(function() {
         volume: (marketInfo[i]['24h_summary']['vol'] && marketInfo[i]['aggregated_price_in_btc']) 
           ? (smartFormat(marketInfo[i]['24h_summary']['vol'] * marketInfo[i]['aggregated_price_in_btc'], 10, 4) + ' BTC') : '',
         pctChange: marketInfo[i]['24h_vol_price_change_in_btc'] ? (smartFormat(marketInfo[i]['24h_vol_price_change_in_btc'], 0, 2) + ' %') : '',
+        pctChangeColorClass: marketInfo[i]['24h_vol_price_change_in_btc'] > 0 ? 'txt-color-green' : (marketInfo[i]['24h_vol_price_change_in_btc'] < 0 ? 'txt-color-red' : 'initial'),
         history: marketInfo[i]['7d_history_in_btc'],
 
         marketCapRaw: marketInfo[i]['market_cap_in_btc'],
@@ -222,7 +224,8 @@ AssetLeaderboardViewModel.formulateExtendedAssetInfo = function(asset, hasImage,
     dispAsset += '<a href="' + website + '" target="_blank">' + asset + '</a>';
   } else if(hasImage) {
     dispAsset = '<img src="' + (USE_TESTNET ? '/_t_asset_img/' : '/_asset_img/') + asset + '.png" />&nbsp;';
-    dispAsset += website ? ('<a href="' + website + '" target="_blank">' + asset + '</a>') : asset;
+    //dispAsset += website ? ('<a href="' + website + '" target="_blank">' + asset + '</a>') : asset;
+    dispAsset += asset; //keep it simple for now for avoid XSS
   }
   return dispAsset;
 }

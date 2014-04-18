@@ -6,13 +6,13 @@
         </em>
         <span>
            A payment of
-           <b class="notoQuantityColor"><span data-bind="text: smartFormat(BTCPAY_DATA['btcQuantity'])"></span></b>
+           <b class="notoQuantityColor"><span data-bind="text: dispBTCQuantity"></span></b>
            <b class="notoAssetColor">BTC</b> is required from 
-           <b class="notoAddrColor"><span data-bind="text: getAddressLabel(BTCPAY_DATA['myAddr'])"></span></b> to settle payment for
-           matched order <b><span data-bind="html: getTxHashLink(BTCPAY_DATA['myOrderTxHash'])"></span></b>.
+           <b class="notoAddrColor"><span data-bind="text: dispMyAddr"></span></b> to settle payment for
+           matched order <b><span data-bind="html: dispMyOrderTxHash"></span></b>.
            <div class="clearfix"></div>
            <span class="pull-right"><button class="btn btn-xs btn-success margin-top-5" data-bind="click: completeBTCPay">Pay Now</button></span>
-           <span class="pull-left font-xs text-muted"><i>Expires ~<span data-bind="timeago: approxExpiresInTime"></span> (@ block <span data-bind="text: BTCPAY_DATA['matchExpireIndex']"></span>)</i>
+           <span class="pull-left font-xs text-muted"><i>Expires ~<span data-bind="timeago: approxExpiresInTime"></span> (@ block <span data-bind="text: MATCH_EXPIRE_INDEX"></span>)</i>
         </span>
       </span>
     </li>
@@ -25,15 +25,10 @@
         </em>
         <span>
            <span data-bind="text: numBlocksUntilEligible"></span> block(s) (~<span data-bind="timeago: approxTimeUntilEligible"></span>)
-           left until order <b><span data-bind="html: getTxHashLink(BTCPAY_DATA['myOrderTxHash'])"></span></b>
-           is eligible for <b class="notoQuantityColor"><span data-bind="text: smartFormat(BTCPAY_DATA['btcQuantity'])"></span></b>
+           left until order <b><span data-bind="html: dispMyOrderTxHash"></span></b>
+           is eligible for <b class="notoQuantityColor"><span data-bind="text: dispBTCQuantity"></span></b>
            <b class="notoAssetColor">BTC</b> payment.
         </span>
       </span>
     </li>
 </ul>
-
-<script type="text/javascript">
-  ko.applyBindings(WAITING_BTCPAY_FEED, document.getElementById("waitingBTCPayFeedContent"));
-  ko.applyBindings(UPCOMING_BTCPAY_FEED, document.getElementById("upcomingBTCPayFeedContent"));
-</script>

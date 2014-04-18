@@ -307,6 +307,10 @@ function ChangeAssetDescriptionModalViewModel() {
     },    
     newDescIsNotSameAsCurrentDesc: self
   });
+  
+  self.dispAssetDescription = ko.computed(function() {
+    return self.asset() ? self.asset().description : '';
+  }, self);
 
   self.dispCharactersRemaining = ko.computed(function() {
     if(!self.newDescription() || self.newDescription().length > MAX_ASSET_DESC_LENGTH) return '';
@@ -405,6 +409,10 @@ function PayDividendModalViewModel() {
     return Decimal.round(new Decimal(self.quantityPerUnit()).mul(self.asset().normalizedTotalIssued()),
       8, Decimal.MidpointRounding.ToEven).toFloat();
   }, self);
+  
+  self.dispTotalPay = ko.computed(function() {
+    return smartFormat(self.totalPay());
+  }, self);
 
   self.dividendAssetBalance = ko.computed(function() {
     if(!self.selectedDividendAsset()) return null;
@@ -414,6 +422,10 @@ function PayDividendModalViewModel() {
   self.dividendAssetBalRemainingPostPay = ko.computed(function() {
     if(!self.asset() || self.dividendAssetBalance() === null || self.totalPay() === null) return null;
     return Decimal.round(new Decimal(self.dividendAssetBalance()).sub(self.totalPay()), 8, Decimal.MidpointRounding.ToEven).toFloat();
+  }, self);
+  
+  self.dispDividendAssetBalRemainingPostPay = ko.computed(function() {
+    return smartFormat(self.dividendAssetBalRemainingPostPay());
   }, self);
   
   self.validationModel = ko.validatedObservable({
@@ -525,14 +537,22 @@ function CallAssetModalViewModel() {
     return self.assetObj().normalizedTotalIssued() - self.assetObj().normalizedBalance();
   }, self); 
 
-  self.dispUnitsToCallback = ko.computed(function() {
+  self.unitsToCallback = ko.computed(function() {
     if(!self.dispTotalOutstanding() || !self.percentageToCall()) return null;
-    return +(self.dispTotalOutstanding() * Decimal.round(new Decimal(self.percentageToCall()).div(100), 8, Decimal.MidpointRounding.ToEven).toFloat()).toFixed(4); 
+    return self.dispTotalOutstanding() * Decimal.round(new Decimal(self.percentageToCall()).div(100), 8, Decimal.MidpointRounding.ToEven).toFloat(); 
+  }, self); 
+
+  self.dispUnitsToCallback = ko.computed(function() {
+    return smartFormat(self.unitsToCallback(), null, 4); 
+  }, self); 
+
+  self.unitsAfterCallback = ko.computed(function() {
+    if(!self.assetObj() || !self.unitsToCallback()) return null;
+    return self.assetObj().normalizedBalance() + self.unitsToCallback();
   }, self); 
 
   self.dispUnitsAfterCallback = ko.computed(function() {
-    if(!self.assetObj() || !self.dispUnitsToCallback()) return null;
-    return +(self.assetObj().normalizedBalance() + self.dispUnitsToCallback()).toFixed(4);
+    return smartFormat(self.unitsAfterCallback(), null, 4); 
   }, self); 
 
   self.totalXCPPay = ko.computed(function() {
@@ -542,7 +562,15 @@ function CallAssetModalViewModel() {
 
   self.xcpBalRemainingPostCall = ko.computed(function() {
     if(self.totalXCPPay() === null) return null;
-    return +(Decimal.round(new Decimal(WALLET.getBalance(self.address(), 'XCP')).sub(self.totalXCPPay()), 8, Decimal.MidpointRounding.ToEven).toFloat()).toFixed(4);
+    return Decimal.round(new Decimal(WALLET.getBalance(self.address(), 'XCP')).sub(self.totalXCPPay()), 8, Decimal.MidpointRounding.ToEven).toFloat();
+  }, self);
+  
+  self.xcpBalRemainingPostCallIsSet = ko.computed(function() {
+    return self.xcpBalRemainingPostCall() !== null;
+  }, self);
+
+  self.dispXCPBalRemainingPostCall = ko.computed(function() {
+    return smartFormat(self.xcpBalRemainingPostCall(), null, 4);
   }, self);
   
   self.validationModel = ko.validatedObservable({
@@ -658,6 +686,14 @@ function ShowAssetInfoModalViewModel() {
   self.callDate = ko.observable(null);
   self.callPrice = ko.observable(null);
   self.history = ko.observableArray([]);
+  
+  self.dispTotalIssued = ko.computed(function() {
+    return smartFormat(self.totalIssued()); 
+  }, self); 
+
+  self.showHistory = ko.computed(function() {
+    return self.history().length ? true : false; 
+  }, self); 
 
   self.show = function(assetObj) {
     self.address(assetObj.ADDRESS);

@@ -12,10 +12,10 @@
         </button>
         <ul class="dropdown-menu">
             <li>
-                <a id="createAddress" href="javascript:void(0);">Create Regular Address</a>
+                <a id="createAddress" href="#">Create Regular Address</a>
             </li>
             <li>
-                <a id="createWatchOnlyAddress" href="javascript:void(0);">Create Watch Only Address</a>
+                <a id="createWatchOnlyAddress" href="#">Create Watch Only Address</a>
             </li>
         </ul>
     </div>
@@ -30,9 +30,9 @@
     Please note the Counterparty team cannot be held responsible for lost or stolen funds.
 </div>
 
-<div id="gettingStartedNotice" data-bind="fadeVisibleInOnly: WALLET.isNew()" class="alert alert-success alert-block" style="display:none">
+<div id="gettingStartedNotice" data-bind="fadeVisibleInOnly: WALLET.isNew()" class="alert alert-success alert-block">
     <a class="close" data-dismiss="alert" href="#">×</a>
-    <h4 class="alert-heading" style="padding-bottom: 10px">Welcome to Counterwallet!</h4>
+    <h4 class="alert-heading padding-bottom-10">Welcome to Counterwallet!</h4>
     We've created three addresses for you, which serve as both Bitcoin and Counterparty addresses.
     To start using the wallet, simply send some BTC or XCP to any one of them (just single click on the address string
     itself to select it, then copy that text, which you can then give to others or use to
@@ -47,7 +47,7 @@
     Note that depending on the speed at which blocks are solved, it could take anywhere from 2 to 40 minutes for your actions to be confirmed.<br/><br/>
 </div>
 
-<div id="pendingBTCPayNotice" data-bind="fadeVisibleInOnly: WALLET.isSellingBTC()" class="alert alert-info alert-block" style="display:none">
+<div id="pendingBTCPayNotice" data-bind="fadeVisibleInOnly: WALLET.isSellingBTC()" class="alert alert-info alert-block">
     <i class="fa-fw fa fa-btc"></i>
     <strong>BTCPay Pending:</strong> As you have one or more open sell orders for BTC, please stay logged in so that the order(s) can be properly filled.
 </div>
@@ -55,7 +55,7 @@
 <section id="widget-grid" class="balancesContainer" data-bind="foreach: addresses"> <!-- widget grid -->
     <div class="row"> <!-- one row per widget in this case -->
       <article class="col-xs-12 col-sm-12 col-md-12 col-lg-12"> <!-- widget START -->
-        <div class="jarviswidget defaultWidgetColor" data-bind="attr: {'id': 'address-wid-' + $data.ADDRESS}" data-widget-deletebutton="false" data-widget-editbutton="false">
+        <div class="jarviswidget" data-bind="attr: {'id': 'address-wid-' + ADDRESS}" data-widget-deletebutton="false" data-widget-editbutton="false">
           <header>
             <span class="widget-icon"> <i class="fa" data-bind="css: { 'fa-arrow-circle-o-right': !IS_WATCH_ONLY, 'fa-eye': IS_WATCH_ONLY }"></i> </span>
             <h3 class="jarviswidget-ctrls"><span class="addressLabelText" href="#" data-bind="text: label, click: changeLabel"></span><span data-bind="visible: IS_WATCH_ONLY">&nbsp;&nbsp;(Watch Only)</span></h3>
@@ -82,18 +82,18 @@
                 </ul>
               </div>
             </div>
-            <div class="widget-toolbar"><span id="" data-bind="attr: {'id': 'address-text-' + $data.ADDRESS}, click: function(data, event) { return selectText('address-text-' + $data.ADDRESS); }, text: ADDRESS"></span></div>
+            <div class="widget-toolbar"><span id="" data-bind="attr: {'id': 'address-text-' + ADDRESS}, click: selectAddressText, text: ADDRESS"></span></div>
             <div class="clearfix"></div>  
           </header>
           <div> <!-- widget div-->
-            <div class="widget-body" data-bind="attr: {'id': 'address-balances-' + $data.ADDRESS}, foreach: filteredAssets"> <!-- widget content -->
-              <div class="asset-item" data-bind="css: { btc: ASSET == 'BTC', xcp: ASSET == 'XCP', myasset: isMine(), othersasset: isMine() == false }">
+            <div class="widget-body" data-bind="attr: {'id': 'address-balances-' + ADDRESS}, foreach: filteredAssets"> <!-- widget content -->
+              <div class="asset-item" data-bind="css: { btc: ASSET === 'BTC', xcp: ASSET === 'XCP', myasset: isMine(), othersasset: !isMine() && (ASSET !== 'BTC' && ASSET !== 'XCP') }">
                 <div class="btn-group"> <!-- asset level action button -->
                   <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown"><span class="caret"></span></button>
                   <ul class="dropdown-menu" role="menu">
                     <li><a data-bind="visible: !$parent.IS_WATCH_ONLY, click: send" href="#">Send</a></li>
-                    <li><a data-bind="visible: isMine() !== null, click: showInfo" href="#">Show Info</a></li>
-                    <li data-bind="visible: !$parent.IS_WATCH_ONLY && USE_TESTNET && ASSET == 'BTC'"><a data-bind="click: testnetBurn" href="#">Burn for XCP</a></li>
+                    <li><a data-bind="visible: ASSET !== 'BTC' && ASSET !== 'XCP', click: showInfo" href="#">Show Info</a></li>
+                    <li data-bind="visible: !$parent.IS_WATCH_ONLY && USE_TESTNET && ASSET === 'BTC'"><a data-bind="click: testnetBurn" href="#">Burn for XCP</a></li>
                     <li data-bind="visible: !$parent.IS_WATCH_ONLY && isMine() && !locked()"><a data-bind="click: issueAdditional" href="#">Issue Additional</a></li>
                     <li data-bind="visible: !$parent.IS_WATCH_ONLY && isMine()"><a data-bind="click: transfer" href="#">Transfer Ownership</a></li>
                     <li data-bind="visible: !$parent.IS_WATCH_ONLY && isMine() && !locked()"><a data-bind="click: lock" href="#">Lock Asset Issuance</a></li>
@@ -104,18 +104,18 @@
                 </div>
                 <h3 class="name pull-left" data-bind="text: ASSET"></h3>
                 <div class="clearfix"></div>
-                <p class="balance" data-bind="style: { 'padding-right': locked() && CALLABLE ? '40px' : locked() || CALLABLE ? '20px' : '0px' }">
+                <p class="balance" data-bind="style: { 'padding-right': dispBalancePadding }">
                     <span data-bind="visible: isMine()">Issued: <span data-bind="text: dispTotalIssued"></span>
                         <span data-bind="visible: issuanceQtyChangePending" title="Quantity issued change pending">
                             <i class="icon-append fa fa-cloud-upload"></i></span>
                     </span><br/>
-                    Bal: <span data-bind="text: normalizedBalance() === null ? '??' : smartFormat(normalizedBalance(), true)"></span>
+                    Bal: <span data-bind="text: dispBalance"></span>
                     <span data-bind="visible: balanceChangePending"
                         title="Balance change pending"><i class="icon-append fa fa-cloud-upload"></i></span></p>
-                <div style="position:absolute;bottom:2px;right:10px">
-                    <span data-bind="visible: locked()" style="float:right;padding-left:5px;"
+                <div class="balancesAssetIcons">
+                    <span data-bind="visible: locked()" class="balancesAssetIcon"
                         title="Asset is locked"><i class="icon-append fa fa-lock"></i></span>
-                    <span data-bind="visible: CALLABLE" style="float:right;padding-left:5px;"
+                    <span data-bind="visible: CALLABLE" class="balancesAssetIcon"
                         title="Asset is callable"><i class="icon-append fa fa-mail-reply-all"></i></span>
                 </div>
               </div>
@@ -164,12 +164,12 @@
     <div class="modal-content">
       <div class="modal-header">
         <button type="button" data-bind="click: hide" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
-        <h4 class="modal-title" data-bind="text: forWatchOnly() ? 'Add Watch Address' : 'Create New Address'"></h4>
+        <h4 class="modal-title" data-bind="text: dispWindowTitle"></h4>
       </div>
       <div class="modal-body no-padding">
         <div data-bind="visible: !forWatchOnly()">
             <p class="formPadded">Enter the description you'd like to use for this new address.<br/><br/>
-            <b style='color:red'>Please NOTE that once you create a new address, you cannot delete it.</b></p>
+            <b class="errorColor">Please NOTE that once you create a new address, you cannot delete it.</b></p>
         </div>
         <div data-bind="visible: forWatchOnly()">
             <p class="formPadded">Please enter the info for the address you would like to add into your wallet as a watch-only address.</p>
@@ -213,7 +213,7 @@
       <div class="modal-body no-padding">
         <p class="formPadded">Send <b data-bind="text: asset"></b> from your address <b data-bind="text: address"></b>
         to the address you enter below.<br/><br/>
-        You have <b><span class="buyColor" data-bind="text: numberWithCommas(normalizedBalance())"></span> <span class="buyColor" data-bind="text: asset"></span></b>
+        You have <b><span class="buyColor" data-bind="text: dispNormalizedBalance"></span> <span class="buyColor" data-bind="text: asset"></span></b>
         available to send from this address.
         </p>
         
@@ -230,7 +230,7 @@
           <section><div class="row">
             <label class="control-label col col-sm-2">Send Amount</label>
             <div class="col col-sm-10">
-                <label class="input" style="display: inline-block;">
+                <label class="input inline-block">
                     <i class="icon-append fa fa-share"></i>
                     <input name="quantity" data-bind="value: quantity, valueUpdate: 'input', attr: {placeholder: 'Enter quantity'}" type="text"/>
                 </label>
@@ -239,8 +239,8 @@
             </div>
           </div></section>
         </fieldset></form>
-        <p class="formPaddedBot" data-bind="fadeVisibleInOnly: normalizedBalRemaining() !== null">
-            After sending, you will have <b><span class="sellColor" data-bind="text: numberWithCommas(normalizedBalRemaining())"></span>
+        <p class="formPaddedBot" data-bind="fadeVisibleInOnly: normalizedBalRemainingIsSet">
+            After sending, you will have <b><span class="sellColor" data-bind="text: dispNormalizedBalRemaining"></span>
             <span class="sellColor" data-bind="text: asset"></span> remaining</b> at this address (minus fees).
         </p>
       </div>
@@ -277,7 +277,7 @@
           <section><div class="row">
             <label class="control-label col col-sm-2">Destination Address</label>
             <div class="col col-sm-10">
-                <select style="width:100%" data-bind="options: availableAddresses, optionsValue: 'ADDRESS', optionsText: 'SELECT_LABEL', select2: { minimumResultsForSearch: 10, escapeMarkup: function(m) { return m; } }, value: destAddress"></select>
+                <select class="width-max" data-bind="options: availableAddresses, optionsValue: 'ADDRESS', optionsText: 'SELECT_LABEL', select2: { minimumResultsForSearch: 10, escapeMarkup: 'direct' }, value: destAddress"></select>
                 <span class="invalid" data-bind="validationMessage: destAddress"></span>
                 <div class="note">Select the address in your wallet that the specified assets for the private key above should be send to.</div>
             </div>
@@ -286,7 +286,7 @@
             <label class="control-label col col-sm-2">Assets to Sweep</label>
             <div class="col col-sm-10">
                 <label class="input">
-                    <select multiple="true" style="width:100%" data-bind="options: availableAssetsToSweep, optionsValue: 'ASSET', optionsText: 'SELECT_LABEL', select2: { minimumResultsForSearch: 10, escapeMarkup: function(m) { return m; } }, selectedOptions: selectedAssetsToSweep"></select>
+                    <select multiple="true" class="width-max" data-bind="options: availableAssetsToSweep, optionsValue: 'ASSET', optionsText: 'SELECT_LABEL', select2: { minimumResultsForSearch: 10, escapeMarkup: 'direct' }, selectedOptions: selectedAssetsToSweep"></select>
                 </label>
                 <span class="invalid" data-bind="validationMessage: selectedAssetsToSweep"></span>
                 <div class="note">Select all of the assets whose total balances you want to move into the destination address.</div>
@@ -379,7 +379,7 @@
         <p class="formPadded">
          Create XCP on Testnet by "burning" your test BTC. Please note that you can only burn up to <b>1 BTC total</b> for any given address.<br/><br/>
          <span data-bind="visible: 1 - btcAlreadyBurned() > 0"><b>You may currently burn up to <span class="sellColor"><span data-bind="text: maxPossibleBurn()"></span> BTC</span> from this address.</b></span>
-         <span data-bind="visible: 1 - btcAlreadyBurned() <= 0"><b style="color: errorColor">You have already burned the maximum allowed BTC from this address.</b></span>
+         <span data-bind="visible: 1 - btcAlreadyBurned() <= 0"><b class="errorColor">You have already burned the maximum allowed BTC from this address.</b></span>
        </p>
        <form class="smart-form" data-bind="submit: doAction"><fieldset>
           <section><div class="row">
@@ -391,14 +391,39 @@
             </div>
           </div></section>
         </fieldset></form>
-        <p class="formPaddedBot" data-bind="fadeVisibleInOnly: validationModel.isValid()" style="font-weight: bold">
+        <p class="formPaddedBot bold" data-bind="fadeVisibleInOnly: validationModel.isValid()">
             After burning, you will have approximately
-            <b class="buyColor"><span data-bind="text: numberWithCommas(quantityXCPToBeCreated())"></span> XCP</b> created at this address.
+            <b class="buyColor"><span data-bind="text: dispQuantityXCPToBeCreated"></span> XCP</b> created at this address.
         </p>
       </div>
       <div class="modal-footer">
         <button type="button" class="btn btn-default" data-bind="click: hide">Cancel</button>
         <button type="button" data-bind="click: submitForm" class="btn btn-success">Burn</button>
+      </div>
+    </div><!-- /.modal-content -->
+  </div><!-- /.modal-dialog -->
+</div><!-- /.modal -->
+
+<!-- modal for display private key -->
+<div data-bind="showModal: shown" id="displayPrivateKeyModal" class="modal fade" data-backdrop="static" data-keyboard="false" tabindex="-1" role="dialog" aria-labelledby="displayPrivateKeyModal" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" data-bind="click: hide" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+        <h4 class="modal-title">Private Key (WIF) for <b data-bind="text: ADDRESS"></b></h4>
+      </div>
+      <div class="modal-body no-padding">
+        <div class="formPadded">
+            <div class="alert alert-warning"><i class="fa-fw fa fa-info"></i>Please make sure nobody can look over your shoulder or see your screen.</div>
+        
+            <center>
+                <a href="#" class="font-lg" data-bind="visible: !privateKeyText(), click: displayPrivateKey">Show Private Key</a>
+                <span class="font-medlg" data-bind="visible: privateKeyText, text: privateKeyText"></span>
+            </center>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-default" data-bind="click: hide">Close</button>
       </div>
     </div><!-- /.modal-content -->
   </div><!-- /.modal-dialog -->
@@ -510,7 +535,7 @@
         <p class="formPadded">How much more of this asset would you like to issue? <i>(For divisible assets, state
        the quantity as a whole or floating point number, not in satoshis -- e.g. '732.45')</i><br/><br/>
        There is currently quantity <b class="buyColor" data-bind="text: dispTotalIssued"></b> of this asset issued.<br/><br/>
-       <b style='color:red'>Please NOTE that this action is irreversable!</b></p>
+       <b class="errorRed">Please NOTE that this action is irreversable!</b></p>
         
         <form class="smart-form" data-bind="submit: doAction"><fieldset>
           <section><div class="row">
@@ -542,7 +567,7 @@
       <div class="modal-body no-padding">
         <p class="formPadded">Enter the <b>Bitcoin address</b> you would like to perminently transfer ownership of this asset to.
             (Be aware that this will not transfer the actual units of this asset that you own to this address -- you can do that with a separate Send transaction.)
-            <br/><br/><b style='color:red'>Please NOTE that this action is irreversable!</b></p>
+            <br/><br/><b class="errorRed">Please NOTE that this action is irreversable!</b></p>
         
         <form class="smart-form" data-bind="submit: doAction"><fieldset>
           <section><div class="row">
@@ -573,7 +598,7 @@
       </div>
       <div class="modal-body no-padding">
         <div class="formPadded">
-            <p>The asset's current description is: <b><span data-bind="text: asset() ? asset().description : ''"></span></b></p>
+            <p>The asset's current description is: <b><span data-bind="text: dispAssetDescription"></span></b></p>
             <p>Enter the new description for this asset<span data-bind="html: dispCharactersRemaining"></span>:</p>
         </div>
         
@@ -610,13 +635,13 @@
       <div class="modal-body no-padding">
         <p class="formPadded">Use this form to pay holders of <b><span data-bind="text: assetName"></span></b> a dividend using XCP or any other asset.
         <i>Note that the full required balance of the asset paid out must be present at this same address.</i><br/><br/>
-       <b style='color:red'>Please NOTE that this action is irreversable!</b></p>
+       <b class="errorRed">Please NOTE that this action is irreversable!</b></p>
         <form class="smart-form" data-bind="submit: doAction"><fieldset>
           <section><div class="row">
             <label class="control-label col col-sm-2">Dividend Asset</label>
             <div class="col col-sm-10">
                 <label class="input">
-                    <select id="selectedDividendAsset" style="width:100%" data-bind="options: availableDividendAssets, optionsValue: 'ASSET', optionsText: 'SELECT_LABEL', select2: { minimumResultsForSearch: 10, escapeMarkup: function(m) { return m; } }, value: selectedDividendAsset"></select>
+                    <select id="selectedDividendAsset" class="width-max" data-bind="options: availableDividendAssets, optionsValue: 'ASSET', optionsText: 'SELECT_LABEL', select2: { minimumResultsForSearch: 10, escapeMarkup: 'direct' }, value: selectedDividendAsset"></select>
                 </label>                    
                 <div class="note">Select the asset with which the dividend should be paid.</div>
             </div>
@@ -633,10 +658,10 @@
         </fieldset></form>
         <div class="formPaddedBot" data-bind="fadeVisibleInOnly: quantityPerUnit() && selectedDividendAsset() && totalPay()">
             <p>This dividend payment would cost you a total of 
-            <b class="sellColor"><span data-bind="text: smartFormat(totalPay())"></span> <span data-bind="html: selectedDividendAsset"></span></b>.</p>
+            <b class="sellColor"><span data-bind="text: dispTotalPay"></span> <span data-bind="text: selectedDividendAsset"></span></b>.</p>
             <p>After dividend payment this address would have a remaining balance of
-            <b data-bind="css: {errorColor: dividendAssetBalRemainingPostPay() < 0, sellColor:  dividendAssetBalRemainingPostPay() >= 0}">
-                <span data-bind="text: numberWithCommas(dividendAssetBalRemainingPostPay())"></span> <span data-bind="html: selectedDividendAsset"></span></b>.</p>
+            <b data-bind="css: {errorColor: dividendAssetBalRemainingPostPay() < 0, sellColor: dividendAssetBalRemainingPostPay() >= 0}">
+                <span data-bind="text: dispDividendAssetBalRemainingPostPay"></span> <span data-bind="text: selectedDividendAsset"></span></b>.</p>
         </div>
       </div>
       <div class="modal-footer">
@@ -658,7 +683,7 @@
       <div class="modal-body no-padding" data-bind="visible: assetObj">
         <p class="formPadded">Use this form to exercise a call option for the selected asset
             (<b><span data-bind="text: asset"></span></b>), any time after its call date of <b><span data-bind="text: dispCallDate"></span></b>.<br/><br/>
-       <b style='color:red'>Please NOTE that this action is irreversable!</b></p>
+       <b class="errorRed">Please NOTE that this action is irreversable!</b></p>
         <form class="smart-form" data-bind="submit: doAction"><fieldset>
           <section><div class="row">
             <label class="control-label col col-sm-2">% to Call</label>
@@ -670,18 +695,18 @@
             </div>
           </div></section>
         </fieldset></form>
-        <div class="formPaddedBot" data-bind="fadeVisibleInOnly: xcpBalRemainingPostCall() !== null">
+        <div class="formPaddedBot" data-bind="fadeVisibleInOnly: xcpBalRemainingPostCallIsSet">
             <p>At the given call price of <b><span data-bind="text: dispCallPrice"></span> XCP</b> per unit
                 of <b><span data-bind="text: asset"></span></b> (which has <b><span data-bind="text: dispTotalIssued"></span></b> units issued
                 and <b class="sellColor"><span data-bind="text: dispTotalOutstanding"></span></b> units outstanding),
                 your total cost for a <b><span data-bind="text: percentageToCall"></span>% callback</b> would be
                 <b class="sellColor"><span data-bind="text: totalXCPPay"></span> XCP</b>.</p>
             <p>After this callback, this address would have a remaining balance of
-            <b data-bind="css: {errorColor: xcpBalRemainingPostCall() < 0, sellColor:  xcpBalRemainingPostCall() >= 0}">
-                <span data-bind="text: numberWithCommas(xcpBalRemainingPostCall())"></span> XCP</b>, and gain
-            <b class="buyColor"><span data-bind="text: numberWithCommas(dispUnitsToCallback())"></span>
+            <b data-bind="css: {errorColor: xcpBalRemainingPostCall() < 0, sellColor: xcpBalRemainingPostCall() >= 0}">
+                <span data-bind="text: dispXCPBalRemainingPostCall"></span> XCP</b>, and gain
+            <b class="buyColor"><span data-bind="text: dispUnitsToCallback"></span>
                 <span data-bind="text: asset"></span></b>, for a final balance of
-             <b><span data-bind="text: numberWithCommas(dispUnitsAfterCallback())"></span>
+             <b><span data-bind="text: dispUnitsAfterCallback"></span>
                 <span data-bind="text: asset"></span></b>.</p>
         </div>
       </div>
@@ -723,7 +748,7 @@
             <label class="control-label col col-sm-2">Total Issued</label>
             <div class="col col-sm-10">
                 <label class="input"><i class="icon-append fa fa-plus"></i>
-                    <input name="assetQuantity"  data-bind="value: numberWithCommas(totalIssued())" type="text" readonly="readonly"/>                        
+                    <input name="assetQuantity"  data-bind="value: dispTotalIssued" type="text" readonly="readonly"/>                        
                 </label>
             </div>
           </div></section>
@@ -773,7 +798,7 @@
             </div>
           </div></section>
         </fieldset></form>
-        <table class="table table-striped table-bordered table-hover" data-bind="fadeVisibleInOnly: history().length">
+        <table class="table table-striped table-bordered table-hover" data-bind="fadeVisibleInOnly: showHistory">
             <thead>
                 <tr>
                     <th>Block Time</th>
@@ -794,69 +819,3 @@
     </div><!-- /.modal-content -->
   </div><!-- /.modal-dialog -->
 </div><!-- /.modal -->
-
-<script type="text/javascript">
-  //Bind the WALLET object to balancesGrid (this MUST go before pageSetUp on this page or Wierd Things Will Happen!)
-  ko.applyBindingsWithValidation(WALLET, document.getElementsByClassName("balancesContainer")[0]);
-  pendingBTCPayNotice
-  pageSetUp(); //init smartadmin featureset
-   
-  //balances.js
-  window.CHANGE_ADDRESS_LABEL_MODAL = new ChangeAddressLabelModalViewModel();
-  window.CREATE_NEW_ADDRESS_MODAL = new CreateNewAddressModalViewModel();
-  window.SEND_MODAL = new SendModalViewModel();
-  window.SWEEP_MODAL = new SweepModalViewModel();
-  window.SIGN_MESSAGE_MODAL = new SignMessageModalViewModel();
-  window.TESTNET_BURN_MODAL = new TestnetBurnModalViewModel();
-  
-  ko.applyBindings({}, document.getElementById("gettingStartedNotice"));
-  ko.applyBindings({}, document.getElementById("pendingBTCPayNotice"));
-  ko.applyBindingsWithValidation(CHANGE_ADDRESS_LABEL_MODAL, document.getElementById("changeAddressLabelModal"));
-  ko.applyBindingsWithValidation(CREATE_NEW_ADDRESS_MODAL, document.getElementById("createNewAddressModal"));
-  ko.applyBindingsWithValidation(SEND_MODAL, document.getElementById("sendModal"));
-  ko.applyBindingsWithValidation(SWEEP_MODAL, document.getElementById("sweepModal"));
-  ko.applyBindingsWithValidation(SIGN_MESSAGE_MODAL, document.getElementById("signMessageModal"));
-  ko.applyBindingsWithValidation(TESTNET_BURN_MODAL, document.getElementById("testnetBurnModal"));
-    
-  //balances_assets.js
-  window.CREATE_ASSET_MODAL = new CreateAssetModalViewModel();
-  window.ISSUE_ADDITIONAL_ASSET_MODAL = new IssueAdditionalAssetModalViewModel();
-  window.TRANSFER_ASSET_MODAL = new TransferAssetModalViewModel();
-  window.CHANGE_ASSET_DESCRIPTION_MODAL = new ChangeAssetDescriptionModalViewModel();
-  window.PAY_DIVIDEND_MODAL = new PayDividendModalViewModel();
-  window.CALL_ASSET_MODAL = new CallAssetModalViewModel();
-  window.SHOW_ASSET_INFO_MODAL = new ShowAssetInfoModalViewModel();
-  
-  ko.applyBindingsWithValidation(CREATE_ASSET_MODAL, document.getElementById("createAssetModal"));
-  ko.applyBindingsWithValidation(ISSUE_ADDITIONAL_ASSET_MODAL, document.getElementById("issueAdditionalAssetModal"));
-  ko.applyBindingsWithValidation(TRANSFER_ASSET_MODAL, document.getElementById("transferAssetModal"));
-  ko.applyBindingsWithValidation(CHANGE_ASSET_DESCRIPTION_MODAL, document.getElementById("changeAssetDescriptionModal"));
-  ko.applyBindingsWithValidation(PAY_DIVIDEND_MODAL, document.getElementById("payDividendModal"));
-  ko.applyBindingsWithValidation(CALL_ASSET_MODAL, document.getElementById("callAssetModal"));
-  ko.applyBindingsWithValidation(SHOW_ASSET_INFO_MODAL, document.getElementById("showAssetInfoModal"));
-  
-  $(document).ready(function() {
-      //Some misc jquery event handlers
-      $('#createAddress, #createWatchOnlyAddress').click(function() {
-        if(WALLET.addresses().length >= MAX_ADDRESSES) {
-          bootbox.alert("You already have the max number of addresses for a single wallet (<b>"
-            + MAX_ADDRESSES + "</b>). Please create a new wallet (i.e. different passphrase) for more.");
-          return false;
-        }
-        CREATE_NEW_ADDRESS_MODAL.show($(this).attr('id') == 'createWatchOnlyAddress');
-      });
-      
-      $('#sweepFunds').click(function() {
-        SWEEP_MODAL.show();
-      });
-        
-      //Called on first load, and every switch back to the balances page
-      if(window._BALANCES_HAS_LOADED_ALREADY === undefined) {
-          window._BALANCES_HAS_LOADED_ALREADY = true;
-      } else {
-          WALLET.refreshBTCBalances(false);
-      }
-  });
-   
-  
-</script>

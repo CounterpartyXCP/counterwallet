@@ -217,22 +217,97 @@ span.logoText {
     padding: 12px 12px 12px 12px;
 }
 
+
 /* Set default widget header color based on the chosen theme */
-body.smart-style-0 .defaultWidgetColor>header { /* simple grey = golden (yellow) pane */
+body.smart-style-0 .jarviswidget>header { /* simple grey = golden (yellow) pane */
     background: #B09B5B;
     color: #FFF;
 }
-body.smart-style-1 .defaultWidgetColor>header { /* dark elegance = lightRed pane */
+body.smart-style-1 .jarviswidget>header { /* dark elegance = lightRed pane */
     background: #A65858;
     color: #FFF;
 }
-body.smart-style-2 .defaultWidgetColor>header { /* ultra light = lightBlue pane */
+body.smart-style-2 .jarviswidget>header { /* ultra light = lightBlue pane */
     background: #CCDADF;
     color: #2b363c;
 }
-body.smart-style-3 .defaultWidgetColor>header { /* google skin = darkBlue (night sky) pane */
+body.smart-style-3 .jarviswidget>header { /* google skin = darkBlue (night sky) pane */
     background: #4C4F53;
     color: #FFF;
+}
+
+/* override widget colors (necessary because we override default widget bar color on a per theme basis) */
+.jarviswidget-color-magenta > header {
+  background: #6E3671 !important;
+  color: #FFF !important;
+}
+.jarviswidget-color-pink > header {
+  background: #AC5287 !important;
+  color: #FFF !important;
+}
+.jarviswidget-color-pinkDark > header {
+  background: #A8829F !important;
+  color: #FFF !important;
+}
+.jarviswidget-color-yellow > header {
+  background: #B09B5B !important;
+  color: #FFF !important;
+}
+.jarviswidget-color-orange > header {
+  background: #C79121 !important;
+  color: #FFF !important;
+}
+.jarviswidget-color-orangeDark > header {
+  background: #A57225 !important;
+  color: #FFF !important;
+}
+.jarviswidget-color-darken > header {
+  background: #404040 !important;
+  color: #FFF !important;
+}
+.jarviswidget-color-purple > header {
+  background: #65596B !important;
+  color: #FFF !important;
+}
+.jarviswidget-color-teal > header {
+  background: #568A89 !important;
+  color: #FFF !important;
+}
+.jarviswidget-color-blueDark > header {
+  background: #4C4F53 !important;
+  color: #FFF !important;
+}
+.jarviswidget-color-blue > header {
+  background: #60747C !important;
+  color: #FFF !important;
+}
+.jarviswidget-color-blueLight > header {
+  background: #CCDADF !important;
+  color: #2b363c !important;
+}
+.jarviswidget-color-red > header {
+  background: #931313 !important;
+  color: #FFF !important;
+}
+.jarviswidget-color-redLight > header {
+  background: #A65858 !important;
+  color: #FFF !important;
+}
+.jarviswidget-color-white > header {
+  background: #fff !important;
+  color: #838383 !important;
+}
+.jarviswidget-color-greenDark > header {
+  background: #496949 !important;
+  color: #FFF !important;
+}
+.jarviswidget-color-green > header {
+  background: #356E35 !important;
+  color: #FFF !important;
+}
+.jarviswidget-color-greenLight > header {
+  background: #71843F !important;
+  color: #FFF !important;
 }
 
 

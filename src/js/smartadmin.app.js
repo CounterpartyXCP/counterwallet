@@ -164,16 +164,6 @@ $(document).ready(function() {
 
     e.preventDefault();
   });
-
-  /*$('input[name="activity"]').change(function() {
-    //alert($(this).val())
-    var $this = $(this);
-
-    url = $this.attr('id');
-    container = $('.ajax-notifications');
-
-    loadURL(url, container);
-  });*/
   //COUNTERWALLET: END MOD
 
   $(document).mouseup(function(e) {
@@ -212,7 +202,7 @@ $(document).ready(function() {
     $.widresetMSG = $this.data('reset-msg');
     
     $.SmartMessageBox({
-      title : "<i class='fa fa-refresh' style='color:green'></i> Clear Local Storage",
+      title : "<i class='fa fa-refresh txt-color-green'></i> Clear Local Storage",
       content : $.widresetMSG || "Would you like to RESET all your saved widgets and clear LocalStorage?",
       buttons : '[No][Yes]'
     }, function(ButtonPressed) {
@@ -233,7 +223,7 @@ $(document).ready(function() {
     $.loginURL = $this.attr('href');
     
     if (window.WALLET && WALLET.isSellingBTC()) {
-      $.logoutMSG = "<span style='color:red;font-weight:bold'>If you log out, any Bitcoin sell orders you have open will probably not be filled.</span>";
+      $.logoutMSG = "<span class='bold txt-color-red'>If you log out, any Bitcoin sell orders you have open will probably not be filled.</span>";
     } else {
       $.logoutMSG = $this.data('logout-msg');
     }
@@ -1324,57 +1314,40 @@ function checkURL() {
 
 }
 
-// LOAD AJAX PAGES
-
+//COUNTERWALLET: START MOD
 function loadURL(url, container) {
-  //console.log(container)
-
   $.ajax({
     type : "GET",
     url : url,
     dataType : 'html',
-    //COUNTERWALLET: START MOD
     cache : !IS_DEV, // yes, in development mode, memory will bloat
-    //COUNTERWALLET: END MOD
     beforeSend : function() {
       // cog placed
       container.html('<h1><i class="fa fa-cog fa-spin"></i> Loading...</h1>');
     
-      // Only draw breadcrumb if it is main content material
-      // TODO: see the framerate for the animation in touch devices
-      
       if (container[0] == $("#content")[0]) {
         drawBreadCrumb();
         // scroll up
-        $("html").animate({
-          scrollTop : 0
-        }, "fast");
+        $("html").animate({ scrollTop : 0 }, "fast");
       } 
     },
-    /*complete: function(){
-        // Handle the complete event
-        // alert("complete")
-    },*/
     success : function(data) {
-      // cog replaced here...
-      // alert("success")
+      var e = container.css({ opacity : '0.0' }).html(data);
       
-      container.css({
-        opacity : '0.0'
-      }).html(data).delay(50).animate({
-        opacity : '1.0'
-      }, 300);
-      
+      //call page initialization code, as necessary
+      if(INIT_FUNC.hasOwnProperty(url)) {
+        INIT_FUNC[url]();
+      }
 
+      e.delay(50).animate({ opacity : '1.0' }, 300);
     },
     error : function(xhr, ajaxOptions, thrownError) {
       container.html('<h4 style="margin-top:10px; display:block; text-align:left"><i class="fa fa-warning txt-color-orangeDark"></i> Error 404! Page not found.</h4>');
     },
     async : false
   });
-
-  //console.log("ajax request sent");
 }
+//COUNTERWALLET: END MOD
 
 // UPDATE BREADCRUMB
 function drawBreadCrumb() {
@@ -1566,63 +1539,4 @@ function runDataTables(specificTableID, destroyOption, extraProps) {
   $(tableSelector+' a[rel=tooltip]').tooltip();
   /* END TABLE TOOLS */
 }
-//COUNTERWALLET: END MOD
-
-//COUNTERWALLET: START MOD
-//naturalSort for Datagrids
-(function() {
-/*
- * Natural Sort algorithm for Javascript - Version 0.7 - Released under MIT license
- * Author: Jim Palmer (based on chunking idea from Dave Koelle)
- * Contributors: Mike Grier (mgrier.com), Clint Priest, Kyle Adams, guillermo
- * See: http://js-naturalsort.googlecode.com/svn/trunk/naturalSort.js
- */
-function naturalSort (a, b) {
-    var re = /(^-?[0-9]+(\.?[0-9]*)[df]?e?[0-9]?$|^0x[0-9a-f]+$|[0-9]+)/gi,
-        sre = /(^[ ]*|[ ]*$)/g,
-        dre = /(^([\w ]+,?[\w ]+)?[\w ]+,?[\w ]+\d+:\d+(:\d+)?[\w ]?|^\d{1,4}[\/\-]\d{1,4}[\/\-]\d{1,4}|^\w+, \w+ \d+, \d{4})/,
-        hre = /^0x[0-9a-f]+$/i,
-        ore = /^0/,
-        // convert all to strings and trim()
-        x = a.toString().replace(sre, '') || '',
-        y = b.toString().replace(sre, '') || '',
-        // chunk/tokenize
-        xN = x.replace(re, '\0$1\0').replace(/\0$/,'').replace(/^\0/,'').split('\0'),
-        yN = y.replace(re, '\0$1\0').replace(/\0$/,'').replace(/^\0/,'').split('\0'),
-        // numeric, hex or date detection
-        xD = parseInt(x.match(hre)) || (xN.length != 1 && x.match(dre) && Date.parse(x)),
-        yD = parseInt(y.match(hre)) || xD && y.match(dre) && Date.parse(y) || null;
-    // first try and sort Hex codes or Dates
-    if (yD)
-        if ( xD < yD ) return -1;
-        else if ( xD > yD )  return 1;
-    // natural sorting through split numeric strings and default strings
-    for(var cLoc=0, numS=Math.max(xN.length, yN.length); cLoc < numS; cLoc++) {
-        // find floats not starting with '0', string or 0 if not defined (Clint Priest)
-        var oFxNcL = !(xN[cLoc] || '').match(ore) && parseFloat(xN[cLoc]) || xN[cLoc] || 0;
-        var oFyNcL = !(yN[cLoc] || '').match(ore) && parseFloat(yN[cLoc]) || yN[cLoc] || 0;
-        // handle numeric vs string comparison - number < string - (Kyle Adams)
-        if (isNaN(oFxNcL) !== isNaN(oFyNcL)) return (isNaN(oFxNcL)) ? 1 : -1;
-        // rely on string comparison if different types - i.e. '02' < 2 != '02' < '2'
-        else if (typeof oFxNcL !== typeof oFyNcL) {
-            oFxNcL += '';
-            oFyNcL += '';
-        }
-        if (oFxNcL < oFyNcL) return -1;
-        if (oFxNcL > oFyNcL) return 1;
-    }
-    return 0;
-}
- 
-$.extend( $.fn.dataTableExt.oSort, {
-    "natural-asc": function ( a, b ) {
-        return naturalSort(a,b);
-    },
- 
-    "natural-desc": function ( a, b ) {
-        return naturalSort(a,b) * -1;
-    }
-} );
- 
-}());
 //COUNTERWALLET: END MOD

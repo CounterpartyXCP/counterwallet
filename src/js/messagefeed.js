@@ -29,6 +29,7 @@ function MessageFeed() {
       'max reconnection attempts': 5,
       'force new connection': true,
       'try multiple transports': false,
+      //'transports': ['websocket', 'htmlfile', 'xhr-multipart', 'xhr-polling', 'jsonp-polling'],
       'resource': USE_TESTNET ? '_t_feed' : '_feed'
     });
   
@@ -253,7 +254,7 @@ function MessageFeed() {
       //valid order statuses: open, filled, invalid, cancelled, and expired
       //update the give/get remaining numbers in the open orders listing, if it already exists
       var match = ko.utils.arrayFirst(OPEN_ORDER_FEED.entries(), function(item) {
-          return item.ORDER['tx_hash'] == message['tx_hash'];
+          return item.TX_HASH == message['tx_hash'];
       });
       if(match) {
         if(message['_status'] != 'open') { //order is filled, expired, or cancelled, remove it from the listing
@@ -264,16 +265,16 @@ function MessageFeed() {
           
           //if the order is for BTC and the qty remaining on either side is negative (but not on BOTH sides,
           // as it would be fully satified then and canceling would be pointless), auto cancel the order
-          if(   (match.ORDER['get_asset'] == 'BTC' || match.ORDER['give_asset'] == 'BTC')
+          if(   (match.GET_ASSET == 'BTC' || match.GIVE_ASSET == 'BTC')
              && (match.rawGiveRemaining() <= 0 || match.rawGetRemaining() <= 0)
              && !(match.rawGiveRemaining() <= 0 && match.rawGetRemaining() <= 0)) {
-            $.jqlog.debug("Auto cancelling BTC order " + match.ORDER['tx_hash']
+            $.jqlog.debug("Auto cancelling BTC order " + match.TX_HASH
               + " as the give_remaining xor get_remaining <= 0 ...");
-            WALLET.doTransaction(match.ORDER['source'], "create_cancel", {
-              offer_hash: match.ORDER['tx_hash'],
-              source: match.ORDER['source'],
+            WALLET.doTransaction(match.SOURCE, "create_cancel", {
+              offer_hash: match.TX_HASH,
+              source: match.SOURCE,
               _type: 'order',
-              _tx_index: match.ORDER['tx_index']
+              _tx_index: match.TX_INDEX
             });
           }
         }

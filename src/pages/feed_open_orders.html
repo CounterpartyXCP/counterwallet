@@ -6,15 +6,15 @@
             <i class="fa fa-fw fa-exchange fa-2x"></i>
           </em>
           <span>
-             Order <b><span data-bind="text: ORDER['tx_index']"></span></b> @ <b class="notoAddrColor"><span data-bind="text: getAddressLabel(ORDER['source'])"></span></b><br/>
-             <b>Buy:</b> <b class="notoQuantityColor"><span data-bind="text: smartFormat(normalizeQuantity(ORDER['get_quantity'], ORDER['_get_asset_divisible']))"></span></b>
-                 <b class="notoAssetColor"><span data-bind="text: ORDER['get_asset']"></span></b>
-                 (remaining: <b class="notoQuantityColor"><span data-bind="text: smartFormat(normalizeQuantity(rawGetRemaining(), ORDER['_get_asset_divisible']))"></span></b> <b class="notoAssetColor"><span data-bind="text: ORDER['get_asset']"></span></b>)<br/>
-             <b>Sell:</b> <b class="notoQuantityColor"><span data-bind="text: smartFormat(normalizeQuantity(ORDER['give_quantity'], ORDER['_give_asset_divisible']))"></span></b>
-                 <b class="notoAssetColor"><span data-bind="text: ORDER['give_asset']"></span></b>
-                 (remaining: <b class="notoQuantityColor"><span data-bind="text: smartFormat(normalizeQuantity(rawGiveRemaining(), ORDER['_give_asset_divisible']))"></span></b> <b class="notoAssetColor"><span data-bind="text: ORDER['give_asset']"></span></b>)<br/>
+             Order <b><span data-bind="text: TX_INDEX"></span></b> @ <b class="notoAddrColor"><span data-bind="text: dispSource"></span></b><br/>
+             <b>Buy:</b> <b class="notoQuantityColor"><span data-bind="text: GET_QUANTITY"></span></b>
+                 <b class="notoAssetColor"><span data-bind="text: GET_ASSET"></span></b>
+                 (remaining: <b class="notoQuantityColor"><span data-bind="text: dispRawGetRemaining"></span></b> <b class="notoAssetColor"><span data-bind="text: GET_ASSET"></span></b>)<br/>
+             <b>Sell:</b> <b class="notoQuantityColor"><span data-bind="text: GIVE_QUANTITY"></span></b>
+                 <b class="notoAssetColor"><span data-bind="text: GIVE_ASSET"></span></b>
+                 (remaining: <b class="notoQuantityColor"><span data-bind="text: dispRawGiveRemaining"></span></b> <b class="notoAssetColor"><span data-bind="text: GIVE_ASSET"></span></b>)<br/>
              <span class="pull-right"><button class="btn btn-xs btn-default margin-top-5" data-bind="click: cancelOpenOrder">Cancel</button></span>
-             <span class="pull-left font-xs text-muted"><i>Expires ~<span data-bind="timeago: approxExpiresInTime"></span> (@ block <span data-bind="text: ORDER['expire_index']"></span>)</i>
+             <span class="pull-left font-xs text-muted"><i>Expires ~<span data-bind="timeago: approxExpiresInTime"></span> (@ block <span data-bind="text: EXPIRE_INDEX"></span>)</i>
           </span>
         </span>
       </li>
@@ -23,7 +23,3 @@
       <i class="fa fa-2x fa-inbox"></i>&nbsp;<span class="font-xl">No entries</span>
   </div>
 </div>
-
-<script type="text/javascript">
-  ko.applyBindings(OPEN_ORDER_FEED, document.getElementById("openOrderFeedContent"));
-</script>

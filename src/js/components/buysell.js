@@ -53,7 +53,7 @@ function BuySellWizardViewModel() {
   self.bidDepth = ko.observable(null);
   self.askDepth = ko.observable(null);
   
-
+  
   //WIZARD TAB 1
   self.selectedBuyAsset = ko.observable('').extend({
     required: true
@@ -135,9 +135,9 @@ function BuySellWizardViewModel() {
     validation: [{
       validator: function (address, self) {
         if(!address) return true; //leave it alone for blank addresses
-        return WALLET.getAddressObj(address).numPrimedTxouts() > 0;
+        return WALLET.getBalance(address, 'BTC') > 0;
       },
-      message: 'This address has no BTC and/or no primed outputs. Please prime the address first.',
+      message: 'This address has no BTC. Please deposit BTC first.',
       params: self
     }, {
       validator: function (address, self) {
@@ -209,6 +209,9 @@ function BuySellWizardViewModel() {
     return WALLET.getBalance(self.selectedAddress(), self.sellAsset());
   }, self);
   
+  self.dispMaxAfford = ko.computed(function() {
+    return numberWithCommas(self.maxAfford());
+  }, self);
   
   //WIZARD TAB 2
   self.MARKET_DATA_REFRESH_TIMERID = null;
@@ -237,6 +240,10 @@ function BuySellWizardViewModel() {
       params: self
     }]
   });
+  self.dispSelectedBuyQuantity = ko.computed(function() {
+    return numberWithCommas(self.selectedBuyQuantity());
+  }, self);
+  
   self.currentMarketUnitPrice = ko.observable();
   // ^ quote / base (per 1 base unit). May be null if there is no established market rate
   self.numBlocksUntilExpiration = ko.observable(ORDER_DEFAULT_EXPIRATION).extend({
@@ -277,6 +284,9 @@ function BuySellWizardViewModel() {
   self.selectedSellQuantity = ko.computed(function() {
     if(self.overrideMarketPrice() || self.currentMarketUnitPrice() == 0) return self.selectedSellQuantityCustom();
     return self.selectedSellQuantityAtMarket();
+  }, self);
+  self.dispSelectedSellQuantity = ko.computed(function() {
+    return numberWithCommas(self.selectedSellQuantity());
   }, self);
   
   self.customSellAs = ko.observable('unitprice'); //unitprice or quantity (default to unitprice)
@@ -336,6 +346,10 @@ function BuySellWizardViewModel() {
   self.customSellAs.subscribe(function(newValue) { //triggered when the user switches between "As Unit Price" and "As Quantity"
     self.customSellAsEntry(''); //clear the value to prevent user mistakes
   });
+  self.dispCustomSellAsEntryPlaceholderText = ko.computed(function() {
+    return self.customSellAs() == 'unitprice' ? 'Unit price' : ('Quantity ' + self.sellAsset());
+  }, self);
+  
   self.selectedBuyQuantity.subscribe(function(newValue) {
     self.customSellAsEntry.valueHasMutated(); //update the value when the button setting changes
   });
@@ -435,6 +449,12 @@ function BuySellWizardViewModel() {
     return numberWithCommas(noExponents(Math.abs(self.sellQuantityRemainingAfterSale())));
   }, self);
   
+  self.isMarketPriceMissingOrOverridden = ko.computed(function() {
+    return self.currentMarketUnitPrice() == 0 || self.overrideMarketPrice();
+  }, self);
+  self.sellQuantityRemainingAfterSaleIsNotNull = ko.computed(function() {
+    return self.sellQuantityRemainingAfterSale() !== null;
+  }, self);
 
   //VALIDATION MODELS  
   self.validationModelTab1 = ko.validatedObservable({
@@ -660,6 +680,16 @@ function BuySellWizardViewModel() {
     });
   }
 
+  self.setOverrideMarketPrice = function() {
+    self.overrideMarketPrice(true);
+    return false;
+  }
+
+  self.setOverrideDefaultOptions = function() {
+    self.overrideDefaultOptions(true);
+    return false;
+  }
+
   self._tab2AutoRefresh = function(callback) {
     if(self.currentTab() != 2) return; //stop refreshing
     $.jqlog.debug("Refreshing market data for " + self.dispAssetPair() + ' ...');
@@ -717,9 +747,11 @@ function BuySellWizardViewModel() {
     var deferred = $.Deferred();
     failoverAPI("get_trade_history_within_dates", [self.buyAsset(), self.sellAsset()], function(data, endpoint) {
       deferred.resolve();
-      self.tradeHistory(data);
-      $.jqlog.debug(data);
-      if(data.length) {
+      self.tradeHistory([]);
+      for(var i=0; i < data.length; i++) {
+        self.tradeHistory.push(new TradeHistoryItemModel(data[i]));
+      }
+      if(self.tradeHistory().length) {
         runDataTables('#tradeHistory', true, { "aaSorting": [ [0, 'desc'] ] });
         self.showTradeHistory(true);
       } else {
@@ -749,8 +781,14 @@ function BuySellWizardViewModel() {
         //set up order book display
         //$.jqlog.debug(data);
         self.showOrderBook(true);
-        self.askBook(data['base_ask_book'].slice(0,10)); //limit to 10 entries
-        self.bidBook(data['base_bid_book'].slice(0,10));
+        
+        var i = null;
+        for(i=0; i < Math.min(10, data['base_ask_book'].length); i++) { //limit to 10 entries
+          self.askBook.push(new OrderBookEntryItemModel(data['base_ask_book'][i]));  
+        }
+        for(i=0; i < Math.min(10, data['base_bid_book'].length); i++) { //limit to 10 entries
+          self.bidBook.push(new OrderBookEntryItemModel(data['base_bid_book'][i]));  
+        }
         self.bidAskMedian(data['bid_ask_median']);
         self.bidDepth(data['bid_depth']);
         self.askDepth(data['ask_depth']);
@@ -761,8 +799,10 @@ function BuySellWizardViewModel() {
       //show all open orders for the selected asset pair
       try { $('#openOrders').dataTable().fnClearTable(); } catch(err) { }
       //^ hack...rows seem to hang around and be duplicated otherwise
-      self.openOrders(data['raw_orders']);
       
+      for(var i=0; i < data['raw_orders'].length; i++) {
+        self.openOrders.push(new OpenOrderItemModel(data['raw_orders'][i], true));
+      }
       //now that we have the complete data, show the orders listing
       if(self.openOrders().length) {
         runDataTables('#openOrders', true, { "aaSorting": [ [0, 'desc'] ] });

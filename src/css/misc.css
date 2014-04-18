@@ -1,0 +1,56 @@
+/* 
+ * Logged in site specific
+ */
+#qr {
+    width: 185px;
+    height: 185px;
+    display: inline-block;
+}
+
+#qr_addr {
+    position: relative;
+    z-index: 1;
+}
+
+.sectionHeaderButtonBar {
+    padding-right: 14px;
+    padding-top: 14px;
+}
+
+.emptyFeedContainer {
+    text-align: center;
+    position: relative;
+    top: 160px;
+}
+
+span.modeIndicator {
+  margin-left:10px;
+  padding: 5px;
+  position:relative;
+  top:15px;
+}
+
+
+/* 
+ * Leaderboard page
+ */
+.leaderboardAssetText {
+  font-weight: bold;
+  font-size: 1.15em;
+}
+.leaderboardMiniChart {
+  width:180px;
+  height:60px;
+}
+
+
+/* 
+ * History page
+ */
+.historyBalsFieldset {
+  padding: 5px 14px 5px;
+}
+
+.historyRecentTxFieldset {
+  padding: 5px 14px 25px;
+}

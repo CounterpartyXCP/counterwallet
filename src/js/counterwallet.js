@@ -24,6 +24,15 @@ if((IS_DEV || USE_TESTNET) && location.search) {
   history.replaceState({}, '', location.pathname);
 }
 
+//Knockout secure binding drop-in initialization
+var options = {
+   attribute: "data-bind",        // default "data-sbind"
+   globals: window,               // default {}
+   bindings: ko.bindingHandlers,  // default ko.bindingHandlers
+   noVirtualElements: false       // default true
+};
+ko.bindingProvider.instance = new ko.secureBindingsProvider(options);
+
 //Knockout validation defaults (https://github.com/ericmbarnard/Knockout-Validation/wiki/Configuration)
 ko.validation.init({
   decorateElement: true,
@@ -99,17 +108,53 @@ function warningOnExit() {
  * POST-JQUERY INIT
  ***********/
 $(document).ready(function() {
-  //Reject cruddy old browsers (we need IE v9 and higher!)
+  //Reject browsers that don't support the features we need (especially CSP 1.0 and window.crypto)
   $.reject({  
     reject: {
-      msie5: true, //die die die!
-      msie6: true, //die die die!
-      msie7: true, //die die die!
-      msie8: true, //die die die!
-      firefox1: true,
-      firefox2: true
+      msie5: true, //kill it with fire
+      msie6: true, //kill it with fire
+      msie7: true, //kill it with fire
+      msie8: true, //kill it with fire
+      msie9: true, //require IE11
+      msie10: true, //require IE11
+      firefox15: true,
+      firefox16: true,
+      firefox17: true,
+      firefox18: true,
+      firefox19: true,
+      firefox20: true,
+      firefox21: true,
+      firefox22: true,
+      firefox23: true,
+      firefox24: true,
+      chrome18: true,
+      chrome19: true,
+      chrome20: true,
+      chrome21: true,
+      chrome22: true,
+      opera9: true,
+      opera10: true,
+      opera11: true,
+      opera12: true,
+      safari5: true,
+      safari6: true
     },
-    imagePath: 'assets/', // Path where images are located    
+    imagePath: 'assets/', // Path where images are located
+    display: ['chrome', 'firefox', 'safari', 'opera', 'msie'],
+    browserInfo: { // Settings for which browsers to display
+      safari: {
+        text: 'Safari',
+        url: 'http://www.apple.com/safari/download/'
+      },
+      opera: {
+        text: 'Opera',
+        url: 'http://www.opera.com/download/'
+      },      
+      msie: {
+        text: 'Internet Explorer (11+)',
+        url: 'http://windows.microsoft.com/en-us/internet-explorer/download-ie'
+      }
+    }        
   });
   
   loadServersListAndSettings();
