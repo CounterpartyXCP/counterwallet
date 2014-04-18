@@ -320,19 +320,13 @@ function SweepModalViewModel() {
       validator: function (val, self, callback) {
         var numAssets = val.length;
         var minBtcBalance = numAssets*MIN_PRIME_BALANCE;
-
-        if(self.numPrimedTxoutsForPrivateKey() === null) {
-          return false; //priv key not set yet??
-        }
         
-        if(self.btcBalanceForPrivateKey() < minBtcBalance) {
+        if (self.btcBalanceForPrivateKey() < minBtcBalance) {
           var missingBtc = minBtcBalance-self.btcBalanceForPrivateKey();
-
           this.message = "We're not able to sweep all of the assets you selected. Please send "
-            + normalizeQuantity(missingBtc)
-            + " BTC transactions to address " + self.addressForPrivateKey() + " and try again."
+                        + normalizeQuantity(missingBtc)
+                        + " BTC transactions to address " + self.addressForPrivateKey() + " and try again.";
           return false;
-
         }
         return true;
       },
@@ -356,8 +350,8 @@ function SweepModalViewModel() {
     assert(key.priv !== null && key.compressed !== null, "Private key not valid!"); //should have been checked already
     return key.getAddress(NETWORK_VERSION).toString();
   }, self);
-  self.numPrimedTxoutsForPrivateKey = ko.observable(null);
-  self.btcBalanceForPrivateKey = ko.observable(null);
+
+  self.btcBalanceForPrivateKey = ko.observable(0);
   self.sweepingProgressionMessage = ko.observable("");
   self.sweepingProgressWidth = ko.observable('0%');
 
@@ -509,7 +503,7 @@ function SweepModalViewModel() {
 
         }, function(jqXHR, textStatus, errorThrown, endpoint) { //on error broadcasting tx
 
-          $.jqlog.debug('Transaction error: '+textStatus);
+          $.jqlog.debug('broadcasting error: '+textStatus);
           // retry..
           return callback(true, {
             'type': 'transferOwnership',
@@ -529,7 +523,7 @@ function SweepModalViewModel() {
         return self.showSweepError(selectedAsset.ASSET, opsComplete);
       }, function(jqXHR, textStatus, errorThrown, endpoint) { //onSysError
 
-        $.jqlog.debug('onSysError error: '+textStatus);
+        $.jqlog.debug('onSysError: '+textStatus);
         // retry..
         return callback(true, {
           'type': 'transferOwnership',
@@ -542,6 +536,9 @@ function SweepModalViewModel() {
     );
   }
 
+  // in first step, we merge all outputs for chaining: each change output serve as input for next transaction.
+  // so the final balance for btc transfert is the value of last change that we get with extractChangeTxoutValue()
+  // TODO: think for a more economic way to have a reliable amount for the final tx (BTC).
   self.mergeOutputs = function(key, pubkey, callback) {
     if (self.txoutsCountForPrivateKey>1) {
 
@@ -732,30 +729,22 @@ function SweepModalViewModel() {
       }
     }
     if(hasBTC !== false) {
-      //adjust the balance of BTC to sweep out to account for the primed TXouts being consumed
+      //This balance is adjusted after each asset transfert with the change output.
       var rawBTCBalance = self.availableAssetsToSweep()[hasBTC].RAW_BALANCE;
-      //var adjustedBTCQuantity = rawBTCBalance - (self.selectedAssetsToSweep().length * MIN_PRIME_BALANCE);
-      //^ the adjusted BTC balance is what we will end up sweeping out of the account.
-      //  BTW...this includes the BTC fee for the BTC sweep itself as a primed TXout size (.0005 instead of .0001...no biggie (I think)
       sendsToMake.push(["BTC", key, pubkey, opsComplete, rawBTCBalance]);
     }
     
     var total = sendsToMake.length;
-    var progress = 0;
     var sendParams = false;
     var retryCounter = {};
 
     var doSweep = function(retry, failedTx) {
-
       // if retry we don't take the next sendsToMake item
       if (retry!==true || sendParams===false) {
 
         sendParams = sendsToMake.shift();
-        progress++;
 
       } else if (retry) {
-
-        $.jqlog.debug("RETRY"); 
 
         if (sendParams[0] in retryCounter) {
           if (retryCounter[sendParams[0]]<TRANSACTION_MAX_RETRY) {
@@ -772,14 +761,15 @@ function SweepModalViewModel() {
         }
 
       }
-
-      $.jqlog.debug(sendParams); 
        
       if(sendParams === undefined) {
+
+        // No more asset or max retry occur
         self.shown(false);
         self._sweepCompleteDialog(opsComplete);
+
       } else {
-        $.jqlog.debug("processing tx "+progress+" / "+total+" ("+sendParams[0]+")");
+
         if (retry && failedTx['type']=='transferOwnership') {
 
           //TODO: this is ugly. transfert asset must be include in sendsToMake array
@@ -803,9 +793,7 @@ function SweepModalViewModel() {
         
       }
     }
-    // we merge all outputs for chaining: each change output serve as input for next transaction.
-    // TODO: we can avoid this by calculate fees for each transactions.. but TransactionIn does
-    // not contains amounts.. So we need to track each outputs from start.
+    // merge output then start sweeping.
     self.mergeOutputs(key, pubkey, doSweep);
   
   }
@@ -841,19 +829,21 @@ function SweepModalViewModel() {
       });
       
       //Also get the BTC balance at this address and put at head of the list
-      //and also record the number of primed txouts for the address
-      //Note that if BTC is one of the things we're sweeping, technically we don't need a full primed output quantity
-      // for that (we just need an available out of > MIN_FEE... but let's just require a primed out for a BTC send to keep things simple)
+      //We just check if unconfirmed balance > 0. 
+      
       WALLET.retriveBTCAddrsInfo([address], function(data) {
-        if(data[0]['confirmedRawBal'] && data[0]['numPrimedTxouts'] >= 1) {
+        $.jqlog.debug(data);
+        //TODO: counterwalletd return unconfirmedRawBal==0, after fixing we need use unconfirmedRawBal
+        var unconfirmedRawBal = data[0]['confirmedRawBal']; 
+        if(unconfirmedRawBal>0) {
           //We don't need to supply asset info to the SweepAssetInDropdownItemModel constructor for BTC
           // b/c we won't be transferring any asset ownership with it
-          self.availableAssetsToSweep.unshift(new SweepAssetInDropdownItemModel(
-            "BTC", data[0]['confirmedRawBal'], normalizeQuantity(data[0]['confirmedRawBal'])));
+          var viewModel = new SweepAssetInDropdownItemModel("BTC", unconfirmedRawBal, normalizeQuantity(unconfirmedRawBal));
+          self.availableAssetsToSweep.unshift(viewModel);
+          self.btcBalanceForPrivateKey(data[0]['confirmedRawBal']);
+          self.txoutsCountForPrivateKey = data[0]['rawUtxoData'].length;
         }
-        self.numPrimedTxoutsForPrivateKey(data[0]['numPrimedTxouts']);
-        self.btcBalanceForPrivateKey(data[0]['confirmedRawBal']);
-        self.txoutsCountForPrivateKey = data[0]['rawUtxoData'].length;
+        
       });
     });
   });  
