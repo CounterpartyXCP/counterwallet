@@ -17,6 +17,25 @@ Features:
 - Runs in the browser, with keys created in memory
 
 
+Browser Support
+-------------------
+
+**Desktop**
+
+- Chrome 23+ (Preferred)
+- Firefox 25+
+- Internet Explorer 11+ (IE9 and IE10 NOT supported)
+- Safari 7+
+- Opera 15+
+
+**Mobile**
+
+- IOS Safari 7+
+- Android Browser 4.4+
+- Chrome for Android 33+
+- Firefox for Android 26+
+
+
 Build Instructions
 -------------------
 
