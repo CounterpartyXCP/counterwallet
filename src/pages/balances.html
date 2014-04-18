@@ -257,13 +257,13 @@
   <div class="modal-dialog">
     <div class="modal-content">
       <div class="modal-header">
-        <button type="button" data-bind="click: hide" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+        <button type="button" data-bind="click: hide, visible: sweepingProgressionMessage()==''" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
         <h4 class="modal-title">Import (Sweep) Funds from Another Address</h4>
       </div>
       <div class="modal-body no-padding">
         <p class="formPadded">Import funds by "sweeping" them from another external address you own into one of your wallet address.</p>
         
-        <form class="smart-form" data-bind="submit: doAction"><fieldset>
+        <form class="smart-form" data-bind="submit: doAction, visible: sweepingProgressionMessage()==''"><fieldset>
           <section><div class="row">
             <label class="control-label col col-sm-2">Private Key To Import</label>
             <div class="col col-sm-10">
@@ -293,8 +293,18 @@
             </div>
           </div></section>
         </fieldset></form>
+
+        <fieldset data-bind="visible: sweepingProgressionMessage()!=''">
+          <section><div class="row" style="margin:15px">
+            <p class="message .txt-color-orangeDark" data-bind="text: sweepingProgressionMessage" style="font-weight:bold;"></p>
+            <div class="progress progress-striped active" style="margin-top:15px;margin-bottom:0;">
+              <div id="sweepingProgressBar" class="progress-bar"  role="progressbar" data-bind="style: { width: sweepingProgressWidth() }">
+              </div>
+            </div>
+          </div></section>  
+        <fieldset>
       </div>
-      <div class="modal-footer">
+      <div class="modal-footer" data-bind="visible: sweepingProgressionMessage()==''">
         <button type="button" class="btn btn-default" data-bind="click: hide">Cancel</button>
         <button type="button" data-bind="click: submitForm" class="btn btn-danger">Sweep</button>
       </div>

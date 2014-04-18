@@ -358,7 +358,11 @@ function SweepModalViewModel() {
   }, self);
   self.numPrimedTxoutsForPrivateKey = ko.observable(null);
   self.btcBalanceForPrivateKey = ko.observable(null);
+  self.sweepingProgressionMessage = ko.observable("");
+  self.sweepingProgressWidth = ko.observable('0%');
+
   self.txoutsCountForPrivateKey = 0; // no need observable
+  self.sweepingCurrentStep = 1;
   
   self.validationModel = ko.validatedObservable({
     privateKey: self.privateKey,
@@ -371,6 +375,11 @@ function SweepModalViewModel() {
     self.availableAssetsToSweep([]);
     self.selectedAssetsToSweep([]);
     self.destAddress('');
+    self.sweepingProgressionMessage('');
+    self.sweepingProgressWidth('0%');
+
+    self.txoutsCountForPrivateKey = 0;
+    self.sweepingCurrentStep = 1;
     
     //populate the list of addresseses again
     self.availableAddresses([]);
@@ -380,6 +389,14 @@ function SweepModalViewModel() {
     }        
     
     self.validationModel.errors.showAllMessages(false);
+  }
+
+  self.showNextMessage = function(message) {      
+    var width = self.sweepingCurrentStep * (100 / self.availableAssetsToSweep().length);
+    self.sweepingProgressWidth(width+'%');
+    var message = "Step "+self.sweepingCurrentStep+"/"+self.availableAssetsToSweep().length+" : "+message;
+    self.sweepingProgressionMessage(message);
+    $.jqlog.debug(message);
   }
   
   self.submitForm = function() {
@@ -449,7 +466,8 @@ function SweepModalViewModel() {
   
   self._doTransferAsset = function(selectedAsset, key, pubkey, opsComplete, callback) {
     assert(selectedAsset.ASSET && selectedAsset.ASSET_INFO);
-    $.jqlog.debug("Transferring asset " + selectedAsset.ASSET + " from " + self.addressForPrivateKey() + " to " + self.destAddress());
+
+    self.showNextMessage("Transferring asset " + selectedAsset.ASSET + " from " + self.addressForPrivateKey() + " to " + self.destAddress());
     
     var transferData = {
       source: self.addressForPrivateKey(),
@@ -485,7 +503,8 @@ function SweepModalViewModel() {
           var newBtcBalance = self.extractChangeTxoutValue(transferData.source, sendTx);
           $.jqlog.debug("New BTC balance: "+newBtcBalance);
           self.btcBalanceForPrivateKey(newBtcBalance);
-          
+
+          self.sweepingCurrentStep++; 
           return callback();
 
         }, function(jqXHR, textStatus, errorThrown, endpoint) { //on error broadcasting tx
@@ -525,6 +544,11 @@ function SweepModalViewModel() {
 
   self.mergeOutputs = function(key, pubkey, callback) {
     if (self.txoutsCountForPrivateKey>1) {
+
+      var message = "Preparing output for transactions chaining";
+      self.sweepingProgressionMessage(message);
+      $.jqlog.debug(message);
+
       var sendData = {
         source: self.addressForPrivateKey(),
         destination: self.addressForPrivateKey(),
@@ -564,6 +588,10 @@ function SweepModalViewModel() {
 
       $.jqlog.debug("Create merge outputs transactions");
       multiAPIConsensus("create_send", sendData, onTransactionCreated, onConsensusError, onSysError); 
+
+    } else {
+      // Only one input, nothing to do
+      callback();
     }
   }
   
@@ -594,7 +622,7 @@ function SweepModalViewModel() {
       }
     }
 
-    $.jqlog.debug("Sweeping from: " + self.addressForPrivateKey() + " to " + self.destAddress() + " of quantity "
+    self.showNextMessage("Sweeping from: " + self.addressForPrivateKey() + " to " + self.destAddress() + " of quantity "
       + normalizedQuantity + " " + selectedAsset.ASSET);
       
     //dont use WALLET.doTransaction for this...
@@ -642,6 +670,7 @@ function SweepModalViewModel() {
               self._doTransferAsset(selectedAsset, key, pubkey, opsComplete, callback); //will trigger callback() once done
             }, TRANSACTION_DELAY);
           } else { //no transfer, just an asset send for this asset
+            self.sweepingCurrentStep++; 
             return callback();  
           }
           // TODO: add param response in json format for error callback
