@@ -358,6 +358,7 @@ function SweepModalViewModel() {
   }, self);
   self.numPrimedTxoutsForPrivateKey = ko.observable(null);
   self.btcBalanceForPrivateKey = ko.observable(null);
+  self.txoutsCountForPrivateKey = 0; // no need observable
   
   self.validationModel = ko.validatedObservable({
     privateKey: self.privateKey,
@@ -521,11 +522,58 @@ function SweepModalViewModel() {
       }
     );
   }
+
+  self.mergeOutputs = function(key, pubkey, callback) {
+    if (self.txoutsCountForPrivateKey>1) {
+      var sendData = {
+        source: self.addressForPrivateKey(),
+        destination: self.addressForPrivateKey(),
+        quantity: self.btcBalanceForPrivateKey()-MIN_FEE,
+        asset: 'BTC',
+        encoding: 'multisig',
+        pubkey: pubkey,
+        allow_unconfirmed_inputs: true
+      };
+
+      var onTransactionError = function() {
+        if (arguments.length==4) {
+          bootbox.alert(arguments[1]);
+        } else {
+          bootbox.alert('Consensus Error!');
+        }
+      }
+      var onConsensusError = onTransactionError;
+      var onSysError = onTransactionError;
+      var onBroadcastError = onTransactionError;
+
+      var onTransactionBroadcasted = function(sendTxHash, endpoint) { //broadcast was successful
+        // No need to display this transaction in notifications
+        $.jqlog.debug("waiting "+TRANSACTION_DELAY+"ms");
+        setTimeout(function() {
+          callback(); //will trigger callback() once done
+        }, TRANSACTION_DELAY);
+      }
+
+      var onTransactionCreated = function(unsignedTxHex, numTotalEndpoints, numConsensusEndpoints) {
+        var sendTx = Bitcoin.Transaction.deserialize(unsignedTxHex);
+        for (i = 0; i < sendTx.ins.length; i++) { //sign each input with the key
+          sendTx.sign(i, key);
+        }
+        WALLET.broadcastSignedTx(sendTx.serializeHex(), onTransactionBroadcasted, onBroadcastError);
+      }
+
+      $.jqlog.debug("Create merge outputs transactions");
+      multiAPIConsensus("create_send", sendData, onTransactionCreated, onConsensusError, onSysError); 
+    }
+  }
   
   self._doSendAsset = function(asset, key, pubkey, opsComplete, adjustedBTCQuantity, callback) {
     $.jqlog.debug('_doSendAsset: '+asset);
+    
+    //TODO: remove this
     if(asset == 'BTC') assert(adjustedBTCQuantity !== null);
     else assert(adjustedBTCQuantity === null);
+    
     var selectedAsset = ko.utils.arrayFirst(self.availableAssetsToSweep(), function(item) {
       return asset == item.ASSET;
     });
@@ -726,28 +774,11 @@ function SweepModalViewModel() {
         
       }
     }
-    doSweep();
-
-    //Make send calls sequentially
-    /*function makeSweeps(){
-      var d = jQuery.Deferred();
-      var doSweep = function() {
-        var sendParams = sendsToMake.shift();
-        if(sendParams === undefined) return d.resolve();
-        //delay for 250ms between each asset send to avoid -22 tx errors (I'm guessing that what causes them in this case)
-        setTimeout(function() {
-          self._doSendAsset(sendParams[0], sendParams[1], sendParams[2], sendParams[3], sendParams[4], function() {
-            return doSweep();
-          }); 
-        }, 300);
-      };
-      doSweep();
-      return d.promise();
-    };
-    makeSweeps().then(function() {
-      self.shown(false);
-      self._sweepCompleteDialog(opsComplete);
-    }); */   
+    // we merge all outputs for chaining: each change output serve as input for next transaction.
+    // TODO: we can avoid this by calculate fees for each transactions.. but TransactionIn does
+    // not contains amounts.. So we need to track each outputs from start.
+    self.mergeOutputs(key, pubkey, doSweep);
+  
   }
   
   self.show = function(resetForm) {
@@ -793,6 +824,7 @@ function SweepModalViewModel() {
         }
         self.numPrimedTxoutsForPrivateKey(data[0]['numPrimedTxouts']);
         self.btcBalanceForPrivateKey(data[0]['confirmedRawBal']);
+        self.txoutsCountForPrivateKey = data[0]['rawUtxoData'].length;
       });
     });
   });  
