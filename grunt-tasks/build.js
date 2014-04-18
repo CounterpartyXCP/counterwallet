@@ -290,7 +290,7 @@ module.exports = function(grunt) {
         for (var filename in currenthashes) {
             var currenthash = currenthashes[filename];
             if (!savedhashes[filename]) {
-                grunt.fail.fatal("File not found in "+config.depsHashesFile+": "+filename+". Please run 'grunt writechecksum'.");
+                grunt.fail.fatal("File not found in "+config.depsHashesFile+": "+filename+". Please run 'grunt freeze'.");
             } else if (savedhashes[filename]!=currenthash) {
                 grunt.fail.fatal("Invalid checksum: "+filename);
             } else {

@@ -135,9 +135,9 @@ function BuySellWizardViewModel() {
     validation: [{
       validator: function (address, self) {
         if(!address) return true; //leave it alone for blank addresses
-        return WALLET.getAddressObj(address).numPrimedTxouts() > 0;
+        return WALLET.getBalance(address, 'BTC') > 0;
       },
-      message: 'This address has no BTC and/or no primed outputs. Please prime the address first.',
+      message: 'This address has no BTC. Please deposit BTC first.',
       params: self
     }, {
       validator: function (address, self) {

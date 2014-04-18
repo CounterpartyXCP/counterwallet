@@ -61,9 +61,10 @@ initIndex(); //call it now, as this script is loaded on index page load
 
 
 function initBalances() {
-  pageSetUp(); //init smartadmin featureset
-  
   ko.applyBindings(WALLET, document.getElementsByClassName("balancesContainer")[0]);
+  //^ this line MUST go above pageSetup() in this case, or odd things will happen
+  
+  pageSetUp(); //init smartadmin featureset
    
   //balances.js
   window.CHANGE_ADDRESS_LABEL_MODAL = new ChangeAddressLabelModalViewModel();

@@ -37,6 +37,11 @@ function WaitingBTCPayViewModel(btcPayData) {
   var self = this;
   self.BTCPAY_DATA = btcPayData;
   self.now = ko.observable(new Date()); //auto updates from the parent model every minute
+  self.MATCH_EXPIRE_INDEX = self.BTCPAY_DATA['matchExpireIndex'];
+  
+  self.dispBTCQuantity = smartFormat(self.BTCPAY_DATA['btcQuantity']);
+  self.dispMyAddr = getAddressLabel(self.BTCPAY_DATA['myAddr']);
+  self.dispMyOrderTxHash = getTxHashLink(self.BTCPAY_DATA['myOrderTxHash']);
   
   self.expiresInNumBlocks = ko.computed(function() {
     return self.BTCPAY_DATA['matchExpireIndex'] - WALLET.networkBlockHeight();
@@ -224,6 +229,9 @@ function UpcomingBTCPayViewModel(btcPayData) {
   var self = this;
   self.BTCPAY_DATA = btcPayData;
   self.now = ko.observable(new Date()); //auto updates from the parent model every minute
+  
+  self.dispBTCQuantity = smartFormat(self.BTCPAY_DATA['btcQuantity']);
+  self.dispMyOrderTxHash = getTxHashLink(self.BTCPAY_DATA['myOrderTxHash']);
   
   self.numBlocksUntilEligible = ko.computed(function() {
     return Math.max(NUM_BLOCKS_TO_WAIT_FOR_BTCPAY - (WALLET.networkBlockHeight() - self.BTCPAY_DATA['blockIndex']), 0);

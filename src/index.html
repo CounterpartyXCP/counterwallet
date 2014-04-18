@@ -263,7 +263,7 @@
               </div>
             </form>
             <div class="clearfix"></div>
-            <div data-bind="fadeVisible: walletGenProgressVal() > 0" class="progress progress-striped active margin-top-15" class="margin-top-15 margin-bottom-0 display-none">
+            <div data-bind="fadeVisible: walletGenProgressVal() > 0" class="progress progress-striped active margin-top-15 margin-bottom-0" class="margin-top-15 margin-bottom-0 display-none">
               <div id="loginProgressBar" class="progress-bar"  role="progressbar" data-bind="style: { width: walletGenProgressWidth() }">
               </div>
             </div>
@@ -479,17 +479,20 @@
     </div><!-- /.modal -->
 
     <!-- build:js js/counterwallet-deps-min.js -->
+    <script src="vendors/jquery/jquery.min.js"></script><!-- Jquery -->
+    <!--<script src="vendors/jquery-ui/ui/minified/jquery-ui.min.js"></script>--><!-- JqueryUI -->
+    <script src="vendors/jquery-ui/ui/minified/jquery.ui.core.min.js"></script>
+    <script src="vendors/jquery-ui/ui/minified/jquery.ui.widget.min.js"></script>
+    <script src="vendors/jquery-ui/ui/minified/jquery.ui.mouse.min.js"></script>
+    <script src="vendors/jquery-ui/ui/minified/jquery.ui.position.min.js"></script>
+    <script src="vendors/jquery-ui/ui/minified/jquery.ui.sortable.min.js"></script>
+    <script src="vendors/jquery-ui/ui/minified/jquery.ui.effect.min.js"></script>
+    <script src="vendors/jquery-ui/ui/minified/jquery.ui.effect-slide.min.js"></script>
+    <script src="vendors/jquery-ui/ui/minified/jquery.ui.tooltip.min.js"></script>
+    <script src="vendors/bootstrap/dist/js/bootstrap.min.js"></script> <!-- BOOTSTRAP JS -->
+    
     <!-- SmartAdmin JS includes -->
-    <script src="vendors/smartadmin/js/libs/jquery-2.0.2.min.js"></script><!-- Jquery -->
-    <script src="vendors/smartadmin/js/libs/jquery-ui-1.10.3.min.js"></script><!-- JqueryUI -->
-    <script src="vendors/smartadmin/js/bootstrap/bootstrap.min.js"></script> <!-- BOOTSTRAP JS -->
-    <script src="vendors/smartadmin/js/notification/SmartNotification.min.js"></script> <!-- CUSTOM NOTIFICATION -->
     <script src="vendors/smartadmin/js/smartwidgets/jarvis.widget.min.js"></script> <!-- JARVIS WIDGETS -->
-    <script src="vendors/smartadmin/js/plugin/jquery-form/jquery-form.min.js"></script> <!-- JQUERY FORM -->
-    <script src="vendors/smartadmin/js/plugin/jquery-validate/jquery.validate.min.js"></script> <!-- JQUERY VALIDATE -->
-    <script src="vendors/smartadmin/js/plugin/select2/select2.min.js"></script> <!-- JQUERY SELECT2 INPUT -->
-    <script src="vendors/smartadmin/js/plugin/msie-fix/jquery.mb.browser.min.js"></script> <!-- browser msie issue fix -->
-    <script src="vendors/smartadmin/js/plugin/fastclick/fastclick.js"></script> <!-- FastClick: For mobile devices: you can disable this in app.js -->
     <script src="vendors/smartadmin/js/plugin/bootstrap-wizard/jquery.bootstrap.wizard.min.js"></script> <!-- bootstrap wizard -->
 
     <!-- datatables -->
@@ -500,15 +503,14 @@
     <script src="vendors/smartadmin/js/plugin/datatables/ZeroClipboard.js"></script>
     <script src="vendors/smartadmin/js/plugin/datatables/media/js/TableTools.min.js"></script>
     <script src="vendors/smartadmin/js/plugin/datatables/DT_bootstrap.js"></script>   
-   
+
     <!-- cryptojs -->
-    <script src="vendors/cryptojs/components/core-min.js"></script>
+    <!--<script src="vendors/cryptojs/components/core-min.js"></script>
     <script src="vendors/cryptojs/components/sha256-min.js"></script>
-    <script src="vendors/cryptojs/components/enc-base64-min.js"></script>
+    <script src="vendors/cryptojs/components/enc-base64-min.js"></script>-->
     
     <!-- JQuery extras -->
     <script src="vendors/jReject/js/jquery.reject.js"></script>
-    <script src="vendors/jquery-xdomainrequest/jquery.xdomainrequest.min.js"></script> <!-- add support for CORS for IE 9 via $.ajax() -->
     <script src="vendors/jquery-yql/jquery.yql.js"></script> <!-- YQL queries for calls that don't support CORS -->
     <script src="vendors/jquery-timeago/jquery.timeago.js"></script>
     <script src="vendors/jquery.slimscroll/jquery.slimscroll.min.js"></script>
@@ -535,6 +537,7 @@
     <script src="js/qrcode.js"></script>  <!-- from http://d-project.googlecode.com/svn/trunk/misc/qrcode/js/ -->
     <!-- todo: replace by a library available in github -->    
     <script src="vendors/jsdecimal/lib/decimal.js"></script> <!-- for accurate arithmetic price operations -->
+    <script src="vendors/select2/select2.min.js"></script> <!-- JQUERY SELECT2 INPUT -->
 
     <!-- socket.io -->
     <script src="vendors/socket.io-client/dist/socket.io.min.js"></script>
