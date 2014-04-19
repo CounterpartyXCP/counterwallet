@@ -337,7 +337,10 @@ function SweepModalViewModel() {
     validation: {
       validator: function (val, self, callback) {
         var numAssets = val.length;
-        var minBtcBalance = numAssets*MIN_PRIME_BALANCE;
+        var minBtcBalance = numAssets*MIN_PRIME_BALANCE+MIN_FEE;
+        if (self.txoutsCountForPrivateKey>1) {
+          minBtcBalance += MIN_FEE; // if we need merge outputs
+        }
         
         if (self.btcBalanceForPrivateKey() < minBtcBalance) {
           var missingBtc = minBtcBalance-self.btcBalanceForPrivateKey();
@@ -557,17 +560,19 @@ function SweepModalViewModel() {
   // in first step, we merge all outputs for chaining: each change output serve as input for next transaction.
   // so the final balance for btc transfert is the value of last change that we get with extractChangeTxoutValue()
   // TODO: think for a more economic way to have a reliable amount for the final tx (BTC).
-  self.mergeOutputs = function(key, pubkey, callback) {
+  self.mergeOutputs = function(key, pubkey, callback, fees) {
     if (self.txoutsCountForPrivateKey>1) {
 
       var message = "Preparing output for transactions chaining";
       self.sweepingProgressionMessage(message);
       $.jqlog.debug(message);
 
+      fees = (typeof fees === "undefined") ? MIN_FEE : fees;
+
       var sendData = {
         source: self.addressForPrivateKey(),
         destination: self.addressForPrivateKey(),
-        quantity: self.btcBalanceForPrivateKey()-MIN_FEE,
+        quantity: self.btcBalanceForPrivateKey()-fees,
         asset: 'BTC',
         encoding: 'multisig',
         pubkey: pubkey,
@@ -576,7 +581,26 @@ function SweepModalViewModel() {
 
       var onTransactionError = function() {
         if (arguments.length==4) {
-          bootbox.alert(arguments[1]);
+          var match = arguments[1].match(/Insufficient bitcoins at address [^\s]+\. \(Need approximately ([\d]+\.[\d]+) BTC/);
+          if (match!=null) {
+            // if insufficient bitcoins we retry we estimated fees by counterpartyd
+            var minEstimateFee = denormalizeQuantity(parseFloat(match[1]))-(self.btcBalanceForPrivateKey()-fees);
+            $.jqlog.debug('Insufficient fees. Need approximately '+minEstimateFee);
+            if (minEstimateFee>self.btcBalanceForPrivateKey()) {
+              self.shown(false);
+              bootbox.alert(arguments[1]);
+            } else {             
+              $.jqlog.debug('Retry with estimated fees.');
+              setTimeout(function() {
+                self.mergeOutputs(key, pubkey, callback, minEstimateFee);
+              }, 500); //wait 0.5s by courtesy
+            }           
+          } else {
+            self.shown(false);
+            bootbox.alert(arguments[1]);
+          }
+          
+
         } else {
           bootbox.alert('Consensus Error!');
         }
@@ -843,26 +867,32 @@ function SweepModalViewModel() {
           assetInfo = $.grep(assetsData, function(e) { return e['asset'] == balancesData[i]['asset']; })[0]; //O(n^2)
           self.availableAssetsToSweep.push(new SweepAssetInDropdownItemModel(
             balancesData[i]['asset'], balancesData[i]['quantity'], balancesData[i]['normalized_quantity'], assetInfo));
+          
         }
-      });
+
+        //Also get the BTC balance at this address and put at head of the list
+        //We just check if unconfirmed balance > 0.      
+        WALLET.retriveBTCAddrsInfo([address], function(data) {
+          $.jqlog.debug(data);
+          //TODO: counterwalletd return unconfirmedRawBal==0, after fixing we need use unconfirmedRawBal
+          var unconfirmedRawBal = data[0]['confirmedRawBal']; 
+          if(unconfirmedRawBal>0) {
+            //We don't need to supply asset info to the SweepAssetInDropdownItemModel constructor for BTC
+            // b/c we won't be transferring any asset ownership with it
+            var viewModel = new SweepAssetInDropdownItemModel("BTC", unconfirmedRawBal, normalizeQuantity(unconfirmedRawBal));
+            self.availableAssetsToSweep.unshift(viewModel);
+            assets.push("BTC");
+            self.btcBalanceForPrivateKey(data[0]['confirmedRawBal']);
+            self.txoutsCountForPrivateKey = data[0]['rawUtxoData'].length;
+
+          }
+          // select all assets by default
+          $('#availableAssetsToSweep').val(assets);
+          $('#availableAssetsToSweep').change();
+        });
+
+      });      
       
-      //Also get the BTC balance at this address and put at head of the list
-      //We just check if unconfirmed balance > 0. 
-      
-      WALLET.retriveBTCAddrsInfo([address], function(data) {
-        $.jqlog.debug(data);
-        //TODO: counterwalletd return unconfirmedRawBal==0, after fixing we need use unconfirmedRawBal
-        var unconfirmedRawBal = data[0]['confirmedRawBal']; 
-        if(unconfirmedRawBal>0) {
-          //We don't need to supply asset info to the SweepAssetInDropdownItemModel constructor for BTC
-          // b/c we won't be transferring any asset ownership with it
-          var viewModel = new SweepAssetInDropdownItemModel("BTC", unconfirmedRawBal, normalizeQuantity(unconfirmedRawBal));
-          self.availableAssetsToSweep.unshift(viewModel);
-          self.btcBalanceForPrivateKey(data[0]['confirmedRawBal']);
-          self.txoutsCountForPrivateKey = data[0]['rawUtxoData'].length;
-        }
-        
-      });
     });
   });  
 }

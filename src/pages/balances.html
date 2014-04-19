@@ -286,7 +286,7 @@
             <label class="control-label col col-sm-2">Assets to Sweep</label>
             <div class="col col-sm-10">
                 <label class="input">
-                    <select multiple="true" class="width-max" data-bind="options: availableAssetsToSweep, optionsValue: 'ASSET', optionsText: 'SELECT_LABEL', select2: { minimumResultsForSearch: 10, escapeMarkup: 'direct' }, selectedOptions: selectedAssetsToSweep"></select>
+                    <select id="availableAssetsToSweep" multiple="true" class="width-max" data-bind="options: availableAssetsToSweep, optionsValue: 'ASSET', optionsText: 'SELECT_LABEL', select2: { minimumResultsForSearch: 10, escapeMarkup: 'direct' }, selectedOptions: selectedAssetsToSweep"></select>
                 </label>
                 <span class="invalid" data-bind="validationMessage: selectedAssetsToSweep"></span>
                 <div class="note">Select all of the assets whose total balances you want to move into the destination address.</div>
