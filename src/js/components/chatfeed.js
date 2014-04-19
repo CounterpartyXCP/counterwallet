@@ -12,7 +12,7 @@ function ChatLineViewModel(handle, text, is_op, is_private) {
       if(self.IS_OP) {
         return "<span class='chatLineOpEmote'>" + self.HANDLE + (self.IS_PRIVATE ? '(PRIVATE)' : '') + ":</span>&nbsp;&nbsp;";  
       } else if(self.HANDLE == CHAT_FEED.handle()) {
-        return "<span class='chatLineSelfEmote'>" + self.HANDLE + ":</span>&nbsp;&nbsp;" + self.text();  
+        return "<span class='chatLineSelfEmote'>" + self.HANDLE + ":</span>&nbsp;&nbsp;";  
       } else {
         return "<span class='chatLineEmote'>" + self.HANDLE + (self.IS_PRIVATE ? '(PRIVATE)' : '') + ":</span>&nbsp;&nbsp;";  
       }
