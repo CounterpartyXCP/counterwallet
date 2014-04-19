@@ -218,7 +218,7 @@
             </div>
             <div class="panel-body">
               <p>We have created a passphrase for you in the box below.</p>
-              <div class="width-max">
+              <div class="width-max margin-bottom-10">
                 <span id="generated" data-bind="text: generatedPassphrase"></span>
                 <button id="generated-regenerate" data-bind="click: generatePassphrase, tooltip: {title: 'Click to generate another random passphrase.'}" class="pull-right btn btn-default" type="button"><i class="fa fa-repeat"></i></button>
               </div>
@@ -271,15 +271,15 @@
         </div>
       </div> <!-- form-well -->
       
-      <div id="extra-info" class="container" data-bind="isible: !(generatedPassphrase().length > 0)">
-        <h3 class="sales-title" style="margin-top:20px;">
-          Counterwallet is a web-wallet for <a href="http://www.counterparty.co" target="_blank">Counterparty</a>, which is <br />the world’s first peer-to-peer digital asset exchange.
+       <div id="extra-info" class="container" data-bind="visible: generatedPassphrase().length === 0">
+        <h3 class="sales-title margin-bottom-10">
+          Counterwallet is a web-wallet for <a href="http://www.counterparty.co" target="_blank">Counterparty</a>, which is the world’s first peer-to-peer digital asset exchange.
         </h3>
-        <h4 class="sales-title" style="margin-top:5px;">
-          All transactions made with Counterwallet use an automatic escrow system<br /> 
+        <h4 class="sales-title">
+          All transactions made with Counterwallet use an automatic escrow system<br/> 
           to keep them secure, atomic and trustless, so no middleman is ever needed.
         </h4>
-        <div class="row" style="margin-top:25px;margin-bottom:20px;">
+        <div class="row">
           <div class="col-sm-4 col-md-4">
             <h4 class="margin-bottom-10"><i class="fa fa-lock"></i> Secure</h4>
             <p>All encryption is handled client-side. Neither your passphrase nor any of your private information ever leaves your browser.</p>
