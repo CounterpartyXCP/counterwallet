@@ -314,15 +314,17 @@ function SweepModalViewModel() {
     required: true,
     validation: {
       validator: function (val, self) {
-  
-        var key = BitcoinECKey(self.privateKey());      
+        var key = null;
+        try {
+          key = BitcoinECKey(self.privateKey()); 
+        } catch(e) {}
         
         /*$.jqlog.debug('adress:'+key.getBitcoinAddress());
         $.jqlog.debug('compressed:'+key.compressed);
         $.jqlog.debug('version:'+key.version);
         $.jqlog.debug('priv:'+key.priv);*/
 
-        return key.priv !== null && key.compressed !== null;
+        return key!=null && key.priv !== null && key.compressed !== null;
       },
       message: 'Not a valid' + (USE_TESTNET ? ' TESTNET ' : ' ') + 'private key.',
       params: self
