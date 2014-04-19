@@ -65,7 +65,7 @@ var AssetLeaderboardViewModel = CClass.create(function() {
         marketCapRaw: marketInfo[i]['market_cap_in_xcp'],
         priceRaw: marketInfo[i]['aggregated_price_as_xcp'],
         supplyRaw: marketInfo[i]['total_supply'],
-        volumeRaw: marketInfo[i]['24h_ohlc_in_xcp']['vol'],
+        volumeRaw: marketInfo[i]['24h_ohlc_in_xcp'] ? marketInfo[i]['24h_ohlc_in_xcp']['vol'] : 0,
         pctChangeRaw: marketInfo[i]['24h_vol_price_change_in_xcp']
       });
     }
@@ -103,7 +103,7 @@ var AssetLeaderboardViewModel = CClass.create(function() {
         marketCapRaw: marketInfo[i]['market_cap_in_btc'],
         priceRaw: marketInfo[i]['aggregated_price_as_btc'],
         supplyRaw: marketInfo[i]['total_supply'],
-        volumeRaw: marketInfo[i]['24h_ohlc_in_btc']['vol'],
+        volumeRaw: marketInfo[i]['24h_ohlc_in_btc'] ? marketInfo[i]['24h_ohlc_in_btc']['vol'] : 0,
         pctChangeRaw: marketInfo[i]['24h_vol_price_change_in_btc']
       });
     }
