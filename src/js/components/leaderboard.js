@@ -56,7 +56,7 @@ var AssetLeaderboardViewModel = CClass.create(function() {
         //volume: marketInfo[i]['24h_summary']['vol'] ? (smartFormat(marketInfo[i]['24h_summary']['vol'], 100, 4) + ' ' + marketInfo[i]['asset']) : '',
         //volume: (marketInfo[i]['24h_ohlc_in_xcp']['vol'] && marketInfo[i]['aggregated_price_in_xcp']) 
         //  ? (smartFormat(marketInfo[i]['24h_ohlc_in_xcp']['vol'] * marketInfo[i]['aggregated_price_in_xcp'], 0, 4) + ' XCP') : '',
-        volume: (marketInfo[i]['24h_summary']['vol'] && marketInfo[i]['aggregated_price_in_xcp']) 
+        volume: (marketInfo[i]['24h_summary'] && marketInfo[i]['24h_summary']['vol'] && marketInfo[i]['aggregated_price_in_xcp']) 
           ? (smartFormat(marketInfo[i]['24h_summary']['vol'] * marketInfo[i]['aggregated_price_in_xcp'], 10, 4) + ' XCP') : '',
         pctChange: marketInfo[i]['24h_vol_price_change_in_xcp'] ? (smartFormat(marketInfo[i]['24h_vol_price_change_in_xcp'], 0, 2) + ' %') : '',
         pctChangeColorClass: marketInfo[i]['24h_vol_price_change_in_xcp'] > 0 ? 'txt-color-green' : (marketInfo[i]['24h_vol_price_change_in_xcp'] < 0 ? 'txt-color-red' : 'initial'),
@@ -94,7 +94,7 @@ var AssetLeaderboardViewModel = CClass.create(function() {
         //volume: marketInfo[i]['24h_summary']['vol'] ? (smartFormat(marketInfo[i]['24h_summary']['vol'], 100, 4) + ' ' + marketInfo[i]['asset']) : '',
         //volume: (marketInfo[i]['24h_ohlc_in_btc']['vol'] && marketInfo[i]['aggregated_price_in_btc']) 
         //  ? (smartFormat(marketInfo[i]['24h_ohlc_in_btc']['vol'] * marketInfo[i]['aggregated_price_in_btc'], 0, 4) + ' BTC') : '',
-        volume: (marketInfo[i]['24h_summary']['vol'] && marketInfo[i]['aggregated_price_in_btc']) 
+        volume: (marketInfo[i]['24h_summary'] && marketInfo[i]['24h_summary']['vol'] && marketInfo[i]['aggregated_price_in_btc']) 
           ? (smartFormat(marketInfo[i]['24h_summary']['vol'] * marketInfo[i]['aggregated_price_in_btc'], 10, 4) + ' BTC') : '',
         pctChange: marketInfo[i]['24h_vol_price_change_in_btc'] ? (smartFormat(marketInfo[i]['24h_vol_price_change_in_btc'], 0, 2) + ' %') : '',
         pctChangeColorClass: marketInfo[i]['24h_vol_price_change_in_btc'] > 0 ? 'txt-color-green' : (marketInfo[i]['24h_vol_price_change_in_btc'] < 0 ? 'txt-color-red' : 'initial'),
