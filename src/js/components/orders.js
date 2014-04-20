@@ -388,7 +388,7 @@ OrdersViewModel.deriveIsOnlineForBTCPayment = function(give_asset, _is_online) {
 OrdersViewModel.doChart = function(dispAssetPair, chartDiv, data) {
   // split the data set into ohlc and volume
   var ohlc = [];
-  var movavg_7s = [];
+  var midline = [];
   var volume = [];
   
   for(var i = 0; i < data.length; i++) {
@@ -399,9 +399,9 @@ OrdersViewModel.doChart = function(dispAssetPair, chartDiv, data) {
       data[i][3], // low
       data[i][4]  // close
     ]);
-    movavg_7s.push([
+    midline.push([
       data[i][0], // the date
-      data[i][7]  // the 7 sample moving average
+      data[i][7]  // the midline for that sample
     ])
     volume.push([
       data[i][0], // the date
@@ -420,9 +420,6 @@ OrdersViewModel.doChart = function(dispAssetPair, chartDiv, data) {
       
   //graph.highcharts('StockChart', {
   chartDiv.highcharts('StockChart', {
-      rangeSelector: {
-          selected: 1
-      },
       title: {
           text: dispAssetPair
       },
@@ -441,6 +438,24 @@ OrdersViewModel.doChart = function(dispAssetPair, chartDiv, data) {
           offset: 0,
           lineWidth: 2
       }],
+      
+      tooltip: {
+          crosshairs: true,
+          shared: true,
+          valueDecimals: 8
+      },      
+      rangeSelector: {
+          selected: 0
+      },
+      
+      /*legend: {
+          enabled: true,
+          layout: 'vertical',
+          align: 'right',
+          verticalAlign: 'middle',
+          borderWidth: 0
+      },*/      
+      
       series: [
       {
           type: 'candlestick',
@@ -449,15 +464,25 @@ OrdersViewModel.doChart = function(dispAssetPair, chartDiv, data) {
           dataGrouping: {
             units: groupingUnits
           }
-      }, 
+      },
       {
-        name: '7 Sample MA',
-        type: 'line',
-        data: movavg_7s,
-        dataGrouping: {
-          units: groupingUnits
-        }
+          name: 'Trace Line',
+          id: 'primary',
+          type : 'line',
+          data: midline,
+          yAxis: 0,
+          visible: false,
+          showInLegend: false
       },      
+      {
+          name: '7-Sample SMA',
+          linkedTo: 'primary',
+          showInLegend: true,
+          yAxis: 0,
+          type: 'trendline',
+          algorithm: 'SMA',
+          periods: 7
+      },
       {
           type: 'column',
           name: 'Volume',

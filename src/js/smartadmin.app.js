@@ -432,7 +432,7 @@ function nav_page_height() {
 
     //COUNTERWALLETD: START MOD
     $('#chatPane').css('height', windowHeight + 'px');
-    $('#chatContentDiv').css('height', (windowHeight - 50 - 40) + 'px');
+    $('#chatContentDiv').css('height', (windowHeight - 50 - 40 - 20) + 'px');
     $('#chatContentInnerDiv').slimScroll({ height: 'auto' });
     //COUNTERWALLETD: END MOD
   } else {
@@ -440,7 +440,7 @@ function nav_page_height() {
     $.root_.css('min-height', windowHeight + 'px');
     //COUNTERWALLETD: START MOD
     $('#chatPane').css('height', windowHeight + 'px');
-    $('#chatContentDiv').css('height', (windowHeight - 50 - 40) + 'px');
+    $('#chatContentDiv').css('height', (windowHeight - 50 - 40 - 20) + 'px');
     $('#chatContentInnerDiv').slimScroll({ height: 'auto' });
     //COUNTERWALLETD: END MOD
   }

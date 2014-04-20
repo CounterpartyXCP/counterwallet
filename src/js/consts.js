@@ -2,7 +2,7 @@
 /***********
  * GLOBAL CONSTANTS
  ***********/
-var VERSION = "1.1.0 BETA";
+var VERSION = "1.1.2 BETA";
 
 var IS_MOBILE_OR_TABLET = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
 var PREFERENCES = {}; //set when logging in
@@ -25,6 +25,8 @@ var ORDER_MAX_EXPIRATION = 3000; //max expiration for order
 
 var DEFAULT_NUM_ADDRESSES = 3; //default number of addresses to generate
 var MARKET_INFO_REFRESH_EVERY = 5 * 60 * 1000; //refresh market info every 5 minutes while enabled 
+
+var CHAT_NUM_USERS_ONLINE_REFRESH_EVERY = 5 * 60 * 1000; //refresh online user count every 5 minutes while enabled
 
 var NUM_BLOCKS_TO_WAIT_FOR_BTCPAY = 6; //number of blocks to wait until the user can make a BTCpay on an order match where they owe BTC
 

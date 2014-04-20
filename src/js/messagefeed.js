@@ -80,17 +80,29 @@ function MessageFeed() {
   self.getTxHash = function(message) {
     var txHash = message['event'] || message['tx_hash'] || (message['tx0_hash'] + message['tx1_hash']) || null;
     if(!txHash)
-      $.jqlog.warn("Cannot derive a txHash for IDX " + message['_message_index']);
+      $.jqlog.warn("Cannot derive a txHash for IDX " + message['_message_index'] + " (category: " + message['_category'] + ")");
     return txHash;
   }
   
   self.checkMessageQueue = function() {
-    var event = null;
+    var event = null, result = null;
     while(self.MESSAGE_QUEUE.length) {
-      event = self.MESSAGE_QUEUE.shift();
-      self.parseMessageWithFeedGapDetection(event[0], event[1], event[2]);
+      event = self.MESSAGE_QUEUE[0];
+      result = self.parseMessageWithFeedGapDetection(event[0], event[1], event[2]);
+      if(result && result.hasOwnProperty('done')) {
+        break; //deferred returned, as there were missing messages. abort processing until we have them
+      }
+      self.MESSAGE_QUEUE.shift(); //normal case. pop off the head and continue processing...
     }
-    setTimeout(function() { self.checkMessageQueue(); }, 1000);
+    
+    if(result && result.hasOwnProperty('done')) {
+      //a gap was found. wait until we get in the missing messages. then call again (as those missing msgs should be at the top of the queue)
+      $.when(result).done(function(d) {
+        self.checkMessageQueue();
+      });
+    } else { //normal case: no gaps. call again in 1 second
+      setTimeout(function() { self.checkMessageQueue(); }, 1000);
+    }
   }
   
   self.parseMessageWithFeedGapDetection = function(txHash, category, message) {
@@ -109,32 +121,39 @@ function MessageFeed() {
     
     //handle normal case that the message we received is the next in order
     if(message['_message_index'] == self.lastMessageIndexReceived() + 1) {
-      return self.handleMessage(txHash, category, message);
+      self.handleMessage(txHash, category, message);
+      return;
     }
     
     //otherwise, we have a forward gap
     $.jqlog.warn("feed:MESSAGE GAP DETECTED: our last msgidx = " + self.lastMessageIndexReceived() + " --  server sent msgidx = " + message['_message_index']);
     
     //sanity check
-    assert(message['_message_index'] - self.lastMessageIndexReceived() <= 30, "Waay too many missing messages, IDX="
+    assert(message['_message_index'] - self.lastMessageIndexReceived() <= 30, "Way too many missing messages, IDX="
       + message['_message_index'] + " (last idx: " + self.lastMessageIndexReceived() + ")");
   
     //request the missing messages from the feed and replay them...
-    var missingMessages = [];
+    var deferred = $.Deferred();
+    var missingMessageIndexes = [];
+    var missingMessageQueueEntries = [];
     for(var i=self.lastMessageIndexReceived()+1; i < message['_message_index']; i++) {
-      missingMessages.push(i);
+      missingMessageIndexes.push(i);
     }
-    failoverAPI("get_messagefeed_messages_by_index", [missingMessages], function(missingMessageData, endpoint) {
+    failoverAPI("get_messagefeed_messages_by_index", [missingMessageIndexes], function(missingMessageData, endpoint) {
       var missingTxHash = null;
       for(var i=0; i < missingMessageData.length; i++) {
         missingTxHash = self.getTxHash(missingMessageData[i]);
-        assert(missingMessageData[i]['_message_index'] == missingMessages[i], "Message feed resync list oddity...?");
+        assert(missingMessageData[i]['_message_index'] == missingMessageIndexes[i], "Message feed resync list oddity...?");
         $.jqlog.info("feed:receiveForGap IDX=" + missingMessageData[i]['_message_index']);
-        missingMessages.push([missingTxHash, missingMessageData[i]['_category'], missingMessageData[i]]);
+        missingMessageQueueEntries.push([missingTxHash, missingMessageData[i]['_category'], missingMessageData[i]]);
       }
-      Array.prototype.splice.apply(self.MESSAGE_QUEUE, [0, 0].concat(missingMessages));
+      Array.prototype.splice.apply(self.MESSAGE_QUEUE, [0, 0].concat(missingMessageQueueEntries));
       //^ throw at the head of the message queue, in the same order
+      deferred.resolve();
     });
+    //this deferred will be resolved once we have successfully retrieved the missing messages
+    //(the subsequent call to the function will process the missing messages, as well as what was already in the message queue)
+    return deferred;
   }
   
   self.handleMessage = function(txHash, category, message) {

@@ -48,9 +48,11 @@ span.modeIndicator {
  * History page
  */
 .historyBalsFieldset {
-  padding: 5px 14px 5px;
+  padding: 5px 14px 5px !important;
+  background: inherit !important;
 }
 
 .historyRecentTxFieldset {
-  padding: 5px 14px 25px;
+  padding: 5px 14px 25px !important;
+  background: inherit !important;
 }

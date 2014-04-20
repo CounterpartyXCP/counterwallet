@@ -42,6 +42,14 @@
   color: #69737A;
 }
 
+#chatPane div.chatOnlineCount {
+  text-align: center;
+  padding: 0;
+  margin: -6px auto 5px 0;
+  font-size: 14px;
+  color: #69737A;
+}
+
 p.chatMessage {
  margin: 0;
  word-wrap: break-word;
