@@ -185,6 +185,11 @@ function AddressViewModel(key, address, initialLabel) {
 
     CREATE_ASSET_MODAL.show(self.ADDRESS);
   }
+
+  self.payDividend = function () {
+    if(!WALLET.canDoTransaction(self.ADDRESS)) return false;
+    PAY_DIVIDEND_MODAL.show(self);
+  };
   
   self.selectAddressText = function() {
     return selectText('address-text-' + self.ADDRESS);    
