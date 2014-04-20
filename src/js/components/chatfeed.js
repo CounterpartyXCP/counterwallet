@@ -7,7 +7,9 @@ function ChatLineViewModel(handle, text, is_op, is_private) {
   self.IS_PRIVATE = is_private || false;
 
   self.text = ko.observable(text);
-  self.lineHead = ko.computed(function(){
+  self.lineHead = ko.computed(function() {
+    //NOTE: This section should NOT include any user-defined chat data (beyond the user's chosen chat
+    // handle), as it is passed through knockouts html: filter.
     if(self.HANDLE) {
       if(self.IS_OP) {
         return "<span class='chatLineOpEmote'>" + self.HANDLE + (self.IS_PRIVATE ? '(PRIVATE)' : '') + ":</span>&nbsp;&nbsp;";  
@@ -48,11 +50,13 @@ function ChatFeedViewModel() {
     return header; 
   });
   
+  self.numUsersOnline = ko.observable('??');
+  
   self.init = function() {
     //Start up the chat feed if necessary
     //Called at login time (we do it then instead of when displaying the chat window, so that we can use it to track
     //which wallet IDs are online, which we use for showing orders with BTCPays that have a higher chance of being
-    //paid more quickly, for instance)
+    //paid more quickly, and how many users are using the wallet, for instance)
     if(self.feedConnections.length) { //already initialized
       return;
     }
@@ -71,6 +75,18 @@ function ChatFeedViewModel() {
       self.feedConnections.push(socket); //must be done before we do any chatting...
       self._registerConnectCallback(i);
     }
+    
+    //Kick off refreshing of user count
+    self.updateOnlineUserCount(); //initial call    
+    setTimeout(function() {
+      self.updateOnlineUserCount();
+    }, CHAT_NUM_USERS_ONLINE_REFRESH_EVERY); 
+  }
+
+  self.updateOnlineUserCount = function() {
+    failoverAPI("get_num_users_online", [], function(numUsersOnline, endpoint) {
+      self.numUsersOnline(numUsersOnline);
+    });
   }
   
   self._showChatWindow = function() {
@@ -89,8 +105,6 @@ function ChatFeedViewModel() {
     $('#chatPane').show('slide', {direction:'right', queue: false}, 600, function() {
       self.scrollToBottomIfNecessary(); //prevent the scroll from slamming back to the top of the div 
     });
-
-         
   }
   
   self._hideChatWindow = function() {

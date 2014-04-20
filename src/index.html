@@ -187,6 +187,7 @@
 
     <div id="chatPane" style="display: none">
       <h2 data-bind="html: headerText"></h2>
+      <div class="chatOnlineCount"><span data-bind="text: numUsersOnline"></span> Users Online</div>
       <div id="chatContentDiv">
         <div id="chatContentInnerDiv" data-bind="foreach: lines">
           <p class="chatMessage"><span data-bind="html: lineHead"></span><span data-bind="text: text"></span></p>
@@ -236,13 +237,11 @@
           </div>
         </div>
 
-        <div class="alert alert-warning" class="margin-bottom-0">
-          <p>
-            <b>IMPORTANT:</b> This Counterwallet server is running an updated version of the Bitcoin deterministic wallet implementation for Javascript (i.e. the bitcoinjs-lib BIP32 HDWallet). This updated version corrects a spec compliance issue with the previous version (which did not impact or lessen security or funds safety in any way, but led to wallet addresses being created that were not 100% compliant with the deterministic wallet spec).
-          </p>
-          <p>
-            <b class="font-sm">If you had an existing account, you will need to create a new account on this system, and then log into <a href="">https://old.counterwallet.co</a> to transfer over your existing balance to your new account created on this system.</b> The <a href="">old.counterwallet.co</a> system provides you the ability to view your private keys, so you can use the "sweep" feature to easily move the balances over. We will keep this <a href="">old.counterwallet.co</a> system running for a few weeks to allow individuals to transfer their balances, however, please move over to the new system (i.e. this site) as soon as possible.
-          </p>
+        <div class="alert alert-info" class="margin-bottom-0">
+          <p><b>IMPORTANT:</b>  Counterwallet has switched to a new address-generation algorithm, for better BIP32 HDWallet compliance.</p>
+          <p>If you have not already done so, we recommend creating a new wallet on this system. If you had a previous
+              wallet with funds, you can access it via <a href="https://old.counterwallet.co" target="_blank">https://old.counterwallet.co</a>,
+              and transfer your funds from there to your new wallet.</p>
         </div>
         <div class="panel panel-info">
           <div class="panel-heading">
@@ -498,6 +497,7 @@
     <!-- SmartAdmin JS includes -->
     <script src="vendors/smartadmin/js/smartwidgets/jarvis.widget.min.js"></script> <!-- JARVIS WIDGETS -->
     <script src="vendors/smartadmin/js/plugin/bootstrap-wizard/jquery.bootstrap.wizard.min.js"></script> <!-- bootstrap wizard -->
+    <script src="vendors/smartadmin/js/notification/SmartNotification.min.js"></script> <!-- smartadmin noto boxes -->
 
     <!-- datatables -->
     <script src="vendors/smartadmin/js/plugin/datatables/jquery.dataTables-cust.min.js"></script>
@@ -531,6 +531,7 @@
 
     <!-- highstock (which also includes highcharts) (minified)-->
     <script src="vendors/highstock/highstock.src.js"></script>
+    <script src="vendors/technical-indicators/index.js"></script>
 
     <!-- Other external libraries. -->
     <script src="js/qrcode.js"></script>  <!-- from http://d-project.googlecode.com/svn/trunk/misc/qrcode/js/ -->

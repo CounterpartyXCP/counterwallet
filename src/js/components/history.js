@@ -165,24 +165,24 @@ function TransactionHistoryItemViewModel(data) {
     var desc = "";
     if(self.RAW_TX_TYPE == 'burns') {
       desc = "XCP Proof-of-Burn<br/>Burned: <Am>" + normalizeQuantity(self.DATA['burned']) + "</Am> <As>BTC</As><br/>"
-        + "Earned: " + numberWithCommas(normalizeQuantity(self.DATA['earned']) ) + " XCP";
+        + "Earned: " + smartFormat(normalizeQuantity(self.DATA['earned']) ) + " XCP";
     } else if(self.RAW_TX_TYPE == 'sends') {
-      desc = "Send of <Am>" + numberWithCommas(normalizeQuantity(self.DATA['quantity'], self.DATA['_divisible'])) + "</Am> <As>" + self.DATA['asset']
+      desc = "Send of <Am>" + smartFormat(normalizeQuantity(self.DATA['quantity'], self.DATA['_divisible'])) + "</Am> <As>" + self.DATA['asset']
         + "</As> to <Ad>" + getLinkForCPData('address', self.DATA['destination'], getAddressLabel(self.DATA['destination'])) + "</Ad>";
     } else if(self.RAW_TX_TYPE == 'orders') {
-      desc = "Sell <Am>" + numberWithCommas(normalizeQuantity(self.DATA['give_quantity'], self.DATA['_give_divisible']))
+      desc = "Sell <Am>" + smartFormat(normalizeQuantity(self.DATA['give_quantity'], self.DATA['_give_divisible']))
         + "</Am> <As>" + self.DATA['give_asset'] + "</As> for <Am>"
-        + numberWithCommas(normalizeQuantity(self.DATA['get_quantity'], self.DATA['_get_divisible'])) + "</Am> <As>"
+        + smartFormat(normalizeQuantity(self.DATA['get_quantity'], self.DATA['_get_divisible'])) + "</Am> <As>"
         + self.DATA['get_asset'] + "</As>";
     } else if(self.RAW_TX_TYPE == 'order_matches') {
       desc = "<Ad>" + getAddressLabel(self.DATA['tx0_address']) + "</Ad> sent <Am>"
-        + numberWithCommas(normalizeQuantity(self.DATA['forward_quantity'], self.DATA['_forward_divisible']))
+        + smartFormat(normalizeQuantity(self.DATA['forward_quantity'], self.DATA['_forward_divisible']))
         + "</Am> <As>" + self.DATA['forward_asset'] + "</As><br/>"
         + "<Ad>" + getAddressLabel(self.DATA['tx1_address']) + "</Ad> sent <Am>"
-        + numberWithCommas(normalizeQuantity(self.DATA['backward_quantity'], self.DATA['_backward_divisible']))
+        + smartFormat(normalizeQuantity(self.DATA['backward_quantity'], self.DATA['_backward_divisible']))
         + "</Am> <As>" + self.DATA['backward_asset'] + "</As>";
     } else if(self.RAW_TX_TYPE == 'btcpays') {
-      desc = "Payment for <Am>" + numberWithCommas(normalizeQuantity(self.DATA['btc_amount'])) + "</Am> <As>BTC</As>";
+      desc = "Payment for <Am>" + smartFormat(normalizeQuantity(self.DATA['btc_amount'])) + "</Am> <As>BTC</As>";
     } else if(self.RAW_TX_TYPE == 'issuances') {
       if(self.DATA['transfer']) {
         desc = "Asset <As>" + self.DATA['asset'] + "</As> transferred to <Ad>"
@@ -190,7 +190,7 @@ function TransactionHistoryItemViewModel(data) {
       } else if(self.DATA['locked']) {
         desc = "Asset <As>" + self.DATA['asset'] + "</As> locked against additional issuance";
       } else {
-        desc = "Quantity <Am>" + numberWithCommas(normalizeQuantity(self.DATA['quantity'], self.DATA['divisible']))
+        desc = "Quantity <Am>" + smartFormat(normalizeQuantity(self.DATA['quantity'], self.DATA['divisible']))
           + "</Am> of asset <As>" + self.DATA['asset'] + "</As> issued";
       }
     } else if(self.RAW_TX_TYPE == 'broadcasts') {
@@ -199,17 +199,17 @@ function TransactionHistoryItemViewModel(data) {
       desc = BET_TYPES[self.DATA['bet_type']] + " bet on feed @ <Ad>"
         + getLinkForCPData('address', self.DATA['feed_address'], getAddressLabel(self.DATA['feed_address'])) + "</Ad><br/>"
         + "Odds: <b>" + self.DATA['odds'] + "</b>, Wager: <Am>"
-        + numberWithCommas(normalizeQuantity(self.DATA['wager_quantity'])) + "</Am> <As>XCP</As>, Counterwager: <Am>"
-        + numberWithCommas(normalizeQuantity(self.DATA['counterwager_quantity'])) + "</Am> <As>XCP</As>";  
+        + smartFormat(normalizeQuantity(self.DATA['wager_quantity'])) + "</Am> <As>XCP</As>, Counterwager: <Am>"
+        + smartFormat(normalizeQuantity(self.DATA['counterwager_quantity'])) + "</Am> <As>XCP</As>";  
     } else if(self.RAW_TX_TYPE == 'bet_matches') {
       desc = "For feed @ <Ad>" 
         + getLinkForCPData('address', self.DATA['feed_address'], getAddressLabel(self.DATA['feed_address']))
         + "</Ad>, <Ad>" + getAddressLabel(self.DATA['tx0_address']) + "</Ad> bet <Am>"
-        + numberWithCommas(normalizeQuantity(self.DATA['forward_quantity'])) + "</Am> <As>XCP</As> and <Ad>"
+        + smartFormat(normalizeQuantity(self.DATA['forward_quantity'])) + "</Am> <As>XCP</As> and <Ad>"
         + getAddressLabel(self.DATA['tx1_address']) + "</Ad> bet <Am>"
-        + numberWithCommas(normalizeQuantity(self.DATA['backward_quantity'])) + "</Am> <As>XCP</As>";
+        + smartFormat(normalizeQuantity(self.DATA['backward_quantity'])) + "</Am> <As>XCP</As>";
     } else if(self.RAW_TX_TYPE == 'dividends') {
-      desc = "Paid <Am>" + numberWithCommas(normalizeQuantity(self.DATA['quantity_per_unit'])) + "</Am> <As>"+ self.DATA['dividend_asset']
+      desc = "Paid <Am>" + smartFormat(normalizeQuantity(self.DATA['quantity_per_unit'])) + "</Am> <As>"+ self.DATA['dividend_asset']
         + "</As> per unit of asset <As>" + self.DATA['asset'] + "</As>";
     } else if(self.RAW_TX_TYPE == 'cancels') {
       desc = "Order/Bet <b>" + data['offer_hash'] + "</b> cancelled.";

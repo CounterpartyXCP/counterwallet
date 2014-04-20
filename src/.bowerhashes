@@ -1,6 +1,5 @@
 {
     "src/vendors/jquery/jquery.min.js": "3558f7ba20898221ec2e8009435d5777bba35e64ab31efe2070e40286e0fd00b",
-    "src/vendors/jquery-ui/ui/minified/jquery-ui.min.js": "953d27ce7add7c3593011b68104a861e9e0211933759e3400c1c7229775bb779",
     "src/vendors/jquery-ui/ui/minified/jquery.ui.core.min.js": "78996194f22e3222b74387cfaa6c0fe5b1190c25789092cd1bd3f3e4189e0fbd",
     "src/vendors/jquery-ui/ui/minified/jquery.ui.widget.min.js": "22f3f51640e610f79dca41e1a82cee4962e5c807a3e3fdd4a64f3695516053b8",
     "src/vendors/jquery-ui/ui/minified/jquery.ui.mouse.min.js": "eb41bb09b956f520a319b8240ca69c2930b2dda47ab23ef1ea1e47a231a3bcea",
@@ -12,6 +11,7 @@
     "src/vendors/bootstrap/dist/js/bootstrap.min.js": "96a2d416b5a10298e698cd0a397514fe6fb5dbd1731cd702de6ee06ff440b3fe",
     "src/vendors/smartadmin/js/smartwidgets/jarvis.widget.min.js": "276fe5c9f51996246f915fc30fe48b82d0eed724a50d0e6b7cba89cc1d332376",
     "src/vendors/smartadmin/js/plugin/bootstrap-wizard/jquery.bootstrap.wizard.min.js": "9a75b7c5999af018a9240201aff2c6a60393158bde1957a498c3aec1581e12e5",
+    "src/vendors/smartadmin/js/notification/SmartNotification.min.js": "837486c2452830ba24f162b7c8940dc36a9e5ecd9ad5c0888e04f404cf11d64c",
     "src/vendors/smartadmin/js/plugin/datatables/jquery.dataTables-cust.min.js": "43fe7a889c153908e63795ecf0c53d93fcd565e7a021f8ee37905656d83e417a",
     "src/vendors/smartadmin/js/plugin/datatables/ColReorder.min.js": "f054ffbd0385299d022d0c2dda0aef347a3f108c74524874d77ff836ef19b04d",
     "src/vendors/smartadmin/js/plugin/datatables/FixedColumns.min.js": "235ad7653d49aea4551a7efd85358ef07c831a8d4c3717f9feaacba012f067f2",
@@ -35,6 +35,7 @@
     "src/vendors/knockout-bootstrap/build/knockout-bootstrap.min.js": "3d253ef8aec822390231333008ce43cecb08d885446dac6edb4cc666990686d5",
     "src/vendors/knockout-validation/Dist/knockout.validation.min.js": "46347e6ebb9d8d909b0840713118ca0f2cdcd9526767025b9fa7d5483a4af94e",
     "src/vendors/highstock/highstock.src.js": "1257bab7ca686ce0ea60c598a0838700ad73ac3a42f2d8d0c1022fd3739d91a4",
+    "src/vendors/technical-indicators/index.js": "cdb912d016e9be095ae68cb02c0d96731c015aa57002db6f277d1c6b6357bec2",
     "src/vendors/jsdecimal/lib/decimal.js": "6f9e7a19a414fec2b9925d516ff3d805cadc1ec19bc6e840f3fe4d2f2d6d0c3b",
     "src/vendors/select2/select2.min.js": "231818c9b851ff39ad5f17dc24837c79560199e7fdaa3eb0be153527a2b9e0bd",
     "src/vendors/socket.io-client/dist/socket.io.min.js": "17f4c075ad907cb0fb38bf76de5d0af7832a95cddf1bf642e75daadf8d1e5201",
