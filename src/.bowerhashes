@@ -20,6 +20,7 @@
     "src/vendors/smartadmin/js/plugin/datatables/media/js/TableTools.min.js": "4ae9d0e887cc46fea270aebe19bcef87589636d54cf68ccaae7411dd99424c96",
     "src/vendors/smartadmin/js/plugin/datatables/DT_bootstrap.js": "ac912c54c489621769292728536561e7b45ff2c7abb073e2ef62a427a60f52a9",
     "src/vendors/jReject/js/jquery.reject.js": "3df535b258480e54a37685dc59b77d02869b5ac8c6d90274ce8c2e51b9a298a8",
+    "src/vendors/jReject-ie11/index.js": "5340c593fe8c37f50b956a907cff98ab9620c3c7a7053e42654433c8141061c4",
     "src/vendors/jquery-yql/index.js": "b3b348cc1f32df04aab58d10d644f3af4508953afe34cd58c50cf84c7ed1462b",
     "src/vendors/jquery-timeago/jquery.timeago.js": "858d14e7743692924171021fb24e902dd2068b19acac055cf993fbf305bc2ae5",
     "src/vendors/jquery.slimscroll/jquery.slimscroll.min.js": "5f5e78e754be6248288ea6b2eae79881ce2f2c13eb002d98c72a5ae1c18fe988",
