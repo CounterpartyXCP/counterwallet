@@ -347,7 +347,7 @@ function ChatFeedViewModel() {
   
   self.sendLine = function() {
     //see if this is a chat command or not
-    var text = $('#chatTextBox').val();
+    var text = $('#chatTextBox').val().trim();
     if(!text) return; //no empty lines
     assert(self.feedConnections.length >= 1, "Not connected to any chat servers!");
     
