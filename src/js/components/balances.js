@@ -583,10 +583,10 @@ function SweepModalViewModel() {
         if (arguments.length==4) {
           var match = arguments[1].match(/Insufficient bitcoins at address [^\s]+\. \(Need approximately ([\d]+\.[\d]+) BTC/);
           if (match!=null) {
-            // if insufficient bitcoins we retry we estimated fees by counterpartyd
-            var minEstimateFee = denormalizeQuantity(parseFloat(match[1]))-(self.btcBalanceForPrivateKey()-fees);
-            $.jqlog.debug('Insufficient fees. Need approximately '+minEstimateFee);
-            if (minEstimateFee>self.btcBalanceForPrivateKey()) {
+            // if insufficient bitcoins we retry with estimated fees return by counterpartyd
+            var minEstimateFee = denormalizeQuantity(parseFloat(match[1])) - (self.btcBalanceForPrivateKey() - fees);
+            $.jqlog.debug('Insufficient fees. Need approximately ' + minEstimateFee);
+            if (minEstimateFee > self.btcBalanceForPrivateKey()) {
               self.shown(false);
               bootbox.alert(arguments[1]);
             } else {             
@@ -611,7 +611,7 @@ function SweepModalViewModel() {
 
       var onTransactionBroadcasted = function(sendTxHash, endpoint) { //broadcast was successful
         // No need to display this transaction in notifications
-        $.jqlog.debug("waiting "+TRANSACTION_DELAY+"ms");
+        $.jqlog.debug("waiting " + TRANSACTION_DELAY + "ms");
         setTimeout(function() {
           callback(); //will trigger callback() once done
         }, TRANSACTION_DELAY);
@@ -635,7 +635,7 @@ function SweepModalViewModel() {
   }
   
   self._doSendAsset = function(asset, key, pubkey, opsComplete, adjustedBTCQuantity, callback) {
-    $.jqlog.debug('_doSendAsset: '+asset);
+    $.jqlog.debug('_doSendAsset: ' + asset);
     
     //TODO: remove this
     if(asset == 'BTC') assert(adjustedBTCQuantity !== null);
@@ -646,9 +646,9 @@ function SweepModalViewModel() {
     });
     var sendTx = null, i = null;
 
-    $.jqlog.debug("btcBalanceForPrivateKey: "+self.btcBalanceForPrivateKey());
-    var quantity = (asset=='BTC') ? (self.btcBalanceForPrivateKey()-MIN_FEE) : selectedAsset.RAW_BALANCE;
-    var normalizedQuantity = (asset=='BTC') ? normalizeQuantity(quantity) : selectedAsset.NORMALIZED_BALANCE;
+    $.jqlog.debug("btcBalanceForPrivateKey: " + self.btcBalanceForPrivateKey());
+    var quantity = (asset == 'BTC') ? (self.btcBalanceForPrivateKey() - MIN_FEE) : selectedAsset.RAW_BALANCE;
+    var normalizedQuantity = (asset == 'BTC') ? normalizeQuantity(quantity) : selectedAsset.NORMALIZED_BALANCE;
     
     assert(selectedAsset);
     
@@ -696,7 +696,7 @@ function SweepModalViewModel() {
           // here we adjust the BTC balance whith the change output
           if (selectedAsset.ASSET != 'BTC') {
             var newBtcBalance = self.extractChangeTxoutValue(sendData.source, sendTx);
-            $.jqlog.debug("New BTC balance: "+newBtcBalance);
+            $.jqlog.debug("New BTC balance: " + newBtcBalance);
             self.btcBalanceForPrivateKey(newBtcBalance);
           }
 
@@ -704,7 +704,7 @@ function SweepModalViewModel() {
           if (selectedAsset.ASSET != 'XCP'
              && selectedAsset.ASSET != 'BTC'
              && selectedAsset.ASSET_INFO['owner'] == self.addressForPrivateKey()) {
-            $.jqlog.debug("waiting "+TRANSACTION_DELAY+"ms");
+            $.jqlog.debug("waiting " + TRANSACTION_DELAY + "ms");
             setTimeout(function() {
               self._doTransferAsset(selectedAsset, key, pubkey, opsComplete, callback); //will trigger callback() once done
             }, TRANSACTION_DELAY);
@@ -715,7 +715,7 @@ function SweepModalViewModel() {
           // TODO: add param response in json format for error callback
         }, function(jqXHR, textStatus, errorThrown, endpoint) { //on error broadcasting tx
 
-          $.jqlog.debug('Transaction error: '+textStatus);
+          $.jqlog.debug('Transaction error: ' + textStatus);
           // retry..
           return callback(true, {
             'type': 'send',
@@ -735,7 +735,7 @@ function SweepModalViewModel() {
         self.showSweepError(selectedAsset.ASSET, opsComplete);
       }, function(jqXHR, textStatus, errorThrown, endpoint) { //onSysError
 
-        $.jqlog.debug('onSysError error: '+textStatus);
+        $.jqlog.debug('onSysError error: ' + textStatus);
         // retry..
         return callback(true, {
           'type': 'send',
@@ -782,16 +782,16 @@ function SweepModalViewModel() {
 
     var doSweep = function(retry, failedTx) {
       // if retry we don't take the next sendsToMake item
-      if (retry!==true || sendParams===false) {
+      if (retry !== true || sendParams === false) {
 
         sendParams = sendsToMake.shift();
 
       } else if (retry) {
 
         if (sendParams[0] in retryCounter) {
-          if (retryCounter[sendParams[0]]<TRANSACTION_MAX_RETRY) {
+          if (retryCounter[sendParams[0]] < TRANSACTION_MAX_RETRY) {
             retryCounter[sendParams[0]]++;    
-            $.jqlog.debug("retry count: "+retryCounter[sendParams[0]]);        
+            $.jqlog.debug("retry count: " + retryCounter[sendParams[0]]);        
           } else {
             sendParams = undefined;
             opsComplete.push(failedTx);
@@ -841,7 +841,7 @@ function SweepModalViewModel() {
   }
   
   self.show = function(resetForm) {
-    if(typeof(resetForm)==='undefined') resetForm = true;
+    if(typeof(resetForm) === 'undefined') resetForm = true;
     if(resetForm) self.resetForm();
     self.shown(true);
   }  
@@ -876,7 +876,7 @@ function SweepModalViewModel() {
           $.jqlog.debug(data);
           //TODO: counterwalletd return unconfirmedRawBal==0, after fixing we need use unconfirmedRawBal
           var unconfirmedRawBal = data[0]['confirmedRawBal']; 
-          if(unconfirmedRawBal>0) {
+          if(unconfirmedRawBal > 0) {
             //We don't need to supply asset info to the SweepAssetInDropdownItemModel constructor for BTC
             // b/c we won't be transferring any asset ownership with it
             var viewModel = new SweepAssetInDropdownItemModel("BTC", unconfirmedRawBal, normalizeQuantity(unconfirmedRawBal));
