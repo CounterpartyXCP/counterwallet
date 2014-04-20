@@ -52,7 +52,7 @@ function CreateAssetModalViewModel() {
   self.divisible = ko.observable(true);
   self.quantity = ko.observable().extend({
     required: true,
-    isValidPositiveQuantity: self,
+    isValidPositiveQuantityOrZero: self,
     isValidQtyForDivisibility: self
   });
   self.callable = ko.observable(false);
