@@ -1,4 +1,72 @@
 
+/*
+ * STRING PROTOTYPES
+ */
+if (typeof String.prototype.startsWith != 'function') {
+  // see below for better implementation!
+  String.prototype.startsWith = function (str){
+    return this.indexOf(str) == 0;
+  };
+}
+
+if (typeof String.prototype.endsWith != 'function') {
+  String.prototype.endsWith = function(suffix) {
+      return this.indexOf(suffix, this.length - suffix.length) !== -1;
+  };
+}
+
+if (typeof String.prototype.stripTags != 'function') {
+  String.prototype.stripTags = function(element){
+      return this.replace(/(<([^>]+)>)/ig,"");
+  };
+}
+
+
+/*
+ * ARRAY PROTOTYPES
+ */
+if (typeof Array.prototype.last != 'function') {
+    Array.prototype.last = function(){
+        return this[this.length - 1];
+    };
+};
+
+if (typeof Array.prototype.contains != 'function') {
+  Array.prototype.contains = function(element){
+      return this.indexOf(element) > -1;
+  };
+}
+
+if (typeof Array.prototype.remove != 'function') {
+  Array.prototype.remove = function() { //http://stackoverflow.com/a/3955096
+      var what, a = arguments, L = a.length, ax;
+      while (L && this.length) {
+          what = a[--L];
+          while ((ax = this.indexOf(what)) !== -1) {
+              this.splice(ax, 1);
+          }
+      }
+      return this;
+  };
+}
+
+if (typeof Array.prototype.unique != 'function') {
+  Array.prototype.unique = function() { //modified from http://stackoverflow.com/a/9229821
+      var prim = {"boolean":{}, "number":{}, "string":{}}, obj = [];
+  
+      return this.filter(function(x) {
+          var t = typeof x;
+          return (t in prim) ? 
+              !prim[t][x] && (prim[t][x] = 1) :
+              obj.indexOf(x) < 0 && obj.push(x);
+      });
+  }
+}
+
+
+/*
+ * OTHER METHODS
+ */
 function numberWithCommas(x) {
   if(x === undefined || x === null) return x;
   //print a number with commas, as appropriate (http://stackoverflow.com/a/2901298)
@@ -19,50 +87,6 @@ function numberHasDecimalPlace(n) {
 function byteCount(s) {
   /*http://stackoverflow.com/a/12203648*/
   return encodeURI(s).split(/%..|./).length - 1;
-}
-
-if (!Array.prototype.last){
-    Array.prototype.last = function(){
-        return this[this.length - 1];
-    };
-};
-
-if (typeof String.prototype.startsWith != 'function') {
-  // see below for better implementation!
-  String.prototype.startsWith = function (str){
-    return this.indexOf(str) == 0;
-  };
-}
-
-if (typeof String.prototype.endsWith != 'function') {
-  String.prototype.endsWith = function(suffix) {
-      return this.indexOf(suffix, this.length - suffix.length) !== -1;
-  };
-}
-
-Array.prototype.contains = function(element){
-    return this.indexOf(element) > -1;
-};
-
-Array.prototype.remove = function() { //http://stackoverflow.com/a/3955096
-    var what, a = arguments, L = a.length, ax;
-    while (L && this.length) {
-        what = a[--L];
-        while ((ax = this.indexOf(what)) !== -1) {
-            this.splice(ax, 1);
-        }
-    }
-    return this;
-};
-Array.prototype.unique = function() { //modified from http://stackoverflow.com/a/9229821
-    var prim = {"boolean":{}, "number":{}, "string":{}}, obj = [];
-
-    return this.filter(function(x) {
-        var t = typeof x;
-        return (t in prim) ? 
-            !prim[t][x] && (prim[t][x] = 1) :
-            obj.indexOf(x) < 0 && obj.push(x);
-    });
 }
 
 function randomIntFromInterval(min, max) {
