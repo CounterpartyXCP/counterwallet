@@ -38,12 +38,21 @@ div#showAssetInfoModal table tbody {
   position:absolute !important;
   top:11px;
   right:15px;
-  z-index: 999 !important;
+  
+}
+
+.asset-item div.btn-group button {
+  z-index: 2 !important;
+}
+
+.asset-item div.btn-group .dropdown-menu {
+  z-index: 3 !important;
 }
 
 .asset-item h3 {
   position: relative;
   top:-10px;
+  z-index: 1 !important;
 }
 
 .asset-item > * {

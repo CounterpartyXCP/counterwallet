@@ -133,11 +133,6 @@ function AssetViewModel(props) {
     if(!WALLET.canDoTransaction(self.ADDRESS)) return false;
     CHANGE_ASSET_DESCRIPTION_MODAL.show(self.ADDRESS, self);
   };
-
-  self.payDividend = function () {
-    if(!WALLET.canDoTransaction(self.ADDRESS)) return false;
-    PAY_DIVIDEND_MODAL.show(self.ADDRESS, self);
-  };
   
   self.call = function() {
     ///////////////////

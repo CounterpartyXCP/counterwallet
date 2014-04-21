@@ -10,6 +10,21 @@ ko.validation.rules['assetNameIsTaken'] = {
     );   
   }
 };
+// TODO: DRY!!
+ko.validation.rules['assetNameExists'] = {
+  async: true,
+  message: 'Asset name does not exists',
+  validator: function (val, self, callback) {
+    failoverAPI("get_issuances",
+      {'filters': {'field': 'asset', 'op': '==', 'value': val}},
+      function(data, endpoint) {
+        $.jqlog.debug("asset exists: "+data.length);
+        return data.length ? callback(true) : callback(false) //empty list -> false (valid = false)
+      }
+    );   
+  }
+};
+
 ko.validation.rules['isValidAssetDescription'] = {
     validator: function (val, self) {
       return byteCount(val) <= MAX_ASSET_DESC_LENGTH;
@@ -37,7 +52,7 @@ function CreateAssetModalViewModel() {
   self.divisible = ko.observable(true);
   self.quantity = ko.observable().extend({
     required: true,
-    isValidPositiveQuantity: self,
+    isValidPositiveQuantityOrZero: self,
     isValidQtyForDivisibility: self
   });
   self.callable = ko.observable(false);
@@ -377,10 +392,27 @@ var DividendAssetInDropdownItemModel = function(asset, rawBalance, normalizedBal
 };
 function PayDividendModalViewModel() {
   var self = this;
-  self.shown = ko.observable(false);
-  self.address = ko.observable(''); // SOURCE address (supplied)
-  self.asset = ko.observable(null); //dividends are paid to holders of this asset
 
+  self.shown = ko.observable(false);
+  self.addressVM = ko.observable(null); // SOURCE address view model(supplied)
+  self.assetData = ko.observable(null);
+  
+  self.assetName = ko.observable('').extend({
+    required: true,
+    pattern: {
+      message: 'Must be between 4-24 uppercase letters only (A-Z) & cannot start with the letter A.',
+      params: '^[B-Z][A-Z]{3,23}$'
+    },
+    assetNameExists: self,
+    rateLimit: { timeout: 500, method: "notifyWhenChangesStop" }
+  });
+  // TODO: DRY! we already make a query to check if assetName exists
+  self.assetName.subscribe(function(name) {
+    failoverAPI("get_asset_info", [[name]], function(assetsData, endpoint) {
+      self.assetData(assetsData[0]);
+    });
+  });
+  
   self.availableDividendAssets = ko.observableArray([]);
   self.selectedDividendAsset = ko.observable(null).extend({ //dividends are paid IN (i.e. with) this asset
     required: true
@@ -399,15 +431,19 @@ function PayDividendModalViewModel() {
     }    
   });
   
-  self.assetName = ko.computed(function() {
-    if(!self.asset()) return null;
-    return self.asset().ASSET;
-  }, self);
-  
   self.totalPay = ko.computed(function() {
-    if(!self.asset() || !isNumber(self.quantityPerUnit()) || !parseFloat(self.quantityPerUnit())) return null;
-    return Decimal.round(new Decimal(self.quantityPerUnit()).mul(self.asset().normalizedTotalIssued()),
-      8, Decimal.MidpointRounding.ToEven).toFloat();
+    if(!self.assetData() || !isNumber(self.quantityPerUnit()) || !parseFloat(self.quantityPerUnit())) return null;
+
+    var supply = new Decimal(normalizeQuantity(self.assetData().supply, self.assetData().divisible));
+    // we substract user balance for this asset
+    var userAsset = self.addressVM().getAssetObj(self.assetName());
+    if (userAsset) {
+      supply = supply.sub(new Decimal(userAsset.normalizedBalance()));
+    }
+    var totalPay = new Decimal(self.quantityPerUnit()).mul(supply);
+    
+    return Decimal.round(totalPay, 8, Decimal.MidpointRounding.ToEven).toFloat();
+
   }, self);
   
   self.dispTotalPay = ko.computed(function() {
@@ -416,11 +452,11 @@ function PayDividendModalViewModel() {
 
   self.dividendAssetBalance = ko.computed(function() {
     if(!self.selectedDividendAsset()) return null;
-    return WALLET.getBalance(self.address(), self.selectedDividendAsset()); //normalized
+    return WALLET.getBalance(self.addressVM().ADDRESS, self.selectedDividendAsset()); //normalized
   }, self);
 
   self.dividendAssetBalRemainingPostPay = ko.computed(function() {
-    if(!self.asset() || self.dividendAssetBalance() === null || self.totalPay() === null) return null;
+    if(!self.assetData() || self.dividendAssetBalance() === null || self.totalPay() === null) return null;
     return Decimal.round(new Decimal(self.dividendAssetBalance()).sub(self.totalPay()), 8, Decimal.MidpointRounding.ToEven).toFloat();
   }, self);
   
@@ -450,37 +486,38 @@ function PayDividendModalViewModel() {
   
   self.doAction = function() {
     //do the additional issuance (specify non-zero quantity, no transfer destination)
-    WALLET.doTransaction(self.address(), "create_dividend",
-      { source: self.address(),
+    WALLET.doTransaction(self.addressVM().ADDRESS, "create_dividend",
+      { source: self.addressVM().ADDRESS,
         quantity_per_unit: denormalizeQuantity(parseFloat(self.quantityPerUnit())),
-        asset: self.asset().ASSET,
+        asset: self.assetData().asset,
         dividend_asset: self.selectedDividendAsset()
       },
       function(txHash, data, endpoint) {
         self.shown(false);
         bootbox.alert("You have paid a dividend of <b class='notoQuantityColor'>" + self.quantityPerUnit() + "</b>"
           + " <b class='notoAssetColor'>" + self.selectedDividendAsset() + "</b> per outstanding unit to holders of asset"
-          + " <b class='notoAssetColor'>" + self.asset().ASSET + "</b>. " + ACTION_PENDING_NOTICE);
+          + " <b class='notoAssetColor'>" + self.assetData().asset + "</b>. " + ACTION_PENDING_NOTICE);
       }
     );
   }
   
-  self.show = function(address, asset, resetForm) {
+  self.show = function(address, resetForm) {
     if(typeof(resetForm)==='undefined') resetForm = true;
     if(resetForm) self.resetForm();
-    self.address(address);
-    self.asset(asset);
+    self.addressVM(address);
+    self.assetName('');
+    self.assetData(null);
     self.shown(true);
     
     //Get the balance of ALL assets at this address
-    failoverAPI("get_normalized_balances", [[address]], function(data, endpoint) {
+    failoverAPI("get_normalized_balances", [[address.ADDRESS]], function(data, endpoint) {
       for(var i=0; i < data.length; i++) {
         if(data[i]['quantity'] !== null && data[i]['quantity'] !== 0)
           self.availableDividendAssets.push(new DividendAssetInDropdownItemModel(data[i]['asset'], data[i]['quantity'], data[i]['normalized_quantity']));
       }
 
       //Also get the BTC balance at this address and put at head of the list
-      WALLET.retrieveBTCBalance(address, function(balance) {
+      WALLET.retrieveBTCBalance(address.ADDRESS, function(balance) {
         if(balance) {
           self.availableDividendAssets.unshift(new DividendAssetInDropdownItemModel("BTC", balance, normalizeQuantity(balance)));
         }
