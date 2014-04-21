@@ -64,10 +64,13 @@
                 <button class="btn dropdown-toggle btn-xs btn-primary" data-toggle="dropdown"><i class="fa fa-bars"></i> Address Actions <i class="fa fa-caret-down"></i></button>                
                 <ul class="dropdown-menu pull-right">
                   <li><a data-bind="click: showQRCode" href="#">Show QR Code</a></li>
-                  <li><a data-bind="visible: !IS_WATCH_ONLY, click: signMessage" href="#">Sign Message</a></li>
-                  <li><a data-bind="visible: !IS_WATCH_ONLY, click: createAsset" href="#">Create Asset</a></li>
-                  <li><a data-bind="visible: IS_WATCH_ONLY, click: removeWatch" href="#">Remove Address</a></li>
                   <li><a data-bind="click: showPrivateKey" href="#">Show Private Key</a></li>
+                  <li><a data-bind="visible: !IS_WATCH_ONLY, click: signMessage" href="#">Sign Message</a></li>                 
+                  <li><a data-bind="visible: IS_WATCH_ONLY, click: removeWatch" href="#">Remove Address</a></li>
+
+                  <li class="divider"></li><li class="dropdown-header">Issuance...</li>                 
+                  <li><a data-bind="visible: !IS_WATCH_ONLY, click: createAsset" href="#">Create Asset</a></li>                
+                  <li><a data-bind="visible: !IS_WATCH_ONLY, click: payDividend" href="#">Pay Dividend</a></li>
 
                   <li class="divider"></li><li class="dropdown-header">Sort by...</li>
                   <li><a data-bind="click: sortAssetsByName" href="#">Name</a></li>
@@ -97,8 +100,7 @@
                     <li data-bind="visible: !$parent.IS_WATCH_ONLY && isMine() && !locked()"><a data-bind="click: issueAdditional" href="#">Issue Additional</a></li>
                     <li data-bind="visible: !$parent.IS_WATCH_ONLY && isMine()"><a data-bind="click: transfer" href="#">Transfer Ownership</a></li>
                     <li data-bind="visible: !$parent.IS_WATCH_ONLY && isMine() && !locked()"><a data-bind="click: lock" href="#">Lock Asset Issuance</a></li>
-                    <li data-bind="visible: !$parent.IS_WATCH_ONLY && isMine()"><a data-bind="click: changeDescription" href="#">Change Asset Description</a></li>
-                    <li data-bind="visible: !$parent.IS_WATCH_ONLY && isMine()"><a data-bind="click: payDividend" href="#">Pay Dividend</a></li>
+                    <li data-bind="visible: !$parent.IS_WATCH_ONLY && isMine()"><a data-bind="click: changeDescription" href="#">Change Asset Description</a></li>    
                     <li data-bind="visible: !$parent.IS_WATCH_ONLY && isMine() && CALLABLE"><a data-bind="click: call" href="#">Call</a></li>
                   </ul>
                 </div>
@@ -286,7 +288,7 @@
             <label class="control-label col col-sm-2">Assets to Sweep</label>
             <div class="col col-sm-10">
                 <label class="input">
-                    <select multiple="true" class="width-max" data-bind="options: availableAssetsToSweep, optionsValue: 'ASSET', optionsText: 'SELECT_LABEL', select2: { minimumResultsForSearch: 10, escapeMarkup: 'direct' }, selectedOptions: selectedAssetsToSweep"></select>
+                    <select id="availableAssetsToSweep" multiple="true" class="width-max" data-bind="options: availableAssetsToSweep, optionsValue: 'ASSET', optionsText: 'SELECT_LABEL', select2: { minimumResultsForSearch: 10, escapeMarkup: 'direct' }, selectedOptions: selectedAssetsToSweep"></select>
                 </label>
                 <span class="invalid" data-bind="validationMessage: selectedAssetsToSweep"></span>
                 <div class="note">Select all of the assets whose total balances you want to move into the destination address.</div>
@@ -630,13 +632,24 @@
     <div class="modal-content">
       <div class="modal-header">
         <button type="button" data-bind="click: hide" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
-        <h4 class="modal-title">Pay Dividend on <span data-bind="text: assetName"></span></h4>
+        <h4 class="modal-title">Pay Dividend</h4>
       </div>
       <div class="modal-body no-padding">
-        <p class="formPadded">Use this form to pay holders of <b><span data-bind="text: assetName"></span></b> a dividend using XCP or any other asset.
+        <p class="formPadded">Use this form to pay holders of any asset a dividend using XCP or any other asset.
         <i>Note that the full required balance of the asset paid out must be present at this same address.</i><br/><br/>
        <b class="errorRed">Please NOTE that this action is irreversable!</b></p>
         <form class="smart-form" data-bind="submit: doAction"><fieldset>
+
+          <section><div class="row">
+            <label class="control-label col col-sm-2">Asset Name</label>
+            <div class="col col-sm-10">
+                <label class="input"><i class="icon-append fa fa-tag"></i>
+                    <input name="assetName" data-bind="value: assetName, valueUpdate : 'input'" type="text"/>
+                </label>
+                <div class="note">The asset's trading symbol.</div>
+            </div>
+          </div></section>
+
           <section><div class="row">
             <label class="control-label col col-sm-2">Dividend Asset</label>
             <div class="col col-sm-10">
