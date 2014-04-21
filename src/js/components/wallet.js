@@ -392,10 +392,10 @@ function WalletViewModel() {
     var addressObj = self.getAddressObj(address);
     assert(!addressObj.IS_WATCH_ONLY, "Cannot perform this action on a watch only address!");
     if(self.getBalance(address, "BTC", false) < MIN_PRIME_BALANCE) {
-      bootbox.alert("Can't do this action as you have insufficient <b class='notoAssetColor'>BTC</b> at this address, and Counterparty actions require a"
-        + " small balance of <b class='notoAssetColor'>BTC</b> to perform (approximately"
-        + " <b class='notoQuantityColor'>" + normalizeQuantity(MIN_PRIME_BALANCE) + "</b> <b class='notoAssetColor'>BTC</b> per transaction).<br/><br/>"
-        + "Please deposit some <b class='notoAssetColor'>BTC</b> into <b class='notoAddrColor'>" + getAddressLabel(address) + "</b> and try again.");
+      bootbox.alert("Cannot do this action as you have insufficient <b class='notoAssetColor'>BTC</b> at this address."
+        + "Due to Bitcoin fees, each Counterparty action requires"
+        + " approximately <b class='notoQuantityColor'>" + normalizeQuantity(MIN_PRIME_BALANCE) + "</b> <b class='notoAssetColor'>BTC</b> to perform.<br/><br/>"
+        + "Please deposit the necessary <b class='notoAssetColor'>BTC</b> into <b class='notoAddrColor'>" + getAddressLabel(address) + "</b> and try again.");
       return false;
     }
     return true;

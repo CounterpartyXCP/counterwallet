@@ -158,17 +158,25 @@ $(document).ready(function() {
     imagePath: 'assets/', // Path where images are located
     display: ['chrome', 'firefox', 'safari'],
     browserInfo: { // Settings for which browsers to display
+      chrome: {
+        text: 'Chrome 23+',
+        url: 'http://www.google.com/chrome/‎'
+      },
+      firefox: {
+        text: 'Firefox 25+',
+        url: 'http://www.mozilla.org/en-US/firefox/new/‎'
+      },
       safari: {
-        text: 'Safari',
+        text: 'Safari 7+',
         url: 'http://www.apple.com/safari/download/'
       },
       opera: {
-        text: 'Opera',
+        text: 'Opera 15+',
         url: 'http://www.opera.com/download/'
       }      
     },
     header: 'Your browser is not supported with Counterwallet',
-    paragraph1: "Counterwallet's security features require a newer browser than what you are using."
+    paragraph1: "Counterwallet's security features require a newer browser than what you are using. We recommend Chrome for the best user experience."
       + " Also, note that Microsoft Internet Explorer is not supported due to it's lack of full support for Content-Security-Policy restrictions.",
     close: false,
     closeESC: false
