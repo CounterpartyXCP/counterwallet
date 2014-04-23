@@ -47,9 +47,9 @@
     Note that depending on the speed at which blocks are solved, it could take anywhere from 2 to 40 minutes for your actions to be confirmed.<br/><br/>
 </div>
 
-<div id="pendingBTCPayNotice" data-bind="fadeVisibleInOnly: WALLET.isSellingBTC()" class="alert alert-info alert-block">
+<div id="pendingBTCPayNotice" data-bind="fadeVisibleInOnly: needWarningOnExit()" class="alert alert-danger alert-block">
     <i class="fa-fw fa fa-btc"></i>
-    <strong>BTCPay Pending:</strong> As you have one or more open sell orders for BTC, please stay logged in so that the order(s) can be properly filled.
+    <strong>Sell BTC Pending:</strong> As you have one or more open sell orders for BTC, please stay logged in so that the order(s) can be properly filled.
 </div>
 
 <section id="widget-grid" class="balancesContainer" data-bind="foreach: addresses"> <!-- widget grid -->

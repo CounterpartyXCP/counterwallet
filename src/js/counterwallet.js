@@ -113,8 +113,15 @@ function loadServersListAndSettings() {
   });
 }
 
+function needWarningOnExit() {
+  return (window.WALLET && WALLET.isSellingBTC()) ||
+         window.OPEN_ORDER_FEED.sellBTCOrdersCount() ||
+         window.PENDING_ACTION_FEED.pendingSellBTCOrdersCount();
+
+}
+
 function warningOnExit() {
-  if (window.WALLET && WALLET.isSellingBTC()) {
+  if (needWarningOnExit()) {
     return "If you log out, any Bitcoin sell orders you have open will probably not be filled.";
   }
 }
