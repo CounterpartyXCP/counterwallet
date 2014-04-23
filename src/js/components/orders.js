@@ -80,7 +80,7 @@ function OrdersViewModel() {
       params: self
     }    
   });
-  self.minBTCFeeProvidedPct = ko.observable(ORDER_DEFAULT_BTCFEE_PCT).extend({
+  self.minBTCFeeProvidedPct = ko.observable(ORDER_DEFAULT_BTCFEE_PCT*1.05).extend({
     required: {
       message: "This field is required.",
       onlyIf: function () { return self.asset1() == 'BTC' || self.asset2() == 'BTC'; }
@@ -88,7 +88,7 @@ function OrdersViewModel() {
     isValidPositiveQuantityOrZero: self,
     max: 100
   });
-  self.maxBTCFeeRequiredPct = ko.observable(ORDER_DEFAULT_BTCFEE_PCT).extend({
+  self.maxBTCFeeRequiredPct = ko.observable(ORDER_DEFAULT_BTCFEE_PCT*0.95).extend({
     required: {
       message: "This field is required.",
       onlyIf: function () { return self.asset1() == 'BTC' || self.asset2() == 'BTC'; }
