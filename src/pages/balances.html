@@ -47,9 +47,9 @@
     Note that depending on the speed at which blocks are solved, it could take anywhere from 2 to 40 minutes for your actions to be confirmed.<br/><br/>
 </div>
 
-<div id="pendingBTCPayNotice" data-bind="fadeVisibleInOnly: WALLET.isSellingBTC()" class="alert alert-info alert-block">
+<div id="pendingBTCPayNotice" data-bind="fadeVisibleInOnly: needWarningOnExit()" class="alert alert-danger alert-block">
     <i class="fa-fw fa fa-btc"></i>
-    <strong>BTCPay Pending:</strong> As you have one or more open sell orders for BTC, please stay logged in so that the order(s) can be properly filled.
+    <strong>Sell BTC Pending:</strong> As you have one or more open sell orders for BTC, please stay logged in so that the order(s) can be properly filled.
 </div>
 
 <section id="widget-grid" class="balancesContainer" data-bind="foreach: addresses"> <!-- widget grid -->
@@ -267,8 +267,8 @@
         
         <form class="smart-form" data-bind="submit: doAction, visible: sweepingProgressionMessage()==''"><fieldset>
           <section><div class="row">
-            <label class="control-label col col-sm-2">Private Key To Import</label>
-            <div class="col col-sm-10">
+            <label class="control-label col col-sm-12">Private Key To Import</label>
+            <div class="col col-sm-12">
                 <label class="input"><i class="icon-append fa fa-lock"></i>
                     <input name="privateKey" data-bind="value: privateKey, valueUpdate: 'input', attr: {placeholder: 'Enter Bitcoin private key'}" type="text"/>
                 </label>
@@ -277,16 +277,16 @@
             </div>
           </div></section>
           <section><div class="row">
-            <label class="control-label col col-sm-2">Destination Address</label>
-            <div class="col col-sm-10">
+            <label class="control-label col col-sm-12">Destination Address</label>
+            <div class="col col-sm-12">
                 <select class="width-max" data-bind="options: availableAddresses, optionsValue: 'ADDRESS', optionsText: 'SELECT_LABEL', select2: { minimumResultsForSearch: 10, escapeMarkup: 'direct' }, value: destAddress"></select>
                 <span class="invalid" data-bind="validationMessage: destAddress"></span>
                 <div class="note">Select the address in your wallet that the specified assets for the private key above should be send to.</div>
             </div>
           </div></section>
           <section data-bind="fadeVisibleInOnly: availableAssetsToSweep().length >= 1"><div class="row">
-            <label class="control-label col col-sm-2">Assets to Sweep</label>
-            <div class="col col-sm-10">
+            <label class="control-label col col-sm-12">Assets to Sweep</label>
+            <div class="col col-sm-12">
                 <label class="input">
                     <select id="availableAssetsToSweep" multiple="true" class="width-max" data-bind="options: availableAssetsToSweep, optionsValue: 'ASSET', optionsText: 'SELECT_LABEL', select2: { minimumResultsForSearch: 10, escapeMarkup: 'direct' }, selectedOptions: selectedAssetsToSweep"></select>
                 </label>
@@ -294,8 +294,18 @@
                 <div class="note">Select all of the assets whose total balances you want to move into the destination address.</div>
             </div>
           </div></section>
+          <section data-bind="visible: notEnoughBTC() || addressForFeesBalance()>0"><div class="row">
+            <label class="control-label col col-sm-12">Private Key used to pay fees</label>
+            <div class="col col-sm-12">
+                <label class="input"><i class="icon-append fa fa-lock"></i>
+                    <input name="privateKeyForFees" data-bind="value: privateKeyForFees, valueUpdate: 'input', attr: {placeholder: 'Enter Bitcoin private key'}" type="text"/>
+                </label>
+                <span class="invalid" data-bind="validationMessage: privateKeyForFees"></span>
+                <span class="note" data-bind="text: addressForFeesBalanceMessage, visible:addressForFeesBalanceMessage()!=''"></span>
+                <div class="note">Enter the unencrypted private key that cooresponds to the address used to pay fees.</div>
+            </div>
+          </div></section>
         </fieldset></form>
-
         <fieldset data-bind="visible: sweepingProgressionMessage()!=''">
           <section><div class="row" style="margin:15px">
             <p class="message .txt-color-orangeDark" data-bind="text: sweepingProgressionMessage" style="font-weight:bold;"></p>
