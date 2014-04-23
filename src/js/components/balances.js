@@ -638,11 +638,12 @@ function SweepModalViewModel() {
     assert(key.priv !== null && key.compressed !== null, "Private key not valid!"); //should have been checked already
     var pubkey = key.getPub().toHex();
     
-    // if address has one ouptut, it will have two after this transaction..
+    // if address has one ouptut, it will has two after this transaction..
     // ..so need output merging
     if (self.txoutsCountForPrivateKey==1) {
       self.missingBtcForFees += MIN_FEE;
     }
+    $.jqlog.debug('missingBtcForFees: '+self.missingBtcForFees);
 
     var sendData = {
       source: self.addressForPrivateKeyForFees(),
