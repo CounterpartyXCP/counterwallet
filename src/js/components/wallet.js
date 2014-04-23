@@ -452,7 +452,7 @@ function WalletViewModel() {
           }
           PENDING_ACTION_FEED.add(txHash, category, data);
           
-          return onSuccess(txHash, data, endpoint);
+          return onSuccess ? onSuccess(txHash, data, endpoint) : null;
         }, onError, verifyDestAddr);
     });
   }
