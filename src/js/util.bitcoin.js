@@ -13,6 +13,17 @@ function denormalizeQuantity(quantity, divisible) {
   //^ we have the quantity !== 0 check due to a bug in Decimal (https://github.com/hiroshi-manabe/JSDecimal/issues/2)
 }
 
+function addFloat(floatA, floatB) {
+  var a = new Decimal(floatA);
+  var b = new Decimal(floatB);
+  return a.add(b).toFloat();
+}
+
+function subFloat(floatA, floatB) {
+  return addFloat(floatA, -floatB);
+}
+
+
 function hashToB64(content) {
   //used for storing address alias data, for instance
   //return Bitcoin.Crypto.SHA256(content).toString(Bitcoin.Crypto.enc.Base64);  
