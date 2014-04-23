@@ -20,6 +20,11 @@ div#showAssetInfoModal table tbody {
   overflow: scroll;    
 }
 
+#sendAmountLabel {
+  width: 80%;
+  display: inline-block;    
+}
+
 .asset-item {
   position: relative;
   float: left;

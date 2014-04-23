@@ -41,5 +41,5 @@
     "src/vendors/select2/select2.min.js": "231818c9b851ff39ad5f17dc24837c79560199e7fdaa3eb0be153527a2b9e0bd",
     "src/vendors/socket.io-client/dist/socket.io.min.js": "17f4c075ad907cb0fb38bf76de5d0af7832a95cddf1bf642e75daadf8d1e5201",
     "src/vendors/jqlog/jquery.jqlog-1.3.min.js": "15bdd1693ad39873922e017c5570c49233c5d5e7c2f209ec32145b3badf36291",
-    "src/vendors/bitcoinjs-lib/bitcoinjs-min.js": "f968696a779f708e2e63cdf798fade2f91ddd462f443f5622372914791b509b9"
+    "src/vendors/bitcoinjs-lib/bitcoinjs-min.js": "9c0ad40d3bf912a586e325c3ddd78d2e10217d5f78cc58f82c681e01cb2de09d"
 }
