@@ -253,7 +253,7 @@ function SendModalViewModel() {
   self.maxAmount = function() {
     assert(self.normalizedBalance(), "No balance present?");
     if(self.asset() == 'BTC')
-      self.quantity(self.normalizedBalance() - normalizeQuantity(MIN_FEE));
+      self.quantity(subFloat(self.normalizedBalance(), normalizeQuantity(MIN_FEE)));
     else
       self.quantity(self.normalizedBalance());
   }
