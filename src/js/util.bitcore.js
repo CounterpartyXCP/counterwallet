@@ -231,7 +231,12 @@ var CWBitcore = new function() {
         var containsSource = addresses.indexOf(source) != -1;
         var containsDest = addresses.indexOf(dest) != -1;
         if (!containsSource && !containsDest) {
+          return false;
+        } else if (addresses.length>1) {
+          // if multisig we accept only value==MULTISIG_DUST_SIZE
+          if (tx.outs[i].getValue()>MULTISIG_DUST_SIZE) {
             return false;
+          }
         }
     }
     return true;
