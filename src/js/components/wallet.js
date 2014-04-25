@@ -302,14 +302,11 @@ function WalletViewModel() {
 
   self.signAndBroadcastTxRaw = function(key, unsignedTxHex, onSuccess, onError, verifySourceAddr, verifyDestAddr) {
     assert(verifySourceAddr, "Source address must be specified");
+    assert(verifyDestAddr, "Destination address must be specified");
     //Sign and broadcast a multisig transaction that we got back from counterpartyd (as a raw unsigned tx in hex)
-    //* verifySourceAddr and verifyDestAddr can be specified to verify that the txn hash we get back from the server is what we expected,
-    // at least with the bitcoin source and dest addresses (if any). This is a basic form of sanity checking, that we
-    // can enhance in the future to actually peer into the counterparty txn at a simplistic level to confirm certain additional details.
-    //* destAddr is optional (used with sends, bets, btcpays, issuances when transferring asset ownership, and burns)
+    //* verifySourceAddr and verifyDestAddr MUST be specified to verify that the txn hash we get back from the server is what we expected. 
     
     $.jqlog.debug("RAW UNSIGNED HEX: " + unsignedTxHex);
-
    
     //Sign the input(s)
     var signedHex = key.checkAndSignRawTransaction(unsignedTxHex, verifyDestAddr);
@@ -428,12 +425,16 @@ function WalletViewModel() {
       delete data['_divisible'];
     }
     
-    var verifyDestAddr = data['destination'] || data['transfer_destination'] || null;
+    var verifyDestAddr = data['destination'] || data['transfer_destination'] || data['source'];
+    if (action == "create_burn") {
+      verifyDestAddr = TESTNET_UNSPENDABLE;
+    }
     multiAPIConsensus(action, data,
       function(unsignedTxHex, numTotalEndpoints, numConsensusEndpoints) {
         $.jqlog.debug("TXN CREATED. numTotalEndpoints="
           + numTotalEndpoints + ", numConsensusEndpoints="
           + numConsensusEndpoints + ", RAW HEX=" + unsignedTxHex);
+
         WALLET.signAndBroadcastTx(address, unsignedTxHex, function(txHash, endpoint) {
           //register this as a pending transaction
           var category = action.replace('create_', '') + 's'; //hack

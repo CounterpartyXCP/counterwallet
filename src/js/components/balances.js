@@ -740,7 +740,7 @@ function SweepModalViewModel() {
     multiAPIConsensus("create_issuance", transferData,
       function(unsignedTxHex, numTotalEndpoints, numConsensusEndpoints) {
         
-        var signedHex = key.checkAndSignRawTransaction(unsignedTxHex,self.destAddress());
+        var signedHex = key.checkAndSignRawTransaction(unsignedTxHex, self.destAddress());
         WALLET.broadcastSignedTx(signedHex, function(issuanceTxHash, endpoint) { //broadcast was successful
           opsComplete.push({
             'type': 'transferOwnership',
