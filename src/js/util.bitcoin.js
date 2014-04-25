@@ -26,8 +26,7 @@ function subFloat(floatA, floatB) {
 
 function hashToB64(content) {
   //used for storing address alias data, for instance
-  //return Bitcoin.Crypto.SHA256(content).toString(Bitcoin.Crypto.enc.Base64);  
-  return Bitcoin.convert.bytesToBase64(Bitcoin.crypto.sha256(content));
+  return CryptoJS.SHA256(content).toString(CryptoJS.enc.Base64); 
 }
 
 function smartFormat(num, truncateDecimalPlacesAtMin, truncateDecimalPlacesTo) { //arbitrary rules to make quantities formatted a bit more friendly
@@ -122,22 +121,30 @@ function testnetBurnDetermineEarned(blockHeight, burned) {
   return normalizeQuantity(earned);
 }
 
-/*
-Blockchain info uses a simple Base58.encode as defaut format.
-Bitcoinjs-lib detect a Base64 format because length is also 44
-Here we assume that if key length is 44 and not end by = we have
-a blockchain.info base58 encoded key.
-TODO: it's true also for the last bitcoinjs version=> make a PR
-*/
-function isBase58BlockchainInfoKey(privateKey) {
-  return privateKey.length==44 && privateKey.indexOf("=")==-1;
+// from bitcoinjs-lib
+function bytesToBase64(bytes) {
+  var base64map = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/'
+  var base64 = []
+
+  for (var i = 0; i < bytes.length; i += 3) {
+    var triplet = (bytes[i] << 16) | (bytes[i + 1] << 8) | bytes[i + 2]
+
+    for (var j = 0; j < 4; j++) {
+      if (i * 8 + j * 6 <= bytes.length * 8) {
+        base64.push(base64map.charAt((triplet >>> 6 * (3 - j)) & 0x3F))
+      } else {
+        base64.push('=')
+      }
+    }
+  }
+
+  return base64.join('')
 }
 
-function BitcoinECKey(privateKey) {
-  if (isBase58BlockchainInfoKey(privateKey)) {
-    privateKey = Bitcoin.base58.decode(privateKey);
-    return Bitcoin.ECKey(privateKey);
-  }
-  return Bitcoin.ECKey(privateKey);
+// from bitcoinjs-lib
+function stringToBytes(string) {
+  return string.split('').map(function(x) {
+    return x.charCodeAt(0)
+  })
 }
 

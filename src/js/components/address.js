@@ -3,12 +3,12 @@ function AddressViewModel(key, address, initialLabel) {
   //An address on a wallet
   var self = this;
   
-  self.KEY = key; //  key : the bitcoinjs-lib ECKey object
+  self.KEY = key; //  key : the BIP32 bitcore object
   //^ if null, then this is a WATCH ONLY address
   self.IS_WATCH_ONLY = !self.KEY;
   
   self.ADDRESS = address;
-  self.PUBKEY = key ? key.getPub().toHex() : ''; //hex string
+  self.PUBKEY = key ? key.getPub() : ''; //hex string
 
   self.lastSort = '';
   self.lastSortDirection = '';

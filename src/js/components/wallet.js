@@ -2,7 +2,7 @@
 function WalletViewModel() {
   //The user's wallet
   var self = this;
-  self.BITCOIN_WALLET = null; //Bitcoin.Wallet() BIP0032 wallet instance
+  self.BITCOIN_WALLET = null; // CWBIP32 instance
   self.autoRefreshBTCBalances = true; //auto refresh BTC balances every 5 minutes
   
   self.identifier = ko.observable(null); //set when logging in
@@ -13,13 +13,19 @@ function WalletViewModel() {
   
   self.isSellingBTC = ko.observable(false); //updated by the btcpay feed
 
-  self.addAddress = function(key) {
+  self.addAddress = function() {
     //adds a key to the wallet, making a new address object on the wallet in the process
     //(assets must still be attached to this address, with updateBalances() or other means...)
     //also, a label should already exist for the address in PREFERENCES.address_aliases by the time this is called
 
     //derive an address from the key (for the appropriate network)
-    var address = key.getAddress(NETWORK_VERSION).toString();
+    var i = self.addresses().length;
+    
+    // m : masterkery / 0' : first private derivation / 0 : external account / i : index
+    var key = self.BITCOIN_WALLET.getAddressKey(i);
+    var address = key.getAddress();
+
+
     //Make sure this address doesn't already exist in the wallet (sanity check)
     assert(!self.getAddressObj(address), "Cannot addAddress: address already exists in wallet!");
     //see if there's a label already for this address that's stored in PREFERENCES, and use that if so
@@ -30,6 +36,8 @@ function WalletViewModel() {
 
     self.addresses.push(new AddressViewModel(key, address, label)); //add new
     $.jqlog.debug("Wallet address added: " + address + " -- hash: " + addressHash + " -- label: " + label);
+
+    return address;
   }
   
   self.addWatchOnlyAddress = function(address) {
@@ -134,7 +142,7 @@ function WalletViewModel() {
         assets.push(assetObj.ASSET);
       }
     }
-    return assets.unique();
+    return arrayUnique(assets);
   }
 
   self.getAssetsOwned = function() { //gets assets the user actually owns (is issuer of)
@@ -149,7 +157,7 @@ function WalletViewModel() {
           assets.push(assetObj.ASSET);
       }
     }
-    return assets.unique();
+    return arrayUnique(assets);
   }
   
   self.refreshCounterpartyBalances = function(addresses, onSuccess) {
@@ -168,7 +176,7 @@ function WalletViewModel() {
         var assets = [];
         //Make a unique list of assets
         for(i=0; i < balancesData.length; i++) {
-          if(!assets.contains(balancesData[i]['asset']))
+          if(assets.indexOf(balancesData[i]['asset'])==-1)
           assets.push(balancesData[i]['asset']);
         }
         failoverAPI("get_asset_info", [assets], function(assetsInfo, endpoint) {
@@ -276,6 +284,11 @@ function WalletViewModel() {
   /////////////////////////
   //BTC-related
   self.broadcastSignedTx = function(signedTxHex, onSuccess, onError) {
+    if (signedTxHex==false) {
+      bootbox.alert("Client-side transaction validation FAILED. Transaction will be aborted and NOT broadcast."
+                    + " Please contact the Counterparty development team");
+      return false;
+    }
     $.jqlog.debug("RAW SIGNED HEX: " + signedTxHex);
     
     failoverAPI("broadcast_tx", {"signed_tx_hex": signedTxHex},
@@ -295,34 +308,18 @@ function WalletViewModel() {
     // can enhance in the future to actually peer into the counterparty txn at a simplistic level to confirm certain additional details.
     //* destAddr is optional (used with sends, bets, btcpays, issuances when transferring asset ownership, and burns)
     
-    var sendTx = Bitcoin.Transaction.deserialize(unsignedTxHex), i = null;
-    //$.jqlog.debug("RAW UNSIGNED HEX: " + unsignedTxHex);
-    
-    //Sanity check on the txn source address and destination address (if specified)
-    var address = null, addr = null;
-    for (i=0; i < sendTx.outs.length; i++) {
-      address = sendTx.outs[i].address;
-      address.version = !USE_TESTNET ? Bitcoin.network.mainnet.addressVersion : Bitcoin.network.testnet.addressVersion;
-      addr = address.toString();
-      if(addr[0] != '1' && addr[0] != 'm' && addr[0] != 'n') continue; //not a pubkeyhash (i.e. address), skip
-      if(addr.length != 33 && addr.length != 34 && addr.length != 35) continue; //not a pubkeyhash (i.e. address), skip
-      //if an address is present, it must be either destAddress, or sourceAddress (i.e. for getting change)
-      if(addr != verifySourceAddr && (verifyDestAddr && addr != verifyDestAddr)) {
-        bootbox.alert("Client-side transaction validation FAILED. Transaction will be aborted and NOT broadcast."
-          + " Please contact the Counterparty development team. Unexpected address was: " + addr);
-        return false;
-      }
-    }
-    
+    $.jqlog.debug("RAW UNSIGNED HEX: " + unsignedTxHex);
+
+   
     //Sign the input(s)
-    for (i=0; i < sendTx.ins.length; i++) {
-      sendTx.sign(i, key);
-    }
-    return self.broadcastSignedTx(sendTx.serializeHex(), onSuccess, onError);
+    var signedHex = key.checkAndSignRawTransaction(unsignedTxHex, verifyDestAddr);
+    return self.broadcastSignedTx(signedHex, onSuccess, onError);
+
+    
   }
   
   self.signAndBroadcastTx = function(address, unsignedTxHex, onSuccess, onError, verifyDestAddr) {
-    var key = WALLET.getAddressObj(address).KEY;    
+    var key = WALLET.getAddressObj(address).KEY;
     return self.signAndBroadcastTxRaw(key, unsignedTxHex, onSuccess, onError, address, verifyDestAddr);
   }
   

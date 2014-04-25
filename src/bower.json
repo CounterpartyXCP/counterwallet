@@ -30,6 +30,7 @@
         "socket.io-client": "0.9.16",
         "typeahead.js": "0.10.2",
         "select2": "3.4.6",
-        "font-awesome": "4.0.3"
+        "font-awesome": "4.0.3",
+        "bitcore": "https://github.com/bitpay/bitcore.git#0.1.12"
     }
 }

@@ -507,7 +507,9 @@ function BuySellWizardViewModel() {
     for(var i=0; i < addresses.length; i++) {
         assets = assets.concat(WALLET.getAddressObj(addresses[i]).getAssetsList());
     }
-    assets = assets.remove('XCP').remove('BTC').unique();
+    assets = arrayRemove(assets, 'XCP');
+    assets = arrayRemove(assets, 'BTC');
+    assets = arrayUnique(assets);
     self.myAssets(assets);
     
     self.buyAsset.subscribe(function(newValue) {

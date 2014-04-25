@@ -1,6 +1,8 @@
 /***********
  * GLOBAL INITALIZATION
  ***********/
+
+
 function assert(condition, message) { if (!condition) throw message || "Assertion failed"; }
 
 //Set up logging (jqlog) and monkey patch jqlog with a debug function
