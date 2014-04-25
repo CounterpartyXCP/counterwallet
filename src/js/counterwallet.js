@@ -4,6 +4,7 @@
 
 
 function assert(condition, message) { if (!condition) throw message || "Assertion failed"; }
+function checkArgType(arg, type) { assert((typeof arg).toLowerCase() == type.toLowerCase(), "Invalid argument type"); }
 
 //Set up logging (jqlog) and monkey patch jqlog with a debug function
 $.jqlog.enabled(true);

@@ -1,6 +1,7 @@
 var bitcore = require('bitcore');
 
 var CWBIP32 = function(passphrase) {
+  checkArgType(passphrase, "string")
 
   var sanitizedPassphrase = $.trim(passphrase.toLowerCase());
   var m = new Mnemonic(sanitizedPassphrase.split(' '));
@@ -12,6 +13,8 @@ var CWBIP32 = function(passphrase) {
   this.basePath = 'm/0\'/0/'
 
   this.getAddressKey = function(index) {
+    checkArgType(index, "number");
+
     var derivedKey = this.BIP32.derive(this.basePath+index);
     return new CWPrivateKey(bitcore.buffertools.toHex(derivedKey.eckey.private));
   }
@@ -69,14 +72,19 @@ var CWPrivateKey = function(priv) {
   }
 
   this.signRawTransaction = function(unsignedHex) {
+    checkArgType(unsignedHex, "string");
     return CWBitcore.signRawTransaction(unsignedHex, this);
   }
 
   this.checkTransactionDest = function(txHex, destAdress) {
+    checkArgType(txHex, "string");
+    checkArgType(destAdress, "string");
     return CWBitcore.checkTransactionDest(txHex, this.getAddress(), destAdress);
   }
 
   this.checkAndSignRawTransaction = function(unsignedHex, destAdress) {
+    checkArgType(unsignedHex, "string");
+    checkArgType(destAdress, "string");
     if (this.checkTransactionDest(unsignedHex, destAdress)) {
       return this.signRawTransaction(unsignedHex);
     }
@@ -109,6 +117,8 @@ var CWBitcore = new function() {
 
 
   this.prepareSignedTransaction = function(unsignedTx) {
+    checkArgType(unsignedTx, "object");
+
     var txobj = {}; 
     txobj.version    = unsignedTx.version;
     txobj.lock_time  = unsignedTx.lock_time;
@@ -124,7 +134,18 @@ var CWBitcore = new function() {
     return new bitcore.Transaction(txobj);
   }
 
+  this.parseRawTransaction = function(txHex) {
+    checkArgType(txHex, "string");
+
+    var raw = new bitcore.buffertools.Buffer(txHex, 'hex');
+    var tx = new bitcore.Transaction();
+    tx.parse(raw);
+    return tx;
+  }
+
   this.signRawTransaction = function(unsignedHex, cwPrivateKey) {
+    checkArgType(unsignedHex, "string");
+    checkArgType(cwPrivateKey, "object");
 
     var address = cwPrivateKey.getAddress();
 
@@ -140,9 +161,7 @@ var CWBitcore = new function() {
     wkMap[address] = new bitcore.WalletKey({network:NETWORK_CONF, privKey:cwPrivateKey.getBitcoreECKey()});
 
     // unserialize raw transaction
-    var raw = new bitcore.buffertools.Buffer(unsignedHex, 'hex');
-    var unsignedTx = new bitcore.Transaction();
-    unsignedTx.parse(raw);
+    var unsignedTx = CWBitcore.parseRawTransaction(unsignedHex);   
 
     // prepare  signed transaction
     var signedTx = new bitcore.TransactionBuilder();
@@ -177,24 +196,44 @@ var CWBitcore = new function() {
     return signedTx.tx.serialize().toString('hex');
   }
 
+  this.extractAddressFromTxOut = function(txout) {
+    checkArgType(txout, "object");
+
+    var script = txout.getScript();
+    return bitcore.Address.fromScriptPubKey(script, NETWORK_CONF.name).toString();
+  }
+
   this.extractChangeTxoutValue = function(source, txHex) {
+    checkArgType(source, "string");
+    checkArgType(txHex, "string");
+
     // unserialize raw transaction
-    var raw = new bitcore.buffertools.Buffer(txHex, 'hex');
-    var tx = new bitcore.Transaction();
-    tx.parse(raw);
+    var tx = CWBitcore.parseRawTransaction(txHex);
+
     for (var i=0; i<tx.outs.length; i++) {
-        var txout = tx.outs[i];
-        var value = txout.getValue();
-        var script = txout.getScript();
-        var address = bitcore.Address.fromScriptPubKey(script, NETWORK_CONF.name).toString();
-        if (address==source) {
-            return value;
+        var address = CWBitcore.extractAddressFromTxOut(tx.outs[i]);
+        if (address == source) {
+            return tx.outs[i].getValue();
         }
     }
     return 0;
   }
 
-  this.checkTransactionDest = function(txHex, source, dest) {
+  this.checkTransactionDest = function(txHex, source, dest) { 
+    checkArgType(txHex, "string"); 
+    checkArgType(source, "string");
+    checkArgType(dest, "string");
+
+    // unserialize raw transaction
+    var tx = CWBitcore.parseRawTransaction(txHex);    
+    for (var i=0; i<tx.outs.length; i++) {
+        var addresses = CWBitcore.extractAddressFromTxOut(tx.outs[i]).split(',');
+        var containsSource = addresses.indexOf(source) != -1;
+        var containsDest = addresses.indexOf(dest) != -1;
+        if (!containsSource && !containsDest) {
+            return false;
+        }
+    }
     return true;
   } 
 
