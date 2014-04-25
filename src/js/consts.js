@@ -16,7 +16,8 @@ var APPROX_SECONDS_PER_BLOCK = 8 * 60; //a *rough* estimate on how many seconds 
 var MIN_PRIME_BALANCE = 50000; //in satoshis ... == .0005
 var ASSET_CREATION_FEE_XCP = 0.5; //in normalized XCP
 var MAX_ASSET_DESC_LENGTH = 41; //42, minus a null term character?
-var ORDER_DEFAULT_BTCFEE_PCT = 1; //1% of total order
+var FEE_FRACTION_REQUIRED_DEFAULT_PCT = .9   //0.90% of total order
+var FEE_FRACTION_PROVIDED_DEFAULT_PCT = 1    //1.00% of total order
 
 //Order expiration
 var ORDER_DEFAULT_EXPIRATION = 1000; //num blocks until expiration (at ~9 min per block this is ~6.75 days)

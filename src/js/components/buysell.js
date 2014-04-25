@@ -257,7 +257,8 @@ function BuySellWizardViewModel() {
     max: ORDER_MAX_EXPIRATION //arbitrary
   });
   //^ default to expiration in this many blocks
-  self.btcFee = ko.observable(ORDER_DEFAULT_BTCFEE_PCT).extend({
+  
+  self.btcFee = ko.observable(0).extend({
     required: {
       message: "This field is required.",
       onlyIf: function () { return self.overrideDefaultOptions(); }
@@ -363,12 +364,13 @@ function BuySellWizardViewModel() {
     var fee = 0;
     if(self.buyAsset() == 'BTC' || self.sellAsset() == 'BTC') {
       var quantity = self.buyAsset() == 'BTC' ? self.selectedBuyQuantity() : self.selectedSellQuantity();
+      var defaulFeePCT = self.buyAsset() == 'BTC' ? FEE_FRACTION_REQUIRED_DEFAULT_PCT : FEE_FRACTION_PROVIDED_DEFAULT_PCT;
       
       if(!isNumber(quantity) || parseFloat(quantity) == 0) return 0; //no quantity == zero fee (since there is nothing to get e.g. 1% from)
       
       if(self.btcFeeAs() == 'percentage') {
         if(!parseFloat(self.btcFee())) return 0;
-        fee = Decimal.round(new Decimal(quantity).mul((self.btcFee() ? self.btcFee() : ORDER_DEFAULT_BTCFEE_PCT) / 100), 8, Decimal.MidpointRounding.ToEven);
+        fee = Decimal.round(new Decimal(quantity).mul((self.btcFee() ? self.btcFee() : defaulFeePCT) / 100), 8, Decimal.MidpointRounding.ToEven);
         if(fee.toString().replace(/.*?\./, '').length == 8)
           fee = fee.add(0.00000001).toFloat();
         else
@@ -584,7 +586,6 @@ function BuySellWizardViewModel() {
           self.customSellAsEntry(null);
           self.currentMarketUnitPrice(null);
           self.numBlocksUntilExpiration(ORDER_DEFAULT_EXPIRATION);
-          self.btcFee(ORDER_DEFAULT_BTCFEE_PCT);
           self.btcFeeAs('percentage');
           self.tradeHistory([]);
     
@@ -605,6 +606,11 @@ function BuySellWizardViewModel() {
           self.selectedBuyQuantity.isModified(false);
           self.customSellAsEntry.isModified(false);
           $('a[href="#tab2"] span.title').text("Select Amounts (" + self.dispAssetPair() + ")");
+
+          if (self.buyAsset() == 'BTC' || self.sellAsset() == 'BTC') {
+            self.btcFee(self.buyAsset() == 'BTC' ? FEE_FRACTION_REQUIRED_DEFAULT_PCT : FEE_FRACTION_PROVIDED_DEFAULT_PCT);
+          }
+          
 
           //Set up the timer to refresh market data (this will immediately refresh and display data as well)
           self._tab2AutoRefresh(function() { self.allTradeDataRetrieved(true); });

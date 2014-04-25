@@ -230,7 +230,7 @@ function MessageFeed() {
       if(WALLET.getAddressObj(message['address'])) {
         //remove non-BTC/XCP asset objects that now have a zero balance from a debit
         if(message['_balance'] == 0 && message['asset'] != "BTC" && message['asset'] != "XCP") {
-          assert(category == "debits"); //a credit to a balance of zero??
+          assert(category == "debits"); //a credit to a balance of zero?? Yes with unconfirmed balance>0
           var addressObj = WALLET.getAddressObj(message['address']);
           var assetObj = addressObj.getAssetObj(message['asset']);
           if(assetObj.isMine()) { //keep the asset object here, even if it has a zero balance
