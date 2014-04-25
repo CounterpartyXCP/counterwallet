@@ -50,6 +50,7 @@ function BuySellWizardViewModel() {
   self.askBook = ko.observableArray([]);
   self.bidBook = ko.observableArray([]);
   self.bidAskMedian = ko.observable(null);
+  self.bidAskSpread = ko.observable(null);
   self.bidDepth = ko.observable(null);
   self.askDepth = ko.observable(null);
   
@@ -596,6 +597,7 @@ function BuySellWizardViewModel() {
           self.askBook([]);
           self.bidBook([]);
           self.bidAskMedian(null);
+          self.bidAskSpread(null);
           self.bidDepth(null);
           self.askDepth(null);
         } else if(current == 2) {
@@ -790,6 +792,7 @@ function BuySellWizardViewModel() {
           self.bidBook.push(new OrderBookEntryItemModel(data['base_bid_book'][i]));  
         }
         self.bidAskMedian(data['bid_ask_median']);
+        self.bidAskSpread(data['bid_ask_spread']);
         self.bidDepth(data['bid_depth']);
         self.askDepth(data['ask_depth']);
       } else {
@@ -817,6 +820,7 @@ function BuySellWizardViewModel() {
   }
   
   self.getMaxAfford = function(unitPrice) {
+    //NOTE: This figure DOES NOT include the BTC fee, if selling BTC
     var pair = self.assetPair();
     if(self.buyAsset() == pair[0]) { //buy asset is the base asset
       //self.totalBalanceAvailForSale / self.currentMarketUnitPrice
@@ -825,6 +829,7 @@ function BuySellWizardViewModel() {
       //self.totalBalanceAvailForSale * self.currentMarketUnitPrice
       var maxAfford = Decimal.round(new Decimal(self.totalBalanceAvailForSale()).mul(unitPrice), 8, Decimal.MidpointRounding.ToEven).toFloat();
     }
+    
     return maxAfford;
   }
   
@@ -867,7 +872,7 @@ function BuySellWizardViewModel() {
     if (fee!=0) {
       fee = (fee/quantity)*100;
       fee = smartFormat(Decimal.round(new Decimal(fee), 8, Decimal.MidpointRounding.ToEven).toFloat());
-      $.jqlog.debug("Auto set fee: "+fee);
+      $.jqlog.debug("Auto set fee: " + fee);
       self.btcFee(fee);
     }
   }
@@ -878,13 +883,26 @@ function BuySellWizardViewModel() {
     self.overrideMarketPrice(true);
     self.customSellAs('unitprice');
     var unitPrice = self.deriveOpenOrderAssetPrice(
-      order['get_asset'], order['get_quantity'], order['give_asset'], order['give_quantity'])
+      order.ORDER['get_asset'], order.ORDER['get_quantity'], order.ORDER['give_asset'], order.ORDER['give_quantity'])
     self.customSellAsEntry(unitPrice);
     var maxAfford = self.getMaxAfford(unitPrice);
-    var totalSaleAmount = self.deriveOpenOrderAssetQuantity(order['give_asset'], order['give_remaining']);
+    var totalSaleAmount = self.deriveOpenOrderAssetQuantity(order.ORDER['give_asset'], order.ORDER['give_remaining']);
     var buyAmount = Math.min(maxAfford, totalSaleAmount);
+    $.jqlog.debug("Initial buy amount: " + buyAmount);
     self.selectedBuyQuantity(buyAmount);
-    self.setBtcFeeFromOrder(order);      
+    
+    //If selling BTC, subtract out in the specified fee from the max afford amount so that we can actually afford the total
+    if(self.sellAsset() == 'BTC' && buyAmount == maxAfford) {
+      if(self.sellAsset() == self.baseAsset()) {
+        buyAmount -= Decimal.round(new Decimal(self.feeForSelectedBTCQuantity()).mul(unitPrice), 8, Decimal.MidpointRounding.ToEven).toFloat();
+      } else { //BTC is the quote asset
+        buyAmount -= Decimal.round(new Decimal(self.feeForSelectedBTCQuantity()).div(unitPrice), 8, Decimal.MidpointRounding.ToEven).toFloat();
+      }
+    }
+    $.jqlog.debug("Updated buy amount (after fee backout): " + buyAmount);
+    self.selectedBuyQuantity(buyAmount); //update the amount
+    
+    self.setBtcFeeFromOrder(order.ORDER);      
 
     //The below is an awful, horrible hack because for some reason, the "invalid balance" message will get triggered and
     // not receive updated obervable notifications (which DO change value)....when it should even't be visible in the first

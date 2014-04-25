@@ -336,8 +336,13 @@
             <span class="widget-icon"> <i class="fa fa-sort-amount-desc"></i> </span>
             <h3>Order book for <span data-bind="text: dispAssetPair"></span></h3>
             <div class="widget-toolbar" role="menu" data-bind="visible: bidAskMedian"> 
-                <div class="label label-success">
-                    <i class="fa fa-retweet"></i>&nbsp;Market Price: <span data-bind="text: bidAskMedian"></span>
+                <div class="label label-info">
+                    <i class="fa fa-adjust"></i>&nbsp;Bid-Ask Median: <span data-bind="text: bidAskMedian"></span>
+                </div>
+            </div>
+            <div class="widget-toolbar" role="menu" data-bind="visible: bidAskSpread"> 
+                <div class="label label-info">
+                    <i class="fa fa-arrows-h"></i>&nbsp;Spread: <span data-bind="text: bidAskSpread"></span>
                 </div>
             </div>
         </header>

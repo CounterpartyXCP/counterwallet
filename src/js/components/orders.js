@@ -14,6 +14,7 @@ var OpenOrderItemModel = function(entry, isBuySell) {
   this.EXPIRES_IN = OrdersViewModel.deriveOpenOrderExpiresIn(entry['block_index'], entry['expiration']);
   this.FEE_REQUIRED_LEFT = smartFormat(normalizeQuantity(entry['fee_required_remaining'])) + ' BTC ' + OrdersViewModel.deriveOpenOrderBuySellLeft(entry['fee_required'], entry['fee_required_remaining']);
   this.FEE_PROVIDED_LEFT = smartFormat(normalizeQuantity(entry['fee_provided_remaining'])) + ' BTC ' + OrdersViewModel.deriveOpenOrderBuySellLeft(entry['fee_provided'], entry['fee_provided_remaining']);
+  this.ORDER = entry;
 };
 
 var TradeHistoryItemModel = function(entry) {
@@ -52,6 +53,7 @@ function OrdersViewModel() {
   self.askBook = ko.observableArray([]);
   self.bidBook = ko.observableArray([]);
   self.bidAskMedian = ko.observable(null);
+  self.bidAskSpread = ko.observable(null);
   self.bidDepth = ko.observable(null);
   self.askDepth = ko.observable(null);
 
@@ -260,6 +262,7 @@ function OrdersViewModel() {
         self.bidBook.push(new OrderBookEntryItemModel(data['base_bid_book'][i]));  
       }
       self.bidAskMedian(data['bid_ask_median']);
+      self.bidAskSpread(data['bid_ask_spread']);
       self.bidDepth(data['bid_depth']);
       self.askDepth(data['ask_depth']);
       

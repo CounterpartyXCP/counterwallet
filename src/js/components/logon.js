@@ -66,6 +66,7 @@ function LogonViewModel() {
       $('#newAccountInfoPane').animate({opacity:0}); //fade out the new account pane if visible
       $('#createNewAcctBtnPane').animate({opacity:0}); //fade out the new account button pane if visible
       $('#extra-info').animate({opacity:0});
+      $('#disclaimer').animate({opacity:0});
       
       //generate the wallet ID from a double SHA256 hash of the passphrase and the network (if testnet)
       var hashBase = Bitcoin.Crypto.SHA256(self.sanitizedEnteredPassphrase() + (USE_TESTNET ? '_testnet' : ''));
