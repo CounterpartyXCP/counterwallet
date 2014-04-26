@@ -12,3 +12,4 @@ src/vendors/
 npm-debug.log
 servers.json
 src/bitcore.html
+src/bitcoinjs.html

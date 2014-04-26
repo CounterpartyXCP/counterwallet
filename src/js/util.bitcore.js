@@ -2,23 +2,59 @@ var bitcore = require('bitcore');
 
 var CWBIP32 = function(passphrase) {
   checkArgType(passphrase, "string")
-
-  var sanitizedPassphrase = $.trim(passphrase.toLowerCase());
-  var m = new Mnemonic(sanitizedPassphrase.split(' '));
-  var seed = m.toHex();
-  this.BIP32 = bitcore.BIP32.seed(seed, NETWORK_NAME);
-
   // same as bitcoinjs-lib :
   // m : masterkery / 0' : first private derivation / 0 : external account / i : index
   this.basePath = 'm/0\'/0/'
+  
+  this.init = function(passphrase) {
+    var seed = passphraseToSeed(passphrase);
+    this.BIP32 = USE_OLD_BIP32 ? oldBIP32FromSeed(seed) : bitcore.BIP32.seed(seed, NETWORK_NAME);  
+  }
+
+  var passphraseToSeed = function(passphrase) {
+    var sanitizedPassphrase = $.trim(passphrase.toLowerCase());
+    var m = new Mnemonic(sanitizedPassphrase.split(' '));
+    return m.toHex();
+  }
+
+  // This function return an Bitcore BIP32 instance
+  // compatible with old counterwallet. ie generates
+  // sames addresses
+  // seed: hex string
+  var oldBIP32FromSeed = function(seed) {
+    checkArgType(seed, "string");
+    // here we need to pass seed as buffer, BUT for 
+    // "historical" reason we keep seed as string to not
+    // change generated addresses from the same passphrase.
+    var words = bytesToWordArray(seed);  
+    var hash = CryptoJS.HmacSHA512(words, 'Bitcoin seed');
+    hash = wordArrayToBytes(hash);
+    hash = bitcore.buffertools.Buffer(hash);
+    var priv =  hash.slice(0, 32).toString('hex');
+    var wk = new bitcore.WalletKey({network: NETWORK_CONF});
+    wk.fromObj({priv:priv});
+    var eckey = wk.privKey;
+    var bip32 = new bitcore.BIP32;
+    bip32.depth = 0x00;
+    bip32.parentFingerprint = bitcore.buffertools.Buffer([0, 0, 0, 0]);
+    bip32.childIndex = bitcore.buffertools.Buffer([0, 0, 0, 0]);
+    bip32.chainCode = hash.slice(32, 64);
+    bip32.version = NETWORK_CONF.bip32privateVersion;
+    bip32.eckey = eckey;
+    bip32.hasPrivateKey = true;
+    bip32.pubKeyHash = bitcore.util.sha256ripe160(bip32.eckey.public);
+    bip32.buildExtendedPublicKey();
+    bip32.buildExtendedPrivateKey();
+    return bip32;
+  }
 
   this.getAddressKey = function(index) {
     checkArgType(index, "number");
-
     var derivedKey = this.BIP32.derive(this.basePath+index);
     return new CWPrivateKey(bitcore.buffertools.toHex(derivedKey.eckey.private));
   }
 
+  this.init(passphrase);
 }
 
 // priv: private key wif or hex
