@@ -1,4 +1,6 @@
 var bitcore = require('bitcore');
+// no reason to be used elsewhere
+var NETWORK = USE_TESTNET ? bitcore.networks.testnet : bitcore.networks.livenet;
 
 var CWBIP32 = function(passphrase) {
   checkArgType(passphrase, "string")
@@ -8,7 +10,7 @@ var CWBIP32 = function(passphrase) {
   
   this.init = function(passphrase) {
     var seed = passphraseToSeed(passphrase);
-    this.BIP32 = USE_OLD_BIP32 ? oldBIP32FromSeed(seed) : bitcore.BIP32.seed(seed, NETWORK_NAME);  
+    this.BIP32 = USE_OLD_BIP32 ? oldBIP32FromSeed(seed) : bitcore.BIP32.seed(seed, NETWORK.name);  
   }
 
   var passphraseToSeed = function(passphrase) {
@@ -31,7 +33,7 @@ var CWBIP32 = function(passphrase) {
     hash = wordArrayToBytes(hash);
     hash = bitcore.buffertools.Buffer(hash);
     var priv =  hash.slice(0, 32).toString('hex');
-    var wk = new bitcore.WalletKey({network: NETWORK_CONF});
+    var wk = new bitcore.WalletKey({network: NETWORK});
     wk.fromObj({priv:priv});
     var eckey = wk.privKey;
     var bip32 = new bitcore.BIP32;
@@ -39,7 +41,7 @@ var CWBIP32 = function(passphrase) {
     bip32.parentFingerprint = bitcore.buffertools.Buffer([0, 0, 0, 0]);
     bip32.childIndex = bitcore.buffertools.Buffer([0, 0, 0, 0]);
     bip32.chainCode = hash.slice(32, 64);
-    bip32.version = NETWORK_CONF.bip32privateVersion;
+    bip32.version = NETWORK.bip32privateVersion;
     bip32.eckey = eckey;
     bip32.hasPrivateKey = true;
     bip32.pubKeyHash = bitcore.util.sha256ripe160(bip32.eckey.public);
@@ -57,6 +59,7 @@ var CWBIP32 = function(passphrase) {
   this.init(passphrase);
 }
 
+
 // priv: private key wif or hex
 var CWPrivateKey = function(priv) {
   checkArgType(priv, "string");
@@ -65,7 +68,7 @@ var CWPrivateKey = function(priv) {
   this.init = function(priv) {
     try {
       this.priv = priv;
-      this.walletKey = new bitcore.WalletKey({network: NETWORK_CONF});
+      this.walletKey = new bitcore.WalletKey({network: NETWORK});
       this.walletKey.fromObj({priv:this.priv});
     } catch (err) {
       this.priv = null;
@@ -84,7 +87,7 @@ var CWPrivateKey = function(priv) {
   this.isValid = function() {
     try {
       var address = new bitcore.Address(this.getAddress());
-      return address.isValid() && (address.version() == NETWORK_VERSION);
+      return address.isValid() && (address.version() == NETWORK.addressVersion);
     } catch (err) {
       return false;
     }
@@ -136,7 +139,7 @@ var CWPrivateKey = function(priv) {
 
   this.getWIF = function() {
     var buf = new bitcore.buffertools.Buffer(this.priv, 'hex');
-    var privkey = new bitcore.PrivateKey(NETWORK_CONF.privKeyVersion, buf, true);
+    var privkey = new bitcore.PrivateKey(NETWORK.privKeyVersion, buf, true);
     return privkey.as('base58');
   }
 
@@ -151,7 +154,7 @@ var CWBitcore = new function() {
     try {
       var address = new bitcore.Address(val);
       if (address.isValid()) {
-        return address.version() == NETWORK_VERSION;
+        return address.version() == NETWORK.addressVersion;
       } else {
         return false;
       }     
@@ -184,7 +187,7 @@ var CWBitcore = new function() {
 
     // build key map
     var wkMap = {};
-    wkMap[address] = new bitcore.WalletKey({network:NETWORK_CONF, privKey:cwPrivateKey.getBitcoreECKey()});
+    wkMap[address] = new bitcore.WalletKey({network:NETWORK, privKey:cwPrivateKey.getBitcoreECKey()});
 
     // unserialize raw transaction
     var unsignedTx = CWBitcore.parseRawTransaction(unsignedHex);   
@@ -226,7 +229,7 @@ var CWBitcore = new function() {
     checkArgType(txout, "object");
 
     var script = txout.getScript();
-    return bitcore.Address.fromScriptPubKey(script, NETWORK_CONF.name).toString();
+    return bitcore.Address.fromScriptPubKey(script, NETWORK.name).toString();
   }
 
   this.extractChangeTxoutValue = function(source, txHex) {
