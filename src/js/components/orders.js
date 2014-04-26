@@ -502,5 +502,8 @@ OrdersViewModel.doChart = function(dispAssetPair, chartDiv, data) {
 }
 
 
+
+
+
 /*NOTE: Any code here is only triggered the first time the page is visited. Put JS that needs to run on the
   first load and subsequent ajax page switches in the .html <script> tag*/

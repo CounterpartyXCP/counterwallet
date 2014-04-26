@@ -76,6 +76,10 @@ function StatsHistoryViewModel() {
         series: self.graphData
     });    
   }
+  
+  self.showNewRow = function(elem) { if (elem.nodeType === 1) $(elem).hide().slideDown() }
+  
+  self.hideOldRow = function(elem) { if (elem.nodeType === 1) $(elem).slideUp(function() { $(elem).remove(); }) }  
 }
 
 
@@ -102,7 +106,8 @@ function StatsTransactionHistoryViewModel() {
   self.addMessage = function(message) {
     //insert at head, and pop off tail
     self.transactions.unshift(new TransactionHistoryItemViewModel(message));
-    self.transactions.pop();
+    if(self.transactions().length > STATS_MAX_NUM_TRANSACTIONS)
+      self.transactions.pop(); //keep it <= STATS_MAX_NUM_TRANSACTIONS
   }
   
   self.dataTableResponsive = function(e) {

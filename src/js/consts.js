@@ -24,6 +24,8 @@ var ORDER_DEFAULT_EXPIRATION = 1000; //num blocks until expiration (at ~9 min pe
 var ORDER_BTCSELL_DEFAULT_EXPIRATION = 2000; //num blocks until expiration for selling BTC order
 var ORDER_MAX_EXPIRATION = 3000; //max expiration for order
 
+var STATS_MAX_NUM_TRANSACTIONS = 100; //max # transactions to show in the table
+
 var DEFAULT_NUM_ADDRESSES = 3; //default number of addresses to generate
 var MARKET_INFO_REFRESH_EVERY = 5 * 60 * 1000; //refresh market info every 5 minutes while enabled 
 

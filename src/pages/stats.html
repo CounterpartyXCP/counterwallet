@@ -50,7 +50,7 @@
                             <th>Fee</th>-->
                         </tr>
                     </thead>
-                    <tbody data-bind="foreach: transactions">
+                    <tbody data-bind="template: { foreach: transactions, beforeRemove: hideOldRow, afterAdd: showNewRow }">
                         <tr>
                             <td data-bind="html: dispTXHash()"></td> 
                             <td data-bind="html: dispBlockIndex()"></td>
