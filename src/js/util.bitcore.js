@@ -119,8 +119,8 @@ var CWPrivateKey = function(priv) {
   }
 
   this.checkTransactionDest = function(txHex, destAdress) {
-    checkArgType(txHex, "string");
-    checkArgType(destAdress, "string");
+    checkArgsType(arguments, ["string", "string"]);
+
     try {
       return CWBitcore.checkTransactionDest(txHex, this.getAddress(), destAdress);
     } catch (err) {
@@ -129,8 +129,8 @@ var CWPrivateKey = function(priv) {
   }
 
   this.checkAndSignRawTransaction = function(unsignedHex, destAdress) {
-    checkArgType(unsignedHex, "string");
-    checkArgType(destAdress, "string");
+    checkArgsType(arguments, ["string", "string"]);
+
     if (this.checkTransactionDest(unsignedHex, destAdress)) {
       return this.signRawTransaction(unsignedHex);
     }
@@ -173,8 +173,7 @@ var CWBitcore = new function() {
   }
 
   this.signRawTransaction = function(unsignedHex, cwPrivateKey) {
-    checkArgType(unsignedHex, "string");
-    checkArgType(cwPrivateKey, "object");
+    checkArgsType(arguments, ["string", "object"]);
 
     var address = cwPrivateKey.getAddress();
 
@@ -233,8 +232,7 @@ var CWBitcore = new function() {
   }
 
   this.extractChangeTxoutValue = function(source, txHex) {
-    checkArgType(source, "string");
-    checkArgType(txHex, "string");
+    checkArgsType(arguments, ["string", "string"]);
 
     // unserialize raw transaction
     var tx = CWBitcore.parseRawTransaction(txHex);
@@ -249,9 +247,7 @@ var CWBitcore = new function() {
   }
 
   this.checkTransactionDest = function(txHex, source, dest) { 
-    checkArgType(txHex, "string"); 
-    checkArgType(source, "string");
-    checkArgType(dest, "string");
+    checkArgsType(arguments, ["string", "string", "string"]);
 
     // unserialize raw transaction
     var tx = CWBitcore.parseRawTransaction(txHex);    
