@@ -6,16 +6,24 @@ var CWBIP32 = function(passphrase) {
   checkArgType(passphrase, "string")
   // same as bitcoinjs-lib :
   // m : masterkery / 0' : first private derivation / 0 : external account / i : index
-  this.basePath = 'm/0\'/0/'
+  this.basePath = 'm/0\'/0/';
+  this.useOldBIP32 = false;
   
   this.init = function(passphrase) {
-    var seed = passphraseToSeed(passphrase);
-    this.BIP32 = USE_OLD_BIP32 ? oldBIP32FromSeed(seed) : bitcore.BIP32.seed(seed, NETWORK.name);  
+    var words = $.trim(passphrase.toLowerCase()).split(' ');
+    
+    // if first word=='old' => old bip32
+    if (words.length==13) {
+      var first = words.shift();
+      this.useOldBIP32 = (first == 'old');
+    }
+
+    var seed = wordsToSeed(words);   
+    this.BIP32 = this.useOldBIP32 ? oldBIP32FromSeed(seed) : bitcore.BIP32.seed(seed, NETWORK.name);  
   }
 
-  var passphraseToSeed = function(passphrase) {
-    var sanitizedPassphrase = $.trim(passphrase.toLowerCase());
-    var m = new Mnemonic(sanitizedPassphrase.split(' '));
+  var wordsToSeed = function(words) {
+    var m = new Mnemonic(words);
     return m.toHex();
   }
 

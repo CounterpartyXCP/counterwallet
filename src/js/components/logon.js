@@ -19,12 +19,20 @@ function LogonViewModel() {
   }, self);
 
   self.isPassphraseValid = ko.computed(function() {
-     if(self.sanitizedEnteredPassphrase().split(' ').length != 12) return false;
+    var words = self.sanitizedEnteredPassphrase().split(' ');
+    
+    if (words.length != 12 && (words.length == 13 && words[0] != 'old')) {
+      return false;
+    }
+
+    if (words.length==13) {
+      words.shift();
+    }
      
      var valid = true;
-     self.sanitizedEnteredPassphrase().split(' ').forEach(function (word) {
+     words.forEach(function (word) {
        if (Mnemonic.words.indexOf(word) == -1) {
-         valid = false;
+          valid = false;
        }
      });
      return valid;
