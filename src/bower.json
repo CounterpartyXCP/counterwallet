@@ -6,7 +6,6 @@
         "bootstrap": "3.1.1",
         "smartadmin": "https://github.com/xnova/countersmartadmin.git",
         "cryptojs": "https://crypto-js.googlecode.com/files/CryptoJS%20v3.1.2.zip",
-        "bitcoinjs-lib": "https://github.com/JahPowerBit/bitcoinjs-lib.git#747a13551f5b666533e21bddae40f4f071ab4f5b",
         "bootbox": "4.2.0",
         "bootstrap-datetimepicker": "https://github.com/Eonasdan/bootstrap-datetimepicker.git#3.0.0",
         "jsdecimal": "https://github.com/hiroshi-manabe/JSDecimal.git#2950032445113a4456581837b25de5622fbd9438",
@@ -31,6 +30,6 @@
         "typeahead.js": "0.10.2",
         "select2": "3.4.6",
         "font-awesome": "4.0.3",
-        "bitcore": "https://github.com/bitpay/bitcore.git#0.1.12"
+        "bitcore": "https://github.com/bitpay/bitcore.git#0.1.16"
     }
 }
