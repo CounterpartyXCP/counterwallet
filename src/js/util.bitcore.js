@@ -59,15 +59,22 @@ var CWBIP32 = function(passphrase) {
 
 // priv: private key wif or hex
 var CWPrivateKey = function(priv) {
+  checkArgType(priv, "string");
+  this.priv = null;
 
-  this.priv = priv;
+  this.init = function(priv) {
+    try {
+      this.priv = priv;
+      this.walletKey = new bitcore.WalletKey({network: NETWORK_CONF});
+      this.walletKey.fromObj({priv:this.priv});
+    } catch (err) {
+      this.priv = null;
+    }
+  }
 
   this.getAddress = function() {
-    if (this.priv=='') return false;
     try {
-      var wk = new bitcore.WalletKey({network: NETWORK_CONF});
-      wk.fromObj({priv:this.priv});
-      var wkObj = wk.storeObj();
+      var wkObj = this.walletKey.storeObj();
       return wkObj.addr;
     } catch (err) {
       return false;
@@ -85,9 +92,7 @@ var CWPrivateKey = function(priv) {
 
   this.getPub = function() {
     try {
-      var wk = new bitcore.WalletKey({network: NETWORK_CONF});
-      wk.fromObj({priv:this.priv});
-      return bitcore.buffertools.toHex(wk.privKey.public);
+      return bitcore.buffertools.toHex(this.walletKey.privKey.public);
     } catch (err) {
       return false;
     }
@@ -95,9 +100,7 @@ var CWPrivateKey = function(priv) {
 
   this.getBitcoreECKey = function() {
     try {
-      var wk = new bitcore.WalletKey({network: NETWORK_CONF});
-      wk.fromObj({priv:this.priv});
-      return wk.privKey;
+      return this.walletKey.privKey;
     } catch (err) {
       return false;
     }
@@ -115,7 +118,11 @@ var CWPrivateKey = function(priv) {
   this.checkTransactionDest = function(txHex, destAdress) {
     checkArgType(txHex, "string");
     checkArgType(destAdress, "string");
-    return CWBitcore.checkTransactionDest(txHex, this.getAddress(), destAdress);
+    try {
+      return CWBitcore.checkTransactionDest(txHex, this.getAddress(), destAdress);
+    } catch (err) {
+      return false;
+    }  
   }
 
   this.checkAndSignRawTransaction = function(unsignedHex, destAdress) {
@@ -133,6 +140,8 @@ var CWPrivateKey = function(priv) {
     return privkey.as('base58');
   }
 
+  this.init(priv);
+
 }
 
 
@@ -149,25 +158,6 @@ var CWBitcore = new function() {
     } catch (err) {
       return false;
     }
-  }
-
-
-  this.prepareSignedTransaction = function(unsignedTx) {
-    checkArgType(unsignedTx, "object");
-
-    var txobj = {}; 
-    txobj.version    = unsignedTx.version;
-    txobj.lock_time  = unsignedTx.lock_time;
-    txobj.ins  = [];
-    for (var i=0; i < unsignedTx.ins.length; i++) {
-      txobj.ins.push({
-        s: bitcore.util.EMPTY_BUFFER,
-        q: unsignedTx.ins[i].q,
-        o: unsignedTx.ins[i].o
-      });
-    }  
-    txobj.outs = unsignedTx.outs;
-    return new bitcore.Transaction(txobj);
   }
 
   this.parseRawTransaction = function(txHex) {
@@ -201,7 +191,8 @@ var CWBitcore = new function() {
 
     // prepare  signed transaction
     var signedTx = new bitcore.TransactionBuilder();
-    signedTx.tx = CWBitcore.prepareSignedTransaction(unsignedTx);
+    //signedTx.tx = CWBitcore.prepareSignedTransaction(unsignedTx);
+    signedTx.tx = unsignedTx;
 
     for (var i=0; i < unsignedTx.ins.length; i++) {
         
@@ -213,14 +204,13 @@ var CWBitcore = new function() {
           scriptPubKey: scriptPubKey,
           scriptType: scriptPubKey.classify(),
           i: i
-      };
-
+      };     
       // generating hash for signature
       var txSigHash = unsignedTx.hashForSignature(scriptPubKey, i, bitcore.Transaction.SIGHASH_ALL);
-      
+      // empty the script
+      signedTx.tx.ins[i].s = bitcore.util.EMPTY_BUFFER;
       // sign hash
-      var ret = fnToSign[input.scriptType].call(signedTx, wkMap, input, txSigHash);
-      
+      var ret = fnToSign[input.scriptType].call(signedTx, wkMap, input, txSigHash);    
       // inject signed script in transaction object
       if (ret && ret.script) {
         signedTx.tx.ins[i].s = ret.script;
