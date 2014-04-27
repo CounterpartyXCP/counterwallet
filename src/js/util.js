@@ -1,3 +1,12 @@
+function assert(condition, message) { if (!condition) throw message || "Assertion failed"; }
+function checkArgType(arg, type) { assert((typeof arg).toLowerCase() == type.toLowerCase(), "Invalid argument type"); }
+
+function checkArgsType(args, types) {
+  for (var a=0; a<args.length; a++) {
+    checkArgType(args[a], types[a]);
+  }
+}
+
 
 /*
  * STRING PROTOTYPES
