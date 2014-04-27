@@ -127,11 +127,6 @@ function LogonViewModel() {
   
   self.openWalletPt2 = function(mustSavePreferencesToServer) {
 
-      $('body').append('<iframe name="fakelogin" style="display:none"></iframe>')
-      $('#loginform').attr("target", "fakelogin");
-      $('#loginform').attr("method", "POST");
-      $('#loginform').attr("action", "/src/index.html");
-      $('#loginform').submit();
       //generate the appropriate number of addresses
       WALLET.BITCOIN_WALLET = new CWBIP32(self.enteredPassphrase());
 
