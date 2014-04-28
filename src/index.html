@@ -258,9 +258,9 @@
             </h3>
           </div>
           <div class="panel-body" class="padding-left-5 padding-right-5">
-            <form class="form-inline" role="form">
+            <form class="form-inline" role="form" id="loginform">
               <div class="col-sm-8">
-                <input id="password" data-bind="value: enteredPassphrase, valueUpdate: 'input'" placeholder="Enter your 12 word passphrase." class="form-control" type="password">
+                <input id="password" data-bind="value: enteredPassphrase, valueUpdate: 'input'" placeholder="Enter your 12 word passphrase." class="form-control" type="password" name="password">
               </div>
               <div class="col-sm-4">
                 <button id="walletLoginButton" data-bind="click: openWallet, enable: isPassphraseValid(), css: { 'btn-primary': isPassphraseValid() }" type="button" class="btn btn-default" disabled>Open Wallet</button>
@@ -568,6 +568,7 @@
     <script src="js/util.api.js"></script>
     <script src="js/util.bitcoin.js"></script>
     <script src="js/util.knockout.js"></script>
+
     <script src="js/messagefeed.js"></script>
     <script src="js/components/wallet.js"></script>
     <script src="js/components/wallet_options.js"></script>
