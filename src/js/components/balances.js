@@ -348,11 +348,9 @@ function SweepModalViewModel() {
         }
         // output merging cost
         if (self.txoutsCountForPrivateKey > 1) {
-          //https://en.bitcoin.it/wiki/Scalability:
-          // Transactions vary in size from about 0.2 kilobytes to over 1 kilobyte, but it's averaging half a kilobyte today.
-          var mergeCost = Math.ceil(self.txoutsCountForPrivateKey / 2) * MIN_FEE;
-          sweepingCost += parseInt(mergeCost); // if outputs merging needed
-          //$.jqlog.debug('Cost for output merging : ' + mergeCost);
+          // MIN_FEE for 4 outputs.
+          self.mergeCost = Math.ceil(self.txoutsCountForPrivateKey / 4) * MIN_FEE;
+          sweepingCost += self.mergeCost; 
         }
 
         //$.jqlog.debug('Total sweeping cost : ' + sweepingCost);
@@ -420,8 +418,8 @@ function SweepModalViewModel() {
   self.txoutsCountForPrivateKey = 0; // no need observable
   self.sweepingCurrentStep = 1;
   self.missingBtcForFees = 0;
-  self.sweepBtc = false;
   self.sweepAssetsCost = {};
+  self.mergeCost = 0;
   
   self.validationModel = ko.validatedObservable({
     privateKey: self.privateKey,
@@ -448,14 +446,13 @@ function SweepModalViewModel() {
           self.availableAssetsToSweep.push(new SweepAssetInDropdownItemModel(
             balancesData[i]['asset'], balancesData[i]['quantity'], balancesData[i]['normalized_quantity'], assetInfo));
 
-          var txcost = MIN_FEE + (2 * MULTISIG_DUST_SIZE);
           var cost = 0;
           if (balancesData[i]['quantity']>0) {
-            cost += txcost;
+            cost += MIN_FEE + (2 * MULTISIG_DUST_SIZE);
           }
           // need ownership transfer
           if (assetInfo['owner'] == self.addressForPrivateKey()) {
-            cost += txcost;
+            cost += MIN_FEE + (4 * MULTISIG_DUST_SIZE);
           }
           self.sweepAssetsCost[balancesData[i]['asset']] = cost;          
         }
@@ -514,8 +511,8 @@ function SweepModalViewModel() {
     self.txoutsCountForPrivateKey = 0;
     self.sweepingCurrentStep = 1;
     self.missingBtcForFees = 0;
-    self.sweepBtc = false;
-    
+    self.mergeCost = 0;
+
     //populate the list of addresseses again
     self.availableAddresses([]);
     var addresses = WALLET.getAddressesList(true);
@@ -596,7 +593,16 @@ function SweepModalViewModel() {
     // if address has one ouptut, it will has two after this transaction..
     // ..so need output merging
     if (self.txoutsCountForPrivateKey==1) {
-      self.missingBtcForFees += MIN_FEE;
+      self.missingBtcForFees += 2 * MIN_FEE;
+    }
+    // To avoid "Destination output is below the dust target value" error
+    var sweepBTC = false;
+    for(var i = 0; i < self.selectedAssetsToSweep().length; i++) {
+      var assetName = self.selectedAssetsToSweep()[i];
+      if (assetName=='BTC') sweepBTC = true;
+    }
+    if (sweepBTC) {
+      self.missingBtcForFees += REGULAR_DUST_SIZE;
     }
     $.jqlog.debug('missingBtcForFees: '+self.missingBtcForFees);
 
@@ -654,7 +660,9 @@ function SweepModalViewModel() {
       self.sweepingProgressionMessage(message);
       $.jqlog.debug(message);
 
-      fees = (typeof fees === "undefined") ? MIN_FEE : fees;
+      fees = (typeof fees === "undefined") ? self.mergeCost : fees;
+
+      $.jqlog.debug("MERGE COST: " + normalizeQuantity(fees));
 
       var sendData = {
         source: self.addressForPrivateKey(),
@@ -663,16 +671,18 @@ function SweepModalViewModel() {
         asset: 'BTC',
         encoding: 'multisig',
         pubkey: pubkey,
-        allow_unconfirmed_inputs: true
+        allow_unconfirmed_inputs: true,
+        fee: fees
       };
 
       var onTransactionError = function() {
         if (arguments.length==4) {
           var match = arguments[1].match(/Insufficient bitcoins at address [^\s]+\. \(Need approximately ([\d]+\.[\d]+) BTC/);
           if (match!=null) {
+            $.jqlog.debug(arguments[1]);
             // if insufficient bitcoins we retry with estimated fees return by counterpartyd
-            var minEstimateFee = denormalizeQuantity(parseFloat(match[1])) - (self.btcBalanceForPrivateKey() - fees);
-            $.jqlog.debug('Insufficient fees. Need approximately ' + minEstimateFee);
+            var minEstimateFee = denormalizeQuantity(parseFloat(match[1])) - (self.btcBalanceForPrivateKey() - self.mergeCost);
+            $.jqlog.debug('Insufficient fees. Need approximately ' + normalizeQuantity(minEstimateFee));
             if (minEstimateFee > self.btcBalanceForPrivateKey()) {
               self.shown(false);
               bootbox.alert(arguments[1]);
