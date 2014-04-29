@@ -72,6 +72,9 @@
                   <li><a data-bind="visible: !IS_WATCH_ONLY, click: createAsset" href="#">Create Asset</a></li>                
                   <li><a data-bind="visible: !IS_WATCH_ONLY, click: payDividend" href="#">Pay Dividend</a></li>
 
+                  <li class="divider"></li><li class="dropdown-header">Betting...</li>  
+                  <li><a data-bind="visible: !IS_WATCH_ONLY, click: broadcast" href="#">Broadcast</a></li>
+
                   <li class="divider"></li><li class="dropdown-header">Sort by...</li>
                   <li><a data-bind="click: sortAssetsByName" href="#">Name</a></li>
                   <li><a data-bind="click: sortAssetsByBalance" href="#">Balance</a></li>
@@ -838,6 +841,71 @@
       </div>
       <div class="modal-footer">
         <button type="button" class="btn btn-default" data-bind="click: hide">Close</button>
+      </div>
+    </div><!-- /.modal-content -->
+  </div><!-- /.modal-dialog -->
+</div><!-- /.modal -->
+
+
+
+<!-- modal for broadcast -->
+<div data-bind="showModal: shown" id="broadcastModal" class="modal fade" data-backdrop="static" data-keyboard="false" tabindex="-1" role="dialog" aria-labelledby="broadcastModal" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" data-bind="click: hide" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+        <h4 class="modal-title">Broadcast</h4>
+      </div>
+      <div class="modal-body no-padding">
+        <p class="formPadded">Use this form to broadcast data.</i><br/><br/>
+       <b class="errorRed">Please NOTE that this action is irreversable!</b></p>
+        <form class="smart-form" data-bind="submit: doAction"><fieldset>
+
+          <section><div class="row">
+            <label class="control-label col col-sm-2">Text</label>
+            <div class="col col-sm-10">
+                <label class="input"><i class="icon-append fa fa-tag"></i>
+                    <input name="textValue" data-bind="value: textValue, valueUpdate : 'input'" type="text"/>
+                </label>
+                <div class="note">The textual part of the broadcast (set to ‘LOCK’ to lock feed).</div>
+            </div>
+          </div></section>
+
+           <section><div class="row">                
+            <label class="control-label col col-sm-2">Value</label>
+            <div class="col col-sm-10">
+                <label class="input"><i class="icon-append fa fa-plus"></i>
+                    <input name="numericalValue" data-bind="value: numericalValue, valueUpdate : 'input'" type="text"/>
+                </label>
+                <div class="note">The numerical value of the broadcast.</div>
+            </div>
+          </div></section>
+
+          <section><div class="row">
+            <label class="control-label col col-sm-2">Fee fraction</label>
+            <div class="col col-sm-10">
+                <label class="input"><i class="icon-append fa fa-plus"></i>
+                    <input name="feeFraction" data-bind="value: feeFraction, valueUpdate : 'input'" type="text"/>
+                </label>
+                <div class="note">the fraction of bets on this feed that go to its operator.</div>
+            </div>
+          </div></section>
+
+          <section><div class="row">                
+            <label class="control-label col col-sm-2">Broadcast Date</label>
+            <div class="col col-sm-10">
+                <label class="input">
+                    <input name="broadcastTimestamp" type="text" data-bind="datetimepicker: broadcastDate"/>
+                </label>
+                <div class="note">The date and time of the broadcast.</div>
+            </div>
+          </div></section>
+
+        </fieldset></form>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-default" data-bind="click: hide">Cancel</button>
+        <button type="button" data-bind="click: submitForm" class="btn btn-warning">Broadcast</button>
       </div>
     </div><!-- /.modal-content -->
   </div><!-- /.modal-dialog -->

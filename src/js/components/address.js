@@ -190,6 +190,11 @@ function AddressViewModel(key, address, initialLabel) {
     if(!WALLET.canDoTransaction(self.ADDRESS)) return false;
     PAY_DIVIDEND_MODAL.show(self);
   };
+
+  self.broadcast = function () {
+    if(!WALLET.canDoTransaction(self.ADDRESS)) return false;
+    BROADCAST_MODAL.show(self, true);
+  };
   
   self.selectAddressText = function() {
     return selectText('address-text-' + self.ADDRESS);    

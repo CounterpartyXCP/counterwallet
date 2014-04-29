@@ -61,6 +61,7 @@ function initBalances() {
   window.SIGN_MESSAGE_MODAL = new SignMessageModalViewModel();
   window.TESTNET_BURN_MODAL = new TestnetBurnModalViewModel();
   window.DISPLAY_PRIVATE_KEY_MODAL = new DisplayPrivateKeyModalViewModel();
+  window.BROADCAST_MODAL = new BroadcastModalViewModel();
   
   ko.applyBindings({}, document.getElementById("gettingStartedNotice"));
   ko.applyBindings({}, document.getElementById("pendingBTCPayNotice"));
@@ -71,6 +72,7 @@ function initBalances() {
   ko.applyBindings(SIGN_MESSAGE_MODAL, document.getElementById("signMessageModal"));
   ko.applyBindings(TESTNET_BURN_MODAL, document.getElementById("testnetBurnModal"));
   ko.applyBindings(DISPLAY_PRIVATE_KEY_MODAL, document.getElementById("displayPrivateKeyModal"));
+  ko.applyBindings(BROADCAST_MODAL, document.getElementById("broadcastModal"));
     
   //balances_assets.js
   window.CREATE_ASSET_MODAL = new CreateAssetModalViewModel();
