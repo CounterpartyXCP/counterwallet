@@ -5,18 +5,16 @@ var OrderBookEntryItemModel = function(entry) {
 };
 
 var OpenOrderItemModel = function(entry, isBuySell) {
-  $.jqlog.debug(entry);
-
   this.PARENT = isBuySell ? BUY_SELL : ORDERS;
   this.TX_ID = getTxHashLink(entry['tx_hash']) + OrdersViewModel.deriveIsOnlineForBTCPayment(entry['give_asset'], entry['_is_online']);
   this.WHEN_CREATED = new Date(entry['block_time']);
   this.PRICE = this.PARENT.deriveOpenOrderAssetPrice(entry['get_asset'], entry['get_quantity'], entry['give_asset'], entry['give_quantity']);
-  $.jqlog.debug("this.PRICE: "+this.PRICE);
   this.BUY_QTY_LEFT = this.PARENT.deriveOpenOrderAssetQuantity(entry['get_asset'], entry['get_remaining']) + ' ' + entry['get_asset'] + ' ' + OrdersViewModel.deriveOpenOrderBuySellLeft(entry['get_quantity'], entry['get_remaining']);
   this.SELL_QTY_LEFT = this.PARENT.deriveOpenOrderAssetQuantity(entry['give_asset'], entry['give_remaining']) + ' ' + entry['give_asset'] + ' ' + OrdersViewModel.deriveOpenOrderBuySellLeft(entry['give_quantity'], entry['give_remaining']);
   this.EXPIRES_IN = OrdersViewModel.deriveOpenOrderExpiresIn(entry['block_index'], entry['expiration']);
   this.FEE_REQUIRED_LEFT = smartFormat(normalizeQuantity(entry['fee_required_remaining'])) + ' BTC ' + OrdersViewModel.deriveOpenOrderBuySellLeft(entry['fee_required'], entry['fee_required_remaining']);
   this.FEE_PROVIDED_LEFT = smartFormat(normalizeQuantity(entry['fee_provided_remaining'])) + ' BTC ' + OrdersViewModel.deriveOpenOrderBuySellLeft(entry['fee_provided'], entry['fee_provided_remaining']);
+  this.ENTRY = entry;
 };
 
 var TradeHistoryItemModel = function(entry) {
@@ -314,9 +312,6 @@ function OrdersViewModel() {
     assert(asset2 && quantity2, "Asset2 and/or quantity2 not present");
     var derivedQuantity1 = self.normalizeAssetQuantity(asset1, quantity1);
     var derivedQuantity2 = self.normalizeAssetQuantity(asset2, quantity2);
-    
-    $.jqlog.debug("derivedQuantity1: "+derivedQuantity1);
-    $.jqlog.debug("derivedQuantity2: "+derivedQuantity2);
 
     if(asset1 == self.baseAsset()) {
       if(!derivedQuantity1) return; //in process of changing assets
