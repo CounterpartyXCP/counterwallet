@@ -5,10 +5,13 @@ var OrderBookEntryItemModel = function(entry) {
 };
 
 var OpenOrderItemModel = function(entry, isBuySell) {
+  $.jqlog.debug(entry);
+
   this.PARENT = isBuySell ? BUY_SELL : ORDERS;
   this.TX_ID = getTxHashLink(entry['tx_hash']) + OrdersViewModel.deriveIsOnlineForBTCPayment(entry['give_asset'], entry['_is_online']);
   this.WHEN_CREATED = new Date(entry['block_time']);
   this.PRICE = this.PARENT.deriveOpenOrderAssetPrice(entry['get_asset'], entry['get_quantity'], entry['give_asset'], entry['give_quantity']);
+  $.jqlog.debug("this.PRICE: "+this.PRICE);
   this.BUY_QTY_LEFT = this.PARENT.deriveOpenOrderAssetQuantity(entry['get_asset'], entry['get_remaining']) + ' ' + entry['get_asset'] + ' ' + OrdersViewModel.deriveOpenOrderBuySellLeft(entry['get_quantity'], entry['get_remaining']);
   this.SELL_QTY_LEFT = this.PARENT.deriveOpenOrderAssetQuantity(entry['give_asset'], entry['give_remaining']) + ' ' + entry['give_asset'] + ' ' + OrdersViewModel.deriveOpenOrderBuySellLeft(entry['give_quantity'], entry['give_remaining']);
   this.EXPIRES_IN = OrdersViewModel.deriveOpenOrderExpiresIn(entry['block_index'], entry['expiration']);
@@ -286,17 +289,21 @@ function OrdersViewModel() {
     });
   }
   
-  self.deriveOpenOrderAssetQuantity = function(asset, quantity) {
+  self.normalizeAssetQuantity = function(asset, quantity) {
     //helper function for showing pending trades
     if(!self.validationModelBaseOrders.isValid()) return;
     if(asset != self.asset1() && asset != self.asset2()) return; //in process of changing assets
     assert(asset && quantity, "Asset and/or quantity not present, or quantity is zero: " + quantity);
     if(asset == self.asset1()) {
-      return smartFormat(normalizeQuantity(quantity, self.asset1IsDivisible()));
+      return normalizeQuantity(quantity, self.asset1IsDivisible());
     } else {
       assert(asset == self.asset2());
-      return smartFormat(normalizeQuantity(quantity, self.asset2IsDivisible()));
+      return normalizeQuantity(quantity, self.asset2IsDivisible());
     }
+  }
+
+  self.deriveOpenOrderAssetQuantity = function(asset, quantity) {
+    return smartFormat(self.normalizeAssetQuantity(asset, quantity));
   }
 
   self.deriveOpenOrderAssetPrice = function(asset1, quantity1, asset2, quantity2) {
@@ -305,9 +312,12 @@ function OrdersViewModel() {
     if((asset1 != self.asset1() && asset1 != self.asset2()) || (asset2 != self.asset1() && asset2 != self.asset2())) return; //in process of changing assets
     assert(asset1 && quantity1, "Asset1 and/or quantity1 not present");
     assert(asset2 && quantity2, "Asset2 and/or quantity2 not present");
-    var derivedQuantity1 = self.deriveOpenOrderAssetQuantity(asset1, quantity1);
-    var derivedQuantity2 = self.deriveOpenOrderAssetQuantity(asset2, quantity2);
+    var derivedQuantity1 = self.normalizeAssetQuantity(asset1, quantity1);
+    var derivedQuantity2 = self.normalizeAssetQuantity(asset2, quantity2);
     
+    $.jqlog.debug("derivedQuantity1: "+derivedQuantity1);
+    $.jqlog.debug("derivedQuantity2: "+derivedQuantity2);
+
     if(asset1 == self.baseAsset()) {
       if(!derivedQuantity1) return; //in process of changing assets
       return smartFormat(Decimal.round(new Decimal(derivedQuantity2).div(derivedQuantity1), 8, Decimal.MidpointRounding.ToEven).toFloat());
