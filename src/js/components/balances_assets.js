@@ -70,8 +70,7 @@ function CreateAssetModalViewModel() {
       message: "Call price is required if the asset is callable",
       onlyIf: function () { return (self.callable() === true); }
     },
-    isValidPositiveQuantityOrZero: self,
-    isValidQtyForDivisibility: self
+    isValidPositiveQuantityOrZero: self
   });
   
   self.validationModel = ko.validatedObservable({

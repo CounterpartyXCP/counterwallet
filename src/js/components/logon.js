@@ -127,6 +127,7 @@ function LogonViewModel() {
   }
   
   self.openWalletPt2 = function(mustSavePreferencesToServer) {
+
       //generate the appropriate number of addresses
       var m = new Mnemonic(self.sanitizedEnteredPassphrase().split(' '));
       var seed = m.toHex();
