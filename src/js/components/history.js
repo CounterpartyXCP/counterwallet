@@ -134,7 +134,7 @@ function TransactionHistoryItemViewModel(data) {
   self.TX_HASH = self.DATA['tx_hash'] || self.DATA['order_hash'] || self.DATA['tx1_hash'] || '';
   self.BLOCK_INDEX = self.DATA['block_index'] || self.DATA['tx1_block_index'];
   self.BLOCK_TIME = self.DATA['_block_time'];
-  self.RAW_TX_TYPE = self.DATA['_entity'];
+  self.RAW_TX_TYPE = self.DATA['_category'];
   self.SOURCE = self.DATA['source'] || self.DATA['address'] || self.DATA['issuer'] || '';
   
   self.dispTXHash = function() {
@@ -157,7 +157,7 @@ function TransactionHistoryItemViewModel(data) {
   };
   
   self.dispTxType = function() {
-    return ENTITY_NAMES[self.DATA['_entity']] + "&nbsp;&nbsp;<i class=\"fa " + ENTITY_ICONS[self.DATA['_entity']] + "\"></i>&nbsp;";
+    return ENTITY_NAMES[self.DATA['_category']] + "&nbsp;&nbsp;<i class=\"fa " + ENTITY_ICONS[self.DATA['_category']] + "\"></i>&nbsp;";
   }
   
   self.dispDescription = function() {
@@ -165,21 +165,21 @@ function TransactionHistoryItemViewModel(data) {
     var desc = "";
     if(self.RAW_TX_TYPE == 'burns') {
       desc = "XCP Proof-of-Burn<br/>Burned: <Am>" + normalizeQuantity(self.DATA['burned']) + "</Am> <As>BTC</As><br/>"
-        + "Earned: " + smartFormat(normalizeQuantity(self.DATA['earned']) ) + " XCP";
+        + "Earned: <Am>" + smartFormat(normalizeQuantity(self.DATA['earned']) ) + "</Am> <As>XCP</As>";
     } else if(self.RAW_TX_TYPE == 'sends') {
       desc = "Send of <Am>" + smartFormat(normalizeQuantity(self.DATA['quantity'], self.DATA['_divisible'])) + "</Am> <As>" + self.DATA['asset']
         + "</As> to <Ad>" + getLinkForCPData('address', self.DATA['destination'], getAddressLabel(self.DATA['destination'])) + "</Ad>";
     } else if(self.RAW_TX_TYPE == 'orders') {
-      desc = "Sell <Am>" + smartFormat(normalizeQuantity(self.DATA['give_quantity'], self.DATA['_give_divisible']))
+      desc = "Sell <Am>" + smartFormat(normalizeQuantity(self.DATA['give_quantity'], self.DATA['_give_asset_divisible']))
         + "</Am> <As>" + self.DATA['give_asset'] + "</As> for <Am>"
-        + smartFormat(normalizeQuantity(self.DATA['get_quantity'], self.DATA['_get_divisible'])) + "</Am> <As>"
+        + smartFormat(normalizeQuantity(self.DATA['get_quantity'], self.DATA['_get_asset_divisible'])) + "</Am> <As>"
         + self.DATA['get_asset'] + "</As>";
     } else if(self.RAW_TX_TYPE == 'order_matches') {
       desc = "<Ad>" + getAddressLabel(self.DATA['tx0_address']) + "</Ad> sent <Am>"
-        + smartFormat(normalizeQuantity(self.DATA['forward_quantity'], self.DATA['_forward_divisible']))
+        + smartFormat(normalizeQuantity(self.DATA['forward_quantity'], self.DATA['_forward_asset_divisible']))
         + "</Am> <As>" + self.DATA['forward_asset'] + "</As><br/>"
         + "<Ad>" + getAddressLabel(self.DATA['tx1_address']) + "</Ad> sent <Am>"
-        + smartFormat(normalizeQuantity(self.DATA['backward_quantity'], self.DATA['_backward_divisible']))
+        + smartFormat(normalizeQuantity(self.DATA['backward_quantity'], self.DATA['_backward_asset_divisible']))
         + "</Am> <As>" + self.DATA['backward_asset'] + "</As>";
     } else if(self.RAW_TX_TYPE == 'btcpays') {
       desc = "Payment for <Am>" + smartFormat(normalizeQuantity(self.DATA['btc_amount'])) + "</Am> <As>BTC</As>";
@@ -223,6 +223,12 @@ function TransactionHistoryItemViewModel(data) {
       desc = "Bet Match <b>" + self.DATA['bet_match_id'] + "</b> expired";
     } else if(self.RAW_TX_TYPE == 'order_match_expirations') {
       desc = "Order Match <b>" + self.DATA['order_match_id'] + "</b> expired";
+    } else if(self.RAW_TX_TYPE == 'credits' || self.RAW_TX_TYPE == 'debits') {
+      //This field only shown in stats, NOT history
+      desc = "Address <Ad>" + getLinkForCPData('address', self.DATA['address'], getAddressLabel(self.DATA['address'])) + "</Ad>"
+        + (self.RAW_TX_TYPE == 'credit' ? ' credited with ' : ' debited for ')
+        + smartFormat(normalizeQuantity(self.DATA['quantity'], self.DATA['_divisible']))
+        + "</Am> <As>" + self.DATA['asset'] + "</As>";
     } else {
       desc = "UNKNOWN TRANSACTION TYPE";
     }
@@ -275,7 +281,7 @@ function TransactionHistoryViewModel() {
       for(var i = 0; i< data.length; i++) {
         self.transactions.push(new TransactionHistoryItemViewModel(data[i])); 
       }
-      runDataTables(null, true, {
+      runDataTables('#txnHistory', true, {
         "aaSorting": [ [1, 'desc'], [0, 'desc'] ]
       });
       $('#txnHistory_wrapper').show();

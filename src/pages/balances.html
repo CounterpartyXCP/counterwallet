@@ -68,7 +68,7 @@
 
 <div id="pendingBTCPayNotice" data-bind="fadeVisibleInOnly: needWarningOnExit()" class="alert alert-danger alert-block">
     <i class="fa-fw fa fa-btc"></i>
-    <strong>Sell BTC Pending:</strong> As you have one or more open sell orders for BTC, please stay logged in so that the order(s) can be properly filled.
+    <strong>Sell BTC Pending:</strong> As you have one or more pending or open sell order for BTC, please stay logged in so that the order(s) can be properly filled.
 </div>
 
  
@@ -396,7 +396,7 @@
             <label class="control-label col col-sm-2">Signed Message</label>
             <div class="col col-sm-10">
                 <label class="textarea">
-                    <textarea id="signedMessage" rows="3" class="custom-scroll" data-bind="fadeInText: signedMessage" readonly="readonly"></textarea>
+                    <textarea id="signedMessage" rows="3" class="custom-scroll" data-bind="fadeInText: signedMessage" disabled="disabled"></textarea>
                 </label>
                 <div class="note">The signed message appears above.</div>
             </div>
@@ -489,7 +489,7 @@
             <label class="control-label col col-sm-2">For Address</label>
             <div class="col col-sm-10">
                 <label class="input"><i class="icon-append fa fa-user"></i>
-                    <input name="assetAddress" data-bind="value: address" type="text" readonly="readonly"/>
+                    <input name="assetAddress" data-bind="value: address" type="text" disabled="disabled"/>
                 </label>
                 <div class="note">The address the asset will be created on.</div>
             </div>
@@ -787,26 +787,55 @@
             <label class="control-label col col-sm-2">Owned By</label>
             <div class="col col-sm-10">
                 <label class="input"><i class="icon-append fa fa-user"></i>
-                    <input name="assetOwner" data-bind="value: owner" type="text" readonly="readonly"/>
+                    <input name="assetOwner" data-bind="value: owner" type="text" disabled="disabled"/>
                 </label>
             </div>
           </div></section>
-          <section><div class="row">
+          <section data-bind="visible: !extDescription()"><div class="row">
             <label class="control-label col col-sm-2">Description</label>
             <div class="col col-sm-10">
                 <label class="input"><i class="icon-append fa fa-info"></i>
-                    <input name="assetDescription" data-bind="value: description" readonly="readonly"/>
+                    <input name="assetDescription" data-bind="value: description" disabled="disabled"/>
                 </label>
             </div>
           </div></section>
+          <section data-bind="visible: extDescription"><div class="row">
+            <label class="control-label col col-sm-2">Description</label>
+            <div class="col col-sm-10">
+                <label class="textarea textarea-resizable">
+                    <textarea name="extDescription" rows="3" class="custom-scroll" data-bind="value: extDescription" disabled="disabled"></textarea>
+                </label>
+            </div>
+          </div></section>
+
           <section><div class="row">
             <label class="control-label col col-sm-2">Total Issued</label>
             <div class="col col-sm-10">
                 <label class="input"><i class="icon-append fa fa-plus"></i>
-                    <input name="assetQuantity"  data-bind="value: dispTotalIssued" type="text" readonly="readonly"/>                        
+                    <input name="assetQuantity"  data-bind="value: dispTotalIssued" type="text" disabled="disabled"/>                        
                 </label>
             </div>
           </div></section>
+
+          <section data-bind="visible: extImageURL"><div class="row">
+            <label class="control-label col col-sm-2">Logo</label>
+            <div class="col col-sm-10">
+                <img data-bind="attr: {'src': extImageURL}" /> <!-- should be 48x48 -->
+            </div>
+          </div></section>
+          <section data-bind="visible: extWebsite"><div class="row">
+            <label class="control-label col col-sm-2">Website URL</label>
+            <div class="col col-sm-10">
+                <a data-bind="attr: {'href': extWebsite}, text: extWebsite" target="_blank"></a>
+            </div>
+          </div></section>
+          <section data-bind="visible: extPGPSigURL"><div class="row">
+            <label class="control-label col col-sm-2">PGP Signature</label>
+            <div class="col col-sm-10">
+                <a data-bind="attr: {'href': extPGPSigURL}, text: extPGPSigURL" target="_blank"></a>
+            </div>
+          </div></section>
+
           <section><div class="row">
             <div class="col col-sm-2"></div>
             <div class="col col-sm-10">
@@ -838,7 +867,7 @@
             <label class="control-label col col-sm-2">Call Date</label>
             <div class="col col-sm-10">
                 <label class="input">
-                    <input name="assetCallDate" type="text" data-bind="value: callDate" readonly="readonly"/>
+                    <input name="assetCallDate" type="text" data-bind="value: callDate" disabled="disabled"/>
                 </label>
                 <div class="note">The date and time after which the owner of the asset may choose to call it back.</div>
             </div>
@@ -847,7 +876,7 @@
             <label class="control-label col col-sm-2">Call Price</label>
             <div class="col col-sm-10">
                 <label class="input">
-                    <input name="assetCallPrice" type="text" data-bind="value: callPrice" readonly="readonly"/>
+                    <input name="assetCallPrice" type="text" data-bind="value: callPrice" disabled="disabled"/>
                 </label>
                 <div class="note">The <b>XCP price per unit</b> that the owner of the asset may call it back for.</div>
             </div>

@@ -31,6 +31,12 @@ if (typeof String.prototype.stripTags != 'function') {
   };
 }
 
+if (typeof String.prototype.capitalize != 'function') {
+  String.prototype.capitalize = function() {
+      return this.charAt(0).toUpperCase() + this.slice(1);
+  }
+}
+
 
 /*
  * ARRAY PROTOTYPES
@@ -95,6 +101,13 @@ if (typeof Array.prototype.unique != 'function') {
   }
 }
 */
+
+function range(start, count) {
+  return Array.apply(0, Array(count)).map(function (element, index) { 
+     return index + start;  
+  });
+}
+
 
 /*
  * OTHER METHODS

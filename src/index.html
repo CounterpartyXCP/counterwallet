@@ -20,6 +20,8 @@
     <link rel="stylesheet" type="text/css" href="vendors/jReject/css/jquery.reject.css">
     <link rel="stylesheet" type="text/css" href="vendors/keyboard/css/keyboard.css">
     <link rel="stylesheet" type="text/css" href="vendors/bootstrap-datetimepicker/build/css/bootstrap-datetimepicker.min.css">
+    <link rel="stylesheet" type="text/css" href="vendors/select2/select2.css">
+    <link rel="stylesheet" type="text/css" href="vendors/select2/select2-bootstrap.css">
     <!-- endbuild -->
 
     <!-- Counterwallet custom styles -->
@@ -150,7 +152,7 @@
             <a href="pages/buysell.html"><i class="fa fa-lg fa-fw fa-exchange"></i> <span class="menu-item-parent">Buy &amp; Sell</span></a>
           </li>
           <li class="">
-            <a href="pages/orders.html"><i class="fa fa-lg fa-fw fa-bar-chart-o"></i> <span class="menu-item-parent">View Prices</span></a>
+            <a href="pages/view_prices.html"><i class="fa fa-lg fa-fw fa-bar-chart-o"></i> <span class="menu-item-parent">View Prices</span></a>
           </li>
           <li class="">
             <a href="pages/portfolio.html"><i class="fa fa-lg fa-fw fa-tasks"></i> <span class="menu-item-parent">My Portfolio</span></a>
@@ -166,6 +168,9 @@
           </li>
           <li class="">
             <a href="https://forums.counterparty.co/index.php?topic=188.0" target="_blank"><i class="fa fa-lg fa-fw fa-question"></i> <span class="menu-item-parent">Report Issues</span></a>
+          </li>
+          <li>
+            <a href="pages/stats.html"><i class="fa fa-lg fa-fw fa-crosshairs"></i><span class="menu-item-parent">Network Stats</span></a>
           </li>
         </ul>
       </nav>
@@ -241,7 +246,7 @@
         <div class="alert alert-info" class="margin-bottom-0">
           <p><b>IMPORTANT:</b>  Counterwallet has switched to a new address-generation algorithm, for better BIP32 HDWallet compliance.</p>
           <p>If you have not already done so, we recommend creating a new wallet on this system. If you had a previous
-              wallet with funds, you can access it via <a href="https://old.counterwallet.co" target="_blank">https://old.counterwallet.co</a>,
+              wallet with funds, you can access it via <a href="https://old.counterwallet.co" target="_blank">old.counterwallet.co</a> (mainnet) or <a href="https://testnet-old.counterwallet.co" target="_blank">testnet-old.counterwallet.co</a> (testnet),
               and transfer your funds from there to your new wallet.</p>
         </div>
         <div class="panel panel-info">
@@ -273,7 +278,8 @@
       
        <div id="extra-info" class="container" data-bind="visible: generatedPassphrase().length === 0">
         <h3 class="sales-title margin-bottom-10">
-          Counterwallet is a web-wallet for <a href="http://www.counterparty.co" target="_blank">Counterparty</a>, which is the world’s first peer-to-peer digital asset exchange.
+          Counterwallet is a web-wallet for <a href="http://www.counterparty.co" target="_blank">Counterparty</a>,
+          the world’s first protocol for the creation and use of decenralized financial tools.
         </h3>
         <h4 class="sales-title">
           All transactions made with Counterwallet use an automatic escrow system<br/> 
@@ -587,14 +593,15 @@
     
     <script src="js/components/balances.js"></script>
     <script src="js/components/balances_assets.js"></script>
-    <script src="js/components/orders.js"></script>
+    <script src="js/components/view_prices.js"></script>
     <script src="js/components/buysell.js"></script>
     <script src="js/components/history.js"></script>
     <script src="js/components/leaderboard.js"></script>
     <script src="js/components/portfolio.js"></script>
+    <script src="js/components/stats.js"></script>
 
     <script src="js/smartadmin.app.js"></script> <!-- custom app.js -->
-    <!-- ^ unfortunately we have to mod the file itself, instead of dynamically override :( -->
+    <!-- ^ unfortunately we have to mod the file itself, instead of dynamically override o_O -->
 
     <script src="js/pages.init.js"></script>
     <!-- endbuild -->
