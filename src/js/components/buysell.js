@@ -740,7 +740,7 @@ function BuySellWizardViewModel() {
       deferred.resolve();
       if(data.length) {
         self.showPriceChart(true);
-        OrdersViewModel.doChart(self.dispAssetPair(), $('#priceHistory'), data); //does what we want
+        ViewPricesViewModel.doChart(self.dispAssetPair(), $('#priceHistory'), data); //does what we want
       } else {
         self.showPriceChart(false);
       }
@@ -753,14 +753,31 @@ function BuySellWizardViewModel() {
   self.tab2RefreshTradeHistory = function() {
     if(self.currentTab() != 2) return;
     var deferred = $.Deferred();
-    failoverAPI("get_trade_history_within_dates", [self.buyAsset(), self.sellAsset()], function(data, endpoint) {
+    failoverAPI("get_trade_history", {'asset1': self.buyAsset(), 'asset2': self.sellAsset()}, function(data, endpoint) {
       deferred.resolve();
       self.tradeHistory([]);
       for(var i=0; i < data.length; i++) {
         self.tradeHistory.push(new TradeHistoryItemModel(data[i]));
       }
       if(self.tradeHistory().length) {
-        runDataTables('#tradeHistory', true, { "aaSorting": [ [0, 'desc'] ] });
+        runDataTables('#tradeHistory', true, {
+          "aaSorting": [ [0, 'desc'] ],
+          "aoColumns": [
+           {"sType": "numeric", "iDataSort": 9}, //block ID
+           {"sType": "numeric", "iDataSort": 10}, //datetime
+           {"sType": "string"}, //order 1
+           {"sType": "string"}, //address 1
+           {"sType": "string"}, //order 2
+           {"sType": "string"}, //address 2
+           {"sType": "numeric", "iDataSort": 11}, //quantity base
+           {"sType": "numeric", "iDataSort": 12}, //quantity quote
+           {"sType": "numeric"}, //unit price
+           {"bVisible": false}, //block index RAW
+           {"bVisible": false}, //block datetime RAW
+           {"bVisible": false}, //quantity base RAW
+           {"bVisible": false}  //quantity quote RAW
+         ]
+        });
         self.showTradeHistory(true);
       } else {
         self.showTradeHistory(false);

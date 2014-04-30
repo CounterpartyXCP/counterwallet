@@ -25,9 +25,14 @@ var ORDER_BTCSELL_DEFAULT_EXPIRATION = 2000; //num blocks until expiration for s
 var ORDER_MAX_EXPIRATION = 3000; //max expiration for order
 
 var STATS_MAX_NUM_TRANSACTIONS = 100; //max # transactions to show in the table
+var VIEW_PRICES_NUM_ASSET_PAIRS = 50; //show market info for this many pairs
+var VIEW_PRICES_ASSET_PAIRS_REFRESH_EVERY = 5 * 60 * 1000; //refresh asset pair market info every 5 minutes
+var VIEW_PRICES_NUM_LATEST_TRADES = 50; //show this many latest trades on the view prices page
+var VIEW_PRICES_LATEST_TRADES_REFRESH_EVERY = 5 * 60 * 1000; //refresh latest trades every 5 minutes
+
+var MARKET_INFO_REFRESH_EVERY = 5 * 60 * 1000; //refresh market info every 5 minutes while enabled (on buy/sell page, and view prices page) 
 
 var DEFAULT_NUM_ADDRESSES = 3; //default number of addresses to generate
-var MARKET_INFO_REFRESH_EVERY = 5 * 60 * 1000; //refresh market info every 5 minutes while enabled 
 
 var CHAT_NUM_USERS_ONLINE_REFRESH_EVERY = 5 * 60 * 1000; //refresh online user count every 5 minutes while enabled
 

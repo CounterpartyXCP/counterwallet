@@ -165,7 +165,7 @@ function TransactionHistoryItemViewModel(data) {
     var desc = "";
     if(self.RAW_TX_TYPE == 'burns') {
       desc = "XCP Proof-of-Burn<br/>Burned: <Am>" + normalizeQuantity(self.DATA['burned']) + "</Am> <As>BTC</As><br/>"
-        + "Earned: " + smartFormat(normalizeQuantity(self.DATA['earned']) ) + " XCP";
+        + "Earned: <Am>" + smartFormat(normalizeQuantity(self.DATA['earned']) ) + "</Am> <As>XCP</As>";
     } else if(self.RAW_TX_TYPE == 'sends') {
       desc = "Send of <Am>" + smartFormat(normalizeQuantity(self.DATA['quantity'], self.DATA['_divisible'])) + "</Am> <As>" + self.DATA['asset']
         + "</As> to <Ad>" + getLinkForCPData('address', self.DATA['destination'], getAddressLabel(self.DATA['destination'])) + "</Ad>";
@@ -226,7 +226,7 @@ function TransactionHistoryItemViewModel(data) {
     } else if(self.RAW_TX_TYPE == 'credits' || self.RAW_TX_TYPE == 'debits') {
       //This field only shown in stats, NOT history
       desc = "Address <Ad>" + getLinkForCPData('address', self.DATA['address'], getAddressLabel(self.DATA['address'])) + "</Ad>"
-        + (self.RAW_TX_TYPE == 'credit' ? ' credited with ' : 'debited for ')
+        + (self.RAW_TX_TYPE == 'credit' ? ' credited with ' : ' debited for ')
         + smartFormat(normalizeQuantity(self.DATA['quantity'], self.DATA['_divisible']))
         + "</Am> <As>" + self.DATA['asset'] + "</As>";
     } else {
@@ -281,7 +281,7 @@ function TransactionHistoryViewModel() {
       for(var i = 0; i< data.length; i++) {
         self.transactions.push(new TransactionHistoryItemViewModel(data[i])); 
       }
-      runDataTables(null, true, {
+      runDataTables('#txnHistory', true, {
         "aaSorting": [ [1, 'desc'], [0, 'desc'] ]
       });
       $('#txnHistory_wrapper').show();
