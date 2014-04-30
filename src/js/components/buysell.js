@@ -905,8 +905,7 @@ function BuySellWizardViewModel() {
   self._afterSelectedAnOpenOrder = ko.observable(false);
   self.buySelectedOpenOrder = function(order) {
     //called when a user clicks on an open order they would like to buy. should fill in the details for them on the buy page
-    order = order.ENTRY;
-
+    
     self.overrideMarketPrice(true);
     self.customSellAs('unitprice');
     var unitPrice = self.deriveOpenOrderAssetPrice(
