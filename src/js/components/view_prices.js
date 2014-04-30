@@ -399,12 +399,6 @@ function ViewPricesViewModel() {
     assert(asset2 && quantity2, "Asset2 and/or quantity2 not present");
     var derivedQuantity1 = self.normalizeAssetQuantity(asset1, quantity1);
     var derivedQuantity2 = self.normalizeAssetQuantity(asset2, quantity2);
-<<<<<<< HEAD:src/js/components/view_prices.js
-=======
-    
-    $.jqlog.debug("derivedQuantity1: "+derivedQuantity1);
-    $.jqlog.debug("derivedQuantity2: "+derivedQuantity2);
->>>>>>> 2973114... fix PRICE in orders book when quantity>1000:src/js/components/orders.js
 
     if(asset1 == self.baseAsset()) {
       if(!derivedQuantity1) return; //in process of changing assets
