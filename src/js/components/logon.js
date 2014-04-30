@@ -129,7 +129,7 @@ function LogonViewModel() {
 
       //generate the appropriate number of addresses
       WALLET.BITCOIN_WALLET = new CWBIP32(self.enteredPassphrase());
-
+      WALLET.isOldWallet(WALLET.BITCOIN_WALLET.useOldBIP32);
       //kick off address generation (we have to take this hacky approach of using setTimeout, otherwise the
       // progress bar does not update correctly through the HD wallet build process....)
       setTimeout(function() { self.genAddress(mustSavePreferencesToServer) }, 1);

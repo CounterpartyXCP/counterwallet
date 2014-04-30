@@ -292,10 +292,11 @@ function SendModalViewModel() {
 }
 
 
-var BalancesAddressInDropdownItemModel = function(address, label) {
+var BalancesAddressInDropdownItemModel = function(address, label, wif) {
   this.ADDRESS = address;
   this.LABEL = label;
   this.SELECT_LABEL = label ? ("<b>" + label + "</b><br/>" + address) : (address);
+  this.WIF = wif;
 };
 var SweepAssetInDropdownItemModel = function(asset, rawBalance, normalizedBalance, assetInfo) {
   this.ASSET = asset;
@@ -386,6 +387,8 @@ function SweepModalViewModel() {
   });
   
   self.availableAddresses = ko.observableArray([]);
+  self.availableOldAddresses = ko.observableArray([]);
+  self.excludedOldAddresses = ko.observableArray([]);
 
   self.privateKeyValidated = ko.validatedObservable({
     privateKey: self.privateKey,
@@ -420,6 +423,13 @@ function SweepModalViewModel() {
   self.missingBtcForFees = 0;
   self.sweepAssetsCost = {};
   self.mergeCost = 0;
+  self.fromOldWallet = ko.observable(false);
+  self.oldPrivateKey = ko.observable('');
+  self.oldPrivateKey.subscribe(function(value) {
+    if (self.fromOldWallet()) {
+      self.privateKey(value);
+    } 
+  });
   
   self.validationModel = ko.validatedObservable({
     privateKey: self.privateKey,
@@ -497,7 +507,8 @@ function SweepModalViewModel() {
     });
   });
  
-  self.resetForm = function() {
+  self.resetForm = function(fromOldWallet) {
+    self.fromOldWallet(fromOldWallet);
     self.privateKey('');
     self.availableAssetsToSweep([]);
     self.selectedAssetsToSweep([]);
@@ -518,7 +529,18 @@ function SweepModalViewModel() {
     var addresses = WALLET.getAddressesList(true);
     for(var i = 0; i < addresses.length; i++) {
         self.availableAddresses.push(new BalancesAddressInDropdownItemModel(addresses[i][0], addresses[i][1]));
-    }        
+    }  
+
+    self.availableOldAddresses([]);
+    if (self.fromOldWallet()) {
+      WALLET.BITCOIN_WALLET.getOldAddressesInfos(function(data) {
+        for (var address in data) {
+          if (self.excludedOldAddresses.indexOf(address) == -1) {
+            self.availableOldAddresses.push(new BalancesAddressInDropdownItemModel(address, address, data[address]['BTC']['privkey']));
+          }       
+        }
+      }); 
+    }    
     
     self.validationModel.errors.showAllMessages(false);
   }
@@ -564,9 +586,15 @@ function SweepModalViewModel() {
         }  
       }
     }
+    var alertCallback = null;
+    if (self.fromOldWallet() && self.availableOldAddresses().length>1) {
+      alertCallback = function() {
+        self.show(true, true, self.addressForPrivateKey());
+      }
+    }
     bootbox.alert("The sweep from address <b class='notoAddrColor'>" + self.addressForPrivateKey()
       + "</b> is complete.<br/>Sweep results:<br/><br/><ul>" + assetDisplayList.join('') + "</ul>"
-      + ACTION_PENDING_NOTICE);
+      + ACTION_PENDING_NOTICE, alertCallback);
   }
   
 
@@ -1024,9 +1052,12 @@ function SweepModalViewModel() {
   
   }
   
-  self.show = function(resetForm) {
-    if(typeof(resetForm) === 'undefined') resetForm = true;
-    if(resetForm) self.resetForm();
+  self.show = function(resetForm, fromOldWallet, excludeOldAddress) {
+    if (typeof(resetForm) === 'undefined') resetForm = true;
+    if (typeof(fromOldWallet) === 'undefined') fromOldWallet = false;
+    if (typeof(excludeOldAddress) !== 'undefined') self.excludedOldAddresses.push(excludeOldAddress);
+
+    if (resetForm) self.resetForm(fromOldWallet);
     self.shown(true);
   }  
 

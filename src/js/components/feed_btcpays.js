@@ -163,6 +163,8 @@ function WaitingBTCPayFeedViewModel() {
 
     failoverAPI("get_order_matches", {'filters': filters, 'filterop': 'or', post_filter_status: 'pending'},
       function(data, endpoint) {
+        console.log('DATA');
+        console.log(data);
         for(var i=0; i < data.length; i++) {
           //if the other party is the one that should be paying BTC for this specific order match, then skip it          
           if(   WALLET.getAddressObj(data['tx0_address']) && data['forward_asset'] == 'BTC'
