@@ -21,12 +21,32 @@ CWBIP32.prototype.init = function(passphrase) {
   }
 
   var seed = this.wordsToSeed(words);   
-  this.BIP32 = this.useOldBIP32 ? this.oldBIP32FromSeed(seed) : bitcore.BIP32.seed(seed, NETWORK.name);  
+  this.BIP32 = this.useOldBIP32 ? this.oldBIP32FromSeed(seed) : bitcore.BIP32.seed(seed, NETWORK.name);
+  // this instance used for sweeping old wallet
+  this.oldBIP32 = this.oldBIP32FromSeed(seed);
 }
 
 CWBIP32.prototype.wordsToSeed = function(words) {
   var m = new Mnemonic(words);
   return m.toHex();
+}
+
+CWBIP32.prototype.getOldAddressesInfos = function(callback) {
+  var addresses = [];
+  var cwkeys = {};
+
+  for (var i=0; i<=9; i++) {
+
+    var derivedKey = this.oldBIP32.derive(this.basePath+i);
+    var key = derivedKey.eckey.private.toString('hex');
+    var cwk = new CWPrivateKey(key);
+    var address = cwk.getAddress();
+    addresses.push(address);
+    cwkeys[address] = cwk;
+  }
+
+  Counterblock.getBalances(addresses, cwkeys, callback);
+  
 }
 
 // This function return an Bitcore BIP32 instance
@@ -66,7 +86,7 @@ CWBIP32.prototype.oldBIP32FromSeed = function(seed) {
 CWBIP32.prototype.getAddressKey = function(index) {
   checkArgType(index, "number");
   var derivedKey = this.BIP32.derive(this.basePath+index);
-  return new CWPrivateKey(bitcore.buffertools.toHex(derivedKey.eckey.private));
+  return new CWPrivateKey(derivedKey.eckey.private.toString('hex'));
 }
 
 
@@ -107,7 +127,7 @@ CWPrivateKey.prototype.isValid = function() {
 
 CWPrivateKey.prototype.getPub = function() {
   try {
-    return bitcore.buffertools.toHex(this.walletKey.privKey.public);
+    return this.walletKey.privKey.public.toString('hex');
   } catch (err) {
     return false;
   }

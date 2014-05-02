@@ -103,9 +103,19 @@ function initBalances() {
         e.preventDefault(); //prevent the location hash from changing
       });
       
-      $('#sweepFunds').click(function() {
-        SWEEP_MODAL.show();
+      $('#sweepFunds, #sweepFunds2').click(function() {
+        SWEEP_MODAL.show(true, false);
       });
+      $('#sweepOldWallet').click(function() {
+        SWEEP_MODAL.show(true, true);
+      });
+
+      //temporary
+      if (WALLET.BITCOIN_WALLET.useOldBIP32) {
+        $('#newWalletSweep').hide();
+      } else {
+        $('#sweepFunds').hide();
+      }
         
       //Called on first load, and every switch back to the balances page
       if(window._BALANCES_HAS_LOADED_ALREADY === undefined) {
@@ -188,6 +198,22 @@ function initHistory() {
 INIT_FUNC['pages/history.html'] = initHistory;
 
 
+function initStats() {
+  pageSetUp(); //init smartadmin featureset
+  
+  //This code is run on each visit to the page
+  window.STATS_HISTORY = new StatsHistoryViewModel();
+  window.STATS_TXN_HISTORY = new StatsTransactionHistoryViewModel();
+  
+  ko.applyBindings(STATS_TXN_HISTORY, document.getElementById("wid-id-statsTxnHistory"));
+  ko.applyBindings(STATS_HISTORY, document.getElementById("wid-id-statsHistory"));
+  
+  STATS_HISTORY.init();
+  STATS_TXN_HISTORY.init();
+}
+INIT_FUNC['pages/stats.html'] = initStats;
+
+
 function initLeaderboard() {
   pageSetUp(); //init smartadmin featureset
   
@@ -207,22 +233,22 @@ function initLeaderboard() {
 INIT_FUNC['pages/leaderboard.html'] = initLeaderboard;
 
 
-function initOrders() {
+function initViewPrices() {
   pageSetUp(); //init smartadmin featureset
   
   //This code is run on each visit to the page
-  window.ORDERS = new OrdersViewModel();
-  ko.applyBindings(ORDERS, document.getElementsByClassName("ordersGrid")[0]);
+  window.VIEW_PRICES = new ViewPricesViewModel();
+  ko.applyBindings(VIEW_PRICES, document.getElementsByClassName("ordersGrid")[0]);
   
-  ORDERS.init(true);
+  VIEW_PRICES.init(true);
   
-  $(window).resize(ORDERS.dataTableResponsive);
+  $(window).resize(VIEW_PRICES.dataTableResponsive);
   $(window).on('hashchange', function() {
-    ORDERS.metricsStopAutoRefresh(); //just in case
-    $(window).off("resize", ORDERS.dataTableResponsive);
+    VIEW_PRICES.metricsStopAutoRefresh(); //just in case
+    $(window).off("resize", VIEW_PRICES.dataTableResponsive);
   });
 }
-INIT_FUNC['pages/orders.html'] = initOrders;
+INIT_FUNC['pages/view_prices.html'] = initViewPrices;
 
 
 function initPortfolio() {

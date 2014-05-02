@@ -181,17 +181,22 @@ function MessageFeed() {
     // just relying on 5 minute polling for new BTC balances)
     if(message['block_index'])
       WALLET.networkBlockHeight(message['block_index']);
-    
-    //filter out non insert messages for now
-    if(message['_command'] != 'insert')
-      return;
       
+    //filter out non insert messages for now, EXCEPT for order messages (so that we get notified when the remaining qty, etc decrease)
+    if(message['_command'] != 'insert' && category != "orders")
+      return;
+
     //If we received an action originating from an address in our wallet that was marked invalid by the network, let the user know
     // (do this even in cases where the entry does not exist in pendingActions, as the user could have logged out and back in)
     if(message['_status'] && message['_status'].startsWith('invalid') && WALLET.getAddressObj(message['source'])) {
       var actionText = PendingActionViewModel.calcText(category, message); //nice "good enough" shortcut method here
       bootbox.alert("<b class='errorColor'>Network processing of the following action failed:</b><br/><br/>"
         + actionText + "<br/><br/><b>Reason:</b> " + message['_status']);
+    }
+
+    //Insert the message into the stats page (if it has been initialized)
+    if(window.hasOwnProperty('STATS_TXN_HISTORY')) {
+      window.STATS_TXN_HISTORY.addMessage(message);
     }
       
     //remove any pending message from the pending actions pane (we do this before we filter out invalid messages
@@ -270,6 +275,9 @@ function MessageFeed() {
     } else if(category == "sends") {
       //the effects of a send are handled based on the credit and debit messages it creates, so nothing to do here
     } else if(category == "orders") {
+      if(message['_btc_below_dust_limit'])
+        return; //ignore any order involving BTC below the dust limit
+      
       //valid order statuses: open, filled, invalid, cancelled, and expired
       //update the give/get remaining numbers in the open orders listing, if it already exists
       var match = ko.utils.arrayFirst(OPEN_ORDER_FEED.entries(), function(item) {
@@ -302,6 +310,9 @@ function MessageFeed() {
         OPEN_ORDER_FEED.add(message);
       }
     } else if(category == "order_matches") {
+      if(message['_btc_below_dust_limit'])
+        return; //ignore any order match involving BTC below the dust limit
+      
       //Look to order matches when determining to do a BTCpay
       //If the order_matches message doesn't have a tx0_address/tx1_address field, then we don't need to do anything with it
       if(   (WALLET.getAddressObj(message['tx0_address']) && message['forward_asset'] == 'BTC' && message['_status'] == 'pending')

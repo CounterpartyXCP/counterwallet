@@ -66,6 +66,7 @@ function LogonViewModel() {
       $('#newAccountInfoPane').animate({opacity:0}); //fade out the new account pane if visible
       $('#createNewAcctBtnPane').animate({opacity:0}); //fade out the new account button pane if visible
       $('#extra-info').animate({opacity:0});
+      $('#disclaimer').animate({opacity:0});
       
       //generate the wallet ID from a double SHA256 hash of the passphrase and the network (if testnet)
       var hashBase = CryptoJS.SHA256(self.sanitizedEnteredPassphrase() + (USE_TESTNET ? '_testnet' : ''));
@@ -129,7 +130,7 @@ function LogonViewModel() {
 
       //generate the appropriate number of addresses
       WALLET.BITCOIN_WALLET = new CWBIP32(self.enteredPassphrase());
-
+      WALLET.isOldWallet(WALLET.BITCOIN_WALLET.useOldBIP32);
       //kick off address generation (we have to take this hacky approach of using setTimeout, otherwise the
       // progress bar does not update correctly through the HD wallet build process....)
       setTimeout(function() { self.genAddress(mustSavePreferencesToServer) }, 1);
