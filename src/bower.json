@@ -30,7 +30,7 @@
         "typeahead.js": "0.10.2",
         "select2": "3.4.6",
         "font-awesome": "4.0.3",
-        "bitcore": "https://github.com/bitpay/bitcore.git#0.1.16",
+        "bitcore": "https://github.com/JahPowerBit/bitcore.git#19e5aaecca1db1ae80b687580086dc8964f50d5d",
         "mocha": "1.18.2",
         "chai": "1.9.1"
     }
