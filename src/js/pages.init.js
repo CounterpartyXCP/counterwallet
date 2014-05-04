@@ -42,6 +42,13 @@ function initIndex() { //main page
       WALLET_OPTIONS_MODAL.show();
       return false;
     });
+
+    $('#loginform').submit(function() {
+      if (LOGON_VIEW_MODEL.isPassphraseValid()) {
+        LOGON_VIEW_MODEL.openWallet();
+      } 
+      return false;
+    })
   });
 }
 initIndex(); //call it now, as this script is loaded on index page load
