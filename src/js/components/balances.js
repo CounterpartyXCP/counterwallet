@@ -358,8 +358,8 @@ function SweepModalViewModel() {
 
         // here we assume that the transaction cost to send BTC from addressForFees is MIN_FEE
         var totalBtcBalanceForSweeep = self.btcBalanceForPrivateKey() + Math.max(0, (self.addressForFeesBalance()-MIN_FEE));
-        self.missingBtcForFees = Math.max(0, sweepingCost - self.btcBalanceForPrivateKey());
-
+        self.missingBtcForFees = Math.max(MULTISIG_DUST_SIZE, sweepingCost - self.btcBalanceForPrivateKey());
+   
 
         if  (totalBtcBalanceForSweeep < sweepingCost) {
           

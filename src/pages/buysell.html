@@ -310,9 +310,9 @@
         <header>
             <span class="widget-icon"> <i class="fa fa-bar-chart-o"></i> </span>
             <h3>Price History for <span data-bind="text: dispAssetPair"></span></h3>
-            <div class="widget-toolbar" role="menu" data-bind="visible: bidAskMedian"> 
+            <div class="widget-toolbar" role="menu" data-bind="visible: currentMarketUnitPrice"> 
                 <div class="label label-success">
-                    <i class="fa fa-retweet"></i>&nbsp;Market Price: <span data-bind="text: bidAskMedian"></span>
+                    <i class="fa fa-retweet"></i>&nbsp;Market Price: <span data-bind="text: currentMarketUnitPrice"></span>
                 </div>
             </div>
         </header>
