@@ -1,0 +1,51 @@
+#betting li.feed-item,  #category-feeds {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  
+}
+
+#betting #category-feeds {
+  padding-top:20px !important;
+}
+
+#betting li.feed-item {
+  margin-bottom: 20px;
+}
+
+#betting li.feed-item div.description,
+#betting div.badges {
+  clear: both;
+}
+
+#betting li.feed-item header img {
+  display: block;
+  float:left;
+  margin-right: 5px
+}
+#betting li.feed-item header h2 {
+  float:left;
+  height: 48px;
+  line-height: 48px;
+  margin: 0;
+  padding: 0;
+}
+
+#betting li.feed-item header h2 .badge {
+  font-size: 16px;
+  line-height: 20px;
+  font-weight: normal;
+  margin-right: 10px;
+}
+
+#betting li.feed-item header h2 strong {
+  margin-right: 10px;
+}
+
+#betting li.feed-item header h2 .badge .fa {
+  margin-right: 6px;
+}
+
+#betting div.feed-tabs {
+  margin-top: 6px;
+}

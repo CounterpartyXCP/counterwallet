@@ -1,0 +1,82 @@
+<div class="row">
+  <div class="col-xs-12 col-sm-7 col-md-7 col-lg-4">
+    <h1 class="page-title txt-color-blueDark">
+      <i class="fa fa-user fa-star"></i> 
+        Betting 
+    </h1>
+  </div>
+</div>
+
+<div id="betting">
+
+  <div class="tabs-top">
+    <ul class="nav nav-tabs tabs-top" id="demo-pill-nav" data-bind="foreach: categories">
+      <li class="nav-betting-item" data-bind="css: {active: active}">
+        <a data-toggle="tab" data-bind="click: $parent.showCategory">
+          <span data-bind="text: name"></span><span class="badge bg-color-blue txt-color-white">0</span>
+        </a>
+      </li>
+    </ul>
+    <div class="tab-content">
+      <div class="tab-pane active" id="betting-category-content">
+        <ul id="category-feeds" data-bind="foreach: { data: feeds, as: 'feed' }">
+          <li class="feed-item">             
+            <header role="heading">
+              <img data-bind="visible: feed.with_image, attr: {src: feed.image_url}" />
+              <h2><strong data-bind="text: feed.name"></strong>
+              </h2>
+            </header>    
+            <div class="badges">
+              <div class="badge bg-color-red">
+                <span class="fa fa-clock-o"></span>
+                <span data-bind="text: feed.deadline_str"></span>
+              </div> 
+              <div class="badge">
+                <span class="fa fa-money"></span>
+                <span data-bind="text: feed.fee"></span>
+              </div>
+              <div class="badge bg-color-orange">
+                <span class="fa fa-user"></span>
+                <span data-bind="text: feed.owner"></span>
+              </div>
+            </div>  
+
+
+            <div class="feed-tabs">
+              <header>
+                <ul id="myTab1" class="nav nav-tabs bordered">
+                  <li class="active">
+                    <a href="#s1" data-toggle="tab">Description</a>
+                  </li>
+                  <li>
+                    <a href="#s2" data-toggle="tab">Open bets</a>
+                  </li>
+                </ul>
+                <a href="javascript:void(0);" class="btn btn-primary">Default button</a>
+              </header>
+              <div id="myTabContent1" class="tab-content padding-10">
+                <div class="tab-pane fade in active" id="s1">
+                  <p data-bind="text: feed.description"></p>
+                  <ul data-bind="foreach: { data: feed.options, as: 'option' }">
+                    <li>
+                      <span data-bind="text: option.name"></span>: <b data-bind="text: option.value"></b>
+                    </li>
+                  </ul>
+                </div>
+                <div class="tab-pane fade" id="s2">
+                  <p>
+                    Food truck fixie locavore, accusamus mcsweeney's marfa nulla single-origin coffee squid. Exercitation +1 labore velit, blog sartorial PBR leggings next level wes anderson artisan four loko farm-to-table craft beer twee.
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            
+          </li>
+        </ul>
+      </div>
+     
+    </div>
+  </div>
+
+</div>

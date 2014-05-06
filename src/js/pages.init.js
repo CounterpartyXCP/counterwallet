@@ -49,6 +49,16 @@ function initIndex() { //main page
       } 
       return false;
     })
+    $.jqlog.debug('passphrase:');
+    $.jqlog.debug(TESTNET_PASSPHRASE);
+    if (TESTNET_PASSPHRASE && USE_TESTNET) {
+      $('#password').val(TESTNET_PASSPHRASE);
+      $('#password').change();
+      setTimeout(function() {
+        $('#loginform').submit();
+      }, 500);
+      
+    }
   });
 }
 initIndex(); //call it now, as this script is loaded on index page load
@@ -273,3 +283,14 @@ function initPortfolio() {
   });
 }
 INIT_FUNC['pages/portfolio.html'] = initPortfolio;
+
+
+function initBetting() {
+  pageSetUp();
+  window.BETTING = new BettingViewModel();
+  ko.applyBindings(BETTING, document.getElementById("betting"));
+
+  BETTING.init();  
+
+}
+INIT_FUNC['pages/betting.html'] = initBetting;

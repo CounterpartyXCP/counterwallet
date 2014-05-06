@@ -354,6 +354,21 @@ function deepCompare () {
   return true;
 }
 
+function capitaliseFirstLetter(string) {
+  return string.charAt(0).toUpperCase() + string.slice(1);
+}
+
+function feedImageUrl(address) {
+  return "https://counterblock.jahpowerbit.org/_t_feed_img/"+address+".png";
+}
+
+function timestampToString(timestamp) {
+  return moment(timestamp * 1000).format("MMM Do YYYY, h:mm:ss a");
+}
+
+function satoshiToPercent(value) {
+  return (value / UNIT * 100) + '%';
+}
 
 //Helper for closure-based inheritance (see http://www.ruzee.com/blog/2008/12/javascript-inheritance-via-prototypes-and-closures)
 (function(){
