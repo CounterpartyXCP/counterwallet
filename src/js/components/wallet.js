@@ -59,7 +59,7 @@ function WalletViewModel() {
     
     ko.utils.arrayForEach(self.addresses(), function(address) {
       if(withLabel) {
-        addresses.push([address.ADDRESS, address.label()]);
+        addresses.push([address.ADDRESS, address.label(), address.getXCPBalance(), address.PUBKEY]);
       } else {
         addresses.push(address.ADDRESS);
       }
@@ -82,6 +82,12 @@ function WalletViewModel() {
     var assetObj = addressObj.getAssetObj(asset);
     if(!assetObj) return 0; //asset not in wallet
     return normalized ? assetObj.normalizedBalance() : assetObj.rawBalance();
+  }
+
+  self.getPubkey = function(address) {
+    var addressObj = self.getAddressObj(address);
+    assert(addressObj);
+    return addressObj.PUBKEY;
   }
 
   self.updateBalance = function(address, asset, rawBalance) {
@@ -427,7 +433,7 @@ function WalletViewModel() {
       delete data['_divisible'];
     }
     
-    var verifyDestAddr = data['destination'] || data['transfer_destination'] || data['source'];
+    var verifyDestAddr = data['destination'] || data['transfer_destination'] || data['feed_address'] || data['source'];
     if (action == "create_burn") {
       verifyDestAddr = TESTNET_UNSPENDABLE;
     }

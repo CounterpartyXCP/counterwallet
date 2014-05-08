@@ -122,6 +122,11 @@ var BET_TYPES = {
   3: "Not Equal"
 };
 
+var COUNTER_BET = {
+  "Equal": 3,
+  "NotEqual": 2
+}
+
 var MAINNET_UNSPENDABLE = '1CounterpartyXXXXXXXXXXXXXXXUWLpVr';
 var TESTNET_UNSPENDABLE = 'mvCounterpartyXXXXXXXXXXXXXXW24Hef';
 var TESTNET_BURN_START = 154908;

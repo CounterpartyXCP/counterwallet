@@ -1,82 +1,239 @@
 <div class="row">
   <div class="col-xs-12 col-sm-7 col-md-7 col-lg-4">
     <h1 class="page-title txt-color-blueDark">
-      <i class="fa fa-user fa-star"></i> 
-        Betting 
+      <i class="fa fa-star"></i> 
+        Binary Bets 
     </h1>
   </div>
 </div>
 
+<!-- Feeds tabs -->
 <div id="betting">
-
-  <div class="tabs-top">
-    <ul class="nav nav-tabs tabs-top" id="demo-pill-nav" data-bind="foreach: categories">
-      <li class="nav-betting-item" data-bind="css: {active: active}">
-        <a data-toggle="tab" data-bind="click: $parent.showCategory">
-          <span data-bind="text: name"></span><span class="badge bg-color-blue txt-color-white">0</span>
-        </a>
+  <div class="tabs-top">    
+    <ul class="nav nav-tabs tabs-top">
+      <li class="nav-betting-item active">
+        <a data-toggle="tab" href="#browse-categories">Browse feeds</a>
+      </li>
+      <li class="nav-betting-item">
+        <a data-toggle="tab" href="#my-open-bets">My open bets</a>
+      </li>
+      <li class="nav-betting-item">
+        <a data-toggle="tab" href="#my-pending-bets">My pending bets</a>
+      </li>
+      <li class="nav-betting-item">
+        <a data-toggle="tab" href="#my-resolved-bets">My resolved bets</a>
+      </li>
+      <li class="nav-betting-item">
+        <a data-toggle="tab" href="#faq"><span class="fa fa-fw fa-lg fa-question"></span>FAQ</a>
       </li>
     </ul>
     <div class="tab-content">
-      <div class="tab-pane active" id="betting-category-content">
+      <div class="tab-pane active" id="browse-categories">
+        <div id="feed-filters" class="alert-info clearfix" style="background-color:#F4F8FD;padding:10px">
+          <div class="form-group feed-categories">
+            <label class="control-label"><b>Category</b></label>
+            <div data-bind="foreach: categories">
+              <label class="radio radio-inline">
+                <input name="category" type="radio" data-bind="checked: $parent.currentCat, attr: {value: name}, valueUpdate: 'input'">
+                <span data-bind="text: name"></span>
+              </label>
+            </div>
+          </div>
+        </div>
+
         <ul id="category-feeds" data-bind="foreach: { data: feeds, as: 'feed' }">
-          <li class="feed-item">             
+          <li class="clearfix feed-item">             
             <header role="heading">
               <img data-bind="visible: feed.with_image, attr: {src: feed.image_url}" />
-              <h2><strong data-bind="text: feed.name"></strong>
+              <h2>
+                <strong data-bind="text: feed.question"></strong>
+                <div class="badges">
+                  <div class="badge bg-color-magenta">
+                    <span class="fa fa-clock-o"></span>
+                    <span data-bind="text: feed.deadline_str"></span>
+                  </div> 
+                  <div class="badge bg-color-pink">
+                    <span class="fa fa-money"></span>
+                    <span data-bind="text: feed.fee"></span>
+                  </div>
+                  <div class="badge bg-color-pinkDark">
+                    <span class="fa fa-user"></span>
+                    <span data-bind="text: feed.owner"></span>
+                  </div>
+                  <div class="badge bg-color-greenLight">
+                    <span class="fa fa-thumbs-o-up"></span>
+                    <span data-bind="text: feed.equal_odd_str"></span>
+                  </div>
+                  <div class="badge bg-color-redLight">
+                    <span class="fa fa-thumbs-o-down"></span>
+                    <span data-bind="text: feed.not_equal_odd_str"></span>
+                  </div>
+                </div>
               </h2>
             </header>    
-            <div class="badges">
-              <div class="badge bg-color-red">
-                <span class="fa fa-clock-o"></span>
-                <span data-bind="text: feed.deadline_str"></span>
-              </div> 
-              <div class="badge">
-                <span class="fa fa-money"></span>
-                <span data-bind="text: feed.fee"></span>
-              </div>
-              <div class="badge bg-color-orange">
-                <span class="fa fa-user"></span>
-                <span data-bind="text: feed.owner"></span>
-              </div>
-            </div>  
-
-
-            <div class="feed-tabs">
-              <header>
-                <ul id="myTab1" class="nav nav-tabs bordered">
-                  <li class="active">
-                    <a href="#s1" data-toggle="tab">Description</a>
-                  </li>
-                  <li>
-                    <a href="#s2" data-toggle="tab">Open bets</a>
-                  </li>
-                </ul>
-                <a href="javascript:void(0);" class="btn btn-primary">Default button</a>
-              </header>
-              <div id="myTabContent1" class="tab-content padding-10">
-                <div class="tab-pane fade in active" id="s1">
-                  <p data-bind="text: feed.description"></p>
-                  <ul data-bind="foreach: { data: feed.options, as: 'option' }">
-                    <li>
-                      <span data-bind="text: option.name"></span>: <b data-bind="text: option.value"></b>
-                    </li>
-                  </ul>
-                </div>
-                <div class="tab-pane fade" id="s2">
-                  <p>
-                    Food truck fixie locavore, accusamus mcsweeney's marfa nulla single-origin coffee squid. Exercitation +1 labore velit, blog sartorial PBR leggings next level wes anderson artisan four loko farm-to-table craft beer twee.
-                  </p>
-                </div>
-              </div>
-            </div>
-
-            
+              
+            <div class="choices">
+              <a href="javascript:void(0);" class="btn btn-labeled btn-success" data-bind="click: $parent.betEqual">
+                <span class="btn-label"><i class="glyphicon glyphicon-thumbs-up"></i></span>
+                <span data-bind="text: feed.yes_label"></span>
+              </a>
+              <a href="javascript:void(0);" class="btn btn-labeled btn-danger" data-bind="click: $parent.betNotEqual">
+                <span class="btn-label"><i class="glyphicon glyphicon-thumbs-down"></i></span>
+                <span data-bind="text: feed.no_label"></span>
+              </a>
+            </div>        
           </li>
         </ul>
+      </div> <!-- .tab-pane -->
+      <div class="tab-pane" id="my-open-bets">
+        open bets
       </div>
-     
-    </div>
-  </div>
+      <div class="tab-pane" id="my-pending-bets">
+        pending bets
+      </div>
+      <div class="tab-pane" id="my-resolved-bets">
+        resolved bets
+      </div>   
+      <div class="tab-pane" id="faq">
+        <h2>How to create a Counterwallet feed?</h2>
+        <p>
+          <ul>
+            <li>
+              <h3>Step 1: prepare an online json</h3>
+<pre>
+{
+    "owner": "JahPowerBit",
+    "address": "muYJYjRZDPmTEMfyEGe34BGN8tZ6rmRZCu",
+    "category": "sports",
+    "type": "simple",
+    "question": "Will Broncos win the Superbowl 2014 ?",
+    "yes_label": "Yes",
+    "no_label": "No",
+    "image": "https://www.jahpowerbit.org/feeds/image-1.png",
+    "website": "http://www.mysite.com/feeds/superbowl2014",
+    "deadline": "2014/07/01 05:06:07 GMT"
+}
+</pre>
 
-</div>
+            </li>
+            <li>
+              <h3>Step 2: broadcast the json url</h3>
+<pre>
+text: json url (max 50 characters, ends by .json)
+value: -1
+fee_fraction: fees for you
+timestamp: start of the bet
+</pre>
+            </li>
+            <li>
+              <h3>Step 2: broadcast the result</h3>
+<pre>
+text: result in text
+value: 1 for YES, something else for NO (target_value always equal 1)
+</pre>
+            </li>
+
+          </ul>
+        </p>
+      </div>  
+    </div><!-- .tab-content -->
+
+    
+  </div><!-- .tabs-top -->
+</div><!-- #betting -->
+
+
+<!-- modal for bet -->
+<div data-bind="showModal: shown" id="betModal" class="modal fade" data-backdrop="static" data-keyboard="false" tabindex="-1" role="dialog" aria-labelledby="betModal" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content" data-bind="with: feed">
+      <form>
+        <div class="modal-header">
+          <button type="button" data-bind="click: $parent.hide" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+          <h4 class="modal-title">
+            <img data-bind="visible: with_image, attr: {src: image_url}" />
+            <b data-bind="text: question"></b>
+            <div class="badges">
+              <div class="badge bg-color-magenta">
+                <span class="fa fa-clock-o"></span>
+                <span data-bind="text: deadline_str"></span>
+              </div> 
+              <div class="badge bg-color-pink">
+                <span class="fa fa-money"></span>
+                <span data-bind="text: fee"></span>
+              </div>
+              <div class="badge bg-color-pinkDark">
+                <span class="fa fa-user"></span>
+                <span data-bind="text: owner"></span>
+              </div>
+            </div>
+          </h4>
+            
+        </div>
+        <div class="modal-body no-padding">
+          <div class="bet-source">
+            <b>You go bet: </b> 
+            <div data-bind="visible: $parent.betType == 'Equal'" class="badge bg-color-green" style="font-size:20px">
+              <i class="glyphicon glyphicon-thumbs-up"></i>
+              <span data-bind="text: yes_label"></span>
+            </div>
+            <div data-bind="visible: $parent.betType == 'NotEqual'" class="badge bg-color-red" style="font-size:20px">
+              <i class="glyphicon glyphicon-thumbs-down"></i>
+              <span data-bind="text: no_label"></span>
+            </div>
+            <b>with: </b>
+            <select class="form-control" style="width: 150px;vertical-align: top;margin-right: 12px;" name="source" data-bind="options: $parent.availableAddresses, optionsValue: 'address', optionsText: 'label', value: $parent.sourceAddress, select2: { minimumResultsForSearch: 10, escapeMarkup: 'direct' }"></select>
+            <b>a wager of: </b>
+            <input type="text"  name="wager"  data-bind="value: $parent.wager, valueUpdate: 'input'" /> <b>XCP</b>
+            <span class="invalid custom" data-bind="validationMessage: $parent.wager"></span>
+          </div><!-- .bet-source -->
+          <div class="smart-form" style="padding:0 12px">
+            <div data-bind="visible: $parent.counterBets().length>0">
+              <label>Select the Counterparty:</label> 
+              <div id="counterbets">           
+                <table width="100%" class="table table-striped table-hover datatable_basic">
+                  <thead>
+                    <tr>
+                      <th>Odd</th>
+                      <th>Counterwager</th>
+                      <th>Deadline</th>
+                    </tr>
+                  </thead>
+                  <tbody data-bind="foreach: { data: $parent.counterBets, as: 'counterbet' }">
+                    <tr class="cb" data-bind="click: $parents[1].selectCounterbet, attr: {id: 'cb_'+counterbet.tx_index}">
+                      <td style="text-align:center" data-bind="text: counterbet.ratio"/></td>
+                      <td style="text-align:right;padding-right:10px !important;width:100px" data-bind="text: counterbet.counterwager"></td>
+                      <td data-bind="text: counterbet.deadline_str"></td> 
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+            <div class="fieldset">            
+              <label>Counterwager:</label>                 
+              <input name="counterwager" class="number" data-bind="value: $parent.counterwager, valueUpdate: 'input'" type="text"/> XCP
+              <span class="invalid custom" data-bind="validationMessage: $parent.counterwager"></span>
+              <div class="note">how much the counterparty must bet.</div>                      
+            </div>
+            <div class="fieldset">           
+              <label>Deadline:</label>                 
+              <input name="deadline" data-bind="datetimepicker: $parent.deadline" type="text" style="width:140px;"/>
+              <span class="invalid custom" data-bind="validationMessage: $parent.deadline"></span>
+              <div class="note">when his bet will be decided.</div>                                  
+            </div>
+            <div class="fieldset">           
+              <label>Expiration:</label>                 
+              <input name="expiration" class="number" data-bind="value: $parent.expiration, valueUpdate: 'input'" type="text"/> blocks
+              <span class="invalid custom" data-bind="validationMessage: $parent.expiration"></span>
+              <div class="note">how many blocks a counterparty has to take the other side of the bet.</div>                                  
+            </div>
+          </div><!-- .smart-form -->
+        </div><!-- .modal-body -->
+        <div class="modal-footer">
+          <button type="button" class="btn btn-default" data-bind="click: $parent.hide">Cancel</button>
+          <button type="button" data-bind="click: $parent.submitForm" class="btn btn-primary">Bet</button>
+        </div>
+      </form>
+    </div><!-- /.modal-content -->
+  </div><!-- /.modal-dialog -->
+</div><!-- /.modal -->

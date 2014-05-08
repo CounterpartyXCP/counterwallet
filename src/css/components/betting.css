@@ -10,7 +10,9 @@
 }
 
 #betting li.feed-item {
-  margin-bottom: 20px;
+  margin: 20px 0;
+  max-width: 900px;
+  clear: both;
 }
 
 #betting li.feed-item div.description,
@@ -26,16 +28,14 @@
 #betting li.feed-item header h2 {
   float:left;
   height: 48px;
-  line-height: 48px;
+  line-height: 20px;
   margin: 0;
   padding: 0;
 }
 
 #betting li.feed-item header h2 .badge {
-  font-size: 16px;
-  line-height: 20px;
   font-weight: normal;
-  margin-right: 10px;
+  font-size: 14px;
 }
 
 #betting li.feed-item header h2 strong {
@@ -48,4 +48,102 @@
 
 #betting div.feed-tabs {
   margin-top: 6px;
+}
+
+#betting div.choices {
+  float: right;
+  padding-top: 7px;
+}
+
+#betting div.feed-categories .radio {
+  margin-top: 0;
+}
+#betting div.feed-categories label {
+  width:auto !important;
+  float:left;
+  margin-left: 10px;
+}
+
+#betModal h4 {
+  line-height:20px; 
+}
+
+
+#betModal h4 img {
+  float:left;
+  margin-right:5px; 
+}
+
+#betModal div.bet-source {
+  margin: 12px;
+}
+
+#betModal div.bet-source select {
+  vertical-align:top;
+  max-width: 150px
+}
+
+#betModal div.bet-source input[name=wager] {
+  vertical-align: top;
+  display: inline-block;
+  max-width: 40px;
+  text-align: right;
+}
+
+#betModal div.bet-source b {
+  display: inline-block;
+  line-height: 30px;
+  height: 30px;
+  vertical-align:top;
+}
+
+#betModal div.bet-source .badge span {
+  vertical-align: top;
+}
+
+#betModal div.bet-source select,
+#betModal div.bet-source .badge {
+  margin-right: 12px;
+}
+
+#betModal span.invalid {
+  display: none;
+}
+
+#betModal span.invalid.custom {
+  display: block;
+  color:red;
+}
+
+#betModal div.fieldset {
+  clear: both;
+  margin-top: 12px;
+}
+
+#betModal div.fieldset label {
+  width: 112px;
+}
+
+#betModal .number {
+  width:140px;
+  text-align:right;
+}
+
+#betModal #counterbets {
+  max-height:150px;
+  overflow-y:scroll !important;
+  overflow-x:hidden !important;
+  overflow: -moz-scrollbars-vertical;
+  font-size: 12px;
+}
+
+#betModal #counterbets td {
+  padding: 4px !important;
+  cursor: pointer;
+}
+
+#betModal #counterbets tr.selectedCounterBet td {
+  background-color: #a8829f !important;
+  font-weight: bold;
+  color:#FFF;
 }

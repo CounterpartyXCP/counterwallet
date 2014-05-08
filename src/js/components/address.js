@@ -251,4 +251,12 @@ function AddressViewModel(key, address, initialLabel) {
   self.showOthersAssetsOnly = function() {
     self.assetFilter('others'); //Show other's (foreign) assets only
   }
+
+  self.getXCPBalance = function() {
+    var xcpAsset =  $.grep(self.assets(), function (value) {
+        return value.ASSET == 'XCP';
+    });
+    return xcpAsset[0].normalizedBalance();
+  }
+
 }

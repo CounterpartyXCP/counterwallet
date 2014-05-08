@@ -288,7 +288,10 @@ INIT_FUNC['pages/portfolio.html'] = initPortfolio;
 function initBetting() {
   pageSetUp();
   window.BETTING = new BettingViewModel();
+  window.BET_MODAL = new BetModalViewModel();
+
   ko.applyBindings(BETTING, document.getElementById("betting"));
+  ko.applyBindings(BET_MODAL, document.getElementById("betModal"));
 
   BETTING.init();  
 

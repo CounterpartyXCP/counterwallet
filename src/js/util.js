@@ -370,6 +370,15 @@ function satoshiToPercent(value) {
   return (value / UNIT * 100) + '%';
 }
 
+// Reduce a fraction by finding the Greatest Common Divisor and dividing by it.
+function reduce(numerator,denominator){
+  var gcd = function gcd(a,b){
+    return b ? gcd(b, a%b) : a;
+  };
+  gcd = gcd(numerator,denominator);
+  return [numerator/gcd, denominator/gcd];
+}
+
 //Helper for closure-based inheritance (see http://www.ruzee.com/blog/2008/12/javascript-inheritance-via-prototypes-and-closures)
 (function(){
   CClass = function(){};
