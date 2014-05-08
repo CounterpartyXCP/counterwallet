@@ -70,8 +70,7 @@ function CreateAssetModalViewModel() {
       message: "Call price is required if the asset is callable",
       onlyIf: function () { return (self.callable() === true); }
     },
-    isValidPositiveQuantityOrZero: self,
-    isValidQtyForDivisibility: self
+    isValidPositiveQuantityOrZero: self
   });
   
   self.validationModel = ko.validatedObservable({
@@ -724,6 +723,11 @@ function ShowAssetInfoModalViewModel() {
   self.callPrice = ko.observable(null);
   self.history = ko.observableArray([]);
   
+  self.extImageURL = ko.observable(null);
+  self.extWebsite = ko.observable(null);
+  self.extDescription = ko.observable(null);
+  self.extPGPSigURL = ko.observable(null);
+  
   self.dispTotalIssued = ko.computed(function() {
     return smartFormat(self.totalIssued()); 
   }, self); 
@@ -746,6 +750,20 @@ function ShowAssetInfoModalViewModel() {
     self.history([]); //clear until we have the data from the API call below...
     
     //Fetch the asset history and populate the table with it
+    failoverAPI("get_asset_extended_info", {asset: assetObj.ASSET},
+      function(ext_info, endpoint) {
+        if(!ext_info)
+          return; //asset has no extended info
+        
+        if(ext_info['image'])
+          self.extImageURL((USE_TESTNET ? '/_t_asset_img/' : '/_asset_img/') + assetObj.ASSET + '.png');
+        
+        self.extWebsite(ext_info['website']);
+        self.extDescription(ext_info['description']);
+        self.extPGPSigURL(ext_info['pgpsig']);
+      }
+    );   
+    
     failoverAPI("get_asset_history", {asset: assetObj.ASSET, reverse: true},
       function(history, endpoint) {
         for(var i=0; i < history.length; i++) {

@@ -306,7 +306,7 @@ function ChatFeedViewModel() {
     } else if(event.keyCode == 9) { //tab pressed - nick competion
       var words = $('#chatTextBox').val().replace(/[ :]+$/g, '').split(' ');
       //^ split without the automatic space and : our completion adds
-      if(!words.last()) return;
+      if(!words[words.length-1]) return;
       
       //gather the list of potential nicks from the last 50 lines of chat history (putting most recently spoken nicks first)
       var handles = [];
@@ -314,11 +314,11 @@ function ChatFeedViewModel() {
         if(self.lines()[i].HANDLE)
           handles.push(self.lines()[i].HANDLE);
       }
-      handles = handles.unique();
-      handles.remove(self.handle()); //our own handle should not be a candidate for tab completion
+      handles = arrayUnique(handles);
+      handles = arrayRemove(self.handle()); //our own handle should not be a candidate for tab completion
       
       var toComplete = null;
-      var lastWord = words.last();
+      var lastWord = words[words.length-1];
       var subsequentTabbing = false;
       if(handles.filter(function(e) { return e == lastWord; }).length && self._handleTabCompletionPrefixText) {
         //last word was a full match, so use the stored last prefix. this will allow us to cycle through nick results
@@ -326,7 +326,7 @@ function ChatFeedViewModel() {
         subsequentTabbing = true;
       } else {
         //last word was not a match, so update the stored prefix to be it
-        toComplete = words.last();
+        toComplete = words[words.length-1];
         self._handleTabCompletionPrefixText = toComplete;
       }
       var matchingHandles = handles.filter(function(e) { return e.toLowerCase().indexOf(toComplete.toLowerCase()) == 0; });

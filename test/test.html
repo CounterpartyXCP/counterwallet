@@ -1,0 +1,36 @@
+<html>
+  <head>
+
+    <link rel="stylesheet" type="text/css" href="../src/vendors/mocha/mocha.css">
+    <script type="text/javascript" src="../src/vendors/jquery/jquery.min.js"></script>
+    <script type="text/javascript" src="../src/vendors/mocha/mocha.js"></script>
+    <script type="text/javascript" src="../src/vendors/chai/chai.js"></script>
+    <script type="text/javascript">
+      mocha.setup('bdd');
+    </script>
+    <script src="../src/vendors/cryptojs/components/core-min.js"></script>
+    <script src="../src/vendors/cryptojs/components/sha256-min.js"></script>
+    <script src="../src/vendors/cryptojs/components/enc-base64-min.js"></script>
+    <script src="../src/vendors/cryptojs/rollups/hmac-sha512.js"></script>
+    <script src="../src/vendors/bitcore/browser/bundle.js"></script>
+    <script src="../src/js/consts.js"></script>
+    <script src="../src/js/mnemonic.js"></script>
+    <script src="../src/js/util.bitcore.js"></script>
+    <script src="../src/js/util.bitcoin.js"></script>
+    <script src="../src/js/util.js"></script>
+
+    <script type="text/javascript" src="fixtures.js"></script>
+    <script type="text/javascript" src="test.bitcore.js"></script>
+    <script type="text/javascript">
+      $(window).load(function() {
+        mocha.run();
+      });
+    </script>
+
+  </head>
+  <body>
+
+    <div id="mocha"></div>
+  
+  </body>
+</html>

@@ -109,7 +109,7 @@ function PendingActionFeedViewModel() {
 
   self.add = function(txHash, category, data, when) {
     if(typeof(when)==='undefined') when = new Date();
-    assert(self.ALLOWED_CATEGORIES.contains(category), "Illegal pending action category");
+    assert(self.ALLOWED_CATEGORIES.indexOf(category)!=-1, "Illegal pending action category");
     var pendingAction = new PendingActionViewModel(txHash, category, data, when);
     if(!pendingAction.ACTION_TEXT) return; //not something we need to display and/or add to the list
     self.entries.unshift(pendingAction); //place at top (i.e. newest at top)
@@ -133,7 +133,7 @@ function PendingActionFeedViewModel() {
   self.remove = function(txHash, category, btcRefreshSpecialLogic) {
     if(typeof(btcRefreshSpecialLogic)==='undefined') btcRefreshSpecialLogic = false;
     if(!txHash) return; //if the event doesn't have an txHash, we can't do much about that. :)
-    if(!self.ALLOWED_CATEGORIES.contains(category)) return; //ignore this category as we don't handle it
+    if(self.ALLOWED_CATEGORIES.indexOf(category)==-1) return; //ignore this category as we don't handle it
     var match = ko.utils.arrayFirst(self.entries(), function(item) {
       return item.TX_HASH == txHash;
       //item.CATEGORY == category

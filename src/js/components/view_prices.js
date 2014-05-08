@@ -1,3 +1,17 @@
+
+var AssetPairMarketInfoItemModel = function(entry) {
+  this.MARKET = entry['base_asset'] + '/' + entry['quote_asset'];
+  this.LOWEST_ASK = entry['lowest_ask'];
+  this.HIGHEST_BID = entry['highest_bid'];
+  this.ORDER_DEPTH = entry['open_orders_count'];
+  this.ORDER_VOL_24H = entry['completed_trades_count'];
+  this.PCT_CHANGE_24H = entry['24h_pct_change'];
+  this.XCP_VOL_24H = entry['24h_vol_in_xcp'];
+  this.BTC_VOL_24H = entry['24h_vol_in_btc'];
+
+  this.PCT_CHANGE_24H_CSS_CLASS = this.PCT_CHANGE_24H > 0 ? 'txt-color-green' : (this.PCT_CHANGE_24H < 0 ? 'txt-color-red' : 'initial');
+};
+
 var OrderBookEntryItemModel = function(entry) {
   this.UNIT_PRICE = entry['unit_price'];
   this.QTY_AND_COUNT = smartFormat(entry['quantity']) + ' (' + entry['count'] + ')';
@@ -5,20 +19,20 @@ var OrderBookEntryItemModel = function(entry) {
 };
 
 var OpenOrderItemModel = function(entry, isBuySell) {
-  this.PARENT = isBuySell ? BUY_SELL : ORDERS;
-  this.TX_ID = getTxHashLink(entry['tx_hash']) + OrdersViewModel.deriveIsOnlineForBTCPayment(entry['give_asset'], entry['_is_online']);
+  this.PARENT = isBuySell ? BUY_SELL : VIEW_PRICES;
+  this.TX_ID = getTxHashLink(entry['tx_hash']) + ViewPricesViewModel.deriveIsOnlineForBTCPayment(entry['give_asset'], entry['_is_online']);
   this.WHEN_CREATED = new Date(entry['block_time']);
   this.PRICE = this.PARENT.deriveOpenOrderAssetPrice(entry['get_asset'], entry['get_quantity'], entry['give_asset'], entry['give_quantity']);
-  this.BUY_QTY_LEFT = this.PARENT.deriveOpenOrderAssetQuantity(entry['get_asset'], entry['get_remaining']) + ' ' + entry['get_asset'] + ' ' + OrdersViewModel.deriveOpenOrderBuySellLeft(entry['get_quantity'], entry['get_remaining']);
-  this.SELL_QTY_LEFT = this.PARENT.deriveOpenOrderAssetQuantity(entry['give_asset'], entry['give_remaining']) + ' ' + entry['give_asset'] + ' ' + OrdersViewModel.deriveOpenOrderBuySellLeft(entry['give_quantity'], entry['give_remaining']);
-  this.EXPIRES_IN = OrdersViewModel.deriveOpenOrderExpiresIn(entry['block_index'], entry['expiration']);
-  this.FEE_REQUIRED_LEFT = smartFormat(normalizeQuantity(entry['fee_required_remaining'])) + ' BTC ' + OrdersViewModel.deriveOpenOrderBuySellLeft(entry['fee_required'], entry['fee_required_remaining']);
-  this.FEE_PROVIDED_LEFT = smartFormat(normalizeQuantity(entry['fee_provided_remaining'])) + ' BTC ' + OrdersViewModel.deriveOpenOrderBuySellLeft(entry['fee_provided'], entry['fee_provided_remaining']);
+  this.BUY_QTY_LEFT = this.PARENT.deriveOpenOrderAssetQuantity(entry['get_asset'], entry['get_remaining']) + ' ' + entry['get_asset'] + ' ' + ViewPricesViewModel.deriveOpenOrderBuySellLeft(entry['get_quantity'], entry['get_remaining']);
+  this.SELL_QTY_LEFT = this.PARENT.deriveOpenOrderAssetQuantity(entry['give_asset'], entry['give_remaining']) + ' ' + entry['give_asset'] + ' ' + ViewPricesViewModel.deriveOpenOrderBuySellLeft(entry['give_quantity'], entry['give_remaining']);
+  this.EXPIRES_IN = ViewPricesViewModel.deriveOpenOrderExpiresIn(entry['block_index'], entry['expiration']);
+  this.FEE_REQUIRED_LEFT = smartFormat(normalizeQuantity(entry['fee_required_remaining'])) + ' BTC ' + ViewPricesViewModel.deriveOpenOrderBuySellLeft(entry['fee_required'], entry['fee_required_remaining']);
+  this.FEE_PROVIDED_LEFT = smartFormat(normalizeQuantity(entry['fee_provided_remaining'])) + ' BTC ' + ViewPricesViewModel.deriveOpenOrderBuySellLeft(entry['fee_provided'], entry['fee_provided_remaining']);
   this.ORDER = entry;
 };
 
 var TradeHistoryItemModel = function(entry) {
-  this.BLOCK = getLinkForBlock(entry['block_index']);
+  this.BLOCK_INDEX = getLinkForBlock(entry['block_index']);
   this.BLOCK_TIME = moment(entry['block_time']).format('MMM Do YYYY, h:mm:ss a');
   this.ORDER_1 = getTxHashLink(entry['order_match_id'].substr(0,64));
   this.ADDRESS_1 = getLinkForCPData('address', entry['order_match_tx0_address']);
@@ -27,6 +41,11 @@ var TradeHistoryItemModel = function(entry) {
   this.QUANTITY_BASE = smartFormat(entry['base_quantity_normalized']) + ' ' + entry['base_asset'];
   this.QUANTITY_QUOTE = smartFormat(entry['quote_quantity_normalized']) + ' ' + entry['quote_asset'];
   this.UNIT_PRICE = entry['unit_price'];
+  
+  this.RAW_BLOCK_INDEX = entry['block_index'];
+  this.RAW_BLOCK_TIME = entry['block_time'];
+  this.RAW_QUANTITY_BASE = entry['base_quantity_normalized'];
+  this.RAW_QUANTITY_QUOTE = entry['quote_quantity_normalized'];
 }
 
 ko.validation.rules['ordersIsExistingAssetName'] = {
@@ -41,11 +60,13 @@ ko.validation.rules['ordersIsExistingAssetName'] = {
 };
 ko.validation.registerExtenders();
 
-function OrdersViewModel() {
+function ViewPricesViewModel() {
   var self = this;
   self.MY_ADDRESSES = WALLET.getAddressesList();
   self._lastWindowWidth = null;
   
+  self.latestTrades = ko.observableArray([]); //populated with the VIEW_PRICES_NUM_LATEST_TRADES latest trades (of any asset pair)
+  self.assetPairMarketInfo = ko.observableArray([]); //populated with top pair level market info
   self.allAssets = ko.observableArray([]);
   //^ a list of all existing assets (for choosing which asset to buy)
   self.tradeHistory = ko.observableArray([]);
@@ -82,7 +103,7 @@ function OrdersViewModel() {
       params: self
     }    
   });
-  self.minBTCFeeProvidedPct = ko.observable(FEE_FRACTION_PROVIDED_DEFAULT_PCT*1.05).extend({
+  self.minBTCFeeProvidedPct = ko.observable(FEE_FRACTION_DEFAULT_FILTER).extend({
     required: {
       message: "This field is required.",
       onlyIf: function () { return self.asset1() == 'BTC' || self.asset2() == 'BTC'; }
@@ -90,7 +111,7 @@ function OrdersViewModel() {
     isValidPositiveQuantityOrZero: self,
     max: 100
   });
-  self.maxBTCFeeRequiredPct = ko.observable(FEE_FRACTION_REQUIRED_DEFAULT_PCT*0.95).extend({
+  self.maxBTCFeeRequiredPct = ko.observable(FEE_FRACTION_DEFAULT_FILTER).extend({
     required: {
       message: "This field is required.",
       onlyIf: function () { return self.asset1() == 'BTC' || self.asset2() == 'BTC'; }
@@ -154,6 +175,9 @@ function OrdersViewModel() {
   });
   
   self.init = function() {
+    self.fetchAssetPairMarketInfo();
+    self.fetchLatestTrades();
+    
     //Get a list of all assets
     failoverAPI("get_asset_names", [], function(data, endpoint) {
       data = ['XCP', 'BTC'].concat(data);
@@ -165,7 +189,7 @@ function OrdersViewModel() {
         queryTokenizer: Bloodhound.tokenizers.whitespace,
         local: self.allAssets()
       });
-      assets.initialize();  
+      assets.initialize();
       $('#asset1, #asset2').typeahead(null, {
         source: assets.ttAdapter(),
         displayKey: function(obj) { return obj }
@@ -174,7 +198,68 @@ function OrdersViewModel() {
           self.asset1(datum); //gotta do a manual update...doesn't play well with knockout
         else if($($e.target).attr('name') == 'asset2')
           self.asset2(datum); //gotta do a manual update...doesn't play well with knockout
-      });    
+      });
+    });
+  }
+  
+  self.fetchAssetPairMarketInfo = function() {
+    if(self.recievedMarketData())
+      return; //stop auto refreshing
+    
+    failoverAPI("get_asset_pair_market_info", {'limit': VIEW_PRICES_NUM_ASSET_PAIRS}, function(data, endpoint) {
+      self.assetPairMarketInfo([]);
+      $('#assetPairMarketInfo').dataTable().fnClearTable();
+
+      var pair_data = [];
+      for(var i=0; i < data.length; i++) {
+        pair_data.push(new AssetPairMarketInfoItemModel(data[i]));
+      }
+      self.assetPairMarketInfo(pair_data);
+      if(self.assetPairMarketInfo().length) {
+        runDataTables('#assetPairMarketInfo', true, { "aaSorting": [ [4, 'desc'] ] });
+      }
+      
+      //kick off the next update to fire after a delay
+      setTimeout(self.fetchAssetPairMarketInfo, VIEW_PRICES_ASSET_PAIRS_REFRESH_EVERY);
+    });
+  }
+  
+  self.fetchLatestTrades = function() {
+    if(self.recievedMarketData())
+      return; //stop auto refreshing
+      
+    failoverAPI("get_trade_history", {'limit': VIEW_PRICES_NUM_LATEST_TRADES}, function(data, endpoint) {
+      self.latestTrades([]);
+      $('#latestTrades').dataTable().fnClearTable();
+      
+      var trades = [];
+      for(var i=0; i < data.length; i++) {
+        trades.push(new TradeHistoryItemModel(data[i]));
+      }
+      self.latestTrades(trades);
+      if(self.latestTrades().length) {
+        runDataTables('#latestTrades', true, {
+          "aaSorting": [ [1, 'desc'] ],
+          "aoColumns": [
+           {"sType": "numeric", "iDataSort": 9}, //block ID
+           {"sType": "numeric", "iDataSort": 10}, //datetime
+           {"sType": "string"}, //order 1
+           {"sType": "string"}, //address 1
+           {"sType": "string"}, //order 2
+           {"sType": "string"}, //address 2
+           {"sType": "numeric", "iDataSort": 11}, //quantity base
+           {"sType": "numeric", "iDataSort": 12}, //quantity quote
+           {"sType": "numeric"}, //unit price
+           {"bVisible": false}, //block index RAW
+           {"bVisible": false}, //block datetime RAW
+           {"bVisible": false}, //quantity base RAW
+           {"bVisible": false}  //quantity quote RAW
+         ]
+        });
+      }
+      
+      //kick off the next update to fire after a delay
+      setTimeout(self.fetchLatestTrades, VIEW_PRICES_LATEST_TRADES_REFRESH_EVERY);
     });
   }
   
@@ -217,7 +302,7 @@ function OrdersViewModel() {
     failoverAPI("get_market_price_history", [self.asset1(), self.asset2()], function(data, endpoint) {
       deferred.resolve();
       if(data.length) {
-        OrdersViewModel.doChart(self.dispAssetPair(), $('#priceHistory'), data);
+        ViewPricesViewModel.doChart(self.dispAssetPair(), $('#priceHistory'), data);
       }
     }, function(jqXHR, textStatus, errorThrown, endpoint) {
       deferred.resolve();
@@ -227,7 +312,7 @@ function OrdersViewModel() {
 
   self.metricsRefreshTradeHistory = function() {
     var deferred = $.Deferred();
-    failoverAPI("get_trade_history_within_dates", [self.asset1(), self.asset2()], function(data, endpoint) {
+    failoverAPI("get_trade_history", {'asset1': self.asset1(), 'asset2': self.asset2()}, function(data, endpoint) {
       deferred.resolve();
       self.tradeHistory([]);
       for(var i=0; i < data.length; i++) {
@@ -289,17 +374,21 @@ function OrdersViewModel() {
     });
   }
   
-  self.deriveOpenOrderAssetQuantity = function(asset, quantity) {
+  self.normalizeAssetQuantity = function(asset, quantity) {
     //helper function for showing pending trades
     if(!self.validationModelBaseOrders.isValid()) return;
     if(asset != self.asset1() && asset != self.asset2()) return; //in process of changing assets
     assert(asset && quantity, "Asset and/or quantity not present, or quantity is zero: " + quantity);
     if(asset == self.asset1()) {
-      return smartFormat(normalizeQuantity(quantity, self.asset1IsDivisible()));
+      return normalizeQuantity(quantity, self.asset1IsDivisible());
     } else {
       assert(asset == self.asset2());
-      return smartFormat(normalizeQuantity(quantity, self.asset2IsDivisible()));
+      return normalizeQuantity(quantity, self.asset2IsDivisible());
     }
+  }
+
+  self.deriveOpenOrderAssetQuantity = function(asset, quantity) {
+    return smartFormat(self.normalizeAssetQuantity(asset, quantity));
   }
 
   self.deriveOpenOrderAssetPrice = function(asset1, quantity1, asset2, quantity2) {
@@ -308,9 +397,9 @@ function OrdersViewModel() {
     if((asset1 != self.asset1() && asset1 != self.asset2()) || (asset2 != self.asset1() && asset2 != self.asset2())) return; //in process of changing assets
     assert(asset1 && quantity1, "Asset1 and/or quantity1 not present");
     assert(asset2 && quantity2, "Asset2 and/or quantity2 not present");
-    var derivedQuantity1 = self.deriveOpenOrderAssetQuantity(asset1, quantity1);
-    var derivedQuantity2 = self.deriveOpenOrderAssetQuantity(asset2, quantity2);
-    
+    var derivedQuantity1 = self.normalizeAssetQuantity(asset1, quantity1);
+    var derivedQuantity2 = self.normalizeAssetQuantity(asset2, quantity2);
+
     if(asset1 == self.baseAsset()) {
       if(!derivedQuantity1) return; //in process of changing assets
       return smartFormat(Decimal.round(new Decimal(derivedQuantity2).div(derivedQuantity1), 8, Decimal.MidpointRounding.ToEven).toFloat());
@@ -350,7 +439,7 @@ function OrdersViewModel() {
   }
 };
 
-OrdersViewModel.deriveOpenOrderExpiresIn = function(blockIndexCreatedAt, expiration) {
+ViewPricesViewModel.deriveOpenOrderExpiresIn = function(blockIndexCreatedAt, expiration) {
   assert(WALLET.networkBlockHeight());
   //Outputs HTML
   var blockLifetime = WALLET.networkBlockHeight() - blockIndexCreatedAt;
@@ -369,7 +458,7 @@ OrdersViewModel.deriveOpenOrderExpiresIn = function(blockIndexCreatedAt, expirat
   return '<span class="label label-' + labelType + '">' + (timeLeft >= 0 ? 'In ' + timeLeft + (timeLeft == 1 ? ' block' : ' blocks') : 'EXPIRED') + '</span>';
 }
 
-OrdersViewModel.deriveOpenOrderBuySellLeft = function(whole, part) {
+ViewPricesViewModel.deriveOpenOrderBuySellLeft = function(whole, part) {
   var pctLeft = (whole == 0 && part == 0) ? 1 : part / whole;
   if(pctLeft >= .30) { //30%+ 
     labelType = 'green';
@@ -383,12 +472,12 @@ OrdersViewModel.deriveOpenOrderBuySellLeft = function(whole, part) {
   return '<span class="pull-right label opacity-70pct padding-5 bg-color-' + labelType + '">' + smartFormat(pctLeft * 100, null, 0) + '%</span>';
 }
 
-OrdersViewModel.deriveIsOnlineForBTCPayment = function(give_asset, _is_online) {
+ViewPricesViewModel.deriveIsOnlineForBTCPayment = function(give_asset, _is_online) {
   if(give_asset != 'BTC') return '';
   return '<span class="padding-left-5" class="fa fa-circle txt-color-' + (_is_online ? 'green' : 'yellow') + ' pull-left" title="' + (_is_online ? 'User is online for BTC payment' : 'User is offline or unknown') + '"></span>';
 }
 
-OrdersViewModel.doChart = function(dispAssetPair, chartDiv, data) {
+ViewPricesViewModel.doChart = function(dispAssetPair, chartDiv, data) {
   // split the data set into ohlc and volume
   var ohlc = [];
   var midline = [];

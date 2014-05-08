@@ -88,27 +88,23 @@ ko.bindingHandlers.datetimepicker = {
  */
 ko.validation.rules['isValidBitcoinAddress'] = {
     validator: function (val, self) {
-        try {
-          var address = new Bitcoin.Address(val);
-          return address.version == (USE_TESTNET ? Bitcoin.network.testnet.addressVersion : Bitcoin.network.mainnet.addressVersion);
-        } catch (err) {
-          return false;
-        }
+        return CWBitcore.isValidAddress(val);
     },
     message: USE_TESTNET ? 'This field must be a valid TESTNET Bitcoin address.' : 'This field must be a valid Bitcoin address.'
 };
+
 ko.validation.rules['isValidBitcoinAddressIfSpecified'] = {
     validator: function (val, self) {
         try {
           if(!val) return true; //the "if specified" part of the name :)
-          var address = new Bitcoin.Address(val);
-          return address.version == (USE_TESTNET ? Bitcoin.network.testnet.addressVersion : Bitcoin.network.mainnet.addressVersion);
+          return CWBitcore.isValidAddress(val);
         } catch (err) {
           return false;
         }
     },
     message: USE_TESTNET ? 'This field must be a valid TESTNET Bitcoin address.' : 'This field must be a valid Bitcoin address.'
 };
+
 ko.validation.rules['isValidQtyForDivisibility'] = {
     validator: function (val, self) {
       if(!self.divisible() && numberHasDecimalPlace(parseFloat(val))) {
@@ -118,18 +114,21 @@ ko.validation.rules['isValidQtyForDivisibility'] = {
     },
     message: 'The quantity entered must be a whole number, since this is a non-divisible asset.'
 };
+
 ko.validation.rules['isNotSameBitcoinAddress'] = {
     validator: function (val, self) {
       return val != self.address();
     },
     message: 'Destination address cannot be equal to the source address.'
 };
+
 ko.validation.rules['isValidPositiveQuantity'] = {
     validator: function (val, self) {
       return val.toString().match(/^[0-9]*\.?[0-9]{0,8}$/) && parseFloat(val) > 0;
     },
     message: 'Must be a valid quantity (positive num with max 8 decimal places)'
 };
+
 ko.validation.rules['isValidPositiveQuantityOrZero'] = {
     validator: function (val, self) {
       return val.toString().match(/^[0-9]*\.?[0-9]{0,8}$/) && parseFloat(val) >= 0;

@@ -310,9 +310,9 @@
         <header>
             <span class="widget-icon"> <i class="fa fa-bar-chart-o"></i> </span>
             <h3>Price History for <span data-bind="text: dispAssetPair"></span></h3>
-            <div class="widget-toolbar" role="menu" data-bind="visible: bidAskMedian"> 
+            <div class="widget-toolbar" role="menu" data-bind="visible: currentMarketUnitPrice"> 
                 <div class="label label-success">
-                    <i class="fa fa-retweet"></i>&nbsp;Market Price: <span data-bind="text: bidAskMedian"></span>
+                    <i class="fa fa-retweet"></i>&nbsp;Market Price: <span data-bind="text: currentMarketUnitPrice"></span>
                 </div>
             </div>
         </header>
@@ -469,7 +469,7 @@
                     </thead>
                     <tbody data-bind="foreach: tradeHistory">
                         <tr>
-                            <td data-bind="html: BLOCK"></td>
+                            <td data-bind="html: BLOCK_INDEX"></td>
                             <td data-bind="text: BLOCK_TIME"></td>
                             <td data-bind="html: ORDER_1"></td> 
                             <td data-bind="html: ADDRESS_1"></td>
@@ -478,6 +478,11 @@
                             <td data-bind="text: QUANTITY_BASE"></td>
                             <td data-bind="text: QUANTITY_QUOTE"></td>
                             <td data-bind="text: UNIT_PRICE"></td>
+                            
+                            <td data-bind="text: RAW_BLOCK_INDEX" class="display-none"></td>
+                            <td data-bind="text: RAW_BLOCK_TIME" class="display-none"></td>
+                            <td data-bind="text: RAW_QUANTITY_BASE" class="display-none"></td>
+                            <td data-bind="text: RAW_QUANTITY_QUOTE" class="display-none"></td>
                         </tr>
                     </tbody>
                 </table>

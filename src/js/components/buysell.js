@@ -508,7 +508,9 @@ function BuySellWizardViewModel() {
     for(var i=0; i < addresses.length; i++) {
         assets = assets.concat(WALLET.getAddressObj(addresses[i]).getAssetsList());
     }
-    assets = assets.remove('XCP').remove('BTC').unique();
+    assets = arrayRemove(assets, 'XCP');
+    assets = arrayRemove(assets, 'BTC');
+    assets = arrayUnique(assets);
     self.myAssets(assets);
     
     self.buyAsset.subscribe(function(newValue) {
@@ -665,7 +667,7 @@ function BuySellWizardViewModel() {
              get_quantity: buyQuantity,
              get_asset: self.buyAsset(),
              _get_divisible: self.buyAssetIsDivisible(),
-             fee_required: self.buyAsset() == 'BTC' ? denormalizeQuantity(self.feeForSelectedBTCQuantity()) : null,
+             fee_required: self.buyAsset() == 'BTC' ? denormalizeQuantity(self.feeForSelectedBTCQuantity()) : 0,
              fee_provided: self.sellAsset() == 'BTC' ? denormalizeQuantity(self.feeForSelectedBTCQuantity()) : MIN_FEE,
              expiration: parseInt(self.numBlocksUntilExpiration())
             },
@@ -740,7 +742,7 @@ function BuySellWizardViewModel() {
       deferred.resolve();
       if(data.length) {
         self.showPriceChart(true);
-        OrdersViewModel.doChart(self.dispAssetPair(), $('#priceHistory'), data); //does what we want
+        ViewPricesViewModel.doChart(self.dispAssetPair(), $('#priceHistory'), data); //does what we want
       } else {
         self.showPriceChart(false);
       }
@@ -753,14 +755,31 @@ function BuySellWizardViewModel() {
   self.tab2RefreshTradeHistory = function() {
     if(self.currentTab() != 2) return;
     var deferred = $.Deferred();
-    failoverAPI("get_trade_history_within_dates", [self.buyAsset(), self.sellAsset()], function(data, endpoint) {
+    failoverAPI("get_trade_history", {'asset1': self.buyAsset(), 'asset2': self.sellAsset()}, function(data, endpoint) {
       deferred.resolve();
       self.tradeHistory([]);
       for(var i=0; i < data.length; i++) {
         self.tradeHistory.push(new TradeHistoryItemModel(data[i]));
       }
       if(self.tradeHistory().length) {
-        runDataTables('#tradeHistory', true, { "aaSorting": [ [0, 'desc'] ] });
+        runDataTables('#tradeHistory', true, {
+          "aaSorting": [ [0, 'desc'] ],
+          "aoColumns": [
+           {"sType": "numeric", "iDataSort": 9}, //block ID
+           {"sType": "numeric", "iDataSort": 10}, //datetime
+           {"sType": "string"}, //order 1
+           {"sType": "string"}, //address 1
+           {"sType": "string"}, //order 2
+           {"sType": "string"}, //address 2
+           {"sType": "numeric", "iDataSort": 11}, //quantity base
+           {"sType": "numeric", "iDataSort": 12}, //quantity quote
+           {"sType": "numeric"}, //unit price
+           {"bVisible": false}, //block index RAW
+           {"bVisible": false}, //block datetime RAW
+           {"bVisible": false}, //quantity base RAW
+           {"bVisible": false}  //quantity quote RAW
+         ]
+        });
         self.showTradeHistory(true);
       } else {
         self.showTradeHistory(false);
@@ -886,6 +905,7 @@ function BuySellWizardViewModel() {
   self._afterSelectedAnOpenOrder = ko.observable(false);
   self.buySelectedOpenOrder = function(order) {
     //called when a user clicks on an open order they would like to buy. should fill in the details for them on the buy page
+    
     self.overrideMarketPrice(true);
     self.customSellAs('unitprice');
     var unitPrice = self.deriveOpenOrderAssetPrice(

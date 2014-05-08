@@ -53,7 +53,7 @@ function StatsHistoryViewModel() {
         },
         tooltip: {
             formatter: function() {
-                return '<b>'+ this.x +'</b><br/>'+
+                return '<b>'+ moment(this.x).format('MMM Do YYYY') +'</b><br/>'+
                     this.series.name +': '+ this.y +'<br/>'+
                     'Total: '+ this.point.stackTotal;
             }
