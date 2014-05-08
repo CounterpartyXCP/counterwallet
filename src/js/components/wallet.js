@@ -33,7 +33,7 @@ function WalletViewModel() {
     //see if there's a label already for this address that's stored in PREFERENCES, and use that if so
     var addressHash = hashToB64(address);
     //^ we store in prefs by a hash of the address so that the server data (if compromised) cannot reveal address associations
-    var label = PREFERENCES.address_aliases[addressHash] || "UNKNOWN LABEL";
+    var label = PREFERENCES.address_aliases[addressHash] || "My Address #" + (i+1);
     //^ an alias is made when a watch address is made, so this should always be found
 
     self.addresses.push(new AddressViewModel(key, address, label)); //add new
