@@ -434,13 +434,7 @@ function BuySellWizardViewModel() {
     //$.jqlog.debug("3.quantityLeft: " + quantityLeft);
 
     if(self.sellAsset() == 'BTC') { //include the fee if we're selling BTC
-      quantityLeft = Decimal.round(new Decimal(quantityLeft).sub(self.feeForSelectedBTCQuantity()), 8, Decimal.MidpointRounding.ToEven);
-      // Decimal.round(new Decimal(0).sub(0), 8) return undefined
-      // https://github.com/xnova/counterwallet/issues/39
-      if (String(quantityLeft) == "undefined") {
-        quantityLeft = new Decimal(0);
-      }
-      quantityLeft = quantityLeft.toFloat();
+      quantityLeft = Decimal.round(new Decimal(quantityLeft).sub(self.feeForSelectedBTCQuantity()), 8, Decimal.MidpointRounding.ToEven).toFloat();
     }
     
     return quantityLeft;
