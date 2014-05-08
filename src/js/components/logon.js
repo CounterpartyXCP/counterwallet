@@ -19,12 +19,20 @@ function LogonViewModel() {
   }, self);
 
   self.isPassphraseValid = ko.computed(function() {
-     if(self.sanitizedEnteredPassphrase().split(' ').length != 12) return false;
+    var words = self.sanitizedEnteredPassphrase().split(' ');
+    
+    if (words.length != 12 && (words.length == 13 && words[0] != 'old')) {
+      return false;
+    }
+
+    if (words.length==13) {
+      words.shift();
+    }
      
      var valid = true;
-     self.sanitizedEnteredPassphrase().split(' ').forEach(function (word) {
+     words.forEach(function (word) {
        if (Mnemonic.words.indexOf(word) == -1) {
-         valid = false;
+          valid = false;
        }
      });
      return valid;
@@ -32,14 +40,6 @@ function LogonViewModel() {
   
   self.generatePassphrase = function() {
     var m = new Mnemonic(128); //128 bits of entropy (12 word passphrase)
-    
-    //inject some additional entropy with 100 rounds of SHA256
-    /*var randomSeed = Bitcoin.convert.bytesToHex(Bitcoin.convert.wordsToBytes(m.random));
-    for(var i=0;i<100;i++) {
-      randomSeed = Bitcoin.Crypto.SHA256(randomSeed).toString();
-      console.log(randomSeed);  
-    }
-    m.random = Bitcoin.convert.bytesToWords(Bitcoin.convert.hexToBytes(randomSeed).slice(0,16)); //leftmost 16 bytes of last hash's output*/
     
     var words = m.toWords();
     self.generatedPassphrase(words.join(' '));
@@ -69,10 +69,10 @@ function LogonViewModel() {
       $('#disclaimer').animate({opacity:0});
       
       //generate the wallet ID from a double SHA256 hash of the passphrase and the network (if testnet)
-      var hashBase = Bitcoin.Crypto.SHA256(self.sanitizedEnteredPassphrase() + (USE_TESTNET ? '_testnet' : ''));
-      var hash = Bitcoin.Crypto.SHA256(hashBase).toString(Bitcoin.Crypto.enc.Base64);
+      var hashBase = CryptoJS.SHA256(self.sanitizedEnteredPassphrase() + (USE_TESTNET ? '_testnet' : ''));
+      var hash = CryptoJS.SHA256(hashBase).toString(CryptoJS.enc.Base64);
       //var hashBase = self.sanitizedEnteredPassphrase() + (USE_TESTNET ? '_testnet' : '');
-      //var hash = Bitcoin.convert.bytesToBase64(Bitcoin.crypto.sha256(Bitcoin.crypto.sha256(hashBase)));
+
       WALLET.identifier(hash);
       $.jqlog.log("My wallet ID: " + WALLET.identifier());
 
@@ -129,15 +129,8 @@ function LogonViewModel() {
   self.openWalletPt2 = function(mustSavePreferencesToServer) {
 
       //generate the appropriate number of addresses
-      var m = new Mnemonic(self.sanitizedEnteredPassphrase().split(' '));
-      var seed = m.toHex();
-      
-      var options = {
-        network: USE_TESTNET ? "testnet" : "mainnet",
-        derivationMethod: 'private'
-      }
-      WALLET.BITCOIN_WALLET = Bitcoin.Wallet(seed, options);
-
+      WALLET.BITCOIN_WALLET = new CWBIP32(self.enteredPassphrase());
+      WALLET.isOldWallet(WALLET.BITCOIN_WALLET.useOldBIP32);
       //kick off address generation (we have to take this hacky approach of using setTimeout, otherwise the
       // progress bar does not update correctly through the HD wallet build process....)
       setTimeout(function() { self.genAddress(mustSavePreferencesToServer) }, 1);
@@ -145,18 +138,15 @@ function LogonViewModel() {
   
   self.genAddress = function(mustSavePreferencesToServer) {
     
-    var address = WALLET.BITCOIN_WALLET.generateAddress();
-    var i = WALLET.BITCOIN_WALLET.addresses.length - 1;
-    //assert(WALLET.BITCOIN_WALLET.getPrivateKey(i).toString() == WALLET.BITCOIN_WALLET.getPrivateKeyForAddress(address).toString());
-    var privkey = WALLET.BITCOIN_WALLET.getPrivateKey(i);
+    var i = WALLET.addresses().length;
+    var address = WALLET.addAddress();
     var addressHash = hashToB64(address);
 
     if(PREFERENCES.address_aliases[addressHash] === undefined) { //no existing label. we need to set one
       mustSavePreferencesToServer = true; //if not already true
       PREFERENCES.address_aliases[addressHash] = "My Address #" + (WALLET.addresses().length + 1).toString();
     }
-    WALLET.addAddress(privkey);
-
+    
     var progress = (i + 1) * (100 / PREFERENCES['num_addresses_used']);
     self.walletGenProgressVal(progress);
     $.jqlog.debug("Progress: Address " + (i + 1) + " of " + PREFERENCES['num_addresses_used']
@@ -222,7 +212,7 @@ function LogonViewModel() {
 
 ko.validation.rules['isValidPassphrasePart'] = {
     validator: function (val, self) {
-      return Mnemonic.words.contains(val);
+      return Mnemonic.words.indexOf(val)!=-1;
     },
     message: 'Invalid phrase word.'
 };
@@ -323,7 +313,7 @@ function LogonPasswordModalViewModel() {
       preventPaste: true
       /*acceptValue: true,
       validate: function(keyboard, value, isClosing) {
-        return Mnemonic.words.contains(value);
+        return Mnemonic.words.indexOf(value)!=-1;
       }*/
     }).autocomplete({
       source: Mnemonic.words

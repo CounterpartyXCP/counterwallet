@@ -161,8 +161,8 @@ function OpenOrderFeedViewModel() {
         //get divisibility for assets (this is slow and unoptimized)
         var assets = [];
         for(i=0; i < openOrders.length; i++) {
-          if(!assets.contains(openOrders[i]['give_asset'])) assets.push(openOrders[i]['give_asset']);
-          if(!assets.contains(openOrders[i]['get_asset'])) assets.push(openOrders[i]['get_asset']);
+          if(!assets.indexOf(openOrders[i]['give_asset']) != -1) assets.push(openOrders[i]['give_asset']);
+          if(!assets.indexOf(openOrders[i]['get_asset']) != -1) assets.push(openOrders[i]['get_asset']);
         }
         failoverAPI("get_asset_info", [assets], function(assetsInfo, endpoint) {
           var assetMappings = {};

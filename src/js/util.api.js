@@ -138,7 +138,7 @@ function _formulateEndpoints(endpoints, qs) {
 
 function _encodeForJSONRPCOverGET(params) {
   //This may be non-standard with JSON RPC 2.0...going off of http://www.jsonrpc.org/historical/json-rpc-over-http.html#get
-  return encodeURIComponent(Bitcoin.convert.bytesToBase64(Bitcoin.convert.stringToBytes(JSON.stringify(params))));
+  return encodeURIComponent(bytesToBase64(stringToBytes(JSON.stringify(params))));
 }
 
 function _makeJSONAPICall(destType, endpoints, method, params, timeout, onSuccess, onError, httpMethod) {

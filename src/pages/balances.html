@@ -19,8 +19,27 @@
             </li>
         </ul>
     </div>
+
     <button id="sweepFunds" type="button" class="btn btn-primary">Import Funds</button>
+    <div class="btn-group" id="newWalletSweep">
+        <button type="button" class="btn btn-primary dropdown-toggle" data-toggle="dropdown">
+            Import Funds&nbsp;<i class="fa fa-caret-down"></i>
+        </button>
+        <ul class="dropdown-menu" style="right:0;left:auto">
+            <li>
+                <a id="sweepFunds2" href="#">From Another Address</a>
+            </li>
+            <li>
+                <a id="sweepOldWallet" href="#">From Old Wallet</a>
+            </li>
+        </ul>
+    </div>
   </div>
+</div>
+
+<div id="pendingBTCPayNotice" data-bind="fadeVisibleInOnly: WALLET.isOldWallet()" class="alert alert-danger alert-block">
+    <i class="fa-fw fa fa-btc"></i>
+    <strong>Old Wallet detected:</strong> We see you are using an old wallet. Please transfer your funds to a newly created wallet as soon as possible. Support for 'old' wallets will be discontinued June 1, 2014.
 </div>
 
 <div class="alert alert-warning">
@@ -51,6 +70,8 @@
     <i class="fa-fw fa fa-btc"></i>
     <strong>Sell BTC Pending:</strong> As you have one or more pending or open sell order for BTC, please stay logged in so that the order(s) can be properly filled.
 </div>
+
+ 
 
 <section id="widget-grid" class="balancesContainer" data-bind="foreach: addresses"> <!-- widget grid -->
     <div class="row"> <!-- one row per widget in this case -->
@@ -266,16 +287,27 @@
         <p class="formPadded">Import funds by "sweeping" them from another external address you own into one of your wallet address.</p>
         
         <form class="smart-form" data-bind="submit: doAction, visible: sweepingProgressionMessage()==''"><fieldset>
-          <section><div class="row">
+          
+          <section data-bind="visible: !fromOldWallet"><div class="row">
             <label class="control-label col col-sm-12">Private Key To Import</label>
             <div class="col col-sm-12">
                 <label class="input"><i class="icon-append fa fa-lock"></i>
                     <input name="privateKey" data-bind="value: privateKey, valueUpdate: 'input', attr: {placeholder: 'Enter Bitcoin private key'}" type="text"/>
                 </label>
                 <span class="invalid" data-bind="validationMessage: privateKey"></span>
-                <div class="note">Enter the unencrypted private key that cooresponds to the address with the funds you want to move.</div>
+                <div class="note">Enter the unencrypted private key that coresponds to the address with the funds you want to move.</div>
             </div>
           </div></section>
+
+          <section data-bind="visible: fromOldWallet"><div class="row">
+            <label class="control-label col col-sm-12">Source Address from old Counterwallet</label>
+            <div class="col col-sm-12">
+                <select class="width-max" data-bind="options: availableOldAddresses, optionsValue: 'WIF', optionsText: 'ADDRESS', select2: { minimumResultsForSearch: 10, escapeMarkup: 'direct' }, value: oldPrivateKey"></select>
+                <span class="invalid" data-bind="validationMessage: privateKey"></span>
+                <div class="note">Select the address in your old wallet that the specified assets should be send from.</div>
+            </div>
+          </div></section>
+
           <section><div class="row">
             <label class="control-label col col-sm-12">Destination Address</label>
             <div class="col col-sm-12">

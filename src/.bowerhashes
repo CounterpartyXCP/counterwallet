@@ -41,5 +41,9 @@
     "src/vendors/select2/select2.min.js": "231818c9b851ff39ad5f17dc24837c79560199e7fdaa3eb0be153527a2b9e0bd",
     "src/vendors/socket.io-client/dist/socket.io.min.js": "17f4c075ad907cb0fb38bf76de5d0af7832a95cddf1bf642e75daadf8d1e5201",
     "src/vendors/jqlog/jquery.jqlog-1.3.min.js": "15bdd1693ad39873922e017c5570c49233c5d5e7c2f209ec32145b3badf36291",
-    "src/vendors/bitcoinjs-lib/bitcoinjs-min.js": "9c0ad40d3bf912a586e325c3ddd78d2e10217d5f78cc58f82c681e01cb2de09d"
+    "src/vendors/cryptojs/components/core-min.js": "28c1ab26fabd75b7cc54c136a81584ef32adb4e978123dc645742c1cd5f75d8c",
+    "src/vendors/cryptojs/components/sha256-min.js": "47213870c70226255209b3e828a44040bbc60a047bbb0343ed0d3d3dbde36904",
+    "src/vendors/cryptojs/components/enc-base64-min.js": "893491ca18f2e0a77fec98bbf1e461d43ea6b36bd88199c98804d2ba63c1aba2",
+    "src/vendors/cryptojs/rollups/hmac-sha512.js": "17f2992e236980c8c028c98af64521e2646e7a995930a6e76515f29d0b5ae2eb",
+    "src/vendors/bitcore/browser/bundle.js": "0fc1cc72a770ccd5afd9c09363df92a35f7694c17fbd287de1eb0a75d42ae1b4"
 }

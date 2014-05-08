@@ -502,7 +502,9 @@ function BuySellWizardViewModel() {
     for(var i=0; i < addresses.length; i++) {
         assets = assets.concat(WALLET.getAddressObj(addresses[i]).getAssetsList());
     }
-    assets = assets.remove('XCP').remove('BTC').unique();
+    assets = arrayRemove(assets, 'XCP');
+    assets = arrayRemove(assets, 'BTC');
+    assets = arrayUnique(assets);
     self.myAssets(assets);
     
     self.buyAsset.subscribe(function(newValue) {
@@ -897,6 +899,7 @@ function BuySellWizardViewModel() {
   self._afterSelectedAnOpenOrder = ko.observable(false);
   self.buySelectedOpenOrder = function(order) {
     //called when a user clicks on an open order they would like to buy. should fill in the details for them on the buy page
+    
     self.overrideMarketPrice(true);
     self.customSellAs('unitprice');
     var unitPrice = self.deriveOpenOrderAssetPrice(

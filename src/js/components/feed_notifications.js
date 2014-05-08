@@ -84,7 +84,7 @@ NotificationViewModel.calcText = function(category, message) {
     if(message['transfer']) {
       //Detect transfers, whether we currently have the object in our wallet or not (as it could be
       // a transfer FROM an address outside of our wallet)
-      if(addresses.contains(message['source']) || addresses.contains(message['issuer'])) {
+      if(addresses.indexOf(message['source'])!=-1 || addresses.indexOf(message['issuer'])!=-1) {
         desc = "Asset <As>" + message['asset'] + "</As> was transferred from <Ad>"
           + getLinkForCPData('address', message['source'], getAddressLabel(message['source'])) + "</Ad> to <Ad>"
           + getLinkForCPData('address', message['issuer'], getAddressLabel(message['issuer'])) + "</Ad>"; 

@@ -556,19 +556,28 @@
     <script src="vendors/socket.io-client/dist/socket.io.min.js"></script>
     <script src="vendors/jqlog/jquery.jqlog-1.3.min.js"></script>
 
-    <!--  bitcoinjs lib -->
-    <script src="vendors/bitcoinjs-lib/bitcoinjs-min.js"></script>
+    <!-- cryptojs -->
+    <script src="vendors/cryptojs/components/core-min.js"></script>
+    <script src="vendors/cryptojs/components/sha256-min.js"></script>
+    <script src="vendors/cryptojs/components/enc-base64-min.js"></script>
+    <script src="vendors/cryptojs/rollups/hmac-sha512.js"></script>
+
+    <!--  bitcore -->
+    <script src="vendors/bitcore/browser/bundle.js"></script>
     <!-- endbuild -->
 
     <!-- COUNTERWALLET JS INCLUDES -->
     <!-- build:js js/counterwallet-min.js --> 
-    <script src="js/mnemonic.js"></script>
     <script src="js/consts.js"></script>
-    <script src="js/counterwallet.js"></script>
-    <script src="js/util.js"></script>
+    <script src="js/mnemonic.js"></script>
+    <script src="js/util.bitcore.js"></script>  
+    
+    <script src="js/util.js"></script> 
     <script src="js/util.api.js"></script>
     <script src="js/util.bitcoin.js"></script>
     <script src="js/util.knockout.js"></script>
+    <script src="js/counterwallet.js"></script>
+    <script src="js/counterblock.js"></script>
 
     <script src="js/messagefeed.js"></script>
     <script src="js/components/wallet.js"></script>
@@ -596,6 +605,8 @@
 
     <script src="js/pages.init.js"></script>
     <!-- endbuild -->
-    </script>
+
+
+
   </body>
 </html>

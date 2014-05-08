@@ -1,4 +1,3 @@
-
 /***********
  * GLOBAL CONSTANTS
  ***********/
@@ -152,9 +151,7 @@ var BLOCKEXPLORER_URL = USE_TESTNET ? "http://test.bitcore.io" : "http://live.bi
 var GOOGLE_ANALYTICS_UAID = null; //will be set in counterwallet.js
 var ROLLBAR_ACCESS_TOKEN = null; //will be set in counterwallet.js
 
-//var NETWORK_VERSION = USE_TESTNET ? Bitcoin.network.testnet.pubKeyHash : Bitcoin.network.bitcoin.pubKeyHash;
-var NETWORK_VERSION = USE_TESTNET ? Bitcoin.network.testnet.addressVersion : Bitcoin.network.mainnet.addressVersion;
-
 var TRANSACTION_DELAY = 5000 // delay between transaction to avoid error -22 (vin reused)
 var TRANSACTION_MAX_RETRY = 5 // max retry when transaction failed (don't include first transaction, so 3 retry means 4 queries)
+
 
