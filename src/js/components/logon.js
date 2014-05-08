@@ -144,7 +144,7 @@ function LogonViewModel() {
 
     if(PREFERENCES.address_aliases[addressHash] === undefined) { //no existing label. we need to set one
       mustSavePreferencesToServer = true; //if not already true
-      PREFERENCES.address_aliases[addressHash] = "My Address #" + (WALLET.addresses().length + 1).toString();
+      PREFERENCES.address_aliases[addressHash] = "My Address #" + (i + 1);
     }
     
     var progress = (i + 1) * (100 / PREFERENCES['num_addresses_used']);
