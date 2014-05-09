@@ -116,7 +116,6 @@ function needWarningOnExit() {
   return (window.WALLET && WALLET.isSellingBTC()) ||
          window.OPEN_ORDER_FEED.sellBTCOrdersCount() ||
          window.PENDING_ACTION_FEED.pendingSellBTCOrdersCount();
-
 }
 
 function warningOnExit() {

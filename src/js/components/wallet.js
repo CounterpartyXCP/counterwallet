@@ -10,11 +10,9 @@ function WalletViewModel() {
   self.addresses = ko.observableArray(); //AddressViewModel objects -- populated at login
   
   self.isNew = ko.observable(false); //set to true if we can't find the user's prefs when logging on. if set, we'll show some intro text on their login, etc.
-  
   self.isSellingBTC = ko.observable(false); //updated by the btcpay feed
-
   self.isOldWallet = ko.observable(false);
-
+  
   self.addAddress = function() {
     //adds a key to the wallet, making a new address object on the wallet in the process
     //(assets must still be attached to this address, with updateBalances() or other means...)
