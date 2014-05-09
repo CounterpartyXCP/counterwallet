@@ -283,10 +283,16 @@
     <div class="modal-content">
       <div class="modal-header">
         <button type="button" data-bind="click: hide, visible: sweepingProgressionMessage()==''" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
-        <h4 class="modal-title">Import (Sweep) Funds from Another Address</h4>
+        <h4 class="modal-title">
+            <span data-bind="visible: !fromOldWallet">Import (Sweep) Funds from Another Address</span>
+            <span data-bind="visible: fromOldWallet">Import (Sweep) Funds from Your Old Wallet</span>
+        </h4>
       </div>
       <div class="modal-body no-padding">
-        <p class="formPadded">Import funds by "sweeping" them from an external address into an address in this wallet.</p>
+        <p class="formPadded">
+            <span data-bind="visible: !fromOldWallet">Import funds by "sweeping" them from an external address into an address in this wallet.</span>
+            <span data-bind="visible: fromOldWallet">Transition to your new wallet by sweeping over the funds from your old wallet.</span>
+        </p>
         
         <form class="smart-form" data-bind="submit: doAction, visible: sweepingProgressionMessage()==''"><fieldset>
           
@@ -302,11 +308,11 @@
           </div></section>
 
           <section data-bind="visible: fromOldWallet"><div class="row">
-            <label class="control-label col col-sm-12">Source Address from old Counterwallet</label>
+            <label class="control-label col col-sm-12">Source Address from old wallet</label>
             <div class="col col-sm-12">
                 <select class="width-max" data-bind="options: availableOldAddresses, optionsValue: 'WIF', optionsText: 'ADDRESS', select2: { minimumResultsForSearch: 10, escapeMarkup: 'direct' }, value: oldPrivateKey"></select>
                 <span class="invalid" data-bind="validationMessage: privateKey"></span>
-                <div class="note">Select the address in your old wallet that the specified assets should be send from.</div>
+                <div class="note">Select the address in your old wallet that the specified assets should be sent from.</div>
             </div>
           </div></section>
 
@@ -315,7 +321,7 @@
             <div class="col col-sm-12">
                 <select class="width-max" data-bind="options: availableAddresses, optionsValue: 'ADDRESS', optionsText: 'SELECT_LABEL', select2: { minimumResultsForSearch: 10, escapeMarkup: 'direct' }, value: destAddress"></select>
                 <span class="invalid" data-bind="validationMessage: destAddress"></span>
-                <div class="note">Select the address in your wallet that the specified assets for the private key above should be send to.</div>
+                <div class="note">Select the address in your wallet that the specified assets for the private key above should be sent to.</div>
             </div>
           </div></section>
           <section data-bind="fadeVisibleInOnly: availableAssetsToSweep().length >= 1"><div class="row">

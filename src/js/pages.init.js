@@ -125,25 +125,27 @@ function initBalances() {
         
       //Called on first load, and every switch back to the balances page
       if(window._BALANCES_HAS_LOADED_ALREADY === undefined) {
-          window._BALANCES_HAS_LOADED_ALREADY = true;
+        window._BALANCES_HAS_LOADED_ALREADY = true;
+          
+        //Prompt an old wallet user to migrate their funds
+        WALLET.BITCOIN_WALLET.getOldAddressesInfos(function(data) {   
+          var needSweep = false;
+          for (var a in data) {
+            needSweep = true;
+            break;
+          }
+          if (needSweep) {
+            bootbox.confirm("<b style='color:red'>We detected that you have an 'old' wallet with funds present. Press 'OK' to sweep these funds into your new wallet, or Cancel to skip for now.</b>", function(value) {
+              if (value) {
+                SWEEP_MODAL.show(true, true);
+              }
+            });
+          }
+        });
+          
       } else {
-          WALLET.refreshBTCBalances(false);
+        WALLET.refreshBTCBalances(false);
       }
-
-      WALLET.BITCOIN_WALLET.getOldAddressesInfos(function(data) {   
-        var needSweep = false;
-        for (var a in data) {
-          needSweep = true;
-          break;
-        }
-        if (needSweep) {
-          bootbox.confirm("<b style='color:red'>We detected that you have used a previous wallet. press 'OK' to sweep into this new one.</b>", function(value) {
-            if (value) {
-              SWEEP_MODAL.show(true, true);
-            }
-          });
-        }
-      });
   });
 }
 INIT_FUNC['pages/balances.html'] = initBalances;
