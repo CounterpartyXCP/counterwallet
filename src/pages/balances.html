@@ -51,7 +51,7 @@
     Please note the Counterparty team cannot be held responsible for lost or stolen funds.
 </div>
 
-<div id="gettingStartedNotice" data-bind="fadeVisibleInOnly: WALLET.isNew()" class="alert alert-success alert-block">
+<div id="gettingStartedNotice" data-bind="fadeVisibleInOnly: WALLET.isNew() && !WALLET.isOldWallet()" class="alert alert-success alert-block">
     <a class="close" data-dismiss="alert" href="#">×</a>
     <h4 class="alert-heading padding-bottom-10">Welcome to Counterwallet!</h4>
     We've created three addresses for you, which serve as both Bitcoin and Counterparty addresses.
