@@ -1448,9 +1448,6 @@ function runDataTables(specificTableID, destroyOption, extraProps) {
   var tableSelector = specificTableID || 'table';
   var props = null;
   
-  /*
-   * BASIC
-   */
   props = {
     "bDestroy": destroyOption,
     "sPaginationType" : "bootstrap_full"
@@ -1458,43 +1455,6 @@ function runDataTables(specificTableID, destroyOption, extraProps) {
   $.extend(props, extraProps);
   //try { $(tableSelector+'.datatable_basic').dataTable().fnClearTable(); } catch(err) { }
   $(tableSelector+'.datatable_basic').dataTable(props);
-    
-
-  /* END BASIC */
-
-  /* Add the events etc before DataTables hides a column */
-  $(tableSelector+".datatable_fixed_column thead input").keyup(function() {
-    oTable.fnFilter(this.value, oTable.oApi._fnVisibleToColumnIndex(oTable.fnSettings(), $("thead input").index(this)));
-  });
-
-  $(tableSelector+".datatable_fixed_column thead input").each(function(i) {
-    this.initVal = this.value;
-  });
-  $(tableSelector+".datatable_fixed_column thead input").focus(function() {
-    if (this.className == "search_init") {
-      this.className = "";
-      this.value = "";
-    }
-  });
-  $(tableSelector+".datatable_fixed_column thead input").blur(function(i) {
-    if (this.value == "") {
-      this.className = "search_init";
-      this.value = this.initVal;
-    }
-  });   
-  
-  props = {
-    "bDestroy": destroyOption,
-    "sDom" : "<'dt-top-row'><'dt-wrapper't><'dt-row dt-bottom-row'<'row'<'col-sm-6'i><'col-sm-6 text-right'p>>",
-    //"sDom" : "t<'row dt-wrapper'<'col-sm-6'i><'dt-row dt-bottom-row'<'row'<'col-sm-6'i><'col-sm-6 text-right'>>",
-    "oLanguage" : {
-      "sSearch" : "Search all columns:"
-    },
-    "bSortCellsTop" : true
-  };
-  $.extend(props, extraProps);
-  //try { $(tableSelector+'.datatable_fixed_column').dataTable().fnClearTable(); } catch(err) { }
-  var oTable = $(tableSelector+'.datatable_fixed_column').dataTable(props);
 
   /*
    * COL ORDER
@@ -1518,7 +1478,7 @@ function runDataTables(specificTableID, destroyOption, extraProps) {
     "bDestroy": destroyOption,
     "sDom" : "<'dt-top-row'Tlf>r<'dt-wrapper't><'dt-row dt-bottom-row'<'row'<'col-sm-6'i><'col-sm-6 text-right'p>>",
     "oTableTools" : {
-      "aButtons" : ["copy", "print", {
+      "aButtons" : ["copy", {
         "sExtends" : "collection",
         "sButtonText" : 'Save <span class="caret" />',
         "aButtons" : ["csv", "xls", "pdf"]

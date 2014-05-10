@@ -12,7 +12,7 @@ ko.validation.rules['isValidQtyForSellAssetDivisibility'] = {
       }
       return true;
     },
-    message: 'The quantity entered must be a whole number, since this is a non-divisible asset.'
+    message: 'The quantity entered must be a whole number, since this is a non-divisible token.'
 };
 ko.validation.rules['isValidBuyOrSellQuantity'] = {
   validator: function (quantity, self) {
@@ -74,7 +74,7 @@ function BuySellWizardViewModel() {
         });
         return match;
       },
-      message: 'The asset specified does not exist.',
+      message: 'The token specified does not exist.',
       params: self
     }
   });
@@ -90,14 +90,14 @@ function BuySellWizardViewModel() {
            && self.selectedBuyAssetOther() == self.selectedSellAssetOther() ) return false;
         return true;
       },
-      message: 'You cannot buy and sell the same asset.',
+      message: 'You cannot buy and sell the same token.',
       params: self
     }    
   });
   self.selectedSellAssetOther = ko.observable('').extend({
      //if the "Other" radio button is selected
     required: {
-      message: "Asset required.",
+      message: "Token required.",
       onlyIf: function () { return (self.selectedSellAsset() == 'Other'); }
     },
     validation: {
@@ -109,7 +109,7 @@ function BuySellWizardViewModel() {
         });
         return match;
       },
-      message: 'The asset specified does not exist.',
+      message: 'The token specified does not exist.',
       params: self
     }
   });
@@ -145,7 +145,7 @@ function BuySellWizardViewModel() {
         if(!address) return true; //leave it alone for blank addresses
         return WALLET.getBalance(address, self.sellAsset());
       },
-      message: 'You have no available balance for the sell asset at this address.',
+      message: 'You have no available balance for the sell token at this address.',
       params: self
     }]
   });
@@ -237,7 +237,7 @@ function BuySellWizardViewModel() {
         }
         return true;
       },
-      message: 'The quantity entered must be a whole number, since this is a non-divisible asset.',
+      message: 'The quantity entered must be a whole number, since this is a non-divisible token.',
       params: self
     }]
   });
@@ -278,7 +278,7 @@ function BuySellWizardViewModel() {
       //self.selectedBuyQuantity * self.currentMarketUnitPrice
       return Decimal.round(new Decimal(self.selectedBuyQuantity()).mul(self.currentMarketUnitPrice()), 8, Decimal.MidpointRounding.ToEven).toFloat();
     else { // sell asset is the base
-      assert(self.assetPair()[0] == self.sellAsset(), "Asset pair is what we thought it should be");
+      assert(self.assetPair()[0] == self.sellAsset(), "Token pair is what we thought it should be");
       //self.selectedBuyQuantity / self.currentMarketUnitPrice
       return Decimal.round(new Decimal(self.selectedBuyQuantity()).div(self.currentMarketUnitPrice()), 8, Decimal.MidpointRounding.ToEven).toFloat();
     }
@@ -434,13 +434,7 @@ function BuySellWizardViewModel() {
     //$.jqlog.debug("3.quantityLeft: " + quantityLeft);
 
     if(self.sellAsset() == 'BTC') { //include the fee if we're selling BTC
-      quantityLeft = Decimal.round(new Decimal(quantityLeft).sub(self.feeForSelectedBTCQuantity()), 8, Decimal.MidpointRounding.ToEven);
-      // Decimal.round(new Decimal(0).sub(0), 8) return undefined
-      // https://github.com/xnova/counterwallet/issues/39
-      if (String(quantityLeft) == "undefined") {
-        quantityLeft = new Decimal(0);
-      }
-      quantityLeft = quantityLeft.toFloat();
+      quantityLeft = Decimal.round(new Decimal(quantityLeft).sub(self.feeForSelectedBTCQuantity()), 8, Decimal.MidpointRounding.ToEven).toFloat();
     }
     
     return quantityLeft;
@@ -533,7 +527,7 @@ function BuySellWizardViewModel() {
           self.buyAssetIsDivisible(assetsInfo[0]['divisible']);
         });
       } else {
-        $.jqlog.debug(newValue+" is not an asset");
+        $.jqlog.debug(newValue + " is not an token");
       }
           
     });
@@ -541,7 +535,7 @@ function BuySellWizardViewModel() {
     self.sellAsset.subscribe(function(newValue) {
       self.selectedAddress(''); //clear it
       // Set order default expiration
-      self.numBlocksUntilExpiration(newValue=='BTC' ? ORDER_BTCSELL_DEFAULT_EXPIRATION : ORDER_DEFAULT_EXPIRATION);
+      self.numBlocksUntilExpiration(newValue == 'BTC' ? ORDER_BTCSELL_DEFAULT_EXPIRATION : ORDER_DEFAULT_EXPIRATION);
     });
     
     self.selectedAddress.subscribe(function(newValue) {
@@ -604,7 +598,7 @@ function BuySellWizardViewModel() {
           self.bidDepth(null);
           self.askDepth(null);
         } else if(current == 2) {
-          assert(self.assetPair(), "Asset pair is not set");
+          assert(self.assetPair(), "Token pair is not set");
           self.selectedBuyQuantity.isModified(false);
           self.customSellAsEntry.isModified(false);
           $('a[href="#tab2"] span.title').text("Select Amounts (" + self.dispAssetPair() + ")");
@@ -860,7 +854,7 @@ function BuySellWizardViewModel() {
   
   self.deriveOpenOrderAssetQuantity = function(asset, quantity) {
     //helper function for showing pending trades
-    assert(asset && quantity, "Asset and/or quantity not present, or quantity is zero: " + quantity);
+    assert(asset && quantity, "Token and/or quantity not present, or quantity is zero: " + quantity);
     if(asset == self.buyAsset()) {
       return smartFormat(normalizeQuantity(quantity, self.buyAssetIsDivisible()));
     } else {
@@ -871,8 +865,8 @@ function BuySellWizardViewModel() {
 
   self.deriveOpenOrderAssetPrice = function(asset1, quantity1, asset2, quantity2) {
     //helper function for showing pending trades
-    assert(asset1 && quantity1, "Asset1 and/or quantity1 not present");
-    assert(asset2 && quantity2, "Asset2 and/or quantity2 not present");
+    assert(asset1 && quantity1, "Token1 and/or quantity1 not present");
+    assert(asset2 && quantity2, "Token2 and/or quantity2 not present");
     var derivedQuantity1 = self.deriveOpenOrderAssetQuantity(asset1, quantity1);
     var derivedQuantity2 = self.deriveOpenOrderAssetQuantity(asset2, quantity2);
     

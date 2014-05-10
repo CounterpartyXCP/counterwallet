@@ -69,10 +69,10 @@ NotificationViewModel.calcText = function(category, message) {
     if(category == "callbacks") {
       desc = "<As>XCP</As> balance adjusted on your address(es) <Ad>" + addressesWithAsset.join(', ')
         + "</Ad> due to <Am>" + (parseFloat(message['fraction']) * 100).toString()
-        + "%</Am> callback option being exercised for asset <As>" + message['asset'] + "</As>";
+        + "%</Am> callback option being exercised for token <As>" + message['asset'] + "</As>";
     } else {
       desc = "<As>" + message['dividend_asset'] + "</As> balance adjusted on your address(es) <Ad>" + addressesWithAsset.join(', ')
-        + "</Ad> due to <Am>" + message['quantity_per_unit'] + "</Am> dividend being issued for asset <As>" + message['asset'] + "</As>";
+        + "</Ad> due to <Am>" + message['quantity_per_unit'] + "</Am> distribution being issued for token <As>" + message['asset'] + "</As>";
     }
   } else if(category == 'issuances') {
     var addresses = WALLET.getAddressesList();
@@ -85,7 +85,7 @@ NotificationViewModel.calcText = function(category, message) {
       //Detect transfers, whether we currently have the object in our wallet or not (as it could be
       // a transfer FROM an address outside of our wallet)
       if(addresses.indexOf(message['source'])!=-1 || addresses.indexOf(message['issuer'])!=-1) {
-        desc = "Asset <As>" + message['asset'] + "</As> was transferred from <Ad>"
+        desc = "Token <As>" + message['asset'] + "</As> was transferred from <Ad>"
           + getLinkForCPData('address', message['source'], getAddressLabel(message['source'])) + "</Ad> to <Ad>"
           + getLinkForCPData('address', message['issuer'], getAddressLabel(message['issuer'])) + "</Ad>"; 
       }
@@ -93,18 +93,18 @@ NotificationViewModel.calcText = function(category, message) {
       //Detect everything else besides transfers, which we only care to see if the asset is listed in one of the wallet addresses
       if(message['locked']) {
         assert(!assetObj.locked());
-        desc = "Asset <As>" + message['asset'] + "</As> was locked against additional issuance";
+        desc = "Token <As>" + message['asset'] + "</As> was locked against additional issuance";
       } else if(message['description'] != assetObj.description()) {
-        desc = "Asset <As>" + message['asset'] + "</As> had its description changed from <b>" + assetObj.description()
+        desc = "Token <As>" + message['asset'] + "</As> had its description changed from <b>" + assetObj.description()
           + "</b> to <b>" + message['description'] + "</b>";
       } else {
         var additionalQuantity = message['quantity'] - assetObj.rawSupply();
         if(additionalQuantity) {
           desc = "Additional <Am>" + smartFormat(normalizeQuantity(additionalQuantity, assetObj.DIVISIBLE))
-            + "</Am> units issued for asset <As>" + message['asset'] + "</As>";
+            + "</Am> units issued for token <As>" + message['asset'] + "</As>";
         } else {
           //this is not a transfer, but it is not in our wallet as well we can assume it's an issuance of a totally new asset
-          desc = "Asset <As>" + message['asset'] + "</As> was issued with an initial quantity of <Am>"
+          desc = "Token <As>" + message['asset'] + "</As> was issued with an initial quantity of <Am>"
             + smartFormat(normalizeQuantity(message['quantity'], message['divisible'])) + "</Am> units";
         }
       }

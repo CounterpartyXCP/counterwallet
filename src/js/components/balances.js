@@ -363,7 +363,7 @@ function SweepModalViewModel() {
 
         if  (totalBtcBalanceForSweeep < sweepingCost) {
           
-          this.message = "We're not able to sweep all of the assets you selected. Please send "
+          this.message = "We're not able to sweep all of the tokens you selected. Please send "
                         + normalizeQuantity(self.missingBtcForFees)
                         + " BTC transactions to address " + self.addressForPrivateKey() + " and try again."
                         + " OR use the following fields to pay fees with another address";          
@@ -859,8 +859,8 @@ function SweepModalViewModel() {
       }
     }
 
-    self.showNextMessage("Sweeping from: " + self.addressForPrivateKey() + " to " + self.destAddress() + " of quantity "
-      + normalizedQuantity + " " + selectedAsset.ASSET);
+    self.showNextMessage("Sweeping " + normalizedQuantity + " " + selectedAsset.ASSET + " from "
+      + self.addressForPrivateKey() + " to " + self.destAddress());
       
     //dont use WALLET.doTransaction for this...
     var sendData = {
@@ -1012,7 +1012,7 @@ function SweepModalViewModel() {
 
           //TODO: this is ugly. transfert asset must be include in sendsToMake array
           self._doTransferAsset(failedTx['selectedAsset'], sendParams[1], sendParams[2], opsComplete, function(retry, failedTx) {
-            $.jqlog.debug("waiting "+TRANSACTION_DELAY+"ms");
+            $.jqlog.debug("waiting "+TRANSACTION_DELAY + "ms");
             setTimeout(function() {
               doSweep(retry, failedTx);
             }, TRANSACTION_DELAY);
@@ -1021,7 +1021,7 @@ function SweepModalViewModel() {
         } else {
 
           self._doSendAsset(sendParams[0], sendParams[1], sendParams[2], sendParams[3], sendParams[4], function(retry, failedTx) {
-            $.jqlog.debug("waiting "+TRANSACTION_DELAY+"ms");
+            $.jqlog.debug("waiting "+TRANSACTION_DELAY + "ms");
             setTimeout(function() {
               doSweep(retry, failedTx);
             }, TRANSACTION_DELAY);

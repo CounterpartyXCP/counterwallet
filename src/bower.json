@@ -4,7 +4,7 @@
         "jquery": "2.0.2",
         "jquery-ui": "1.10.3",
         "bootstrap": "3.1.1",
-        "smartadmin": "https://github.com/xnova/countersmartadmin.git",
+        "smartadmin": "https://github.com/CounterpartyXCP/countersmartadmin.git",
         "cryptojs": "https://crypto-js.googlecode.com/files/CryptoJS%20v3.1.2.zip",
         "bootbox": "4.2.0",
         "bootstrap-datetimepicker": "https://github.com/Eonasdan/bootstrap-datetimepicker.git#3.0.0",
@@ -30,7 +30,7 @@
         "typeahead.js": "0.10.2",
         "select2": "3.4.6",
         "font-awesome": "4.0.3",
-        "bitcore": "https://github.com/bitpay/bitcore.git#566b74863a2b017ba3a11c3be5f077a9a44809b3",
+        "bitcore": "https://github.com/bitpay/bitcore.git#527c49a11d1747f02a741d6d16d0b26c652bf07a",
         "mocha": "1.18.2",
         "chai": "1.9.1"
     }

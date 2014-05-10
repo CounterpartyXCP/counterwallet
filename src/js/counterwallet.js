@@ -116,7 +116,6 @@ function needWarningOnExit() {
   return (window.WALLET && WALLET.isSellingBTC()) ||
          window.OPEN_ORDER_FEED.sellBTCOrdersCount() ||
          window.PENDING_ACTION_FEED.pendingSellBTCOrdersCount();
-
 }
 
 function warningOnExit() {
@@ -215,19 +214,19 @@ $(document).ready(function() {
     display: ['chrome', 'firefox', 'safari'],
     browserInfo: { // Settings for which browsers to display
       chrome: {
-        text: 'Chrome 23+',
+        text: 'Chrome',
         url: 'https://www.google.com/intl/en/chrome/browser/'
       },
       firefox: {
-        text: 'Firefox 25+',
+        text: 'Firefox',
         url: 'http://http://www.mozilla.org/'
       },
       safari: {
-        text: 'Safari 7+',
+        text: 'Safari (Mac Users)',
         url: 'http://www.apple.com/safari/download/'
       },
       opera: {
-        text: 'Opera 15+',
+        text: 'Opera',
         url: 'http://www.opera.com/download/'
       }      
     },

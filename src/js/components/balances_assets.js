@@ -1,6 +1,6 @@
 ko.validation.rules['assetNameIsTaken'] = {
   async: true,
-  message: 'Asset name is already taken',
+  message: 'Token name is already taken',
   validator: function (val, self, callback) {
     failoverAPI("get_issuances",
       {'filters': {'field': 'asset', 'op': '==', 'value': val}},
@@ -13,7 +13,7 @@ ko.validation.rules['assetNameIsTaken'] = {
 // TODO: DRY!!
 ko.validation.rules['assetNameExists'] = {
   async: true,
-  message: 'Asset name does not exists',
+  message: 'Token name does not exist',
   validator: function (val, self, callback) {
     failoverAPI("get_issuances",
       {'filters': {'field': 'asset', 'op': '==', 'value': val}},
@@ -29,7 +29,7 @@ ko.validation.rules['isValidAssetDescription'] = {
     validator: function (val, self) {
       return byteCount(val) <= MAX_ASSET_DESC_LENGTH;
     },
-    message: 'Asset description is more than ' + MAX_ASSET_DESC_LENGTH + ' bytes long.'
+    message: 'Token description is more than ' + MAX_ASSET_DESC_LENGTH + ' bytes long.'
 };
 ko.validation.registerExtenders();
 
@@ -61,13 +61,13 @@ function CreateAssetModalViewModel() {
     // field validation not working if this field is empty). This is temporary...
     date: true,
     required: {
-      message: "Call date is required if the asset is callable",
+      message: "Call date is required if the token is callable",
       onlyIf: function () { return (self.callable() === true); }
     }
   });
   self.callPrice = ko.observable(0).extend({
     required: {
-      message: "Call price is required if the asset is callable",
+      message: "Call price is required if the token is callable",
       onlyIf: function () { return (self.callable() === true); }
     },
     isValidPositiveQuantityOrZero: self
@@ -111,7 +111,7 @@ function CreateAssetModalViewModel() {
     var rawQuantity = denormalizeQuantity(quantity, self.divisible());
     
     if(rawQuantity > MAX_INT) {
-      bootbox.alert("The quantity desired to be issued for this asset is too high.");
+      bootbox.alert("The quantity desired to be issued for this token is too high.");
       return false;
     }
     
@@ -132,7 +132,7 @@ function CreateAssetModalViewModel() {
         transfer_destination: null
       },
       function(txHash, data, endpoint) {
-        bootbox.alert("Your asset <b class='notoAssetColor'>" + self.name() + "</b>"
+        bootbox.alert("Your token <b class='notoAssetColor'>" + self.name() + "</b>"
           + " has been created.<br/><br/>It will automatically appear under the appropriate address once the network"
           + " has confirmed it, and your address <b class='notoAddrColor'>" + getAddressLabel(self.address())
           +  "</b> will be deducted by <b class='notoQuantityColor'>" + ASSET_CREATION_FEE_XCP + "</b> <b class='notoAssetColor'>XCP</b>.");
@@ -217,7 +217,7 @@ function IssueAdditionalAssetModalViewModel() {
       function(txHash, data, endpoint) {
         self.shown(false);
         bootbox.alert("You have issued <b class='notoQuantityColor'>" + self.additionalIssue() + "</b> additional"
-          + " quantity on your asset <b class='notoAssetColor'>" + self.asset().ASSET + "</b>. "
+          + " quantity on your token <b class='notoAssetColor'>" + self.asset().ASSET + "</b>. "
           + ACTION_PENDING_NOTICE);
       }
     );
@@ -363,7 +363,7 @@ function ChangeAssetDescriptionModalViewModel() {
       },
       function(txHash, data, endpoint) {
         self.shown(false);
-        bootbox.alert("The description for asset <b class='notoAssetColor'>" + self.asset().ASSET + "</b> has been"
+        bootbox.alert("The description for token <b class='notoAssetColor'>" + self.asset().ASSET + "</b> has been"
           + " changed to <b>" + self.newDescription() + "</b>. " + ACTION_PENDING_NOTICE);
       }
     );
@@ -425,7 +425,7 @@ function PayDividendModalViewModel() {
         if(self.dividendAssetBalRemainingPostPay() === null) return true; //wait until dividend asset chosen to validate
         return self.dividendAssetBalRemainingPostPay() >= 0;
       },
-      message: 'The total dividend would exceed the address\' balance for the selected Dividend Asset.',
+      message: 'The total distribution would exceed the address\' balance for the selected Distribution Token.',
       params: self
     }    
   });
@@ -493,8 +493,8 @@ function PayDividendModalViewModel() {
       },
       function(txHash, data, endpoint) {
         self.shown(false);
-        bootbox.alert("You have paid a dividend of <b class='notoQuantityColor'>" + self.quantityPerUnit() + "</b>"
-          + " <b class='notoAssetColor'>" + self.selectedDividendAsset() + "</b> per outstanding unit to holders of asset"
+        bootbox.alert("You have paid a distribution of <b class='notoQuantityColor'>" + self.quantityPerUnit() + "</b>"
+          + " <b class='notoAssetColor'>" + self.selectedDividendAsset() + "</b> per outstanding unit to holders of token"
           + " <b class='notoAssetColor'>" + self.assetData().asset + "</b>. " + ACTION_PENDING_NOTICE);
       }
     );
@@ -547,7 +547,7 @@ function CallAssetModalViewModel() {
         if(self.xcpBalRemainingPostCall() === null) return true; //wait until dividend asset chosen to validate
         return self.xcpBalRemainingPostCall() >= 0;
       },
-      message: 'The total dividend would exceed the address\' balance for the selected Dividend Asset.',
+      message: 'The total dividend would exceed the address\' balance for the selected Dividend Token.',
       params: self
     }    
   });
@@ -636,7 +636,7 @@ function CallAssetModalViewModel() {
       function(txHash, data, endpoint) {
         self.shown(false);
         bootbox.alert("You have called back <b class='notoQuantityColor'>" + self.percentageToCall() + "%</b>"
-          + " of asset <b class='notoAssetColor'>" + self.asset() + "</b>"
+          + " of token <b class='notoAssetColor'>" + self.asset() + "</b>"
           + " for the price of <b class='notoQuantityColor'>" + self.totalXCPPay() + "</b> <b class='notoAssetColor'>XCP</b>. "
           + ACTION_PENDING_NOTICE);
       }
@@ -653,13 +653,13 @@ function CallAssetModalViewModel() {
     var nowUTC = new Date(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate(), now.getUTCHours(), now.getUTCMinutes(), now.getUTCSeconds());
 
     //Check if the passed asset is callable
-    assert(self.assetObj().isMine(), "Asset is not yours!");
-    assert(self.assetObj().CALLABLE, "Asset is not callable!");
+    assert(self.assetObj().isMine(), "Token is not yours!");
+    assert(self.assetObj().CALLABLE, "Token is not callable!");
 
     var callDate = new Date(0);
     callDate.setUTCSeconds(self.assetObj().CALLDATE);
     if(callDate > nowUTC) {
-      bootbox.alert("Asset <b class='notoAssetColor'>" + self.asset()
+      bootbox.alert("Token <b class='notoAssetColor'>" + self.asset()
       + "</b> cannot be called until " + self.assetObj().dispCallDate());
       return;
     }
@@ -683,7 +683,7 @@ var AssetHistoryItemModel = function(historyObj) {
   self.dispDescription = function() {
     var desc = '';
     if(self.HISTORYOBJ['type'] == 'created') {
-      desc = "Asset created with description '<b>" + self.HISTORYOBJ['description']
+      desc = "Token created with description '<b>" + self.HISTORYOBJ['description']
         + "</b>' and total issuance of <Am>" + numberWithCommas(self.HISTORYOBJ['total_issued_normalized']) + "</Am> units."
         + " Owned by address <Ad>" + getAddressLabel(self.HISTORYOBJ['owner']) + "</Ad>";
     } else if(self.HISTORYOBJ['type'] == 'issued_more') {
@@ -692,12 +692,12 @@ var AssetHistoryItemModel = function(historyObj) {
     } else if(self.HISTORYOBJ['type'] == 'changed_description') {
       desc = "Description changed to '<b>" + self.HISTORYOBJ['new_description'] + "</b>'";
     } else if(self.HISTORYOBJ['type'] == 'locked') {
-      desc = "Asset locked";
+      desc = "Token locked";
     } else if(self.HISTORYOBJ['type'] == 'transferred') {
-      desc = "Asset transferred from address <Ad>" + getAddressLabel(self.HISTORYOBJ['prev_owner'])
+      desc = "Token transferred from address <Ad>" + getAddressLabel(self.HISTORYOBJ['prev_owner'])
         + "</Ad> to address <Ad>" + getAddressLabel(self.HISTORYOBJ['new_owner']) + "</Ad>";
     } else if(self.HISTORYOBJ['type'] == 'called_back') {
-      desc = "<Am>" + self.HISTORYOBJ['percentage'] + "%</Am> of asset called back";
+      desc = "<Am>" + self.HISTORYOBJ['percentage'] + "%</Am> of token called back";
     } else {
       desc = "UNKNOWN OP: <b>" + self.HISTORYOBJ['type'] + "</b>";
     }

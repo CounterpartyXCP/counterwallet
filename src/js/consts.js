@@ -1,7 +1,7 @@
 /***********
  * GLOBAL CONSTANTS
  ***********/
-var VERSION = "1.1.4 BETA";
+var VERSION = "1.1.5 BETA";
 
 var IS_MOBILE_OR_TABLET = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
 var PREFERENCES = {}; //set when logging in
@@ -64,7 +64,7 @@ var ENTITY_NAMES = {
   'broadcasts': 'Broadcast',
   'bets': 'Bet',
   'bet_matches': 'Bet Match',
-  'dividends': 'Dividend',
+  'dividends': 'Distribution',
   'cancels': 'Cancel',
   'callbacks': 'Callback',
   'bet_expirations': 'Bet Expired',

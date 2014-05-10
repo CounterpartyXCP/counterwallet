@@ -10,11 +10,9 @@ function WalletViewModel() {
   self.addresses = ko.observableArray(); //AddressViewModel objects -- populated at login
   
   self.isNew = ko.observable(false); //set to true if we can't find the user's prefs when logging on. if set, we'll show some intro text on their login, etc.
-  
   self.isSellingBTC = ko.observable(false); //updated by the btcpay feed
-
   self.isOldWallet = ko.observable(false);
-
+  
   self.addAddress = function() {
     //adds a key to the wallet, making a new address object on the wallet in the process
     //(assets must still be attached to this address, with updateBalances() or other means...)
@@ -33,11 +31,11 @@ function WalletViewModel() {
     //see if there's a label already for this address that's stored in PREFERENCES, and use that if so
     var addressHash = hashToB64(address);
     //^ we store in prefs by a hash of the address so that the server data (if compromised) cannot reveal address associations
-    var label = PREFERENCES.address_aliases[addressHash] || "UNKNOWN LABEL";
+    var label = PREFERENCES.address_aliases[addressHash] || "My Address #" + (i + 1);
     //^ an alias is made when a watch address is made, so this should always be found
 
     self.addresses.push(new AddressViewModel(key, address, label)); //add new
-    $.jqlog.debug("Wallet address added: " + address + " -- hash: " + addressHash + " -- label: " + label);
+    $.jqlog.debug("Wallet address added: " + address + " -- hash: " + addressHash + " -- label: " + label + " -- index: " + i);
 
     return address;
   }
@@ -432,8 +430,10 @@ function WalletViewModel() {
       extra1 = data['_divisible'];
       delete data['_divisible'];
     }
-    
-    var verifyDestAddr = data['destination'] || data['transfer_destination'] || data['feed_address'] || data['source'];
+
+    var verifyDestAddr = data['destination'] || data['transfer_destination'] || data['feed_address'] || data['destBtcPay'] || data['source'];
+    delete data['destBtcPay'];
+
     if (action == "create_burn") {
       verifyDestAddr = TESTNET_UNSPENDABLE;
     }
