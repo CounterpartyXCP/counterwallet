@@ -256,8 +256,7 @@
       just bear it and repeat the HTML code... looping the jarvis widgets with knockout causes odd bugs -->
   <div class="row" data-bind="fadeVisibleInOnly: $root.validationModelBaseOrders.isValid() && $root.recievedMarketData() && $root.asset1OpenBuyOrders().length">
     <article class="col-xs-12 col-sm-12 col-md-12 col-lg-12"> <!-- NEW WIDGET START -->
-      <div class="jarviswidget defaultWidgetColor" data-widget-editbutton="false" data-widget-deletebutton="false"
-       data-bind="attr: {id: 'wid-id-openOrders-asset' + $data}">
+      <div class="jarviswidget defaultWidgetColor" id="wid-id-openOrders-buying" data-widget-editbutton="false" data-widget-deletebutton="false">
         <header>
             <span class="widget-icon"> <i class="fa fa-circle-o"></i> </span>
             <h3>Open Orders Buying <span data-bind="text: $root.asset1()"></span></h3>
@@ -301,8 +300,7 @@
   
   <div class="row" data-bind="fadeVisibleInOnly: $root.validationModelBaseOrders.isValid() && $root.recievedMarketData() && $root.asset2OpenBuyOrders().length">
     <article class="col-xs-12 col-sm-12 col-md-12 col-lg-12"> <!-- NEW WIDGET START -->
-      <div class="jarviswidget defaultWidgetColor" data-widget-editbutton="false" data-widget-deletebutton="false"
-       data-bind="attr: {id: 'wid-id-openOrders-asset' + $data}">
+      <div class="jarviswidget defaultWidgetColor" id="wid-id-openOrders-selling" data-widget-editbutton="false" data-widget-deletebutton="false">
         <header>
             <span class="widget-icon"> <i class="fa fa-circle-o"></i> </span>
             <h3>Open Orders Buying <span data-bind="text: $root.asset2()"></span></h3>
