@@ -6,11 +6,12 @@ Online Webwallet for [Counterparty](http://www.counterparty.co).
 Originally based off of [Carbonwallet](http://www.carbonwallet.com) (however virtually all the original code has been removed or rewritten).
 
 
-[counterwallet.co](https://www.counterwallet.co/)
-----------------------------------------------------
+Production Systems
+-------------------
 
-[testnet.counterwallet.co](https://testnet.counterwallet.co/)
-----------------------------------------------------
+* Mainnet: **[counterwallet.co](https://www.counterwallet.co/)**
+* Testnet: **[testnet.counterwallet.co](https://testnet.counterwallet.co/)**
+
 
 Features
 ----------
@@ -66,6 +67,10 @@ grunt build
 grunt freeze
 ```
 
+Setting up your own Counterwallet Server
+-----------------------------------------
+
+See [this link](https://github.com/CounterpartyXCP/counterpartyd_build/blob/master/docs/SettingUpAFederatedNode.rst) for more info.
 
 
 Licence

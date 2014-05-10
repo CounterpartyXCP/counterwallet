@@ -33,7 +33,7 @@
 * MAINNET RELEASE
 * numerous bug fixes
 
-### v0.9.5 ### 
+### v0.9.5 ###
 **Enhancements:**
 * implemented asset description json and asset pictures, yay (see https://wiki.counterparty.co/w/Enhanced_Asset_Info_in_Counterwallet)
 * added 7 sample moving average to price charts
