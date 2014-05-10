@@ -259,26 +259,29 @@ function _multiAPIPrimative(method, params, onFinished) {
     function(jqXHR, textStatus, errorThrown, endpoint) { //error callback
       gatheredResults.push({'success': false, 'endpoint': endpoint, 'jqXHR': jqXHR, 'textStatus': textStatus, 'errorThrown': errorThrown});
       
-      //525 DETECTION (needed here and in failoverAPI() as failoverAPI() doesn't use this primative)
-      if(method != "is_ready" && gatheredResults.length == cwAPIUrls().length) {
-        //detect a special case of all servers returning code 525, which would mean counterpartyd had a reorg and/or we are upgrading
-        var allNotCaughtUp = true;
-        for(var j=0;j < gatheredResults.length; j++) {
-          if(!gatheredResults['jqXHR'] || gatheredResults['jqXHR'].status != '525') {
-            allNotCaughtUp = false;
-            break;
+      if(gatheredResults.length == cwAPIUrls().length) {
+        
+        if(method != "is_ready") {
+          //525 DETECTION (needed here and in failoverAPI() as failoverAPI() doesn't use this primative)
+          //detect a special case of all servers returning code 525, which would mean counterpartyd had a reorg and/or we are upgrading
+          var allNotCaughtUp = true;
+          for(var j=0;j < gatheredResults.length; j++) {
+            if(!gatheredResults['jqXHR'] || gatheredResults['jqXHR'].status != '525') {
+              allNotCaughtUp = false;
+              break;
+            }
+          }
+          if(allNotCaughtUp) {
+            alert("The server(s) are currently updating and/or not caught up to the blockchain. Logging you out."
+              + " Please try logging in again later. (Most likely this message is due to the server being updated.)")
+            location.reload(false); //log the user out to avoid ruckus
+            return;
           }
         }
-        if(allNotCaughtUp) {
-          alert("The server(s) are currently updating and/or not caught up to the blockchain. Logging you out."
-            + " Please try logging in again later. (Most likely this message is due to the server being updated.)")
-          location.reload(false); //log the user out to avoid ruckus
-          return;
-        }
-      }
         
-      //otherwise, respond as normal
-      onFinished(gatheredResults);  
+        //if this is the last result to come back, then trigger the callback
+        onFinished(gatheredResults);  
+      }
     });
   }
 }

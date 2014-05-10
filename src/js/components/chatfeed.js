@@ -84,6 +84,8 @@ function ChatFeedViewModel() {
   }
 
   self.updateOnlineUserCount = function() {
+    //As all users are connected to every chat feed (at least currently), this should return an accurate number
+    //If total numbers of servers in the backends list > # servers the client connects to, this will no longer be the case
     failoverAPI("get_num_users_online", [], function(numUsersOnline, endpoint) {
       self.numUsersOnline(numUsersOnline);
     });
@@ -219,6 +221,12 @@ function ChatFeedViewModel() {
               "Lost chat feed link and attempted to correct. Please try sending your chat line again.", null, null);  
           });
         }
+      } else if(error_name == 'invalid_id' && self.handle()) {
+        //will happen if there are multiple servers, and at least one we have a handle, and 1 or more of
+        // the others, we don't (i.e. there is a mismatch). In this case, store the handle to make them match up
+        multiAPI("store_chat_handle", [WALLET.identifier(), self.handle()], function(data, endpoint) {
+          $.jqlog.info("Synced handle '" + self.handle() + "' to all servers.");
+        });
       } else {
         if(error_name == 'too_fast')
           self._nextMessageNotSent = true; //as the success callback is triggered after receiving the error callback
