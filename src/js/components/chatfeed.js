@@ -249,7 +249,7 @@ function ChatFeedViewModel() {
   }
   
   self.addLine = function(handle, text, is_op, is_private) {
-    //check for a dupe line in the last 3 lines and do not post if so
+    //check for a dupe line in the last 3 lines and do not post if so (this includes emotes and commands)
     var newLine = new ChatLineViewModel(handle, text, is_op, is_private);
     var lastLines = self.lines.slice(Math.max(self.lines().length - 3, 1));
     for(var i=0; i < lastLines.length; i++) {
@@ -363,9 +363,9 @@ function ChatFeedViewModel() {
       var parts = text.replace('/', '').split(' ');
       var command = parts[0];
       var args = parts.slice(1);
-      $.jqlog.debug("chat.sendLine(command): " + command + ", args: " + JSON.stringify(args));
       //send to EVERY chat server, as this modifies local server state (if accepted)
       for(var i=0; i < self.feedConnections.length; i++) {
+        $.jqlog.debug("chat.sendLine(feed-" + i + "\\command): " + command + ", args: " + JSON.stringify(args));
         self.feedConnections[i].emit('command', command, args); //no need for a callback as the server will broadcast to us
       }
       $('#chatTextBox').val('');
@@ -374,7 +374,6 @@ function ChatFeedViewModel() {
       // and will get the message
       //just grab val() (not very knockout friendly) because certain browsers (certain mobile especially)
       // can get a bit wierd with keydown vs. keypress, etc...not work messing with it
-      $.jqlog.debug("chat.sendLine(emote): " + text);
       
       function _doChatEmote(num) {
         self.feedConnections[num].emit('emote', text, function(data) {
@@ -393,7 +392,12 @@ function ChatFeedViewModel() {
       } 
       
       for(var i=0; i < self.feedConnections.length; i++) {
-        _doChatEmote(i);
+        //Send the line out the first connected chat server
+        if(self.feedConnections[i].socket.connected) {
+          $.jqlog.debug("chat.sendLine(feed-" + i + "\\emote): " + text);
+          _doChatEmote(i);
+          break;
+        }
       }
     }
   }
