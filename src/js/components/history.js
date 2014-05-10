@@ -181,6 +181,9 @@ function TransactionHistoryItemViewModel(data) {
         + "<Ad>" + getAddressLabel(self.DATA['tx1_address']) + "</Ad> sent <Am>"
         + smartFormat(normalizeQuantity(self.DATA['backward_quantity'], self.DATA['_backward_asset_divisible']))
         + "</Am> <As>" + self.DATA['backward_asset'] + "</As>";
+      if(self.DATA['forward_asset'] == 'BTC' || self.DATA['backward_asset'] == 'BTC') {
+        desc += " <b>(pending BTCpay)</b>";
+      }
     } else if(self.RAW_TX_TYPE == 'btcpays') {
       desc = "Payment for <Am>" + smartFormat(normalizeQuantity(self.DATA['btc_amount'])) + "</Am> <As>BTC</As>";
     } else if(self.RAW_TX_TYPE == 'issuances') {
