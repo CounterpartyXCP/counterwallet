@@ -86,7 +86,7 @@ function WaitingBTCPayViewModel(btcPayData) {
             callback: function() {
               //complete the BTCpay. Start by getting the current BTC balance for the address
               WALLET.doTransaction(self.BTCPAY_DATA['myAddr'], "create_btcpay",
-                { order_match_id: self.BTCPAY_DATA['orderMatchID'], source: self.BTCPAY_DATA['myAddr'] },
+                { order_match_id: self.BTCPAY_DATA['orderMatchID'], source: self.BTCPAY_DATA['myAddr'], destBtcPay: self.BTCPAY_DATA['btcDestAddr'] },
                 function(txHash, data, endpoint) { 
                   //remove the BTC payment from the notifications
                   WAITING_BTCPAY_FEED.remove(self.BTCPAY_DATA['orderMatchID']);
