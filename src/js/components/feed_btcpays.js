@@ -313,7 +313,7 @@ function UpcomingBTCPayFeedViewModel() {
         
          //user has the sufficient balance
         WALLET.doTransaction(btcPayData['myAddr'], "create_btcpay",
-          { order_match_id: btcPayData['orderMatchID'], source: btcPayData['myAddr'] },
+          { order_match_id: btcPayData['orderMatchID'], source: btcPayData['myAddr'], destBtcPay: btcPayData['btcDestAddr'] },
           function(txHash, data, endpoint) {
             //notify the user of the automatic BTC payment
             bootbox.alert("Automatic <b class='notoAssetColor'>BTC</b> payment of "
@@ -367,7 +367,7 @@ function UpcomingBTCPayFeedViewModel() {
             className: "btn-success",
             callback: function() {
               WALLET.doTransaction(btcPayData['myAddr'], "create_btcpay",
-                { order_match_id: btcPayData['orderMatchID'], source: btcPayData['myAddr'] },
+                { order_match_id: btcPayData['orderMatchID'], source: btcPayData['myAddr'], destBtcPay: btcPayData['btcDestAddr'] },
                 function(txHash, data, endpoint) {
                   //notify the user of the automatic BTC payment
                   bootbox.alert("Automatic <b class='notoAssetColor'>BTC</b> payment of"
