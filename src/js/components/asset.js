@@ -91,7 +91,7 @@ function AssetViewModel(props) {
     if(!WALLET.canDoTransaction(self.ADDRESS)) return false;
     
     bootbox.dialog({
-      message: "By locking your asset, you will not be able to issue more units of it in the future.<br/><br/> \
+      message: "By locking your token, you will not be able to issue more units of it in the future.<br/><br/> \
         <b class='errorRed'>Please NOTE that this action is irreversable!</b>",
       title: "Are you sure?",
       buttons: {
@@ -103,7 +103,7 @@ function AssetViewModel(props) {
           }
         },
         danger: {
-          label: "Lock this asset",
+          label: "Lock Token",
           className: "btn-danger",
           callback: function() {
             //to lock, issue with quantity == 0 and "LOCK" in the description field
@@ -120,7 +120,7 @@ function AssetViewModel(props) {
                 transfer_destination: null
               },
               function(txHash, data, endpoint) {
-                bootbox.alert("Your asset has been locked and no more units of the asset may be issued. It may take a bit for this to reflect.");
+                bootbox.alert("Your token has been locked and no more units of the token may be issued. " + ACTION_PENDING_NOTICE);
               }
             );
           }
@@ -137,7 +137,7 @@ function AssetViewModel(props) {
   self.call = function() {
     ///////////////////
     //TEMP DISABLE
-    bootbox.alert("Asset callbacks are temporarily disabled.");
+    bootbox.alert("Token callbacks are temporarily disabled.");
     return false;
     ///////////////////
     

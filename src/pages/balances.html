@@ -62,7 +62,7 @@
     <br/><br/>
     
     One important thing to know before getting started is that when you perform an action in Counterwallet (i.e. place
-    an order, create an asset, etc), <b>it doesn't take effect immediately as it must first be confirmed on the Bitcoin blockchain</b>.
+    an order, create a token, etc), <b>it doesn't take effect immediately as it must first be confirmed on the Bitcoin blockchain</b>.
     Counterwallet lets you know this by displaying your actions under the <b>Pending Actions</b> panel (the Clock icon on the top bar), and then moving
     them to the <b>Notifications</b> panel (the Checkbox icon) automatically once the network has successfully confirmed them.
     Note that depending on the speed at which blocks are solved, it could take anywhere from 2 to 40 minutes for your actions to be confirmed.<br/><br/>
@@ -92,8 +92,8 @@
                   <li><a data-bind="visible: IS_WATCH_ONLY, click: removeWatch" href="#">Remove Address</a></li>
 
                   <li class="divider"></li><li class="dropdown-header">Issuance...</li>                 
-                  <li><a data-bind="visible: !IS_WATCH_ONLY, click: createAsset" href="#">Create Asset</a></li>                
-                  <li><a data-bind="visible: !IS_WATCH_ONLY, click: payDividend" href="#">Pay Dividend</a></li>
+                  <li><a data-bind="visible: !IS_WATCH_ONLY, click: createAsset" href="#">Create Token</a></li>                
+                  <li><a data-bind="visible: !IS_WATCH_ONLY, click: payDividend" href="#">Pay Distribution</a></li>
 
                   <li class="divider"></li><li class="dropdown-header">Sort by...</li>
                   <li><a data-bind="click: sortAssetsByName" href="#">Name</a></li>
@@ -102,8 +102,8 @@
                   <li class="divider"></li><li class="dropdown-header">Filter by...</li>
                   <li><a data-bind="click: showAllAssets" href="#">Show All</a></li>
                   <li><a data-bind="click: showBaseAssetsOnly" href="#">Show XCP &amp; BTC Only</a></li>
-                  <li><a data-bind="click: showMyAssetsOnly" href="#">Show My Assets Only</a></li>
-                  <li><a data-bind="click: showOthersAssetsOnly" href="#">Show Other Assets Only</a></li>
+                  <li><a data-bind="click: showMyAssetsOnly" href="#">Show My Tokens Only</a></li>
+                  <li><a data-bind="click: showOthersAssetsOnly" href="#">Show Other Tokens Only</a></li>
 
                 </ul>
               </div>
@@ -122,8 +122,8 @@
                     <li data-bind="visible: !$parent.IS_WATCH_ONLY && USE_TESTNET && ASSET === 'BTC'"><a data-bind="click: testnetBurn" href="#">Burn for XCP</a></li>
                     <li data-bind="visible: !$parent.IS_WATCH_ONLY && isMine() && !locked()"><a data-bind="click: issueAdditional" href="#">Issue Additional</a></li>
                     <li data-bind="visible: !$parent.IS_WATCH_ONLY && isMine()"><a data-bind="click: transfer" href="#">Transfer Ownership</a></li>
-                    <li data-bind="visible: !$parent.IS_WATCH_ONLY && isMine() && !locked()"><a data-bind="click: lock" href="#">Lock Asset Issuance</a></li>
-                    <li data-bind="visible: !$parent.IS_WATCH_ONLY && isMine()"><a data-bind="click: changeDescription" href="#">Change Asset Description</a></li>    
+                    <li data-bind="visible: !$parent.IS_WATCH_ONLY && isMine() && !locked()"><a data-bind="click: lock" href="#">Lock Token Issuance</a></li>
+                    <li data-bind="visible: !$parent.IS_WATCH_ONLY && isMine()"><a data-bind="click: changeDescription" href="#">Change Token Description</a></li>    
                     <li data-bind="visible: !$parent.IS_WATCH_ONLY && isMine() && CALLABLE"><a data-bind="click: call" href="#">Call</a></li>
                   </ul>
                 </div>
@@ -139,9 +139,9 @@
                         title="Balance change pending"><i class="icon-append fa fa-cloud-upload"></i></span></p>
                 <div class="balancesAssetIcons">
                     <span data-bind="visible: locked()" class="balancesAssetIcon"
-                        title="Asset is locked"><i class="icon-append fa fa-lock"></i></span>
+                        title="Token is locked"><i class="icon-append fa fa-lock"></i></span>
                     <span data-bind="visible: CALLABLE" class="balancesAssetIcon"
-                        title="Asset is callable"><i class="icon-append fa fa-mail-reply-all"></i></span>
+                        title="Token is callable"><i class="icon-append fa fa-mail-reply-all"></i></span>
                 </div>
               </div>
             </div> <!-- end widget content body -->
@@ -233,7 +233,7 @@
     <div class="modal-content">
       <div class="modal-header">
         <button type="button" data-bind="click: hide" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
-        <h4 class="modal-title">Send Funds</h4>
+        <h4 class="modal-title">Send Tokens</h4>
       </div>
       <div class="modal-body no-padding">
         <p class="formPadded">Send <b data-bind="text: asset"></b> from your address <b data-bind="text: address"></b>
@@ -284,14 +284,14 @@
       <div class="modal-header">
         <button type="button" data-bind="click: hide, visible: sweepingProgressionMessage()==''" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
         <h4 class="modal-title">
-            <span data-bind="visible: !fromOldWallet">Import (Sweep) Funds from Another Address</span>
-            <span data-bind="visible: fromOldWallet">Import (Sweep) Funds from Your Old Wallet</span>
+            <span data-bind="visible: !fromOldWallet">Import (Sweep) Tokens from Another Address</span>
+            <span data-bind="visible: fromOldWallet">Import (Sweep) Tokens from Your Old Wallet</span>
         </h4>
       </div>
       <div class="modal-body no-padding">
         <p class="formPadded">
-            <span data-bind="visible: !fromOldWallet">Import funds by "sweeping" them from an external address into an address in this wallet.</span>
-            <span data-bind="visible: fromOldWallet">Transition to your new wallet by sweeping over the funds from your old wallet.</span>
+            <span data-bind="visible: !fromOldWallet">Import token funds by "sweeping" them from an external address into an address in this wallet.</span>
+            <span data-bind="visible: fromOldWallet">Transition to your new wallet by sweeping over the token funds from your old wallet.</span>
         </p>
         
         <form class="smart-form" data-bind="submit: doAction, visible: sweepingProgressionMessage()==''"><fieldset>
@@ -303,7 +303,7 @@
                     <input name="privateKey" data-bind="value: privateKey, valueUpdate: 'input', attr: {placeholder: 'Enter Bitcoin private key'}" type="text"/>
                 </label>
                 <span class="invalid" data-bind="validationMessage: privateKey"></span>
-                <div class="note">Enter the unencrypted private key that coresponds to the address with the funds you want to move.</div>
+                <div class="note">Enter the unencrypted private key to the address with the tokens you want to move over.</div>
             </div>
           </div></section>
 
@@ -312,7 +312,7 @@
             <div class="col col-sm-12">
                 <select class="width-max" data-bind="options: availableOldAddresses, optionsValue: 'WIF', optionsText: 'ADDRESS', select2: { minimumResultsForSearch: 10, escapeMarkup: 'direct' }, value: oldPrivateKey"></select>
                 <span class="invalid" data-bind="validationMessage: privateKey"></span>
-                <div class="note">Select the address in your old wallet that the specified assets should be sent from.</div>
+                <div class="note">Select the address in your old wallet that the specified tokens should be sent from.</div>
             </div>
           </div></section>
 
@@ -321,17 +321,17 @@
             <div class="col col-sm-12">
                 <select class="width-max" data-bind="options: availableAddresses, optionsValue: 'ADDRESS', optionsText: 'SELECT_LABEL', select2: { minimumResultsForSearch: 10, escapeMarkup: 'direct' }, value: destAddress"></select>
                 <span class="invalid" data-bind="validationMessage: destAddress"></span>
-                <div class="note">Select the address in your wallet that the specified assets for the private key above should be sent to.</div>
+                <div class="note">Select the address in your wallet that the specified tokens for the private key above should be sent to.</div>
             </div>
           </div></section>
           <section data-bind="fadeVisibleInOnly: availableAssetsToSweep().length >= 1"><div class="row">
-            <label class="control-label col col-sm-12">Assets to Sweep</label>
+            <label class="control-label col col-sm-12">Tokens to Sweep</label>
             <div class="col col-sm-12">
                 <label class="input">
                     <select id="availableAssetsToSweep" multiple="true" class="width-max" data-bind="options: availableAssetsToSweep, optionsValue: 'ASSET', optionsText: 'SELECT_LABEL', select2: { minimumResultsForSearch: 10, escapeMarkup: 'direct' }, selectedOptions: selectedAssetsToSweep"></select>
                 </label>
                 <span class="invalid" data-bind="validationMessage: selectedAssetsToSweep"></span>
-                <div class="note">Select all of the assets whose total balances you want to move into the destination address.</div>
+                <div class="note">Select all of the tokens whose total balances you want to move into the destination address.</div>
             </div>
           </div></section>
           <section data-bind="visible: notEnoughBTC() || addressForFeesBalance()>0"><div class="row">
@@ -487,10 +487,11 @@
     <div class="modal-content">
       <div class="modal-header">
         <button type="button" data-bind="click: hide" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
-        <h4 class="modal-title">Create (Issue) an Asset</h4>
+        <h4 class="modal-title">Create (Issue) a Token</h4>
       </div>
       <div class="modal-body no-padding">
-        <p class="formPadded">Please note that a <b class="notoQuantityColor"><span data-bind="text: ASSET_CREATION_FEE_XCP"></span></b> <b class="notoAssetColor">XCP</b> fee will be deducted from your balance upon successful creation.</p>
+        <p class="formPadded">Please note that a <b class="notoQuantityColor"><span data-bind="text: ASSET_CREATION_FEE_XCP"></span></b>
+        <b class="notoAssetColor">XCP</b> fee will be deducted from your balance upon successful creation.</p>
         
         <form class="smart-form" data-bind="submit: doAction"><fieldset>
           <section><div class="row">
@@ -499,16 +500,16 @@
                 <label class="input"><i class="icon-append fa fa-user"></i>
                     <input name="assetAddress" data-bind="value: address" type="text" disabled="disabled"/>
                 </label>
-                <div class="note">The address the asset will be created on.</div>
+                <div class="note">The address the token will be created on.</div>
             </div>
           </div></section>
           <section><div class="row">
-            <label class="control-label col col-sm-2">Asset Name</label>
+            <label class="control-label col col-sm-2">Token Name</label>
             <div class="col col-sm-10">
                 <label class="input"><i class="icon-append fa fa-tag"></i>
                     <input name="assetName" data-bind="value: name, valueUpdate : 'input'" type="text"/>
                 </label>
-                <div class="note">The asset's trading symbol.</div>
+                <div class="note">The token's trading symbol.</div>
             </div>
           </div></section>
           <section><div class="row">
@@ -517,7 +518,7 @@
                 <label class="input"><i class="icon-append fa fa-info"></i>
                     <input name="assetDescription" data-bind="value: description, valueUpdate: 'input'"/>
                 </label>
-                <div class="note">Optional text that provides more information on the asset.</div>
+                <div class="note">Optional text that provides more information about the token.</div>
             </div>
           </div></section>
           <section><div class="row">
@@ -526,7 +527,7 @@
                 <label class="input"><i class="icon-append fa fa-plus"></i>
                     <input name="assetQuantity"  data-bind="value: quantity, valueUpdate: 'input'" type="text"/>                        
                 </label>
-                <div class="note">How many of the units of the asset to issue (can be increased later).</div>
+                <div class="note">How many of the units of the token to issue (can be increased later).</div>
             </div>
           </div></section>
           <section><div class="row">
@@ -534,18 +535,18 @@
             <div class="col col-sm-10">
               <label class="checkbox">
                 <input name="assetDivisible" type="checkbox" data-bind="checked: divisible">
-                <i></i>Divisible asset?
+                <i></i>Make divisible?
               </label>
-              <div class="note">Divisble assets can be subdivided into decimal places.</div>
+              <div class="note">Divisble tokens can be subdivided into decimal places.</div>
           </div></section>
           <section><div class="row">
             <div class="col col-sm-2"></div>
             <div class="col col-sm-10">
               <label class="checkbox">
                 <input name="assetCallable" type="checkbox" data-bind="checked: callable">
-                <i></i>Callable asset?
+                <i></i>Make callable?
               </label>
-              <div class="note">Callable assets may be called back at a specific date for a specific strike price.</div>
+              <div class="note">Callable token may be called back at a specific date for a specific strike price.</div>
           </div></section>
           <section data-bind="fadeVisibleInOnly: callable"><div class="row">                
             <label class="control-label col col-sm-2">Call Date</label>
@@ -553,7 +554,7 @@
                 <label class="input">
                     <input name="assetCallDate" type="text" data-bind="datetimepicker: callDate"/>
                 </label>
-                <div class="note">The date and time after which the owner of the asset may choose to call it back.</div>
+                <div class="note">The date and time after which the owner of the token may choose to call it back.</div>
             </div>
           </div></section>
           <section data-bind="fadeVisibleInOnly: callable"><div class="row">                
@@ -562,14 +563,14 @@
                 <label class="input">
                     <input name="assetCallPrice" type="text" data-bind="value: callPrice, valueUpdate: 'input'"/>
                 </label>
-                <div class="note">The <b>XCP price per unit</b> that the owner of the asset may call it back for.</div>
+                <div class="note">The <b>XCP price per unit</b> that the owner of the token may call it back for.</div>
             </div>
           </div></section>
         </fieldset></form>                    
       </div>
       <div class="modal-footer">
         <button type="button" class="btn btn-default" data-bind="click: hide">Cancel</button>
-        <button type="button" data-bind="click: submitForm" class="btn btn-primary">Create Asset</button>
+        <button type="button" data-bind="click: submitForm" class="btn btn-primary">Create Token</button>
       </div>
     </div><!-- /.modal-content -->
   </div><!-- /.modal-dialog -->
@@ -581,12 +582,12 @@
     <div class="modal-content">
       <div class="modal-header">
         <button type="button" data-bind="click: hide" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
-        <h4 class="modal-title">Issue Additional Asset Quantity</h4>
+        <h4 class="modal-title">Issue Additional Token Quantity</h4>
       </div>
       <div class="modal-body no-padding">
-        <p class="formPadded">How much more of this asset would you like to issue? <i>(For divisible assets, state
+        <p class="formPadded">How much more of this token would you like to issue? <i>(For divisible tokens, state
        the quantity as a whole or floating point number, not in satoshis -- e.g. '732.45')</i><br/><br/>
-       There is currently quantity <b class="buyColor" data-bind="text: dispTotalIssued"></b> of this asset issued.<br/><br/>
+       There are currently <b class="buyColor" data-bind="text: dispTotalIssued"></b> units of this token issued.<br/><br/>
        <b class="errorRed">Please NOTE that this action is irreversable!</b></p>
         
         <form class="smart-form" data-bind="submit: doAction"><fieldset>
@@ -614,11 +615,11 @@
     <div class="modal-content">
       <div class="modal-header">
         <button type="button" data-bind="click: hide" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
-        <h4 class="modal-title">Transfer Asset</h4>
+        <h4 class="modal-title">Transfer Token</h4>
       </div>
       <div class="modal-body no-padding">
-        <p class="formPadded">Enter the <b>Bitcoin address</b> you would like to perminently transfer ownership of this asset to.
-            (Be aware that this will not transfer the actual units of this asset that you own to this address -- you can do that with a separate Send transaction.)
+        <p class="formPadded">Enter the <b>Bitcoin address</b> you would like to perminently transfer ownership of this token to.
+            (Be aware that this will not transfer the actual units of this token that you own to this address -- you can do that with a separate Send transaction.)
             <br/><br/><b class="errorRed">Please NOTE that this action is irreversable!</b></p>
         
         <form class="smart-form" data-bind="submit: doAction"><fieldset>
@@ -646,12 +647,12 @@
     <div class="modal-content">
       <div class="modal-header">
         <button type="button" data-bind="click: hide" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
-        <h4 class="modal-title">Change Asset Description</h4>
+        <h4 class="modal-title">Change Token Description</h4>
       </div>
       <div class="modal-body no-padding">
         <div class="formPadded">
-            <p>The asset's current description is: <b><span data-bind="text: dispAssetDescription"></span></b></p>
-            <p>Enter the new description for this asset<span data-bind="html: dispCharactersRemaining"></span>:</p>
+            <p>The token's current description is: <b><span data-bind="text: dispAssetDescription"></span></b></p>
+            <p>Enter the new description for this token<span data-bind="html: dispCharactersRemaining"></span>:</p>
         </div>
         
         <form class="smart-form" data-bind="submit: doAction"><fieldset>
@@ -664,8 +665,8 @@
             </div>
           </div></section>
         </fieldset></form>
-        <div class="formPaddedBot">Want to give your asset an image, enahnced description text, or more? See
-            <a href="https://wiki.counterparty.co/w/Enhanced_Asset_Info_in_Counterwallet" target="_blank">this link</a>.
+        <div class="formPaddedBot">Want to give your token an image, enahnced description text, or more? See
+            <a href="https://wiki.counterparty.co/w/Enhanced_Token_Info_in_Counterwallet" target="_blank">this link</a>.
         </div>
       </div>
       <div class="modal-footer">
@@ -682,54 +683,54 @@
     <div class="modal-content">
       <div class="modal-header">
         <button type="button" data-bind="click: hide" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
-        <h4 class="modal-title">Pay Dividend</h4>
+        <h4 class="modal-title">Pay Distribution</h4>
       </div>
       <div class="modal-body no-padding">
-        <p class="formPadded">Use this form to pay holders of any asset a dividend using XCP or any other asset.
-        <i>Note that the full required balance of the asset paid out must be present at this same address.</i><br/><br/>
+        <p class="formPadded">Use this form to pay holders of any token a distribution using XCP or any other token.
+        <i>Note that the full required balance of the token paid out must be present at this same address.</i><br/><br/>
        <b class="errorRed">Please NOTE that this action is irreversable!</b></p>
         <form class="smart-form" data-bind="submit: doAction"><fieldset>
 
           <section><div class="row">
-            <label class="control-label col col-sm-2">Asset Name</label>
+            <label class="control-label col col-sm-2">Token Name</label>
             <div class="col col-sm-10">
                 <label class="input"><i class="icon-append fa fa-tag"></i>
                     <input name="assetName" data-bind="value: assetName, valueUpdate : 'input'" type="text"/>
                 </label>
-                <div class="note">The asset's trading symbol.</div>
+                <div class="note">The token's trading symbol.</div>
             </div>
           </div></section>
 
           <section><div class="row">
-            <label class="control-label col col-sm-2">Dividend Asset</label>
+            <label class="control-label col col-sm-2">Distribution Token</label>
             <div class="col col-sm-10">
                 <label class="input">
                     <select id="selectedDividendAsset" class="width-max" data-bind="options: availableDividendAssets, optionsValue: 'ASSET', optionsText: 'SELECT_LABEL', select2: { minimumResultsForSearch: 10, escapeMarkup: 'direct' }, value: selectedDividendAsset"></select>
                 </label>                    
-                <div class="note">Select the asset with which the dividend should be paid.</div>
+                <div class="note">Select the token with which the distribution should be paid.</div>
             </div>
           </div></section>
           <section><div class="row">
-            <label class="control-label col col-sm-2">Dividend per Unit</label>
+            <label class="control-label col col-sm-2">Distribution per Unit</label>
             <div class="col col-sm-10">
                 <label class="input"><i class="icon-append fa fa-plus"></i>
                     <input name="quantityPerUnit" data-bind="value: quantityPerUnit, valueUpdate : 'input'" type="text"/>
                 </label>
-                <div class="note">Enter the quantity of the Dividend Asset that should be distributed per share of <span data-bind="text: assetName"></span>.</div>
+                <div class="note">Enter the quantity of the Distribution Token that should be distributed per share of <span data-bind="text: assetName"></span>.</div>
             </div>
           </div></section>
         </fieldset></form>
         <div class="formPaddedBot" data-bind="fadeVisibleInOnly: quantityPerUnit() && selectedDividendAsset() && totalPay()">
-            <p>This dividend payment would cost you a total of 
+            <p>This distribution payment would cost you a total of 
             <b class="sellColor"><span data-bind="text: dispTotalPay"></span> <span data-bind="text: selectedDividendAsset"></span></b>.</p>
-            <p>After dividend payment this address would have a remaining balance of
+            <p>After distribution payment this address would have a remaining balance of
             <b data-bind="css: {errorColor: dividendAssetBalRemainingPostPay() < 0, sellColor: dividendAssetBalRemainingPostPay() >= 0}">
                 <span data-bind="text: dispDividendAssetBalRemainingPostPay"></span> <span data-bind="text: selectedDividendAsset"></span></b>.</p>
         </div>
       </div>
       <div class="modal-footer">
         <button type="button" class="btn btn-default" data-bind="click: hide">Cancel</button>
-        <button type="button" data-bind="click: submitForm" class="btn btn-warning">Pay Dividend</button>
+        <button type="button" data-bind="click: submitForm" class="btn btn-warning">Pay Distribution</button>
       </div>
     </div><!-- /.modal-content -->
   </div><!-- /.modal-dialog -->
@@ -741,10 +742,10 @@
     <div class="modal-content">
       <div class="modal-header">
         <button type="button" data-bind="click: hide" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
-        <h4 class="modal-title">Call Asset <b><span data-bind="text: asset"></span></b></h4>
+        <h4 class="modal-title">Call Token <b><span data-bind="text: asset"></span></b></h4>
       </div>
       <div class="modal-body no-padding" data-bind="visible: assetObj">
-        <p class="formPadded">Use this form to exercise a call option for the selected asset
+        <p class="formPadded">Use this form to exercise a call option for the selected token
             (<b><span data-bind="text: asset"></span></b>), any time after its call date of <b><span data-bind="text: dispCallDate"></span></b>.<br/><br/>
        <b class="errorRed">Please NOTE that this action is irreversable!</b></p>
         <form class="smart-form" data-bind="submit: doAction"><fieldset>
@@ -754,7 +755,7 @@
                 <label class="input"><i class="icon-append fa fa-plus"></i>
                     <input name="percentageToCall" data-bind="value: percentageToCall, valueUpdate : 'input'" type="text"/>
                 </label>
-                <div class="note">Enter the percentage of the asset to call back (e.g. 40.5 for 40.5%).</div>
+                <div class="note">Enter the percentage of the token to call back (e.g. 40.5 for 40.5%).</div>
             </div>
           </div></section>
         </fieldset></form>
@@ -851,14 +852,14 @@
                 <input name="assetDivisible" type="checkbox" data-bind="checked: locked" disabled="disabled">
                 <i></i>Is locked?
               </label>
-              <div class="note">Locked assets may not have additional unit issued.</div>
+              <div class="note">Locked tokens may not have additional unit issued.</div>
           </div></section>
           <section><div class="row">
             <div class="col col-sm-2"></div>
             <div class="col col-sm-10">
               <label class="checkbox">
                 <input name="assetDivisible" type="checkbox" data-bind="checked: divisible" disabled="disabled">
-                <i></i>Divisible asset?
+                <i></i>Divisible token?
               </label>
               <div class="note">Divisble assets can be subdivided into decimal places.</div>
           </div></section>
@@ -867,9 +868,9 @@
             <div class="col col-sm-10">
               <label class="checkbox">
                 <input name="assetCallable" type="checkbox" data-bind="checked: callable" disabled="disabled">
-                <i></i>Callable asset?
+                <i></i>Callable token?
               </label>
-              <div class="note">Callable assets may be called back at a specific date for a specific strike price.</div>
+              <div class="note">Callable tokens may be called back at a specific date for a specific strike price.</div>
           </div></section>
           <section data-bind="visible: callable"><div class="row">                
             <label class="control-label col col-sm-2">Call Date</label>
@@ -877,7 +878,7 @@
                 <label class="input">
                     <input name="assetCallDate" type="text" data-bind="value: callDate" disabled="disabled"/>
                 </label>
-                <div class="note">The date and time after which the owner of the asset may choose to call it back.</div>
+                <div class="note">The date and time after which the owner of the token may choose to call it back.</div>
             </div>
           </div></section>
           <section data-bind="fadeVisibleInOnly: callable"><div class="row">                
@@ -886,7 +887,7 @@
                 <label class="input">
                     <input name="assetCallPrice" type="text" data-bind="value: callPrice" disabled="disabled"/>
                 </label>
-                <div class="note">The <b>XCP price per unit</b> that the owner of the asset may call it back for.</div>
+                <div class="note">The <b>XCP price per unit</b> that the owner of the token may call it back for.</div>
             </div>
           </div></section>
         </fieldset></form>

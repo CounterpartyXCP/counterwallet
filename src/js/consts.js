@@ -64,7 +64,7 @@ var ENTITY_NAMES = {
   'broadcasts': 'Broadcast',
   'bets': 'Bet',
   'bet_matches': 'Bet Match',
-  'dividends': 'Dividend',
+  'dividends': 'Distribution',
   'cancels': 'Cancel',
   'callbacks': 'Callback',
   'bet_expirations': 'Bet Expired',

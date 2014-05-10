@@ -32,13 +32,13 @@ PendingActionViewModel.calcText = function(category, data) {
       + data['get_asset'] + "</As>";
   } else if(category == 'issuances') {
     if(data['transfer_destination']) {
-      desc = "Pending transfer of asset <As>" + data['asset'] + "</As> from <Ad>"
+      desc = "Pending transfer of token <As>" + data['asset'] + "</As> from <Ad>"
         + getLinkForCPData('address', data['source'], getAddressLabel(data['source'])) + "</Ad> to <Ad>"
         + getLinkForCPData('address', data['transfer_destination'], getAddressLabel(data['transfer_destination'])) + "</Ad>"; 
     } else if(data['locked']) {
-      desc = "Pending lock of asset <As>" + data['asset'] + "</As> against additional issuance";
+      desc = "Pending lock of token <As>" + data['asset'] + "</As> against additional issuance";
     } else if(data['quantity'] == 0) {
-      desc = "Pending change of description for asset <As>" + data['asset'] + "</As> to <b>" + data['description'] + "</b>";
+      desc = "Pending change of description for token <As>" + data['asset'] + "</As> to <b>" + data['description'] + "</b>";
     } else {
       //See if this is a new issuance or not
       var assetObj = null;
@@ -48,9 +48,9 @@ PendingActionViewModel.calcText = function(category, data) {
       
       if(assetObj) { //the asset exists in our wallet already somewhere, so it's an additional issuance of more units for it
         desc = "Pending issuance of <Am>" + numberWithCommas(normalizeQuantity(data['quantity'], data['divisible']))
-          + "</Am> additional units for asset <As>" + data['asset'] + "</As>";
+          + "</Am> additional units for token <As>" + data['asset'] + "</As>";
       } else { //new issuance
-        desc = "Pending creation of asset <As>" + data['asset'] + "</As> with initial quantity of <Am>"
+        desc = "Pending creation of token <As>" + data['asset'] + "</As> with initial quantity of <Am>"
           + numberWithCommas(normalizeQuantity(data['quantity'], data['divisible'])) + "</Am> units";
       }
     }
@@ -65,11 +65,11 @@ PendingActionViewModel.calcText = function(category, data) {
   } else if(category == 'dividends') {
     var divUnitDivisible = WALLET.getAddressObj(data['source']).getAssetObj(data['dividend_asset']).DIVISIBLE;
     desc = "Pending dividend payment of <Am>" + numberWithCommas(normalizeQuantity(data['quantity_per_unit'], divUnitDivisible)) + "</Am> <As>"
-      + data['dividend_asset'] + "</As> on asset <As>" + data['asset'] + "</As>";
+      + data['dividend_asset'] + "</As> on token <As>" + data['asset'] + "</As>";
   } else if(category == 'cancels') {
     desc = "Pending cancellation of " + data['_type'] + " ID <b>" + data['_tx_index'] + "</b>";
   } else if(category == 'callbacks') {
-    desc = "Pending callback for <Am>" + (data['fraction'] * 100).toFixed(4) + "%</Am> outstanding on asset <As>" + data['asset'] + "</As>";
+    desc = "Pending callback for <Am>" + (data['fraction'] * 100).toFixed(4) + "%</Am> outstanding on token <As>" + data['asset'] + "</As>";
   } else if(category == 'btcpays') {
     desc = "Pending BTC Payment from <Ad>" + getAddressLabel(data['source']) + "</Ad>";
   } else {

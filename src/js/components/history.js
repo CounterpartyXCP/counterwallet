@@ -26,7 +26,7 @@ function BalanceHistoryViewModel() {
   self.assetChanged = function() {
     if(self.selectedAsset() == self.ASSET_LASTCHANGE) return;
     self.ASSET_LASTCHANGE = self.selectedAsset();
-    $.jqlog.debug("Balance history: Asset changed: " + self.selectedAsset());
+    $.jqlog.debug("Balance history: Token changed: " + self.selectedAsset());
     
     if(self.selectedAsset() == "BTC") { //mainnet only (as we use blockchain.info for this and they don't support testnet)
       var addresses = WALLET.getAddressesList();
@@ -185,13 +185,13 @@ function TransactionHistoryItemViewModel(data) {
       desc = "Payment for <Am>" + smartFormat(normalizeQuantity(self.DATA['btc_amount'])) + "</Am> <As>BTC</As>";
     } else if(self.RAW_TX_TYPE == 'issuances') {
       if(self.DATA['transfer']) {
-        desc = "Asset <As>" + self.DATA['asset'] + "</As> transferred to <Ad>"
+        desc = "Token <As>" + self.DATA['asset'] + "</As> transferred to <Ad>"
           + getLinkForCPData('address', self.DATA['issuer'], getAddressLabel(self.DATA['issuer'])) + "</Ad>";
       } else if(self.DATA['locked']) {
-        desc = "Asset <As>" + self.DATA['asset'] + "</As> locked against additional issuance";
+        desc = "Token <As>" + self.DATA['asset'] + "</As> locked against additional issuance";
       } else {
         desc = "Quantity <Am>" + smartFormat(normalizeQuantity(self.DATA['quantity'], self.DATA['divisible']))
-          + "</Am> of asset <As>" + self.DATA['asset'] + "</As> issued";
+          + "</Am> of token <As>" + self.DATA['asset'] + "</As> issued";
       }
     } else if(self.RAW_TX_TYPE == 'broadcasts') {
       desc = "Text: " + self.DATA['text'] + "<br/>Value: " + self.DATA['value'];
@@ -210,11 +210,11 @@ function TransactionHistoryItemViewModel(data) {
         + smartFormat(normalizeQuantity(self.DATA['backward_quantity'])) + "</Am> <As>XCP</As>";
     } else if(self.RAW_TX_TYPE == 'dividends') {
       desc = "Paid <Am>" + smartFormat(normalizeQuantity(self.DATA['quantity_per_unit'])) + "</Am> <As>"+ self.DATA['dividend_asset']
-        + "</As> per unit of asset <As>" + self.DATA['asset'] + "</As>";
+        + "</As> per unit of token <As>" + self.DATA['asset'] + "</As>";
     } else if(self.RAW_TX_TYPE == 'cancels') {
       desc = "Order/Bet <b>" + data['offer_hash'] + "</b> cancelled.";
     } else if(self.RAW_TX_TYPE == 'callbacks') {
-      desc = "<Am>" + (self.DATA['fraction'] * 100).toFixed(4) + "%</Am> outstanding called back for asset <As>" + self.DATA['asset'] + "</As>";
+      desc = "<Am>" + (self.DATA['fraction'] * 100).toFixed(4) + "%</Am> outstanding called back for token <As>" + self.DATA['asset'] + "</As>";
     } else if(self.RAW_TX_TYPE == 'bet_expirations') {
       desc = "Bet <b>" + self.DATA['bet_index'] + "</b> expired";
     } else if(self.RAW_TX_TYPE == 'order_expirations') {
