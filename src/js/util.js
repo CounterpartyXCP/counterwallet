@@ -370,6 +370,18 @@ function satoshiToPercent(value) {
   return (value / UNIT * 100) + '%';
 }
 
+function currency(amount, unit) {
+  return smartFormat(normalizeQuantity(amount), 4, 4) + ' ' + unit;
+}
+
+function satoshiToXCP(amount) {
+  return currency(amount, 'XCP');
+}
+
+function round(amount, decimals) {
+  return Math.ceil(amount * decimals * 100) / (decimals * 100);
+}
+
 // Reduce a fraction by finding the Greatest Common Divisor and dividing by it.
 function reduce(numerator,denominator){
   var gcd = function gcd(a,b){

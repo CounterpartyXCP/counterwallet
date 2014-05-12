@@ -42,46 +42,46 @@
         </div>
 
         <ul id="category-feeds" data-bind="foreach: { data: feeds, as: 'feed' }">
-          <li class="clearfix feed-item">             
+          <li class="clearfix feed-item"> 
+
             <header role="heading">
               <img data-bind="visible: feed.with_image, attr: {src: feed.image_url}" />
               <h2>
-                <strong data-bind="text: feed.question"></strong>
-                <div class="badges">
-                  <div class="badge bg-color-magenta">
-                    <span class="fa fa-clock-o"></span>
-                    <span data-bind="text: feed.deadline_str"></span>
+                <strong data-bind="text: feed.event"></strong>
+                <span class="operator" data-bind="text: 'By '+feed.owner"></span>
+                <div class="badges clearfix">
+                  <div>
+                    <span>Date</span><span data-bind="text: feed.date_str"></span>
                   </div> 
-                  <div class="badge bg-color-pink">
-                    <span class="fa fa-money"></span>
-                    <span data-bind="text: feed.fee"></span>
+                  <div>
+                    <span>Deadline</span><span data-bind="text: feed.deadline"></span>
                   </div>
-                  <div class="badge bg-color-pinkDark">
-                    <span class="fa fa-user"></span>
-                    <span data-bind="text: feed.owner"></span>
-                  </div>
-                  <div class="badge bg-color-greenLight">
-                    <span class="fa fa-thumbs-o-up"></span>
-                    <span data-bind="text: feed.equal_odd_str"></span>
-                  </div>
-                  <div class="badge bg-color-redLight">
-                    <span class="fa fa-thumbs-o-down"></span>
-                    <span data-bind="text: feed.not_equal_odd_str"></span>
+                  <div>
+                    <span>Fee</span><span data-bind="text: feed.fee"></span>
                   </div>
                 </div>
               </h2>
-            </header>    
-              
-            <div class="choices">
-              <a href="javascript:void(0);" class="btn btn-labeled btn-success" data-bind="click: $parent.betEqual">
-                <span class="btn-label"><i class="glyphicon glyphicon-thumbs-up"></i></span>
-                <span data-bind="text: feed.yes_label"></span>
-              </a>
-              <a href="javascript:void(0);" class="btn btn-labeled btn-danger" data-bind="click: $parent.betNotEqual">
-                <span class="btn-label"><i class="glyphicon glyphicon-thumbs-down"></i></span>
-                <span data-bind="text: feed.no_label"></span>
-              </a>
-            </div>        
+            </header>  
+            <div style="clear:both" class="clearfix">  
+              <ul class="outcomes" data-bind="foreach: { data: feed.choices, as: 'outcome' }">
+                <li class="clearfix">
+                  <h3><span data-bind="text: outcome.text"></span></h3>
+                  <div class="choices">
+                    <a href="javascript:void(0);" class="btn-sm btn-labeled btn-success" data-bind="click: $parents[1].betEqual">
+                      <span>Yes</span>
+                    </a>
+                    <a href="javascript:void(0);" class="btn-sm btn-labeled btn-danger" data-bind="click: $parents[1].betNotEqual">
+                      <span>No</span>
+                    </a>
+                    <div class="odds">
+                      (<span data-bind="text: outcome.odds.equal" class="txt-color-greenDark"></span>&nbsp;-&nbsp;
+                      <span data-bind="text: outcome.odds.not_equal" class="txt-color-red"></span>)
+                    </div>
+                  </div>
+                </li>
+              </ul>  
+            </div>   
+
           </li>
         </ul>
       </div> <!-- .tab-pane -->
@@ -152,84 +152,120 @@ value: 1 for YES, something else for NO (target_value always equal 1)
           <button type="button" data-bind="click: $parent.hide" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
           <h4 class="modal-title">
             <img data-bind="visible: with_image, attr: {src: image_url}" />
-            <b data-bind="text: question"></b>
-            <div class="badges">
-              <div class="badge bg-color-magenta">
-                <span class="fa fa-clock-o"></span>
-                <span data-bind="text: deadline_str"></span>
+            <b data-bind="text: event"></b> 
+            <span data-bind="text: 'by '+owner"></span>
+            <div class="badges clearfix">
+              <div>
+                <span>Date</span><span data-bind="text: date_str"></span>
               </div> 
-              <div class="badge bg-color-pink">
-                <span class="fa fa-money"></span>
-                <span data-bind="text: fee"></span>
+              <div>
+                <span>Deadline</span><span data-bind="text: $parent.deadlineStr"></span>
               </div>
-              <div class="badge bg-color-pinkDark">
-                <span class="fa fa-user"></span>
-                <span data-bind="text: owner"></span>
+              <div>
+                <span>Fee</span><span data-bind="text: fee"></span>
               </div>
             </div>
           </h4>
-            
+          <h5>
+            <span data-bind="text: $parent.selectedOutcome"></span>
+          </h5>
         </div>
         <div class="modal-body no-padding">
           <div class="bet-source">
             <b>You go bet: </b> 
             <div data-bind="visible: $parent.betType == 'Equal'" class="badge bg-color-green" style="font-size:20px">
               <i class="glyphicon glyphicon-thumbs-up"></i>
-              <span data-bind="text: yes_label"></span>
+              <span>Yes</span>
             </div>
             <div data-bind="visible: $parent.betType == 'NotEqual'" class="badge bg-color-red" style="font-size:20px">
               <i class="glyphicon glyphicon-thumbs-down"></i>
-              <span data-bind="text: no_label"></span>
+              <span>No</span>
             </div>
             <b>with: </b>
-            <select class="form-control" style="width: 150px;vertical-align: top;margin-right: 12px;" name="source" data-bind="options: $parent.availableAddresses, optionsValue: 'address', optionsText: 'label', value: $parent.sourceAddress, select2: { minimumResultsForSearch: 10, escapeMarkup: 'direct' }"></select>
-            <b>a wager of: </b>
-            <input type="text"  name="wager"  data-bind="value: $parent.wager, valueUpdate: 'input'" /> <b>XCP</b>
-            <span class="invalid custom" data-bind="validationMessage: $parent.wager"></span>
+            <select class="form-control" style="width: 350px;vertical-align: top;margin-right: 12px;" name="source" data-bind="options: $parent.availableAddresses, optionsValue: 'address', optionsText: 'label', value: $parent.sourceAddress, select2: { minimumResultsForSearch: 10, escapeMarkup: 'direct' }"></select>
           </div><!-- .bet-source -->
           <div class="smart-form" style="padding:0 12px">
+
+            <div class="wagers clearfix">
+              <div class="fieldset"> 
+                <label>Your wager: </label>
+                <input type="text"  name="wager" class="number"  data-bind="value: $parent.wager, valueUpdate: 'input'" /> XCP
+                <span class="invalid custom" data-bind="validationMessage: $parent.wager"></span>
+                <div class="note">how much you are betting.</div> 
+              </div>
+              <div class="fieldset">            
+                <label>Odd:</label>                 
+                <input name="odd" class="number" data-bind="value: $parent.odd, valueUpdate: 'input'" type="text"/> XCP
+                <span class="invalid custom" data-bind="validationMessage: $parent.odd"></span>
+                <div class="note">how much do you want to win<br /> per 1 XCP.</div>                      
+              </div>
+              <div class="fieldset winnings">  
+                <div>          
+                  <label>Winnings:</label>
+                  <span data-bind="text: $parent.counterwager + ' XCP'"></span>  
+                </div>
+                <div>              
+                  <label>Fee:</label> 
+                  <span data-bind="text: $parent.fee + ' XCP'"></span>  
+                </div> 
+                <div style="font-size:11px">              
+                  <label>Matching:</label> 
+                  <span data-bind="text: $parent.matchingVolume + ' XCP'"></span>  
+                </div> 
+                <div style="font-size:11px">              
+                  <label>Open:</label> 
+                  <span data-bind="text: $parent.openingVolume + ' XCP'"></span>  
+                </div>                 
+              </div>            
+            </div>
+
             <div data-bind="visible: $parent.counterBets().length>0">
-              <label>Select the Counterparty:</label> 
+              <label>Open bets:</label> 
               <div id="counterbets">           
                 <table width="100%" class="table table-striped table-hover datatable_basic">
                   <thead>
                     <tr>
                       <th>Odd</th>
-                      <th>Counterwager</th>
-                      <th>Deadline</th>
+                      <th>Volume</th>
+                      <th>Cumul</th>
+                      <th>Bets</th>
                     </tr>
                   </thead>
                   <tbody data-bind="foreach: { data: $parent.counterBets, as: 'counterbet' }">
                     <tr class="cb" data-bind="click: $parents[1].selectCounterbet, attr: {id: 'cb_'+counterbet.tx_index}">
                       <td style="text-align:center" data-bind="text: counterbet.ratio"/></td>
-                      <td style="text-align:right;padding-right:10px !important;width:100px" data-bind="text: counterbet.counterwager"></td>
-                      <td data-bind="text: counterbet.deadline_str"></td> 
+                      <td style="text-align:right;padding-right:10px !important;" data-bind="text: counterbet.wager"></td>
+                      <td style="text-align:right;padding-right:10px !important;">
+                        <b data-bind="text: counterbet.volume_str"></b>
+                      </td>
+                      <td style="text-align:right;padding-right:10px !important;" data-bind="text: counterbet.bet_count"></td>
                     </tr>
                   </tbody>
                 </table>
               </div>
             </div>
-            <div class="fieldset">            
-              <label>Counterwager:</label>                 
-              <input name="counterwager" class="number" data-bind="value: $parent.counterwager, valueUpdate: 'input'" type="text"/> XCP
-              <span class="invalid custom" data-bind="validationMessage: $parent.counterwager"></span>
-              <div class="note">how much the counterparty must bet.</div>                      
-            </div>
-            <div class="fieldset">           
-              <label>Deadline:</label>                 
-              <input name="deadline" data-bind="datetimepicker: $parent.deadline" type="text" style="width:140px;"/>
-              <span class="invalid custom" data-bind="validationMessage: $parent.deadline"></span>
-              <div class="note">when his bet will be decided.</div>                                  
-            </div>
-            <div class="fieldset">           
-              <label>Expiration:</label>                 
-              <input name="expiration" class="number" data-bind="value: $parent.expiration, valueUpdate: 'input'" type="text"/> blocks
-              <span class="invalid custom" data-bind="validationMessage: $parent.expiration"></span>
-              <div class="note">how many blocks a counterparty has to take the other side of the bet.</div>                                  
+
+            <div data-bind="visible: $parent.showAdvancedOptions">
+              <div class="fieldset">           
+                <label>Deadline:</label>                             
+                <select class="form-control" name="deadline" style="width: 200px" data-bind="options: deadlines, optionsValue: 'timestamp', optionsText: 'text', value: $parent.deadline, select2: { minimumResultsForSearch: 10, escapeMarkup: 'direct' }"></select>
+                <div class="note">when his bet will be decided.</div>                                  
+              </div>
+              <div class="fieldset">           
+                <label>Expiration:</label>                 
+                <input name="expiration" class="number" data-bind="value: $parent.expiration, valueUpdate: 'input'" type="text"/> blocks
+                <span class="invalid custom" data-bind="validationMessage: $parent.expiration"></span>
+                <div class="note">how many blocks a counterparty has to take the other side of the bet.</div>                                  
+              </div>
             </div>
           </div><!-- .smart-form -->
         </div><!-- .modal-body -->
         <div class="modal-footer">
+          <div style="float:left;">
+            <input type="checkbox" name="showAdvancedOptions" value="1" data-bind="checked: $parent.showAdvancedOptions" />
+            <label style="text-align:right">Show advanced options</label>             
+          </div>
+
           <button type="button" class="btn btn-default" data-bind="click: $parent.hide">Cancel</button>
           <button type="button" data-bind="click: $parent.submitForm" class="btn btn-primary">Bet</button>
         </div>

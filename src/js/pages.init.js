@@ -140,7 +140,7 @@ function initBalances() {
         window._BALANCES_HAS_LOADED_ALREADY = true;
           
         //Prompt an old wallet user to migrate their funds
-        WALLET.BITCOIN_WALLET.getOldAddressesInfos(function(data) {   
+        /*WALLET.BITCOIN_WALLET.getOldAddressesInfos(function(data) {   
           var needSweep = false;
           for (var a in data) {
             needSweep = true;
@@ -153,7 +153,7 @@ function initBalances() {
               }
             });
           }
-        });
+        });*/
           
       } else {
         WALLET.refreshBTCBalances(false);
@@ -312,6 +312,5 @@ function initBetting() {
   ko.applyBindings(BET_MODAL, document.getElementById("betModal"));
 
   BETTING.init();  
-
 }
 INIT_FUNC['pages/betting.html'] = initBetting;

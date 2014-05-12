@@ -17,8 +17,6 @@ Counterblock.getBalances = function(addresses, cwkeys, callback) {
       // extracts BTC only if balance>0 or other assets in data[e.addr]
       for (var i in btcData) {
         e = btcData[i];
-        console.log(e.addr);
-        console.log(e)
         if (data[e.addr] || e.confirmedRawBal>0) {
           data[e.addr] = data[e.addr] || {};
           data[e.addr]['BTC'] = {            
@@ -30,7 +28,6 @@ Counterblock.getBalances = function(addresses, cwkeys, callback) {
           }
         }        
       }
-      console.log(data);
       callback(data);
     });
   });

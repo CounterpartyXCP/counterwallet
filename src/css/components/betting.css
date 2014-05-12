@@ -10,7 +10,7 @@
 }
 
 #betting li.feed-item {
-  margin: 20px 0;
+  margin: 20px 0 35px 0;
   max-width: 900px;
   clear: both;
 }
@@ -32,27 +32,53 @@
   margin: 0;
   padding: 0;
 }
+#betting li.feed-item header h2 span.operator {
+  font-size:16px;
+}
 
-#betting li.feed-item header h2 .badge {
+#betting .badges,
+#betModal .badges {
+  margin-top: 5px;
+}
+
+#betting .badges > div,
+#betModal .badges > div {
   font-weight: normal;
   font-size: 14px;
+  float: left;
+  margin-right: 5px;
+}
+
+#betModal .badges {
+  padding-left: 53px;
+}
+
+#betModal .badges > div {
+  margin-bottom: 3px;
+}
+
+#betting .badges > div span,
+#betModal .badges > div span  {
+  display: inline-block;
+  padding: 0 5px;
+  color: #FFF;
+}
+#betting .badges > div span:first-child,
+#betModal .badges > div span:first-child {
+  background-color: #4c4f53 !important;
+}
+
+#betting .badges > div span:last-child,
+#betModal .badges > div span:last-child  {
+  background-color: #92a2a8 !important;
 }
 
 #betting li.feed-item header h2 strong {
   margin-right: 10px;
 }
 
-#betting li.feed-item header h2 .badge .fa {
-  margin-right: 6px;
-}
-
 #betting div.feed-tabs {
   margin-top: 6px;
-}
-
-#betting div.choices {
-  float: right;
-  padding-top: 7px;
 }
 
 #betting div.feed-categories .radio {
@@ -64,8 +90,51 @@
   margin-left: 10px;
 }
 
+#betting ul.outcomes {
+  margin: 0;
+  padding: 0;
+  float: left;  
+  margin-top: 15px;
+  padding-left: 52px;
+}
+
+#betting ul.outcomes .odds {
+  font-size: 12px;
+  font-style: italic;
+  display: inline-block;
+  margin-left: 5px;
+  width: 170px;
+}
+
+#betting ul.outcomes li {
+  list-style: none;
+}
+
+#betting ul.outcomes li h3 {
+  margin:0;
+  float: left;
+}
+
+#betting ul.outcomes li div.choices {
+  float: right;
+  margin: 3px 0 0 5px;
+}
+
+#betting ul.outcomes li div.choices a.btn-sm {
+  margin-right:3px;
+}
+
+#betting ul.outcomes li div.choices a.btn-sm:hover {
+  text-decoration: none;
+}
+
 #betModal h4 {
   line-height:20px; 
+}
+
+#betModal h5 {
+  margin-bottom: 0;
+  margin-left: 52px;
 }
 
 
@@ -125,7 +194,7 @@
 }
 
 #betModal .number {
-  width:140px;
+  width:130px;
   text-align:right;
 }
 
@@ -137,6 +206,10 @@
   font-size: 12px;
 }
 
+#betModal #counterbets th {
+  text-align: center;
+}
+
 #betModal #counterbets td {
   padding: 4px !important;
   cursor: pointer;
@@ -146,4 +219,26 @@
   background-color: #a8829f !important;
   font-weight: bold;
   color:#FFF;
+}
+
+#betModal div.wagers div.fieldset {
+  width:32%;
+  float:left;
+  clear:none;
+}
+
+#betModal div.wagers div.fieldset.winnings {
+  font-weight: bold;
+  padding-top: 5px;
+  padding-left: 15px;
+}
+
+#betModal div.wagers div.fieldset.winnings label {
+  width: 65px;
+  display: inline-block;
+}
+
+#betModal div.wagers div.fieldset label {
+  display: block;
+  width: auto;
 }
