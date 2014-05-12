@@ -84,6 +84,8 @@ function ChatFeedViewModel() {
   }
 
   self.updateOnlineUserCount = function() {
+    //As all users are connected to every chat feed (at least currently), this should return an accurate number
+    //If total numbers of servers in the backends list > # servers the client connects to, this will no longer be the case
     failoverAPI("get_num_users_online", [], function(numUsersOnline, endpoint) {
       self.numUsersOnline(numUsersOnline);
     });
@@ -219,6 +221,12 @@ function ChatFeedViewModel() {
               "Lost chat feed link and attempted to correct. Please try sending your chat line again.", null, null);  
           });
         }
+      } else if(error_name == 'invalid_id' && self.handle()) {
+        //will happen if there are multiple servers, and at least one we have a handle, and 1 or more of
+        // the others, we don't (i.e. there is a mismatch). In this case, store the handle to make them match up
+        multiAPI("store_chat_handle", [WALLET.identifier(), self.handle()], function(data, endpoint) {
+          $.jqlog.info("Synced handle '" + self.handle() + "' to all servers.");
+        });
       } else {
         if(error_name == 'too_fast')
           self._nextMessageNotSent = true; //as the success callback is triggered after receiving the error callback
@@ -241,7 +249,7 @@ function ChatFeedViewModel() {
   }
   
   self.addLine = function(handle, text, is_op, is_private) {
-    //check for a dupe line in the last 3 lines and do not post if so
+    //check for a dupe line in the last 3 lines and do not post if so (this includes emotes and commands)
     var newLine = new ChatLineViewModel(handle, text, is_op, is_private);
     var lastLines = self.lines.slice(Math.max(self.lines().length - 3, 1));
     for(var i=0; i < lastLines.length; i++) {
@@ -355,9 +363,9 @@ function ChatFeedViewModel() {
       var parts = text.replace('/', '').split(' ');
       var command = parts[0];
       var args = parts.slice(1);
-      $.jqlog.debug("chat.sendLine(command): " + command + ", args: " + JSON.stringify(args));
       //send to EVERY chat server, as this modifies local server state (if accepted)
       for(var i=0; i < self.feedConnections.length; i++) {
+        $.jqlog.debug("chat.sendLine(feed-" + i + "\\command): " + command + ", args: " + JSON.stringify(args));
         self.feedConnections[i].emit('command', command, args); //no need for a callback as the server will broadcast to us
       }
       $('#chatTextBox').val('');
@@ -366,7 +374,6 @@ function ChatFeedViewModel() {
       // and will get the message
       //just grab val() (not very knockout friendly) because certain browsers (certain mobile especially)
       // can get a bit wierd with keydown vs. keypress, etc...not work messing with it
-      $.jqlog.debug("chat.sendLine(emote): " + text);
       
       function _doChatEmote(num) {
         self.feedConnections[num].emit('emote', text, function(data) {
@@ -385,7 +392,12 @@ function ChatFeedViewModel() {
       } 
       
       for(var i=0; i < self.feedConnections.length; i++) {
-        _doChatEmote(i);
+        //Send the line out the first connected chat server
+        if(self.feedConnections[i].socket.connected) {
+          $.jqlog.debug("chat.sendLine(feed-" + i + "\\emote): " + text);
+          _doChatEmote(i);
+          break;
+        }
       }
     }
   }

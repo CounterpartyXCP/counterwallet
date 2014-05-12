@@ -63,17 +63,13 @@ function produceCWServerList() {
 }
 
 function initGoogleAnalytics() {
+  $.jqlog.debug("Initializing Google Analytics for UA: " + GOOGLE_ANALYTICS_UAID);
   if(!GOOGLE_ANALYTICS_UAID) return;
   
-  var _gaq = _gaq || [];
-  _gaq.push(['_setAccount', GOOGLE_ANALYTICS_UAID]);
-  _gaq.push(['_trackPageview']);
-  
-  (function() {
-    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
-    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
-    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
-  })();
+  window._gaq=[["_setAccount", GOOGLE_ANALYTICS_UAID], ["_trackPageview"]]; 
+  (function(d,t){var g=d.createElement(t),s=d.getElementsByTagName(t)[0];g.async=1;
+  g.src=("https:"==location.protocol?"//ssl":"//www")+".google-analytics.com/ga.js";
+  s.parentNode.insertBefore(g,s)}(document,"script"));  
 }
 
 function initRollbar() {
@@ -97,7 +93,7 @@ function loadServersListAndSettings() {
     assert(data && typeof data == "object" && data.hasOwnProperty("servers"), "Returned servers.json file does not contain valid JSON object");
     assert(data['servers'] && data['servers'] instanceof Array, "'servers' field in returned servers.json file is not an array");
     ROLLBAR_ACCESS_TOKEN = data['rollbarAccessToken'] || ''; 
-    GOOGLE_ANALYTICS_UAID = (USE_TESTNET ? data['googleAnalyticsUA'] : data['googleAnalyticsUA-testnet']) || '';
+    GOOGLE_ANALYTICS_UAID = (!USE_TESTNET ? data['googleAnalyticsUA'] : data['googleAnalyticsUA-testnet']) || '';
     if(!data['servers'].length)
       cwURLs([ location.origin ]);
     else
