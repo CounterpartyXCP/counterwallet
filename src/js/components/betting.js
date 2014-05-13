@@ -5,10 +5,17 @@ function BettingViewModel() {
   self.categories = ko.observableArray([]);
   self.feeds = ko.observableArray([]);
   self.currentCat = ko.observable(capitaliseFirstLetter(FEED_CATEGORIES[0]));
+  self.currentStatus = ko.observable('');
+
+  self.currentStatus.subscribe(function(value) {
+    self.loadUserBets();
+  });
 
   self.currentCat.subscribe(function(value) {
     self.showCategory(value);
   });
+
+  self.userBets = ko.observableArray([]);
     
   self.init = function() {
     var cats = [];
@@ -20,6 +27,10 @@ function BettingViewModel() {
     }
     self.categories(cats);
     self.showCategory(cats[0].name);
+  }
+
+  self.showFeeds = function() {
+    self.currentCat('sports');
   }
 
   self.showCategory = function(category) {
@@ -82,6 +93,65 @@ function BettingViewModel() {
 
   self.betNotEqual = function(outcome) {
     self.bet(outcome, "NotEqual");
+  }
+
+  self.showUserBets = function() {
+    self.currentStatus('open');
+  }
+
+  self.loadUserBets = function() {
+    if (self.currentStatus()=='') return false;
+    var addresses = [];
+    var walletAddresses = WALLET.addresses();
+    for (var a in  walletAddresses) {
+      addresses.push(walletAddresses[a].ADDRESS);
+    }
+    var params = {
+      'addresses': addresses,
+      'status': self.currentStatus()
+    }
+    failoverAPI('get_user_bets', params, function(data) {
+      $.jqlog.debug(data);
+
+      var bets = [];
+      for (var b in data.bets) {
+        var bet = data.bets[b];
+
+        var srcObj = WALLET.getAddressObj(bet.source);
+        if (srcObj) {
+          bet.source_label = srcObj.label;
+        } else {
+          bet.source_label = bet.source;
+        }
+
+        var feed = data.feeds[bet.feed_address];
+        if (feed) {
+          bet.feed_name = feed.event;
+          bet.outcome = feed.outcomes[bet.target_value-1];
+          bet.feed_owner = feed.owner;
+          bet.date_str = timestampToString(feed.date);
+
+        } else {
+          bet.feed_name = bet.feed_address;
+          bet.outcome = bet.targetValue;
+          bet.feed_owner = 'UNKNOWN';
+          bet.date_str = 'UNKNOWN';
+        }
+        bet.bet_type_name = bet.bet_type == 2 ? 'Yes' : 'No';
+        bet.bet_type_class = bet.bet_type == 2 ? 'btn-sm btn-labeled btn-success' : 'btn-sm btn-labeled btn-danger';
+        bet.deadline_str = timestampToString(bet.deadline);
+        bet.fee = satoshiToPercent(bet.fee_fraction_int);
+
+        bet.wager_quantity = satoshiToXCP(bet.wager_quantity);
+        bet.counterwager_quantity = satoshiToXCP(bet.counterwager_quantity);
+        bet.wager_remaining = satoshiToXCP(bet.wager_remaining);
+        bet.counterwager_remaining = satoshiToXCP(bet.counterwager_remaining);
+
+        bets.push(bet);
+      }
+
+      self.userBets(bets);
+    });
   }
 }
 
@@ -226,6 +296,8 @@ function BetModalViewModel() {
         bet.multiplier = Math.floor(bet.multiplier*100) / 100;
         bet.wager = satoshiToXCP(data[b].wager_remaining);
         bet.wager_remaining = data[b].wager_remaining;
+        bet.counterwager_remaining = data[b].counterwager_remaining;
+        bet.counterwager = satoshiToXCP(data[b].counterwager_remaining);
         bet.tx_index = data[b].tx_index;
         bet.bet_count = 1;
         displayedData.push(bet);
@@ -240,6 +312,7 @@ function BetModalViewModel() {
           if (displayedData[b].multiplier == displayedData[b-1].multiplier) {
             var i = displayedData2.length-1;
             displayedData2[i].wager_remaining += displayedData[b].wager_remaining;
+            displayedData2[i].counterwager_remaining += displayedData[b].counterwager_remaining;
             displayedData2[i].wager = satoshiToXCP(displayedData2[i].wager_remaining);
             displayedData2[i].bet_count += displayedData[b].bet_count;
           } else {
@@ -251,7 +324,12 @@ function BetModalViewModel() {
           var previousVolume = 0;
           if (b>0) displayedData2[b].volume = displayedData2[b-1].volume + displayedData2[b].wager_remaining;
           else displayedData2[b].volume = displayedData2[b].wager_remaining;
-          displayedData2[b].volume_str = satoshiToXCP(displayedData2[b].volume);
+
+          previousVolume = 0;
+          if (b>0) displayedData2[b].countervolume = displayedData2[b-1].countervolume + displayedData2[b].counterwager_remaining;
+          else displayedData2[b].countervolume = displayedData2[b].counterwager_remaining;
+
+          displayedData2[b].volume_str = satoshiToXCP(displayedData2[b].countervolume);
         }
       }
 
@@ -318,7 +396,7 @@ function BetModalViewModel() {
     var volume = 0;
     for (var i=0; i<books.length; i++) {
       if (books[i].multiplier>=value) {
-        volume = books[i].volume;
+        volume = books[i].countervolume;
       } else {
         break;
       }
@@ -330,14 +408,20 @@ function BetModalViewModel() {
     var odd = self.odd();
     var wager = self.wager();
     var volume = self.getVolumeFromOdd(odd) / UNIT;
-    var matching = Math.min(volume, wager);
-    var opening = wager - matching
-
-    self.matchingVolume(matching);
-    self.openingVolume(opening);
+    var winning = self.counterwager()
 
     $.jqlog.debug('updateMatchingVolume');
-    $.jqlog.debug(odd+ ' , '+wager);
+    $.jqlog.debug('volume: ' + volume);
+    $.jqlog.debug('winning: ' + wager);
+    $.jqlog.debug('odd: ' + odd);
+
+    var matching = Math.min(volume, wager);
+    var opening = (wager - matching);
+
+    self.matchingVolume(round(matching, 4));
+    self.openingVolume(round(opening, 4));
+
+    
   }
 
 }

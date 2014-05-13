@@ -12,16 +12,10 @@
   <div class="tabs-top">    
     <ul class="nav nav-tabs tabs-top">
       <li class="nav-betting-item active">
-        <a data-toggle="tab" href="#browse-categories">Browse feeds</a>
+        <a data-toggle="tab" href="#browse-categories" data-bind="click: showFeeds">Browse feeds</a>
       </li>
-      <li class="nav-betting-item">
-        <a data-toggle="tab" href="#my-open-bets">My open bets</a>
-      </li>
-      <li class="nav-betting-item">
-        <a data-toggle="tab" href="#my-pending-bets">My pending bets</a>
-      </li>
-      <li class="nav-betting-item">
-        <a data-toggle="tab" href="#my-resolved-bets">My resolved bets</a>
+      <li class="nav-betting-item" data-bind="click: showUserBets">
+        <a data-toggle="tab" href="#my-open-bets">My bets</a>
       </li>
       <li class="nav-betting-item">
         <a data-toggle="tab" href="#faq"><span class="fa fa-fw fa-lg fa-question"></span>FAQ</a>
@@ -84,16 +78,86 @@
 
           </li>
         </ul>
-      </div> <!-- .tab-pane -->
+      </div> <!-- .tab-pane  " -->
       <div class="tab-pane" id="my-open-bets">
-        open bets
+
+        <div id="feed-filters" class="alert-info clearfix" style="background-color:#F4F8FD;padding:10px">
+          <div class="form-group feed-categories">
+            <label class="control-label"><b>Status</b></label>
+            <div>
+              <label class="radio radio-inline">
+                <input name="category" type="radio" data-bind="checked: currentStatus, attr: {value: 'open'}, valueUpdate: 'input'">
+                <span>Open<span>
+              </label>
+              <label class="radio radio-inline">
+                <input name="category" type="radio" data-bind="checked: currentStatus, attr: {value: 'filled'}, valueUpdate: 'input'">
+                <span>Pending<span>
+              </label>
+              <label class="radio radio-inline">
+                <input name="category" type="radio" data-bind="checked: currentStatus, attr: {value: 'resolved'}, valueUpdate: 'input'">
+                <span>Resolved<span>
+              </label>
+            </div>
+          </div>
+        </div>
+
+        <div class="jarviswidget defaultWidgetColor" id="userBets" data-widget-editbutton="false" data-widget-deletebutton="false">
+          <header>
+            <span class="widget-icon"> <i class="fa fa-rocket"></i> </span>
+            <h3>My pending bets</h3>
+            <div class="clearfix"></div>
+          </header>
+          <div> <!-- widget div-->
+            <div class="widget-body no-padding"> <!-- widget content --> 
+              <table id="userBetsTable" class="table table-striped table-hover datatable_basic">
+                <thead>
+                    <tr>                  
+                      <th>Feed</th>
+                      <th>Bet</th>
+                      <th>Wager (remaining)</th>
+                      <th>Counterwager (remaining)</th>
+                    </tr>
+                </thead>
+                <tbody data-bind="foreach: { data: userBets, as: 'bet' }">
+                  <tr>
+                    <td class="betItem">
+                      <h4>
+                        <strong data-bind="text: bet.feed_name"></strong><br />
+                        <span class="operator" data-bind="text: 'By '+bet.feed_owner"></span><br />
+                        <div class="badges clearfix">
+                          <div>
+                            <span>Date</span><span data-bind="text: bet.date_str"></span>
+                          </div><br /> 
+                          <div>
+                            <span>Deadline</span><span data-bind="text: bet.deadline_str"></span>
+                          </div><br />
+                          <div>
+                            <span>Fee</span><span data-bind="text: bet.fee"></span>
+                          </div>
+                        </div>
+                      </h4>
+                    </td> 
+                    <td class="betItem">
+                      <h4>
+                        <strong data-bind="text: bet.outcome"></strong>
+                        <a href="javascript:void(0);" data-bind="attr: {class: bet.bet_type_class}">
+                          <span data-bind="text: bet.bet_type_name"></span>
+                        </a><br />
+                        <span data-bind="text: 'with ' + bet.source_label"></span><br />
+                        <span style="font-size:11px" data-bind="text: '(block: ' + bet.block_index + ')'"></span>
+                      </h4>
+                    </td>                                
+                    <td data-bind="text: bet.wager_quantity + ' (' + bet.wager_remaining + ')'"></td>
+                    <td data-bind="text: bet.counterwager_quantity + ' (' + bet.counterwager_remaining + ')'"></td>
+                  </tr>
+                </tbody>
+              </table>
+            </div> <!-- end widget content -->
+          </div> <!-- end widget div -->
+        </div> <!-- end widget -->
+
       </div>
-      <div class="tab-pane" id="my-pending-bets">
-        pending bets
-      </div>
-      <div class="tab-pane" id="my-resolved-bets">
-        resolved bets
-      </div>   
+   
       <div class="tab-pane" id="faq">
         <h2>How to create a Counterwallet feed?</h2>
         <p>
@@ -234,7 +298,7 @@ value: 1 for YES, something else for NO (target_value always equal 1)
                   <tbody data-bind="foreach: { data: $parent.counterBets, as: 'counterbet' }">
                     <tr class="cb" data-bind="click: $parents[1].selectCounterbet, attr: {id: 'cb_'+counterbet.tx_index}">
                       <td style="text-align:center" data-bind="text: counterbet.ratio"/></td>
-                      <td style="text-align:right;padding-right:10px !important;" data-bind="text: counterbet.wager"></td>
+                      <td style="text-align:right;padding-right:10px !important;" data-bind="text: counterbet.counterwager"></td>
                       <td style="text-align:right;padding-right:10px !important;">
                         <b data-bind="text: counterbet.volume_str"></b>
                       </td>

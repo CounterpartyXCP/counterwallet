@@ -6,7 +6,7 @@
 }
 
 #betting #category-feeds {
-  padding-top:20px !important;
+
 }
 
 #betting li.feed-item {
@@ -126,6 +126,21 @@
 
 #betting ul.outcomes li div.choices a.btn-sm:hover {
   text-decoration: none;
+}
+
+#userBets {
+  margin-top:  20px;
+}
+
+#userBets td.number {
+  text-align: right;
+}
+
+#betting td.betItem {
+  white-space: nowrap;
+}
+#betting td.betItem h4  {
+  font-size: 16px;
 }
 
 #betModal h4 {
