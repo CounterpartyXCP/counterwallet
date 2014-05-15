@@ -64,12 +64,15 @@ function ChatFeedViewModel() {
     $.jqlog.debug("Starting chat feeds: " + JSON.stringify(cwBaseURLs()));
     for(var i = 0; i < cwBaseURLs().length; i++) {
       var socket = io.connect(cwBaseURLs()[i], {
-        'max reconnection attempts': 5,
+        'connect timeout': 5000,
+        'reconnect': true,
+        'reconnection delay': 5000,
+        'reconnection limit': 60000,
+        'max reconnection attempts': 50000, /* just keep on trying */
         'try multiple transports': false,
         'force new connection': true, /* needed, otherwise socket.io will reuse the feed connection */
         //'transports': ['websocket', 'htmlfile', 'xhr-multipart', 'xhr-polling', 'jsonp-polling'],
         //'reconnection limit': 100000,
-        //'max reconnection attempts': Infinity,
         'resource': USE_TESTNET ? '_t_chat' : '_chat'
       });
       self.feedConnections.push(socket); //must be done before we do any chatting...
