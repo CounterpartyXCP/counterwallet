@@ -63,6 +63,15 @@ arrayUnique = function(arr) { //modified from http://stackoverflow.com/a/9229821
     });
 }
 
+array1ContainsOneOfArray2 = function(arr1, arr2) {
+  for (var i in arr2) {
+    if (arr1.indexOf(arr2[i]) != -1) {
+      return true;
+    }
+  }
+  return false;
+}
+
 /*if (typeof Array.prototype.contains != 'function') {
   Array.prototype.contains = function(element){
       return this.indexOf(element) > -1;
