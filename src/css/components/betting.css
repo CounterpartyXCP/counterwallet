@@ -81,13 +81,17 @@
   margin-top: 6px;
 }
 
-#betting div.feed-categories .radio {
-  margin-top: 0;
+#betting div.feed-categories {
+  margin: 0;
 }
+
 #betting div.feed-categories label {
   width:auto !important;
   float:left;
-  margin-left: 10px;
+  margin: 4px 10px 0px 10px;
+}
+#betting div.feed-categories input[type=text] {
+  width:350px;
 }
 
 #betting ul.outcomes {

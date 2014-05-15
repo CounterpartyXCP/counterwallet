@@ -315,7 +315,6 @@ function initBetting() {
 
   ko.applyBindings(BETTING, document.getElementById("betting"));
   ko.applyBindings(BET_MODAL, document.getElementById("betModal"));
-
-  BETTING.init();  
+ 
 }
 INIT_FUNC['pages/betting.html'] = initBetting;

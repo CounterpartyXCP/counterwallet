@@ -2,45 +2,20 @@
 function BettingViewModel() {
   var self = this;
 
-  self.categories = ko.observableArray([]);
   self.feeds = ko.observableArray([]);
-  self.currentCat = ko.observable(capitaliseFirstLetter(FEED_CATEGORIES[0]));
+  self.feedUrl = ko.observable('');
   self.currentStatus = ko.observable('');
 
   self.currentStatus.subscribe(function(value) {
     self.loadUserBets();
   });
 
-  self.currentCat.subscribe(function(value) {
-    self.showCategory(value);
-  });
-
   self.userBets = ko.observableArray([]);
-    
-  self.init = function() {
-    var cats = [];
-    for (var c in FEED_CATEGORIES) {
-      cats.push({
-        'name': capitaliseFirstLetter(FEED_CATEGORIES[c]),
-        'active': c==0 ? true : false
-      });
-    }
-    self.categories(cats);
-    self.showCategory(cats[0].name);
-  }
 
-  self.showFeeds = function() {
-    self.currentCat('sports');
-  }
-
-  self.showCategory = function(category) {
+  self.showFeed = function() {
 
     var params = {
-      'bet_type': 'simple',
-      'category': category.toLowerCase(),
-      'owner': '',
-      'source': '',
-      'sort_order': -1
+      'url': self.feedUrl()
     };
 
     var onReceivedFeeds = function(data) {

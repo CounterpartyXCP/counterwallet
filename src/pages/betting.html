@@ -12,7 +12,7 @@
   <div class="tabs-top">    
     <ul class="nav nav-tabs tabs-top">
       <li class="nav-betting-item active">
-        <a data-toggle="tab" href="#browse-categories" data-bind="click: showFeeds">Browse feeds</a>
+        <a data-toggle="tab" href="#browse-categories">Feeds</a>
       </li>
       <li class="nav-betting-item" data-bind="click: showUserBets">
         <a data-toggle="tab" href="#my-open-bets">My bets</a>
@@ -25,13 +25,12 @@
       <div class="tab-pane active" id="browse-categories">
         <div id="feed-filters" class="alert-info clearfix" style="background-color:#F4F8FD;padding:10px">
           <div class="form-group feed-categories">
-            <label class="control-label"><b>Category</b></label>
-            <div data-bind="foreach: categories">
-              <label class="radio radio-inline">
-                <input name="category" type="radio" data-bind="checked: $parent.currentCat, attr: {value: name}, valueUpdate: 'input'">
-                <span data-bind="text: name"></span>
-              </label>
-            </div>
+            <label class="control-label">
+              <b>Feed URL</b>
+              <input name="feed_url" class="sm-input" type="text" data-bind="value: feedUrl, valueUpdate: 'input'">
+            </label>
+            
+            <button type="button" class="btn btn-default" data-bind="click: showFeed">Load</button>
           </div>
         </div>
 
@@ -283,7 +282,7 @@ value: 1 for YES, something else for NO (target_value always equal 1)
               </div>            
             </div>
 
-            <div data-bind="visible: $parent.counterBets().length>0">
+            <div data-bind="visible: $parent.counterBets().length>0 && $parent.showAdvancedOptions()">
               <label>Open bets:</label> 
               <div id="counterbets">           
                 <table width="100%" class="table table-striped table-hover datatable_basic">
