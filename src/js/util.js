@@ -358,8 +358,11 @@ function capitaliseFirstLetter(string) {
   return string.charAt(0).toUpperCase() + string.slice(1);
 }
 
-function feedImageUrl(address) {
-  return "https://counterblock.jahpowerbit.org/_t_feed_img/"+address+".png";
+function feedImageUrl(image_name) {
+  var url = cwBaseURLs()[0];
+  url += USE_TESTNET ? '/_t_feed_img/' : '/_feed_img/';
+  url += image_name + '.png';
+  return url;
 }
 
 function timestampToString(timestamp) {
@@ -367,7 +370,8 @@ function timestampToString(timestamp) {
 }
 
 function satoshiToPercent(value) {
-  return (value / UNIT * 100) + '%';
+  var percent = mulFloat(divFloat(value, UNIT), 100);
+  return smartFormat(percent, 4, 4) + '%'
 }
 
 function currency(amount, unit) {
@@ -389,6 +393,16 @@ function reduce(numerator,denominator){
   };
   gcd = gcd(numerator,denominator);
   return [numerator/gcd, denominator/gcd];
+}
+
+function isValidURL(str) {
+  var pattern = /^(https?:\/\/)?((([a-z\d]([a-z\d-]*[a-z\d])*)\.)+[a-z]{2,}|((\d{1,3}\.){3}\d{1,3}))(\:\d+)?(\/[-a-z\d%_.~+]*)*(\?[;&a-z\d%_.~+=-]*)?(\#[-a-z\d_]*)?$/i;
+
+  if(!str.match(pattern)) {
+    return false;
+  } else {
+    return true;
+  }
 }
 
 //Helper for closure-based inheritance (see http://www.ruzee.com/blog/2008/12/javascript-inheritance-via-prototypes-and-closures)

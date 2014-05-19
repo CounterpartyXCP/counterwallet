@@ -310,11 +310,10 @@ INIT_FUNC['pages/portfolio.html'] = initPortfolio;
 
 function initBetting() {
   pageSetUp();
-  window.BETTING = new BettingViewModel();
-  window.BET_MODAL = new BetModalViewModel();
+  window.FEED_BROWSER = new FeedBrowserViewModel();
+  ko.applyBindings(FEED_BROWSER, document.getElementById("betting"));
 
-  ko.applyBindings(BETTING, document.getElementById("betting"));
-  ko.applyBindings(BET_MODAL, document.getElementById("betModal"));
+  FEED_BROWSER.init();
  
 }
 INIT_FUNC['pages/betting.html'] = initBetting;

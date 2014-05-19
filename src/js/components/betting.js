@@ -1,137 +1,6 @@
 
-function BettingViewModel() {
-  var self = this;
+function FeedBrowserViewModel() {
 
-  self.feeds = ko.observableArray([]);
-  self.feedUrl = ko.observable('');
-  self.currentStatus = ko.observable('');
-
-  self.currentStatus.subscribe(function(value) {
-    self.loadUserBets();
-  });
-
-  self.userBets = ko.observableArray([]);
-
-  self.showFeed = function() {
-
-    var params = {
-      'url': self.feedUrl()
-    };
-
-    var onReceivedFeeds = function(data) {
-      $.jqlog.debug(data);
-      // prepare data for display
-      for (var f in data) {
-        if (data[f].with_image) {
-          data[f].image_url = feedImageUrl(data[f].source);
-        }
-        data[f].date_str = timestampToString(data[f].date);
-        data[f].fee = satoshiToPercent(data[f].fee_fraction_int)
-        data[f].choices = [];
-        for (var c in data[f].outcomes) {
-          var oddsBet = data[f].odds[parseInt(c)];
-          var odds = {
-            'equal': oddsBet.equal == 'NA' ? 'NA' : round(oddsBet.equal, 4) + ' XCP',
-            'not_equal': oddsBet.not_equal == 'NA' ? 'NA' : round(oddsBet.not_equal, 4) + ' XCP'
-          }
-          data[f].choices.push({
-            text: data[f].outcomes[c],
-            target_value: parseInt(c)+1,
-            feed: data[f],
-            odds: odds
-          });
-        }
-        deadlines = [];
-        for (var d in data[f].deadlines) {
-          deadlines.push({
-            text: timestampToString(data[f].deadlines[d]),
-            timestamp: data[f].deadlines[d]
-          });
-        }
-        data[f].deadlines = deadlines;
-        data[f].deadline = deadlines[0].text;
-      }
-      self.feeds(data);
-      $("a[rel=tooltip]").tooltip();
-    }
-    failoverAPI('get_feeds', params, onReceivedFeeds);
-  }
-
-  self.bet = function(outcome, betType) {
-    $.jqlog.debug(outcome);
-    BET_MODAL.show(outcome.feed, betType, outcome.target_value);
-  }
-
-  self.betEqual = function(outcome) {
-    self.bet(outcome, "Equal");
-  }
-
-  self.betNotEqual = function(outcome) {
-    self.bet(outcome, "NotEqual");
-  }
-
-  self.showUserBets = function() {
-    self.currentStatus('open');
-  }
-
-  self.loadUserBets = function() {
-    if (self.currentStatus()=='') return false;
-    var addresses = [];
-    var walletAddresses = WALLET.addresses();
-    for (var a in  walletAddresses) {
-      addresses.push(walletAddresses[a].ADDRESS);
-    }
-    var params = {
-      'addresses': addresses,
-      'status': self.currentStatus()
-    }
-    failoverAPI('get_user_bets', params, function(data) {
-      $.jqlog.debug(data);
-
-      var bets = [];
-      for (var b in data.bets) {
-        var bet = data.bets[b];
-
-        var srcObj = WALLET.getAddressObj(bet.source);
-        if (srcObj) {
-          bet.source_label = srcObj.label;
-        } else {
-          bet.source_label = bet.source;
-        }
-
-        var feed = data.feeds[bet.feed_address];
-        if (feed) {
-          bet.feed_name = feed.event;
-          bet.outcome = feed.outcomes[bet.target_value-1];
-          bet.feed_owner = feed.owner;
-          bet.date_str = timestampToString(feed.date);
-
-        } else {
-          bet.feed_name = bet.feed_address;
-          bet.outcome = bet.targetValue;
-          bet.feed_owner = 'UNKNOWN';
-          bet.date_str = 'UNKNOWN';
-        }
-        bet.bet_type_name = bet.bet_type == 2 ? 'Yes' : 'No';
-        bet.bet_type_class = bet.bet_type == 2 ? 'btn-sm btn-labeled btn-success' : 'btn-sm btn-labeled btn-danger';
-        bet.deadline_str = timestampToString(bet.deadline);
-        bet.fee = satoshiToPercent(bet.fee_fraction_int);
-
-        bet.wager_quantity = satoshiToXCP(bet.wager_quantity);
-        bet.counterwager_quantity = satoshiToXCP(bet.counterwager_quantity);
-        bet.wager_remaining = satoshiToXCP(bet.wager_remaining);
-        bet.counterwager_remaining = satoshiToXCP(bet.counterwager_remaining);
-
-        bets.push(bet);
-      }
-
-      self.userBets(bets);
-    });
-  }
-}
-
-
-function BetModalViewModel() {
   var self = this;
 
   var wagerValidator = {
@@ -152,64 +21,97 @@ function BetModalViewModel() {
       params: self
     }    
   }
-
-  self.shown = ko.observable(false);
-  self.feed = ko.observable({});
+  
+  
+  self.feed = ko.observable(null);
+  self.targetValue = ko.observable(0);
+  self.targetValueText = ko.observable('');
+  self.betType = ko.observable('');
+  self.betTypeCounter = ko.observable('');
+  self.betTypeLabelEqual = ko.observable('Equal');
+  self.betTypeLabelNotEqual = ko.observable('NotEqual');
+  self.deadlines = ko.observableArray([]);
+  self.deadline = ko.observable(0);
   self.availableAddresses = ko.observableArray([]);
   self.sourceAddress = ko.observable(null).extend(wagerValidator);
-  self.deadline = ko.observable(null);
-  self.deadlineStr = ko.observable(null);
   self.balances = {};
+	self.wager = ko.observable(null).extend(wagerValidator);
+  self.odd = ko.observable(1);
   self.counterBets = ko.observableArray([]);
   self.selectedCounterBetTx = ko.observable(null);
-  self.targetValue = ko.observable(1);
-  self.selectedOutcome = ko.observable('');
-  self.showAdvancedOptions = ko.observable(false);
-  self.odd = ko.observable(1); 
-  self.fee = ko.observable(0);
-  self.wager = ko.observable(null).extend(wagerValidator);
   self.matchingVolume = ko.observable(0);
   self.openingVolume = ko.observable(0);
-
-  self.wager.subscribe(function(value) {
-    try {
-      self.counterwager(round(value * self.odd(), 4));      
-    } catch(e) {
-      self.counterwager(0);
-    }
-    self.updateMatchingVolume();
-  });
-
-  self.odd.subscribe(function(value) {
-    try {
-      self.counterwager(round(value * self.wager(), 4));
-    } catch(e) {
-      self.counterwager(0);
-    }  
-    self.updateMatchingVolume();
-  });
+  self.fee = ko.observable(0);
+  self.showAdvancedOptions = ko.observable(false);
+  self.currentStep = ko.observable(0);
+  self.sourceAddress = ko.observable('');
 
   self.counterwager = ko.observable(null).extend({
     required: true,
     isValidPositiveQuantity: self    
   });
 
-  self.counterwager.subscribe(function(value) {
-    try {
-      self.fee(round(value * (self.feed().fee_fraction_int / UNIT), 4));
-    } catch(e) {
-      self.fee(0);
-    }  
+  self.feedUrl = ko.observable('').extend({
+    required: false,
+    isValidUrlOrValidBitcoinAdress: self
+  });
+  
+  self.feedUrl.subscribe(function(val) {
+    if (self.feedUrl.isValid()) {
+      self.loadFeed();
+    }
   });
 
-  self.deadline.subscribe(function(value) {
-    self.loadCounterBets();
-    self.deadlineStr(timestampToString(value));
+  self.targetValue.subscribe(function(val) {
+  	// pepare bet type labels
+  	var labelEqual = 'Equal', labelNotEqual = 'NotEqual', labelTargetValue = 'target_value = '+val;
+  	for (var i in self.feed().info_data.outcomes) {
+  		if (self.feed().info_data.outcomes[i].target_value == val) {
+  			if (self.feed().info_data.outcomes[i].labels) {
+  				labelEqual = self.feed().info_data.outcomes[i].labels.equal + ' (Equal)';
+  				labelNotEqual = self.feed().info_data.outcomes[i].labels.not_equal + ' (NotEqual)';
+  				labelTargetValue = self.feed().info_data.outcomes[i].long_text;
+  				break;
+  			}
+  		}
+  	}
+  	self.betTypeLabelEqual(labelEqual);
+  	self.betTypeLabelNotEqual(labelNotEqual);
+  	self.targetValueText(labelTargetValue)
+  });
+
+  self.betType.subscribe(function(val) {
+  	if (val=='') return;
+  	self.betTypeCounter(BET_TYPES[COUNTER_BET[val]]);
+  	self.loadCounterBets();
+  });
+
+  self.wager.subscribe(function(value) {
+    try {
+    	var c = mulFloat(self.odd(), value);
+      self.counterwager(c);
+      var f = mulFloat(divFloat(self.feed().fee_fraction_int, UNIT), value);
+      self.fee(f);      
+    } catch(e) {
+      self.counterwager(0);
+      self.fee(0);
+    }
+    self.updateMatchingVolume();
+  });
+
+  self.odd.subscribe(function(value) {
+    try {
+    	var c = mulFloat(self.wager(), value);
+      self.counterwager(c);
+    } catch(e) {
+      self.counterwager(0);
+    }  
+    self.updateMatchingVolume();
   });
 
   self.expiration = ko.observable(1000).extend({
     required: true,
-    isValidPositiveInteger: self    
+    isValidPositiveInteger: self
   });
 
   self.validationModel = ko.validatedObservable({
@@ -218,18 +120,46 @@ function BetModalViewModel() {
     expiration: self.expiration
   });
 
-  self.show = function(feed, betType, targetValue) {
-    self.shown(true);
-    self.betType = betType;
-    self.targetValue(targetValue);
-    self.feed(feed);
-    self.selectedOutcome(feed.outcomes[targetValue-1])
-    
-    //populate the list of addresseses again
-    self.availableAddresses([]);
-    self.balances = {};
-    self.counterBets([]);
+  $('#feedWizard').bootstrapWizard({
+      tabClass: 'form-wizard',
+      nextSelector: 'li.next',
+      onTabClick: function(tab, navigation, index) {
+      	$.jqlog.debug("TAB CLICK: "+tab);
+        return true; //tab click disabled
+      },
+      onTabShow: function(tab, navigation, index) {
+      	$.jqlog.debug("TAB: "+index);
+      	if (index==0) {
+      		$('li.previous').addClass('disabled');
+			  	$('li.next').show();
+			  	$('li.next.finish').hide();
+      	} else if (index==1) {
+      		$('li.previous').removeClass('disabled');
+  				$('li.next').hide();
+  				$('li.next.finish').removeClass('disabled').show();
+      	} else {
+      		return false;
+      	}
+      	self.currentStep(index);
+      	return true;
+      },
+      onNext: function (tab, navigation, index) {
+      	$.jqlog.debug("NEXT CLICK: "+index);
+      	return true;
+      }
+   });
 
+  self.init = function() {
+  	$('li.next').addClass('disabled');
+  	$('li.previous').addClass('disabled');
+  	$('li.next.finish').hide();
+  }
+
+  self.displayFeed = function(feed) {  
+
+  	// prepare source addresses
+  	self.availableAddresses([]);
+    self.balances = {};
     var addresses = WALLET.getAddressesList(true);
     var options = []
     for(var i = 0; i < addresses.length; i++) {
@@ -240,34 +170,66 @@ function BetModalViewModel() {
       self.balances[addresses[i][0]] = addresses[i][2];
     }
     self.availableAddresses(options);
-    //self.counterwager(1);
-    self.wager(1);
+  	
+  	// prepare images url
+    feed.info_data.owner.image_url = feed.info_data.owner.valid_image ? feedImageUrl(feed.source + '_owner') : '';
+    feed.info_data.event.image_url = feed.info_data.event.valid_image ? feedImageUrl(feed.source + '_event') : '';
+    for (var i in feed.info_data.outcomes) {
+    	var image_name = feed.source + '_tv_' + feed.info_data.outcomes[i].target_value;
+    	feed.info_data.outcomes[i].image_url = feed.info_data.outcomes[i].valid_image ? feedImageUrl(image_name) : '';
+    	feed.info_data.outcomes[i].long_text = feed.info_data.outcomes[i].text + ' (value: ' + feed.info_data.outcomes[i].target_value + ')';
+    }
+    // prepare fee
+    feed.fee = satoshiToPercent(feed.fee_fraction_int);
+    // prepare deadlines
+    deadlines = [];
+    for (var d in feed.info_data.deadlines) {
+      deadlines.push({
+        text: feed.info_data.deadlines[d],
+        timestamp: feed.info_data.deadlines[d]
+      });
+    }
+    feed.info_data.deadlines = deadlines;
+    feed.info_data.deadline = deadlines[0].text;
 
-    // feed timestamp - 2h
-    self.deadline(feed.deadlines[0] * 1000);
+
+    $.jqlog.debug(feed);
+    self.feed(feed);
+    self.betType(''); // to force change event
+    self.betType('Equal');
+    self.wager(1);
+    $('li.next').removeClass('disabled');
+  }
+
+  self.loadFeed = function() {
+    failoverAPI('get_feed', {'address_or_url': self.feedUrl()}, self.displayFeed)
+  }
+
+  self.getFeedImageUrl = function(image_type) {
+    return "/feed.png";
   }
 
   self.loadCounterBets = function() {
-    if (!self.betType ||  !self.feed() || !self.deadline() || !self.targetValue()) return false;
+    if (!self.betType() ||  !self.feed() || !self.deadline() || !self.targetValue()) return false;
     var params = {
-      bet_type: COUNTER_BET[self.betType],
+      bet_type: COUNTER_BET[self.betType()],
       feed_address: self.feed().source,
       target_value: self.targetValue(),
-      deadline: self.deadline(),
+      deadline: moment(self.deadline()).unix(),
       leverage: 5040,
 
     };
 
     var onCounterbetsLoaded = function(data) {
       $.jqlog.debug(data);
-      $.jqlog.debug('data');
+
       // prepare data for display. TODO: optimize, all in one loop
       var displayedData = []
       for (var b = data.length-1; b>=0; b--) {
         bet = {}
         bet.deadline_str = timestampToString(data[b].deadline);
         bet.ratio = reduce(data[b].wager_quantity, data[b].counterwager_quantity).join('/');
-        bet.multiplier = parseInt(data[b].wager_quantity)/parseInt(data[b].counterwager_quantity);
+        bet.multiplier = divFloat(parseInt(data[b].wager_quantity), parseInt(data[b].counterwager_quantity));
         bet.multiplier = Math.floor(bet.multiplier*100) / 100;
         bet.wager = satoshiToXCP(data[b].wager_remaining);
         bet.wager_remaining = data[b].wager_remaining;
@@ -323,46 +285,15 @@ function BetModalViewModel() {
 
   self.selectCounterbet = function(counterbet) {
     $.jqlog.debug(counterbet);
-    var cw = self.wager() * counterbet.multiplier;
+    var cw = mulFloat(self.wager(), counterbet.multiplier);
     cw = Math.floor(cw*10000) / 10000;
 
     self.counterwager(cw);
     self.odd(counterbet.multiplier);
     //self.deadline(counterbet.deadline * 1000);
     self.selectedCounterBetTx(counterbet.tx_index);
-    $('#betModal #counterbets tr').removeClass('selectedCounterBet');
+    $('#betting #counterbets tr').removeClass('selectedCounterBet');
     $('#cb_'+counterbet.tx_index).addClass('selectedCounterBet');
-  }
-
-  self.hide = function() {
-    self.shown(false);
-  }
-
-  self.submitForm = function() {
-    if (!self.validationModel.isValid()) {
-      self.validationModel.errors.showAllMessages();
-      return false;
-    }
-    
-    var params = {
-      source: self.sourceAddress(),
-      feed_address: self.feed().source,
-      bet_type: self.betType,
-      deadline: Math.round(self.deadline()),
-      wager: denormalizeQuantity(self.wager()),
-      counterwager: denormalizeQuantity(self.counterwager()),
-      expiration: parseInt(self.expiration()),
-      target_value: self.targetValue(),
-      leverage: 5040
-    }
-    $.jqlog.debug(params);
-
-    var onSuccess = function(txHash, data, endpoint) {
-      bootbox.alert("<b>Your funds were sent successfully.</b> " + ACTION_PENDING_NOTICE);
-    }
-
-    WALLET.doTransaction(self.sourceAddress(), "create_bet", params, onSuccess);
-    self.shown(false);
   }
 
   self.getVolumeFromOdd = function(value) {
@@ -394,10 +325,43 @@ function BetModalViewModel() {
     var opening = (wager - matching);
 
     self.matchingVolume(round(matching, 4));
-    self.openingVolume(round(opening, 4));
-
-    
+    self.openingVolume(round(opening, 4)); 
   }
+
+  self.nextStep = function() {
+  	$('#feedWizard').bootstrapWizard('next');
+  }
+
+  self.previousStep = function() {
+  	$('#feedWizard').bootstrapWizard('previous');
+  }
+
+  self.submitBet = function() {
+  	if (!self.validationModel.isValid()) {
+      self.validationModel.errors.showAllMessages();
+      return false;
+    }
+    
+    var params = {
+      source: self.sourceAddress(),
+      feed_address: self.feed().source,
+      bet_type: self.betType(),
+      deadline: moment(self.deadline()).unix(),
+      wager: denormalizeQuantity(self.wager()),
+      counterwager: denormalizeQuantity(self.counterwager()),
+      expiration: parseInt(self.expiration()),
+      target_value: self.targetValue(),
+      leverage: 5040
+    }
+    $.jqlog.debug(params);
+
+    var onSuccess = function(txHash, data, endpoint) {
+      bootbox.alert("<b>Your funds were sent successfully.</b> " + ACTION_PENDING_NOTICE);
+    }
+
+    WALLET.doTransaction(self.sourceAddress(), "create_bet", params, onSuccess);
+  }
+
 
 }
 

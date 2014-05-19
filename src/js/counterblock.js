@@ -33,3 +33,13 @@ Counterblock.getBalances = function(addresses, cwkeys, callback) {
   });
 
 }
+
+Counterblock.getFeedByUrl = function(url) {
+
+}
+
+Counterblock.getFeedByAddress = function(address) {
+  
+}
+
+

@@ -164,5 +164,4 @@ var TRANSACTION_MAX_RETRY = 5 // max retry when transaction failed (don't includ
 var FEED_CATEGORIES = ['sports', 'politics', 'entertainment', 'economics', 'other']
 var FEED_TYPES = ['simple', 'cfd']
 
-IS_DEV = true;
-USE_TESTNET = false;
+
