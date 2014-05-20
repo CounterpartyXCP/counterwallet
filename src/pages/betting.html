@@ -67,25 +67,24 @@
                             </div>
                           </div>
                           <div class="row">
-                            <label class="col col-lg-4 control-label font-medlg">Target value:</label>
-                            <div class="col col-lg-8">
-                              <select class="form-control" name="targetValue" data-bind="options: info_data.outcomes, optionsValue: 'target_value', optionsText: 'long_text', value: $parent.targetValue, select2: { minimumResultsForSearch: 10, escapeMarkup: 'direct' }"></select>
-                            </div>
-                          </div>
-                          <div class="row">
                             <label class="col col-lg-4 control-label font-medlg">Bet type:</label>
                             <div class="col col-lg-8">
                               <label class="radio radio-inline">
                                 <input name="betType" value="Equal" type="radio" data-bind="checked: $parent.betType">
-                                <span data-bind="text: $parent.betTypeLabelEqual"></span>
+                                <span style="font-size: 16px" data-bind="text: $parent.betTypeLabelEqual"></span>
                               </label>
                               <label class="radio radio-inline">
                                 <input name="betType" value="NotEqual" type="radio" data-bind="checked: $parent.betType">
-                                <span data-bind="text: $parent.betTypeLabelNotEqual"></span>
+                                <span style="font-size: 16px" data-bind="text: $parent.betTypeLabelNotEqual"></span>
                               </label>
                             </div>
                           </div> 
-                          
+                          <div class="row">
+                            <label class="col col-lg-4 control-label font-medlg">Target value:</label>
+                            <div class="col col-lg-8">
+                              <select class="form-control" name="targetValue" data-bind="options: info_data.outcomes, optionsValue: 'target_value', optionsText: 'long_text', value: $parent.targetValue, select2: { minimumResultsForSearch: 10, escapeMarkup: 'direct' }"></select>
+                            </div>
+                          </div>                          
                           <div class="row" data-bind="visible: $parent.showAdvancedOptions || $parent.counterBets().length == 0">            
                             <label class="col col-lg-4 control-label font-medlg">Odd:</label> 
                             <div class="col col-lg-8">                
@@ -117,6 +116,14 @@
                         </div>
 
                         <div class="col col-lg-6 col-sm-6 winnings">
+                          <div>
+                            <label>Odd:</label>
+                            <div class="progress progress-sm odd-bar">
+                              <div class="progress-bar bg-color-greenLight" data-bind="attr: {style: 'width: '+$parent.greenPercent()+'%'}"></div>
+                              <div class="progress-bar bg-color-redLight" data-bind="attr: {style: 'width: '+(100-$parent.greenPercent())+'%'}"></div>
+                            </div>
+                            <span data-bind="text: $parent.odd"></span>  
+                          </div>
                           <div>          
                             <label>Winnings:</label>
                             <span data-bind="text: $parent.counterwager + ' XCP'"></span>  
@@ -207,45 +214,6 @@
       </article> <!-- WIDGET END -->
     </div> <!-- end row -->
 
-
-    <div class="row" data-bind="with: feed"> <!-- row -->
-      <article class="col-xs-12 col-sm-12 col-md-12 col-lg-12"> <!-- NEW WIDGET START -->
-        <!-- Widget ID (each widget will need unique ID)-->
-        <div class="jarviswidget defaultWidgetColor" data-widget-editbutton="false" data-widget-deletebutton="false">
-            <header>
-              <span class="widget-icon"> <i class="fa fa-rocket"></i> </span>
-              <h3>Feed owner</h3>
-              <div class="clearfix"></div>
-            </header>
-            <div> <!-- widget div-->
-              <div class="widget-body" data-bind="validationOptions: { insertMessages: false }"> <!-- widget content -->
-                <div class="row">
-                  <div class="col col-lg-1" data-bind="visible: info_data.owner.valid_image" style="width:60px">
-                    <img data-bind="attr: {src: info_data.owner.image_url}" />
-                  </div>
-                  <div class="col col-lg-11">
-                    <div class="row">
-                      <label class="col col-lg-1">Name:</label>
-                      <span class="value" data-bind="text: info_data.owner.name"></span>
-                    </div>
-                    <div class="row" data-bind="visible: info_data.owner.url">
-                      <label class="col col-lg-1">URL:</label>
-                      <span class="value">
-                        <a target="_blank" data-bind="text: info_data.owner.url, attr: {href: info_data.owner.url}"></a>
-                      </span>
-                    </div>
-                    <div class="row" data-bind="visible: info_data.owner.description">
-                      <label class="col col-lg-1">Description:</label>
-                      <span class="value" data-bind="text: info_data.owner.description"></span>
-                    </div>
-                  </div>
-                </div>
-              </div>
-           </div> <!-- end widget div -->
-        </div> <!-- end widget -->
-      </article> <!-- WIDGET END -->
-    </div> <!-- end row -->
-
     <div class="row" data-bind="with: feed"> <!-- row -->
       <article class="col-xs-12 col-sm-12 col-md-12 col-lg-12"> <!-- NEW WIDGET START -->
         <!-- Widget ID (each widget will need unique ID)-->
@@ -292,6 +260,76 @@
       </article> <!-- WIDGET END -->
     </div> <!-- end row -->
 
+    <div class="row" data-bind="with: feed"> <!-- row -->
+      <article class="col-xs-12 col-sm-12 col-md-12 col-lg-12"> <!-- NEW WIDGET START -->
+        <!-- Widget ID (each widget will need unique ID)-->
+        <div class="jarviswidget defaultWidgetColor" data-widget-editbutton="false" data-widget-deletebutton="false">
+            <header>
+              <span class="widget-icon"> <i class="fa fa-rocket"></i> </span>
+              <h3>Feed owner</h3>
+              <div class="clearfix"></div>
+            </header>
+            <div> <!-- widget div-->
+              <div class="widget-body" data-bind="validationOptions: { insertMessages: false }"> <!-- widget content -->
+                <div class="row">
+                  <div class="col col-lg-11">
+                    <div class="row">
+                      <label class="col col-lg-1">Name:</label>
+                      <span class="value" data-bind="text: info_data.owner.name"></span>
+                    </div>
+                    <div class="row" data-bind="visible: info_data.owner.url">
+                      <label class="col col-lg-1">URL:</label>
+                      <span class="value">
+                        <a target="_blank" data-bind="text: info_data.owner.url, attr: {href: info_data.owner.url}"></a>
+                      </span>
+                    </div>
+                    <div class="row" data-bind="visible: info_data.owner.description">
+                      <label class="col col-lg-1">Description:</label>
+                      <span class="value" data-bind="text: info_data.owner.description"></span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+           </div> <!-- end widget div -->
+        </div> <!-- end widget -->
+      </article> <!-- WIDGET END -->
+    </div> <!-- end row -->
+
+    <div class="row" data-bind="with: feed"> <!-- row -->
+      <article class="col-xs-12 col-sm-12 col-md-12 col-lg-12"> <!-- NEW WIDGET START -->
+        <!-- Widget ID (each widget will need unique ID)-->
+        <div class="jarviswidget defaultWidgetColor" data-widget-editbutton="false" data-widget-deletebutton="false">
+            <header>
+              <span class="widget-icon"> <i class="fa fa-rocket"></i> </span>
+              <h3>Feed bets</h3>
+              <div class="clearfix"></div>
+            </header>
+            <div id="counterbets"> <!-- widget div-->
+              <div class="widget-body no-padding" data-bind="validationOptions: { insertMessages: false }"> <!-- widget content -->
+
+                <table width="100%" class="table table-striped table-hover datatable_basic">
+                  <thead>
+                    <tr>
+                      <th>Status</th>
+                      <th>Bet count</th>
+                      <th>Wager quantity</th>
+                      <th>Wager remaining</th>
+                    </tr>
+                  </thead>
+                  <tbody data-bind="foreach: { data: counters.bets, as: 'bets' }">
+                    <tr class="cb">
+                      <td style="text-align:center" data-bind="text: bets.status"/></td>
+                      <td style="text-align:right;padding-right:10px !important;" data-bind="text: bets.bet_count"></td>
+                      <td style="text-align:right;padding-right:10px !important;" data-bind="text: bets.wager_quantity"></td>
+                      <td style="text-align:right;padding-right:10px !important;" data-bind="text: bets.wager_remaining"></td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+           </div> <!-- end widget div -->
+        </div> <!-- end widget -->
+      </article> <!-- WIDGET END -->
+    </div> <!-- end row -->
 
   </section>
 

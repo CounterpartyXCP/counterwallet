@@ -45,6 +45,7 @@ function FeedBrowserViewModel() {
   self.showAdvancedOptions = ko.observable(false);
   self.currentStep = ko.observable(0);
   self.sourceAddress = ko.observable('');
+  self.greenPercent = ko.observable(20);
 
   self.counterwager = ko.observable(null).extend({
     required: true,
@@ -112,6 +113,16 @@ function FeedBrowserViewModel() {
   self.expiration = ko.observable(1000).extend({
     required: true,
     isValidPositiveInteger: self
+  });
+
+  self.counterwager.subscribe(function() {
+  	var t = addFloat(self.wager(), self.counterwager())
+  	var p = divFloat(t, 100);
+  	var g = divFloat(self.wager(), p);
+  	if (self.betType == 'NotEqual') {
+  		g = divFloat(self.counterwager(), p);
+  	}
+  	self.greenPercent(g);
   });
 
   self.validationModel = ko.validatedObservable({
@@ -191,6 +202,11 @@ function FeedBrowserViewModel() {
     }
     feed.info_data.deadlines = deadlines;
     feed.info_data.deadline = deadlines[0].text;
+    // prepare counters
+    for (var i in feed.counters.bets) {
+    	feed.counters.bets[i].wager_quantity = normalizeQuantity(feed.counters.bets[i].wager_quantity) + ' XCP';
+    	feed.counters.bets[i].wager_remaining = normalizeQuantity(feed.counters.bets[i].wager_remaining) + ' XCP';
+    }
 
 
     $.jqlog.debug(feed);

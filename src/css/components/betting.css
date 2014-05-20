@@ -53,12 +53,25 @@
   font-size: 14px;
 }
 
-#counterbets tr.selectedCounterBet td {
+#betting #counterbets tr.selectedCounterBet td {
   background-color: #a8829f !important;
   font-weight: bold;
   color:#FFF;
 }
 
-#counterbets th {
+#betting #counterbets th {
   text-align: center !important;
+}
+
+
+#betting div.odd-bar {
+  display: inline-block;
+  width: 76px;
+  margin: 0;
+  vertical-align: middle;
+  margin-bottom: 3px;
+}
+
+#betting div.odd-bar div.bg-color-redLight {
+  right: 0;
 }
