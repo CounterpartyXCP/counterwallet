@@ -30,6 +30,7 @@ function FeedBrowserViewModel() {
   self.betTypeCounter = ko.observable('');
   self.betTypeLabelEqual = ko.observable('Equal');
   self.betTypeLabelNotEqual = ko.observable('NotEqual');
+  self.betTypeText = ko.observable('');
   self.deadlines = ko.observableArray([]);
   self.deadline = ko.observable(0);
   self.availableAddresses = ko.observableArray([]);
@@ -84,7 +85,8 @@ function FeedBrowserViewModel() {
 
   self.betType.subscribe(function(val) {
   	if (val=='') return;
-  	self.betTypeCounter(BET_TYPES[COUNTER_BET[val]]);
+  	val == 'Equal' ? self.betTypeText(self.betTypeLabelEqual()) : self.betTypeText(self.betTypeLabelNotEqual());
+  	val == 'NotEqual' ? self.betTypeCounter(self.betTypeLabelEqual()) : self.betTypeCounter(self.betTypeLabelNotEqual());
   	self.loadCounterBets();
   });
 
@@ -120,9 +122,7 @@ function FeedBrowserViewModel() {
   	var t = addFloat(self.wager(), self.counterwager())
   	var p = divFloat(t, 100);
   	var g = divFloat(self.wager(), p);
-  	if (self.betType == 'NotEqual') {
-  		g = divFloat(self.counterwager(), p);
-  	}
+  	
   	self.greenPercent(g);
   });
 
@@ -146,6 +146,10 @@ function FeedBrowserViewModel() {
 			  	$('li.next').show();
 			  	$('li.next.finish').hide();
       	} else if (index==1) {
+      		$('li.previous').removeClass('disabled');
+      		$('li.next').show();
+			  	$('li.next.finish').hide();
+      	} else if (index==2) {
       		$('li.previous').removeClass('disabled');
   				$('li.next').hide();
   				$('li.next.finish').removeClass('disabled').show();
@@ -197,7 +201,7 @@ function FeedBrowserViewModel() {
     deadlines = [];
     for (var d in feed.info_data.deadlines) {
       deadlines.push({
-        text: feed.info_data.deadlines[d],
+        text: moment(feed.info_data.deadlines[d]).format('YYYY/MM/DD hh:mm:ss A Z'),
         timestamp: feed.info_data.deadlines[d]
       });
     }

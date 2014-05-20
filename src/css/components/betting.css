@@ -20,6 +20,7 @@
 
 #betting div.bet-params div.row {
   margin-bottom: 15px;
+  font-size: 19px !important;
 }
 #betting div.bet-params label {
   text-align: right !important;
@@ -74,4 +75,10 @@
 
 #betting div.odd-bar div.bg-color-redLight {
   right: 0;
+}
+
+#betting div.bet-confim {
+  font-size: 19px !important;
+  padding: 20px;
+  padding-top: 0;
 }
