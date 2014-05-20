@@ -46,6 +46,7 @@ function FeedBrowserViewModel() {
   self.currentStep = ko.observable(0);
   self.sourceAddress = ko.observable('');
   self.greenPercent = ko.observable(20);
+  self.feedStats = ko.observableArray([]);
 
   self.counterwager = ko.observable(null).extend({
     required: true,
@@ -203,14 +204,23 @@ function FeedBrowserViewModel() {
     feed.info_data.deadlines = deadlines;
     feed.info_data.deadline = deadlines[0].text;
     // prepare counters
+    var classes = {
+    	'open': 'success',
+    	'filled': 'primary',
+    	'expired': 'danger'
+    };
     for (var i in feed.counters.bets) {
     	feed.counters.bets[i].wager_quantity = normalizeQuantity(feed.counters.bets[i].wager_quantity) + ' XCP';
     	feed.counters.bets[i].wager_remaining = normalizeQuantity(feed.counters.bets[i].wager_remaining) + ' XCP';
-    }
+    	feed.counters.bets[i].status_html = '<span class="label label-'+classes[feed.counters.bets[i].status]+'">'+feed.counters.bets[i].status+'</span>';
 
+    }
+    self.feedStats(feed.counters.bets)
+    feed.info_data.event.date_str = moment(feed.info_data.event.date).format('LLLL');
 
     $.jqlog.debug(feed);
     self.feed(feed);
+    self.feedStats(feed.counters.bets);
     self.betType(''); // to force change event
     self.betType('Equal');
     self.wager(1);

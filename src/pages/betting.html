@@ -11,13 +11,61 @@
 
   <section id="widget-grid"> <!-- widget grid -->
 
+    <div class="row" data-bind="with: feed"> <!-- row -->
+      <article class="col-xs-12 col-sm-12 col-md-12 col-lg-12"> <!-- NEW WIDGET START -->
+        <!-- Widget ID (each widget will need unique ID)-->
+        <div class="jarviswidget defaultWidgetColor" data-widget-editbutton="false" data-widget-deletebutton="false">
+            <header>
+              <span class="widget-icon"> <i class="fa fa-rocket"></i> </span>
+              <h3>Feed event</h3>
+              <div class="clearfix"></div>
+            </header>
+            <div> <!-- widget div-->
+              <div class="widget-body" data-bind="validationOptions: { insertMessages: false }"> <!-- widget content -->
+                <div class="row">
+                  <div class="col col-lg-1" data-bind="visible: info_data.event.valid_image" style="width:60px">
+                    <img data-bind="attr: {src: info_data.event.image_url}" />
+                  </div>
+                  <div class="col col-lg-11">
+                    
+                    <div class="row">
+                      <label class="col col-lg-1">Event date:</label>
+                      <span class="value" data-bind="text: info_data.event.date_str" style="font-size:16px"></span>
+                      <div class="note" style="display:inline;margin:0">(when this bet will be resolved.)</div> 
+                    </div>
+                    <div class="row">
+                      <label class="col col-lg-1">Name:</label>
+                      <span class="value" data-bind="text: info_data.event.name"></span>
+                    </div>
+                    <div class="row" data-bind="visible: info_data.event.url">
+                      <label class="col col-lg-1">URL:</label>
+                      <span class="value">
+                        <a target="_blank" data-bind="text: info_data.event.url, attr: {href: info_data.event.url}"></a>
+                      </span>
+                    </div>
+                    <div class="row" data-bind="visible: info_data.event.description">
+                      <label class="col col-lg-1">Description:</label>
+                      <span class="value" data-bind="text: info_data.event.description"></span>
+                    </div>
+                    <div class="row">
+                      <label class="col col-lg-1">Fee:</label>
+                      <span class="value" data-bind="text: fee"></span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+           </div> <!-- end widget div -->
+        </div> <!-- end widget -->
+      </article> <!-- WIDGET END -->
+    </div> <!-- end row -->
+
     <div class="row"> <!-- row -->
       <article class="col-xs-12 col-sm-12 col-md-12 col-lg-12"> <!-- NEW WIDGET START -->
         <!-- Widget ID (each widget will need unique ID)-->
         <div class="jarviswidget defaultWidgetColor" data-widget-editbutton="false" data-widget-deletebutton="false">
             <header>
               <span class="widget-icon"> <i class="fa fa-rocket"></i> </span>
-              <h3>Select Feed</h3>
+              <h3>Enter bet</h3>
               <div class="clearfix"></div>
             </header>
             <div> <!-- widget div-->
@@ -27,7 +75,7 @@
                     <div class="form-bootstrapWizard">
                       <ul class="bootstrapWizard form-wizard">
                           <li class="active" data-target="#step1">
-                              <a href="#tab1" data-toggle="tab"> <span class="step">1</span> <span class="title">Select Feed</span> </a>
+                              <a href="#tab1" data-toggle="tab"> <span class="step">1</span> <span class="title">Select feed</span> </a>
                           </li>
                           <li data-target="#step2">
                               <a href="#tab2" data-toggle="tab"> <span class="step">2</span> <span class="title">Bet</span> </a>
@@ -122,7 +170,7 @@
                               <div class="progress-bar bg-color-greenLight" data-bind="attr: {style: 'width: '+$parent.greenPercent()+'%'}"></div>
                               <div class="progress-bar bg-color-redLight" data-bind="attr: {style: 'width: '+(100-$parent.greenPercent())+'%'}"></div>
                             </div>
-                            <span data-bind="text: $parent.odd"></span>  
+                            win <span data-bind="text: $parent.odd"></span> XCP for every 1 XCP you bet 
                           </div>
                           <div>          
                             <label>Winnings:</label>
@@ -214,51 +262,7 @@
       </article> <!-- WIDGET END -->
     </div> <!-- end row -->
 
-    <div class="row" data-bind="with: feed"> <!-- row -->
-      <article class="col-xs-12 col-sm-12 col-md-12 col-lg-12"> <!-- NEW WIDGET START -->
-        <!-- Widget ID (each widget will need unique ID)-->
-        <div class="jarviswidget defaultWidgetColor" data-widget-editbutton="false" data-widget-deletebutton="false">
-            <header>
-              <span class="widget-icon"> <i class="fa fa-rocket"></i> </span>
-              <h3>Feed event</h3>
-              <div class="clearfix"></div>
-            </header>
-            <div> <!-- widget div-->
-              <div class="widget-body" data-bind="validationOptions: { insertMessages: false }"> <!-- widget content -->
-                <div class="row">
-                  <div class="col col-lg-1" data-bind="visible: info_data.event.valid_image" style="width:60px">
-                    <img data-bind="attr: {src: info_data.event.image_url}" />
-                  </div>
-                  <div class="col col-lg-11">
-                    <div class="row">
-                      <label class="col col-lg-1">Name:</label>
-                      <span class="value" data-bind="text: info_data.event.name"></span>
-                    </div>
-                    <div class="row">
-                      <label class="col col-lg-1">Date:</label>
-                      <span class="value" data-bind="text: info_data.event.date"></span>
-                    </div>
-                    <div class="row" data-bind="visible: info_data.event.url">
-                      <label class="col col-lg-1">URL:</label>
-                      <span class="value">
-                        <a target="_blank" data-bind="text: info_data.event.url, attr: {href: info_data.event.url}"></a>
-                      </span>
-                    </div>
-                    <div class="row" data-bind="visible: info_data.event.description">
-                      <label class="col col-lg-1">Description:</label>
-                      <span class="value" data-bind="text: info_data.event.description"></span>
-                    </div>
-                    <div class="row">
-                      <label class="col col-lg-1">Fee:</label>
-                      <span class="value" data-bind="text: fee"></span>
-                    </div>
-                  </div>
-                </div>
-              </div>
-           </div> <!-- end widget div -->
-        </div> <!-- end widget -->
-      </article> <!-- WIDGET END -->
-    </div> <!-- end row -->
+    
 
     <div class="row" data-bind="with: feed"> <!-- row -->
       <article class="col-xs-12 col-sm-12 col-md-12 col-lg-12"> <!-- NEW WIDGET START -->
@@ -316,9 +320,9 @@
                       <th>Wager remaining</th>
                     </tr>
                   </thead>
-                  <tbody data-bind="foreach: { data: counters.bets, as: 'bets' }">
+                  <tbody data-bind="foreach: {data: $parent.feedStats, as: 'bets'}">
                     <tr class="cb">
-                      <td style="text-align:center" data-bind="text: bets.status"/></td>
+                      <td style="text-align:center" data-bind="html: bets.status_html"/></td>
                       <td style="text-align:right;padding-right:10px !important;" data-bind="text: bets.bet_count"></td>
                       <td style="text-align:right;padding-right:10px !important;" data-bind="text: bets.wager_quantity"></td>
                       <td style="text-align:right;padding-right:10px !important;" data-bind="text: bets.wager_remaining"></td>
