@@ -151,7 +151,7 @@
                               </label>
                             </div>
                           </div>                              
-                          <div class="row" data-bind="visible: $parent.showAdvancedOptions || $parent.counterBets().length == 0">            
+                          <div class="row" data-bind="visible: $parent.showAdvancedOptions || ($parent.counterBets().length == 0 && !$parent.selectedTarget().odds)">            
                             <label class="col col-lg-4 control-label font-medlg">Odds:</label> 
                             <div class="col col-lg-8">                
                               <input name="odd" class="number form-control" data-bind="value: $parent.odd, valueUpdate: 'input'" type="text"/> XCP
