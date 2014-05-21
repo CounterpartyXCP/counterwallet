@@ -279,7 +279,6 @@ CWBitcore.checkTransactionDest = function(txHex, source, dest) {
   var tx = CWBitcore.parseRawTransaction(txHex);    
   for (var i=0; i<tx.outs.length; i++) {
       var addresses = CWBitcore.extractAddressFromTxOut(tx.outs[i]).split(',');
-      $.jqlog.debug('addresses:::: '+addresses);
       var containsSource = addresses.indexOf(source) != -1;
       var containsDest = addresses.indexOf(dest) != -1;
       if (!containsSource && !containsDest) {

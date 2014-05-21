@@ -875,19 +875,6 @@ function SweepModalViewModel() {
     multiAPIConsensus("create_send", sendData, //can send both BTC and counterparty assets
       function(unsignedTxHex, numTotalEndpoints, numConsensusEndpoints) {
         
-        $.jqlog.debug('unsignedTxHex');
-        $.jqlog.debug(unsignedTxHex);
-        $.jqlog.debug('source:');
-        $.jqlog.debug(key.getAddress());
-        $.jqlog.debug('dest:');
-        $.jqlog.debug(self.destAddress());
-        $.jqlog.debug('pub1:');
-        $.jqlog.debug(pubkey);
-        $.jqlog.debug('pub2:');
-        $.jqlog.debug(key.getPub());
-
-
-
         var signedHex = key.checkAndSignRawTransaction(unsignedTxHex, self.destAddress());
 
         WALLET.broadcastSignedTx(signedHex, function(sendTxHash, endpoint) { //broadcast was successful
