@@ -49,6 +49,7 @@ function FeedBrowserViewModel() {
   self.greenPercent = ko.observable(20);
   self.feedStats = ko.observableArray([]);
   self.wizardTitle = ko.observable("Select Feed");
+  self.selectedTarget = ko.observable(null);
 
   self.counterwager = ko.observable(null).extend({
     required: true,
@@ -71,17 +72,19 @@ function FeedBrowserViewModel() {
   	var labelEqual = 'Equal', labelNotEqual = 'NotEqual', labelTargetValue = 'target_value = '+val;
   	for (var i in self.feed().info_data.targets) {
   		if (self.feed().info_data.targets[i].value == val) {
+        self.selectedTarget(self.feed().info_data.targets[i]);
   			if (self.feed().info_data.targets[i].labels) {
   				labelEqual = self.feed().info_data.targets[i].labels.equal;
   				labelNotEqual = self.feed().info_data.targets[i].labels.not_equal;
-  				labelTargetValue = self.feed().info_data.targets[i].long_text;
-  				break;
+  				labelTargetValue = self.feed().info_data.targets[i].long_text; 				
   			}
+        break;
   		}
   	}
   	self.betTypeLabelEqual(labelEqual);
   	self.betTypeLabelNotEqual(labelNotEqual);
-  	self.targetValueText(labelTargetValue)
+  	self.targetValueText(labelTargetValue);
+    self.loadCounterBets();
   });
 
   self.betType.subscribe(function(val) {
@@ -307,16 +310,42 @@ function FeedBrowserViewModel() {
       }
 
       self.counterBets(displayedData2);
-      if (displayedData2.length>0) {
-        self.selectCounterbet(displayedData2[0]);
-      } else {
-        self.counterwager(1);
-        self.odd(1);
-      }
+      self.setDefaultOdds();
       
     }
 
     failoverAPI('get_bets', params, onCounterbetsLoaded);
+  }
+
+  self.setDefaultOdds = function() {
+    $.jqlog.debug("DEFAULT ODDS:");
+    $.jqlog.debug(self.selectedTarget());
+
+    var defaultOdds, overrideOdds;
+    if (self.selectedTarget().odds) {
+      defaultOdds = self.betType()=='Equal' ? self.selectedTarget().odds.default : divFloat(1, self.selectedTarget().odds.default);
+      if (self.selectedTarget().odds.override) {
+        overrideOdds = self.betType()=='Equal' ? self.selectedTarget().odds.override : divFloat(1, self.selectedTarget().odds.override);
+      }    
+    }
+     
+    if (self.counterBets().length>0) {
+      // we use odds.override only if better than better open bet 
+      if (overrideOdds && overrideOdds > self.counterBets()[0].multiplier) {
+        self.odd(overrideOdds);
+      } else {
+        self.selectCounterbet(self.counterBets()[0]);
+      }
+      
+    } else {
+
+      if (self.selectedTarget().odds) {
+        self.odd(defaultOdds);        
+      } else {
+        self.odd(1);
+      }
+      
+    }
   }
 
   self.selectCounterbet = function(counterbet) {

@@ -17,7 +17,7 @@
         <div class="jarviswidget defaultWidgetColor" data-widget-editbutton="false" data-widget-deletebutton="false">
             <header>
               <span class="widget-icon"> <i class="fa fa-rocket"></i> </span>
-              <h3>Feed infos</h3>
+              <h3>Feed Info</h3>
               <div class="clearfix"></div>
             </header>
             <div> <!-- widget div-->
@@ -117,6 +117,15 @@
 
                         <div class="col col-lg-6 col-sm-6">
                           <div class="row">
+                            <label class="col col-lg-4 control-label font-medlg">Topic:</label>
+                            <div class="col col-lg-8" data-bind="visible: info_data.targets.length>1">
+                              <select class="form-control" name="targetValue" data-bind="options: info_data.targets, optionsValue: 'value', optionsText: 'long_text', value: $parent.targetValue, select2: { minimumResultsForSearch: 10, escapeMarkup: 'direct' }"></select>
+                            </div>
+                            <div class="col col-lg-8" data-bind="visible: info_data.targets.length==1">
+                              <span style="font-size:19px;font-weight:bold" data-bind="text: info_data.targets[0].long_text"></span>
+                            </div>
+                          </div> 
+                          <div class="row">
                             <label class="col col-lg-4 control-label font-medlg">Bet with:</label>
                             <div class="col col-lg-8">
                               <select class="form-control" style="width: 350px;vertical-align: top;margin-right: 12px;" name="source" data-bind="options: $parent.availableAddresses, optionsValue: 'address', optionsText: 'label', value: $parent.sourceAddress, select2: { minimumResultsForSearch: 10, escapeMarkup: 'direct' }"></select>
@@ -127,15 +136,6 @@
                             <div class="col col-lg-8">
                               <input type="text"  name="wager" class="number form-control"  data-bind="value: $parent.wager, valueUpdate: 'input'" /> XCP
                               <br /><span class="invalid" data-bind="validationMessage: $parent.wager"></span>
-                            </div>
-                          </div>
-                          <div class="row">
-                            <label class="col col-lg-4 control-label font-medlg">Topic:</label>
-                            <div class="col col-lg-8" data-bind="visible: info_data.targets.length>1">
-                              <select class="form-control" name="targetValue" data-bind="options: info_data.targets, optionsValue: 'value', optionsText: 'long_text', value: $parent.targetValue, select2: { minimumResultsForSearch: 10, escapeMarkup: 'direct' }"></select>
-                            </div>
-                            <div class="col col-lg-8" data-bind="visible: info_data.targets.length==1">
-                              <span style="font-size:19px;font-weight:bold" data-bind="text: info_data.targets[0].long_text"></span>
                             </div>
                           </div> 
                           <div class="row">
@@ -150,8 +150,7 @@
                                 <span style="font-size: 16px" data-bind="text: $parent.betTypeLabelNotEqual"></span>
                               </label>
                             </div>
-                          </div> 
-                                                   
+                          </div>                              
                           <div class="row" data-bind="visible: $parent.showAdvancedOptions || $parent.counterBets().length == 0">            
                             <label class="col col-lg-4 control-label font-medlg">Odds:</label> 
                             <div class="col col-lg-8">                
