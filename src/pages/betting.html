@@ -23,14 +23,14 @@
             <div> <!-- widget div-->
               <div class="widget-body" data-bind="validationOptions: { insertMessages: false }"> <!-- widget content -->
                 <div class="row">
-                  <div class="col col-lg-1" data-bind="visible: info_data.event.valid_image" style="width:60px">
-                    <img data-bind="attr: {src: info_data.event.image_url}" />
+                  <div class="col col-lg-1" data-bind="visible: info_data.topic.valid_image" style="width:60px">
+                    <img data-bind="attr: {src: info_data.topic.image_url}" />
                   </div>
                   <div class="col col-lg-11">
                     
                     <div class="row">
                       <label class="col col-lg-1">Event date:</label>
-                      <span class="value" data-bind="text: info_data.event.date_str" style="font-size:16px"></span>
+                      <span class="value" data-bind="text: info_data.topic.date_str" style="font-size:16px"></span>
                       <div class="note" style="display:inline;margin:0">(when this bet will be resolved.)</div> 
                     </div>
                     <div class="row">
@@ -39,17 +39,17 @@
                     </div>
                     <div class="row">
                       <label class="col col-lg-1">Name:</label>
-                      <span class="value" data-bind="text: info_data.event.name"></span>
+                      <span class="value" data-bind="text: info_data.topic.name"></span>
                     </div>
-                    <div class="row" data-bind="visible: info_data.event.url">
+                    <div class="row" data-bind="visible: info_data.topic.url">
                       <label class="col col-lg-1">URL:</label>
                       <span class="value">
-                        <a target="_blank" data-bind="text: info_data.event.url, attr: {href: info_data.event.url}"></a>
+                        <a target="_blank" data-bind="text: info_data.topic.url, attr: {href: info_data.topic.url}"></a>
                       </span>
                     </div>
-                    <div class="row" data-bind="visible: info_data.event.description">
+                    <div class="row" data-bind="visible: info_data.topic.description">
                       <label class="col col-lg-1">Description:</label>
-                      <span class="value" data-bind="text: info_data.event.description"></span>
+                      <span class="value" data-bind="text: info_data.topic.description"></span>
                     </div>
                     <div class="row">
                       <label class="col col-lg-1">Fee:</label>
@@ -77,7 +77,7 @@
         <div class="jarviswidget defaultWidgetColor" data-widget-editbutton="false" data-widget-deletebutton="false">
             <header>
               <span class="widget-icon"> <i class="fa fa-rocket"></i> </span>
-              <h3>Enter bet</h3>
+              <h3 data-bind="text: wizardTitle"></h3>
               <div class="clearfix"></div>
             </header>
             <div> <!-- widget div-->
@@ -90,10 +90,10 @@
                               <a href="#tab1" data-toggle="tab"> <span class="step">1</span> <span class="title">Select feed</span> </a>
                           </li>
                           <li data-target="#step2">
-                              <a href="#tab2" data-toggle="tab"> <span class="step">2</span> <span class="title">Bet</span> </a>
+                              <a href="#tab2" data-toggle="tab"> <span class="step">2</span> <span class="title">Enter bet</span> </a>
                           </li>
                           <li data-target="#step3">
-                              <a href="#tab3" data-toggle="tab"> <span class="step">3</span> <span class="title">Confirm</span> </a>
+                              <a href="#tab3" data-toggle="tab"> <span class="step">3</span> <span class="title">Confirm Bet</span> </a>
                           </li>
                       </ul>    
                     </div>
@@ -125,21 +125,21 @@
                           <div class="row">
                             <label class="col col-lg-4 control-label font-medlg">Wager:</label>
                             <div class="col col-lg-8">
-                              <input type="text"  name="wager" class="number form-control input-lg"  data-bind="value: $parent.wager, valueUpdate: 'input'" /> XCP
+                              <input type="text"  name="wager" class="number form-control"  data-bind="value: $parent.wager, valueUpdate: 'input'" /> XCP
                               <br /><span class="invalid" data-bind="validationMessage: $parent.wager"></span>
                             </div>
                           </div>
                           <div class="row">
-                            <label class="col col-lg-4 control-label font-medlg">Target value:</label>
-                            <div class="col col-lg-8" data-bind="visible: info_data.outcomes.length>1">
-                              <select class="form-control" name="targetValue" data-bind="options: info_data.outcomes, optionsValue: 'target_value', optionsText: 'long_text', value: $parent.targetValue, select2: { minimumResultsForSearch: 10, escapeMarkup: 'direct' }"></select>
+                            <label class="col col-lg-4 control-label font-medlg">Topic:</label>
+                            <div class="col col-lg-8" data-bind="visible: info_data.targets.length>1">
+                              <select class="form-control" name="targetValue" data-bind="options: info_data.targets, optionsValue: 'value', optionsText: 'long_text', value: $parent.targetValue, select2: { minimumResultsForSearch: 10, escapeMarkup: 'direct' }"></select>
                             </div>
-                            <div class="col col-lg-8" data-bind="visible: info_data.outcomes.length==1">
-                              <span style="font-size:19px;font-weight:bold" data-bind="text: info_data.outcomes[0].long_text"></span>
+                            <div class="col col-lg-8" data-bind="visible: info_data.targets.length==1">
+                              <span style="font-size:19px;font-weight:bold" data-bind="text: info_data.targets[0].long_text"></span>
                             </div>
                           </div> 
                           <div class="row">
-                            <label class="col col-lg-4 control-label font-medlg">Bet type:</label>
+                            <label class="col col-lg-4 control-label font-medlg">Your choice:</label>
                             <div class="col col-lg-8">
                               <label class="radio radio-inline">
                                 <input name="betType" value="Equal" type="radio" data-bind="checked: $parent.betType">
@@ -155,7 +155,7 @@
                           <div class="row" data-bind="visible: $parent.showAdvancedOptions || $parent.counterBets().length == 0">            
                             <label class="col col-lg-4 control-label font-medlg">Odds:</label> 
                             <div class="col col-lg-8">                
-                              <input name="odd" class="number form-control input-lg" data-bind="value: $parent.odd, valueUpdate: 'input'" type="text"/> XCP
+                              <input name="odd" class="number form-control" data-bind="value: $parent.odd, valueUpdate: 'input'" type="text"/> XCP
                               <span class="invalid" data-bind="validationMessage: $parent.odd"></span>
                               <br /><div class="note">how much do you want to win per 1 XCP.</div>
                             </div>                      
@@ -163,7 +163,7 @@
                           <div class="row" data-bind="visible: $parent.showAdvancedOptions">           
                             <label class="col col-lg-4 control-label font-medlg">Deadline:</label>
                             <div class="col col-lg-8">                              
-                              <select class="form-control" name="deadline" style="width: 200px" data-bind="options: deadlines, optionsValue: 'timestamp', optionsText: 'text', value: $parent.deadline, select2: { minimumResultsForSearch: 10, escapeMarkup: 'direct' }"></select>
+                              <select class="form-control" name="deadline" style="width: 300px" data-bind="options: deadlines, optionsValue: 'timestamp', optionsText: 'text', value: $parent.deadline, select2: { minimumResultsForSearch: 10, escapeMarkup: 'direct' }"></select>
                               <div class="note">when this bet will be decided.</div> 
                             </div>                                  
                           </div>
@@ -220,11 +220,11 @@
                               <td><b><span data-bind="text: $parent.wager + ' XCP'"></span></b></td>
                             </tr>
                             <tr>          
-                              <td><b>Bet type:</b></td>
+                              <td><b>Your choice:</b></td>
                               <td><b><span data-bind="text: $parent.betTypeText"></span></b></td> 
                             </tr>
                             <tr>          
-                              <td><b>Target value:</b></td>
+                              <td><b>Topic:</b></td>
                               <td><b><span data-bind="text: $parent.targetValueText"></span></b></td>  
                             </tr>
                             <tr>
@@ -237,21 +237,9 @@
                                 win <span data-bind="text: $parent.odd"></span> XCP for every 1 XCP you bet 
                               </td>
                             </tr>
-                            <tr>          
-                              <td><b>Winnings:</b></td>
-                              <td><b><span data-bind="text: $parent.counterwager + ' XCP'"></span></b></td>
-                            </tr>
                             <tr>              
                               <td><b>Fee:</b></td> 
                               <td><b><span data-bind="text: $parent.fee + ' XCP'"></span></b></td>  
-                            </tr> 
-                            <tr>              
-                              <td><b>Matching:</b></td>
-                              <td><b><span data-bind="text: $parent.matchingVolume + ' XCP'"></span></b></td>  
-                            </tr> 
-                            <tr>              
-                              <td><b>Open:</b></td> 
-                              <td><b><span data-bind="text: $parent.openingVolume + ' XCP'"></span></b></td>  
                             </tr>
                           </tbody>
                         </table>

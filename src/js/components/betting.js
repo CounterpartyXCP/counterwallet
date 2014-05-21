@@ -48,6 +48,7 @@ function FeedBrowserViewModel() {
   self.sourceAddress = ko.observable('');
   self.greenPercent = ko.observable(20);
   self.feedStats = ko.observableArray([]);
+  self.wizardTitle = ko.observable("Select Feed");
 
   self.counterwager = ko.observable(null).extend({
     required: true,
@@ -68,12 +69,12 @@ function FeedBrowserViewModel() {
   self.targetValue.subscribe(function(val) {
   	// pepare bet type labels
   	var labelEqual = 'Equal', labelNotEqual = 'NotEqual', labelTargetValue = 'target_value = '+val;
-  	for (var i in self.feed().info_data.outcomes) {
-  		if (self.feed().info_data.outcomes[i].target_value == val) {
-  			if (self.feed().info_data.outcomes[i].labels) {
-  				labelEqual = self.feed().info_data.outcomes[i].labels.equal + ' (Equal)';
-  				labelNotEqual = self.feed().info_data.outcomes[i].labels.not_equal + ' (NotEqual)';
-  				labelTargetValue = self.feed().info_data.outcomes[i].long_text;
+  	for (var i in self.feed().info_data.targets) {
+  		if (self.feed().info_data.targets[i].value == val) {
+  			if (self.feed().info_data.targets[i].labels) {
+  				labelEqual = self.feed().info_data.targets[i].labels.equal;
+  				labelNotEqual = self.feed().info_data.targets[i].labels.not_equal;
+  				labelTargetValue = self.feed().info_data.targets[i].long_text;
   				break;
   			}
   		}
@@ -145,14 +146,17 @@ function FeedBrowserViewModel() {
       		$('li.previous').addClass('disabled');
 			  	$('li.next').show();
 			  	$('li.next.finish').hide();
+          self.wizardTitle("Select Feed");
       	} else if (index==1) {
       		$('li.previous').removeClass('disabled');
       		$('li.next').show();
 			  	$('li.next.finish').hide();
+          self.wizardTitle("Enter Bet");
       	} else if (index==2) {
       		$('li.previous').removeClass('disabled');
   				$('li.next').hide();
   				$('li.next.finish').removeClass('disabled').show();
+          self.wizardTitle("Confirm Bet");
       	} else {
       		return false;
       	}
@@ -189,11 +193,11 @@ function FeedBrowserViewModel() {
   	
   	// prepare images url
     feed.info_data.owner.image_url = feed.info_data.owner.valid_image ? feedImageUrl(feed.source + '_owner') : '';
-    feed.info_data.event.image_url = feed.info_data.event.valid_image ? feedImageUrl(feed.source + '_event') : '';
-    for (var i in feed.info_data.outcomes) {
-    	var image_name = feed.source + '_tv_' + feed.info_data.outcomes[i].target_value;
-    	feed.info_data.outcomes[i].image_url = feed.info_data.outcomes[i].valid_image ? feedImageUrl(image_name) : '';
-    	feed.info_data.outcomes[i].long_text = feed.info_data.outcomes[i].text + ' (value: ' + feed.info_data.outcomes[i].target_value + ')';
+    feed.info_data.topic.image_url = feed.info_data.topic.valid_image ? feedImageUrl(feed.source + '_event') : '';
+    for (var i in feed.info_data.targets) {
+    	var image_name = feed.source + '_tv_' + feed.info_data.targets[i].value;
+    	feed.info_data.targets[i].image_url = feed.info_data.targets[i].valid_image ? feedImageUrl(image_name) : '';
+    	feed.info_data.targets[i].long_text = feed.info_data.targets[i].text/* + ' (value: ' + feed.info_data.targets[i].value + ')'*/;
     }
     // prepare fee
     feed.fee = satoshiToPercent(feed.fee_fraction_int);
@@ -220,7 +224,7 @@ function FeedBrowserViewModel() {
 
     }
     self.feedStats(feed.counters.bets)
-    feed.info_data.event.date_str = moment(feed.info_data.event.date).format('LLLL');
+    feed.info_data.topic.date_str = moment(feed.info_data.topic.date).format('LLLL');
 
     $.jqlog.debug(feed);
     self.feed(feed);
@@ -228,6 +232,8 @@ function FeedBrowserViewModel() {
     self.betType(''); // to force change event
     self.betType('Equal');
     self.wager(1);
+    self.targetValue('');
+    self.targetValue(feed.info_data.targets[0].value);
     $('li.next').removeClass('disabled');
   }
 
