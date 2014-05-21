@@ -42,9 +42,9 @@ function MessageFeed() {
             original_$emit.apply(socket, ['default'].concat(args));
         }
     }
-    socket.on('default',function(event, data) {
-        $.jqlog.log('socket.io event not trapped: ' + event + ' - data:' + JSON.stringify(data));
-    });
+    /*socket.on('default',function(event, data) {
+        $.jqlog.debug('socket.io event not trapped: ' + event + ' - data:' + JSON.stringify(data));
+    });*/
     socket.on('*',function(event, data) {
         $.jqlog.log('socket.io message received: ' + event + ' - data:' + JSON.stringify(data));
         if(event == 'connect') {

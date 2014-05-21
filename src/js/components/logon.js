@@ -117,7 +117,7 @@ function LogonViewModel() {
         WALLET_OPTIONS_MODAL.selectedTheme(PREFERENCES['selected_theme']);
         WALLET_OPTIONS_MODAL.selectedLang(PREFERENCES['selected_lang']);
         
-        self.openWalletPt2(mustSavePreferencesToServer);
+        self.displayLicenseIfNecessary(mustSavePreferencesToServer);
       });
     },
     function(jqXHR, textStatus, errorThrown, endpoint) {
@@ -126,8 +126,16 @@ function LogonViewModel() {
     });
   }
   
-  self.openWalletPt2 = function(mustSavePreferencesToServer) {
+  self.displayLicenseIfNecessary = function(mustSavePreferencesToServer) {
+    if(!PREFERENCES['has_accepted_license']) {
+      LICENSE_MODAL.show(mustSavePreferencesToServer); //User must accept the license before moving on
+    } else {
+      //Generate the wallet addresses
+      self.openWalletPt2(mustSavePreferencesToServer);
+    }
+  }
 
+  self.openWalletPt2 = function(mustSavePreferencesToServer) {
       //generate the appropriate number of addresses
       WALLET.BITCOIN_WALLET = new CWBIP32(self.enteredPassphrase());
       WALLET.isOldWallet(WALLET.BITCOIN_WALLET.useOldBIP32);
@@ -210,6 +218,33 @@ function LogonViewModel() {
   }  
 }
 
+
+function LicenseModalViewModel() {
+  var self = this;
+  self.shown = ko.observable(false);
+  
+  self.show = function() {
+    self.shown(true);
+    
+    //Load in the license file text into the textarea
+    $.get( "pages/license.html", function( data ) {
+      $("#licenseAgreementText").val(data);
+    });
+  }
+
+  self.hide = function() {
+    self.shown(false);
+  }
+  
+  self.acceptTerms = function() {
+    //Continue on to generate the wallet addresses
+    PREFERENCES['has_accepted_license'] = true;
+    self.shown(false);
+    LOGON_VIEW_MODEL.openWalletPt2(true); //save the prefs to the server as we updated them
+  }
+}
+
+
 ko.validation.rules['isValidPassphrasePart'] = {
     validator: function (val, self) {
       return Mnemonic.words.indexOf(val)!=-1;
@@ -217,7 +252,6 @@ ko.validation.rules['isValidPassphrasePart'] = {
     message: 'Invalid phrase word.'
 };
 ko.validation.registerExtenders();
-
 function LogonPasswordModalViewModel() {
   var self = this;
   self.shown = ko.observable(false);

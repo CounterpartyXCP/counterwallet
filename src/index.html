@@ -244,14 +244,8 @@
         </div>
 
         <div class="alert alert-warning" class="margin-bottom-0">
-          <p style="font-size: 1.45em;text-align:center;font-weight:bold">** Existing wallet users, please read! **</p>
-          <br/>
-          <p>If you created your wallet before May 8th, please see
+          <p><b>Existing wallet users:</b> If you created your wallet before May 8th, please see
               <a href="https://forums.counterparty.co/index.php?topic=321.0" target="_blank">this post</a> on our forums. 
-              Upon logging in, you will be prompted to automatically sweep your old wallet funds into your new wallet addresses.<br/><br/>
-              If you'd like to avoid this and <b>not</b> transition to your new wallet yet, you can log into your old wallet instead
-              by prepending your passphrase with <b>"old "</b>. For example,
-            <i>"<b>old </b>acid doubt danger hum dinner action final point demand inhale bedroom ocean"</i>.
           </p>
         </div>
         <div class="panel panel-info">
@@ -308,14 +302,32 @@
           </div>
         </div>
       </div>
-      
-      <div id="disclaimer">
-          The Counterparty team does not condone the use of this technology for activities that may be unlawful in a
-          particular jurisdiction, and explicitly disclaims responsibility for the independent actions of any third
-          party utilizing this software.
-      </div>
     </div> <!-- END logged out cover div -->
     
+    <!-- modal for keyboardless passphrase entry (on login page) -->
+    <div data-bind="showModal: shown" id="licenseModal" class="modal fade" data-backdrop="static" data-keyboard="false" tabindex="-1" role="dialog" aria-labelledby="licenseModal" aria-hidden="true">
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <div class="modal-header">
+            <button type="button" data-bind="click: hide" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+            <h4 class="modal-title">License Agreement</h4>
+          </div>
+          <div class="modal-body no-padding">
+            <p class="formPadded">You must read and accept the following agreement in order to use this site:</p>
+            <form class="smart-form"><fieldset>
+              <section><div class="row">
+                  <textarea id="licenseAgreementText" class="form-control" rows="10" readonly="readonly"></textarea>
+              </div></section>
+            </fieldset></form>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-danger" data-bind="click: hide">Reject Terms</button>
+            <button type="button" data-bind="click: acceptTerms" class="btn btn-success">Accept Terms</button>
+          </div>
+        </div><!-- /.modal-content -->
+      </div><!-- /.modal-dialog -->
+    </div><!-- /.modal -->
+
     <!-- modal for keyboardless passphrase entry (on login page) -->
     <div data-bind="showModal: shown" id="logonPassphaseModal" class="modal fade" data-backdrop="static" data-keyboard="false" tabindex="-1" role="dialog" aria-labelledby="logonPassphaseModal" aria-hidden="true">
       <div class="modal-dialog">

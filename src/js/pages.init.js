@@ -2,6 +2,7 @@ INIT_FUNC = {};
 
 function initIndex() { //main page
   window.LOGON_VIEW_MODEL = new LogonViewModel();
+  window.LICENSE_MODAL = new LicenseModalViewModel();
   window.LOGON_PASSWORD_MODAL = new LogonPasswordModalViewModel();
   
   window.WALLET = new WalletViewModel();
@@ -21,6 +22,7 @@ function initIndex() { //main page
   
   $(document).ready(function() {
     ko.applyBindings(LOGON_VIEW_MODEL, document.getElementById("logon"));
+    ko.applyBindings(LICENSE_MODAL, document.getElementById("licenseModal"));
     ko.applyBindings(LOGON_PASSWORD_MODAL, document.getElementById("logonPassphaseModal"));
     ko.applyBindings(WALLET_OPTIONS_MODAL, document.getElementById("walletOptionsModal"));
     ko.applyBindings(CHAT_FEED, document.getElementById("chatPane"));
