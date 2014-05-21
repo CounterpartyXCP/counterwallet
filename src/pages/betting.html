@@ -189,6 +189,9 @@
                               <div class="progress-bar bg-color-redLight" data-bind="attr: {style: 'width: '+(100-$parent.greenPercent())+'%'}"></div>
                             </div>
                             win <span data-bind="text: $parent.odd"></span> XCP for every 1 XCP you bet 
+                            <a data-bind="visible: operatorOdds" href="#" onclick="return false" title="The feed operator is actively managing the odds">
+                              <span class="fa fa-crosshairs"></span>
+                            </a>
                           </div>
                           <div>          
                             <label>Winnings:</label>

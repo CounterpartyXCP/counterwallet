@@ -45,6 +45,7 @@ function FeedBrowserViewModel() {
   self.feedStats = ko.observableArray([]);
   self.wizardTitle = ko.observable("Select Feed");
   self.selectedTarget = ko.observable(null);
+  self.operatorOdds = ko.observable(false);
 
   self.counterwager = ko.observable(null).extend({
     required: true,
@@ -309,16 +310,19 @@ function FeedBrowserViewModel() {
         overrideOdds = self.betType()=='Equal' ? self.selectedTarget().odds.override : divFloat(1, self.selectedTarget().odds.override);
       }    
     }    
+    self.operatorOdds(false);
     if (self.counterBets().length>0) {
       // we use odds.override only if better than better open bet 
       if (overrideOdds) {
         self.odd(overrideOdds);
+        self.operatorOdds(true);
       } else {
         self.selectCounterbet(self.counterBets()[0]);
       }     
     } else {
       if (self.selectedTarget().odds) {
-        self.odd(defaultOdds);        
+        self.odd(defaultOdds);  
+        self.operatorOdds(true);      
       } else {
         self.odd(1);
       }      
