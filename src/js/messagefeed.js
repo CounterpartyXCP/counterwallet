@@ -11,21 +11,21 @@ function MessageFeed() {
     } else {
       self.failoverCurrentIndex(self.failoverCurrentIndex() + 1);
     }
-    $.jqlog.log('socket.io: Trying next server: ' + url[self.failoverCurrentIndex()]);
-    self.init();
+    $.jqlog.log('socket.io: Trying next server: ' + cwBaseURLs()[self.failoverCurrentIndex()]);
+    self.init(self.lastMessageIndexReceived());
   }
   
   self.init = function(last_message_index) {
     self.lastMessageIndexReceived(last_message_index);
     //set up a connection to the server event feed via socket.io and handle messages
     var url = cwBaseURLs()[self.failoverCurrentIndex()];
-    $.jqlog.log("socket.io: Connecting to: " + url);
+    $.jqlog.log("socket.io(messages): Connecting to: " + url);
     //https://github.com/LearnBoost/Socket.IO/wiki/Configuring-Socket.IO
     var socket = io.connect(url, {
       'connect timeout': 5000,
       'reconnect': true,
       'reconnection delay': 500,
-      'reconnection limit': 2000,
+      'reconnection limit': 10000,
       'max reconnection attempts': 5,
       'force new connection': true,
       'try multiple transports': false,
@@ -43,10 +43,10 @@ function MessageFeed() {
         }
     }
     /*socket.on('default',function(event, data) {
-        $.jqlog.log('socket.io event not trapped: ' + event + ' - data:' + JSON.stringify(data));
+        $.jqlog.debug('socket.io event not trapped: ' + event + ' - data:' + JSON.stringify(data));
     });*/
     socket.on('*',function(event, data) {
-        //$.jqlog.log('socket.io message received: ' + event + ' - data:' + JSON.stringify(data));
+        $.jqlog.log('socket.io message received: ' + event + ' - data:' + JSON.stringify(data));
         if(event == 'connect') {
           $.jqlog.log('socket.io(messages): Connected to server: ' + url);
           socket.emit("subscribe"); //subscribe to the data feed itself
@@ -54,11 +54,11 @@ function MessageFeed() {
           $.jqlog.warn('socket.io(messages): The client has disconnected from server: ' + url);
         } else if(event == 'connect_failed') {
           $.jqlog.warn('socket.io(messages): Connection to server failed: ' + url);
-          io.disconnect();
+          socket.disconnect();
           self.tryNextSIOMessageFeed();
         } else if(event == 'reconnect_failed') {
           $.jqlog.warn('socket.io(messages): Reconnect to the server failed: ' + url);
-          io.disconnect();
+          socket.disconnect();
           self.tryNextSIOMessageFeed();
         } else if(event == 'error') {
           $.jqlog.warn('socket.io(messages): Received an error: ' + url);

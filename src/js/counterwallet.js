@@ -125,6 +125,7 @@ function warningOnExit() {
  ***********/
 $(document).ready(function() {
   //Reject browsers that don't support the features we need (especially CSP 1.0 and window.crypto)
+  // See http://caniuse.com/contentsecuritypolicy and https://developer.mozilla.org/en-US/docs/Web/API/window.crypto.getRandomValues
   $.reject({  
     reject: {
       msie1: true,
@@ -160,8 +161,6 @@ $(document).ready(function() {
       firefox20: true,
       firefox21: true,
       firefox22: true,
-      firefox23: true,
-      firefox24: true,
       chrome1: true,
       chrome2: true,
       chrome3: true,
@@ -184,6 +183,8 @@ $(document).ready(function() {
       chrome20: true,
       chrome21: true,
       chrome22: true,
+      chrome23: true,
+      chrome24: true,
       opera1: true,
       opera2: true,
       opera3: true,
