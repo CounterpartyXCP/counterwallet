@@ -10,11 +10,6 @@ function FeedBrowserViewModel() {
       validator: function (val, self) {
         var address = self.sourceAddress();
         var wager = self.wager();
-
-        $.jqlog.debug('address: '+address);
-        $.jqlog.debug('balances: '+self.balances[address]);
-        $.jqlog.debug('wager: '+wager);
-
         return parseFloat(wager) <= self.balances[address];
       },
       message: 'Quantity entered exceeds the address balance.',
@@ -125,8 +120,7 @@ function FeedBrowserViewModel() {
   self.counterwager.subscribe(function() {
   	var t = addFloat(self.wager(), self.counterwager())
   	var p = divFloat(t, 100);
-  	var g = divFloat(self.wager(), p);
-  	
+  	var g = divFloat(self.wager(), p);  	
   	self.greenPercent(g);
   });
 
@@ -140,8 +134,7 @@ function FeedBrowserViewModel() {
       tabClass: 'form-wizard',
       nextSelector: 'li.next',
       onTabClick: function(tab, navigation, index) {
-      	$.jqlog.debug("TAB CLICK: "+tab);
-        return true; //tab click disabled
+      	return true; //tab click disabled
       },
       onTabShow: function(tab, navigation, index) {
       	$.jqlog.debug("TAB: "+index);
@@ -167,7 +160,6 @@ function FeedBrowserViewModel() {
       	return true;
       },
       onNext: function (tab, navigation, index) {
-      	$.jqlog.debug("NEXT CLICK: "+index);
       	return true;
       }
    });
@@ -229,7 +221,7 @@ function FeedBrowserViewModel() {
     self.feedStats(feed.counters.bets)
     feed.info_data.topic.date_str = moment(feed.info_data.topic.date).format('LLLL');
 
-    $.jqlog.debug(feed);
+    //$.jqlog.debug(feed);
     self.feed(feed);
     self.feedStats(feed.counters.bets);
     self.betType(''); // to force change event
@@ -244,10 +236,6 @@ function FeedBrowserViewModel() {
     failoverAPI('get_feed', {'address_or_url': self.feedUrl()}, self.displayFeed)
   }
 
-  self.getFeedImageUrl = function(image_type) {
-    return "/feed.png";
-  }
-
   self.loadCounterBets = function() {
     if (!self.betType() ||  !self.feed() || !self.deadline() || !self.targetValue()) return false;
     var params = {
@@ -258,10 +246,8 @@ function FeedBrowserViewModel() {
       leverage: 5040,
 
     };
-
     var onCounterbetsLoaded = function(data) {
-      $.jqlog.debug(data);
-
+      //$.jqlog.debug(data);
       // prepare data for display. TODO: optimize, all in one loop
       var displayedData = []
       for (var b = data.length-1; b>=0; b--) {
@@ -308,43 +294,34 @@ function FeedBrowserViewModel() {
           displayedData2[b].volume_str = satoshiToXCP(displayedData2[b].countervolume);
         }
       }
-
       self.counterBets(displayedData2);
-      self.setDefaultOdds();
-      
+      self.setDefaultOdds();    
     }
 
     failoverAPI('get_bets', params, onCounterbetsLoaded);
   }
 
   self.setDefaultOdds = function() {
-    $.jqlog.debug("DEFAULT ODDS:");
-    $.jqlog.debug(self.selectedTarget());
-
     var defaultOdds, overrideOdds;
     if (self.selectedTarget().odds) {
       defaultOdds = self.betType()=='Equal' ? self.selectedTarget().odds.default : divFloat(1, self.selectedTarget().odds.default);
       if (self.selectedTarget().odds.override) {
         overrideOdds = self.betType()=='Equal' ? self.selectedTarget().odds.override : divFloat(1, self.selectedTarget().odds.override);
       }    
-    }
-     
+    }    
     if (self.counterBets().length>0) {
       // we use odds.override only if better than better open bet 
       if (overrideOdds && overrideOdds > self.counterBets()[0].multiplier) {
         self.odd(overrideOdds);
       } else {
         self.selectCounterbet(self.counterBets()[0]);
-      }
-      
+      }     
     } else {
-
       if (self.selectedTarget().odds) {
         self.odd(defaultOdds);        
       } else {
         self.odd(1);
-      }
-      
+      }      
     }
   }
 
@@ -377,18 +354,10 @@ function FeedBrowserViewModel() {
 
   self.updateMatchingVolume = function() {
     var odd = self.odd();
-    var wager = self.wager();
     var volume = self.getVolumeFromOdd(odd) / UNIT;
-    var winning = self.counterwager()
-
-    $.jqlog.debug('updateMatchingVolume');
-    $.jqlog.debug('volume: ' + volume);
-    $.jqlog.debug('winning: ' + wager);
-    $.jqlog.debug('odd: ' + odd);
-
+    var wager = self.wager();
     var matching = Math.min(volume, wager);
     var opening = (wager - matching);
-
     self.matchingVolume(round(matching, 4));
     self.openingVolume(round(opening, 4)); 
   }
@@ -405,8 +374,7 @@ function FeedBrowserViewModel() {
   	if (!self.validationModel.isValid()) {
       self.validationModel.errors.showAllMessages();
       return false;
-    }
-    
+    }    
     var params = {
       source: self.sourceAddress(),
       feed_address: self.feed().source,
@@ -418,15 +386,11 @@ function FeedBrowserViewModel() {
       target_value: self.targetValue(),
       leverage: 5040
     }
-    $.jqlog.debug(params);
-
     var onSuccess = function(txHash, data, endpoint) {
-      bootbox.alert("<b>Your funds were sent successfully.</b> " + ACTION_PENDING_NOTICE);
+      bootbox.alert("<b>Your bet were sent successfully.</b> " + ACTION_PENDING_NOTICE);
     }
-
     WALLET.doTransaction(self.sourceAddress(), "create_bet", params, onSuccess);
   }
-
 
 }
 
