@@ -311,7 +311,7 @@ function FeedBrowserViewModel() {
     }    
     if (self.counterBets().length>0) {
       // we use odds.override only if better than better open bet 
-      if (overrideOdds && overrideOdds > self.counterBets()[0].multiplier) {
+      if (overrideOdds) {
         self.odd(overrideOdds);
       } else {
         self.selectCounterbet(self.counterBets()[0]);
