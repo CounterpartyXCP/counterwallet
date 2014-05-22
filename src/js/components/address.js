@@ -171,6 +171,10 @@ function AddressViewModel(key, address, initialLabel) {
     SIGN_MESSAGE_MODAL.show(self.ADDRESS);
   }
 
+  self.signTransaction = function() {
+    SIGN_TRANSACTION_MODAL.show(self.ADDRESS);
+  }
+
   self.createAsset = function() {
     if(!WALLET.canDoTransaction(self.ADDRESS)) return false;
 
