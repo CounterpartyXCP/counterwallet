@@ -1,0 +1,358 @@
+<div id="betting">
+
+  <div class="row">
+    <div class="col-xs-12 col-sm-7 col-md-7 col-lg-4">
+      <h1 class="page-title txt-color-blueDark">
+        <i class="glyphicon glyphicon-share-alt"></i> 
+          Binary Bets 
+      </h1>
+    </div>
+  </div>
+
+  <section id="widget-grid"> <!-- widget grid -->
+
+    <div class="row" data-bind="with: feed"> <!-- row -->
+      <article class="col-xs-12 col-sm-12 col-md-12 col-lg-12"> <!-- NEW WIDGET START -->
+        <!-- Widget ID (each widget will need unique ID)-->
+        <div class="jarviswidget defaultWidgetColor" data-widget-editbutton="false" data-widget-deletebutton="false">
+            <header>
+              <span class="widget-icon"> <i class="fa fa-rocket"></i> </span>
+              <h3>Feed Info</h3>
+              <div class="clearfix"></div>
+            </header>
+            <div> <!-- widget div-->
+              <div class="widget-body" data-bind="validationOptions: { insertMessages: false }"> <!-- widget content -->
+                <div class="row">
+                  <div class="col col-lg-1" data-bind="visible: info_data.topic.valid_image" style="width:60px">
+                    <img data-bind="attr: {src: info_data.topic.image_url}" />
+                  </div>
+                  <div class="col col-lg-11">
+                    
+                    <div class="row">
+                      <label class="col col-lg-1">Event date:</label>
+                      <span class="value" data-bind="text: info_data.topic.date_str" style="font-size:16px"></span>
+                      <div class="note" style="display:inline;margin:0">(when this bet will be resolved.)</div> 
+                    </div>
+                    <div class="row">
+                      <label class="col col-lg-1">Address:</label>
+                      <span class="value" data-bind="text: source"></span>
+                    </div>
+                    <div class="row">
+                      <label class="col col-lg-1">Name:</label>
+                      <span class="value" data-bind="text: info_data.topic.name"></span>
+                    </div>
+                    <div class="row" data-bind="visible: info_data.topic.url">
+                      <label class="col col-lg-1">URL:</label>
+                      <span class="value">
+                        <a target="_blank" data-bind="text: info_data.topic.url, attr: {href: info_data.topic.url}"></a>
+                      </span>
+                    </div>
+                    <div class="row" data-bind="visible: info_data.topic.description">
+                      <label class="col col-lg-1">Description:</label>
+                      <span class="value" data-bind="text: info_data.topic.description"></span>
+                    </div>
+                    <div class="row">
+                      <label class="col col-lg-1">Fee:</label>
+                      <span class="value" data-bind="text: fee"></span>
+                    </div>
+                    <div class="row">
+                      <label class="col col-lg-1">Owner:</label>
+                      <href class="value" data-bind="text: info_data.owner.name, attr: {href: info_data.owner.url} "></a>
+                    </div>
+                    <div class="row" data-bind="visible: info_data.owner.description">
+                      <label class="col col-lg-1">&nbsp;</label>
+                      <span class="value" data-bind="text: info_data.owner.description"></span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+           </div> <!-- end widget div -->
+        </div> <!-- end widget -->
+      </article> <!-- WIDGET END -->
+    </div> <!-- end row -->
+
+    <div class="row"> <!-- row -->
+      <article class="col-xs-12 col-sm-12 col-md-12 col-lg-12"> <!-- NEW WIDGET START -->
+        <!-- Widget ID (each widget will need unique ID)-->
+        <div class="jarviswidget defaultWidgetColor" data-widget-editbutton="false" data-widget-deletebutton="false">
+            <header>
+              <span class="widget-icon"> <i class="fa fa-rocket"></i> </span>
+              <h3 data-bind="text: wizardTitle"></h3>
+              <div class="clearfix"></div>
+            </header>
+            <div> <!-- widget div-->
+              <div class="widget-body" data-bind="validationOptions: { insertMessages: false }"> <!-- widget content -->
+
+                  <div id="feedWizard" class="row" style="margin-bottom:40px;">
+                    <div class="form-bootstrapWizard">
+                      <ul class="bootstrapWizard form-wizard">
+                          <li class="active" data-target="#step1">
+                              <a href="#tab1" data-toggle="tab"> <span class="step">1</span> <span class="title">Select feed</span> </a>
+                          </li>
+                          <li data-target="#step2">
+                              <a href="#tab2" data-toggle="tab"> <span class="step">2</span> <span class="title">Enter bet</span> </a>
+                          </li>
+                          <li data-target="#step3">
+                              <a href="#tab3" data-toggle="tab"> <span class="step">3</span> <span class="title">Confirm Bet</span> </a>
+                          </li>
+                      </ul>    
+                    </div>
+                  </div>
+
+                  <div class="row">                  
+                    <div class="tab-content">
+                      <div class="tab-pane active" id="tab1">
+
+                        <section class="col col-lg-6 col-sm-6">
+                          <label for="asset1" class="control-label font-medlg">Url or Address: </label>
+                          <label class="input">
+                            <input type="text" id="feed_url" name="feed_url" class="form-control input-lg" type="text"  data-bind="value: feedUrl, valueUpdate: 'input'" />
+                          </label>
+                          <br/><span class="errorColor" data-bind="validationMessage: feedUrl"></span>
+                        </section>
+
+                      </div>
+
+                      <div class="tab-pane bet-params" id="tab2" data-bind="with: feed">
+
+                        <div class="col col-lg-6 col-sm-6">
+                          <div class="row">
+                            <label class="col col-lg-4 control-label font-medlg">Topic:</label>
+                            <div class="col col-lg-8" data-bind="visible: info_data.targets.length>1">
+                              <select class="form-control" name="targetValue" data-bind="options: info_data.targets, optionsValue: 'value', optionsText: 'long_text', value: $parent.targetValue, select2: { minimumResultsForSearch: 10, escapeMarkup: 'direct' }"></select>
+                            </div>
+                            <div class="col col-lg-8" data-bind="visible: info_data.targets.length==1">
+                              <span style="font-size:19px;font-weight:bold" data-bind="text: info_data.targets[0].long_text"></span>
+                            </div>
+                          </div> 
+                          <div class="row">
+                            <label class="col col-lg-4 control-label font-medlg">Bet with:</label>
+                            <div class="col col-lg-8">
+                              <select class="form-control" style="width: 350px;vertical-align: top;margin-right: 12px;" name="source" data-bind="options: $parent.availableAddresses, optionsValue: 'address', optionsText: 'label', value: $parent.sourceAddress, select2: { minimumResultsForSearch: 10, escapeMarkup: 'direct' }"></select>
+                            </div>
+                          </div>
+                          <div class="row">
+                            <label class="col col-lg-4 control-label font-medlg">Wager:</label>
+                            <div class="col col-lg-8">
+                              <input type="text"  name="wager" class="number form-control"  data-bind="value: $parent.wager, valueUpdate: 'input'" /> XCP
+                              <br /><span class="invalid" data-bind="validationMessage: $parent.wager"></span>
+                            </div>
+                          </div> 
+                          <div class="row">
+                            <label class="col col-lg-4 control-label font-medlg">Your choice:</label>
+                            <div class="col col-lg-8">
+                              <label class="radio radio-inline">
+                                <input name="betType" value="Equal" type="radio" data-bind="checked: $parent.betType">
+                                <span style="font-size: 16px" data-bind="text: $parent.betTypeLabelEqual"></span>
+                              </label>
+                              <label class="radio radio-inline">
+                                <input name="betType" value="NotEqual" type="radio" data-bind="checked: $parent.betType">
+                                <span style="font-size: 16px" data-bind="text: $parent.betTypeLabelNotEqual"></span>
+                              </label>
+                            </div>
+                          </div>                              
+                          <div class="row" data-bind="visible: $parent.showAdvancedOptions || ($parent.counterBets().length == 0 && !$parent.selectedTarget().odds)">            
+                            <label class="col col-lg-4 control-label font-medlg">Odds:</label> 
+                            <div class="col col-lg-8">                
+                              <input name="odd" class="number form-control" data-bind="value: $parent.odd, valueUpdate: 'input'" type="text"/> XCP
+                              <span class="invalid" data-bind="validationMessage: $parent.odd"></span>
+                              <br /><div class="note">how much do you want to win per 1 XCP.</div>
+                            </div>                      
+                          </div>
+                          <div class="row" data-bind="visible: $parent.showAdvancedOptions">           
+                            <label class="col col-lg-4 control-label font-medlg">Deadline:</label>
+                            <div class="col col-lg-8">                              
+                              <select class="form-control" name="deadline" style="width: 300px" data-bind="options: deadlines, optionsValue: 'timestamp', optionsText: 'text', value: $parent.deadline, select2: { minimumResultsForSearch: 10, escapeMarkup: 'direct' }"></select>
+                              <div class="note">when this bet will be decided.</div> 
+                            </div>                                  
+                          </div>
+                          <div class="row" data-bind="visible: $parent.showAdvancedOptions">            
+                            <label class="col col-lg-4 control-label font-medlg">Expiration:</label> 
+                            <div class="col col-lg-8">                
+                              <input name="expiration" class="number form-control" data-bind="value: $parent.expiration, valueUpdate: 'input'" type="text"/> blocks
+                              <br /><span class="invalid" data-bind="validationMessage: $parent.expiration"></span>
+                              <div class="note">how many blocks a counterparty has to take the other side of the bet.</div>
+                            </div>                      
+                          </div>
+                        
+                          <div class="show-advanced">
+                            <input type="checkbox" name="showAdvancedOptions" value="1" data-bind="checked: $parent.showAdvancedOptions" />
+                            <label>Show advanced options</label>             
+                          </div>
+                        </div>
+
+                        <div class="col col-lg-6 col-sm-6 winnings">
+                          <div>
+                            <label>Odds:</label>
+                            <div class="progress progress-sm odd-bar">
+                              <div class="progress-bar bg-color-greenLight" data-bind="attr: {style: 'width: '+$parent.greenPercent()+'%'}"></div>
+                              <div class="progress-bar bg-color-redLight" data-bind="attr: {style: 'width: '+(100-$parent.greenPercent())+'%'}"></div>
+                            </div>
+                            win <span data-bind="text: $parent.odd"></span> XCP for every 1 XCP you bet 
+                            <a data-bind="visible: operatorOdds" href="#" onclick="return false" title="The feed operator is actively managing the odds">
+                              <span class="fa fa-crosshairs"></span>
+                            </a>
+                          </div>
+                          <div>          
+                            <label>Winnings:</label>
+                            <span data-bind="text: $parent.counterwager + ' XCP'"></span>  
+                          </div>
+                          <div>              
+                            <label>Fee:</label> 
+                            <span data-bind="text: $parent.fee + ' XCP'"></span>  
+                          </div> 
+                          <div>              
+                            <label>Matching:</label> 
+                            <span data-bind="text: $parent.matchingVolume + ' XCP'"></span>  
+                          </div> 
+                          <div>              
+                            <label>Open:</label> 
+                            <span data-bind="text: $parent.openingVolume + ' XCP'"></span>  
+                          </div>
+                        </div>
+
+                      </div>
+
+                      <div class="tab-pane bet-confim" id="tab3" data-bind="with: feed">
+                        <table class="table table-bordered">​
+                          <thead></thead>
+                          <tbody>
+                            <tr>
+                              <td><b>Wager:</b></td>
+                              <td><b><span data-bind="text: $parent.wager + ' XCP'"></span></b></td>
+                            </tr>
+                            <tr>          
+                              <td><b>Your choice:</b></td>
+                              <td><b><span data-bind="text: $parent.betTypeText"></span></b></td> 
+                            </tr>
+                            <tr>          
+                              <td><b>Topic:</b></td>
+                              <td><b><span data-bind="text: $parent.targetValueText"></span></b></td>  
+                            </tr>
+                            <tr>
+                              <td><b>Odds:</b></td>
+                              <td>
+                                <div class="progress progress-sm odd-bar">
+                                  <div class="progress-bar bg-color-greenLight" data-bind="attr: {style: 'width: '+$parent.greenPercent()+'%'}"></div>
+                                  <div class="progress-bar bg-color-redLight" data-bind="attr: {style: 'width: '+(100-$parent.greenPercent())+'%'}"></div>
+                                </div>
+                                win <span data-bind="text: $parent.odd"></span> XCP for every 1 XCP you bet 
+                              </td>
+                            </tr>
+                            <tr>              
+                              <td><b>Fee:</b></td> 
+                              <td><b><span data-bind="text: $parent.fee + ' XCP'"></span></b></td>  
+                            </tr>
+                          </tbody>
+                        </table>
+                      </div>
+
+                    </div>
+                  </div>
+
+                  <div class="form-actions">
+                    <div class="row">
+                      <div class="col-sm-12">
+                        <ul class="pager wizard no-margin">
+                          <li class="previous disabled">
+                            <a href="#" class="btn btn-lg btn-default" data-bind="click: previousStep"> Previous</a>
+                          </li>
+                          <li class="next">
+                            <a href="#" class="btn btn-lg txt-color-darken" data-bind="click: nextStep"> Next </a>
+                          </li>
+                          <li class="next finish">
+                            <a href="#" class="btn btn-lg btn-success" data-bind="click: submitBet"> Bet</a>
+                          </li>
+                        </ul>
+                      </div>
+                    </div>
+                  </div>
+
+              </div>
+           </div> <!-- end widget div -->
+        </div> <!-- end widget -->
+      </article> <!-- WIDGET END -->
+    </div> <!-- end row -->
+
+    <div class="row" data-bind="with: feed, visible: currentStep()==1"> <!-- row -->
+      <article class="col-xs-12 col-sm-12 col-md-12 col-lg-12"> <!-- NEW WIDGET START -->
+        <!-- Widget ID (each widget will need unique ID)-->
+        <div class="jarviswidget defaultWidgetColor" data-widget-editbutton="false" data-widget-deletebutton="false">
+            <header>
+              <span class="widget-icon"> <i class="fa fa-rocket"></i> </span>
+              <h3>
+                Open bets 
+                <b data-bind="text: $parent.betTypeCounter"></b> on 
+                <b data-bind="text: $parent.targetValueText"></b>
+              </h3>
+              <div class="clearfix"></div>
+            </header>
+            <div id="counterbets"> <!-- widget div-->
+              <div class="widget-body no-padding" data-bind="validationOptions: { insertMessages: false }"> <!-- widget content -->
+
+                <table width="100%" class="table table-striped table-hover datatable_basic">
+                  <thead>
+                    <tr>
+                      <th>Odds</th>
+                      <th>Volume</th>
+                      <th>Cumul</th>
+                      <th>Bets</th>
+                    </tr>
+                  </thead>
+                  <tbody data-bind="foreach: { data: $parent.counterBets, as: 'counterbet' }">
+                    <tr class="cb" data-bind="click: $parents[1].selectCounterbet, attr: {id: 'cb_'+counterbet.tx_index}">
+                      <td style="text-align:center" data-bind="text: counterbet.ratio"/></td>
+                      <td style="text-align:right;padding-right:10px !important;" data-bind="text: counterbet.counterwager"></td>
+                      <td style="text-align:right;padding-right:10px !important;">
+                        <b data-bind="text: counterbet.volume_str"></b>
+                      </td>
+                      <td style="text-align:right;padding-right:10px !important;" data-bind="text: counterbet.bet_count"></td>
+                    </tr>
+                  </tbody>
+                </table>
+
+              </div>
+           </div> <!-- end widget div -->
+        </div> <!-- end widget -->
+      </article> <!-- WIDGET END -->
+    </div> <!-- end row -->
+
+    <div class="row" data-bind="with: feed"> <!-- row -->
+      <article class="col-xs-12 col-sm-12 col-md-12 col-lg-12"> <!-- NEW WIDGET START -->
+        <!-- Widget ID (each widget will need unique ID)-->
+        <div class="jarviswidget defaultWidgetColor" data-widget-editbutton="false" data-widget-deletebutton="false">
+            <header>
+              <span class="widget-icon"> <i class="fa fa-rocket"></i> </span>
+              <h3>Feed bets</h3>
+              <div class="clearfix"></div>
+            </header>
+            <div id="counterbets"> <!-- widget div-->
+              <div class="widget-body no-padding" data-bind="validationOptions: { insertMessages: false }"> <!-- widget content -->
+
+                <table width="100%" class="table table-striped table-hover datatable_basic">
+                  <thead>
+                    <tr>
+                      <th>Status</th>
+                      <th>Bet count</th>
+                      <th>Wager quantity</th>
+                      <th>Wager remaining</th>
+                    </tr>
+                  </thead>
+                  <tbody data-bind="foreach: {data: $parent.feedStats, as: 'bets'}">
+                    <tr class="cb">
+                      <td style="text-align:center" data-bind="html: bets.status_html"/></td>
+                      <td style="text-align:right;padding-right:10px !important;" data-bind="text: bets.bet_count"></td>
+                      <td style="text-align:right;padding-right:10px !important;" data-bind="text: bets.wager_quantity"></td>
+                      <td style="text-align:right;padding-right:10px !important;" data-bind="text: bets.wager_remaining"></td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+           </div> <!-- end widget div -->
+        </div> <!-- end widget -->
+      </article> <!-- WIDGET END -->
+    </div> <!-- end row -->
+
+  </section>
+
+</div>

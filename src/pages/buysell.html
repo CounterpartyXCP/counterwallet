@@ -164,9 +164,7 @@
                                             </div>
                                         </div>
                                     </div>
-                                    <div class="row buySellRow" data-bind="visible: currentTab() == 2 && isMarketPriceMissingOrOverridden() && !overrideDefaultOptions()">
-                                        <a href="#" data-bind="click: setOverrideDefaultOptions" class="font-xs">Override Trade Options</a>
-                                    </div>
+                                    
                                     
                                     <!-- PURCHASE SUMMARY -->
                                     <div class="row margin-top-10" data-bind="fadeVisibleInOnly: currentTab() == 2 && unitPrice() && selectedBuyQuantity()">
@@ -230,6 +228,11 @@
                                                 <input type="radio" name="btcFeeAs" value="quantity" data-bind="btnGroupChecked: btcFeeAs">As Amount</label>
                                             </div>
                                         </div>
+                                    </div>
+
+                                    <div class="row buySellRow" data-bind="visible: currentTab() == 2">
+                                        <input type="checkbox" name="showAdvancedOptions" value="1" data-bind="checked: overrideDefaultOptions" />
+                                        <label style="font-size:14px">Override Trade Options</label>  
                                     </div>
                                 </div>
                                 <div class="tab-pane" id="tab3">
