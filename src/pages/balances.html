@@ -86,7 +86,8 @@
                 <ul class="dropdown-menu pull-right">
                   <li><a data-bind="click: showQRCode" href="#">Show QR Code</a></li>
                   <li><a data-bind="click: showPrivateKey" href="#">Show Private Key</a></li>
-                  <li><a data-bind="visible: !IS_WATCH_ONLY, click: signMessage" href="#">Sign Message</a></li>                 
+                  <li><a data-bind="visible: !IS_WATCH_ONLY, click: signMessage" href="#">Sign Message</a></li>  
+                  <li><a data-bind="visible: !IS_WATCH_ONLY, click: signTransaction" href="#">Sign Transaction</a></li>               
                   <li><a data-bind="visible: IS_WATCH_ONLY, click: removeWatch" href="#">Remove Address</a></li>
 
                   <li class="divider"></li><li class="dropdown-header">Issuance...</li>                 
@@ -974,6 +975,49 @@
       <div class="modal-footer">
         <button type="button" class="btn btn-default" data-bind="click: hide">Cancel</button>
         <button type="button" data-bind="click: submitForm" class="btn btn-warning">Broadcast</button>
+      </div>
+    </div><!-- /.modal-content -->
+  </div><!-- /.modal-dialog -->
+</div><!-- /.modal -->
+
+
+<!-- modal for sign transaction -->
+<div data-bind="showModal: shown" id="signTransactionModal" class="modal fade" data-backdrop="static" data-keyboard="false" tabindex="-1" role="dialog" aria-labelledby="signTransactionModal" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" data-bind="click: hide" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+        <h4 class="modal-title">Sign a Transaction</h4>
+      </div>
+      <div class="modal-body no-padding">
+        <p class="formPadded">Sign a transaction with address <b data-bind="text: address"></b>.</p>
+        
+        <form class="smart-form"><fieldset>
+          <section><div class="row">
+            <label class="control-label col col-sm-2">Unsigned hex transaction to Sign</label>
+            <div class="col col-sm-10">
+                <label class="textarea">
+                    <textarea rows="3" class="custom-scroll" data-bind="value: unsignedTx, valueUpdate : 'input'"></textarea>
+                </label>
+                <div class="note">Enter the raw transaction to be signed.</div>
+            </div>
+          </div></section>
+          
+          <section><div class="row">
+            <label class="control-label col col-sm-2">Signed Transaction</label>
+            <div class="col col-sm-10">
+                <label class="textarea">
+                    <textarea id="signedTx" rows="6" class="custom-scroll" data-bind="fadeInText: signedTx" disabled="disabled"></textarea>
+                </label>
+                <div class="note">The signed transaction appears above.</div>
+            </div>
+          </div></section>
+        </fieldset></form>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-default" data-bind="click: hide">Close</button>
+        <button type="button" data-bind="click: signTransaction" class="btn btn-primary">Sign</button>
+        <button type="button" data-bind="click: signAndBroadcastTransaction" class="btn btn-primary">Sign And Broadcast</button>
       </div>
     </div><!-- /.modal-content -->
   </div><!-- /.modal-dialog -->

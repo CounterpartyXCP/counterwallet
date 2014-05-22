@@ -1345,5 +1345,67 @@ function BroadcastModalViewModel() {
     WALLET.doTransaction(self.address(), "create_broadcast", params, onSuccess, onError);
   }
 }
+
+function SignTransactionModalViewModel() {
+  var self = this;
+  self.shown = ko.observable(false);
+  self.address = ko.observable(null); //address string, not an Address object
+  self.unsignedTx = ko.observable('').extend({
+    required: true,
+  });
+  self.signedTx = ko.observable();
+  self.validTx = ko.observable(false);
+  
+  self.validationModel = ko.validatedObservable({
+    unsignedTx: self.unsignedTx
+  });
+  
+  self.resetForm = function() {
+    self.address(null);
+    self.unsignedTx('');
+    self.signedTx('');
+    self.validationModel.errors.showAllMessages(false);
+  }
+  
+  
+  self.show = function(address, resetForm) {
+    if(typeof(resetForm)==='undefined') resetForm = true;
+    if(resetForm) self.resetForm();
+    self.address(address);
+    self.shown(true);
+  }  
+
+  self.hide = function() {
+    self.shown(false);
+  }
+  
+  self.signTransaction = function() {
+    assert(self.validationModel.isValid(), "Cannot sign");
+    var cwk = WALLET.getAddressObj(self.address()).KEY;
+    var signed = '';
+    try {
+      signed = cwk.signRawTransaction(self.unsignedTx());
+      self.validTx(true);
+    } catch (e) {
+      signed = e.message;
+      self.validTx(false);
+    }   
+    self.signedTx(signed);
+    $("#signedMessage").effect("highlight", {}, 1500);
+    //Keep the form up after signing, the user will manually press Close to close it...
+  }
+
+  self.signAndBroadcastTransaction = function() {
+    self.signTransaction();
+    if (self.validTx()) {
+      var onSuccess = function(txHash, endpoint) {
+        self.shown(false);
+        bootbox.alert("Your transaction were broacasted successfully:<br /><br /><b>"+txHash+"</b>");
+      }
+
+      WALLET.broadcastSignedTx(self.signedTx(), onSuccess, defaultErrorHandler);
+    }
+  }
+}
 /*NOTE: Any code here is only triggered the first time the page is visited. Put JS that needs to run on the
   first load and subsequent ajax page switches in the .html <script> tag*/
