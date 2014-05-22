@@ -215,7 +215,7 @@
 
     <!-- Logged out cover div -->
     <div id="logon">
-      <h1>Welcome to Counterwallet</h1>
+      <h1>Welcome to Counterwallet<span data-bind="visible: USE_TESTNET">&nbsp;Testnet</span></h1>
       <h2>Powered by Counterparty</h2>
       <div id="form-well">
         <div id="createNewAcctBtnPane" data-bind="visible: generatedPassphrase().length == 0">
@@ -255,7 +255,7 @@
         <div class="panel panel-info">
           <div class="panel-heading">
             <h3 class="panel-title">
-              <b>Log Into Your Wallet</b>
+              <b>Log Into Your <span data-bind="visible: USE_TESTNET">Testnet&nbsp;</span>Wallet</b>
               <span data-bind="fadeVisibleInOnly: IS_DEV" class="label label-warning pull-right margin-left-5 padding-5 display-none"><i class="fa-fw fa fa-warning"></i>&nbsp;Dev Mode Enabled</span>
               <span data-bind="fadeVisibleInOnly: USE_TESTNET" class="label label-info pull-right margin-left-5 padding-5 display-none"><i class="fa-fw fa fa-info"></i>&nbsp;Testnet In Use</span>
             </h3>
@@ -282,7 +282,7 @@
        <div id="extra-info" class="container" data-bind="visible: generatedPassphrase().length === 0">
         <h3 class="sales-title margin-bottom-10">
           Counterwallet is a web-wallet for <a href="http://www.counterparty.co" target="_blank">Counterparty</a>,
-          the world’s first protocol for decenralized financial tools.
+          the world’s first protocol for decentralized financial tools.
         </h3>
         <h4 class="sales-title">
           All transactions made with Counterwallet use an automatic escrow system to keep them secure, with no middleman required.
