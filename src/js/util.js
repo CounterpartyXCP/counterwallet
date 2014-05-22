@@ -363,6 +363,56 @@ function deepCompare () {
   return true;
 }
 
+function capitaliseFirstLetter(string) {
+  return string.charAt(0).toUpperCase() + string.slice(1);
+}
+
+function feedImageUrl(image_name) {
+  var url = cwBaseURLs()[0];
+  url += USE_TESTNET ? '/_t_feed_img/' : '/_feed_img/';
+  url += image_name + '.png';
+  return url;
+}
+
+function timestampToString(timestamp) {
+  return moment(timestamp * 1000).format("MMM Do YYYY, h:mm:ss a");
+}
+
+function satoshiToPercent(value) {
+  var percent = mulFloat(divFloat(value, UNIT), 100);
+  return smartFormat(percent, 4, 4) + '%'
+}
+
+function currency(amount, unit) {
+  return smartFormat(normalizeQuantity(amount), 4, 4) + ' ' + unit;
+}
+
+function satoshiToXCP(amount) {
+  return currency(amount, 'XCP');
+}
+
+function round(amount, decimals) {
+  return Math.ceil(amount * decimals * 100) / (decimals * 100);
+}
+
+// Reduce a fraction by finding the Greatest Common Divisor and dividing by it.
+function reduce(numerator,denominator){
+  var gcd = function gcd(a,b){
+    return b ? gcd(b, a%b) : a;
+  };
+  gcd = gcd(numerator,denominator);
+  return [numerator/gcd, denominator/gcd];
+}
+
+function isValidURL(str) {
+  var pattern = /^(https?:\/\/)?((([a-z\d]([a-z\d-]*[a-z\d])*)\.)+[a-z]{2,}|((\d{1,3}\.){3}\d{1,3}))(\:\d+)?(\/[-a-z\d%_.~+]*)*(\?[;&a-z\d%_.~+=-]*)?(\#[-a-z\d_]*)?$/i;
+
+  if(!str.match(pattern)) {
+    return false;
+  } else {
+    return true;
+  }
+}
 
 //Helper for closure-based inheritance (see http://www.ruzee.com/blog/2008/12/javascript-inheritance-via-prototypes-and-closures)
 (function(){

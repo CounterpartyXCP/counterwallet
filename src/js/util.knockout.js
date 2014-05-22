@@ -135,6 +135,36 @@ ko.validation.rules['isValidPositiveQuantityOrZero'] = {
     },
     message: 'Must be a valid quantity (num with max 8 decimal places), or zero'
 };
+
+ko.validation.rules['isValidPositiveInteger'] = {
+    validator: function (val, self) {
+      return val.toString().match(/^[0-9]+$/) && parseFloat(val) >= 0;
+    },
+    message: 'Must be a positive integer'
+};
+
+ko.validation.rules['isValidUrl'] = {
+    validator: function (val, self) {
+        return isValidURL(val);
+    },
+    message: 'This field must be a valid url'
+};
+
+ko.validation.rules['isValidUrlOrValidBitcoinAdress'] = {
+    validator: function (val, self) {
+      if (!val) return false;
+      // regex to check url, make freeze Chrome when checking btc address
+      // TODO: change the way to check an url
+      // return CWBitcore.isValidAddress(val) || isValidURL(val);
+      if (val.indexOf('http://') == 0 || val.indexOf('https://') == 0) {
+        return isValidURL(val);
+      } else {
+        return CWBitcore.isValidAddress(val);
+      }   
+    },
+    message: 'This field must be a valid url or a valid Bitcoin address'
+};
+
 ko.validation.registerExtenders();
 
 

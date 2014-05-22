@@ -23,6 +23,17 @@ function subFloat(floatA, floatB) {
   return addFloat(floatA, -floatB);
 }
 
+function mulFloat(floatA, floatB) {
+  var a = new Decimal(floatA);
+  var b = new Decimal(floatB);
+  return a.mul(b).toFloat();
+}
+
+function divFloat(floatA, floatB) {
+  var a = new Decimal(floatA);
+  var b = new Decimal(floatB);
+  return a.div(b).toFloat();
+}
 
 function hashToB64(content) {
   //used for storing address alias data, for instance

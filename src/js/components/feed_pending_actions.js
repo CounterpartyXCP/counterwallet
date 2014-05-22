@@ -57,11 +57,11 @@ PendingActionViewModel.calcText = function(category, data) {
   } else if(category == 'broadcasts') {
     desc = "Pending broadcast:<br/>Text: " + data['text'] + "<br/>Value:" + data['value'];
   } else if(category == 'bets') {
-    desc = "Pending <b>" + BET_CATEGORYS[data['bet_type']] + "</b> bet on feed @ <Ad>"
+    desc = "Pending <b>" + data['bet_type'] + "</b> bet on feed @ <Ad>"
       + getLinkForCPData('address', data['feed_address'], getAddressLabel(data['feed_address'])) + "</Ad><br/>"
-      + "Odds: " + data['odds'] + ", Wager: <Am>"
-      + numberWithCommas(normalizeQuantity(data['wager_quantity'])) + "</Am> <As>XCP</As>, Counterwager: <Am>"
-      + numberWithCommas(normalizeQuantity(data['counterwager_quantity'])) + "</Am> <As>XCP</As>";  
+      + "Wager: <Am>"
+      + numberWithCommas(normalizeQuantity(data['wager'])) + "</Am> <As>XCP</As>, Counterwager: <Am>"
+      + numberWithCommas(normalizeQuantity(data['counterwager'])) + "</Am> <As>XCP</As>";  
   } else if(category == 'dividends') {
     var divUnitDivisible = WALLET.getAddressObj(data['source']).getAssetObj(data['dividend_asset']).DIVISIBLE;
     desc = "Pending dividend payment of <Am>" + numberWithCommas(normalizeQuantity(data['quantity_per_unit'], divUnitDivisible)) + "</Am> <As>"

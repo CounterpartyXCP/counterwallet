@@ -1250,5 +1250,100 @@ function DisplayPrivateKeyModalViewModel() {
   }
 }
 
+
+function BroadcastModalViewModel() {
+  var self = this;
+
+  self.addressObj = null;
+
+  self.shown = ko.observable(false);
+
+  self.address = ko.observable(null).extend({
+    required: true   
+  });
+
+  self.textValue = ko.observable('').extend({
+    required: true   
+  });
+
+  self.numericalValue = ko.observable(-1).extend({
+    number: true
+  });
+
+  self.feeFraction = ko.observable(0).extend({
+    max: 42.94967295,
+    isValidPositiveQuantityOrZero: self
+
+  });
+
+  self.broadcastDate = ko.observable(new Date()).extend({
+    date: true
+  });
+
+  self.validationModel = ko.validatedObservable({
+    address: self.address,
+    textValue: self.textValue,
+    numericalValue: self.numericalValue,
+    feeFraction: self.feeFraction,
+    broadcastDate: self.broadcastDate
+  });
+
+  self.resetForm = function() {
+    self.addressObj = null;
+    self.address(null);
+    self.textValue('');
+    self.numericalValue(-1);
+    self.feeFraction(0);
+    self.broadcastDate(new Date());
+    self.validationModel.errors.showAllMessages(false);
+  }
+  
+  self.show = function(addressObj, resetForm) {
+    if(typeof(resetForm)==='undefined') resetForm = true;
+    if(resetForm) self.resetForm();
+    console.log(addressObj);
+    self.addressObj = addressObj;
+    self.address(self.addressObj.ADDRESS);
+    self.shown(true);
+  }  
+
+  self.hide = function() {
+    self.shown(false);
+  }
+
+  self.submitForm = function() {
+    if (!self.validationModel.isValid()) {
+      $.jqlog.debug('ERRORS');
+      self.validationModel.errors.showAllMessages();
+      return false;
+    }    
+    //data entry is valid...submit to the server
+    $('#broadcastModal form').submit();
+  }
+
+  self.doAction = function() {
+   
+    var params = {
+      source: self.address(),
+      fee_fraction: Decimal.round(new Decimal(self.feeFraction()).div(100), 8, Decimal.MidpointRounding.ToEven).toFloat(),
+      text: self.textValue(),
+      timestamp: self.broadcastDate() ? parseInt(self.broadcastDate().getTime() / 1000) : null,
+      value: self.numericalValue()
+    }
+    //$.jqlog.debug(params); 
+    
+    var onSuccess = function(txHash, data, endpoint) {
+      self.hide();
+      bootbox.alert("Broadcast done.");
+    }
+
+    var onError = function(jqXHR, textStatus, errorThrown, endpoint) {
+      self.hide();
+      bootbox.alert(textStatus);
+    }
+
+    WALLET.doTransaction(self.address(), "create_broadcast", params, onSuccess, onError);
+  }
+}
 /*NOTE: Any code here is only triggered the first time the page is visited. Put JS that needs to run on the
   first load and subsequent ajax page switches in the .html <script> tag*/
