@@ -12,11 +12,6 @@
     z-index: 1;
 }
 
-.sectionHeaderButtonBar {
-    padding-right: 14px;
-    padding-top: 14px;
-}
-
 .emptyFeedContainer {
     text-align: center;
     position: relative;
@@ -55,4 +50,25 @@ span.modeIndicator {
 .historyRecentTxFieldset {
   padding: 5px 14px 25px !important;
   background: inherit !important;
+}
+
+
+/*
+ * Stats page
+ */
+#statsTxnHistoryContainer {
+  resize: both;
+  width: 100%;
+}
+
+
+/*
+ * Portfolio/Leaderboard
+ */
+#portfolioMarketBar, #leaderboardMarketBar {
+  padding-bottom: 20px;
+}
+
+#portfolioMarketBar h2, #leaderboardMarketBar h2 {
+  display: inline;
 }
