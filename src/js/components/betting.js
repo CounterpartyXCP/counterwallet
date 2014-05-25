@@ -39,7 +39,6 @@ function FeedBrowserViewModel() {
   self.fee = ko.observable(0);
   self.showAdvancedOptions = ko.observable(false);
   self.currentStep = ko.observable(0);
-  self.sourceAddress = ko.observable('');
   self.greenPercent = ko.observable(20);
   self.feedStats = ko.observableArray([]);
   self.wizardTitle = ko.observable("Select Feed");
@@ -398,6 +397,174 @@ function FeedBrowserViewModel() {
 
 }
 
+
+function OpenBetsViewModel() {
+  self = this;
+
+  self.openBets = ko.observableArray([]);
+  self.addressesLabels = {};
+
+  self.init = function() {
+    self.addressesLabels = {};
+    var wallet_adressess = WALLET.getAddressesList(true);
+    var addresses = [];
+    for(var i = 0; i < wallet_adressess.length; i++) {
+      addresses.push(wallet_adressess[i][0]);
+      self.addressesLabels[wallet_adressess[i][0]] = wallet_adressess[i][1];
+    }
+
+    var params = {
+      'addresses': addresses,
+      'status': 'open'
+    }
+    failoverAPI("get_user_bets", params, self.displayOpenBets);
+  }
+
+  self.displayOpenBets = function(data) {
+    self.openBets([]);
+    var bets = [];
+    for (var i=0; i<data.bets.length; i++) {
+      var bet = {};
+      bet.address = data.bets[i].source;
+      bet.address_label = self.addressesLabels[bet.address];
+      if (data.feeds[data.bets[i].feed_address]) {
+        var feed = data.feeds[data.bets[i].feed_address];
+        bet.feed = feed.info_data.title;
+        for (var j=0; j<feed.info_data.targets.length; j++) {
+          if (feed.info_data.targets[j].value == data.bets[i].target_value) {
+            bet.target_value = feed.info_data.targets[j].text;
+          }
+          if (feed.info_data.targets[j].labels) {
+            bet.bet_type = data.bets[i].bet_type == 2 ? feed.info_data.targets[j].labels.equal : feed.info_data.targets[j].labels.not_equal;
+          } else {
+            bet.bet_type = BET_TYPES[data.bets[i].bet_type];
+          }
+        }
+      } else {
+        bet.feed = data.bets[i].feed_address;
+        bet.target_value = data.bets[i].target_value;
+        bet.bet_type = BET_TYPES[data.bets[i].bet_type];
+      }
+      bet.fee = satoshiToPercent(data.bets[i].fee_fraction_int);
+      bet.deadline = moment(data.bets[i].deadline*1000).format('YYYY/MM/DD hh:mm:ss A Z')
+      bet.wager_quantity = satoshiToXCP(data.bets[i].wager_quantity);
+      bet.wager_remaining = satoshiToXCP(data.bets[i].wager_remaining);
+      bet.counterwager_quantity = satoshiToXCP(data.bets[i].counterwager_quantity);
+      bet.counterwager_remaining = satoshiToXCP(data.bets[i].counterwager_remaining);
+      bets.push(bet);
+    }
+    self.openBets(bets);
+    var openBetsTable = $('#openBetsTable').dataTable();
+    //$.jqlog.debug(bets);
+  }
+
+  
+}
+
+function MatchedBetsViewModel() {
+  self = this;
+  self.matchedBets = ko.observableArray([]);
+  self.addressesLabels = {};
+
+  self.init = function() {
+    self.addressesLabels = {};
+    var wallet_adressess = WALLET.getAddressesList(true); 
+    var filters = [];
+    for(var i = 0; i < wallet_adressess.length; i++) { 
+      self.addressesLabels[wallet_adressess[i][0]] = wallet_adressess[i][1];
+      var filter = {
+        'field': 'tx0_address',
+        'op': '==',
+        'value': wallet_adressess[i][0]
+      };
+      filters.push(filter);
+      filter = {
+        'field': 'tx1_address',
+        'op': '==',
+        'value': wallet_adressess[i][0]
+      };
+      filters.push(filter);
+    }
+
+    params = {
+      'filters': filters,
+      'filterop': 'or',
+      'order_by': 'id',
+      'order_dir': 'desc'
+    };
+    failoverAPI("get_bet_matches", params, self.displayMatchedBets);
+  }
+
+  self.displayMatchedBets = function(data) {
+    $.jqlog.debug(data);
+    var feed_addresses = {};
+    for (var i in data) {
+      feed_addresses[data[i].feed_address] = true;
+    }
+    feed_addresses = Object.keys(feed_addresses);
+
+    var genBetItem = function(data_bet, num_tx, feeds) {
+      var bet = {};
+      bet.address = data_bet['tx'+num_tx+'_address'];
+      bet.address_label = self.addressesLabels[bet.address];
+      if (feeds[data_bet.feed_address]) {
+        var feed = feeds[data_bet.feed_address];
+        bet.feed = feed.info_data.title;
+        for (var j=0; j<feed.info_data.targets.length; j++) {
+          if (feed.info_data.targets[j].value == data_bet.target_value) {
+            bet.target_value = feed.info_data.targets[j].text;
+          }
+          if (feed.info_data.targets[j].labels) {
+            bet.bet_type = data_bet['tx'+num_tx+'_bet_type'] == 2 ? feed.info_data.targets[j].labels.equal : feed.info_data.targets[j].labels.not_equal;
+          } else {
+            bet.bet_type = BET_TYPES[data_bet['tx'+num_tx+'_bet_type']];
+          }
+        }
+      } else {
+        bet.feed = data_bet.feed_address;
+        bet.target_value = data_bet.target_value;
+        bet.bet_type = BET_TYPES[data_bet['tx'+num_tx+'_bet_type']];
+      }
+      bet.fee = satoshiToPercent(data_bet.fee_fraction_int);
+      bet.deadline = moment(data_bet.deadline*1000).format('YYYY/MM/DD hh:mm:ss A Z')
+      if (num_tx=='0') {
+        bet.wager = satoshiToXCP(data_bet.forward_quantity);
+        bet.counterwager = satoshiToXCP(data_bet.backward_quantity);
+      } else {
+        bet.wager = satoshiToXCP(data_bet.backward_quantity);
+        bet.counterwager = satoshiToXCP(data_bet.forward_quantity);
+      }
+      if (data_bet.status == 'pending') {
+        bet.status = data_bet.status;
+      } else {
+        var win_bet_type = BET_MATCHES_STATUS[data_bet.status];
+        bet.status = win_bet_type == data_bet['tx'+num_tx+'_bet_type'] ? 'win' : 'loose';
+      }
+      return bet;
+    }
+
+    var onReceivedFeed = function(feeds) {     
+      var bets = [];
+      for (var i in data) {
+        // one bet_matche can generate 2 lines if both addresses are in the wallet
+        if (self.addressesLabels[data[i].tx0_address]) {
+          bets.push(genBetItem(data[i], '0', feeds));
+        }
+        if (self.addressesLabels[data[i].tx1_address]) {
+          bets.push(genBetItem(data[i], '1', feeds));
+        }
+      }
+      self.matchedBets(bets);
+      var matchedBetsTable = $('#matchedBetsTable').dataTable();
+    }
+
+    self.matchedBets([]);
+    var params = {
+      'addresses': feed_addresses
+    }
+    failoverAPI('get_feeds_by_source', params, onReceivedFeed);
+  }
+}
 
 /*NOTE: Any code here is only triggered the first time the page is visited. Put JS that needs to run on the
   first load and subsequent ajax page switches in the .html <script> tag*/
