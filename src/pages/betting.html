@@ -23,14 +23,14 @@
             <div> <!-- widget div-->
               <div class="widget-body" data-bind="validationOptions: { insertMessages: false }"> <!-- widget content -->
                 <div class="row">
-                  <div class="col col-lg-1" data-bind="visible: info_data.topic.valid_image" style="width:60px">
-                    <img data-bind="attr: {src: info_data.topic.image_url}" />
+                  <div class="col col-lg-1" data-bind="visible: info_data.valid_image" style="width:60px">
+                    <img data-bind="attr: {src: info_data.image_url}" />
                   </div>
                   <div class="col col-lg-11">
                     
                     <div class="row">
                       <label class="col col-lg-1">Event date:</label>
-                      <span class="value" data-bind="text: info_data.topic.date_str" style="font-size:16px"></span>
+                      <span class="value" data-bind="text: info_data.date_str" style="font-size:16px"></span>
                       <div class="note" style="display:inline;margin:0">(when this bet will be resolved.)</div> 
                     </div>
                     <div class="row">
@@ -39,29 +39,30 @@
                     </div>
                     <div class="row">
                       <label class="col col-lg-1">Name:</label>
-                      <span class="value" data-bind="text: info_data.topic.name"></span>
+                      <span class="value" data-bind="text: info_data.title"></span>
                     </div>
-                    <div class="row" data-bind="visible: info_data.topic.url">
+                    <div class="row" data-bind="visible: info_data.url">
                       <label class="col col-lg-1">URL:</label>
                       <span class="value">
-                        <a target="_blank" data-bind="text: info_data.topic.url, attr: {href: info_data.topic.url}"></a>
+                        <a target="_blank" data-bind="text: info_data.url, attr: {href: info_data.url}"></a>
                       </span>
                     </div>
-                    <div class="row" data-bind="visible: info_data.topic.description">
+                    <div class="row" data-bind="visible: info_data.description">
                       <label class="col col-lg-1">Description:</label>
-                      <span class="value" data-bind="text: info_data.topic.description"></span>
+                      <span class="value" data-bind="text: info_data.description"></span>
                     </div>
                     <div class="row">
                       <label class="col col-lg-1">Fee:</label>
                       <span class="value" data-bind="text: fee"></span>
                     </div>
-                    <div class="row">
+                    <div class="row" data-bind="visible: info_data.operator">
                       <label class="col col-lg-1">Owner:</label>
-                      <href class="value" data-bind="text: info_data.owner.name, attr: {href: info_data.owner.url} "></a>
+                      <href class="value" data-bind="visible: info_data.operator.url, text: info_data.operator.name, attr: {href: info_data.operator.url} "></a>
+                      <span class="value" data-bind="visible: !info_data.operator.url, text: info_data.operator.name"></span>
                     </div>
-                    <div class="row" data-bind="visible: info_data.owner.description">
+                    <div class="row" data-bind="visible: info_data.operator && info_data.operator.description">
                       <label class="col col-lg-1">&nbsp;</label>
-                      <span class="value" data-bind="text: info_data.owner.description"></span>
+                      <span class="value" data-bind="text: info_data.operator.description"></span>
                     </div>
                   </div>
                 </div>
@@ -151,8 +152,7 @@
                               </label>
                             </div>
                           </div>                              
-                          <div class="row" data-bind="visible: $parent.showAdvancedOptions || ($parent.counterBets().length == 0 && !$parent.selectedTarget().odds)">            
-                            <label class="col col-lg-4 control-label font-medlg">Odds:</label> 
+                          <div class="row" data-bind="visible: $parent.showAdvancedOptions || ($parent.counterBets().length == 0 && !$parent.selectedTarget().odds)">  <label class="col col-lg-4 control-label font-medlg">Odds:</label> 
                             <div class="col col-lg-8">                
                               <input name="odd" class="number form-control" data-bind="value: $parent.odd, valueUpdate: 'input'" type="text"/> XCP
                               <span class="invalid" data-bind="validationMessage: $parent.odd"></span>
@@ -162,7 +162,8 @@
                           <div class="row" data-bind="visible: $parent.showAdvancedOptions">           
                             <label class="col col-lg-4 control-label font-medlg">Deadline:</label>
                             <div class="col col-lg-8">                              
-                              <select class="form-control" name="deadline" style="width: 300px" data-bind="options: deadlines, optionsValue: 'timestamp', optionsText: 'text', value: $parent.deadline, select2: { minimumResultsForSearch: 10, escapeMarkup: 'direct' }"></select>
+                              <input name="deadline" type="text" data-bind="datetimepicker: $parent.deadline"/>
+                              <span class="invalid" data-bind="validationMessage: $parent.deadline"></span>
                               <div class="note">when this bet will be decided.</div> 
                             </div>                                  
                           </div>

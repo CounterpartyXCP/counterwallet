@@ -26,7 +26,6 @@ function FeedBrowserViewModel() {
   self.betTypeLabelEqual = ko.observable('Equal');
   self.betTypeLabelNotEqual = ko.observable('NotEqual');
   self.betTypeText = ko.observable('');
-  self.deadlines = ko.observableArray([]);
   self.deadline = ko.observable(0);
   self.availableAddresses = ko.observableArray([]);
   self.sourceAddress = ko.observable(null).extend(wagerValidator);
@@ -69,6 +68,7 @@ function FeedBrowserViewModel() {
   	for (var i in self.feed().info_data.targets) {
   		if (self.feed().info_data.targets[i].value == val) {
         self.selectedTarget(self.feed().info_data.targets[i]);
+        self.deadline(self.feed().info_data.targets[i].deadline);
   			if (self.feed().info_data.targets[i].labels) {
   				labelEqual = self.feed().info_data.targets[i].labels.equal;
   				labelNotEqual = self.feed().info_data.targets[i].labels.not_equal;
@@ -188,25 +188,18 @@ function FeedBrowserViewModel() {
     self.availableAddresses(options);
   	
   	// prepare images url
-    feed.info_data.owner.image_url = feed.info_data.owner.valid_image ? feedImageUrl(feed.source + '_owner') : '';
-    feed.info_data.topic.image_url = feed.info_data.topic.valid_image ? feedImageUrl(feed.source + '_event') : '';
+    feed.info_data.operator.image_url = feed.info_data.operator.valid_image ? feedImageUrl(feed.source + '_owner') : '';
+    feed.info_data.image_url = feed.info_data.valid_image ? feedImageUrl(feed.source + '_topic') : '';
+    // prepare targets
     for (var i in feed.info_data.targets) {
     	var image_name = feed.source + '_tv_' + feed.info_data.targets[i].value;
     	feed.info_data.targets[i].image_url = feed.info_data.targets[i].valid_image ? feedImageUrl(image_name) : '';
     	feed.info_data.targets[i].long_text = feed.info_data.targets[i].text/* + ' (value: ' + feed.info_data.targets[i].value + ')'*/;
+      feed.info_data.targets[i].deadline_str = moment(feed.info_data.targets[i].deadline).format('YYYY/MM/DD hh:mm:ss A Z')
     }
     // prepare fee
     feed.fee = satoshiToPercent(feed.fee_fraction_int);
-    // prepare deadlines
-    deadlines = [];
-    for (var d in feed.info_data.deadlines) {
-      deadlines.push({
-        text: moment(feed.info_data.deadlines[d]).format('YYYY/MM/DD hh:mm:ss A Z'),
-        timestamp: feed.info_data.deadlines[d]
-      });
-    }
-    feed.info_data.deadlines = deadlines;
-    feed.info_data.deadline = deadlines[0].text;
+   
     // prepare counters
     var classes = {
     	'open': 'success',
@@ -220,7 +213,7 @@ function FeedBrowserViewModel() {
 
     }
     self.feedStats(feed.counters.bets)
-    feed.info_data.topic.date_str = moment(feed.info_data.topic.date).format('LLLL');
+    feed.info_data.date_str = moment(feed.info_data.resolution_date).format('YYYY/MM/DD hh:mm:ss A Z');
 
     //$.jqlog.debug(feed);
     self.feed(feed);
@@ -305,10 +298,15 @@ function FeedBrowserViewModel() {
   self.setDefaultOdds = function() {
     var defaultOdds, overrideOdds;
     if (self.selectedTarget().odds) {
-      defaultOdds = self.betType()=='Equal' ? self.selectedTarget().odds.default : divFloat(1, self.selectedTarget().odds.default);
-      if (self.selectedTarget().odds.override) {
-        overrideOdds = self.betType()=='Equal' ? self.selectedTarget().odds.override : divFloat(1, self.selectedTarget().odds.override);
-      }    
+      if (self.selectedTarget().odds.initial) {
+        defaultOdds = self.betType()=='Equal' ? self.selectedTarget().odds.initial : divFloat(1, self.selectedTarget().odds.initial);
+      }
+      if (self.selectedTarget().odds.suggested) {
+        overrideOdds = self.betType()=='Equal' ? self.selectedTarget().odds.suggested : divFloat(1, self.selectedTarget().odds.suggested);
+      }
+      if (overrideOdds && !defaultOdds) {
+        defaultOdds = overrideOdds;
+      } 
     }    
     self.operatorOdds(false);
     if (self.counterBets().length>0) {
@@ -336,7 +334,6 @@ function FeedBrowserViewModel() {
 
     self.counterwager(cw);
     self.odd(counterbet.multiplier);
-    //self.deadline(counterbet.deadline * 1000);
     self.selectedCounterBetTx(counterbet.tx_index);
     $('#betting #counterbets tr').removeClass('selectedCounterBet');
     $('#cb_'+counterbet.tx_index).addClass('selectedCounterBet');
@@ -376,6 +373,9 @@ function FeedBrowserViewModel() {
 
   self.submitBet = function() {
   	if (!self.validationModel.isValid()) {
+
+      $.jqlog.debug("ERRRROR");
+      $.jqlog.debug(self.validationModel());
       self.validationModel.errors.showAllMessages();
       return false;
     }    

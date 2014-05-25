@@ -16,7 +16,7 @@ function denormalizeQuantity(quantity, divisible) {
 function addFloat(floatA, floatB) {
   var a = new Decimal(floatA);
   var b = new Decimal(floatB);
-  return a.add(b).toFloat();
+  return Decimal.round(a.add(b), 8, Decimal.MidpointRounding.ToEven).toFloat();
 }
 
 function subFloat(floatA, floatB) {
@@ -26,13 +26,13 @@ function subFloat(floatA, floatB) {
 function mulFloat(floatA, floatB) {
   var a = new Decimal(floatA);
   var b = new Decimal(floatB);
-  return a.mul(b).toFloat();
+  return Decimal.round(a.mul(b), 8, Decimal.MidpointRounding.ToEven).toFloat();
 }
 
 function divFloat(floatA, floatB) {
   var a = new Decimal(floatA);
   var b = new Decimal(floatB);
-  return a.div(b).toFloat();
+  return Decimal.round(a.div(b), 8, Decimal.MidpointRounding.ToEven).toFloat();
 }
 
 function hashToB64(content) {
