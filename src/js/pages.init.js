@@ -321,3 +321,24 @@ function initBetting() {
  
 }
 INIT_FUNC['pages/betting.html'] = initBetting;
+
+
+function initOpenBets() {
+  pageSetUp();
+  window.OPEN_BETS = new OpenBetsViewModel();
+  ko.applyBindings(OPEN_BETS, document.getElementById("openbets"));
+
+  OPEN_BETS.init();
+ 
+}
+INIT_FUNC['pages/openbets.html'] = initOpenBets;
+
+function initMatchedBets() {
+  pageSetUp();
+  window.MATCHED_BETS = new MatchedBetsViewModel();
+  ko.applyBindings(MATCHED_BETS, document.getElementById("matchedbets"));
+
+  MATCHED_BETS.init();
+ 
+}
+INIT_FUNC['pages/matchedbets.html'] = initMatchedBets;

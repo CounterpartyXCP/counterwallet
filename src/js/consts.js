@@ -128,6 +128,13 @@ var COUNTER_BET = {
   "NotEqual": 2
 }
 
+var BET_MATCHES_STATUS = {
+  "settled: liquidated for bear": 0,
+  "settled: liquidated for bull": 1,
+  "settled: for equal": 2,
+  "settled: for notequal": 3
+}
+
 var MAINNET_UNSPENDABLE = '1CounterpartyXXXXXXXXXXXXXXXUWLpVr';
 var TESTNET_UNSPENDABLE = 'mvCounterpartyXXXXXXXXXXXXXXW24Hef';
 var TESTNET_BURN_START = 154908;

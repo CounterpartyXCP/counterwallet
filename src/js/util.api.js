@@ -226,7 +226,7 @@ function _getDestTypeFromMethod(method) {
       'get_owned_assets', 'get_asset_history', 'get_asset_extended_info', 'get_transaction_stats', 'get_asset_pair_market_info',
       'get_market_price_summary', 'get_market_price_history', 'get_market_info', 'get_market_info_leaderboard', 'get_market_cap_history',
       'get_order_book_simple', 'get_order_book_buysell', 'get_trade_history',
-      'record_btc_open_order', 'cancel_btc_open_order', 'get_bets', 'get_user_bets', 'get_feed'].indexOf(method) >= 0) {
+      'record_btc_open_order', 'cancel_btc_open_order', 'get_bets', 'get_user_bets', 'get_feed', 'get_feeds_by_source'].indexOf(method) >= 0) {
     destType = "counterwalletd";
   }
   return destType;

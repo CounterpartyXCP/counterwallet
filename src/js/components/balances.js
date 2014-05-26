@@ -1328,7 +1328,7 @@ function BroadcastModalViewModel() {
       fee_fraction: Decimal.round(new Decimal(self.feeFraction()).div(100), 8, Decimal.MidpointRounding.ToEven).toFloat(),
       text: self.textValue(),
       timestamp: self.broadcastDate() ? parseInt(self.broadcastDate().getTime() / 1000) : null,
-      value: self.numericalValue()
+      value: parseFloat(self.numericalValue())
     }
     //$.jqlog.debug(params); 
     

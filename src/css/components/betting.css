@@ -82,3 +82,15 @@
   padding: 20px;
   padding-top: 0;
 }
+
+#matchedbets td.number, #openbets td.number {
+  text-align: right;
+}
+
+#matchedbets td.date, #openbets td.date {
+  white-space: nowrap;
+}
+
+#matchedbets td.bold, #openbets td.bold {
+  font-weight: bold;
+}
