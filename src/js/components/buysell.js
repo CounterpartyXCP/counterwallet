@@ -904,12 +904,12 @@ function BuySellWizardViewModel() {
     self.customSellAs('unitprice');
     var unitPrice = self.deriveOpenOrderAssetPrice(
       order.ORDER['get_asset'], order.ORDER['get_quantity'], order.ORDER['give_asset'], order.ORDER['give_quantity'])
-    self.customSellAsEntry(unitPrice);
+    self.customSellAsEntry(round(unitPrice));
     var maxAfford = self.getMaxAfford(unitPrice);
     var totalSaleAmount = self.deriveOpenOrderAssetQuantity(order.ORDER['give_asset'], order.ORDER['give_remaining']);
     var buyAmount = Math.min(maxAfford, totalSaleAmount);
     $.jqlog.debug("Initial buy amount: " + buyAmount);
-    self.selectedBuyQuantity(buyAmount);
+    self.selectedBuyQuantity(round(buyAmount));
     
     //If selling BTC, subtract out in the specified fee from the max afford amount so that we can actually afford the total
     if(self.sellAsset() == 'BTC' && buyAmount == maxAfford) {

@@ -392,7 +392,8 @@ function satoshiToXCP(amount) {
 }
 
 function round(amount, decimals) {
-  return Math.ceil(amount * decimals * 100) / (decimals * 100);
+  if(decimals === undefined || decimals === null) decimals = 8;
+  return Decimal.round(new Decimal(amount), decimals, Decimal.MidpointRounding.ToEven).toFloat();
 }
 
 // Reduce a fraction by finding the Greatest Common Divisor and dividing by it.
