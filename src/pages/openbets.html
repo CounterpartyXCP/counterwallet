@@ -26,11 +26,11 @@
                 <table width="100%" class="table table-striped table-hover datatable_basic" id="openBetsTable">
                   <thead>
                     <tr>
+                      <th>Topic</th>
+                      <th>Your choice</th>
                       <th>Address</th>
                       <th>Feed</th>
                       <th>Fee</th>
-                      <th>Target value</th>
-                      <th>Bet Type</th>
                       <th>Deadline</th>
                       <th>Wager quantity</th>
                       <th>Wager remaining</th>
@@ -40,16 +40,16 @@
                   </thead>
                   <tbody data-bind="foreach: { data: openBets, as: 'bet' }">
                     <tr>
+                      <td class="bold" data-bind="text: bet.target_value"></td>
+                      <td class="bold" data-bind="text: bet.bet_type"></td>
                       <td data-bind="text: bet.address_label"></td>
                       <td data-bind="text: bet.feed"></td>
-                      <td data-bind="text: bet.fee"></td>
-                      <td data-bind="text: bet.target_value"></td>
-                      <td data-bind="text: bet.bet_type"></td>
-                      <td data-bind="text: bet.deadline"></td>
-                      <td data-bind="text: bet.wager_quantity"></td>
-                      <td data-bind="text: bet.wager_remaining"></td>
-                      <td data-bind="text: bet.counterwager_quantity"></td>
-                      <td data-bind="text: bet.counterwager_remaining"></td>
+                      <td class="number" data-bind="text: bet.fee"></td>
+                      <td class="date" data-bind="text: bet.deadline"></td>
+                      <td class="number" data-bind="text: bet.wager_quantity"></td>
+                      <td class="number" data-bind="text: bet.wager_remaining"></td>
+                      <td class="number" data-bind="text: bet.counterwager_quantity"></td>
+                      <td class="number" data-bind="text: bet.counterwager_remaining"></td>
                     </tr>
                   </tbody>
                 </table>

@@ -104,9 +104,8 @@
                                         </div>
                                     </div>
                                     <div class="row buySellRow" data-bind="visible: currentTab() == 2 && currentMarketUnitPrice() && !overrideMarketPrice()">
-                                        <div class="col-md-4">Quantity <b class="buyColor"><span data-bind="text: buyAsset"></span></b> to buy:
-                                            <br/><a href="#" data-bind="click: setOverrideMarketPrice" class="buySellOverrideTextPos1 font-xs">Override Market Rate</a>
-                                            <br/><a href="#" data-bind="visible: !overrideDefaultOptions(), click: setOverrideDefaultOptions" class="buySellOverrideTextPos2 font-xs">Override Trade Options</a>
+                                        <div class="col-md-4">
+                                            Quantity <b class="buyColor"><span data-bind="text: buyAsset"></span></b> to buy:
                                         </div>
                                         <div class="col-md-8">
                                             <div class="input-group">
@@ -231,8 +230,12 @@
                                     </div>
 
                                     <div class="row buySellRow" data-bind="visible: currentTab() == 2">
+                                        <div data-bind="visible: currentMarketUnitPrice()">
+                                            <input type="checkbox" name="overrideMarketPrice" value="1" data-bind="checked: overrideMarketPrice" />
+                                            <label style="font-size:14px">Override Market Rate</label> 
+                                        </div>
                                         <input type="checkbox" name="showAdvancedOptions" value="1" data-bind="checked: overrideDefaultOptions" />
-                                        <label style="font-size:14px">Override Trade Options</label>  
+                                        <label style="font-size:14px">Override Trade Options</label>                                          
                                     </div>
                                 </div>
                                 <div class="tab-pane" id="tab3">

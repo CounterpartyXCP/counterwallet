@@ -421,6 +421,7 @@ function OpenBetsViewModel() {
   }
 
   self.displayOpenBets = function(data) {
+    $.jqlog.debug(data);
     self.openBets([]);
     var bets = [];
     for (var i=0; i<data.bets.length; i++) {
@@ -451,6 +452,7 @@ function OpenBetsViewModel() {
       bet.wager_remaining = satoshiToXCP(data.bets[i].wager_remaining);
       bet.counterwager_quantity = satoshiToXCP(data.bets[i].counterwager_quantity);
       bet.counterwager_remaining = satoshiToXCP(data.bets[i].counterwager_remaining);
+      bet.bet_html = '<b>' + bet.bet_type + '</b> on <b>' + bet.target_value + '</b>';
       bets.push(bet);
     }
     self.openBets(bets);
@@ -489,7 +491,7 @@ function MatchedBetsViewModel() {
     params = {
       'filters': filters,
       'filterop': 'or',
-      'order_by': 'id',
+      'order_by': 'deadline',
       'order_dir': 'desc'
     };
     failoverAPI("get_bet_matches", params, self.displayMatchedBets);
@@ -540,6 +542,12 @@ function MatchedBetsViewModel() {
         var win_bet_type = BET_MATCHES_STATUS[data_bet.status];
         bet.status = win_bet_type == data_bet['tx'+num_tx+'_bet_type'] ? 'win' : 'loose';
       }
+      var classes = {
+        'win': 'success',
+        'pending': 'primary',
+        'loose': 'danger'
+      };
+      bet.status_html = '<span class="label label-'+classes[bet.status]+'">'+bet.status+'</span>';
       return bet;
     }
 
@@ -555,7 +563,10 @@ function MatchedBetsViewModel() {
         }
       }
       self.matchedBets(bets);
-      var matchedBetsTable = $('#matchedBetsTable').dataTable();
+      var matchedBetsTable = $('#matchedBetsTable').dataTable({
+        "order": [ 6, 'asc' ]
+      });
+      matchedBetsTable.order([ 6, 'asc' ]).draw();
     }
 
     self.matchedBets([]);
@@ -565,6 +576,7 @@ function MatchedBetsViewModel() {
     failoverAPI('get_feeds_by_source', params, onReceivedFeed);
   }
 }
+
 
 /*NOTE: Any code here is only triggered the first time the page is visited. Put JS that needs to run on the
   first load and subsequent ajax page switches in the .html <script> tag*/
