@@ -2,42 +2,42 @@ var bitcore = require('bitcore');
 // no reason to be used elsewhere
 var NETWORK = USE_TESTNET ? bitcore.networks.testnet : bitcore.networks.livenet;
 
-var CWBIP32 = function(passphrase) {
+var CWHierarchicalKey = function(passphrase) {
   checkArgType(passphrase, "string")
   // same as bitcoinjs-lib :
   // m : masterkery / 0' : first private derivation / 0 : external account / i : index
   this.basePath = 'm/0\'/0/';
-  this.useOldBIP32 = false;
+  this.useOldHierarchicalKey = false;
   this.init(passphrase);
 }
 
-CWBIP32.prototype.init = function(passphrase) {
+CWHierarchicalKey.prototype.init = function(passphrase) {
   var words = $.trim(passphrase.toLowerCase()).split(' ');
   
-  // if first word=='old' => old bip32
+  // if first word=='old' => old HierarchicalKey
   if (words.length==13) {
     var first = words.shift();
-    this.useOldBIP32 = (first == 'old');
+    this.useOldHierarchicalKey = (first == 'old');
   }
 
   var seed = this.wordsToSeed(words);   
-  this.BIP32 = this.useOldBIP32 ? this.oldBIP32FromSeed(seed) : bitcore.BIP32.seed(seed, NETWORK.name);
+  this.HierarchicalKey = this.useOldHierarchicalKey ? this.oldHierarchicalKeyFromSeed(seed) : bitcore.HierarchicalKey.seed(seed, NETWORK.name);
   // this instance used for sweeping old wallet
-  this.oldBIP32 = this.oldBIP32FromSeed(seed);
+  this.oldHierarchicalKey = this.oldHierarchicalKeyFromSeed(seed);
 }
 
-CWBIP32.prototype.wordsToSeed = function(words) {
+CWHierarchicalKey.prototype.wordsToSeed = function(words) {
   var m = new Mnemonic(words);
   return m.toHex();
 }
 
-CWBIP32.prototype.getOldAddressesInfos = function(callback) {
+CWHierarchicalKey.prototype.getOldAddressesInfos = function(callback) {
   var addresses = [];
   var cwkeys = {};
 
   for (var i=0; i<=9; i++) {
 
-    var derivedKey = this.oldBIP32.derive(this.basePath+i);
+    var derivedKey = this.oldHierarchicalKey.derive(this.basePath+i);
     var key = derivedKey.eckey.private.toString('hex');
     var cwk = new CWPrivateKey(key);
     var address = cwk.getAddress();
@@ -49,11 +49,11 @@ CWBIP32.prototype.getOldAddressesInfos = function(callback) {
   
 }
 
-// This function return an Bitcore BIP32 instance
+// This function return an Bitcore HierarchicalKey instance
 // compatible with old counterwallet. ie generates
 // sames addresses
 // seed: hex string
-CWBIP32.prototype.oldBIP32FromSeed = function(seed) {
+CWHierarchicalKey.prototype.oldHierarchicalKeyFromSeed = function(seed) {
   checkArgType(seed, "string");
   // here we need to pass seed as buffer, BUT for 
   // "historical" reason we keep seed as string to not
@@ -69,23 +69,23 @@ CWBIP32.prototype.oldBIP32FromSeed = function(seed) {
   eckey.private = hash.slice(0, 32);
   eckey.regenerateSync();
 
-  var bip32 = new bitcore.BIP32;
-  bip32.depth = 0x00;
-  bip32.parentFingerprint = bitcore.Buffer([0, 0, 0, 0]);
-  bip32.childIndex = bitcore.Buffer([0, 0, 0, 0]);
-  bip32.chainCode = hash.slice(32, 64);
-  bip32.version = NETWORK.bip32privateVersion;
-  bip32.eckey = eckey;
-  bip32.hasPrivateKey = true;
-  bip32.pubKeyHash = bitcore.util.sha256ripe160(bip32.eckey.public);
-  bip32.buildExtendedPublicKey();
-  bip32.buildExtendedPrivateKey();
-  return bip32;
+  var hkey = new bitcore.HierarchicalKey;
+  hkey.depth = 0x00;
+  hkey.parentFingerprint = bitcore.Buffer([0, 0, 0, 0]);
+  hkey.childIndex = bitcore.Buffer([0, 0, 0, 0]);
+  hkey.chainCode = hash.slice(32, 64);
+  hkey.version = NETWORK.hkeyPrivateVersion;
+  hkey.eckey = eckey;
+  hkey.hasPrivateKey = true;
+  hkey.pubKeyHash = bitcore.util.sha256ripe160(hkey.eckey.public);
+  hkey.buildExtendedPublicKey();
+  hkey.buildExtendedPrivateKey();
+  return hkey;
 }
 
-CWBIP32.prototype.getAddressKey = function(index) {
+CWHierarchicalKey.prototype.getAddressKey = function(index) {
   checkArgType(index, "number");
-  var derivedKey = this.BIP32.derive(this.basePath+index);
+  var derivedKey = this.HierarchicalKey.derive(this.basePath+index);
   return new CWPrivateKey(derivedKey.eckey.private.toString('hex'));
 }
 

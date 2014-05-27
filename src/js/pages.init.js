@@ -133,7 +133,7 @@ function initBalances() {
       });
 
       //temporary
-      if (WALLET.BITCOIN_WALLET.useOldBIP32) {
+      if (WALLET.BITCOIN_WALLET.useOldHierarchicalKey) {
         $('#newWalletSweep').hide();
       } else {
         $('#sweepFunds').hide();
