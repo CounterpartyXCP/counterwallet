@@ -84,13 +84,9 @@ function BuySellWizardViewModel() {
       validator: function (asset, self) {
         if(!asset) return null;
         if(asset == "BTC" && self.selectedBuyAsset() == "BTC") return false;
-        if(asset == "XCP" && self.selectedBuyAsset() == "XCP") return false;
-        if(   asset == "Other"
-           && self.selectedBuyAsset() == "Other"
-           && self.selectedBuyAssetOther() == self.selectedSellAssetOther() ) return false;
         return true;
       },
-      message: 'You cannot buy and sell the same token.',
+      message: 'You cannot both buy and sell BTC.',
       params: self
     }    
   });
