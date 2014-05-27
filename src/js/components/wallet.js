@@ -2,7 +2,7 @@
 function WalletViewModel() {
   //The user's wallet
   var self = this;
-  self.BITCOIN_WALLET = null; // CWBIP32 instance
+  self.BITCOIN_WALLET = null; // CWHierarchicalKey instance
   self.autoRefreshBTCBalances = true; //auto refresh BTC balances every 5 minutes
   
   self.identifier = ko.observable(null); //set when logging in

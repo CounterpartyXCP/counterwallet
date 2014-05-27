@@ -6,12 +6,12 @@ for (var network in fixtures) {
   NETWORK = bitcore.networks[data.network];
   var prefix = '['+data.network.toUpperCase()+'] ';
   
-  describe(prefix+'BIP32 addresses', function() {
+  describe(prefix+'HierarchicalKey addresses', function() {
 
     it('Should correctly generate addresses from passphrase', function() {
-      var bip32 = new CWBIP32(data.passphrase);
+      var hkey = new CWHierarchicalKey(data.passphrase);
       for (var i=0; i<3; i++) {
-        var cwk = bip32.getAddressKey(i);
+        var cwk = hkey.getAddressKey(i);
         var address = cwk.getAddress();
         address.should.be.a('string');
         address.should.equal(data.addresses[i]);
@@ -20,9 +20,9 @@ for (var network in fixtures) {
     });
 
     it('Should correctly generate old addresses from passphrase', function() {
-      var bip32 = new CWBIP32('old '+data.passphrase);
+      var hkey = new CWHierarchicalKey('old '+data.passphrase);
       for (var i=0; i<3; i++) {
-        var cwk = bip32.getAddressKey(i);
+        var cwk = hkey.getAddressKey(i);
         var address = cwk.getAddress();
         address.should.be.a('string');
         address.should.equal(data.oldaddresses[i]);
@@ -30,9 +30,9 @@ for (var network in fixtures) {
     });
 
     it('Should generate different addresses from diffrent passphrase', function() {
-      var bip32 = new CWBIP32(data.passphrase2);
+      var hkey = new CWHierarchicalKey(data.passphrase2);
       for (var i=0; i<3; i++) {
-        var cwk = bip32.getAddressKey(i);
+        var cwk = hkey.getAddressKey(i);
         var address = cwk.getAddress();
         address.should.be.a('string');
         address.should.not.equal(data.addresses[i]);
@@ -40,9 +40,9 @@ for (var network in fixtures) {
     });
 
     it('Should generate different old addresses from diffrent passphrase', function() {
-      var bip32 = new CWBIP32('old '+data.passphrase2);
+      var hkey = new CWHierarchicalKey('old '+data.passphrase2);
       for (var i=0; i<3; i++) {
-        var cwk = bip32.getAddressKey(i);
+        var cwk = hkey.getAddressKey(i);
         var address = cwk.getAddress();
         address.should.be.a('string');
         address.should.not.equal(data.addresses[i]);
@@ -68,11 +68,13 @@ for (var network in fixtures) {
       cwk.getWIF().should.be.equal(data.wif);
     });
 
-    it('Should correctly sign transaction', function() {
+    // bad test because K change each transaction.
+    // TO deserialize signed transaction and check input/ouptut OR/AND find a better way to do this.
+    /*it('Should correctly sign transaction', function() {
       var cwk = new CWPrivateKey(data.privkey);
       var signed = cwk.signRawTransaction(data.transaction.unsigned);
       signed.should.be.equal(data.transaction.signed);
-    });
+    });*/
 
     it('Should reject transaction with incorrect destination', function() {
       var cwk = new CWPrivateKey(data.privkey);

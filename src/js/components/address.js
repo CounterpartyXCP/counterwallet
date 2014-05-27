@@ -3,7 +3,7 @@ function AddressViewModel(key, address, initialLabel) {
   //An address on a wallet
   var self = this;
   
-  self.KEY = key; //  key : the BIP32 bitcore object
+  self.KEY = key; //  key : the HierarchicalKey bitcore object
   //^ if null, then this is a WATCH ONLY address
   self.IS_WATCH_ONLY = !self.KEY;
   
