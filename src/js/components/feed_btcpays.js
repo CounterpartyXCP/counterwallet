@@ -161,7 +161,7 @@ function WaitingBTCPayFeedViewModel() {
       filters.push({'field': 'tx1_address', 'op': '==', 'value': addresses[i]});
     }
 
-    failoverAPI("get_order_matches", {'filters': filters, 'filterop': 'or', post_filter_status: 'pending'},
+    failoverAPI("get_order_matches", {'filters': filters, 'filterop': 'or', status: 'pending'},
       function(data, endpoint) {
         $.jqlog.debug("Order matches: " + JSON.stringify(data));
         for(var i=0; i < data.length; i++) {
