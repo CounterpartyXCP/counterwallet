@@ -27,10 +27,10 @@
                   <thead>
                     <tr>
                       <th>Status</th>
-                      <th>Topic</th>
-                      <th>Your choice</th>
-                      <th>Address</th>
                       <th>Feed</th>
+                      <th>Your choice</th>
+                      <th>Topic</th>
+                      <th>Address</th>
                       <th>Fee</th>
                       <th>Deadline</th>
                       <th>Wager</th>
@@ -39,11 +39,11 @@
                   </thead>
                   <tbody data-bind="foreach: { data: matchedBets, as: 'bet' }">
                     <tr>
-                      <td style="text-align:center" data-bind="html: bet.status_html"></td>
-                      <td class="bold" data-bind="text: bet.target_value"></td>
-                      <td class="bold" data-bind="text: bet.bet_type"></td>
-                      <td data-bind="text: bet.address_label"></td>
+                      <td style="text-align:center" data-bind="html: bet.status_html"></td> 
                       <td data-bind="text: bet.feed"></td>
+                      <td class="bold" data-bind="text: bet.bet_type"></td>
+                      <td class="bold" data-bind="text: bet.target_value"></td>                     
+                      <td data-bind="text: bet.address_label"></td>                 
                       <td class="number" data-bind="text: bet.fee"></td>
                       <td class="date" data-bind="text: bet.deadline"></td>
                       <td class="number" data-bind="text: bet.wager"></td>

@@ -125,7 +125,9 @@ var BET_TYPES = {
 
 var COUNTER_BET = {
   "Equal": 3,
-  "NotEqual": 2
+  "NotEqual": 2,
+  "BullCFD": 1,
+  "BearCFD": 0
 }
 
 var BET_MATCHES_STATUS = {
@@ -134,6 +136,8 @@ var BET_MATCHES_STATUS = {
   "settled: for equal": 2,
   "settled: for notequal": 3
 }
+
+var LEVERAGE_UNIT = 5040;
 
 var MAINNET_UNSPENDABLE = '1CounterpartyXXXXXXXXXXXXXXXUWLpVr';
 var TESTNET_UNSPENDABLE = 'mvCounterpartyXXXXXXXXXXXXXXW24Hef';

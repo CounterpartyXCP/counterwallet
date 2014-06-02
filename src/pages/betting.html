@@ -29,39 +29,43 @@
                   <div class="col col-lg-11">
                     
                     <div class="row">
-                      <label class="col col-lg-1">Event date:</label>
+                      <label class="col col-lg-2">Resolution date:</label>
                       <span class="value" data-bind="text: info_data.date_str" style="font-size:16px"></span>
                       <div class="note" style="display:inline;margin:0">(when this bet will be resolved.)</div> 
                     </div>
+                    <div class="row" data-bind="visible: info_data.type=='cfd'">
+                      <label class="col col-lg-2">Broadcast interval:</label>
+                      <span class="value" data-bind="text: info_data.broadcast_interval"></span>
+                    </div>
                     <div class="row">
-                      <label class="col col-lg-1">Address:</label>
+                      <label class="col col-lg-2">Address:</label>
                       <span class="value" data-bind="text: source"></span>
                     </div>
                     <div class="row">
-                      <label class="col col-lg-1">Name:</label>
+                      <label class="col col-lg-2">Name:</label>
                       <span class="value" data-bind="text: info_data.title"></span>
                     </div>
                     <div class="row" data-bind="visible: info_data.url">
-                      <label class="col col-lg-1">URL:</label>
+                      <label class="col col-lg-2">URL:</label>
                       <span class="value">
                         <a target="_blank" data-bind="text: info_data.url, attr: {href: info_data.url}"></a>
                       </span>
                     </div>
                     <div class="row" data-bind="visible: info_data.description">
-                      <label class="col col-lg-1">Description:</label>
+                      <label class="col col-lg-2">Description:</label>
                       <span class="value" data-bind="text: info_data.description"></span>
                     </div>
                     <div class="row">
-                      <label class="col col-lg-1">Fee:</label>
+                      <label class="col col-lg-2">Fee:</label>
                       <span class="value" data-bind="text: fee"></span>
                     </div>
                     <div class="row" data-bind="visible: info_data.operator">
-                      <label class="col col-lg-1">Owner:</label>
+                      <label class="col col-lg-2">Owner:</label>
                       <href class="value" data-bind="visible: info_data.operator.url, text: info_data.operator.name, attr: {href: info_data.operator.url} "></a>
                       <span class="value" data-bind="visible: !info_data.operator.url, text: info_data.operator.name"></span>
                     </div>
                     <div class="row" data-bind="visible: info_data.operator && info_data.operator.description">
-                      <label class="col col-lg-1">&nbsp;</label>
+                      <label class="col col-lg-2">&nbsp;</label>
                       <span class="value" data-bind="text: info_data.operator.description"></span>
                     </div>
                   </div>
@@ -117,7 +121,7 @@
                       <div class="tab-pane bet-params" id="tab2" data-bind="with: feed">
 
                         <div class="col col-lg-6 col-sm-6">
-                          <div class="row">
+                          <div class="row" data-bind="visible: info_data.type=='binary'">
                             <label class="col col-lg-4 control-label font-medlg">Topic:</label>
                             <div class="col col-lg-8" data-bind="visible: info_data.targets.length>1">
                               <select class="form-control" name="targetValue" data-bind="options: info_data.targets, optionsValue: 'value', optionsText: 'long_text', value: $parent.targetValue, select2: { minimumResultsForSearch: 10, escapeMarkup: 'direct' }"></select>
@@ -141,7 +145,7 @@
                           </div> 
                           <div class="row">
                             <label class="col col-lg-4 control-label font-medlg">Your choice:</label>
-                            <div class="col col-lg-8">
+                            <div class="col col-lg-8" data-bind="visible: info_data.type=='binary'">
                               <label class="radio radio-inline">
                                 <input name="betType" value="Equal" type="radio" data-bind="checked: $parent.betType">
                                 <span style="font-size: 16px" data-bind="text: $parent.betTypeLabelEqual"></span>
@@ -151,12 +155,32 @@
                                 <span style="font-size: 16px" data-bind="text: $parent.betTypeLabelNotEqual"></span>
                               </label>
                             </div>
+                            <div class="col col-lg-8" data-bind="visible: info_data.type=='cfd'">
+                              <label class="radio radio-inline">
+                                <input name="betType" value="BullCFD" type="radio" data-bind="checked: $parent.betType">
+                                <span style="font-size: 16px" data-bind="text: $parent.betTypeLabelBull"></span>
+                              </label>
+                              <label class="radio radio-inline">
+                                <input name="betType" value="BearCFD" type="radio" data-bind="checked: $parent.betType">
+                                <span style="font-size: 16px" data-bind="text: $parent.betTypeLabelBear"></span>
+                              </label>
+                            </div>
                           </div>                              
-                          <div class="row" data-bind="visible: $parent.showAdvancedOptions || ($parent.counterBets().length == 0 && !$parent.selectedTarget().odds)">  <label class="col col-lg-4 control-label font-medlg">Odds:</label> 
+                          <div class="row" data-bind="visible: $parent.showAdvancedOptions || ($parent.counterBets().length == 0 && $parent.operatorOdds()==false)"> 
+                            <label class="col col-lg-4 control-label font-medlg">Odds:</label> 
                             <div class="col col-lg-8">                
                               <input name="odd" class="number form-control" data-bind="value: $parent.odd, valueUpdate: 'input'" type="text"/> XCP
                               <span class="invalid" data-bind="validationMessage: $parent.odd"></span>
                               <br /><div class="note">how much do you want to win per 1 XCP.</div>
+                            </div>                      
+                          </div>
+                          <div class="row" data-bind="visible: info_data.type=='cfd' && $parent.showAdvancedOptions">
+                            <label class="col col-lg-4 control-label font-medlg">Leverage:</label> 
+                            <div class="col col-lg-8">                
+                              <select class="form-control" style="width: 100px;vertical-align: top;margin-right: 12px;" name="leverage" data-bind="options: $parent.leverageList, optionsValue: 'value', optionsText: 'label', value: $parent.leverage, select2: { minimumResultsForSearch: 10, escapeMarkup: 'direct' }"></select>
+
+                              <span class="invalid" data-bind="validationMessage: $parent.leverage"></span>
+                              <br /><div class="note">how sensitive bet will be to movements in the value.</div>
                             </div>                      
                           </div>
                           <div class="row" data-bind="visible: $parent.showAdvancedOptions">           
@@ -164,7 +188,8 @@
                             <div class="col col-lg-8">                              
                               <input name="deadline" type="text" data-bind="datetimepicker: $parent.deadline"/>
                               <span class="invalid" data-bind="validationMessage: $parent.deadline"></span>
-                              <div class="note">when this bet will be decided.</div> 
+                              <div class="note" data-bind="visible: info_data.type=='binary'">when this bet will be decided.</div> 
+                              <div class="note" data-bind="visible: info_data.type=='cfd'">when this bet will be liquidated.</div> 
                             </div>                                  
                           </div>
                           <div class="row" data-bind="visible: $parent.showAdvancedOptions">            
@@ -222,13 +247,13 @@
                               <td><b>Wager:</b></td>
                               <td><b><span data-bind="text: $parent.wager + ' XCP'"></span></b></td>
                             </tr>
+                            <tr data-bind="visible: info_data.type=='binary'">          
+                              <td><b>Topic:</b></td>
+                              <td><b><span data-bind="text: $parent.targetValueText"></span></b></td>  
+                            </tr>
                             <tr>          
                               <td><b>Your choice:</b></td>
                               <td><b><span data-bind="text: $parent.betTypeText"></span></b></td> 
-                            </tr>
-                            <tr>          
-                              <td><b>Topic:</b></td>
-                              <td><b><span data-bind="text: $parent.targetValueText"></span></b></td>  
                             </tr>
                             <tr>
                               <td><b>Odds:</b></td>

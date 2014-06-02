@@ -415,6 +415,17 @@ function isValidURL(str) {
   }
 }
 
+function get_duration(interval) {
+  var interval_array = interval.split('/');
+  for (var i in interval_array) {
+    if (interval_array[i].substring(0,1)=='P') {
+      var duration = nezasa.iso8601.Period.parseToString(interval_array[i]);
+      return duration;
+    }
+  }
+  return 'Unknown';
+}
+
 //Helper for closure-based inheritance (see http://www.ruzee.com/blog/2008/12/javascript-inheritance-via-prototypes-and-closures)
 (function(){
   CClass = function(){};
