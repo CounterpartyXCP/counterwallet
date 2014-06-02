@@ -107,8 +107,11 @@ function FeedBrowserViewModel() {
       self.betTypeText(self.betTypeLabelBear());
       self.betTypeCounter(self.betTypeLabelBull());
     }
-    $.jqlog.debug('loadCounterBets00');
   	self.loadCounterBets();
+  });
+
+  self.leverage.subscribe(function(val) {
+    self.loadCounterBets();
   });
 
   self.wager.subscribe(function(value) {
@@ -165,7 +168,6 @@ function FeedBrowserViewModel() {
       	return true; //tab click disabled
       },
       onTabShow: function(tab, navigation, index) {
-      	$.jqlog.debug("TAB: "+index);
       	if (index==0) {
       		$('li.previous').addClass('disabled');
 			  	$('li.next').show();
@@ -358,7 +360,6 @@ function FeedBrowserViewModel() {
           displayedData2[b].volume_str = satoshiToXCP(displayedData2[b].countervolume);
         }
       }
-      $.jqlog.debug('loadCounterBets232');
       self.counterBets(displayedData2);
       self.setDefaultOdds();    
     }
@@ -367,7 +368,6 @@ function FeedBrowserViewModel() {
   }
 
   self.setDefaultOdds = function() {
-    $.jqlog.debug('setDefaultOdds');
     var odds, defaultOdds, overrideOdds;
 
     if (self.feed().info_data.type=="cfd") {
@@ -412,7 +412,6 @@ function FeedBrowserViewModel() {
   }
 
   self.selectCounterbet = function(counterbet) {
-    $.jqlog.debug(counterbet);
     var cw = mulFloat(self.wager(), counterbet.multiplier);
     cw = Math.floor(cw*10000) / 10000;
 
@@ -457,9 +456,6 @@ function FeedBrowserViewModel() {
 
   self.submitBet = function() {
   	if (!self.validationModel.isValid()) {
-
-      $.jqlog.debug("ERRRROR");
-      $.jqlog.debug(self.validationModel());
       self.validationModel.errors.showAllMessages();
       return false;
     }    
@@ -554,7 +550,6 @@ function OpenBetsViewModel() {
     }
     self.openBets(bets);
     var openBetsTable = $('#openBetsTable').dataTable();
-    //$.jqlog.debug(bets);
   }
 
   
