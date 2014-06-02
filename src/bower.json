@@ -33,6 +33,7 @@
         "bitcore": "https://github.com/bitpay/bitcore.git#5594f82398689e42b9a1ed5ee24ca4b1ce5f0673",
         "mocha": "1.18.2",
         "chai": "1.9.1",
-        "iso8601-js-period": "https://github.com/nezasa/iso8601-js-period.git#v0.2.0.0"
+        "iso8601-js-period": "https://github.com/nezasa/iso8601-js-period.git#v0.2.0.0",
+        "tv4": "v1.0.17"
     }
 }

@@ -48,6 +48,14 @@ function FeedBrowserViewModel() {
   self.leverage = ko.observable(LEVERAGE_UNIT);
   self.notAnUrlFeed = ko.observable(false);
 
+  self.notAnUrlFeed.subscribe(function(value) {
+    if (value) {
+      $('li.nextStep').addClass('disabled');
+    } else {
+      $('li.nextStep').removeClass('disabled');
+    }
+  });
+
   self.counterwager = ko.observable(null).extend({
     required: true,
     isValidPositiveQuantity: self    
@@ -59,6 +67,7 @@ function FeedBrowserViewModel() {
   });
   
   self.feedUrl.subscribe(function(val) {
+    $('li.nextStep').addClass('disabled');
     if (self.feedUrl.isValid()) {
       self.loadFeed();
     }
@@ -191,6 +200,9 @@ function FeedBrowserViewModel() {
       	return true;
       },
       onNext: function (tab, navigation, index) {
+        if (!self.feedUrl.isValid() || self.notAnUrlFeed()) {
+          return false;
+        }
       	return true;
       }
    });
@@ -206,6 +218,8 @@ function FeedBrowserViewModel() {
     if (typeof(feed.info_data) == "undefined") {
       self.notAnUrlFeed(true);
       return;
+    } else {
+      $('li.nextStep').removeClass('disabled');
     }
 
   	// prepare source addresses

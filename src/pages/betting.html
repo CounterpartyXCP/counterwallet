@@ -109,12 +109,12 @@
                       <div class="tab-pane active" id="tab1">
 
                         <section class="col col-lg-6 col-sm-6">
-                          <label for="asset1" class="control-label font-medlg">Url or Address: </label>
+                          <label for="asset1" class="control-label font-medlg">Feed Address: </label>
                           <label class="input">
-                            <input type="text" id="feed_url" name="feed_url" class="form-control input-lg" type="text"  data-bind="value: feedUrl, valueUpdate: 'input'" />
+                            <input type="text" id="feed_url" name="feed_url" class="form-control input-lg" type="text"  data-bind="value: feedUrl, valueUpdate: 'input'" placeholder="Enter the Bitcoin address of a feed to bet on" />
                           </label>
                           <br/><span class="errorColor" data-bind="validationMessage: feedUrl"></span>
-                          <span class="errorColor" data-bind="visible: notAnUrlFeed">No feed informations found for this address</span>
+                          <span class="errorColor" data-bind="visible: notAnUrlFeed">We can't find a feed at this address</span>
                         </section>
 
                       </div>
@@ -284,8 +284,8 @@
                           <li class="previous disabled">
                             <a href="#" class="btn btn-lg btn-default" data-bind="click: previousStep"> Previous</a>
                           </li>
-                          <li class="next">
-                            <a href="#" class="btn btn-lg txt-color-darken" data-bind="click: nextStep"> Next </a>
+                          <li class="next nextStep">
+                            <a href="#" class="btn btn-lg btn-default" data-bind="click: nextStep"> Next </a>
                           </li>
                           <li class="next finish">
                             <a href="#" class="btn btn-lg btn-success" data-bind="click: submitBet"> Bet</a>
