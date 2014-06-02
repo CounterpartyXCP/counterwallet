@@ -46,6 +46,7 @@ function FeedBrowserViewModel() {
   self.selectedTarget = ko.observable(null);
   self.operatorOdds = ko.observable(false);
   self.leverage = ko.observable(LEVERAGE_UNIT);
+  self.notAnUrlFeed = ko.observable(false);
 
   self.counterwager = ko.observable(null).extend({
     required: true,
@@ -202,6 +203,10 @@ function FeedBrowserViewModel() {
 
   self.displayFeed = function(feed) {  
     $.jqlog.debug(feed);
+    if (typeof(feed.info_data) == "undefined") {
+      self.notAnUrlFeed(true);
+      return;
+    }
 
   	// prepare source addresses
   	self.availableAddresses([]);
@@ -298,6 +303,7 @@ function FeedBrowserViewModel() {
   }
 
   self.loadFeed = function() {
+    self.notAnUrlFeed(false);
     failoverAPI('get_feed', {'address_or_url': self.feedUrl()}, self.displayFeed)
   }
 

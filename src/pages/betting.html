@@ -114,6 +114,7 @@
                             <input type="text" id="feed_url" name="feed_url" class="form-control input-lg" type="text"  data-bind="value: feedUrl, valueUpdate: 'input'" />
                           </label>
                           <br/><span class="errorColor" data-bind="validationMessage: feedUrl"></span>
+                          <span class="errorColor" data-bind="visible: notAnUrlFeed">No feed informations found for this address</span>
                         </section>
 
                       </div>
