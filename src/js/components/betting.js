@@ -22,8 +22,8 @@ function FeedBrowserViewModel() {
   self.targetValueText = ko.observable('');
   self.betType = ko.observable('');
   self.betTypeCounter = ko.observable('');
-  self.betTypeLabelBull = ko.observable('Bull');
-  self.betTypeLabelBear = ko.observable('Bear');
+  self.betTypeLabelBull = ko.observable('Bullish (up)');
+  self.betTypeLabelBear = ko.observable('Bearish (down)');
   self.betTypeLabelEqual = ko.observable('Equal');
   self.betTypeLabelNotEqual = ko.observable('NotEqual');
   self.betTypeText = ko.observable('');
@@ -248,7 +248,7 @@ function FeedBrowserViewModel() {
     
     // labels for cfd
     if (feed.info_data.type=="cfd") {
-      var labelBull = 'Bull', labelBear = 'Bear';
+      var labelBull = 'Bullish (up)', labelBear = 'Bearish (down)';
       if (feed.info_data.labels && feed.info_data.labels.bull) {
         labelBull = feed.info_data.labels.bull;
         labelBear = feed.info_data.labels.bear;
