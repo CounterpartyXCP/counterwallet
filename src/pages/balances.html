@@ -134,11 +134,11 @@
                 <p class="balance" data-bind="style: { 'padding-right': dispBalancePadding }">
                     <span data-bind="visible: isMine()">Issued: <span data-bind="text: dispTotalIssued"></span>
                         <span data-bind="visible: issuanceQtyChangePending" title="Quantity issued change pending">
-                            <i class="icon-append fa fa-cloud-upload"></i></span>
+                            <i class="icon-append fa fa-spinner fa-spin"></i></span>
                     </span><br/>
                     Bal: <span data-bind="text: dispBalance"></span>
                     <span data-bind="visible: balanceChangePending"
-                        title="Balance change pending"><i class="icon-append fa fa-cloud-upload"></i></span></p>
+                        title="Balance change pending"><i class="icon-append fa fa-spinner fa-spin"></i></span></p>
                 <div class="balancesAssetIcons">
                     <span data-bind="visible: locked()" class="balancesAssetIcon"
                         title="Token is locked"><i class="icon-append fa fa-lock"></i></span>
