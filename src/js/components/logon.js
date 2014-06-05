@@ -21,7 +21,7 @@ function LogonViewModel() {
   self.isPassphraseValid = ko.computed(function() {
     var words = self.sanitizedEnteredPassphrase().split(' ');
     
-    if (words.length != 12 && (words.length == 13 && words[0] != 'old')) {
+    if (words.length != 12 && (words.length != 13 || words[0] != 'old')) {
       return false;
     }
 

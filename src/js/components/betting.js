@@ -732,12 +732,12 @@ function MatchedBetsViewModel() {
         bet.status = data_bet.status;
       } else {
         var win_bet_type = BET_MATCHES_STATUS[data_bet.status];
-        bet.status = win_bet_type == data_bet['tx'+num_tx+'_bet_type'] ? 'win' : 'loose';
+        bet.status = win_bet_type == data_bet['tx'+num_tx+'_bet_type'] ? 'win' : 'lose';
       }
       var classes = {
         'win': 'success',
         'pending': 'primary',
-        'loose': 'danger'
+        'lose': 'danger'
       };
       bet.status_html = '<span class="label label-'+classes[bet.status]+'">'+bet.status+'</span>';
       return bet;
