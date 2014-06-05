@@ -47,5 +47,6 @@
     "src/vendors/cryptojs/components/sha256-min.js": "47213870c70226255209b3e828a44040bbc60a047bbb0343ed0d3d3dbde36904",
     "src/vendors/cryptojs/components/enc-base64-min.js": "893491ca18f2e0a77fec98bbf1e461d43ea6b36bd88199c98804d2ba63c1aba2",
     "src/vendors/cryptojs/rollups/hmac-sha512.js": "17f2992e236980c8c028c98af64521e2646e7a995930a6e76515f29d0b5ae2eb",
-    "src/vendors/bitcore/browser/bundle.js": "69f1a4dc81e4cb60424ff9d8a1565abb06d8bc086ba13b7fce680b62e9f5e145"
+    "src/vendors/bitcore/browser/bundle.js": "69f1a4dc81e4cb60424ff9d8a1565abb06d8bc086ba13b7fce680b62e9f5e145",
+    "src/vendors/iso8601-js-period/iso8601.min.js": "2b143cf4c690e01f1ae2c3e529d7ddf682aea712fae1272a21973d7319842fde"
 }
