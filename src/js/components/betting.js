@@ -69,7 +69,7 @@ function FeedBrowserViewModel() {
   
   self.feedUrl.subscribe(function(val) {
     $('li.nextStep').addClass('disabled');
-    if (self.feedUrl().lastIndexOf('=') == self.feedUrl().length-1) {
+    if (self.feedUrl().length > 50 || self.feedUrl().lastIndexOf('=') == self.feedUrl().length-1) {
       self.loadProvidedJsonBet(self.feedUrl());
     } else if (self.feedUrl.isValid()) {
       self.loadFeed();
@@ -537,19 +537,19 @@ function FeedBrowserViewModel() {
 
   
   /*
-      "command": "bet",
-      "source": "mfzSPkV7kAYma5oxZ37pHkw9qtwAEQx8Wy",
-      "feed_address": "mzRuPj1UL1GYkqHU3Ud371sWtPF2x1pgpm",
-      "bet_type": "Equal",
-      "deadline": "2014-06-12T20:00:00+00:00",
-      "wager": 20,
-      "counterwager": 4.6,
-      "target_value": 1,
-      "expiration": 143,
-      "leverage": 5040
+  "command": "bet",
+  "source": "mfzSPkV7kAYma5oxZ37pHkw9qtwAEQx8Wy",
+  "feed_address": "mzRuPj1UL1GYkqHU3Ud371sWtPF2x1pgpm",
+  "bet_type": "Equal",
+  "deadline": "2014-06-12T20:00:00+00:00",
+  "wager": 20,
+  "counterwager": 4.6,
+  "target_value": 1,
+  "expiration": 143,
+  "leverage": 5040
   */
+  //jsonBetBase64 = "eyJjb21tYW5kIjogImJldCIsICJzb3VyY2UiOiAibWZ6U1BrVjdrQVltYTVveFozN3BIa3c5cXR3QUVReDhXeSIsICJmZWVkX2FkZHJlc3MiOiAibXpSdVBqMVVMMUdZa3FIVTNVZDM3MXNXdFBGMngxcGdwbSIsICJiZXRfdHlwZSI6ICJFcXVhbCIsICJkZWFkbGluZSI6ICIyMDE0LTA2LTEyVDIwOjAwOjAwKzAwOjAwIiwgIndhZ2VyIjogMjAsICJjb3VudGVyd2FnZXIiOiA0LjYsICJ0YXJnZXRfdmFsdWUiOiAxLCAiZXhwaXJhdGlvbiI6IDE0MywgImxldmVyYWdlIjogNTA0MH0=";
   self.loadProvidedJsonBet = function(jsonBetBase64) {
-    //jsonBetBase64 = "eyJjb21tYW5kIjogImJldCIsICJzb3VyY2UiOiAibWZ6U1BrVjdrQVltYTVveFozN3BIa3c5cXR3QUVReDhXeSIsICJmZWVkX2FkZHJlc3MiOiAibXpSdVBqMVVMMUdZa3FIVTNVZDM3MXNXdFBGMngxcGdwbSIsICJiZXRfdHlwZSI6ICJFcXVhbCIsICJkZWFkbGluZSI6ICIyMDE0LTA2LTEyVDIwOjAwOjAwKzAwOjAwIiwgIndhZ2VyIjogMjAsICJjb3VudGVyd2FnZXIiOiA0LjYsICJ0YXJnZXRfdmFsdWUiOiAxLCAiZXhwaXJhdGlvbiI6IDE0MywgImxldmVyYWdlIjogNTA0MH0=";
     jsonBet = decodeJsonBet(jsonBetBase64);
     if (typeof(jsonBet) == 'object') {
       self.jsonBetProvided(jsonBet);
@@ -557,8 +557,9 @@ function FeedBrowserViewModel() {
     } else {
       $.jqlog.debug("JSON ERROR");
     }
-    
   }
+
+  
 }
 
 

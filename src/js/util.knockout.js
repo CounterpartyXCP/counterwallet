@@ -156,10 +156,10 @@ ko.validation.rules['isValidUrlOrValidBitcoinAdressOrJsonBet'] = {
       // regex to check url, make freeze Chrome when checking btc address
       // TODO: change the way to check an url
       // return CWBitcore.isValidAddress(val) || isValidURL(val);
-      if (val.indexOf('http://') == 0 || val.indexOf('https://') == 0) {
-        return isValidURL(val);
-      } else if (val.lastIndexOf('=') == val.length-1) {
+      if (val.length>50 || val.lastIndexOf('=') == val.length-1) {
         return typeof(decodeJsonBet(val)) == 'object';
+      } else if (val.indexOf('http://') == 0 || val.indexOf('https://') == 0) {
+        return isValidURL(val);
       } else {
         return CWBitcore.isValidAddress(val);
       }   

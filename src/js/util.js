@@ -429,7 +429,9 @@ function get_duration(interval) {
 function decodeJsonBet(jsonBetBase64) {
   var jsonBet;
   try {
+    $.jqlog.debug(atob(jsonBetBase64));
     jsonBet = JSON.parse(atob(jsonBetBase64));
+
   } catch(e) {
     return false;
   }
@@ -439,11 +441,7 @@ function decodeJsonBet(jsonBetBase64) {
   if (jsonBet.command == undefined || jsonBet.command != 'bet') {
     return false;
   }
-  
-  if (jsonBet.bet_type == undefined || COUNTER_BET[jsonBet.bet_type] == undefined) {
-    return false;
-  }
-  var numbers = {'wager':1, 'counterwager':1, 'target_value':1, 'expiration':1, 'leverage':1};
+  var numbers = {'wager':1, 'counterwager':1, 'target_value':1, 'expiration':1, 'leverage':1, 'bet_type':1};
   for (var e in numbers) {
     if (jsonBet[e] == undefined || isNaN(jsonBet[e])) {
       return false;
