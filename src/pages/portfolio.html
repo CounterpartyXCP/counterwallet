@@ -4,15 +4,17 @@
       <i class="fa fa-tasks fa-fw "></i> 
         My Portfolio 
     </h1>
-  </div>
-  <div id="portfolioButtonBar" class="pull-right sectionHeaderButtonBar">
-      <div class="btn-group">
-        <button class="btn dropdown-toggle btn-primary" data-toggle="dropdown"><i class="fa fa-bars"></i> Show In&nbsp;<i class="fa fa-caret-down"></i></button>                
-        <ul class="dropdown-menu">
-          <li><a data-bind="click: showPortfolioInXCP" href="#">XCP</a></li>
-          <li><a data-bind="click: showPortfolioInBTC" href="#">BTC</a></li>
-        </ul>
-      </div>
+    <div id="portfolioMarketBar">
+      <h2>Market:&nbsp;</h2>
+      <div class="btn-group" data-toggle="buttons">
+          <label class="btn btn-primary btn-lg active" data-bind="click: showPortfolioInXCP">
+            <input type="radio" name="options" id="xcpMarket"> <i class="fa fa-times"></i>&nbsp;XCP
+          </label>
+          <label class="btn btn-primary btn-lg" data-bind="click: showPortfolioInBTC">
+            <input type="radio" name="options" id="btcMarket"> <i class="fa fa-btc"></i>&nbsp;BTC
+          </label>
+      </div>                
+    </div>
   </div>
 </div>
 

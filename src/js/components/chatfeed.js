@@ -326,7 +326,7 @@ function ChatFeedViewModel() {
           handles.push(self.lines()[i].HANDLE);
       }
       handles = arrayUnique(handles);
-      handles = arrayRemove(self.handle()); //our own handle should not be a candidate for tab completion
+      handles = arrayRemove(handles, self.handle()); //our own handle should not be a candidate for tab completion
       
       var toComplete = null;
       var lastWord = words[words.length-1];

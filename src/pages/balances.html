@@ -51,7 +51,7 @@
     Please note the Counterparty team cannot be held responsible for lost or stolen funds.
 </div>
 
-<div id="gettingStartedNotice" data-bind="fadeVisibleInOnly: WALLET.isNew() && !WALLET.isOldWallet()" class="alert alert-success alert-block">
+<div id="gettingStartedNotice" data-bind="fadeVisibleInOnly: WALLET.isNew() && !WALLET.isOldWallet() && window._BALANCES_HAS_LOADED_ALREADY === undefined" class="alert alert-success alert-block">
     <a class="close" data-dismiss="alert" href="#">×</a>
     <h4 class="alert-heading padding-bottom-10">Welcome to Counterwallet!</h4>
     We've created three addresses for you, which serve as both Bitcoin and Counterparty addresses.
@@ -91,7 +91,7 @@
                   <li><a data-bind="visible: IS_WATCH_ONLY, click: removeWatch" href="#">Remove Address</a></li>
 
                   <li class="divider"></li><li class="dropdown-header">Issuance...</li>                 
-                  <li><a data-bind="visible: !IS_WATCH_ONLY, click: createAsset" href="#">Create Token</a></li>                
+                  <li><a data-bind="visible: !IS_WATCH_ONLY, click: createAsset" href="#">Create a Token (Asset)</a></li>                
                   <li><a data-bind="visible: !IS_WATCH_ONLY, click: payDividend" href="#">Pay Distribution</a></li>
 
                   <li class="divider"></li><li class="dropdown-header">Betting...</li>  
@@ -134,11 +134,11 @@
                 <p class="balance" data-bind="style: { 'padding-right': dispBalancePadding }">
                     <span data-bind="visible: isMine()">Issued: <span data-bind="text: dispTotalIssued"></span>
                         <span data-bind="visible: issuanceQtyChangePending" title="Quantity issued change pending">
-                            <i class="icon-append fa fa-cloud-upload"></i></span>
+                            <i class="icon-append fa fa-spinner fa-spin"></i></span>
                     </span><br/>
                     Bal: <span data-bind="text: dispBalance"></span>
                     <span data-bind="visible: balanceChangePending"
-                        title="Balance change pending"><i class="icon-append fa fa-cloud-upload"></i></span></p>
+                        title="Balance change pending"><i class="icon-append fa fa-spinner fa-spin"></i></span></p>
                 <div class="balancesAssetIcons">
                     <span data-bind="visible: locked()" class="balancesAssetIcon"
                         title="Token is locked"><i class="icon-append fa fa-lock"></i></span>

@@ -20,6 +20,8 @@ function initIndex() { //main page
   window.OPEN_ORDER_FEED = new OpenOrderFeedViewModel();
   window.NOTIFICATION_FEED = new NotificationFeedViewModel();
   
+  window.SUPPORT_MODAL = new SupportModalViewModel();
+  
   $(document).ready(function() {
     ko.applyBindings(LOGON_VIEW_MODEL, document.getElementById("logon"));
     ko.applyBindings(LICENSE_MODAL, document.getElementById("licenseModal"));
@@ -31,6 +33,7 @@ function initIndex() { //main page
     ko.applyBindings(BTCPAY_FEED, document.getElementById("btcPayFeed"));
     ko.applyBindings(OPEN_ORDER_FEED, document.getElementById("openOrderFeed"));
     ko.applyBindings(NOTIFICATION_FEED, document.getElementById("notificationFeed"));        
+    ko.applyBindings(SUPPORT_MODAL, document.getElementById("supportModal"));
             
     //so that knockout is run on the DOM sections and global context is accessible...
     ko.applyBindings({}, document.getElementById("noticeTestnet"));
@@ -44,7 +47,10 @@ function initIndex() { //main page
       WALLET_OPTIONS_MODAL.show();
       return false;
     });
-
+    $('#support').click(function(e) {
+      SUPPORT_MODAL.show();
+      return false;
+    });
     $('#loginform').submit(function() {
       if (LOGON_VIEW_MODEL.isPassphraseValid()) {
         LOGON_VIEW_MODEL.openWallet();
@@ -264,7 +270,7 @@ function initLeaderboard() {
   //This code is run on each visit to the page
   window.ASSET_LEADERBOARD = new AssetLeaderboardViewModel();
   
-  ko.applyBindings(ASSET_LEADERBOARD, document.getElementById("leaderboardButtonBar"));
+  ko.applyBindings(ASSET_LEADERBOARD, document.getElementById("leaderboardMarketBar"));
   ko.applyBindings(ASSET_LEADERBOARD, document.getElementsByClassName("leaderboardGrid")[0]);
   
   ASSET_LEADERBOARD.init();
@@ -299,9 +305,9 @@ function initPortfolio() {
   pageSetUp(); //init smartadmin featureset
   
   //This code is run on each visit to the page
-  window.ASSET_PORTFOLIO = new AssetPortfolioViewModel("Test");
+  window.ASSET_PORTFOLIO = new AssetPortfolioViewModel();
   
-  ko.applyBindings(ASSET_PORTFOLIO, document.getElementById("portfolioButtonBar"));
+  ko.applyBindings(ASSET_PORTFOLIO, document.getElementById("portfolioMarketBar"));
   ko.applyBindings(ASSET_PORTFOLIO, document.getElementsByClassName("portfolioGrid")[0]);
   
   $(window).bind("resize", ASSET_PORTFOLIO.dataTableResponsive);

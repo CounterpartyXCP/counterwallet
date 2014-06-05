@@ -118,6 +118,10 @@
           <span> <a href="pages/logon.html" title="Sign Out"><i class="fa fa-sign-out"></i></a> </span>
         </div> <!-- end logout button -->
 
+        <div id="support" class="btn-header transparent pull-right"> <!-- help button -->
+          <span> <a href="#" title="Support"><i class="fa fa-question"></i></a> </span>
+        </div> <!-- end help button -->
+
         <div id="fullscreen" class="btn-header transparent pull-right"> <!-- fullscreen button -->
             <span> <a href="#" title="Full Screen"><i class="fa fa-arrows-alt"></i></a> </span>
         </div> <!-- end fullscreen button -->
@@ -156,18 +160,12 @@
             <a href="pages/view_prices.html"><i class="fa fa-lg fa-fw fa-bar-chart-o"></i> <span class="menu-item-parent">View Prices</span></a>
           </li>
           <li class="">
-            <a href="#"><i class="glyphicon fa-lg fa-fw glyphicon-share-alt"></i> <span class="menu-item-parent">Betting</span></a>
+            <a href="#"><i class="fa fa-lg fa-fw fa-bullseye"></i> <span class="menu-item-parent">Betting</span></a>
             <ul>
-              <li><a href="pages/betting.html"><i class="glyphicon fa-lg fa-fw glyphicon-share-alt"></i> Make a Bet</a></li>
-              <li><a href="pages/openbets.html"><i class="glyphicon fa-lg fa-fw glyphicon-share-alt"></i> Open Bets</a></li>
-              <li><a href="pages/matchedbets.html"><i class="glyphicon fa-lg fa-fw glyphicon-share-alt"></i> My Bet History</a></li>
+              <li><a href="pages/betting.html"><i class="fa fa-lg fa-fw fa-share"></i> Make a Bet</a></li>
+              <li><a href="pages/openbets.html"><i class="fa fa-lg fa-fw fa-circle-o"></i> Open Bets</a></li>
+              <li><a href="pages/matchedbets.html"><i class="fa fa-lg fa-fw fa-book"></i> My Bet History</a></li>
             </ul>
-          </li>
-          <li class="">
-            <a href="pages/portfolio.html"><i class="fa fa-lg fa-fw fa-tasks"></i> <span class="menu-item-parent">My Portfolio</span></a>
-          </li>
-          <li class="">
-            <a href="pages/leaderboard.html"><i class="fa fa-lg fa-fw fa-trophy"></i> <span class="menu-item-parent">Top Assets</span></a>
           </li>
           <li class="">
             <a href="pages/history.html"><i class="fa fa-lg fa-fw fa-book"></i> <span class="menu-item-parent">History</span></a>
@@ -176,10 +174,12 @@
             <a href="#" id="chatLink"><i class="fa fa-lg fa-fw fa-comments-o"></i><span class="menu-item-parent">Show Chat</span></a>
           </li>
           <li class="">
-            <a href="https://forums.counterparty.co/index.php?topic=188.0" target="_blank"><i class="fa fa-lg fa-fw fa-question"></i> <span class="menu-item-parent">Report Issues</span></a>
-          </li>
-          <li>
-            <a href="pages/stats.html"><i class="fa fa-lg fa-fw fa-crosshairs"></i><span class="menu-item-parent">Network Stats</span></a>
+            <a href="#"><i class="fa fa-lg fa-fw fa-plus"></i> <span class="menu-item-parent">More</span></a>
+            <ul>
+                <li><a href="pages/portfolio.html"><i class="fa fa-lg fa-fw fa-tasks"></i> My Portfolio</a></li>
+                <li><a href="pages/leaderboard.html"><i class="fa fa-lg fa-fw fa-trophy"></i> Top Assets</a></li>
+                <li><a href="pages/stats.html"><i class="fa fa-lg fa-fw fa-crosshairs"></i> Network Stats</a></li>
+            </ul>
           </li>
         </ul>
       </nav>
@@ -220,7 +220,7 @@
 
     <!-- Logged out cover div -->
     <div id="logon">
-      <h1>Welcome to Counterwallet</h1>
+      <h1>Welcome to Counterwallet<span data-bind="visible: USE_TESTNET">&nbsp;Testnet</span></h1>
       <h2>Powered by Counterparty</h2>
       <div id="form-well">
         <div id="createNewAcctBtnPane" data-bind="visible: generatedPassphrase().length == 0">
@@ -260,7 +260,7 @@
         <div class="panel panel-info">
           <div class="panel-heading">
             <h3 class="panel-title">
-              <b>Log Into Your Wallet</b>
+              <b>Log Into Your <span data-bind="visible: USE_TESTNET">Testnet&nbsp;</span>Wallet</b>
               <span data-bind="fadeVisibleInOnly: IS_DEV" class="label label-warning pull-right margin-left-5 padding-5 display-none"><i class="fa-fw fa fa-warning"></i>&nbsp;Dev Mode Enabled</span>
               <span data-bind="fadeVisibleInOnly: USE_TESTNET" class="label label-info pull-right margin-left-5 padding-5 display-none"><i class="fa-fw fa fa-info"></i>&nbsp;Testnet In Use</span>
             </h3>
@@ -287,7 +287,7 @@
        <div id="extra-info" class="container" data-bind="visible: generatedPassphrase().length === 0">
         <h3 class="sales-title margin-bottom-10">
           Counterwallet is a web-wallet for <a href="http://www.counterparty.co" target="_blank">Counterparty</a>,
-          the world’s first protocol for decenralized financial tools.
+          the world’s first protocol for decentralized financial tools.
         </h3>
         <h4 class="sales-title">
           All transactions made with Counterwallet use an automatic escrow system to keep them secure, with no middleman required.
@@ -519,6 +519,29 @@
         </div><!-- /.modal-content -->
       </div><!-- /.modal-dialog -->
     </div><!-- /.modal -->
+    
+    <!-- modal for support window (in logged in interface) -->
+    <div data-bind="showModal: shown" id="supportModal" class="modal fade" data-backdrop="static" data-keyboard="false" tabindex="-1" role="dialog" aria-labelledby="supportModal" aria-hidden="true">
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <div class="modal-header">
+            <button type="button" data-bind="click: hide" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+            <h4 class="modal-title">Having Issues?</h4><br/>
+            <p>If you are having issues using Counterwallet, please try the following:</p>
+            <ul>
+                <li>Ask in Counterwallet chat: Click on the <b>Show Chat</b> link on the left menubar, and ask your question there. Someone may know the answer.</li>
+                <li>Especially if you think you have found a bug in Counterwallet, you can post your question or issue in <a href="https://forums.counterparty.co/index.php?topic=188.0" target="_blank">this thread</a> in the <a href="https://forums.counterparty.co/" target="_blank">Counterparty forums</a>.</li>
+                <li>If all else fails, you can email the Counterparty developers at <a href="mailto: dev@counterparty.co">dev@counterparty.co</a>. Please avoid the use of this for trivial issues, and/or non-bugs.</li>
+            </ul>
+          </div>
+          <div class="modal-body no-padding">
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-default" data-bind="click: hide">Okay</button>
+          </div>
+        </div><!-- /.modal-content -->
+      </div><!-- /.modal-dialog -->
+    </div><!-- /.modal -->
 
     <!-- build:js js/counterwallet-deps-min.js -->
     <script src="vendors/jquery/jquery.min.js"></script><!-- Jquery -->
@@ -530,6 +553,8 @@
     <script src="vendors/jquery-ui/ui/minified/jquery.ui.effect.min.js"></script>
     <script src="vendors/jquery-ui/ui/minified/jquery.ui.effect-slide.min.js"></script>
     <script src="vendors/jquery-ui/ui/minified/jquery.ui.tooltip.min.js"></script>
+    <script src="vendors/jquery-ui/ui/minified/jquery.ui.menu.min.js"></script>
+    <script src="vendors/jquery-ui/ui/minified/jquery.ui.autocomplete.min.js"></script>
     <script src="vendors/bootstrap/dist/js/bootstrap.min.js"></script> <!-- BOOTSTRAP JS -->
     
     <!-- SmartAdmin JS includes -->
@@ -615,6 +640,7 @@
     <script src="js/components/address.js"></script>
     <script src="js/components/asset.js"></script>
     <script src="js/components/logon.js"></script>
+    <script src="js/components/misc.js"></script>
     <script src="js/components/feed_notifications.js"></script>
     <script src="js/components/feed_open_orders.js"></script>
     <script src="js/components/feed_pending_actions.js"></script>
