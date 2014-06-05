@@ -447,6 +447,9 @@ function decodeJsonBet(jsonBetBase64) {
       return false;
     }
   }
+  if (BET_TYPES_SHORT[jsonBet.bet_type] == undefined) {
+    return false;
+  }
   if (jsonBet.deadline == undefined || !moment(jsonBet.deadline).isValid()) {
     return false;
   }

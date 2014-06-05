@@ -123,6 +123,13 @@ var BET_TYPES = {
   3: "Not Equal"
 };
 
+var BET_TYPES_SHORT = {
+  0: "BullCFD",
+  1: "BearCFD",
+  2: "Equal",
+  3: "NotEqual"
+}
+
 var COUNTER_BET = {
   "Equal": 3,
   "NotEqual": 2,

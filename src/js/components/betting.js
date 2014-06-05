@@ -127,6 +127,10 @@ function FeedBrowserViewModel() {
     self.loadCounterBets();
   });
 
+  self.deadline.subscribe(function(val) {
+    self.loadCounterBets();
+  });
+
   self.wager.subscribe(function(value) {
     try {
     	var c = mulFloat(self.odd(), value);
@@ -358,10 +362,10 @@ function FeedBrowserViewModel() {
         bet.ratio = reduce(data[b].wager_quantity, data[b].counterwager_quantity).join('/');
         bet.multiplier = divFloat(parseInt(data[b].wager_quantity), parseInt(data[b].counterwager_quantity));
         bet.multiplier = Math.floor(bet.multiplier*100) / 100;
-        bet.wager = satoshiToXCP(data[b].wager_remaining);
+        bet.wager = data[b].wager_remaining;
         bet.wager_remaining = data[b].wager_remaining;
         bet.counterwager_remaining = data[b].counterwager_remaining;
-        bet.counterwager = satoshiToXCP(data[b].counterwager_remaining);
+        bet.counterwager = data[b].counterwager_remaining;
         bet.tx_index = data[b].tx_index;
         bet.bet_count = 1;
         displayedData.push(bet);
@@ -377,8 +381,9 @@ function FeedBrowserViewModel() {
             var i = displayedData2.length-1;
             displayedData2[i].wager_remaining += displayedData[b].wager_remaining;
             displayedData2[i].counterwager_remaining += displayedData[b].counterwager_remaining;
-            displayedData2[i].wager = satoshiToXCP(displayedData2[i].wager_remaining);
+            displayedData2[i].wager += displayedData[b].wager;
             displayedData2[i].bet_count += displayedData[b].bet_count;
+            displayedData2[i].counterwager += displayedData[b].counterwager;
           } else {
             displayedData2.push(displayedData[b]);
           }
@@ -394,6 +399,7 @@ function FeedBrowserViewModel() {
           else displayedData2[b].countervolume = displayedData2[b].counterwager_remaining;
 
           displayedData2[b].volume_str = satoshiToXCP(displayedData2[b].countervolume);
+          displayedData2[b].counterwager = satoshiToXCP(displayedData2[b].counterwager);
         }
       }
       self.counterBets(displayedData2);
@@ -522,9 +528,9 @@ function FeedBrowserViewModel() {
 
   self.displayProvidedBet = function() {
     var jsonBet = self.jsonBetProvided();
-    self.sourceAddress(jsonBet.source);
-    self.betType(jsonBet.bet_type);
     self.deadline(jsonBet.deadline);
+    self.sourceAddress(jsonBet.source);
+    self.betType(BET_TYPES_SHORT[jsonBet.bet_type]);
     self.wager(jsonBet.wager);
     self.counterwager(jsonBet.counterwager);
     self.odd(divFloat(jsonBet.counterwager, jsonBet.wager));
@@ -559,7 +565,7 @@ function FeedBrowserViewModel() {
     }
   }
 
-  
+
 }
 
 
