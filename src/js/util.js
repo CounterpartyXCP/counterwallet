@@ -426,6 +426,51 @@ function get_duration(interval) {
   return 'Unknown';
 }
 
+function decodeJsonBet(jsonBetBase64) {
+  var jsonBet;
+  try {
+    jsonBet = JSON.parse(atob(jsonBetBase64));
+  } catch(e) {
+    return false;
+  }
+  if (typeof(jsonBet) != 'object') {
+    return false;
+  }
+  if (jsonBet.command == undefined || jsonBet.command != 'bet') {
+    return false;
+  }
+  
+  if (jsonBet.bet_type == undefined || COUNTER_BET[jsonBet.bet_type] == undefined) {
+    return false;
+  }
+  var numbers = {'wager':1, 'counterwager':1, 'target_value':1, 'expiration':1, 'leverage':1};
+  for (var e in numbers) {
+    if (jsonBet[e] == undefined || isNaN(jsonBet[e])) {
+      return false;
+    }
+  }
+  if (jsonBet.deadline == undefined || !moment(jsonBet.deadline).isValid()) {
+    return false;
+  }
+  if (jsonBet.feed_address == undefined || !CWBitcore.isValidAddress(jsonBet.feed_address)) {
+    return false;
+  }
+  if (jsonBet.source == undefined) {
+    return false;
+  }
+  var addresses = WALLET.getAddressesList(true);
+  var isMine = false;
+  for(var i = 0; i < addresses.length; i++) {
+    if (addresses[i][0] == jsonBet.source) {
+      isMine = true;
+    }    
+  }
+  if (!isMine) {
+    return false;
+  }
+  return jsonBet;
+}
+
 //Helper for closure-based inheritance (see http://www.ruzee.com/blog/2008/12/javascript-inheritance-via-prototypes-and-closures)
 (function(){
   CClass = function(){};

@@ -47,6 +47,7 @@ function FeedBrowserViewModel() {
   self.operatorOdds = ko.observable(false);
   self.leverage = ko.observable(LEVERAGE_UNIT);
   self.notAnUrlFeed = ko.observable(false);
+  self.jsonBetProvided = ko.observable(false);
 
   self.notAnUrlFeed.subscribe(function(value) {
     if (value) {
@@ -63,12 +64,14 @@ function FeedBrowserViewModel() {
 
   self.feedUrl = ko.observable('').extend({
     required: false,
-    isValidUrlOrValidBitcoinAdress: self
+    isValidUrlOrValidBitcoinAdressOrJsonBet: self
   });
   
   self.feedUrl.subscribe(function(val) {
     $('li.nextStep').addClass('disabled');
-    if (self.feedUrl.isValid()) {
+    if (self.feedUrl().lastIndexOf('=') == self.feedUrl().length-1) {
+      self.loadProvidedJsonBet(self.feedUrl());
+    } else if (self.feedUrl.isValid()) {
       self.loadFeed();
     }
   });
@@ -182,6 +185,7 @@ function FeedBrowserViewModel() {
       		$('li.previous').addClass('disabled');
 			  	$('li.next').show();
 			  	$('li.next.finish').hide();
+          self.jsonBetProvided(false);
           self.wizardTitle("Select Feed");
       	} else if (index==1) {
       		$('li.previous').removeClass('disabled');
@@ -204,6 +208,16 @@ function FeedBrowserViewModel() {
           return false;
         }
       	return true;
+      },
+      onPrevious: function (tab, navigation, index) {
+        if (self.jsonBetProvided()) {
+          $('#feedWizard').bootstrapWizard('show', 0);
+          return false;
+        }
+        if (!self.feedUrl.isValid() || self.notAnUrlFeed()) {
+          return false;
+        }
+        return true;
       }
    });
 
@@ -211,6 +225,8 @@ function FeedBrowserViewModel() {
   	$('li.next').addClass('disabled');
   	$('li.previous').addClass('disabled');
   	$('li.next.finish').hide();
+    self.feed(null);
+    self.jsonBetProvided(false);
   }
 
   self.displayFeed = function(feed) {  
@@ -265,7 +281,7 @@ function FeedBrowserViewModel() {
       feed.info_data.targets = [{'long_text':''}]; // targets needed in html template. ugly but avoid additonals variables.
       feed.info_data.deadline_str = moment(feed.info_data.next_deadline).format('YYYY/MM/DD hh:mm:ss A Z')
       feed.info_data.date_str = moment(feed.info_data.next_broadcast).format('YYYY/MM/DD hh:mm:ss A Z');
-      feed.info_data.broadcast_interval = get_duration(feed.info_data.resolution_date);
+      feed.info_data.broadcast_interval = get_duration(feed.info_data.broadcast_date);
       self.deadline(feed.info_data.next_deadline);
 
     } else {
@@ -276,7 +292,7 @@ function FeedBrowserViewModel() {
         feed.info_data.targets[i].long_text = feed.info_data.targets[i].text/* + ' (value: ' + feed.info_data.targets[i].value + ')'*/;
         feed.info_data.targets[i].deadline_str = moment(feed.info_data.targets[i].deadline).format('YYYY/MM/DD hh:mm:ss A Z')
       }
-      feed.info_data.date_str = moment(feed.info_data.resolution_date).format('YYYY/MM/DD hh:mm:ss A Z');
+      feed.info_data.date_str = moment(feed.info_data.broadcast_date).format('YYYY/MM/DD hh:mm:ss A Z');
     }
     
     // prepare fee
@@ -381,7 +397,11 @@ function FeedBrowserViewModel() {
         }
       }
       self.counterBets(displayedData2);
-      self.setDefaultOdds();    
+      self.setDefaultOdds();   
+
+      if (self.jsonBetProvided()) {
+        self.displayProvidedBet();
+      }
     }
 
     failoverAPI('get_bets', params, onCounterbetsLoaded);
@@ -475,27 +495,70 @@ function FeedBrowserViewModel() {
   }
 
   self.submitBet = function() {
+    $.jqlog.debug("submitBet");
   	if (!self.validationModel.isValid()) {
       self.validationModel.errors.showAllMessages();
       return false;
     }    
+    $.jqlog.debug("submitBet2");
+
     var params = {
       source: self.sourceAddress(),
-      feed_address: self.feed().source,
+      feed_address:  self.feed().source,
       bet_type: self.betType(),
       deadline: moment(self.deadline()).unix(),
       wager: denormalizeQuantity(self.wager()),
       counterwager: denormalizeQuantity(self.counterwager()),
       expiration: parseInt(self.expiration()),
       target_value: self.targetValue(),
-      leverage: 5040
+      leverage: self.leverage()
     }
+    $.jqlog.debug(params);
     var onSuccess = function(txHash, data, endpoint) {
       bootbox.alert("<b>Your bet were sent successfully.</b> " + ACTION_PENDING_NOTICE);
     }
     WALLET.doTransaction(self.sourceAddress(), "create_bet", params, onSuccess);
   }
 
+  self.displayProvidedBet = function() {
+    var jsonBet = self.jsonBetProvided();
+    self.sourceAddress(jsonBet.source);
+    self.betType(jsonBet.bet_type);
+    self.deadline(jsonBet.deadline);
+    self.wager(jsonBet.wager);
+    self.counterwager(jsonBet.counterwager);
+    self.odd(divFloat(jsonBet.counterwager, jsonBet.wager));
+    self.targetValue(jsonBet.target_value);
+    self.expiration(jsonBet.expiration);
+    self.leverage(jsonBet.leverage);
+
+    $('#feedWizard').bootstrapWizard('last');
+  }
+
+  
+  /*
+      "command": "bet",
+      "source": "mfzSPkV7kAYma5oxZ37pHkw9qtwAEQx8Wy",
+      "feed_address": "mzRuPj1UL1GYkqHU3Ud371sWtPF2x1pgpm",
+      "bet_type": "Equal",
+      "deadline": "2014-06-12T20:00:00+00:00",
+      "wager": 20,
+      "counterwager": 4.6,
+      "target_value": 1,
+      "expiration": 143,
+      "leverage": 5040
+  */
+  self.loadProvidedJsonBet = function(jsonBetBase64) {
+    //jsonBetBase64 = "eyJjb21tYW5kIjogImJldCIsICJzb3VyY2UiOiAibWZ6U1BrVjdrQVltYTVveFozN3BIa3c5cXR3QUVReDhXeSIsICJmZWVkX2FkZHJlc3MiOiAibXpSdVBqMVVMMUdZa3FIVTNVZDM3MXNXdFBGMngxcGdwbSIsICJiZXRfdHlwZSI6ICJFcXVhbCIsICJkZWFkbGluZSI6ICIyMDE0LTA2LTEyVDIwOjAwOjAwKzAwOjAwIiwgIndhZ2VyIjogMjAsICJjb3VudGVyd2FnZXIiOiA0LjYsICJ0YXJnZXRfdmFsdWUiOiAxLCAiZXhwaXJhdGlvbiI6IDE0MywgImxldmVyYWdlIjogNTA0MH0=";
+    jsonBet = decodeJsonBet(jsonBetBase64);
+    if (typeof(jsonBet) == 'object') {
+      self.jsonBetProvided(jsonBet);
+      self.feedUrl(jsonBet.feed_address);
+    } else {
+      $.jqlog.debug("JSON ERROR");
+    }
+    
+  }
 }
 
 

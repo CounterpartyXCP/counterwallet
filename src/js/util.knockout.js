@@ -150,7 +150,7 @@ ko.validation.rules['isValidUrl'] = {
     message: 'This field must be a valid url'
 };
 
-ko.validation.rules['isValidUrlOrValidBitcoinAdress'] = {
+ko.validation.rules['isValidUrlOrValidBitcoinAdressOrJsonBet'] = {
     validator: function (val, self) {
       if (!val) return false;
       // regex to check url, make freeze Chrome when checking btc address
@@ -158,6 +158,8 @@ ko.validation.rules['isValidUrlOrValidBitcoinAdress'] = {
       // return CWBitcore.isValidAddress(val) || isValidURL(val);
       if (val.indexOf('http://') == 0 || val.indexOf('https://') == 0) {
         return isValidURL(val);
+      } else if (val.lastIndexOf('=') == val.length-1) {
+        return typeof(decodeJsonBet(val)) == 'object';
       } else {
         return CWBitcore.isValidAddress(val);
       }   

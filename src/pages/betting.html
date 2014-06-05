@@ -244,6 +244,12 @@
                         <table class="table table-bordered">​
                           <thead></thead>
                           <tbody>
+                            <tr data-bind="visible: $parent.jsonBetProvided">
+                              <td><b>Operator:</b></td>
+                              <td>
+                                <a data-bind="attr: {href: info_data.operator.url}" target="_blank"><span data-bind="text: info_data.operator.name"></span></a>
+                              </td>
+                            </tr>
                             <tr>
                               <td><b>Wager:</b></td>
                               <td><b><span data-bind="text: $parent.wager + ' XCP'"></span></b></td>
@@ -266,7 +272,7 @@
                                 win <span data-bind="text: $parent.odd"></span> XCP for every 1 XCP you bet 
                               </td>
                             </tr>
-                            <tr>              
+                            <tr data-bind="visible: $parent.fee>=0">              
                               <td><b>Fee:</b></td> 
                               <td><b><span data-bind="text: $parent.fee + ' XCP'"></span></b></td>  
                             </tr>
