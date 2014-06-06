@@ -233,7 +233,8 @@ function FeedBrowserViewModel() {
     self.jsonBetProvided(false);
   }
 
-  self.displayFeed = function(feed) {  
+  self.displayFeed = function(feed) { 
+  $.jqlog.debug("displayFeed1"); 
     $.jqlog.debug(feed);
     if (typeof(feed.info_data) == "undefined") {
       self.notAnUrlFeed(true);
@@ -353,6 +354,7 @@ function FeedBrowserViewModel() {
       params.target_value = self.targetValue();
     }
     var onCounterbetsLoaded = function(data) {
+      $.jqlog.debug("onCounterbetsLoaded");
       $.jqlog.debug(data);
       // prepare data for display. TODO: optimize, all in one loop
       var displayedData = []
@@ -559,7 +561,19 @@ function FeedBrowserViewModel() {
     jsonBet = decodeJsonBet(jsonBetBase64);
     if (typeof(jsonBet) == 'object') {
       self.jsonBetProvided(jsonBet);
-      self.feedUrl(jsonBet.feed_address);
+      if (typeof(jsonBet.feed) == 'object') {
+
+        self.notAnUrlFeed(false);
+        failoverAPI('parse_base64_feed', {'base64_feed': jsonBetBase64}, function(data) {
+          self.displayFeed(data.feed);
+        }, function() {
+          self.notAnUrlFeed(true);
+        })
+        
+      } else {
+        self.feedUrl(jsonBet.feed_address);
+      }
+      
     } else {
       $.jqlog.debug("JSON ERROR");
     }
