@@ -123,9 +123,18 @@ var BET_TYPES = {
   3: "Not Equal"
 };
 
+var BET_TYPES_SHORT = {
+  0: "BullCFD",
+  1: "BearCFD",
+  2: "Equal",
+  3: "NotEqual"
+}
+
 var COUNTER_BET = {
   "Equal": 3,
-  "NotEqual": 2
+  "NotEqual": 2,
+  "BullCFD": 1,
+  "BearCFD": 0
 }
 
 var BET_MATCHES_STATUS = {
@@ -134,6 +143,8 @@ var BET_MATCHES_STATUS = {
   "settled: for equal": 2,
   "settled: for notequal": 3
 }
+
+var LEVERAGE_UNIT = 5040;
 
 var MAINNET_UNSPENDABLE = '1CounterpartyXXXXXXXXXXXXXXXUWLpVr';
 var TESTNET_UNSPENDABLE = 'mvCounterpartyXXXXXXXXXXXXXXW24Hef';

@@ -324,7 +324,6 @@ function initBetting() {
   ko.applyBindings(FEED_BROWSER, document.getElementById("betting"));
 
   FEED_BROWSER.init();
- 
 }
 INIT_FUNC['pages/betting.html'] = initBetting;
 
@@ -335,7 +334,11 @@ function initOpenBets() {
   ko.applyBindings(OPEN_BETS, document.getElementById("openbets"));
 
   OPEN_BETS.init();
- 
+
+  $(window).bind("resize", OPEN_BETS.dataTableResponsive);
+  $(window).on('hashchange', function() {
+    $(window).off("resize", OPEN_BETS.dataTableResponsive);
+  });
 }
 INIT_FUNC['pages/openbets.html'] = initOpenBets;
 
@@ -345,6 +348,11 @@ function initMatchedBets() {
   ko.applyBindings(MATCHED_BETS, document.getElementById("matchedbets"));
 
   MATCHED_BETS.init();
+
+  $(window).bind("resize", MATCHED_BETS.dataTableResponsive);
+  $(window).on('hashchange', function() {
+    $(window).off("resize", MATCHED_BETS.dataTableResponsive);
+  });
  
 }
 INIT_FUNC['pages/matchedbets.html'] = initMatchedBets;
