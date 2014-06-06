@@ -565,7 +565,6 @@ function FeedBrowserViewModel() {
     }
   }
 
-
 }
 
 
@@ -635,6 +634,7 @@ function OpenBetsViewModel() {
       bet.wager_remaining = satoshiToXCP(data.bets[i].wager_remaining);
       bet.counterwager_quantity = satoshiToXCP(data.bets[i].counterwager_quantity);
       bet.counterwager_remaining = satoshiToXCP(data.bets[i].counterwager_remaining);
+      bet.odds = reduce(data.bets[i].wager_quantity, data.bets[i].counterwager_quantity).join('/');
       bet.bet_html = '<b>' + bet.bet_type + '</b> on <b>' + bet.target_value + '</b>';
       bets.push(bet);
     }
@@ -642,6 +642,27 @@ function OpenBetsViewModel() {
     var openBetsTable = $('#openBetsTable').dataTable();
   }
 
+  self.dataTableResponsive = function(e) {
+    // Responsive design for our data tables and more on this page
+    var newWindowWidth = $(window).width();
+    if(self._lastWindowWidth && newWindowWidth == self._lastWindowWidth) return;
+    self._lastWindowWidth = newWindowWidth;
+    
+    if($('#openBetsTable').hasClass('dataTable')) {
+      var openBetsTable = $('#openBetsTable').dataTable();
+      if(newWindowWidth < 1250) { //hide some...
+        openBetsTable.fnSetColumnVis(3, false); //hide address
+        openBetsTable.fnSetColumnVis(4, false); //hide fee
+        openBetsTable.fnSetColumnVis(5, false); //hide deadline
+      }
+      if(newWindowWidth >= 1250) { //show it all, baby
+        openBetsTable.fnSetColumnVis(3, true); //show address
+        openBetsTable.fnSetColumnVis(4, true); //show fee
+        openBetsTable.fnSetColumnVis(5, true); //show deadline
+      }
+      openBetsTable.fnAdjustColumnSizing();
+    }
+  }
   
 }
 
@@ -722,12 +743,16 @@ function MatchedBetsViewModel() {
       bet.fee = satoshiToPercent(data_bet.fee_fraction_int);
       bet.deadline = moment(data_bet.deadline*1000).format('YYYY/MM/DD hh:mm:ss A Z')
       if (num_tx=='0') {
-        bet.wager = satoshiToXCP(data_bet.forward_quantity);
-        bet.counterwager = satoshiToXCP(data_bet.backward_quantity);
+        bet.wager = data_bet.forward_quantity;
+        bet.counterwager = data_bet.backward_quantity;
       } else {
-        bet.wager = satoshiToXCP(data_bet.backward_quantity);
-        bet.counterwager = satoshiToXCP(data_bet.forward_quantity);
+        bet.wager = data_bet.backward_quantity;
+        bet.counterwager = data_bet.forward_quantity;
       }
+      bet.odds = reduce(bet.wager, bet.counterwager).join('/');
+      bet.wager = satoshiToXCP(bet.wager);
+      bet.counterwager = satoshiToXCP(bet.counterwager);
+
       if (data_bet.status == 'pending') {
         bet.status = data_bet.status;
       } else {
@@ -765,6 +790,28 @@ function MatchedBetsViewModel() {
       'addresses': feed_addresses
     }
     failoverAPI('get_feeds_by_source', params, onReceivedFeed);
+  }
+
+  self.dataTableResponsive = function(e) {
+    // Responsive design for our data tables and more on this page
+    var newWindowWidth = $(window).width();
+    if(self._lastWindowWidth && newWindowWidth == self._lastWindowWidth) return;
+    self._lastWindowWidth = newWindowWidth;
+    
+    if($('#matchedBetsTable').hasClass('dataTable')) {
+      var matchedBetsTable = $('#matchedBetsTable').dataTable();
+      if(newWindowWidth < 1250) { //hide some...
+        matchedBetsTable.fnSetColumnVis(4, false); //hide address
+        matchedBetsTable.fnSetColumnVis(5, false); //hide fee
+        matchedBetsTable.fnSetColumnVis(6, false); //hide deadline
+      }
+      if(newWindowWidth >= 1250) { //show it all, baby
+        matchedBetsTable.fnSetColumnVis(4, true); //show address
+        matchedBetsTable.fnSetColumnVis(5, true); //show fee
+        matchedBetsTable.fnSetColumnVis(6, true); //show deadline
+      }
+      matchedBetsTable.fnAdjustColumnSizing();
+    }
   }
 }
 
