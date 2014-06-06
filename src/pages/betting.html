@@ -109,9 +109,10 @@
                       <div class="tab-pane active" id="tab1">
 
                         <section class="col col-lg-6 col-sm-6">
-                          <label for="asset1" class="control-label font-medlg">Feed Address: </label>
+                          <label for="asset1" class="control-label font-medlg" style="vertical-align:top">Address / Bet Code: </label>
                           <label class="input">
-                            <input type="text" id="feed_url" name="feed_url" class="form-control input-lg" type="text"  data-bind="value: feedUrl, valueUpdate: 'input'" placeholder="Enter the Bitcoin address of a feed to bet on" />
+                            <textarea id="feed_url" name="feed_url" class="form-control input-lg" data-bind="value: feedUrl, valueUpdate: 'input'" placeholder="Enter feed address or bet code" ></textarea>
+
                           </label>
                           <br/><span class="errorColor" data-bind="validationMessage: feedUrl"></span>
                           <span class="errorColor" data-bind="visible: notAnUrlFeed">We can't find a feed at this address</span>
