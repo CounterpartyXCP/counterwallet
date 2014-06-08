@@ -59,6 +59,14 @@ function WaitingBTCPayViewModel(btcPayData) {
   }, self);
   
   self.completeBTCPay = function() {
+    //check duplicate
+    if (PROCESSED_BTCPAY[btcPayData['orderMatchID']]) {
+      $.jqlog.error("Attempt to make duplicate btcpay: " + btcPayData['orderMatchID']);
+      return false;
+    } else {
+      PROCESSED_BTCPAY[btcPayData['orderMatchID']] = true;
+    }
+
     //Pop up confirm dialog, and make BTC payment
     WALLET.retrieveBTCBalance(self.BTCPAY_DATA['myAddr'], function(balance) {
       if(balance < self.BTCPAY_DATA['btcQuantityRaw'] + MIN_PRIME_BALANCE) {
@@ -273,6 +281,13 @@ function UpcomingBTCPayFeedViewModel() {
     //^ must be a BTCPayData structure, not a plain message from the feed or result from the API
 
     if(typeof(resort)==='undefined') resort = true;
+    // check duplicate
+    for (var e in self.entries) {
+      if (self.entries[e].BTCPAY_DATA && self.entries[e].BTCPAY_DATA['orderMatchID'] == btcPayData['orderMatchID']) {
+        $.jqlog.error("Attempt to make duplicate btcpay: " + btcPayData['orderMatchID']);
+        return false;
+      }
+    }
     self.entries.unshift(new UpcomingBTCPayViewModel(btcPayData));
     if(resort) self.sort();
     self.lastUpdated(new Date());
@@ -301,6 +316,14 @@ function UpcomingBTCPayFeedViewModel() {
   
   self.process = function(btcPayData) {
     //The btcpay required is no longer "upcoming" and a create_btcpay should be broadcast...
+
+    //check duplicate
+    if (PROCESSED_BTCPAY[btcPayData['orderMatchID']]) {
+      $.jqlog.error("Attempt to make duplicate btcpay: " + btcPayData['orderMatchID']);
+      return false;
+    } else {
+      PROCESSED_BTCPAY[btcPayData['orderMatchID']] = true;
+    }
     
     //remove the entry from the "upcoming" list, as it will be migrating to the "waiting" list
     self.remove(btcPayData['orderMatchID']);

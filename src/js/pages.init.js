@@ -1,4 +1,5 @@
 INIT_FUNC = {};
+PROCESSED_BTCPAY = {};
 
 function initIndex() { //main page
   window.LOGON_VIEW_MODEL = new LogonViewModel();
