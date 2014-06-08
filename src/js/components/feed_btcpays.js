@@ -59,6 +59,13 @@ function WaitingBTCPayViewModel(btcPayData) {
   }, self);
   
   self.completeBTCPay = function() {
+    //check duplicate
+    if (PROCESSED_BTCPAY[btcPayData['orderMatchID']]) {
+      return false;
+    } else {
+      PROCESSED_BTCPAY[btcPayData['orderMatchID']] = true;
+    }
+
     //Pop up confirm dialog, and make BTC payment
     WALLET.retrieveBTCBalance(self.BTCPAY_DATA['myAddr'], function(balance) {
       if(balance < self.BTCPAY_DATA['btcQuantityRaw'] + MIN_PRIME_BALANCE) {
