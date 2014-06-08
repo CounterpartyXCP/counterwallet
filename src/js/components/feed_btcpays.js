@@ -283,7 +283,7 @@ function UpcomingBTCPayFeedViewModel() {
     if(typeof(resort)==='undefined') resort = true;
     // check duplicate
     for (var e in self.entries) {
-      if (self.entries[e].BTCPAY_DATA['orderMatchID'] == btcPayData['orderMatchID']) {
+      if (self.entries[e].BTCPAY_DATA && self.entries[e].BTCPAY_DATA['orderMatchID'] == btcPayData['orderMatchID']) {
         $.jqlog.error("Attempt to make duplicate btcpay: " + btcPayData['orderMatchID']);
         return false;
       }
