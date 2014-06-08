@@ -61,6 +61,7 @@ function WaitingBTCPayViewModel(btcPayData) {
   self.completeBTCPay = function() {
     //check duplicate
     if (PROCESSED_BTCPAY[btcPayData['orderMatchID']]) {
+      $.jqlog.error("Attempt to make duplicate btcpay: " + btcPayData['orderMatchID']);
       return false;
     } else {
       PROCESSED_BTCPAY[btcPayData['orderMatchID']] = true;
@@ -283,6 +284,7 @@ function UpcomingBTCPayFeedViewModel() {
     // check duplicate
     for (var e in self.entries) {
       if (self.entries[e].BTCPAY_DATA['orderMatchID'] == btcPayData['orderMatchID']) {
+        $.jqlog.error("Attempt to make duplicate btcpay: " + btcPayData['orderMatchID']);
         return false;
       }
     }
@@ -317,6 +319,7 @@ function UpcomingBTCPayFeedViewModel() {
 
     //check duplicate
     if (PROCESSED_BTCPAY[btcPayData['orderMatchID']]) {
+      $.jqlog.error("Attempt to make duplicate btcpay: " + btcPayData['orderMatchID']);
       return false;
     } else {
       PROCESSED_BTCPAY[btcPayData['orderMatchID']] = true;
