@@ -650,6 +650,8 @@ function OpenBetsViewModel() {
       bet.counterwager_remaining = satoshiToXCP(data.bets[i].counterwager_remaining);
       bet.odds = reduce(data.bets[i].wager_quantity, data.bets[i].counterwager_quantity).join('/');
       bet.bet_html = '<b>' + bet.bet_type + '</b> on <b>' + bet.target_value + '</b>';
+      bet.tx_hash = data.bets[i].tx_hash;
+      bet.tx_index = data.bets[i].tx_index;
       bets.push(bet);
     }
     self.openBets(bets);
@@ -676,6 +678,21 @@ function OpenBetsViewModel() {
       }
       openBetsTable.fnAdjustColumnSizing();
     }
+  }
+
+  self.cancelOpenBet = function(bet) {
+    var params = {
+      offer_hash: bet.tx_hash,
+      source: bet.address,
+      _type: 'bet',
+      _tx_index: bet.tx_index
+    }
+
+    var onSuccess = function(txHash, data, endpoint) {
+      bootbox.alert("<b>Your bet were canceled successfully.</b> " + ACTION_PENDING_NOTICE);
+    }
+
+    WALLET.doTransaction(bet.address, "create_cancel", params, onSuccess);
   }
   
 }
