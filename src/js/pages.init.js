@@ -386,3 +386,24 @@ function initMatchedBets() {
  
 }
 INIT_FUNC['pages/matchedbets.html'] = initMatchedBets;
+
+
+function initOpenOrders() {
+  pageSetUp();
+  window.OPEN_ORDERS = new OpenOrdersViewModel();
+  ko.applyBindings(OPEN_ORDERS, document.getElementById("openorders"));
+
+  OPEN_ORDERS.init();
+
+}
+INIT_FUNC['pages/openorders.html'] = initOpenOrders;
+
+function initOrderMatches() {
+  pageSetUp();
+  window.ORDER_MATCHES = new OrderMatchesViewModel();
+  ko.applyBindings(ORDER_MATCHES, document.getElementById("ordermatches"));
+
+  ORDER_MATCHES.init();
+
+}
+INIT_FUNC['pages/ordermatches.html'] = initOrderMatches;

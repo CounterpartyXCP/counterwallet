@@ -472,6 +472,11 @@ function decodeJsonBet(jsonBetBase64) {
   return jsonBet;
 }
 
+function expireDate(expire_index) {
+  var expire_in = expire_index - WALLET.networkBlockHeight();
+  return new Date((new Date()).getTime() + (expire_in * APPROX_SECONDS_PER_BLOCK * 1000));
+}
+
 //Helper for closure-based inheritance (see http://www.ruzee.com/blog/2008/12/javascript-inheritance-via-prototypes-and-closures)
 (function(){
   CClass = function(){};

@@ -155,12 +155,15 @@
         <ul>
           <li class="">
             <a href="pages/balances.html"><i class="fa fa-lg fa-fw fa-user"></i> <span class="menu-item-parent">My Balances</span></a>
-          </li>
+          </li>          
           <li class="">
-            <a href="pages/buysell.html"><i class="fa fa-lg fa-fw fa-exchange"></i> <span class="menu-item-parent">Buy &amp; Sell</span></a>
-          </li>
-          <li class="">
-            <a href="pages/view_prices.html"><i class="fa fa-lg fa-fw fa-bar-chart-o"></i> <span class="menu-item-parent">View Prices</span></a>
+            <a href="#"><i class="fa fa-lg fa-fw fa-exchange"></i> <span class="menu-item-parent">Exchange</span></a>
+            <ul>
+              <li><a href="pages/view_prices.html"><i class="fa fa-lg fa-fw fa-bar-chart-o"></i> View Prices</a></li>
+              <li><a href="pages/buysell.html"><i class="fa fa-lg fa-fw fa-share"></i> Buy &amp; Sell</a></li>
+              <li><a href="pages/openorders.html"><i class="fa fa-lg fa-fw fa-circle-o"></i> Open Orders</a></li>
+              <li><a href="pages/ordermatches.html"><i class="fa fa-lg fa-fw fa-book"></i> My Order History</a></li>
+            </ul>
           </li>
           <li class="">
             <a href="#"><i class="fa fa-lg fa-fw fa-bullseye"></i> <span class="menu-item-parent">Betting</span></a>
@@ -724,6 +727,7 @@
     <script src="js/components/stats.js"></script>
     <script src="js/components/betting.js"></script>
     <script src="js/components/donate.js"></script>
+    <script src="js/components/exchange.js"></script>
 
     <script src="js/smartadmin.app.js"></script> <!-- custom app.js -->
     <!-- ^ unfortunately we have to mod the file itself, instead of dynamically override o_O -->
