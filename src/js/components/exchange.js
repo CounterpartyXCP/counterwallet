@@ -16,8 +16,9 @@ function OpenOrdersViewModel() {
     var params = {
       filters: [
         {'field':'source', 'op':'IN', 'value':addresses},
-        {'field':'status', 'op':'=', 'value':'open'}
-      ]
+        {'field':'give_remaining', 'op':'>', 'value':0}
+      ],
+      status: 'open'
     };
     failoverAPI("get_orders", params, self.displayOpenOrders);
   }
