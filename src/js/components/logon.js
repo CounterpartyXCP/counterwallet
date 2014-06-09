@@ -82,12 +82,11 @@ function LogonViewModel() {
       //Initialize the socket.io-driven event feed (notifies us in realtime of new events, as counterparty processes confirmed blocks)
       MESSAGE_FEED.init(data['last_message_index']);
       //^ set the "starting" message_index, under which we will ignore if received on the messages feed
-      
-      //Initialize chat feeds (even through the chat pane will remain closed by default and the user has not started chatting)
-      CHAT_FEED.init();
-      
-      //Grab preferences
-      multiAPINewest("get_preferences", [WALLET.identifier()], 'last_updated', function(data) {
+
+      var onReceivedPreferences = function(data) {
+        //Initialize chat feeds (even through the chat pane will remain closed by default and the user has not started chatting)
+        CHAT_FEED.init();
+
         var mustSavePreferencesToServer = false;
         
         if(data) { //user stored preferences located successfully
@@ -118,7 +117,21 @@ function LogonViewModel() {
         WALLET_OPTIONS_MODAL.selectedLang(PREFERENCES['selected_lang']);
         
         self.displayLicenseIfNecessary(mustSavePreferencesToServer);
-      });
+      }
+
+      var onError = function(jqXHR, textStatus, errorThrown) {
+        if (textStatus.indexOf('Already connected.') != -1) {
+          var message = "<b class='errorColor'>You appear to be logged into Counterwallet elsewhere.</b> It's not safe to be logged into the same wallet account from multiple devices at the same time. If you are sure that this is not the case, press Continue. Otherwise, please press Cancel, logout from your other device, and try again.";
+          var force = bootbox.confirm(message, function(force) {
+            if (force) {
+              multiAPINewest("get_preferences", [WALLET.identifier(), true], 'last_updated', onReceivedPreferences);
+            }
+          });
+        }
+      }
+      
+      //Grab preferences
+      multiAPINewest("get_preferences", [WALLET.identifier()], 'last_updated', onReceivedPreferences, onError);
     },
     function(jqXHR, textStatus, errorThrown, endpoint) {
       var message = describeError(jqXHR, textStatus, errorThrown);
