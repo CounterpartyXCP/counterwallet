@@ -322,6 +322,12 @@ body.smart-style-3 .jarviswidget>header { /* google skin = darkBlue (night sky) 
     padding: 0 0 14px 14px !important;
   }
 }
+/* otherwise just pad it off the right of the screen a bit */
+@media only screen and (min-width : 861px) {
+  div.pull-right.sectionHeaderButtonBar {
+      margin-right: 15px;
+  }
+}
 
 /* Fix widget header height for low resolution */
 section.balancesContainer .jarviswidget>header,
@@ -378,6 +384,9 @@ b.notoAddrColor > a {
 .btn-success {
     background-color: #739e73 !important;
 }
+#sparks li h5 {
+    margin: 0 !important;
+}
 
 /*
  * JARVIS WIDGET OVERRIDES
@@ -399,6 +408,7 @@ line-height: 34px;
 font-weight: 400;
 letter-spacing: 0;
 }
+
 /*
  * DATA TABLES OVERRIDES
  */

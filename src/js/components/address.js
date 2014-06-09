@@ -162,7 +162,7 @@ function AddressViewModel(key, address, initialLabel) {
     
     //update the preferences with this address removed
     PREFERENCES['watch_only_addresses'].remove(self.ADDRESS);
-    multiAPI("store_preferences", [WALLET.identifier(), PREFERENCES], function() {
+    multiAPI("store_preferences", {'wallet_id': WALLET.identifier(), 'preferences': PREFERENCES}, function() {
       checkURL(); //refresh the page without this address listed on it
     });
   }

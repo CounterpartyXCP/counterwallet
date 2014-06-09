@@ -40,7 +40,7 @@ function ChangeAddressLabelModalViewModel() {
     //^ remove any HTML tags from the text
     PREFERENCES.address_aliases[addressHash] = label;
     //^ update the preferences on the server 
-    multiAPI("store_preferences", [WALLET.identifier(), PREFERENCES], function(data, endpoint) {
+    multiAPI("store_preferences", {'wallet_id': WALLET.identifier(), 'preferences': PREFERENCES}, function(data, endpoint) {
       WALLET.getAddressObj(self.address()).label(label); //update was a success
       self.shown(false);
     });
@@ -146,7 +146,7 @@ function CreateNewAddressModalViewModel() {
     WALLET.getAddressObj(newAddress).label(sanitizedDescription);
 
     //save prefs to server
-    multiAPI("store_preferences", [WALLET.identifier(), PREFERENCES], function(data, endpoint) {
+    multiAPI("store_preferences", {'wallet_id': WALLET.identifier(), 'preferences': PREFERENCES}, function(data, endpoint) {
       self.shown(false);
       
       if(self.forWatchOnly()) {

@@ -2,7 +2,7 @@
   "name": "counterwallet",
   "description": "Counterwallet",
   "author": "Counterparty development team",
-  "version": "1.2.0",
+  "version": "1.2.1",
   "main": "build/index.html",
   "repository": { 
     "type" : "git",
