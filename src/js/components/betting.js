@@ -689,7 +689,7 @@ function OpenBetsViewModel() {
     }
 
     var onSuccess = function(txHash, data, endpoint) {
-      bootbox.alert("<b>Your bet were canceled successfully.</b> " + ACTION_PENDING_NOTICE);
+      bootbox.alert("<b>Your bet was canceled successfully.</b> " + ACTION_PENDING_NOTICE);
     }
 
     WALLET.doTransaction(bet.address, "create_cancel", params, onSuccess);
