@@ -51,6 +51,42 @@ function LogonViewModel() {
   self.showSecureKeyboard = function() {
     LOGON_PASSWORD_MODAL.show(); 
   }
+
+  self.onReceivedPreferences = function(data) {
+    //Initialize chat feeds (even through the chat pane will remain closed by default and the user has not started chatting)
+    CHAT_FEED.init();
+
+    var mustSavePreferencesToServer = false;
+    
+    if(data) { //user stored preferences located successfully
+      assert(data && data.hasOwnProperty('preferences'), "Invalid stored preferences");
+      PREFERENCES = data['preferences'];
+      
+      //Provide defaults for any missing fields in the stored preferences object
+      for(var prop in DEFAULT_PREFERENCES) {
+        if(DEFAULT_PREFERENCES.hasOwnProperty(prop)) {
+          if(PREFERENCES[prop] === undefined) {
+            $.jqlog.info("Providing default for preferences property: " + prop);
+            PREFERENCES[prop] = DEFAULT_PREFERENCES[prop];
+            mustSavePreferencesToServer = true;
+          }
+        }
+      }
+    } else { //could not find user stored preferences
+      //No server had the preferences
+      $.jqlog.log("Stored preferences NOT found on server(s). Creating new...");
+      WALLET.isNew(true);
+      
+      //no stored preferences on any server(s) in the federation, go with the default...
+      PREFERENCES = DEFAULT_PREFERENCES;
+      mustSavePreferencesToServer = true;
+    }
+    
+    WALLET_OPTIONS_MODAL.selectedTheme(PREFERENCES['selected_theme']);
+    WALLET_OPTIONS_MODAL.selectedLang(PREFERENCES['selected_lang']);
+    
+    self.displayLicenseIfNecessary(mustSavePreferencesToServer);
+  }
   
   self.openWallet = function() {
     //Start with a gate check to make sure at least one of the servers is ready and caught up before we try to log in
@@ -83,55 +119,19 @@ function LogonViewModel() {
       MESSAGE_FEED.init(data['last_message_index']);
       //^ set the "starting" message_index, under which we will ignore if received on the messages feed
 
-      var onReceivedPreferences = function(data) {
-        //Initialize chat feeds (even through the chat pane will remain closed by default and the user has not started chatting)
-        CHAT_FEED.init();
-
-        var mustSavePreferencesToServer = false;
-        
-        if(data) { //user stored preferences located successfully
-          assert(data && data.hasOwnProperty('preferences'), "Invalid stored preferences");
-          PREFERENCES = data['preferences'];
-          
-          //Provide defaults for any missing fields in the stored preferences object
-          for(var prop in DEFAULT_PREFERENCES) {
-            if(DEFAULT_PREFERENCES.hasOwnProperty(prop)) {
-              if(PREFERENCES[prop] === undefined) {
-                $.jqlog.info("Providing default for preferences property: " + prop);
-                PREFERENCES[prop] = DEFAULT_PREFERENCES[prop];
-                mustSavePreferencesToServer = true;
-              }
-            }
-          }
-        } else { //could not find user stored preferences
-          //No server had the preferences
-          $.jqlog.log("Stored preferences NOT found on server(s). Creating new...");
-          WALLET.isNew(true);
-          
-          //no stored preferences on any server(s) in the federation, go with the default...
-          PREFERENCES = DEFAULT_PREFERENCES;
-          mustSavePreferencesToServer = true;
-        }
-        
-        WALLET_OPTIONS_MODAL.selectedTheme(PREFERENCES['selected_theme']);
-        WALLET_OPTIONS_MODAL.selectedLang(PREFERENCES['selected_lang']);
-        
-        self.displayLicenseIfNecessary(mustSavePreferencesToServer);
-      }
-
       var onError = function(jqXHR, textStatus, errorThrown) {
         if (textStatus.indexOf('Already connected.') != -1) {
           var message = "<b class='errorColor'>You appear to be logged into Counterwallet elsewhere.</b> It's not safe to be logged into the same wallet account from multiple devices at the same time. If you are sure that this is not the case, press Continue. Otherwise, please press Cancel, logout from your other device, and try again.";
           var force = bootbox.confirm(message, function(force) {
             if (force) {
-              multiAPINewest("get_preferences", [WALLET.identifier(), true], 'last_updated', onReceivedPreferences);
+              multiAPINewest("get_preferences", [WALLET.identifier(), true], 'last_updated', self.onReceivedPreferences);
             }
           });
         }
       }
       
       //Grab preferences
-      multiAPINewest("get_preferences", [WALLET.identifier()], 'last_updated', onReceivedPreferences, onError);
+      multiAPINewest("get_preferences", [WALLET.identifier()], 'last_updated', self.onReceivedPreferences, onError);
     },
     function(jqXHR, textStatus, errorThrown, endpoint) {
       var message = describeError(jqXHR, textStatus, errorThrown);
