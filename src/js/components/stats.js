@@ -1,19 +1,34 @@
 
 function StatsHistoryViewModel() {
   var self = this;
-  self.graphData = null;
+  self.txGraphData = null;
+  self.walletGraphData = null;
+  self.totalMainnetWallets = 0;
+  self.totalTestnetWallets = 0;
+  self.totalUnknownWallets = 0;
   
   self.init = function() {
     failoverAPI("get_transaction_stats", {}, function(data, endpoint) {
       for(var i=0; i < data.length; i++) {
           data[i]['name'] = data[i]['name'].capitalize().replace(/_/g, ' ');
       }
-      self.graphData = data;
-      self.doChart();
+      self.txGraphData = data;
+      self.doTxChart();
+    });
+
+    failoverAPI("get_wallet_stats", {}, function(data, endpoint) {
+      self.walletGraphData = data['wallet_stats'];
+      self.totalMainnetWallets = data['num_wallets_mainnet'];
+      $('#totalMainnetWallets').text(self.totalMainnetWallets);
+      self.totalTestnetWallets = data['num_wallets_testnet'];
+      $('#totalTestnetWallets').text(self.totalTestnetWallets);
+      self.totalUnknownWallets = data['num_wallets_unknown'];
+      $('#totalUnknownWallets').text(self.totalUnknownWallets);
+      self.doWalletChart();
     });
   }
   
-  self.doChart = function() {
+  self.doTxChart = function() {
     $('#transactionStatHistory').highcharts({
        chart: {
             type: 'column',
@@ -64,19 +79,68 @@ function StatsHistoryViewModel() {
         plotOptions: {
             column: {
                 stacking: 'normal'
-                /*dataLabels: {
-                    enabled: true,
-                    color: (Highcharts.theme && Highcharts.theme.dataLabelsColor) || 'white',
-                    style: {
-                        textShadow: '0 0 3px black, 0 0 3px black'
-                    }
-                }*/
             }
         },      
-        series: self.graphData
+        series: self.txGraphData
     });    
   }
   
+  self.doWalletChart = function() {
+    $('#walletStatHistory').highcharts({
+       chart: {
+            type: 'line',
+            zoomType: 'x',
+            maxZoom: 48 * 3600 * 1000
+        },
+        title: {
+            text: 'Wallet Activity by Day'
+        },
+        xAxis: {
+          type: 'datetime',
+          title: {
+            text: null
+          }
+        },
+        yAxis: {
+            min: 0,
+            title: {
+                text: '#'
+            },
+            stackLabels: {
+                enabled: true,
+                style: {
+                    fontWeight: 'bold',
+                    color: (Highcharts.theme && Highcharts.theme.textColor) || 'gray'
+                }
+            }
+        },
+        legend: {
+            align: 'right',
+            verticalAlign: 'top',
+            floating: true,
+            backgroundColor: (Highcharts.theme && Highcharts.theme.background2) || 'white',
+            borderColor: '#CCC',
+            borderWidth: 1,
+            shadow: false
+        },
+        tooltip: {
+            formatter: function() {
+                return '<b>'+ moment(this.x).format('MMM Do YYYY') +'</b><br/>'+
+                    this.series.name +': '+ this.y;
+            }
+        },
+        credits: {
+            enabled: false
+        },        
+        plotOptions: {
+            column: {
+                stacking: 'normal'
+            }
+        },      
+        series: self.walletGraphData
+    });    
+  }
+
   self.showNewRow = function(elem) { if (elem.nodeType === 1) $(elem).hide().slideDown() }
   
   self.hideOldRow = function(elem) { if (elem.nodeType === 1) $(elem).slideUp(function() { $(elem).remove(); }) }  

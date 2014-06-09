@@ -384,6 +384,9 @@ b.notoAddrColor > a {
 .btn-success {
     background-color: #739e73 !important;
 }
+#sparks li h5 {
+    margin: 0 !important;
+}
 
 /*
  * JARVIS WIDGET OVERRIDES
@@ -405,6 +408,7 @@ line-height: 34px;
 font-weight: 400;
 letter-spacing: 0;
 }
+
 /*
  * DATA TABLES OVERRIDES
  */
