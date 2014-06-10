@@ -393,6 +393,7 @@ function BuySellWizardViewModel() {
   }, self);
 
   self.unitPriceCustom = ko.computed(function() {
+     $.jqlog.debug("unitPriceCustom "+self.customSellAsEntry()+" "+self.customSellAs());
     if(!self.assetPair() || !isNumber(self.selectedBuyQuantity()) || !isNumber(self.selectedSellQuantityCustom())) return null;
     //^ only valid when the market unit price doesn't exist or is overridden
     if(parseFloat(self.selectedSellQuantityCustom()) == 0 || parseFloat(self.selectedBuyQuantity()) == 0) return null;
@@ -400,21 +401,28 @@ function BuySellWizardViewModel() {
     // (i.e. if we override unit price and manually display that, if we rounded to 8 places, the unit price displayed
     // may not always be the unit price we entered, as we actually still derive the unit price from setting the sale quantity, 
     // and don't use the unit price we enter directly, in order to reduce complexity and utilizing existing reactive control logic)
-    if(self.assetPair()[0] == self.buyAsset()) //buy asset is the base
-      //self.selectedSellQuantityCustom / self.selectedBuyQuantity
-      return Decimal.round(new Decimal(self.selectedSellQuantityCustom()).div(self.selectedBuyQuantity()), 6, Decimal.MidpointRounding.ToEven).toFloat();
-    else { // sell asset is the base
-      assert(self.assetPair()[0] == self.sellAsset());
-      //self.selectedBuyQuantity / self.selectedSellQuantityCustom
-      return Decimal.round(new Decimal(self.selectedBuyQuantity()).div(self.selectedSellQuantityCustom()), 6, Decimal.MidpointRounding.ToEven).toFloat();
+    if (self.customSellAs() == 'unitprice' && self.overrideMarketPrice()) {
+      return self.customSellAsEntry();
+    } else {
+      if(self.assetPair()[0] == self.buyAsset()) //buy asset is the base
+        //self.selectedSellQuantityCustom / self.selectedBuyQuantity
+        return Decimal.round(new Decimal(self.selectedSellQuantityCustom()).div(self.selectedBuyQuantity()), 6, Decimal.MidpointRounding.ToEven).toFloat();
+      else { // sell asset is the base
+        assert(self.assetPair()[0] == self.sellAsset());
+        //self.selectedBuyQuantity / self.selectedSellQuantityCustom
+        return Decimal.round(new Decimal(self.selectedBuyQuantity()).div(self.selectedSellQuantityCustom()), 6, Decimal.MidpointRounding.ToEven).toFloat();
+      }
     }
+    
   }, self);
   self.unitPrice = ko.computed(function() {
+    $.jqlog.debug("unitPrice");
     //if we've overridden the unit price, return that, otherwise go with the market rate (if there is one)
-    if(self.overrideMarketPrice() || self.currentMarketUnitPrice() == 0) return self.unitPriceCustom();
+    if (self.overrideMarketPrice() || self.currentMarketUnitPrice() == 0) return self.unitPriceCustom();
     return self.currentMarketUnitPrice();
   }, self);
   self.dispUnitPrice = ko.computed(function() {
+    $.jqlog.debug("dispUnitPrice");
     if(!self.unitPrice()) return null;
     return smartFormat(self.unitPrice());
   }, self);
