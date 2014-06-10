@@ -393,7 +393,6 @@ function BuySellWizardViewModel() {
   }, self);
 
   self.unitPriceCustom = ko.computed(function() {
-     $.jqlog.debug("unitPriceCustom "+self.customSellAsEntry()+" "+self.customSellAs());
     if(!self.assetPair() || !isNumber(self.selectedBuyQuantity()) || !isNumber(self.selectedSellQuantityCustom())) return null;
     //^ only valid when the market unit price doesn't exist or is overridden
     if(parseFloat(self.selectedSellQuantityCustom()) == 0 || parseFloat(self.selectedBuyQuantity()) == 0) return null;
@@ -416,13 +415,11 @@ function BuySellWizardViewModel() {
     
   }, self);
   self.unitPrice = ko.computed(function() {
-    $.jqlog.debug("unitPrice");
     //if we've overridden the unit price, return that, otherwise go with the market rate (if there is one)
     if (self.overrideMarketPrice() || self.currentMarketUnitPrice() == 0) return self.unitPriceCustom();
     return self.currentMarketUnitPrice();
   }, self);
   self.dispUnitPrice = ko.computed(function() {
-    $.jqlog.debug("dispUnitPrice");
     if(!self.unitPrice()) return null;
     return smartFormat(self.unitPrice());
   }, self);
