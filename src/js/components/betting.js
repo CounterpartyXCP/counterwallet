@@ -655,7 +655,14 @@ function OpenBetsViewModel() {
       bets.push(bet);
     }
     self.openBets(bets);
-    var openBetsTable = $('#openBetsTable').dataTable();
+    var openBetsTable = $('#openBetsTable').dataTable({
+      "aaSorting": [[6, 'desc']],
+      "aoColumns": [
+        {"bSortable": false},
+        null,null,null,null,null,null,null,null,null,null,null,null
+      ]
+    });
+    openBetsTable.fnSetColumnVis(12, false);
   }
 
   self.dataTableResponsive = function(e) {
@@ -667,14 +674,14 @@ function OpenBetsViewModel() {
     if($('#openBetsTable').hasClass('dataTable')) {
       var openBetsTable = $('#openBetsTable').dataTable();
       if(newWindowWidth < 1250) { //hide some...
-        openBetsTable.fnSetColumnVis(3, false); //hide address
-        openBetsTable.fnSetColumnVis(4, false); //hide fee
-        openBetsTable.fnSetColumnVis(5, false); //hide deadline
+        openBetsTable.fnSetColumnVis(4, false); //hide address
+        openBetsTable.fnSetColumnVis(5, false); //hide fee
+        openBetsTable.fnSetColumnVis(6, false); //hide deadline
       }
       if(newWindowWidth >= 1250) { //show it all, baby
-        openBetsTable.fnSetColumnVis(3, true); //show address
-        openBetsTable.fnSetColumnVis(4, true); //show fee
-        openBetsTable.fnSetColumnVis(5, true); //show deadline
+        openBetsTable.fnSetColumnVis(4, true); //show address
+        openBetsTable.fnSetColumnVis(5, true); //show fee
+        openBetsTable.fnSetColumnVis(6, true); //show deadline
       }
       openBetsTable.fnAdjustColumnSizing();
     }
@@ -796,6 +803,7 @@ function MatchedBetsViewModel() {
         'lose': 'danger'
       };
       bet.status_html = '<span class="label label-'+classes[bet.status]+'">'+bet.status+'</span>';
+      bet.id = data_bet.id;
       return bet;
     }
 
@@ -812,8 +820,9 @@ function MatchedBetsViewModel() {
       }
       self.matchedBets(bets);
       var matchedBetsTable = $('#matchedBetsTable').dataTable({
-        "order": [ 6, 'asc' ]
+        "aaSorting": [[6, 'desc']]
       });
+      matchedBetsTable.fnSetColumnVis(10, false);
     }
 
     self.matchedBets([]);

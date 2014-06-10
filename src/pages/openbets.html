@@ -38,6 +38,7 @@
                       <th>Wager remaining</th>
                       <th>Counterwager quantity</th>
                       <th>Counterwager remaining</th>
+                      <th>tx_hash</th>
                     </tr>
                   </thead>
                   <tbody data-bind="foreach: { data: openBets, as: 'bet' }">
@@ -56,6 +57,7 @@
                       <td class="number" data-bind="text: bet.wager_remaining"></td>
                       <td class="number" data-bind="text: bet.counterwager_quantity"></td>
                       <td class="number" data-bind="text: bet.counterwager_remaining"></td>
+                      <td data-bind="text: bet.tx_hash"></td>
                     </tr>
                   </tbody>
                 </table>
