@@ -201,7 +201,7 @@ function TransactionHistoryItemViewModel(data) {
     } else if(self.RAW_TX_TYPE == 'bets') {
       desc = BET_TYPES[self.DATA['bet_type']] + " bet on feed @ <Ad>"
         + getLinkForCPData('address', self.DATA['feed_address'], getAddressLabel(self.DATA['feed_address'])) + "</Ad><br/>"
-        + "Odds: <b>" + self.DATA['odds'] + "</b>, Wager: <Am>"
+        + "Odds: <b>" + reduce(self.DATA['wager_quantity'], self.DATA['counterwager_quantity']).join('/') + "</b>, Wager: <Am>"
         + smartFormat(normalizeQuantity(self.DATA['wager_quantity'])) + "</Am> <As>XCP</As>, Counterwager: <Am>"
         + smartFormat(normalizeQuantity(self.DATA['counterwager_quantity'])) + "</Am> <As>XCP</As>";  
     } else if(self.RAW_TX_TYPE == 'bet_matches') {
