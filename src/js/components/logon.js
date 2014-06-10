@@ -124,7 +124,7 @@ function LogonViewModel() {
           var message = "<b class='errorColor'>You appear to be logged into Counterwallet elsewhere.</b> It's not safe to be logged into the same wallet account from multiple devices at the same time. If you are sure that this is not the case, press Continue. Otherwise, please press Cancel, logout from your other device, and try again.";
           var force = bootbox.confirm(message, function(force) {
             if (force) {
-              multiAPINewest("get_preferences", [WALLET.identifier(), true], 'last_updated', self.onReceivedPreferences);
+              multiAPINewest("get_preferences", {wallet_id: WALLET.identifier(), force_login: true}, 'last_updated', self.onReceivedPreferences);
             }
           });
         }
