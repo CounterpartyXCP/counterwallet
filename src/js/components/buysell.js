@@ -757,6 +757,7 @@ function BuySellWizardViewModel() {
         self.tradeHistory.push(new TradeHistoryItemModel(data[i]));
       }
       if(self.tradeHistory().length) {
+        $.jqlog.debug(self.tradeHistory());
         runDataTables('#tradeHistory', true, {
           "aaSorting": [ [0, 'desc'] ],
           "aoColumns": [
