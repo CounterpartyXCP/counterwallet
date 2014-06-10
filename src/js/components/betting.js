@@ -650,10 +650,19 @@ function OpenBetsViewModel() {
       bet.counterwager_remaining = satoshiToXCP(data.bets[i].counterwager_remaining);
       bet.odds = reduce(data.bets[i].wager_quantity, data.bets[i].counterwager_quantity).join('/');
       bet.bet_html = '<b>' + bet.bet_type + '</b> on <b>' + bet.target_value + '</b>';
+      bet.tx_hash = data.bets[i].tx_hash;
+      bet.tx_index = data.bets[i].tx_index;
       bets.push(bet);
     }
     self.openBets(bets);
-    var openBetsTable = $('#openBetsTable').dataTable();
+    var openBetsTable = $('#openBetsTable').dataTable({
+      "aaSorting": [[6, 'desc']],
+      "aoColumns": [
+        {"bSortable": false},
+        null,null,null,null,null,null,null,null,null,null,null,null
+      ]
+    });
+    openBetsTable.fnSetColumnVis(12, false);
   }
 
   self.dataTableResponsive = function(e) {
@@ -665,17 +674,32 @@ function OpenBetsViewModel() {
     if($('#openBetsTable').hasClass('dataTable')) {
       var openBetsTable = $('#openBetsTable').dataTable();
       if(newWindowWidth < 1250) { //hide some...
-        openBetsTable.fnSetColumnVis(3, false); //hide address
-        openBetsTable.fnSetColumnVis(4, false); //hide fee
-        openBetsTable.fnSetColumnVis(5, false); //hide deadline
+        openBetsTable.fnSetColumnVis(4, false); //hide address
+        openBetsTable.fnSetColumnVis(5, false); //hide fee
+        openBetsTable.fnSetColumnVis(6, false); //hide deadline
       }
       if(newWindowWidth >= 1250) { //show it all, baby
-        openBetsTable.fnSetColumnVis(3, true); //show address
-        openBetsTable.fnSetColumnVis(4, true); //show fee
-        openBetsTable.fnSetColumnVis(5, true); //show deadline
+        openBetsTable.fnSetColumnVis(4, true); //show address
+        openBetsTable.fnSetColumnVis(5, true); //show fee
+        openBetsTable.fnSetColumnVis(6, true); //show deadline
       }
       openBetsTable.fnAdjustColumnSizing();
     }
+  }
+
+  self.cancelOpenBet = function(bet) {
+    var params = {
+      offer_hash: bet.tx_hash,
+      source: bet.address,
+      _type: 'bet',
+      _tx_index: bet.tx_index
+    }
+
+    var onSuccess = function(txHash, data, endpoint) {
+      bootbox.alert("<b>Your bet was canceled successfully.</b> " + ACTION_PENDING_NOTICE);
+    }
+
+    WALLET.doTransaction(bet.address, "create_cancel", params, onSuccess);
   }
   
 }
@@ -779,6 +803,7 @@ function MatchedBetsViewModel() {
         'lose': 'danger'
       };
       bet.status_html = '<span class="label label-'+classes[bet.status]+'">'+bet.status+'</span>';
+      bet.id = data_bet.id;
       return bet;
     }
 
@@ -795,8 +820,9 @@ function MatchedBetsViewModel() {
       }
       self.matchedBets(bets);
       var matchedBetsTable = $('#matchedBetsTable').dataTable({
-        "order": [ 6, 'asc' ]
+        "aaSorting": [[6, 'desc']]
       });
+      matchedBetsTable.fnSetColumnVis(10, false);
     }
 
     self.matchedBets([]);

@@ -1,3 +1,8 @@
+### v1.2.2 (unreleased) ###
+**Enhancements:**
+* Check double connection to prevent double btcpay
+* Cancel bet buttons
+
 ### v1.2.1 ###
 **Enhancements:**
 * Added wallet-level statistics and logging of wallet logins

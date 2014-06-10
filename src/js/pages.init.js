@@ -339,7 +339,7 @@ function initOpenBets() {
   ko.applyBindings(OPEN_BETS, document.getElementById("openbets"));
 
   OPEN_BETS.init();
-
+  
   $(window).bind("resize", OPEN_BETS.dataTableResponsive);
   $(window).on('hashchange', function() {
     $(window).off("resize", OPEN_BETS.dataTableResponsive);

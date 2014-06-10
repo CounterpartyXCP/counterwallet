@@ -35,7 +35,8 @@
                       <th>Deadline</th>
                       <th>Odds</th>
                       <th>Wager</th>
-                      <th>Counterwager</th>                   
+                      <th>Counterwager</th> 
+                      <th>id</th>                   
                     </tr>
                   </thead>
                   <tbody data-bind="foreach: { data: matchedBets, as: 'bet' }">
@@ -50,6 +51,7 @@
                       <td data-bind="text: bet.odds"></td>
                       <td class="number" data-bind="text: bet.wager"></td>
                       <td class="number" data-bind="text: bet.counterwager"></td>
+                      <td data-bind="text: bet.id"></td>
                     </tr>
                   </tbody>
                 </table>
