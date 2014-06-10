@@ -229,7 +229,7 @@ function TransactionHistoryItemViewModel(data) {
     } else if(self.RAW_TX_TYPE == 'credits' || self.RAW_TX_TYPE == 'debits') {
       //This field only shown in stats, NOT history
       desc = "Address <Ad>" + getLinkForCPData('address', self.DATA['address'], getAddressLabel(self.DATA['address'])) + "</Ad>"
-        + (self.RAW_TX_TYPE == 'credit' ? ' credited with ' : ' debited for ')
+        + (self.RAW_TX_TYPE == 'credits' ? ' credited with ' : ' debited for ')
         + smartFormat(normalizeQuantity(self.DATA['quantity'], self.DATA['_divisible']))
         + "</Am> <As>" + self.DATA['asset'] + "</As>";
     } else {
