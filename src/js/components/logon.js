@@ -139,7 +139,13 @@ function LogonViewModel() {
                 label: "Continue",
                 className: "btn-primary",
                 callback: function() {
-                  multiAPINewest("get_preferences", {wallet_id: WALLET.identifier(), force_login: true}, 'last_updated', self.onReceivedPreferences);
+                  var params = {
+                    wallet_id: WALLET.identifier(), 
+                    for_login: true,
+                    network: USE_TESTNET ? 'testnet' : 'mainnet',
+                    force_login: true
+                  };
+                  multiAPINewest("get_preferences", params, 'last_updated', self.onReceivedPreferences);
                 }
               }
             }
@@ -149,7 +155,13 @@ function LogonViewModel() {
       }
       
       //Grab preferences
-      multiAPINewest("get_preferences", [WALLET.identifier()], 'last_updated', self.onReceivedPreferences, onError);
+      var params = {
+        wallet_id: WALLET.identifier(), 
+        for_login: true,
+        network: USE_TESTNET ? 'testnet' : 'mainnet'
+      };
+      multiAPINewest("get_preferences", params, 'last_updated', self.onReceivedPreferences, onError);
+
     },
     function(jqXHR, textStatus, errorThrown, endpoint) {
       var message = describeError(jqXHR, textStatus, errorThrown);
