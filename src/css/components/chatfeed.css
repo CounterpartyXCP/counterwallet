@@ -7,7 +7,7 @@
   /*z-index: 1002;*/
   width: 280px;
   box-sizing: border-box;
-  overflow: hidden;
+  overflow: visible;
   border-style: solid;
   border-width: 0 0 1px 1px;
   
@@ -81,4 +81,31 @@ span.chatLineSystem {
   padding: 0 10px;
   height: 40px;
   width: 279px; /* 1 less so the scrollbar doesn't show (bit of a hack) */
+}
+
+div.openChatPane {
+  position: absolute;
+  top:50%;
+  right:-17px;
+  margin-top: -17px;
+  background-color: #000;
+  color: #FFF;
+  font-weight: bold;
+  height: 26px;
+  line-height: 26px;
+  width: 60px;
+  text-align: center;
+  border-radius: 0px 0 5px 5px;
+  
+  -webkit-transform: rotate(90deg);
+  -moz-transform: rotate(90deg);
+  filter: progid:DXImageTransform.Microsoft.BasicImage(rotation=1);
+
+  display: none;
+  cursor: pointer;
+}
+
+#chatPane div.openChatPane {
+  left:-43px;
+  margin-top: -45px;
 }
