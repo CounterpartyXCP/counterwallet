@@ -19,6 +19,8 @@ var OrderBookEntryItemModel = function(entry) {
 };
 
 var OpenOrderItemModel = function(entry, isBuySell) {
+  $.jqlog.debug('OpenOrderItemModel');
+  $.jqlog.debug(entry);
   this.PARENT = isBuySell ? BUY_SELL : VIEW_PRICES;
   this.TX_ID = getTxHashLink(entry['tx_hash']) + ViewPricesViewModel.deriveIsOnlineForBTCPayment(entry['give_asset'], entry['_is_online']);
   this.WHEN_CREATED = new Date(entry['block_time']);

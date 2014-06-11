@@ -552,7 +552,11 @@
             <h4 class="modal-title">Make a donation</h4>
           </div>
           <div class="modal-body no-padding">
-            <p class="formPadded">Send a donation to support Counterparty and Counterwallet development.</p>
+            <p class="formPadded">
+              <b>Send a donation to support Counterparty and Counterwallet development.</b><br />
+              Counterparty is non-profit, self-funded, open source and community supported.
+              We appreciate any donations, and all donations go directly towards supporting future development.
+            </p>
             
             <form class="smart-form"><fieldset>
 
@@ -585,11 +589,17 @@
                   </div>
                 </div>
               </div></section>
-
+              <p class="formPaddedBot" data-bind="fadeVisibleInOnly: quantity">
+                You are choosing to send 
+                <b>
+                  <span class="sellColor" data-bind="text: quantity"></span>
+                  <span class="sellColor" data-bind="text: donationCurrency"></span> 
+                </b>
+                to support Counterparty development.
+              </p>
             </fieldset></form>
             <p class="formPaddedBot">
-                Counterparty is non-profit, self-funded, open source and community supported.
-                We appreciate any donations, and all donations go directly towards supporting future development.
+                
             </p>
           </div>
           <div class="modal-footer">
