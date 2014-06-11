@@ -140,14 +140,18 @@ NotificationViewModel.calcText = function(category, message) {
       desc = "You have broadcast value <Am>" + message['value'] + "</Am> from address <Ad>" + getAddressLabel(message['source']) + "</Ad>";
     }
   } else if(category == "bets" && WALLET.getAddressObj(message['source'])) {
+
     desc = "You bet <Am>" + smartFormat(normalizeQuantity(message['wager_quantity'])) + "</Am> <As>XCP</As> on the feed @"
       + " <Ad>" + getAddressLabel(message['source']) + "</Ad>";
+
   } else if(category == "bet_matches" && (WALLET.getAddressObj(message['tx0_address']) || WALLET.getAddressObj(message['tx1_address']))) {
-    desc = "Bet @ feed <Ad>" + getAddressLabel(message['source']) + "</Ad> matched between <Ad>" 
+
+    desc = "Bet @ feed <Ad>" + message['feed_address'] + "</Ad> matched between <Ad>" 
       + getAddressLabel(message['tx0_address']) + "</Ad> (gave <Am>"
       + smartFormat(normalizeQuantity(message['forward_quantity'])) + "</Ad> <As>XCP</As>) and <Ad>"
       + getAddressLabel(message['tx1_address']) + "</Ad> (gave <Am>"
       + smartFormat(normalizeQuantity(message['backward_quantity'])) + "</Ad> <As>XCP</As>)";
+
   } else if(category == "bet_expirations" && WALLET.getAddressObj(message['source'])) {
     desc = "Your bet ID <b>" + message['bet_index'] + "</b> from address <Ad>" + getAddressLabel(message['source']) + "</Ad> has expired";
   } else if(category == "bet_match_expirations") {
