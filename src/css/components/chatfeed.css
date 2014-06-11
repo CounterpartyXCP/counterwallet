@@ -84,7 +84,7 @@ span.chatLineSystem {
 }
 
 div.openChatPane {
-  position: absolute;
+  position: fixed;
   top:50%;
   right:-17px;
   margin-top: -17px;
@@ -108,4 +108,5 @@ div.openChatPane {
 #chatPane div.openChatPane {
   left:-43px;
   margin-top: -45px;
+  position: absolute;
 }

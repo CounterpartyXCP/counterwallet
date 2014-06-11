@@ -428,3 +428,9 @@ letter-spacing: 0;
 div.tooltip-inner {
   word-wrap: break-word !important;
 }
+
+
+#donate {
+  margin-top: 7px;
+  display: none;
+}
