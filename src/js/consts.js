@@ -185,4 +185,5 @@ var TRANSACTION_MAX_RETRY = 5 // max retry when transaction failed (don't includ
 var FEED_CATEGORIES = ['sports', 'politics', 'entertainment', 'economics', 'other']
 var FEED_TYPES = ['simple', 'cfd']
 
+var DONATION_ADDRESS = USE_TESTNET ? 'n4MGGJBkW9RjRKBbZfBAceHDndhywvVPV9' : '19U6MmLLumsqxXSBMB5FgYXbezgXYC6Gpe';
 

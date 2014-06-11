@@ -23,6 +23,8 @@ function initIndex() { //main page
   
   window.SUPPORT_MODAL = new SupportModalViewModel();
   
+  window.DONATE_MODAL = new DonationViewModel();
+
   $(document).ready(function() {
     ko.applyBindings(LOGON_VIEW_MODEL, document.getElementById("logon"));
     ko.applyBindings(LICENSE_MODAL, document.getElementById("licenseModal"));
@@ -35,6 +37,7 @@ function initIndex() { //main page
     ko.applyBindings(OPEN_ORDER_FEED, document.getElementById("openOrderFeed"));
     ko.applyBindings(NOTIFICATION_FEED, document.getElementById("notificationFeed"));        
     ko.applyBindings(SUPPORT_MODAL, document.getElementById("supportModal"));
+    ko.applyBindings(DONATE_MODAL, document.getElementById("donateModal"));
             
     //so that knockout is run on the DOM sections and global context is accessible...
     ko.applyBindings({}, document.getElementById("noticeTestnet"));
@@ -58,6 +61,10 @@ function initIndex() { //main page
       } 
       return false;
     })
+    $('#donate').click(function(e) {
+      DONATE_MODAL.show();
+      return false;
+    });
     $.jqlog.debug('passphrase:');
     $.jqlog.debug(TESTNET_PASSPHRASE);
     if (TESTNET_PASSPHRASE && USE_TESTNET) {

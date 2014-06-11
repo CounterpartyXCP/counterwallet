@@ -432,5 +432,9 @@ div.tooltip-inner {
 
 #donate {
   margin-top: 7px;
-  display: none;
 }
+
+#donateModal .radioBtn {
+  border: 1px solid #555;
+}
+
