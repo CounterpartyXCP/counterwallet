@@ -52,6 +52,77 @@ function LogonViewModel() {
     LOGON_PASSWORD_MODAL.show(); 
   }
 
+  self.openWallet = function() {
+    //Start with a gate check to make sure at least one of the servers is ready and caught up before we try to log in
+    multiAPI("is_ready", [], function(data, endpoint) {
+      assert(data['caught_up'], "Invalid is_ready result"); //otherwise we should have gotten a 525 error
+      assert(USE_TESTNET == data['testnet'], "USE_TESTNET is " + USE_TESTNET + " from URL-based detection, but the server API disagrees!");
+      
+      $.jqlog.log("Backend is ready. Testnet status: " + USE_TESTNET + ". Last message feed index: " + data['last_message_index']);
+      assert(data['last_message_index'] > 0);
+
+      //User is logging in...
+      self.walletGenProgressVal(0); //reset so the progress bar hides again...
+      $('#newAccountInfoPane').animate({opacity:0}); //fade out the new account pane if visible
+      $('#createNewAcctBtnPane').animate({opacity:0}); //fade out the new account button pane if visible
+      $('#extra-info').animate({opacity:0});
+      $('#disclaimer').animate({opacity:0});
+      
+      //generate the wallet ID from a double SHA256 hash of the passphrase and the network (if testnet)
+      var hashBase = CryptoJS.SHA256(self.sanitizedEnteredPassphrase() + (USE_TESTNET ? '_testnet' : ''));
+      var hash = CryptoJS.SHA256(hashBase).toString(CryptoJS.enc.Base64);
+      //var hashBase = self.sanitizedEnteredPassphrase() + (USE_TESTNET ? '_testnet' : '');
+
+      WALLET.identifier(hash);
+      $.jqlog.log("My wallet ID: " + WALLET.identifier());
+
+      //Set initial block height (will be updated again on each periodic refresh of BTC account balances)
+      WALLET.networkBlockHeight(data['block_height']);
+      
+      //Initialize the socket.io-driven event feed (notifies us in realtime of new events, as counterparty processes confirmed blocks)
+      MESSAGE_FEED.init(data['last_message_index']);
+      //^ set the "starting" message_index, under which we will ignore if received on the messages feed
+
+      multiAPI("is_wallet_online", [WALLET.identifier()], self.onIsWalletOnline);
+
+    },
+    function(jqXHR, textStatus, errorThrown, endpoint) {
+      var message = describeError(jqXHR, textStatus, errorThrown);
+      bootbox.alert("No counterparty servers are currently available. Please try again later. ERROR: " + message);
+    });
+  }
+
+  self.onIsWalletOnline = function(isOnline, endpoint) {
+    if(isOnline) {
+      var message = "<b class='errorColor'>You appear to be logged into Counterwallet elsewhere.</b> It's not safe to be logged into the same wallet account from multiple devices at the same time. If you are sure that this is not the case, press Continue. Otherwise, please press Cancel, logout from your other device, and try again.";
+      
+      bootbox.dialog({
+        title: "Confirm connection",
+        message: message,
+        buttons: {
+          "cancel": {
+            label: "Cancel",
+            className: "btn-danger",
+            callback: function() {
+              bootbox.hideAll();
+              return false;
+            }
+          },
+          "continue": {
+            label: "Continue",
+            className: "btn-primary",
+            callback: function() {
+              multiAPINewest("get_preferences", {wallet_id: WALLET.identifier()}, 'last_updated', self.onReceivedPreferences);
+            }
+          }
+        }
+      });
+    } else {
+      //Grab preferences
+      multiAPINewest("get_preferences", {wallet_id: WALLET.identifier()}, 'last_updated', self.onReceivedPreferences);
+    }
+  }
+  
   self.onReceivedPreferences = function(data) {
     //Initialize chat feeds (even through the chat pane will remain closed by default and the user has not started chatting)
     CHAT_FEED.init();
@@ -87,88 +158,7 @@ function LogonViewModel() {
     
     self.displayLicenseIfNecessary(mustSavePreferencesToServer);
   }
-  
-  self.openWallet = function() {
-    //Start with a gate check to make sure at least one of the servers is ready and caught up before we try to log in
-    multiAPI("is_ready", [], function(data, endpoint) {
-      assert(data['caught_up'], "Invalid is_ready result"); //otherwise we should have gotten a 525 error
-      assert(USE_TESTNET == data['testnet'], "USE_TESTNET is " + USE_TESTNET + " from URL-based detection, but the server API disagrees!");
-      
-      $.jqlog.log("Backend is ready. Testnet status: " + USE_TESTNET + ". Last message feed index: " + data['last_message_index']);
-      assert(data['last_message_index'] > 0);
 
-      //User is logging in...
-      self.walletGenProgressVal(0); //reset so the progress bar hides again...
-      $('#newAccountInfoPane').animate({opacity:0}); //fade out the new account pane if visible
-      $('#createNewAcctBtnPane').animate({opacity:0}); //fade out the new account button pane if visible
-      $('#extra-info').animate({opacity:0});
-      $('#disclaimer').animate({opacity:0});
-      
-      //generate the wallet ID from a double SHA256 hash of the passphrase and the network (if testnet)
-      var hashBase = CryptoJS.SHA256(self.sanitizedEnteredPassphrase() + (USE_TESTNET ? '_testnet' : ''));
-      var hash = CryptoJS.SHA256(hashBase).toString(CryptoJS.enc.Base64);
-      //var hashBase = self.sanitizedEnteredPassphrase() + (USE_TESTNET ? '_testnet' : '');
-
-      WALLET.identifier(hash);
-      $.jqlog.log("My wallet ID: " + WALLET.identifier());
-
-      //Set initial block height (will be updated again on each periodic refresh of BTC account balances)
-      WALLET.networkBlockHeight(data['block_height']);
-      
-      //Initialize the socket.io-driven event feed (notifies us in realtime of new events, as counterparty processes confirmed blocks)
-      MESSAGE_FEED.init(data['last_message_index']);
-      //^ set the "starting" message_index, under which we will ignore if received on the messages feed
-
-      var onError = function(jqXHR, textStatus, errorThrown) {
-        if (textStatus.indexOf('Already connected.') != -1) {
-          var message = "<b class='errorColor'>You appear to be logged into Counterwallet elsewhere.</b> It's not safe to be logged into the same wallet account from multiple devices at the same time. If you are sure that this is not the case, press Continue. Otherwise, please press Cancel, logout from your other device, and try again.";
-          
-          bootbox.dialog({
-            title: "Confirm connection",
-            message: message,
-            buttons: {
-              "cancel": {
-                label: "Cancel",
-                className: "btn-danger",
-                callback: function() {
-                  bootbox.hideAll();
-                  return false;
-                }
-              },
-              "continue": {
-                label: "Continue",
-                className: "btn-primary",
-                callback: function() {
-                  var params = {
-                    wallet_id: WALLET.identifier(), 
-                    for_login: true,
-                    network: USE_TESTNET ? 'testnet' : 'mainnet',
-                    force_login: true
-                  };
-                  multiAPINewest("get_preferences", params, 'last_updated', self.onReceivedPreferences);
-                }
-              }
-            }
-          });
-
-        }
-      }
-      
-      //Grab preferences
-      var params = {
-        wallet_id: WALLET.identifier(), 
-        for_login: true,
-        network: USE_TESTNET ? 'testnet' : 'mainnet'
-      };
-      multiAPINewest("get_preferences", params, 'last_updated', self.onReceivedPreferences, onError);
-
-    },
-    function(jqXHR, textStatus, errorThrown, endpoint) {
-      var message = describeError(jqXHR, textStatus, errorThrown);
-      bootbox.alert("No counterparty servers are currently available. Please try again later. ERROR: " + message);
-    });
-  }
-  
   self.displayLicenseIfNecessary = function(mustSavePreferencesToServer) {
     if(!PREFERENCES['has_accepted_license']) {
       LICENSE_MODAL.show(mustSavePreferencesToServer); //User must accept the license before moving on
