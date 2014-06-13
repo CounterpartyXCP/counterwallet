@@ -98,7 +98,7 @@ NotificationViewModel.calcText = function(category, message) {
         desc = "Token <As>" + message['asset'] + "</As> had its description changed from <b>" + assetObj.description()
           + "</b> to <b>" + message['description'] + "</b>";
       } else {
-        var additionalQuantity = message['quantity'] - assetObj.rawSupply();
+        var additionalQuantity = message['quantity'];
         if(additionalQuantity) {
           desc = "Additional <Am>" + smartFormat(normalizeQuantity(additionalQuantity, assetObj.DIVISIBLE))
             + "</Am> units issued for token <As>" + message['asset'] + "</As>";

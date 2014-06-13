@@ -60,8 +60,8 @@ PendingActionViewModel.calcText = function(category, data) {
     desc = "Pending <b>" + data['bet_type'] + "</b> bet on feed @ <Ad>"
       + getLinkForCPData('address', data['feed_address'], getAddressLabel(data['feed_address'])) + "</Ad><br/>"
       + "Wager: <Am>"
-      + numberWithCommas(normalizeQuantity(data['wager'])) + "</Am> <As>XCP</As>, Counterwager: <Am>"
-      + numberWithCommas(normalizeQuantity(data['counterwager'])) + "</Am> <As>XCP</As>";  
+      + numberWithCommas(normalizeQuantity(data['wager_quantity'])) + "</Am> <As>XCP</As>, Counterwager: <Am>"
+      + numberWithCommas(normalizeQuantity(data['counterwager_quantity'])) + "</Am> <As>XCP</As>";  
   } else if(category == 'dividends') {
     var divUnitDivisible = WALLET.getAddressObj(data['source']).getAssetObj(data['dividend_asset']).DIVISIBLE;
     desc = "Pending dividend payment of <Am>" + numberWithCommas(normalizeQuantity(data['quantity_per_unit'], divUnitDivisible)) + "</Am> <As>"
