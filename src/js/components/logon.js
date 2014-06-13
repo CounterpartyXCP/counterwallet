@@ -248,7 +248,7 @@ function LogonViewModel() {
       // feed to determine whether a btcpay process is in progress (pending) or not
       WAITING_BTCPAY_FEED.restore();   
     });
-    OPEN_ORDER_FEED.restore();
+    MESSAGE_FEED.restoreOrder();
     
 
     //all done. load the balances screen

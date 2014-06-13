@@ -89,17 +89,6 @@
             </div> <!-- .ajax-dropdown -->
         </span>
 
-        <span id="openOrderFeed" class="activity-parent" data-contenturl="pages/feed_open_orders.html">
-            <span class="activity-dropdown">
-                <i class="fa fa-exchange"></i><b data-bind="visible: dispCount() > 0, text: dispCount" class="badge"></b>
-            </span>
-            <div class="ajax-dropdown">
-              <h2>Open Orders</h2>
-              <div class="ajax-notifications custom-scroll"></div> <!-- notification content -->
-              <span><b>Last updated:</b> <span id="openOrdersLastUpdated" data-bind="timeago: lastUpdated()"></span></span> <!-- footer -->
-            </div> <!-- .ajax-dropdown -->
-        </span>
-
         <span id="btcPayFeed" data-bind="fadeVisible: dispCount()" class="activity-parent" data-contenturl="pages/feed_btcpays.html">
             <span class="activity-dropdown">
                 <i class="fa fa-btc"></i><b data-bind="text: dispCount()" class="badge badge-error"></b>
@@ -712,7 +701,6 @@
     <script src="js/components/logon.js"></script>
     <script src="js/components/misc.js"></script>
     <script src="js/components/feed_notifications.js"></script>
-    <script src="js/components/feed_open_orders.js"></script>
     <script src="js/components/feed_pending_actions.js"></script>
     <script src="js/components/feed_btcpays.js"></script>
     <script src="js/components/chatfeed.js"></script>

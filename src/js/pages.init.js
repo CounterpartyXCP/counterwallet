@@ -18,7 +18,6 @@ function initIndex() { //main page
   window.WAITING_BTCPAY_FEED = new WaitingBTCPayFeedViewModel();
   window.BTCPAY_FEED = new BTCPayFeedViewModel();
   
-  window.OPEN_ORDER_FEED = new OpenOrderFeedViewModel();
   window.NOTIFICATION_FEED = new NotificationFeedViewModel();
   
   window.SUPPORT_MODAL = new SupportModalViewModel();
@@ -34,7 +33,6 @@ function initIndex() { //main page
     ko.applyBindings(CHAT_SET_HANDLE_MODAL, document.getElementById("chatSetHandleModal"));
     ko.applyBindings(PENDING_ACTION_FEED, document.getElementById("pendingActionFeed"));
     ko.applyBindings(BTCPAY_FEED, document.getElementById("btcPayFeed"));
-    ko.applyBindings(OPEN_ORDER_FEED, document.getElementById("openOrderFeed"));
     ko.applyBindings(NOTIFICATION_FEED, document.getElementById("notificationFeed"));        
     ko.applyBindings(SUPPORT_MODAL, document.getElementById("supportModal"));
     ko.applyBindings(DONATE_MODAL, document.getElementById("donateModal"));
@@ -243,12 +241,6 @@ function initFeedNotifications() {
   ko.applyBindings(NOTIFICATION_FEED, document.getElementById("notificationFeedContent"));
 }
 INIT_FUNC['pages/feed_notifications.html'] = initFeedNotifications;
-
-
-function initFeedOpenOrders() {
-  ko.applyBindings(OPEN_ORDER_FEED, document.getElementById("openOrderFeedContent"));
-}
-INIT_FUNC['pages/feed_open_orders.html'] = initFeedOpenOrders;
 
 
 function initFeedPendingActions() {
