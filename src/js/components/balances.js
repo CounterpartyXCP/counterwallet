@@ -770,7 +770,7 @@ function SweepModalViewModel() {
       callable_: selectedAsset.ASSET_INFO['callable'],
       call_date: selectedAsset.ASSET_INFO['call_date'],
       call_price: parseFloat(selectedAsset.ASSET_INFO['call_price']) || null,
-      transfer_destination: self.destAddress(),
+      destination: self.destAddress(),
       encoding: 'multisig',
       pubkey: pubkey,
       allow_unconfirmed_inputs: true

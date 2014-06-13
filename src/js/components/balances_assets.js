@@ -129,7 +129,7 @@ function CreateAssetModalViewModel() {
         callable_: self.callable(),
         call_date: self.callDate() ? parseInt(self.callDate().getTime() / 1000) : null, //epoch ts
         call_price: parseFloat(self.callPrice()) || null, //float
-        transfer_destination: null
+        destination: null
       },
       function(txHash, data, endpoint) {
         bootbox.alert("Your token <b class='notoAssetColor'>" + self.name() + "</b>"
@@ -212,7 +212,7 @@ function IssueAdditionalAssetModalViewModel() {
         callable_: self.asset().CALLABLE,
         call_date: self.asset().CALLDATE,
         call_price: self.asset().CALLPRICE,
-        transfer_destination: null
+        destination: null
       },
       function(txHash, data, endpoint) {
         self.shown(false);
@@ -278,7 +278,7 @@ function TransferAssetModalViewModel() {
         callable_: self.asset().CALLABLE,
         call_date: self.asset().CALLDATE,
         call_price: self.asset().CALLPRICE,
-        transfer_destination: self.destAddress()
+        destination: self.destAddress()
       },
       function(txHash, data, endpoint) {
         self.shown(false);
@@ -359,7 +359,7 @@ function ChangeAssetDescriptionModalViewModel() {
         callable_: self.asset().CALLABLE,
         call_date: self.asset().CALLDATE,
         call_price: self.asset().CALLPRICE,
-        transfer_destination: null
+        destination: null
       },
       function(txHash, data, endpoint) {
         self.shown(false);
