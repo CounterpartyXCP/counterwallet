@@ -323,7 +323,7 @@ function ChangeAssetDescriptionModalViewModel() {
   });
   
   self.dispAssetDescription = ko.computed(function() {
-    return self.asset() ? self.asset().description : '';
+    return self.asset() ? self.asset().description() : '';
   }, self);
 
   self.dispCharactersRemaining = ko.computed(function() {

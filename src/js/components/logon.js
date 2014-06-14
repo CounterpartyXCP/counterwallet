@@ -84,6 +84,7 @@ function LogonViewModel() {
       //^ set the "starting" message_index, under which we will ignore if received on the messages feed
 
       multiAPI("is_wallet_online", [WALLET.identifier()], self.onIsWalletOnline);
+
     },
     function(jqXHR, textStatus, errorThrown, endpoint) {
       var message = describeError(jqXHR, textStatus, errorThrown);
