@@ -115,7 +115,7 @@
             <div class="widget-body" data-bind="attr: {'id': 'address-balances-' + ADDRESS}, foreach: filteredAssets"> <!-- widget content -->
               <div class="asset-item" data-bind="css: { btc: ASSET === 'BTC', xcp: ASSET === 'XCP', myasset: isMine(), othersasset: !isMine() && (ASSET !== 'BTC' && ASSET !== 'XCP') }">
                 <div class="btn-group"> <!-- asset level action button -->
-                  <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown"><span class="caret"></span></button>
+                  <button type="button" class="btn btn-default dropdown-toggle assetBtn"><span class="caret"></span></button>
                   <ul class="dropdown-menu" role="menu">
                     <li><a data-bind="visible: !$parent.IS_WATCH_ONLY, click: send" href="#">Send</a></li>
                     <li><a data-bind="visible: ASSET !== 'BTC' && ASSET !== 'XCP', click: showInfo" href="#">Show Info</a></li>

@@ -137,6 +137,9 @@
         <span id="noticeDevMode" data-bind="visible: IS_DEV" class="label label-warning pull-right modeIndicator"><i class="fa-fw fa fa-warning"></i>&nbsp;Dev Mode Enabled</span>
         <span id="noticeTestnet" data-bind="visible: USE_TESTNET" class="label label-info pull-right modeIndicator"><i class="fa-fw fa fa-info"></i>&nbsp;Testnet In Use</span>
 
+        <span id="donate" class="pull-right">
+          <a href="#" class="btn btn-primary">DONATE</a>
+        </span>
 
       </div> <!-- end pulled right: nav area -->
     </header> <!-- END HEADER -->
@@ -170,9 +173,6 @@
           <li class="">
             <a href="pages/history.html"><i class="fa fa-lg fa-fw fa-book"></i> <span class="menu-item-parent">History</span></a>
           </li>
-          <li>
-            <a href="#" id="chatLink"><i class="fa fa-lg fa-fw fa-comments-o"></i><span class="menu-item-parent">Show Chat</span></a>
-          </li>
           <li class="">
             <a href="#"><i class="fa fa-lg fa-fw fa-plus"></i> <span class="menu-item-parent">More</span></a>
             <ul>
@@ -199,7 +199,7 @@
       <!-- END MAIN CONTENT -->
     </div>
     <!-- END MAIN PANEL -->
-
+    <div class="openChatPane">CHAT</div>
     <div id="chatPane" style="display: none">
       <h2 data-bind="html: headerText"></h2>
       <div class="chatOnlineCount"><span data-bind="text: numUsersOnline"></span> Users Online</div>
@@ -543,6 +543,73 @@
       </div><!-- /.modal-dialog -->
     </div><!-- /.modal -->
 
+    <!-- modal for donation -->
+    <div data-bind="showModal: shown, validationOptions: { insertMessages: false }" id="donateModal" class="modal fade" data-backdrop="static" data-keyboard="false" tabindex="-1" role="dialog" aria-labelledby="donateModal" aria-hidden="true">
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <div class="modal-header">
+            <button type="button" data-bind="click: hide" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+            <h4 class="modal-title">Make a donation</h4>
+          </div>
+          <div class="modal-body no-padding">
+            <p class="formPadded">
+              <b>Send a donation to support Counterparty and Counterwallet development.</b><br />
+              Counterparty is non-profit, self-funded, open source and community supported.
+              We appreciate any donations, and all donations go directly towards supporting future development.
+            </p>
+            
+            <form class="smart-form"><fieldset>
+
+              <section><div class="row">
+                <label class="control-label col col-sm-2">Send with:</label>
+                <div class="col col-sm-10">
+                  <select class="form-control" style="width: 350px;vertical-align: top;margin-right: 12px;" name="source" data-bind="options: availableAddresses, optionsValue: 'address', optionsText: 'label', value: sourceAddress, select2: { minimumResultsForSearch: 10, escapeMarkup: 'direct' }"></select>
+                </div>
+              </div></section>
+
+              <section><div class="row">
+                <label class="control-label col col-sm-2">Send Amount</label>
+                <div class="col col-sm-6">
+                    <label class="input inline-block">
+                      <div class="input-group">
+                        <span class="input-group-addon"><i class="fa fa-arrow-circle-o-up fa-lg fa-fw"></i></span>
+                        <input name="quantity" class="form-control input-lg" data-bind="value: quantity, valueUpdate: 'input', attr: {placeholder: 'Enter quantity'}" type="text"/>
+                      </div>
+                    </label>
+                    <span class="invalid" data-bind="validationMessage: quantity"></span>
+                </div>
+                <div class="col col-sm-4">
+                  <div class="btn-group" data-toggle="buttons">
+                    <label class="radioBtn btn btn-lg" data-bind="css: { 'btn-success': donationCurrency() == 'BTC' }">
+                      <input type="radio" name="donationCurrency" value="BTC" data-bind="btnGroupChecked: donationCurrency">BTC
+                    </label>
+                    <label class="radioBtn btn btn-lg" data-bind="css: { 'btn-success': donationCurrency() == 'XCP' }">
+                      <input type="radio" name="donationCurrency" value="XCP" data-bind="btnGroupChecked: donationCurrency">XCP
+                    </label>
+                  </div>
+                </div>
+              </div></section>
+              <p class="formPaddedBot" data-bind="fadeVisibleInOnly: quantity">
+                You are choosing to send 
+                <b>
+                  <span class="sellColor" data-bind="text: quantity"></span>
+                  <span class="sellColor" data-bind="text: donationCurrency"></span> 
+                </b>
+                to support Counterparty development.
+              </p>
+            </fieldset></form>
+            <p class="formPaddedBot">
+                
+            </p>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-default" data-bind="click: hide">Cancel</button>
+            <button type="button" class="btn btn-primary" data-bind="click: submitDonation">Send</button>
+          </div>
+        </div><!-- /.modal-content -->
+      </div><!-- /.modal-dialog -->
+    </div><!-- /.modal -->
+
     <!-- build:js js/counterwallet-deps-min.js -->
     <script src="vendors/jquery/jquery.min.js"></script><!-- Jquery -->
     <script src="vendors/jquery-ui/ui/minified/jquery.ui.core.min.js"></script>
@@ -656,6 +723,7 @@
     <script src="js/components/portfolio.js"></script>
     <script src="js/components/stats.js"></script>
     <script src="js/components/betting.js"></script>
+    <script src="js/components/donate.js"></script>
 
     <script src="js/smartadmin.app.js"></script> <!-- custom app.js -->
     <!-- ^ unfortunately we have to mod the file itself, instead of dynamically override o_O -->

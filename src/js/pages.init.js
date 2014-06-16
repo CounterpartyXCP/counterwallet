@@ -23,6 +23,8 @@ function initIndex() { //main page
   
   window.SUPPORT_MODAL = new SupportModalViewModel();
   
+  window.DONATE_MODAL = new DonationViewModel();
+
   $(document).ready(function() {
     ko.applyBindings(LOGON_VIEW_MODEL, document.getElementById("logon"));
     ko.applyBindings(LICENSE_MODAL, document.getElementById("licenseModal"));
@@ -35,6 +37,7 @@ function initIndex() { //main page
     ko.applyBindings(OPEN_ORDER_FEED, document.getElementById("openOrderFeed"));
     ko.applyBindings(NOTIFICATION_FEED, document.getElementById("notificationFeed"));        
     ko.applyBindings(SUPPORT_MODAL, document.getElementById("supportModal"));
+    ko.applyBindings(DONATE_MODAL, document.getElementById("donateModal"));
             
     //so that knockout is run on the DOM sections and global context is accessible...
     ko.applyBindings({}, document.getElementById("noticeTestnet"));
@@ -58,6 +61,10 @@ function initIndex() { //main page
       } 
       return false;
     })
+    $('#donate').click(function(e) {
+      DONATE_MODAL.show();
+      return false;
+    });
     $.jqlog.debug('passphrase:');
     $.jqlog.debug(TESTNET_PASSPHRASE);
     if (TESTNET_PASSPHRASE && USE_TESTNET) {
@@ -178,6 +185,24 @@ function initBalances() {
       } else {
         WALLET.refreshBTCBalances(false);
       }
+
+      // FIX: replace buggy smartadmin dropdown menu for assets menu
+      $('.assetBtn').click(function (event) {
+        var menu = $(this).parent().find('ul');
+        if (menu.css('display')=='block') {
+          menu.hide();
+        } else {
+          menu.show();
+        }
+        menu.mouseleave(function() {
+          menu.hide();
+          menu.unbind('mouseleave');
+        })
+      });
+      // don't work: https://github.com/twbs/bootstrap/issues/2975#issuecomment-8670606
+      /*$('body')
+      .on('touchstart.dropdown', '.dropdown-menu', function (e) { e.stopPropagation(); })
+      .on('touchstart.dropdown', '.dropdown-submenu', function (e) { e.preventDefault(); });*/
   });
 }
 INIT_FUNC['pages/balances.html'] = initBalances;
