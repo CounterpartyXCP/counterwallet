@@ -185,6 +185,24 @@ function initBalances() {
       } else {
         WALLET.refreshBTCBalances(false);
       }
+
+      // FIX: replace buggy smartadmin dropdown menu for assets menu
+      $('.assetBtn').click(function (event) {
+        var menu = $(this).parent().find('ul');
+        if (menu.css('display')=='block') {
+          menu.hide();
+        } else {
+          menu.show();
+        }
+        menu.mouseleave(function() {
+          menu.hide();
+          menu.unbind('mouseleave');
+        })
+      });
+      // don't work: https://github.com/twbs/bootstrap/issues/2975#issuecomment-8670606
+      /*$('body')
+      .on('touchstart.dropdown', '.dropdown-menu', function (e) { e.stopPropagation(); })
+      .on('touchstart.dropdown', '.dropdown-submenu', function (e) { e.preventDefault(); });*/
   });
 }
 INIT_FUNC['pages/balances.html'] = initBalances;
