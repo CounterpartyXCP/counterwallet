@@ -1,6 +1,9 @@
 
 var AssetPairMarketInfoItemModel = function(entry) {
   this.MARKET = entry['base_asset'] + '/' + entry['quote_asset'];
+  this.MARKET_ALT = entry['quote_asset'] + '/' + entry['base_asset'];
+  this.BASE_ASSET = entry['base_asset'];
+  this.QUOTE_ASSET = entry['quote_asset'];
   this.LOWEST_ASK = entry['lowest_ask'];
   this.HIGHEST_BID = entry['highest_bid'];
   this.ORDER_DEPTH = entry['open_orders_count'];
@@ -13,16 +16,18 @@ var AssetPairMarketInfoItemModel = function(entry) {
 };
 
 var OrderBookEntryItemModel = function(entry) {
-  this.UNIT_PRICE = entry['unit_price'];
-  this.QTY_AND_COUNT = smartFormat(entry['quantity']) + ' (' + entry['count'] + ')';
-  this.DEPTH = smartFormat(entry['depth'], 10);
+  this.BASE_ASSET = entry['base_asset'];
+  this.QUOTE_ASSET = entry['quote_asset'];
+  this.UNIT_PRICE = entry['unit_price'] + ' ' + entry['quote_asset'] + '/' + entry['base_asset'];
+  this.QTY_AND_COUNT = smartFormat(entry['quantity']) + ' ' + entry['base_asset'] + ' (' + entry['count'] + ')';
+  this.DEPTH = smartFormat(entry['depth'], 10) + ' ' + entry['base_asset'];
 };
 
 var OpenOrderItemModel = function(entry, isBuySell) {
   this.PARENT = isBuySell ? BUY_SELL : VIEW_PRICES;
   this.TX_ID = getTxHashLink(entry['tx_hash']) + ViewPricesViewModel.deriveIsOnlineForBTCPayment(entry['give_asset'], entry['_is_online']);
   this.WHEN_CREATED = new Date(entry['block_time']);
-  this.PRICE = this.PARENT.deriveOpenOrderAssetPrice(entry['get_asset'], entry['get_quantity'], entry['give_asset'], entry['give_quantity']);
+  this.PRICE = this.PARENT.deriveOpenOrderAssetPrice(entry['get_asset'], entry['get_quantity'], entry['give_asset'], entry['give_quantity']) + ' ' + entry['quote_asset'] + '/' + entry['base_asset'];
   this.BUY_QTY_LEFT = this.PARENT.deriveOpenOrderAssetQuantity(entry['get_asset'], entry['get_remaining']) + ' ' + entry['get_asset'] + ' ' + ViewPricesViewModel.deriveOpenOrderBuySellLeft(entry['get_quantity'], entry['get_remaining']);
   this.SELL_QTY_LEFT = this.PARENT.deriveOpenOrderAssetQuantity(entry['give_asset'], entry['give_remaining']) + ' ' + entry['give_asset'] + ' ' + ViewPricesViewModel.deriveOpenOrderBuySellLeft(entry['give_quantity'], entry['give_remaining']);
   this.EXPIRES_IN = ViewPricesViewModel.deriveOpenOrderExpiresIn(entry['block_index'], entry['expiration']);
@@ -40,8 +45,7 @@ var TradeHistoryItemModel = function(entry) {
   this.ADDRESS_2 = getLinkForCPData('address', entry['order_match_tx1_address']);
   this.QUANTITY_BASE = smartFormat(entry['base_quantity_normalized']) + ' ' + entry['base_asset'];
   this.QUANTITY_QUOTE = smartFormat(entry['quote_quantity_normalized']) + ' ' + entry['quote_asset'];
-  this.UNIT_PRICE = entry['unit_price'];
-  
+  this.UNIT_PRICE = entry['unit_price'] + ' ' + entry['quote_asset'] + '/' + entry['base_asset'];
   this.RAW_BLOCK_INDEX = entry['block_index'];
   this.RAW_BLOCK_TIME = entry['block_time'];
   this.RAW_QUANTITY_BASE = entry['base_quantity_normalized'];
@@ -337,13 +341,19 @@ function ViewPricesViewModel() {
     };
 
     failoverAPI("get_order_book_simple", args, function(data, endpoint) {
+      $.jqlog.debug('get_order_book_simple:');
+      $.jqlog.debug(data);
       deferred.resolve();
       //set up order book display
       var i = null;
       for(i=0; i < Math.min(10, data['base_ask_book'].length); i++) { //limit to 10 entries
+        data['base_ask_book'][i]['base_asset'] = data['base_asset'];
+        data['base_ask_book'][i]['quote_asset'] = data['quote_asset'];
         self.askBook.push(new OrderBookEntryItemModel(data['base_ask_book'][i]));  
       }
       for(i=0; i < Math.min(10, data['base_bid_book'].length); i++) { //limit to 10 entries
+        data['base_bid_book'][i]['base_asset'] = data['base_asset'];
+        data['base_bid_book'][i]['quote_asset'] = data['quote_asset'];
         self.bidBook.push(new OrderBookEntryItemModel(data['base_bid_book'][i]));  
       }
       self.bidAskMedian(data['bid_ask_median']);
@@ -355,6 +365,8 @@ function ViewPricesViewModel() {
       try { $('#asset2OpenBuyOrders').dataTable().fnClearTable(); } catch(err) { }
       //split raw_orders into buy orders for asset1 and asset2
       for(var i=0; i < data['raw_orders'].length; i++) {
+        data['raw_orders'][i]['base_asset'] = data['base_asset'];
+        data['raw_orders'][i]['quote_asset'] = data['quote_asset'];
         if(data['raw_orders'][i]['get_asset'] == self.asset1())
           self.asset1OpenBuyOrders.push(new OpenOrderItemModel(data['raw_orders'][i], false));
         else {
