@@ -182,7 +182,7 @@ function PendingActionFeedViewModel() {
 
     //construct a new pending info storage object that doesn't include any hashes that we get no data back on
     var newPendingActionsStorage = [], pendingAction = null;
-    failoverAPI("get_btc_txns_status", [txHashes], function(txInfo, endpoint) {
+    failoverAPI("get_chain_txns_status", [txHashes], function(txInfo, endpoint) {
       for(i=0; i < txInfo.length; i++) {
         pendingAction = $.grep(pendingActionsStorage, function(e) { return e['txHash'] == txInfo[i]['tx_hash']; })[0];
         if(pendingAction && txInfo[i]['confirmations'] == 0) { //still pending

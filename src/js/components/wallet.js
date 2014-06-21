@@ -330,7 +330,7 @@ function WalletViewModel() {
     //We used to have a retrieveBTCBalances function for getting balance of multiple addresses, but scrapped it
     // since it worked in serial, and one address with a lot of txns could hold up the balance retrieval of every
     // other address behind it
-    failoverAPI("get_btc_address_info", {"addresses": [address], "with_uxtos": false, "with_last_txn_hashes": 0},
+    failoverAPI("get_chain_address_info", {"addresses": [address], "with_uxtos": false, "with_last_txn_hashes": 0},
       function(data, endpoint) {
         return onSuccess(
           parseInt(data[0]['info']['balanceSat'] || 0), //confirmed BTC balance
@@ -346,7 +346,7 @@ function WalletViewModel() {
       onError = function(jqXHR, textStatus, errorThrown) { return defaultErrorHandler(jqXHR, textStatus, errorThrown); };
     assert(onSuccess, "onSuccess callback must be defined");
     
-    failoverAPI("get_btc_address_info", {"addresses": addresses, "with_uxtos": true, "with_last_txn_hashes": 5, "with_block_height": true},
+    failoverAPI("get_chain_address_info", {"addresses": addresses, "with_uxtos": true, "with_last_txn_hashes": 5, "with_block_height": true},
       function(data, endpoint) {
         var numSuitableUnspentTxouts = null;
         var numPrimedTxoutsIncl0Confirms = null;

@@ -220,7 +220,7 @@ function _getDestTypeFromMethod(method) {
   var destType = "counterpartyd";
   if(['is_ready', 'get_reflected_host_info', 'is_chat_handle_in_use',
       'get_messagefeed_messages_by_index', 'get_normalized_balances', 'get_required_btcpays',
-      'get_btc_address_info', 'get_btc_block_height', 'get_btc_txns_status',
+      'get_chain_address_info', 'get_chain_block_height', 'get_chain_txns_status',
       'get_num_users_online', 'get_chat_handle', 'store_chat_handle', 'is_wallet_online', 'get_preferences', 'store_preferences',
       'get_raw_transactions', 'get_balance_history', 'get_last_n_messages',
       'get_owned_assets', 'get_asset_history', 'get_asset_extended_info', 'get_transaction_stats', 'get_wallet_stats', 'get_asset_pair_market_info',
