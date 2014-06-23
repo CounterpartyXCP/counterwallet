@@ -399,3 +399,13 @@ function initOrderMatches() {
 
 }
 INIT_FUNC['pages/ordermatches.html'] = initOrderMatches;
+
+function initRPS() {
+  pageSetUp();
+  window.RPS = new RpsViewModel();
+  ko.applyBindings(RPS, document.getElementById("rps"));
+
+  RPS.init();
+
+}
+INIT_FUNC['pages/rps.html'] = initRPS;

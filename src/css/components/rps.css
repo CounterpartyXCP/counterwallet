@@ -1,0 +1,71 @@
+#rps div.rps-play {
+  text-align: center;
+}
+
+#rps div.rps-play h2 {
+  margin-top: 0;
+  padding-top: 0;
+  font-weight: bold;
+}
+
+#rps li.rps-image {
+  display: inline-block;
+  padding: 0 10px;
+  text-align: center;
+  list-style: none;
+  text-transform: capitalize;
+}
+
+#rps li.rps-image img {
+  border: 2px solid #FFF;
+}
+
+#rps li.rps-image.selectedMove {
+  font-weight: bold;
+}
+
+#rps li.rps-image.selectedMove img {
+  border-color: #000;
+}
+
+#rps li.rps-image.win img {
+  border-color: #dbf5d0;
+}
+
+#rps li.rps-image.lose img {
+  border-color: #f5d0d0;
+}
+
+#rps div.wager-groups label {
+  border: 1px solid #000;
+}
+
+#rps div.wager-groups {
+  margin: auto;
+  width: 510px;
+  margin-bottom: 15px;
+}
+
+#rps div.wager-groups h2 {
+  text-align:center;
+  font-weight: bold;
+}
+
+#rps div.wager-groups label.active {
+  background-color: #739e73;
+  border-color: #659265;
+}
+
+#rps div.wager-groups .amount {
+  font-size: 16px;
+}
+
+#rps div.wager-groups .openedCount {
+  font-size: 11px;
+  display: block;
+}
+
+#rps div.wager-groups .radioBtn {
+  width: 100px;
+  margin: 0 !important; 
+}

@@ -64,6 +64,22 @@ function WalletViewModel() {
     });
     return addresses;
   }
+
+  self.getBiggestXCPBalanceAddress = function() {
+    var maxAmount = 0;
+    var maxAddress = null;
+
+    ko.utils.arrayForEach(self.addresses(), function(address) {
+      var xcpBalance = address.getXCPBalance();
+      if (xcpBalance>maxAmount) {
+        maxAmount = xcpBalance;
+        maxAddress = address;
+      }
+    });
+
+    return maxAddress;
+
+  }
   
   self.getAddressObj = function(address) {
     //given an address string, return a reference to the cooresponding AddressViewModel object
@@ -446,6 +462,7 @@ function WalletViewModel() {
         WALLET.signAndBroadcastTx(address, unsignedTxHex, function(txHash, endpoint) {
           //register this as a pending transaction
           var category = action.replace('create_', '') + 's'; //hack
+          if (category == 'rpss') category = 'rps';
           if(data['source'] === undefined) data['source'] = address;
           if(action == 'create_order') {
             data['_give_divisible'] = extra1;

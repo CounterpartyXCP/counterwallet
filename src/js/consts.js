@@ -71,7 +71,9 @@ var ENTITY_NAMES = {
   'bet_expirations': 'Bet Expired',
   'order_expirations': 'Order Expired',
   'bet_match_expirations': 'Bet Match Exp',
-  'order_match_expirations': 'Order Match Exp'
+  'order_match_expirations': 'Order Match Exp',
+  'rps': 'Rock-Paper-Scissors',
+  'rps_matches': 'Rock-Paper-Scissors Match'
 };
 
 var ENTITY_ICONS = {

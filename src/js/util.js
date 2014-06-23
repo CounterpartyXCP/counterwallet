@@ -477,6 +477,28 @@ function expireDate(expire_index) {
   return new Date((new Date()).getTime() + (expire_in * APPROX_SECONDS_PER_BLOCK * 1000));
 }
 
+function genRandom() {
+  var random = new Uint8Array(16);
+            
+  if (window.crypto && window.crypto.getRandomValues) {
+    window.crypto.getRandomValues(random); // Catch no entropy here.
+  } else if (window.msCrypto && window.msCrypto.getRandomValues) {
+    window.msCrypto.getRandomValues(random);
+  } else {
+    var errText = "Your browser lacks a way to securely generate random values. Please use a different, newer browser.";
+    bootbox.alert(errText);
+    assert(false, errText);
+  }
+
+  return Crypto.util.bytesToHex(random);
+}
+
+function doubleHash(hexstr) {
+  return bitcore.util.sha256(bitcore.util.sha256(Crypto.util.hexToBytes(hexstr))).toString('hex');
+}
+
+// Crypto.util.bytesToHex(CryptoJS.SHA256("4ff3ccad0146d643634fdff42eeb8f6f"))
+
 //Helper for closure-based inheritance (see http://www.ruzee.com/blog/2008/12/javascript-inheritance-via-prototypes-and-closures)
 (function(){
   CClass = function(){};

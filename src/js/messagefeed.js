@@ -5,6 +5,7 @@ function MessageFeed() {
   self.failoverCurrentIndex = ko.observable(0); //last idx in the cwBaseURLs tried (used for socket.io failover)
   self.MESSAGE_QUEUE = [];
   self.OPEN_ORDERS = []; // here only for sellBTCOrdersCount
+  self.OPEN_RPS = {};
 
   self.sellBTCOrdersCount = ko.computed(function() {
     return $.map(self.OPEN_ORDERS, function(item) {       
@@ -261,6 +262,7 @@ function MessageFeed() {
       || message['_status'].startsWith('cancelled') //orders and bets
       || message['_status'].startsWith('completed') //order match (non-BTC, or BTC match where BTCPay has been made)
       || message['_status'].startsWith('expired'));
+
     if(message['_status'].startsWith('invalid'))
       return; //ignore message
     if(message['_status'] == 'expired') {
@@ -394,6 +396,30 @@ function MessageFeed() {
     } else if(category == "bet_expirations") {
       //TODO
     } else if(category == "bet_match_expirations") {
+      //TODO
+    } else if(category == "rps") {
+      
+    } else if(category == "rps_matches") {
+      
+      var moveParam = MESSAGE_FEED.OPEN_RPS[message['tx0_hash']] || MESSAGE_FEED.OPEN_RPS[message['tx1_hash']];
+      if (moveParam) {
+
+        moveParam['rps_match_id'] = message['id'];
+        delete moveParam['move_random_hash'];
+
+        var onSuccess = function(txHash, data, endpoint) {
+          MESSAGE_FEED.OPEN_RPS[txHash] = null;
+          //bootbox.alert("<b>RPS game auto resolved</b> " + ACTION_PENDING_NOTICE);
+        }
+
+        WALLET.doTransaction(moveParam['source'], "create_rpsresolve", moveParam, onSuccess);
+      }
+      
+    } else if(category == "rpsresolves") {
+      
+    } else if(category == "rps_expirations") {
+      //TODO
+    } else if(category == "rps_match_expirations") {
       //TODO
     } else {
       $.jqlog.error("Unknown message category: " + category);

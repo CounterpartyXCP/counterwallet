@@ -227,7 +227,7 @@ function _getDestTypeFromMethod(method) {
       'get_market_price_summary', 'get_market_price_history', 'get_market_info', 'get_market_info_leaderboard', 'get_market_cap_history',
       'get_order_book_simple', 'get_order_book_buysell', 'get_trade_history',
       'record_btc_open_order', 'cancel_btc_open_order', 'get_bets', 'get_user_bets', 'get_feed', 'get_feeds_by_source',
-      'parse_base64_feed'].indexOf(method) >= 0) {
+      'parse_base64_feed', 'get_open_rps_count', 'get_user_rps'].indexOf(method) >= 0) {
     destType = "counterwalletd";
   }
   return destType;
