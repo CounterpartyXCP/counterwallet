@@ -63,7 +63,7 @@ function WaitingBTCPayViewModel(btcPayData) {
     if (PROCESSED_BTCPAY[btcPayData['orderMatchID']]) {
       $.jqlog.error("Attempt to make duplicate btcpay: " + btcPayData['orderMatchID']);
       return false;
-    } else if (self.expiresInNumBlocks<3) {
+    } else if (self.expiresInNumBlocks()<3) {
       $.jqlog.error("Attempt to make expired btcpay: " + btcPayData['orderMatchID']);
       return false;
     } else {
