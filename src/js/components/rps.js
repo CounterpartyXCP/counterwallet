@@ -4,16 +4,9 @@ function RpsViewModel() {
   var self = this;
 
   var defaul_wagers = [
-    { wager: 0.1, game_count: 0},
-    { wager: 0.2, game_count: 0},
-    { wager: 0.5, game_count: 0},
     { wager: 1, game_count: 0},
     { wager: 2, game_count: 0},
-    { wager: 5, game_count: 0},
-    { wager: 10, game_count: 0},
-    { wager: 20, game_count: 0},
-    { wager: 50, game_count: 0},
-    { wager: 100, game_count: 0} 
+    { wager: 5, game_count: 0}
   ];
 
   self.addressesLabels = {};
@@ -34,14 +27,19 @@ function RpsViewModel() {
   self.playLabel = ko.observable('');
   self.expiration = ko.observable(10);
   self.myGames = ko.observableArray(null);
+  self.possibleMoves = ko.observable(3);
 
   self.move.subscribe(function() { self.updatePlayLabel(); });
   self.wager.subscribe(function() { self.updatePlayLabel(); });
+  self.possibleMoves.subscribe(function() { self.init(); });
+
+  self.showAdvancedOptions = ko.observable(false);
 
   self.init = function() {
     self.move(null);
     self.wager(null);
     self.playLabel('');
+    $(".rps-image").removeClass('selectedMove').removeClass('win').removeClass('lose');
     self.updateOpenGames();
     var wallet_adressess = WALLET.getAddressesList(true);
     for (var i = 0; i < wallet_adressess.length; i++) {
@@ -50,6 +48,7 @@ function RpsViewModel() {
   }
 
   self.updateOpenGames = function() {
+    $('#myRpsTable').dataTable().fnClearTable();
     failoverAPI('get_open_rps_count', {'exclude_addresses': WALLET.getAddressesList()}, self.displayOpenGames); 
     failoverAPI('get_user_rps', {'addresses': WALLET.getAddressesList()}, self.displayUserGames); 
   }
@@ -145,13 +144,15 @@ function RpsViewModel() {
     var param = {
       source: address.ADDRESS,
       wager: denormalizeQuantity(self.wager()),
-      possible_moves: 5,
+      possible_moves: self.possibleMoves(),
       expiration: self.expiration(),
       move_random_hash: moveParams['move_random_hash']
     }
     var onSuccess = function(txHash, data, endpoint) {
       MESSAGE_FEED.OPEN_RPS[txHash] = moveParams;
-      bootbox.alert("<b>You are played " + self.wager() + " XCP on " + self.move().name.toUpperCase() + ".</b> " + ACTION_PENDING_NOTICE);
+      message = "<b>You are played " + self.wager() + " XCP on " + self.move().name.toUpperCase() + ".</b> " + ACTION_PENDING_NOTICE;
+      self.init()
+      bootbox.alert(message);
     }
     WALLET.doTransaction(address.ADDRESS, "create_rps", param, onSuccess);
     return false; 

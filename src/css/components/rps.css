@@ -36,8 +36,13 @@
   border-color: #f5d0d0;
 }
 
-#rps div.wager-groups label {
+#rps div.wager-groups label,
+#rps div.possibleMoves label {
   border: 1px solid #000;
+}
+
+#rps div.possibleMoves label {
+  background-color: #FFF;
 }
 
 #rps div.wager-groups {
@@ -51,7 +56,8 @@
   font-weight: bold;
 }
 
-#rps div.wager-groups label.active {
+#rps div.wager-groups label.active,
+#rps div.possibleMoves label.active {
   background-color: #739e73;
   border-color: #659265;
 }
@@ -68,4 +74,19 @@
 #rps div.wager-groups .radioBtn {
   width: 100px;
   margin: 0 !important; 
+}
+
+#rps div.rpsfield {
+  width:350px;
+  margin:0 auto;
+}
+
+#rps div.rpsfield input {
+  width:75%;
+  display: inline-block;
+  text-align: right;
+}
+
+#rps div.rpsfield label {
+  line-height: 34px;
 }
