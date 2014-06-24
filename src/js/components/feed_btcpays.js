@@ -63,6 +63,9 @@ function WaitingBTCPayViewModel(btcPayData) {
     if (PROCESSED_BTCPAY[btcPayData['orderMatchID']]) {
       $.jqlog.error("Attempt to make duplicate btcpay: " + btcPayData['orderMatchID']);
       return false;
+    } else if (self.expiresInNumBlocks<3) {
+      $.jqlog.error("Attempt to make expired btcpay: " + btcPayData['orderMatchID']);
+      return false;
     } else {
       PROCESSED_BTCPAY[btcPayData['orderMatchID']] = true;
     }
@@ -320,6 +323,9 @@ function UpcomingBTCPayFeedViewModel() {
     //check duplicate
     if (PROCESSED_BTCPAY[btcPayData['orderMatchID']]) {
       $.jqlog.error("Attempt to make duplicate btcpay: " + btcPayData['orderMatchID']);
+      return false;
+    } else if (btcPayData['matchExpireIndex'] - WALLET.networkBlockHeight() < 3) {
+      $.jqlog.error("Attempt to make expired btcpay: " + btcPayData['orderMatchID']);
       return false;
     } else {
       PROCESSED_BTCPAY[btcPayData['orderMatchID']] = true;
