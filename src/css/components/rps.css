@@ -90,3 +90,7 @@
 #rps div.rpsfield label {
   line-height: 34px;
 }
+
+#rps span.invalid {
+  color:#FF0000;
+}

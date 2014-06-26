@@ -3,6 +3,20 @@ function RpsViewModel() {
 
   var self = this;
 
+  var wagerValidator = {
+    required: true,
+    isValidPositiveQuantity: self,
+    validation: {
+      validator: function (val, self) {
+        var address = self.sourceAddress();
+        var wager = self.wager();
+        return parseFloat(wager) <= self.balances[address];
+      },
+      message: 'Wager entered exceeds the address balance.',
+      params: self
+    }    
+  }
+
   var defaul_wagers = [
     { wager: 1, game_count: 0},
     { wager: 2, game_count: 0},
@@ -10,6 +24,7 @@ function RpsViewModel() {
   ];
 
   self.addressesLabels = {};
+  self.balances = {};
 
   self.rpssl = ko.observableArray([
     {name: 'rock', value: 1, win:[3, 5], lose:[2, 4]},
@@ -21,13 +36,22 @@ function RpsViewModel() {
 
   self.move_names = ['NA', 'Rock', 'Paper', 'Scissors', 'Spock', 'Lizard'];
 
-  self.wagers = ko.observableArray(null);
+  self.wagers = ko.observableArray(0);
   self.move = ko.observable(null);
-  self.wager = ko.observable(null);
+  
   self.playLabel = ko.observable('');
-  self.expiration = ko.observable(10);
   self.myGames = ko.observableArray(null);
   self.possibleMoves = ko.observable(3);
+
+  self.sourceAddress = ko.observable(null).extend(wagerValidator);
+  self.availableAddresses = ko.observableArray([]);
+
+  self.wager = ko.observable(null).extend(wagerValidator);;
+
+  self.expiration = ko.observable(10).extend({
+    required: true,
+    isValidPositiveInteger: self
+  });
 
   self.move.subscribe(function() { self.updatePlayLabel(); });
   self.wager.subscribe(function() { self.updatePlayLabel(); });
@@ -35,21 +59,52 @@ function RpsViewModel() {
 
   self.showAdvancedOptions = ko.observable(false);
 
+  self.showAdvancedOptions.subscribe(function(value) { 
+    if (value) {
+      $('#rps .wager-groups .radioBtn.active, #rps .wager-groups .radioBtn.active input.active').removeClass('active');
+    }
+  });
+
+  self.validationModel = ko.validatedObservable({
+    wager: self.wager,
+    expiration: self.expiration
+  });
+
   self.init = function() {
     self.move(null);
     self.wager(null);
     self.playLabel('');
     $(".rps-image").removeClass('selectedMove').removeClass('win').removeClass('lose');
+    $('#rps .wager-groups .invalid').hide();
     self.updateOpenGames();
+
     var wallet_adressess = WALLET.getAddressesList(true);
+
+    self.availableAddresses([]);
+    self.balances = {};
+    var options = []
+    var maxBalance = wallet_adressess[0][2];
+    var maxAddress = wallet_adressess[0][0];
+    
     for (var i = 0; i < wallet_adressess.length; i++) {
       self.addressesLabels[wallet_adressess[i][0]] = wallet_adressess[i][1];
+      options.push({
+        address: wallet_adressess[i][0], 
+        label: wallet_adressess[i][1] + ' (' + wallet_adressess[i][2] + ' XCP)'
+      });
+      self.balances[wallet_adressess[i][0]] = wallet_adressess[i][2];
+      if (wallet_adressess[i][2] > maxBalance) {
+        maxBalance = wallet_adressess[i][2];
+        maxAddress = wallet_adressess[i][0];
+      }
     }
+    self.availableAddresses(options);
+    self.sourceAddress(maxAddress);
   }
 
   self.updateOpenGames = function() {
     $('#myRpsTable').dataTable().fnClearTable();
-    failoverAPI('get_open_rps_count', {'exclude_addresses': WALLET.getAddressesList()}, self.displayOpenGames); 
+    failoverAPI('get_open_rps_count', {'possible_moves': self.possibleMoves(),'exclude_addresses': WALLET.getAddressesList()}, self.displayOpenGames); 
     failoverAPI('get_user_rps', {'addresses': WALLET.getAddressesList()}, self.displayUserGames); 
   }
 
@@ -95,6 +150,13 @@ function RpsViewModel() {
       game['wager'] = normalizeQuantity(data[i]['wager']) + ' XCP';
       game['move_str'] = self.move_names[data[i]['move']];
       game['countermove_str'] = self.move_names[data[i]['counter_move']];
+      if (data[i]['possible_moves'] == 3) {
+        game['game_type'] = 'RPS'
+      } else if (data[i]['possible_moves'] == 5) {
+        game['game_type'] = 'RPSSL'
+      } else {
+        game['game_type'] = data[i]['possible_moves']+ 'moves'
+      }
       games.push(game);
     }
     self.myGames(games);
@@ -128,23 +190,23 @@ function RpsViewModel() {
   }
 
   self.doAction = function() {
-    $.jqlog.debug('doAction');
+    if (!self.validationModel.isValid()) {
+      self.validationModel.errors.showAllMessages();
+      return false;
+    }
 
-    var address = WALLET.getBiggestXCPBalanceAddress();
-    $.jqlog.debug(address);
-
-    if (address.getXCPBalance() < self.wager()) {
+    if (self.balances[self.sourceAddress()] < self.wager()) {
       bootbox.alert("None of your addresses contain enough XCP");
       return false;
     }
     var moveParams = self.generateMoveRandomHash(self.move().value);
-    moveParams['source'] = address.ADDRESS;
+    moveParams['source'] = self.sourceAddress();
     $.jqlog.debug(moveParams);
 
     var param = {
-      source: address.ADDRESS,
+      source: self.sourceAddress(),
       wager: denormalizeQuantity(self.wager()),
-      possible_moves: self.possibleMoves(),
+      possible_moves: parseInt(self.possibleMoves()),
       expiration: self.expiration(),
       move_random_hash: moveParams['move_random_hash']
     }
@@ -154,7 +216,7 @@ function RpsViewModel() {
       self.init()
       bootbox.alert(message);
     }
-    WALLET.doTransaction(address.ADDRESS, "create_rps", param, onSuccess);
+    WALLET.doTransaction(self.sourceAddress(), "create_rps", param, onSuccess);
     return false; 
   }
 

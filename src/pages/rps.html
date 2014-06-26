@@ -53,19 +53,27 @@
 
                 <div class="row">
                   <div class="col col-lg-12 rps-play">
-                    <h2>2. Select your wager</h2>
+                    <h2 data-bind="visible: showAdvancedOptions() == false">2. Select your wager</h2>
+                    <h2 data-bind="visible: showAdvancedOptions">2. Select your options</h2>
                     <div class="wager-groups" data-bind="visible: showAdvancedOptions() == false">
                       <div class="btn-group" data-toggle="buttons" data-bind="foreach: wagers">
                         <label class="radioBtn btn btn-lg">
                           <input type="radio" name="wager" data-bind="attr: {value: wager}, btnGroupChecked: $parent.wager">
                           <span class="amount" data-bind="text: wager + ' XCP'"></span>
-                          <span class="openedCount" data-bind="text: '(' + game_count + ' open)'"></span>
+                          <span class="openedCount fa  fa-hand-o-right" data-bind="html: '&nbsp;' + game_count + ' open'"></span>
                         </label>
                       </div>
+                      <br /><span class="invalid" data-bind="validationMessage: wager"></span>
                     </div>
                   </div>
                 </div>
 
+                <div class="row rpsfield" data-bind="visible: showAdvancedOptions">
+                  <label class="col col-lg-3 control-label font-medlg">Source:</label>
+                  <div class="col col-lg-9">
+                    <select class="form-control" style="width: 350px;vertical-align: top;margin-right: 12px;" name="source" data-bind="options: availableAddresses, optionsValue: 'address', optionsText: 'label', value: sourceAddress, select2: { minimumResultsForSearch: 10, escapeMarkup: 'direct' }"></select>
+                  </div>
+                </div>
                 <div class="row rpsfield" data-bind="visible: showAdvancedOptions">
                   <label class="col col-lg-3 control-label font-medlg">Wager:</label>
                   <div class="col col-lg-9">
@@ -120,6 +128,7 @@
                       <th>Wager</th>     
                       <th>Move</th>   
                       <th>Counter move</th>
+                      <th>Game</th>
                     </tr>
                   </thead>
                   <tbody data-bind="foreach: { data: myGames, as: 'game' }">
@@ -130,6 +139,7 @@
                       <td class="number" data-bind="text: game.wager"></td>
                       <td class="number" data-bind="text: game.move_str"></td>
                       <td class="number" data-bind="text: game.countermove_str"></td>
+                      <td data-bind="text: game.game_type"></td> 
                     </tr>
                   </tbody>
                 </table>
