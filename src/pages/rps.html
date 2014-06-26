@@ -43,7 +43,7 @@
                     <div>
                       <ul class="rps-images" data-bind="foreach: rpssl">
                         <li class="rps-image" data-bind="attr: {rel: value}, visible: value <= $parent.possibleMoves">
-                          <img data-bind="attr: {src: 'images/'+name+'.png'}, click: $parent.selectMove"><br />
+                          <img data-bind="attr: {src: 'assets/'+name+'.png'}, click: $parent.selectMove"><br />
                           <span data-bind="text: name"></span>
                         </li>
                       </ul>
