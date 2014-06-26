@@ -8,6 +8,10 @@
   font-weight: bold;
 }
 
+#rps ul.rps-images {
+  padding: 0;
+}
+
 #rps li.rps-image {
   display: inline-block;
   padding: 0 10px;
