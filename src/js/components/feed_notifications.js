@@ -165,7 +165,86 @@ NotificationViewModel.calcText = function(category, message) {
       desc = "A bet match between your address <Ad>" + getAddressLabel(message['tx1_address'])
         + "</Ad> and address <Ad>" + getAddressLabel(message['tx0_address']) + "</Ad> has expired";
     }
-  }  
+
+
+  } else if(category == 'rps'  && WALLET.getAddressObj(message['source'])) {
+
+    desc  = "You play Rock-Paper-Scissors with <Am>" + smartFormat(normalizeQuantity(message['wager']))+ "</Am> <As>XCP</As>";
+    desc += " with <Ad>"+ getAddressLabel(message['source']) + "</Ad>";
+
+  } else if(category == 'rpsresolves' && WALLET.getAddressObj(message['source'])) {
+
+    var move_names = ['NA', 'ROCK', 'PAPER', 'SCISSORS', 'SPOCK', 'LIZARD'];
+    var move_name = move_names[message['move']] || message['move']
+    desc  = "Your move <Am>"+ move_name +"</Am> with <Ad>" + getAddressLabel(message['source']) + "</Ad> is confirmed";
+
+  } else if(category == 'rps_expirations' && WALLET.getAddressObj(message['source'])) {
+
+    desc = "Your RPS game ID <b>" + message['rps_index'] + "</b> from address <Ad>" + getAddressLabel(message['source']) + "</Ad> has expired";
+
+  } else if(category == "rps_match_expirations") {
+
+    if(WALLET.getAddressObj(message['tx0_address']) && WALLET.getAddressObj(message['tx1_address'])) {
+      desc = "A RPS match between your addresses <Ad>" + getAddressLabel(message['tx0_address'])
+        + "</Ad> and <Ad>" + getAddressLabel(message['tx1_address']) + "</Ad> has expired";
+    } else if(WALLET.getAddressObj(message['tx0_address'])) {
+      desc = "A RPS match between your address <Ad>" + getAddressLabel(message['tx0_address'])
+        + "</Ad> and address <Ad>" + getAddressLabel(message['tx1_address']) + "</Ad> has expired";
+    } else if(WALLET.getAddressObj(message['tx1_address'])) {
+      desc = "A RPS match between your address <Ad>" + getAddressLabel(message['tx1_address'])
+        + "</Ad> and address <Ad>" + getAddressLabel(message['tx0_address']) + "</Ad> has expired";
+    }
+
+  } else if(category == "rps_matches") {
+
+    if (!message['tx0_address']) {
+
+      var param = {
+        filters: [
+          {field: 'id', op: '=', value: message['rps_match_id']}
+        ]
+      }
+
+      var onReceiveRpsMatch = function(data) {
+        for (var i in data) {
+          var rps_match = data[i];
+          NOTIFICATION_FEED.add(category, rps_match);
+        }        
+      }
+
+      failoverAPI('get_rps_matches', param, onReceiveRpsMatch);
+
+    } else {
+
+      if (WALLET.getAddressObj(message['tx0_address'])) {
+        if  (message['status'] == "concluded: first player wins") {
+          desc = "RPS: You win " + smartFormat(normalizeQuantity(message['wager']))+ "</Am> <As>XCP</As>" + 
+                 " with <Ad>" + getAddressLabel(message['tx0_address']) + "</Ad>";
+        } else if  (message['status'] == "concluded: second player wins") {
+          desc = "RPS: You lose " + smartFormat(normalizeQuantity(message['wager']))+ "</Am> <As>XCP</As>" + 
+                 " with <Ad>" + getAddressLabel(message['tx0_address']) + "</Ad>";
+        } else if  (message['status'] == "concluded: tie") {
+          desc = "RPS: Tie with <Ad>" + getAddressLabel(message['tx0_address']) + "</Ad>";
+        }
+      }
+
+      if (WALLET.getAddressObj(message['tx1_address'])) {
+        if  (message['status'] == "concluded: first player wins") {
+          desc = "RPS: You lose " + smartFormat(normalizeQuantity(message['wager']))+ "</Am> <As>XCP</As>" + 
+                 " with <Ad>" + getAddressLabel(message['tx1_address']) + "</Ad>";
+        } else if  (message['status'] == "concluded: second player wins") {
+          desc = "RPS: You win " + smartFormat(normalizeQuantity(message['wager']))+ "</Am> <As>XCP</As>" + 
+                 " with <Ad>" + getAddressLabel(message['tx1_address']) + "</Ad>";
+        } else if  (message['status'] == "concluded: tie") {
+          desc = "RPS: Tie with <Ad>" + getAddressLabel(message['tx1_address']) + "</Ad>";
+        }
+      }
+      
+    }
+
+    
+
+  }
 
   if(desc) {
     desc = desc.replace(/<Am>/g, '<b class="notoQuantityColor">').replace(/<\/Am>/g, '</b>');

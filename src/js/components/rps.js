@@ -18,9 +18,9 @@ function RpsViewModel() {
   }
 
   var defaul_wagers = [
-    { wager: 1, game_count: 0},
-    { wager: 2, game_count: 0},
-    { wager: 5, game_count: 0}
+    { wager: 1, game_count: 0, picto: 'bronze'},
+    { wager: 2, game_count: 0, picto: 'silver'},
+    { wager: 5, game_count: 0, picto: 'gold'}
   ];
 
   self.addressesLabels = {};
@@ -48,14 +48,14 @@ function RpsViewModel() {
 
   self.wager = ko.observable(null).extend(wagerValidator);;
 
-  self.expiration = ko.observable(10).extend({
+  self.expiration = ko.observable(500).extend({
     required: true,
     isValidPositiveInteger: self
   });
 
   self.move.subscribe(function() { self.updatePlayLabel(); });
   self.wager.subscribe(function() { self.updatePlayLabel(); });
-  self.possibleMoves.subscribe(function() { self.init(); });
+  self.possibleMoves.subscribe(function() { self.onChangeGameType(); });
 
   self.showAdvancedOptions = ko.observable(false);
 
@@ -65,18 +65,26 @@ function RpsViewModel() {
     }
   });
 
+  self.pendingRPS = ko.observable(false);
+
   self.validationModel = ko.validatedObservable({
     wager: self.wager,
     expiration: self.expiration
   });
 
-  self.init = function() {
+  self.onChangeGameType = function() {
     self.move(null);
     self.wager(null);
     self.playLabel('');
     $(".rps-image").removeClass('selectedMove').removeClass('win').removeClass('lose');
-    $('#rps .wager-groups .invalid').hide();
+    $('#rps span.invalid').hide();
     self.updateOpenGames();
+
+  }
+
+  self.init = function() {
+
+    self.onChangeGameType();
 
     var wallet_adressess = WALLET.getAddressesList(true);
 
@@ -120,7 +128,8 @@ function RpsViewModel() {
       var w = defaul_wagers[i].wager;
       newWagers[i] = {
         wager: w,
-        game_count: countByWager[w] || 0
+        game_count: countByWager[w] || 0,
+        picto: defaul_wagers[i].picto
       };
       newWagers[i].game_count += "";
     } 
@@ -142,6 +151,10 @@ function RpsViewModel() {
 
     var games = [];
     for (var i in data) {
+
+      if (data[i]['status'] == 'pending' || data[i]['status'] == 'open') {
+        self.pendingRPS(true);
+      }
       var game = {};
 
       game['status_html'] = '<span class="label label-'+classes[data[i]['status']]+'">'+data[i]['status']+'</span>';
@@ -160,26 +173,36 @@ function RpsViewModel() {
       games.push(game);
     }
     self.myGames(games);
-    var myRpsTable = $('#myRpsTable').dataTable();
+    runDataTables('#myRpsTable', true, {
+      "aaSorting": [[1, 'desc']]
+    });
+    
   }
 
   self.updatePlayLabel = function(value) {
     if (self.wager() && self.move()) {
       self.playLabel('Play <b>' + self.wager() + ' XCP</b> on <b>'+self.move().name.toUpperCase() + '</b>');
+    } else {
+      self.playLabel('');
     }
   }
 
   self.selectMove = function(move) {
-    $.jqlog.debug(move);
-    $(".rps-image").removeClass('selectedMove').removeClass('win').removeClass('lose');
-    $(".rps-image[rel='"+move.value+"']").addClass('selectedMove');
-    for (var m in move.win) {
-      $(".rps-image[rel='"+move.win[m]+"']").addClass('win');
+    if (self.move() == null || self.move().value != move.value) {
+      $(".rps-image").removeClass('selectedMove').removeClass('win').removeClass('lose');
+      $(".rps-image[rel='"+move.value+"']").addClass('selectedMove');
+      for (var m in move.win) {
+        $(".rps-image[rel='"+move.win[m]+"']").addClass('win');
+      }
+      for (var m in move.lose) {
+        $(".rps-image[rel='"+move.lose[m]+"']").addClass('lose');
+      }
+      self.move(move);
+    } else {
+      self.move(null);
+      self.playLabel('');
+      $(".rps-image").removeClass('selectedMove').removeClass('win').removeClass('lose');
     }
-    for (var m in move.lose) {
-      $(".rps-image[rel='"+move.lose[m]+"']").addClass('lose');
-    }
-    self.move(move)
   }
 
   self.generateMoveRandomHash = function(move) {
@@ -211,9 +234,11 @@ function RpsViewModel() {
       move_random_hash: moveParams['move_random_hash']
     }
     var onSuccess = function(txHash, data, endpoint) {
-      MESSAGE_FEED.OPEN_RPS[txHash] = moveParams;
-      message = "<b>You are played " + self.wager() + " XCP on " + self.move().name.toUpperCase() + ".</b> " + ACTION_PENDING_NOTICE;
-      self.init()
+      MESSAGE_FEED.setOpenRPS(self.sourceAddress(), txHash, moveParams);
+
+      var warn = '<b class="errorColor">Please stay logged in so that the game(s) can be properly resolved. Be careful, if you close the Wallet before the end of the game you can lose money!!</b><br />';
+      message = "<b>You are played " + self.wager() + " XCP on " + self.move().name.toUpperCase() + ".</b> " + warn + ACTION_PENDING_NOTICE;
+      self.init();
       bootbox.alert(message);
     }
     WALLET.doTransaction(self.sourceAddress(), "create_rps", param, onSuccess);

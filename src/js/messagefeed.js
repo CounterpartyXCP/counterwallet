@@ -5,13 +5,140 @@ function MessageFeed() {
   self.failoverCurrentIndex = ko.observable(0); //last idx in the cwBaseURLs tried (used for socket.io failover)
   self.MESSAGE_QUEUE = [];
   self.OPEN_ORDERS = []; // here only for sellBTCOrdersCount
-  self.OPEN_RPS = {};
 
   self.sellBTCOrdersCount = ko.computed(function() {
     return $.map(self.OPEN_ORDERS, function(item) {       
         return ('BTC' == item['get_asset']) ? item : null;
     }).length;
   }, self);
+
+  self.rpsresolveQueue = null;
+  self.rpsresolveErrors = {};
+
+  self.setOpenRPS = function(source, hash, moveParam) {
+    var openRps = localStorage.getObject('openRps') || {};
+    var cwk = WALLET.getAddressObj(source).KEY;
+    var moveParamStr = JSON.stringify(moveParam);
+    var cryptedMoveParam = cwk.encrypt(moveParamStr);
+    openRps[hash] = cryptedMoveParam;
+
+    localStorage.setObject('openRps', openRps);
+  }
+
+  self.getOpenRPS = function(source, hash) {
+    var openRps = localStorage.getObject('openRps') || {};
+    var cryptedMoveParam = openRps[hash];
+
+    if (cryptedMoveParam) {
+      var cwk = WALLET.getAddressObj(source).KEY;
+      var moveParamStr = cwk.decrypt(cryptedMoveParam);
+      return JSON.parse(moveParamStr);
+    }
+    return null;
+  }
+
+  self.deleteOpenRPS = function(hash) {
+    var openRps = localStorage.getObject('openRps') || {};
+    delete openRps[hash];
+    localStorage.setObject('openRps', openRps);
+  }
+
+  self.onRpsMatch = function(rps_match, callback) {
+    $.jqlog.debug("on open rps: ");
+    $.jqlog.debug(rps_match);
+
+    var source = null;
+    var hash = null;
+    if (WALLET.getAddressObj(rps_match['tx0_address']) 
+        && (rps_match['status'] == 'pending' 
+            || rps_match['status'] == 'pending and resolved')) {
+
+      source = rps_match['tx0_address'];
+      hash = rps_match['tx0_hash'];
+
+    } else if (WALLET.getAddressObj(rps_match['tx1_address']) 
+               && (rps_match['status'] == 'pending'
+                   || rps_match['status'] == 'resolved and pending')) {
+
+      source = rps_match['tx1_address'];
+      hash = rps_match['tx1_hash'];
+
+    }
+    if (source && hash) {
+
+      var moveParam = self.getOpenRPS(source, hash);
+      if (moveParam) {
+        self.resolvePendingRpsMatch(hash, moveParam, rps_match, callback);
+      } else {
+        $.jqlog.debug('RANDOM LOST: '+rps_match['id']);
+        if (callback) callback();
+      }
+
+    }
+  }
+
+  self.resolvePendingRpsMatch = function(tx_hash, moveParam, rps_match, callback) {
+    $.jqlog.debug("resolvePendingRpsMatch: ");
+    $.jqlog.debug(rps_match);
+    $.jqlog.debug(tx_hash);
+    $.jqlog.debug(moveParam);
+
+    
+
+    // wait 10 secondes to avoid -22 bitcoind error
+    setTimeout(function() {
+      
+      moveParam['rps_match_id'] = rps_match['id'];
+      if (moveParam['move_random_hash']) delete moveParam['move_random_hash'];
+
+      var onSuccess = function(txHash, data, endpoint) {
+        $.jqlog.debug('onSuccess');
+        self.deleteOpenRPS(tx_hash);
+        if (callback) callback();
+      }
+
+      var onError = function() {
+
+        $.jqlog.debug('ERROR. RETRY ');
+
+        self.rpsresolveErrors[rps_match['id']] = self.rpsresolveErrors[rps_match['id']] || 0;
+        self.rpsresolveErrors[rps_match['id']] += 1;
+
+        if (self.rpsresolveErrors[rps_match['id']]  < TRANSACTION_MAX_RETRY) {
+          self.rpsresolveQueue = self.rpsresolveQueue.defer(self.onRpsMatch, rps_match)
+        }
+      }
+
+      WALLET.doTransaction(moveParam['source'], "create_rpsresolve", moveParam, onSuccess, onError);
+
+    }, TRANSACTION_DELAY);
+  }
+
+  self.resolvePendingRpsMatches = function() {
+    $.jqlog.debug("resolvePendingRpsMatches: ");
+
+    var myAddresses = WALLET.getAddressesList();
+    var params = {
+      filters: [
+        {field: 'tx0_address', op: 'IN', value: myAddresses},
+        {field: 'tx1_address', op: 'IN', value: myAddresses}
+      ],
+      filterop: 'OR',
+      status: ['pending', 'pending and resolved', 'resolved and pending']
+    }
+
+    var onReceivePendingRpsMatches = function(data) {
+      $.jqlog.debug(data);
+
+      self.rpsresolveQueue = queue(1);
+      for (var i in data) {
+        self.rpsresolveQueue = self.rpsresolveQueue.defer(self.onRpsMatch, data[i]);
+      }
+    }
+
+    failoverAPI('get_rps_matches', params, onReceivePendingRpsMatches);
+  }
+
 
   self.removeOrder = function(hash) {
     for (var i in self.OPEN_ORDERS) {
@@ -400,20 +527,8 @@ function MessageFeed() {
     } else if(category == "rps") {
       
     } else if(category == "rps_matches") {
-      
-      var moveParam = MESSAGE_FEED.OPEN_RPS[message['tx0_hash']] || MESSAGE_FEED.OPEN_RPS[message['tx1_hash']];
-      if (moveParam) {
 
-        moveParam['rps_match_id'] = message['id'];
-        delete moveParam['move_random_hash'];
-
-        var onSuccess = function(txHash, data, endpoint) {
-          MESSAGE_FEED.OPEN_RPS[txHash] = null;
-          //bootbox.alert("<b>RPS game auto resolved</b> " + ACTION_PENDING_NOTICE);
-        }
-
-        WALLET.doTransaction(moveParam['source'], "create_rpsresolve", moveParam, onSuccess);
-      }
+      self.onRpsMatch(message); 
       
     } else if(category == "rpsresolves") {
       
@@ -424,5 +539,16 @@ function MessageFeed() {
     } else {
       $.jqlog.error("Unknown message category: " + category);
     }
+
+    if (["rps", "rps_matches", "rpsresolves", "rps_expirations", "rps_match_expirations"].indexOf(category)) {
+      try {
+        RPS.updateOpenGames();
+      } catch(err) {
+        $.jqlog.debug(err.message);
+      }
+      
+    }
   }
+
+
 }

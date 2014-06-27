@@ -18,6 +18,7 @@
   text-align: center;
   list-style: none;
   text-transform: capitalize;
+  cursor: pointer;
 }
 
 #rps li.rps-image img {
@@ -78,6 +79,11 @@
 #rps div.wager-groups .radioBtn {
   width: 100px;
   margin: 0 !important; 
+  background-repeat: no-repeat;
+  background-position: 9px;
+  background-size: 24px 24px;
+  padding-left: 38px;
+
 }
 
 #rps div.rpsfield {
@@ -97,4 +103,9 @@
 
 #rps span.invalid {
   color:#FF0000;
+}
+
+#rps div.show-advanced {
+  text-align: center;
+  margin-top:15px
 }

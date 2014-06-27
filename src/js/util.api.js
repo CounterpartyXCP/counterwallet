@@ -378,8 +378,18 @@ function multiAPIConsensus(method, params, onSuccess, onConsensusError, onSysErr
   }
   if(typeof(onSysError)==='undefined') {
     onSysError = function(jqXHR, textStatus, errorThrown, endpoint) {
-      var message = describeError(jqXHR, textStatus, errorThrown);
-      bootbox.alert("multiAPIConsensus: Parallel call failed (no server returned success). Method: " + method + "; Last error: " + message);
+      $.jqlog.debug(textStatus);
+      var message = textStatus;
+      var noBtcPos = textStatus.indexOf("Insufficient bitcoins");
+      if (noBtcPos != 1) {
+        var endMessage = textStatus.indexOf(")", noBtcPos) + 1;
+
+        message = '<b class="errorColor">'+textStatus.substr(noBtcPos, endMessage-noBtcPos)+ '</b>. You must have a little BTC amount to pay miner fees. Please funds this address and retry.';
+      } else {
+        message = describeError(jqXHR, textStatus, errorThrown);
+        message = "multiAPIConsensus: Parallel call failed (no server returned success). Method: " + method + "; Last error: " + message;
+      }
+      bootbox.alert(message);
     };
   }
  

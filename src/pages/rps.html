@@ -9,6 +9,12 @@
     </div>
   </div>
 
+  <div id="pendingRPS" data-bind="fadeVisibleInOnly: pendingRPS()" class="alert alert-danger alert-block">
+    <i class="fa-fw fa fa-btc"></i>
+    <strong>Pending Game:</strong> As you have one or more pending game, please stay logged in so that the game(s) can be properly resolved. <br />
+    Be careful, if you close the Wallet before the end of the game you can lose money!!
+  </div>
+
   <section id="widget-grid"> <!-- widget grid -->
 
     <div class="row"> <!-- row -->
@@ -43,7 +49,7 @@
                     <div>
                       <ul class="rps-images" data-bind="foreach: rpssl">
                         <li class="rps-image" data-bind="attr: {rel: value}, visible: value <= $parent.possibleMoves">
-                          <img data-bind="attr: {src: 'assets/'+name+'.png'}, click: $parent.selectMove"><br />
+                          <img data-bind="attr: {src: 'assets/'+name+'.png'}, click: $parent.selectMove" /><br />
                           <span data-bind="text: name"></span>
                         </li>
                       </ul>
@@ -57,7 +63,7 @@
                     <h2 data-bind="visible: showAdvancedOptions">2. Select your options</h2>
                     <div class="wager-groups" data-bind="visible: showAdvancedOptions() == false">
                       <div class="btn-group" data-toggle="buttons" data-bind="foreach: wagers">
-                        <label class="radioBtn btn btn-lg">
+                        <label class="radioBtn btn btn-lg" data-bind="attr: {style: 'background-image:url(assets/'+picto+'.png)'}">
                           <input type="radio" name="wager" data-bind="attr: {value: wager}, btnGroupChecked: $parent.wager">
                           <span class="amount" data-bind="text: wager + ' XCP'"></span>
                           <span class="openedCount fa  fa-hand-o-right" data-bind="html: '&nbsp;' + game_count + ' open'"></span>
@@ -68,10 +74,11 @@
                   </div>
                 </div>
 
-                <div class="row rpsfield" data-bind="visible: showAdvancedOptions">
-                  <label class="col col-lg-3 control-label font-medlg">Source:</label>
+                <div class="row rpsfield">
+                  <label class="col col-lg-2 control-label font-medlg" data-bind="visible: showAdvancedOptions() == false" style="padding-left:0">Source:</label>
+                  <label class="col col-lg-3 control-label font-medlg" data-bind="visible: showAdvancedOptions">Source:</label>
                   <div class="col col-lg-9">
-                    <select class="form-control" style="width: 350px;vertical-align: top;margin-right: 12px;" name="source" data-bind="options: availableAddresses, optionsValue: 'address', optionsText: 'label', value: sourceAddress, select2: { minimumResultsForSearch: 10, escapeMarkup: 'direct' }"></select>
+                    <select class="form-control" style="width: 280px;vertical-align: top;margin-right: 12px;" name="source" data-bind="options: availableAddresses, optionsValue: 'address', optionsText: 'label', value: sourceAddress, select2: { minimumResultsForSearch: 10, escapeMarkup: 'direct' }"></select>
                   </div>
                 </div>
                 <div class="row rpsfield" data-bind="visible: showAdvancedOptions">
@@ -81,7 +88,7 @@
                     <br /><span class="invalid" data-bind="validationMessage: wager"></span>
                   </div>
                 </div>
-                <div class="row rpsfield" data-bind="visible: showAdvancedOptions" style="margin-bottom:15px">
+                <div class="row rpsfield" data-bind="visible: showAdvancedOptions">
                   <label class="col col-lg-3 control-label font-medlg">Expiration:</label>
                   <div class="col col-lg-9">
                     <input type="text"  name="expiration" class="number form-control"  data-bind="value: expiration, valueUpdate: 'input'" /> blocks
@@ -90,7 +97,7 @@
                   </div>
                 </div>
 
-                <div class="row" data-bind="visible: playLabel">
+                <div class="row" data-bind="visible: playLabel" style="margin-top:15px">
                   <div class="col col-lg-12 rps-play">
                     <a class="btn btn-primary btn-lg" href="#" data-bind="html: playLabel, click: doAction"></a>
                   </div>
@@ -98,7 +105,7 @@
 
                 <div class="show-advanced">
                   <input type="checkbox" name="showAdvancedOptions" value="1" data-bind="checked: showAdvancedOptions" />
-                  <label>Show advanced options</label>             
+                  <label>Advanced Options</label>             
                 </div>
 
               </div>
@@ -116,9 +123,10 @@
               <h3>My games</h3>
               <div class="clearfix"></div>
             </header>
-            <div id="counterbets"> <!-- widget div-->
+            <div id="openGames"> <!-- widget div-->
               <div class="widget-body no-padding" data-bind="validationOptions: { insertMessages: false }"> <!-- widget content -->
                 <div class="widget-body-toolbar"></div>
+
                 <table width="100%" class="table table-striped table-hover datatable_basic" id="myRpsTable">
                   <thead>
                     <tr>
@@ -137,12 +145,13 @@
                       <td data-bind="text: game.block_index"></td>
                       <td data-bind="text: game.address_label"></td>   
                       <td class="number" data-bind="text: game.wager"></td>
-                      <td class="number" data-bind="text: game.move_str"></td>
-                      <td class="number" data-bind="text: game.countermove_str"></td>
+                      <td data-bind="text: game.move_str"></td>
+                      <td data-bind="text: game.countermove_str"></td>
                       <td data-bind="text: game.game_type"></td> 
                     </tr>
                   </tbody>
                 </table>
+
               </div>
            </div> <!-- end widget div -->
         </div> <!-- end widget -->
