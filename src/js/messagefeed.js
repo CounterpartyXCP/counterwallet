@@ -14,19 +14,20 @@ function MessageFeed() {
 
   self.rpsresolveQueue = null;
   self.rpsresolveErrors = {};
+  self.openRpsKey = 'openRps_' + WALLET.identifier();
 
   self.setOpenRPS = function(source, hash, moveParam) {
-    var openRps = localStorage.getObject('openRps') || {};
+    var openRps = localStorage.getObject(self.openRpsKey) || {};
     var cwk = WALLET.getAddressObj(source).KEY;
     var moveParamStr = JSON.stringify(moveParam);
     var cryptedMoveParam = cwk.encrypt(moveParamStr);
     openRps[hash] = cryptedMoveParam;
 
-    localStorage.setObject('openRps', openRps);
+    localStorage.setObject(self.openRpsKey, openRps);
   }
 
   self.getOpenRPS = function(source, hash) {
-    var openRps = localStorage.getObject('openRps') || {};
+    var openRps = localStorage.getObject(self.openRpsKey) || {};
     var cryptedMoveParam = openRps[hash];
 
     if (cryptedMoveParam) {
@@ -38,9 +39,9 @@ function MessageFeed() {
   }
 
   self.deleteOpenRPS = function(hash) {
-    var openRps = localStorage.getObject('openRps') || {};
+    var openRps = localStorage.getObject(self.openRpsKey) || {};
     delete openRps[hash];
-    localStorage.setObject('openRps', openRps);
+    localStorage.setObject(self.openRpsKey, openRps);
   }
 
   self.onRpsMatch = function(rps_match, callback) {
@@ -64,6 +65,7 @@ function MessageFeed() {
       hash = rps_match['tx1_hash'];
 
     }
+
     if (source && hash) {
 
       var moveParam = self.getOpenRPS(source, hash);
@@ -73,6 +75,10 @@ function MessageFeed() {
         $.jqlog.debug('RANDOM LOST: '+rps_match['id']);
         if (callback) callback();
       }
+
+    } else {
+
+      $.jqlog.debug('NO NEED RESOLVE: '+rps_match['id']);     
 
     }
   }
@@ -361,7 +367,7 @@ function MessageFeed() {
       WALLET.networkBlockHeight(message['block_index']);
       
     //filter out non insert messages for now, EXCEPT for order messages (so that we get notified when the remaining qty, etc decrease)
-    if(message['_command'] != 'insert' && category != "orders")
+    if(message['_command'] != 'insert' && (category != "orders" && category != "rps_matches"))
       return;
 
     //If we received an action originating from an address in our wallet that was marked invalid by the network, let the user know
@@ -382,6 +388,8 @@ function MessageFeed() {
     PENDING_ACTION_FEED.remove(txHash, category);
   
     //filter out any invalid messages for action processing itself
+    // TODO: set a list of status for each category in consts.js
+    /*
     assert(message['_status'].startsWith('valid')
       || message['_status'].startsWith('invalid')
       || message['_status'].startsWith('pending') //order matches for BTC
@@ -389,7 +397,8 @@ function MessageFeed() {
       || message['_status'].startsWith('cancelled') //orders and bets
       || message['_status'].startsWith('completed') //order match (non-BTC, or BTC match where BTCPay has been made)
       || message['_status'].startsWith('expired'));
-
+    */
+    
     if(message['_status'].startsWith('invalid'))
       return; //ignore message
     if(message['_status'] == 'expired') {

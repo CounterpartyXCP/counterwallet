@@ -1,3 +1,4 @@
+NOTIFIED_RPS_RESULT = {};
 
 function NotificationViewModel(category, message) {
   var self = this;
@@ -11,6 +12,7 @@ function NotificationViewModel(category, message) {
   self.MESSAGE_TEXT = NotificationViewModel.calcText(category, message);
   
 }
+
 NotificationViewModel.calcIconClass = function(category) {
   /*
    * Possible categories:
@@ -199,7 +201,7 @@ NotificationViewModel.calcText = function(category, message) {
 
     if (!message['tx0_address']) {
 
-      var param = {
+      var params = {
         filters: [
           {field: 'id', op: '=', value: message['rps_match_id']}
         ]
@@ -212,37 +214,49 @@ NotificationViewModel.calcText = function(category, message) {
         }        
       }
 
-      failoverAPI('get_rps_matches', param, onReceiveRpsMatch);
+      failoverAPI('get_rps_matches', params, onReceiveRpsMatch);
 
     } else {
-
-      if (WALLET.getAddressObj(message['tx0_address'])) {
-        if  (message['status'] == "concluded: first player wins") {
-          desc = "RPS: You win " + smartFormat(normalizeQuantity(message['wager']))+ "</Am> <As>XCP</As>" + 
-                 " with <Ad>" + getAddressLabel(message['tx0_address']) + "</Ad>";
-        } else if  (message['status'] == "concluded: second player wins") {
-          desc = "RPS: You lose " + smartFormat(normalizeQuantity(message['wager']))+ "</Am> <As>XCP</As>" + 
-                 " with <Ad>" + getAddressLabel(message['tx0_address']) + "</Ad>";
-        } else if  (message['status'] == "concluded: tie") {
-          desc = "RPS: Tie with <Ad>" + getAddressLabel(message['tx0_address']) + "</Ad>";
+        
+        if (WALLET.getAddressObj(message['tx0_address'])) {
+          if  (message['status'] == "concluded: first player wins") {
+            desc = "RPS: You win " + smartFormat(normalizeQuantity(message['wager']))+ "</Am> <As>XCP</As>" + 
+                   " with <Ad>" + getAddressLabel(message['tx0_address']) + "</Ad>";
+          } else if  (message['status'] == "concluded: second player wins") {
+            desc = "RPS: You lose " + smartFormat(normalizeQuantity(message['wager']))+ "</Am> <As>XCP</As>" + 
+                   " with <Ad>" + getAddressLabel(message['tx0_address']) + "</Ad>";
+          } else if  (message['status'] == "concluded: tie") {
+            desc = "RPS: Tie with <Ad>" + getAddressLabel(message['tx0_address']) + "</Ad>";
+          }
+          if (desc) {
+            desc += " (" + message['tx0_index'] + ")";
+          }
         }
-      }
 
-      if (WALLET.getAddressObj(message['tx1_address'])) {
-        if  (message['status'] == "concluded: first player wins") {
-          desc = "RPS: You lose " + smartFormat(normalizeQuantity(message['wager']))+ "</Am> <As>XCP</As>" + 
-                 " with <Ad>" + getAddressLabel(message['tx1_address']) + "</Ad>";
-        } else if  (message['status'] == "concluded: second player wins") {
-          desc = "RPS: You win " + smartFormat(normalizeQuantity(message['wager']))+ "</Am> <As>XCP</As>" + 
-                 " with <Ad>" + getAddressLabel(message['tx1_address']) + "</Ad>";
-        } else if  (message['status'] == "concluded: tie") {
-          desc = "RPS: Tie with <Ad>" + getAddressLabel(message['tx1_address']) + "</Ad>";
+        if (WALLET.getAddressObj(message['tx1_address'])) {
+          if  (message['status'] == "concluded: first player wins") {
+            desc = "RPS: You lose " + smartFormat(normalizeQuantity(message['wager']))+ "</Am> <As>XCP</As>" + 
+                   " with <Ad>" + getAddressLabel(message['tx1_address']) + "</Ad>";
+          } else if  (message['status'] == "concluded: second player wins") {
+            desc = "RPS: You win " + smartFormat(normalizeQuantity(message['wager']))+ "</Am> <As>XCP</As>" + 
+                   " with <Ad>" + getAddressLabel(message['tx1_address']) + "</Ad>";
+          } else if  (message['status'] == "concluded: tie") {
+            desc = "RPS: Tie with <Ad>" + getAddressLabel(message['tx1_address']) + "</Ad>";
+          }
+          if (desc) {
+            desc += " (" + message['tx1_index'] + ")";
+          }
         }
-      }
+
+
+
+        if (desc && NOTIFIED_RPS_RESULT[desc]) {
+          desc = null;
+        } else if (desc) {
+          NOTIFIED_RPS_RESULT[desc] = true;
+        }
       
     }
-
-    
 
   }
 

@@ -73,8 +73,8 @@ PendingActionViewModel.calcText = function(category, data) {
   } else if(category == 'btcpays') {
     desc = "Pending BTC Payment from <Ad>" + getAddressLabel(data['source']) + "</Ad>";
   } else if(category == 'rps') {
-    desc  = "Pending RPS game with <Ad>" + getAddressLabel(data['source']) + "</Ad>";
-    desc += "("+numberWithCommas(normalizeQuantity(data['wager'])) + ')';
+    desc  = "Pending RPS game with <Ad>" + getAddressLabel(data['source']) + "</Ad>: ";
+    desc += " <Am>"+numberWithCommas(normalizeQuantity(data['wager'])) + '</Am> <As>XCP</As>';
   } else if(category == 'rpsresolves') {
     desc  = "Pending RPS resolution with <Ad>" + getAddressLabel(data['source']) + "</Ad>";
   } else {

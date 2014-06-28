@@ -25,6 +25,7 @@ function RpsViewModel() {
 
   self.addressesLabels = {};
   self.balances = {};
+  self.updatingOpenGames = false;
 
   self.rpssl = ko.observableArray([
     {name: 'rock', value: 1, win:[3, 5], lose:[2, 4]},
@@ -111,9 +112,12 @@ function RpsViewModel() {
   }
 
   self.updateOpenGames = function() {
-    $('#myRpsTable').dataTable().fnClearTable();
-    failoverAPI('get_open_rps_count', {'possible_moves': self.possibleMoves(),'exclude_addresses': WALLET.getAddressesList()}, self.displayOpenGames); 
-    failoverAPI('get_user_rps', {'addresses': WALLET.getAddressesList()}, self.displayUserGames); 
+    if (self.updatingOpenGames == false) {
+      self.updatingOpenGames = true;
+      failoverAPI('get_open_rps_count', {'possible_moves': self.possibleMoves(),'exclude_addresses': WALLET.getAddressesList()}, self.displayOpenGames); 
+      failoverAPI('get_user_rps', {'addresses': WALLET.getAddressesList()}, self.displayUserGames); 
+    }
+     
   }
 
   self.displayOpenGames = function(data) {
@@ -133,14 +137,11 @@ function RpsViewModel() {
       };
       newWagers[i].game_count += "";
     } 
-    $.jqlog.debug('newWagers');
-    $.jqlog.debug(newWagers);
 
     self.wagers(newWagers);
   }
 
   self.displayUserGames = function(data) {
-    $.jqlog.debug(data);
     var classes = {
       'win': 'success',
       'open': 'primary',
@@ -172,11 +173,12 @@ function RpsViewModel() {
       }
       games.push(game);
     }
+    $('#myRpsTable').dataTable().fnClearTable();
     self.myGames(games);
     runDataTables('#myRpsTable', true, {
       "aaSorting": [[1, 'desc']]
     });
-    
+    self.updatingOpenGames = false;
   }
 
   self.updatePlayLabel = function(value) {
@@ -224,7 +226,6 @@ function RpsViewModel() {
     }
     var moveParams = self.generateMoveRandomHash(self.move().value);
     moveParams['source'] = self.sourceAddress();
-    $.jqlog.debug(moveParams);
 
     var param = {
       source: self.sourceAddress(),
