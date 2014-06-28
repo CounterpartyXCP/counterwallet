@@ -83,6 +83,16 @@ function RpsViewModel() {
 
   }
 
+  self.toggleGame = function() {
+    if (self.possibleMoves() == 3) {
+      $('#rps div.rpsButton').addClass('rps5');
+      self.possibleMoves(5);
+    } else {
+      $('#rps div.rpsButton').removeClass('rps5');
+      self.possibleMoves(3);
+    } 
+  }
+
   self.init = function() {
 
     self.onChangeGameType();
@@ -109,6 +119,10 @@ function RpsViewModel() {
     }
     self.availableAddresses(options);
     self.sourceAddress(maxAddress);
+
+    if (PENDING_ACTION_FEED.pendingRPS()) {
+      self.pendingRPS(true);
+    }
   }
 
   self.updateOpenGames = function() {
@@ -151,11 +165,13 @@ function RpsViewModel() {
     };
 
     var games = [];
+    var displayWarning = false;
+
     for (var i in data) {
 
-      if (data[i]['status'] == 'pending' || data[i]['status'] == 'open') {
-        self.pendingRPS(true);
-      }
+      if ((data[i]['status'] == 'pending' && data[i]['move'] == 0) || data[i]['status'] == 'open') {
+        displayWarning = true;
+      } 
       var game = {};
 
       game['status_html'] = '<span class="label label-'+classes[data[i]['status']]+'">'+data[i]['status']+'</span>';
@@ -173,6 +189,7 @@ function RpsViewModel() {
       }
       games.push(game);
     }
+    self.pendingRPS(displayWarning);
     $('#myRpsTable').dataTable().fnClearTable();
     self.myGames(games);
     runDataTables('#myRpsTable', true, {
@@ -240,6 +257,7 @@ function RpsViewModel() {
       var warn = '<b class="errorColor">Please stay logged in so that the game(s) can be properly resolved. Be careful, if you close the Wallet before the end of the game you can lose money!!</b><br />';
       message = "<b>You are played " + self.wager() + " XCP on " + self.move().name.toUpperCase() + ".</b> " + warn + ACTION_PENDING_NOTICE;
       self.init();
+      self.pendingRPS(true);
       bootbox.alert(message);
     }
     WALLET.doTransaction(self.sourceAddress(), "create_rps", param, onSuccess);

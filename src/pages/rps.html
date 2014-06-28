@@ -3,8 +3,8 @@
   <div class="row">
     <div class="col-xs-12 col-sm-7 col-md-7 col-lg-4">
       <h1 class="page-title txt-color-blueDark">
-        <i class="glyphicon glyphicon-share-alt"></i> 
-          Rock-Paper-Scissors
+        <i class="glyphicon glyphicon-hand-right"></i> 
+          Rock-Paper-Scissors<span data-bind="visible: possibleMoves() == 5" style="font-size:24px">-Spock-Lizard</span>
       </h1>
     </div>
   </div>
@@ -24,28 +24,12 @@
             <header>
               <span class="widget-icon"> <i class="fa fa-rocket"></i> </span>
               <h3>
-                Play Rock-Paper-Scissors<span data-bind="visible: possibleMoves() == '5'">-Spock-Lizard</span>
+                Play Rock-Paper-Scissors<span data-bind="visible: possibleMoves() == 5">-Spock-Lizard</span>
               </h3>
-              <div class="widget-toolbar" role="menu">
-                <div class="btn-group possibleMoves" data-toggle="buttons">
-                  <label class="radioBtn btn btn-xs active">
-                    <input type="radio" name="possibleMoves" value="3" data-bind="btnGroupChecked: possibleMoves">
-                    <span>RPS</span>
-                  </label>
-                  <label class="radioBtn btn btn-xs">
-                    <input type="radio" name="possibleMoves" value="5" data-bind="btnGroupChecked: possibleMoves">
-                    <span>RPSSL</span>
-                  </label>
-                </div>
-              </div>
               <div class="clearfix"></div>
             </header>
             <div> <!-- widget div-->
               <div class="widget-body" data-bind="validationOptions: { insertMessages: false }" style="position:relative"> <!-- widget content -->
-
-                <div class="rpsButton" style="display:none">
-                  <img src="images/spock-lizard.jpg" />
-                </div>
 
                 <div class="row">
                   <div class="col col-lg-12 rps-play">
@@ -110,6 +94,13 @@
                 <div class="show-advanced">
                   <input type="checkbox" name="showAdvancedOptions" value="1" data-bind="checked: showAdvancedOptions" />
                   <label>Advanced Options</label>             
+                </div>
+
+                <div class="rps5button">
+                  <div class="rpsButton">
+                    <img src="images/spock-lizard.jpg" data-bind="click: toggleGame" />
+                  </div>
+                  <a href="http://www.youtube.com/watch?v=iapcKVn7DdY" target="_blank" data-bind="visible: possibleMoves() == 5">Watch rules</a>
                 </div>
 
               </div>

@@ -107,6 +107,13 @@ function PendingActionFeedViewModel() {
         return sellingBTC ? item : null;
     }).length;
   }, self);
+
+  self.pendingRPS = ko.computed(function() {
+    return $.map(self.entries(), function(item) { 
+        var game = 'rps' == item.CATEGORY;
+        return game ? item : null;
+    }).length;
+  }, self);
   
   self.getLocalStorageKey = function() {
     return 'pendingActions_' + WALLET.identifier();
