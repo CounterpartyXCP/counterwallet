@@ -109,3 +109,18 @@
   text-align: center;
   margin-top:15px
 }
+
+#rps div.rpsButton {
+  position:absolute;top:3px;left:3px;
+  width:100px;
+  height: 77px;
+  -webkit-border-radius: 20px;
+  -moz-border-radius: 20px;
+  border-radius: 20px;
+  overflow: hidden;
+  border: 2px solid #FFF;
+}
+
+#rps div.rpsButton.selected {
+  border: 2px solid #15F215;
+}
