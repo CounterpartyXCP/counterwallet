@@ -127,9 +127,9 @@ function CreateAssetModalViewModel() {
         divisible: self.divisible(),
         description: self.description(),
         callable_: self.callable(),
-        call_date: self.callDate() ? parseInt(self.callDate().getTime() / 1000) : null, //epoch ts
-        call_price: parseFloat(self.callPrice()) || null, //float
-        destination: null
+        call_date: self.callable() ? parseInt(self.callDate().getTime() / 1000) : null, //epoch ts
+        call_price: self.callable() ? parseFloat(self.callPrice()) : null, //float
+        transfer_destination: null
       },
       function(txHash, data, endpoint) {
         bootbox.alert("Your token <b class='notoAssetColor'>" + self.name() + "</b>"
@@ -210,9 +210,9 @@ function IssueAdditionalAssetModalViewModel() {
         divisible: self.asset().DIVISIBLE,
         description: self.asset().description(),
         callable_: self.asset().CALLABLE,
-        call_date: self.asset().CALLDATE,
-        call_price: self.asset().CALLPRICE,
-        destination: null
+        call_date: self.asset().CALLABLE ? self.asset().CALLDATE : null,
+        call_price: self.asset().CALLABLE ? self.asset().CALLPRICE : null,
+        transfer_destination: null
       },
       function(txHash, data, endpoint) {
         self.shown(false);
@@ -276,9 +276,9 @@ function TransferAssetModalViewModel() {
         divisible: self.asset().DIVISIBLE,
         description: self.asset().description(),
         callable_: self.asset().CALLABLE,
-        call_date: self.asset().CALLDATE,
-        call_price: self.asset().CALLPRICE,
-        destination: self.destAddress()
+        call_date: self.asset().CALLABLE ? self.asset().CALLDATE : null,
+        call_price: self.asset().CALLABLE ? self.asset().CALLPRICE : null,
+        transfer_destination: self.destAddress()
       },
       function(txHash, data, endpoint) {
         self.shown(false);
@@ -357,9 +357,9 @@ function ChangeAssetDescriptionModalViewModel() {
         divisible: self.asset().DIVISIBLE,
         description: self.newDescription(),
         callable_: self.asset().CALLABLE,
-        call_date: self.asset().CALLDATE,
-        call_price: self.asset().CALLPRICE,
-        destination: null
+        call_date: self.asset().CALLABLE ? self.asset().CALLDATE : null,
+        call_price: self.asset().CALLABLE ? self.asset().CALLPRICE : null,
+        transfer_destination: null
       },
       function(txHash, data, endpoint) {
         self.shown(false);
