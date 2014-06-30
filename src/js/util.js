@@ -497,7 +497,40 @@ function doubleHash(hexstr) {
   return bitcore.util.sha256(bitcore.util.sha256(Crypto.util.hexToBytes(hexstr))).toString('hex');
 }
 
-// Crypto.util.bytesToHex(CryptoJS.SHA256("4ff3ccad0146d643634fdff42eeb8f6f"))
+function checkCountry(action, callback) {
+
+  if (LIMITED_FEATURES && (RESTRICTED_AREA.indexOf(action) != -1)) {
+    
+    var message = 'It appears that you are located in a country in which we are legally unable to provide services. <br> If you are using <b>Tor Browser</b> from a country in which the use of this website is allowed, please press the blue "New Identity" button and this problem will be solved immediately.';
+
+    bootbox.dialog({
+      title: "Country warning",
+      message: message,
+      buttons: {
+        "cancel": {
+          label: "Cancel",
+          className: "btn-danger",
+          callback: function() {
+            bootbox.hideAll();
+            return false;
+          }
+        },
+        "continue": {
+          label: "New Identity",
+          className: "btn-primary",
+          callback: function() {
+            LIMITED_FEATURES = false;
+            callback();
+          }
+        }
+      }
+    });
+
+  } else {
+    callback();
+  }
+
+}
 
 //Helper for closure-based inheritance (see http://www.ruzee.com/blog/2008/12/javascript-inheritance-via-prototypes-and-closures)
 (function(){

@@ -209,4 +209,4 @@ var FEED_TYPES = ['simple', 'cfd']
 
 var DONATION_ADDRESS = USE_TESTNET ? 'n4MGGJBkW9RjRKBbZfBAceHDndhywvVPV9' : '19U6MmLLumsqxXSBMB5FgYXbezgXYC6Gpe';
 
-var LIMITED_COUNTRIES = [];
+var LIMITED_COUNTRIES = ['US'];

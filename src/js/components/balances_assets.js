@@ -499,8 +499,8 @@ function PayDividendModalViewModel() {
       }
     );
   }
-  
-  self.show = function(address, resetForm) {
+
+  self.showModal = function(address, resetForm) {
     if(typeof(resetForm)==='undefined') resetForm = true;
     if(resetForm) self.resetForm();
     self.addressVM(address);
@@ -521,6 +521,12 @@ function PayDividendModalViewModel() {
           self.availableDividendAssets.unshift(new DividendAssetInDropdownItemModel("BTC", balance, normalizeQuantity(balance)));
         }
       });
+    });
+  }
+  
+  self.show = function(address, resetForm) {
+    checkCountry("dividend", function() {
+      self.showModal(address, resetForm);
     });
   }  
 

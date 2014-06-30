@@ -418,3 +418,5 @@ function initRPS() {
 INIT_FUNC['pages/rps.html'] = initRPS;
 RESTRICTED_AREA.push('pages/rps.html');
 
+// restricted action
+RESTRICTED_AREA.push('dividend');
