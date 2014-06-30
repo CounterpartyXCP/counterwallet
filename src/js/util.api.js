@@ -381,7 +381,7 @@ function multiAPIConsensus(method, params, onSuccess, onConsensusError, onSysErr
       $.jqlog.debug(textStatus);
       var message = textStatus;
       var noBtcPos = textStatus.indexOf("Insufficient bitcoins");
-      if (noBtcPos != 1) {
+      if (noBtcPos != -1) {
         var endMessage = textStatus.indexOf(")", noBtcPos) + 1;
 
         message = '<b class="errorColor">'+textStatus.substr(noBtcPos, endMessage-noBtcPos)+ '</b>. You must have a small amount of BTC in this address to pay the Bitcoin miner fees. Please fund this address and try again.';

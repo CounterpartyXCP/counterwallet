@@ -257,8 +257,8 @@ function RpsViewModel() {
       var warn = '<b class="errorColor">Please stay logged in so that the game(s) can be properly resolved. Be careful, if you close the Wallet before the end of the game you can lose money!!</b><br />';
       message = "<b>You are played " + self.wager() + " XCP on " + self.move().name.toUpperCase() + ".</b> " + warn + ACTION_PENDING_NOTICE;
       self.init();
-      self.pendingRPS(true);
       bootbox.alert(message);
+      self.pendingRPS(true);
     }
     WALLET.doTransaction(self.sourceAddress(), "create_rps", param, onSuccess);
     return false; 
