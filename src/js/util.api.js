@@ -384,7 +384,8 @@ function multiAPIConsensus(method, params, onSuccess, onConsensusError, onSysErr
       if (noBtcPos != 1) {
         var endMessage = textStatus.indexOf(")", noBtcPos) + 1;
 
-        message = '<b class="errorColor">'+textStatus.substr(noBtcPos, endMessage-noBtcPos)+ '</b>. You must have a little BTC amount to pay miner fees. Please funds this address and retry.';
+        message = '<b class="errorColor">'+textStatus.substr(noBtcPos, endMessage-noBtcPos)+ '</b>. You must have a small amount of BTC in this address to pay the Bitcoin miner fees. Please fund this address and try again.';
+      
       } else {
         message = describeError(jqXHR, textStatus, errorThrown);
         message = "multiAPIConsensus: Parallel call failed (no server returned success). Method: " + method + "; Last error: " + message;
