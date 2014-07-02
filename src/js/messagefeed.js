@@ -288,15 +288,59 @@ function MessageFeed() {
       setTimeout(function() { self.checkMessageQueue(); }, 1000);
     }
   }
+
+  self.parseMempoolTransaction = function(txHash, category, message) {
+
+    message['bindings'] = JSON.parse(message['bindings']);
+
+    var displayTx = false;
+    
+    if (!WALLET.getAddressObj(message['bindings']['source'])) {
+      if (category=='sends' || category=='btcpays') {
+        if (WALLET.getAddressObj(message['bindings']['destination'])) {
+          displayTx = true;
+        }
+      } else if (category == 'issuances' && message['bindings']['transfer']) {
+        if (WALLET.getAddressObj(message['bindings']['issuer'])) {
+          message['bindings']['transfer_destination'] = message['bindings']['issuer'];
+          displayTx = true;
+        }
+      } else if (category == 'dividends' || category == 'callbacks') {
+        if (WALLET.isAssetHolder(message['bindings']['asset'])) {
+          displayTx = true;
+        }
+      }
+    }
+
+    if (displayTx) {
+      WALLET.searchDivisibility(message['bindings']['asset'], function(divisibility) {
+        message['bindings']['divisible'] = divisibility;
+        if (category == 'dividends') {
+          WALLET.searchDivisibility(message['bindings']['dividend_asset'], function(asset_divisibility) {
+            message['bindings']['dividend_asset_divisible'] = asset_divisibility;
+            PENDING_ACTION_FEED.add(txHash, category, message['bindings']);
+          });
+        } else {
+          PENDING_ACTION_FEED.add(txHash, category, message['bindings']);
+        }
+      });
+    }
+    
+  }
   
   self.parseMessageWithFeedGapDetection = function(txHash, category, message) {
     if(!message || (message.substring && message.startswith("<html>"))) return;
     //^ sometimes nginx can trigger this via its proxy handling it seems, with a blank payload (or a html 502 Bad Gateway
     // payload) -- especially if the backend server reloads. Just ignore it.
     assert(self.lastMessageIndexReceived(), "lastMessageIndexReceived is not defined!");
-  
+
     $.jqlog.info("feed:receive IDX=" + message['_message_index']);
-  
+
+    if (message['_message_index'] == 'mempool') {
+      self.parseMempoolTransaction(txHash, category, message);
+      return;
+    }
+
     //Ignore old messages if they are ever thrown at us
     if(message['_message_index'] <= self.lastMessageIndexReceived()) {
       $.jqlog.warn("Received message_index is <= lastMessageIndexReceived: " + JSON.stringify(message));

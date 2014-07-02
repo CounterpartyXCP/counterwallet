@@ -167,6 +167,47 @@ function WalletViewModel() {
     return arrayUnique(assets);
   }
 
+  self.isAssetHolder = function(asset) {
+    var addressObj = null, assetObj = null, i = null, j = null;
+    for(i=0; i < self.addresses().length; i++) {
+      addressObj = self.addresses()[i];
+      for(j=0; j < addressObj.assets().length; j++) {
+        assetObj = addressObj.assets()[j]; 
+        if (assetObj.ASSET == asset) {
+          return true;
+        }
+      }
+    }
+    return false
+  }
+
+  self.searchDivisibility = function(asset, callback) {
+    if (asset == 'BTC' || asset == 'XCP') {
+      callback(true);
+      return;
+    }
+    // check if the wallet have the information
+    var divisible = -1;
+    var addressObj = null, assetObj = null, i = null, j = null;
+    for(i=0; i < self.addresses().length; i++) {
+      addressObj = self.addresses()[i];
+      for(j=0; j < addressObj.assets().length; j++) {
+        assetObj = addressObj.assets()[j]; 
+        if (assetObj.ASSET == asset) {
+          callback(assetObj.DIVISIBLE);
+          return;
+        }
+      }
+    }
+    // else make a query to counterpartyd
+    if (divisible == -1) {
+      failoverAPI("get_asset_info", [[asset]], function(assetsInfo, endpoint) {
+        callback(assetsInfo[0]['divisible']);
+        return;
+      }); 
+    }
+  }
+
   self.getAssetsOwned = function() { //gets assets the user actually owns (is issuer of)
     //this is not optimized... O(n^2)
     var assets = [];

@@ -63,9 +63,18 @@ PendingActionViewModel.calcText = function(category, data) {
       + numberWithCommas(normalizeQuantity(data['wager_quantity'])) + "</Am> <As>XCP</As>, Counterwager: <Am>"
       + numberWithCommas(normalizeQuantity(data['counterwager_quantity'])) + "</Am> <As>XCP</As>";  
   } else if(category == 'dividends') {
-    var divUnitDivisible = WALLET.getAddressObj(data['source']).getAssetObj(data['dividend_asset']).DIVISIBLE;
-    desc = "Pending dividend payment of <Am>" + numberWithCommas(normalizeQuantity(data['quantity_per_unit'], divUnitDivisible)) + "</Am> <As>"
-      + data['dividend_asset'] + "</As> on token <As>" + data['asset'] + "</As>";
+    
+    var divUnitDivisible;
+    if (WALLET.getAddressObj(data['source'])) {
+      divUnitDivisible = WALLET.getAddressObj(data['source']).getAssetObj(data['dividend_asset']).DIVISIBLE;
+      desc = "Pending dividend payment ";
+    } else {
+      divUnitDivisible = data['dividend_asset_divisible'];
+      desc = "Pending dividend reception ";
+    }
+    desc += "of <Am>" + numberWithCommas(normalizeQuantity(data['quantity_per_unit'], divUnitDivisible)) + "</Am> <As>"
+        + data['dividend_asset'] + "</As> on token <As>" + data['asset'] + "</As>";
+  
   } else if(category == 'cancels') {
     desc = "Pending cancellation of " + data['_type'] + " ID <b>" + data['_tx_index'] + "</b>";
   } else if(category == 'callbacks') {
