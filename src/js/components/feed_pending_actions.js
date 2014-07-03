@@ -86,6 +86,14 @@ PendingActionViewModel.calcText = function(category, data) {
     desc += " <Am>"+numberWithCommas(normalizeQuantity(data['wager'])) + '</Am> <As>XCP</As>';
   } else if(category == 'rpsresolves') {
     desc  = "Pending RPS resolution with <Ad>" + getAddressLabel(data['source']) + "</Ad>";
+  } else if(category == 'order_matches') {
+
+    if (WALLET.getAddressObj(data['tx1_address']) && data['forward_asset'] == 'BTC' && data['_status'] == 'pending') {      
+      desc = "Waiting <Am>" + numberWithCommas(normalizeQuantity(data['forward_quantity'])) + "</Am> <As>BTC</As> payment from <Ad>" + getAddressLabel(data['tx0_address']) + "</Ad>";
+    } else if (WALLET.getAddressObj(data['tx0_address']) && data['backward_asset'] == 'BTC' && data['_status'] == 'pending') {
+      desc = "Waiting <Am>" + numberWithCommas(normalizeQuantity(data['backward_quantity'])) + "</Am> <As>BTC</As> payment from <Ad>" + getAddressLabel(data['tx1_address']) + "</Ad>";
+    }
+
   } else {
     desc = "UNHANDLED TRANSACTION CATEGORY";
   }
@@ -102,7 +110,7 @@ function PendingActionFeedViewModel() {
   self.entries = ko.observableArray([]); //pending actions beyond pending BTCpays
   self.lastUpdated = ko.observable(new Date());
   self.ALLOWED_CATEGORIES = [
-    'sends', 'orders', 'issuances', 'broadcasts', 'bets', 'dividends', 'burns', 'cancels', 'callbacks', 'btcpays', 'rps', 'rpsresolves'
+    'sends', 'orders', 'issuances', 'broadcasts', 'bets', 'dividends', 'burns', 'cancels', 'callbacks', 'btcpays', 'rps', 'rpsresolves', 'order_matches'
     //^ pending actions are only allowed for these categories
   ];
   
@@ -197,7 +205,9 @@ function PendingActionFeedViewModel() {
     var txHashes = [], i = null;
     if(pendingActionsStorage === null) pendingActionsStorage = [];
     for(var i=0; i < pendingActionsStorage.length; i++) {
-      txHashes.push(pendingActionsStorage[i]['txHash']);
+      if (pendingActionsStorage[i]['txHash'].length==64) {
+        txHashes.push(pendingActionsStorage[i]['txHash']);
+      }
     }
     if(!txHashes.length) return onSuccess ? onSuccess() : null;
 
@@ -227,31 +237,120 @@ function PendingActionFeedViewModel() {
 PendingActionFeedViewModel.modifyBalancePendingFlag = function(category, data, flagSetting) {
   assert(flagSetting === true || flagSetting === false);
   //depending on the value of category and data, will modify the associated asset(s) (if any)'s balanceChangePending flag
+
+  var updateUnconfirmedBalance = function(addrObj, asset, quantity) {
+    var assetObj = addrObj.getAssetObj(asset);
+    if (assetObj) {
+      var newUnconfirmedBalance = normalizeQuantity(quantity, assetObj.DIVISIBLE);
+      if (flagSetting) {
+        assetObj.unconfirmedBalance(assetObj.unconfirmedBalance() + newUnconfirmedBalance);
+      } else {
+        assetObj.unconfirmedBalance(assetObj.unconfirmedBalance() - newUnconfirmedBalance);
+      }
+    }
+  }
+
   var addressObj = null;
   if(category == 'burns') {
+
     addressObj = WALLET.getAddressObj(data['source']);
     addressObj.getAssetObj("BTC").balanceChangePending(flagSetting);
     addressObj.getAssetObj("XCP").balanceChangePending(flagSetting);
+    updateUnconfirmedBalance(addressObj, "BTC", data['quantity'] * -1);
+    
+
   } else if(category == 'sends') {
+
     addressObj = WALLET.getAddressObj(data['source']);
     if(addressObj && addressObj.getAssetObj(data['asset'])) {
       //source addr may not exist in the wallet if we are importing funds from an outside address 
       addressObj.getAssetObj(data['asset']).balanceChangePending(flagSetting);
+      updateUnconfirmedBalance(addressObj, data['asset'], data['quantity'] * -1);
     }
+
     addressObj = WALLET.getAddressObj(data['destination']);
     if(addressObj && addressObj.getAssetObj(data['asset'])) {
       //dest addr may not exist in the wallet if we are sending funds to an outside address 
       addressObj.getAssetObj(data['asset']).balanceChangePending(flagSetting);
+      updateUnconfirmedBalance(addressObj, data['asset'], data['quantity']);
     }
+
   } else if(category == 'btcpays') {
+
     addressObj = WALLET.getAddressObj(data['source']);
-    addressObj.getAssetObj("BTC").balanceChangePending(flagSetting);
+    if (addressObj) {
+      addressObj.getAssetObj("BTC").balanceChangePending(flagSetting);
+      updateUnconfirmedBalance(addressObj, "BTC", data['quantity'] * -1);
+    }
+
+    addressObj = WALLET.getAddressObj(data['destination']);
+    if (addressObj) {
+      addressObj.getAssetObj("BTC").balanceChangePending(flagSetting);
+      updateUnconfirmedBalance(addressObj, "BTC", data['quantity']);
+    } 
+
   } else if(category == 'issuances' && data['quantity'] != 0 && !data['locked'] && !data['transfer_destination']) {
     //with this, we don't modify the balanceChangePending flag, but the issuanceQtyChangePending flag instead...
     addressObj = WALLET.getAddressObj(data['source']);
     var assetObj = addressObj.getAssetObj(data['asset']);
     if(assetObj && assetObj.isMine())
       assetObj.issuanceQtyChangePending(flagSetting);
+  
+  } else if (category == 'dividend') {
+
+    addressObj = WALLET.getAddressObj(data['source']);
+    if (addressObj) {
+      var assetObj = addressObj.getAssetObj(data['dividend_asset']);
+      if (assetObj) {
+        assetObj.balanceChangePending(flagSetting);
+        updateUnconfirmedBalance(addressObj, data['dividend_asset'], data['quantity_per_unit'] * assetObj.holdersSupply * -1);
+      }
+    }
+
+    addressObj = WALLET.getAddressObj(data['destination']);
+    if (addressObj) {
+      var assetObj = addressObj.getAssetObj(data['dividend_asset']);
+      if (assetObj) {
+        assetObj.balanceChangePending(flagSetting);
+        updateUnconfirmedBalance(addressObj, data['dividend_asset'], data['quantity_per_unit'] * assetObj.rawBalance);
+      }
+    }
+
+  } else if (category == 'orders') {
+
+    if (data['give_asset'] != 'BTC') {
+      addressObj = WALLET.getAddressObj(data['source']);
+      if (addressObj) {
+        var assetObj = addressObj.getAssetObj(data['give_asset']);
+        if (assetObj) {
+          assetObj.balanceChangePending(flagSetting);
+          updateUnconfirmedBalance(addressObj, data['give_asset'], data['give_quantity'] * -1);
+        }
+      } 
+    }   
+
+  } else if (category == 'bets') {
+
+    addressObj = WALLET.getAddressObj(data['source']);
+    if (addressObj) {
+      var assetObj = addressObj.getAssetObj('XCP');
+      if (assetObj) {
+        assetObj.balanceChangePending(flagSetting);
+        updateUnconfirmedBalance(addressObj, 'XCP', data['wager_quantity'] * -1);
+      }
+    }
+    
+  } else if (category == 'rps') {
+
+    addressObj = WALLET.getAddressObj(data['source']);
+    if (addressObj) {
+      var assetObj = addressObj.getAssetObj('XCP');
+      if (assetObj) {
+        assetObj.balanceChangePending(flagSetting);
+        updateUnconfirmedBalance(addressObj, 'XCP', data['wager'] * -1);
+      }
+    }
+    
   }
 }
 

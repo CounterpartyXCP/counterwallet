@@ -543,12 +543,13 @@ function MessageFeed() {
         self.OPEN_ORDERS.push(message);
       }
     } else if(category == "order_matches") {
+
       if(message['_btc_below_dust_limit'])
         return; //ignore any order match involving BTC below the dust limit
       
       //Look to order matches when determining to do a BTCpay
       //If the order_matches message doesn't have a tx0_address/tx1_address field, then we don't need to do anything with it
-      if(   (WALLET.getAddressObj(message['tx0_address']) && message['forward_asset'] == 'BTC' && message['_status'] == 'pending')
+      if ((WALLET.getAddressObj(message['tx0_address']) && message['forward_asset'] == 'BTC' && message['_status'] == 'pending')
          || (WALLET.getAddressObj(message['tx1_address']) && message['backward_asset'] == 'BTC' && message['_status'] == 'pending')) {
         //Register this as an "upcoming" BTCpay
         var btcPayData = WaitingBTCPayFeedViewModel.makeBTCPayData(message); 
@@ -559,7 +560,13 @@ function MessageFeed() {
           $.jqlog.debug("dust order_matches "+btcPayData['orderMatchID']+" : "+btcPayData['btcQuantityRaw']);
         }  
         
+      } else if ((WALLET.getAddressObj(message['tx1_address']) && message['forward_asset'] == 'BTC' && message['_status'] == 'pending')
+         || (WALLET.getAddressObj(message['tx0_address']) && message['backward_asset'] == 'BTC' && message['_status'] == 'pending')) {
+
+        PENDING_ACTION_FEED.add(txHash, category, message);
+
       }
+
     } else if(category == "order_expirations") {
       //Remove the order from the open orders list
       self.removeOrder(message['order_hash']);
