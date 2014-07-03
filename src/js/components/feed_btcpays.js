@@ -194,13 +194,15 @@ function WaitingBTCPayFeedViewModel() {
           } else {
             //not paid yet (confirmed), nor is it a pending action
             var btcPayData = WaitingBTCPayFeedViewModel.makeBTCPayData(data[i]);            
-            if(WALLET.networkBlockHeight() - btcPayData['blockIndex'] < NUM_BLOCKS_TO_WAIT_FOR_BTCPAY) {
-              //If the order match is younger than NUM_BLOCKS_TO_WAIT_FOR_BTCPAY blocks, then it's actually still an
-              // order that should be in the upcomingBTCPay feed
-              UPCOMING_BTCPAY_FEED.add(btcPayData);
-            } else {
-              //otherwise, if not already paid and awaiting confirmation, show it as a waiting BTCpay
-              WAITING_BTCPAY_FEED.add(btcPayData);
+            if (btcPayData) {
+              if(WALLET.networkBlockHeight() - btcPayData['blockIndex'] < NUM_BLOCKS_TO_WAIT_FOR_BTCPAY) {
+                //If the order match is younger than NUM_BLOCKS_TO_WAIT_FOR_BTCPAY blocks, then it's actually still an
+                // order that should be in the upcomingBTCPay feed
+                UPCOMING_BTCPAY_FEED.add(btcPayData);
+              } else {
+                //otherwise, if not already paid and awaiting confirmation, show it as a waiting BTCpay
+                WAITING_BTCPAY_FEED.add(btcPayData);
+              }
             }
           }
         }
@@ -215,7 +217,7 @@ function WaitingBTCPayFeedViewModel() {
 WaitingBTCPayFeedViewModel.makeBTCPayData = function(data) {
   //data is a pending order match object (from a data feed message received, or from a get_orders API result)
   var firstInPair = (WALLET.getAddressObj(data['tx0_address']) && data['forward_asset'] == 'BTC') ? true : false;
-  if(!firstInPair) assert(WALLET.getAddressObj(data['tx1_address']) && data['backward_asset'] == 'BTC');
+  if(!firstInPair) if (!(WALLET.getAddressObj(data['tx1_address']) && data['backward_asset'] == 'BTC')) return false;
   
   return {
     blockIndex: data['tx1_block_index'], //the latter block index, which is when the match was actually made
