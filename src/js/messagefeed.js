@@ -313,7 +313,7 @@ function MessageFeed() {
     }
 
     if (displayTx) {
-      WALLET.searchDivisibility(message['bindings']['asset'], function(divisibility) {
+      WALLET.searchDivisibility(message['bindings']['asset'] || 'BTC', function(divisibility) {
         message['bindings']['divisible'] = divisibility;
         if (category == 'dividends') {
           WALLET.searchDivisibility(message['bindings']['dividend_asset'], function(asset_divisibility) {
