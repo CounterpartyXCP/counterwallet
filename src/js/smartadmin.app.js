@@ -1314,8 +1314,7 @@ function checkURL() {
 
 }
 
-//COUNTERWALLET: START MOD
-function loadURL(url, container) {
+function loadPage(url, container) {
   $.ajax({
     type : "GET",
     url : url,
@@ -1346,6 +1345,15 @@ function loadURL(url, container) {
     },
     async : false
   });
+}
+
+//COUNTERWALLET: START MOD
+function loadURL(url, container) {
+
+  checkCountry(url, function() {
+    loadPage(url, container);
+  });
+
 }
 //COUNTERWALLET: END MOD
 

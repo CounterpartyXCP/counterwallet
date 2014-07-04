@@ -187,7 +187,15 @@ CWPrivateKey.prototype.getWIF = function() {
   return privkey.as('base58');
 }
 
+CWPrivateKey.prototype.encrypt = function(message) {
+  return CWBitcore.encrypt(message, this.priv);
+}
 
+CWPrivateKey.prototype.decrypt = function(cryptedMessage) {
+  return CWBitcore.decrypt(cryptedMessage, this.priv);
+}
+
+// TODO: rename to be more generic
 var CWBitcore =  {}
 
 CWBitcore.isValidAddress = function(val) {
@@ -307,5 +315,13 @@ CWBitcore.checkTransactionDest = function(txHex, source, dest) {
       }
   }
   return true;
+}
+
+CWBitcore.encrypt = function(message, password) {
+  return CryptoJS.AES.encrypt(message, password).toString();
+}
+
+CWBitcore.decrypt = function(cryptedMessage, password) {
+  return CryptoJS.enc.Utf8.stringify(CryptoJS.AES.decrypt(cryptedMessage, password));
 }
 

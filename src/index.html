@@ -34,6 +34,7 @@
     <link rel="stylesheet" type="text/css" media="screen" href="css/components/balances.css">
     <link rel="stylesheet" type="text/css" media="screen" href="css/components/buysell.css">
     <link rel="stylesheet" type="text/css" media="screen" href="css/components/betting.css">
+    <link rel="stylesheet" type="text/css" media="screen" href="css/components/rps.css">
     <!-- endbuild -->
 
     <!-- FAVICONS -->
@@ -86,17 +87,6 @@
               <h2>Pending Actions</h2>
               <div class="ajax-notifications custom-scroll"></div> <!-- notification content -->
               <span><b>Last updated:</b> <span id="pendingLastUpdated" data-bind="timeago: lastUpdated()"></span></span> <!-- footer -->
-            </div> <!-- .ajax-dropdown -->
-        </span>
-
-        <span id="openOrderFeed" class="activity-parent" data-contenturl="pages/feed_open_orders.html">
-            <span class="activity-dropdown">
-                <i class="fa fa-exchange"></i><b data-bind="visible: dispCount() > 0, text: dispCount" class="badge"></b>
-            </span>
-            <div class="ajax-dropdown">
-              <h2>Open Orders</h2>
-              <div class="ajax-notifications custom-scroll"></div> <!-- notification content -->
-              <span><b>Last updated:</b> <span id="openOrdersLastUpdated" data-bind="timeago: lastUpdated()"></span></span> <!-- footer -->
             </div> <!-- .ajax-dropdown -->
         </span>
 
@@ -155,12 +145,15 @@
         <ul>
           <li class="">
             <a href="pages/balances.html"><i class="fa fa-lg fa-fw fa-user"></i> <span class="menu-item-parent">My Balances</span></a>
-          </li>
+          </li>          
           <li class="">
-            <a href="pages/buysell.html"><i class="fa fa-lg fa-fw fa-exchange"></i> <span class="menu-item-parent">Buy &amp; Sell</span></a>
-          </li>
-          <li class="">
-            <a href="pages/view_prices.html"><i class="fa fa-lg fa-fw fa-bar-chart-o"></i> <span class="menu-item-parent">View Prices</span></a>
+            <a href="#"><i class="fa fa-lg fa-fw fa-exchange"></i> <span class="menu-item-parent">Exchange</span></a>
+            <ul>
+              <li><a href="pages/view_prices.html"><i class="fa fa-lg fa-fw fa-bar-chart-o"></i> View Prices</a></li>
+              <li><a href="pages/buysell.html"><i class="fa fa-lg fa-fw fa-share"></i> Buy &amp; Sell</a></li>
+              <li><a href="pages/openorders.html"><i class="fa fa-lg fa-fw fa-circle-o"></i> Open Orders</a></li>
+              <li><a href="pages/ordermatches.html"><i class="fa fa-lg fa-fw fa-book"></i> My Order History</a></li>
+            </ul>
           </li>
           <li class="">
             <a href="#"><i class="fa fa-lg fa-fw fa-bullseye"></i> <span class="menu-item-parent">Betting</span></a>
@@ -168,6 +161,12 @@
               <li><a href="pages/betting.html"><i class="fa fa-lg fa-fw fa-share"></i> Make a Bet</a></li>
               <li><a href="pages/openbets.html"><i class="fa fa-lg fa-fw fa-circle-o"></i> Open Bets</a></li>
               <li><a href="pages/matchedbets.html"><i class="fa fa-lg fa-fw fa-book"></i> My Bet History</a></li>
+            </ul>
+          </li>
+          <li class="" style="display:none">
+            <a href="#"><i class="fa fa-lg fa-fw fa-trophy"></i> <span class="menu-item-parent">Gaming</span></a>
+            <ul>
+              <li><a href="pages/rps.html"><i class="fa-lg fa-fw glyphicon glyphicon-hand-right"></i> Rock-Paper-Scissors</a></li>
             </ul>
           </li>
           <li class="">
@@ -230,7 +229,7 @@
           <br/>
           <div class="panel panel-warning">
             <div class="panel-heading">
-              <h3 class="panel-title"><b>To use Counterwallet you need a 12 word passphrase</b></h3>
+              <h3 class="panel-title"><b>To use Counterwallet you need a twelve word passphrase.</b></h3>
             </div>
             <div class="panel-body">
               <p>We have created a passphrase for you in the box below.</p>
@@ -241,10 +240,10 @@
               <div class="alert alert-danger" class="margin-top-10">
                 <p class="logonWarningLine1">Write your passphrase down and keep it safe.</p>
                 <p class="logonWarningOtherLines">
-                  If you lose this passphrase, you will lose access to your wallet.
+                  If you lose this passphrase, you will lose access to your wallet <i>forever</i>.
                 </p>
                 <p class="logonWarningOtherLines">
-                  If someone gets your passphrase, they can gain access to your wallet.
+                  If someone gets your passphrase, they gain access to your wallet.
                 </p>
               </div>
               <p>To log into your wallet, input your passphase in the wallet login textbox below, and press the <b>Open Wallet</b> button.</p>
@@ -252,11 +251,6 @@
           </div>
         </div>
 
-        <div class="alert alert-warning" class="margin-bottom-0">
-          <p><b>Existing wallet users:</b> If you created your wallet before May 8th, please see
-              <a href="https://forums.counterparty.co/index.php?topic=321.0" target="_blank">this post</a> on our forums. 
-          </p>
-        </div>
         <div class="panel panel-info">
           <div class="panel-heading">
             <h3 class="panel-title">
@@ -677,12 +671,16 @@
     <script src="vendors/cryptojs/components/core-min.js"></script>
     <script src="vendors/cryptojs/components/sha256-min.js"></script>
     <script src="vendors/cryptojs/components/enc-base64-min.js"></script>
+    <script src="vendors/cryptojs/components/enc-utf16-min.js"></script> 
     <script src="vendors/cryptojs/rollups/hmac-sha512.js"></script>
+    <script src="vendors/cryptojs/rollups/aes.js"></script>
 
     <!--  bitcore -->
     <script src="vendors/bitcore/browser/bundle.js"></script>
 
     <script src="vendors/iso8601-js-period/iso8601.min.js"></script>
+
+    <script src="vendors/queue/queue.min.js"></script>
 
     <!-- endbuild -->
 
@@ -709,7 +707,6 @@
     <script src="js/components/logon.js"></script>
     <script src="js/components/misc.js"></script>
     <script src="js/components/feed_notifications.js"></script>
-    <script src="js/components/feed_open_orders.js"></script>
     <script src="js/components/feed_pending_actions.js"></script>
     <script src="js/components/feed_btcpays.js"></script>
     <script src="js/components/chatfeed.js"></script>
@@ -724,6 +721,8 @@
     <script src="js/components/stats.js"></script>
     <script src="js/components/betting.js"></script>
     <script src="js/components/donate.js"></script>
+    <script src="js/components/exchange.js"></script>
+    <script src="js/components/rps.js"></script>
 
     <script src="js/smartadmin.app.js"></script> <!-- custom app.js -->
     <!-- ^ unfortunately we have to mod the file itself, instead of dynamically override o_O -->

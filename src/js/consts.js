@@ -71,7 +71,12 @@ var ENTITY_NAMES = {
   'bet_expirations': 'Bet Expired',
   'order_expirations': 'Order Expired',
   'bet_match_expirations': 'Bet Match Exp',
-  'order_match_expirations': 'Order Match Exp'
+  'order_match_expirations': 'Order Match Exp',
+  'rps': 'Rock-Paper-Scissors',
+  'rps_matches': 'RPS Match',
+  'rpsresolves': 'RPS Confirmed',
+  'rps_expirations': 'RPS Expired',
+  'rps_match_expirations': 'RPS Match Expired'
 };
 
 var ENTITY_ICONS = {
@@ -92,7 +97,12 @@ var ENTITY_ICONS = {
   'bet_expirations': 'fa-clock-o',
   'order_expirations': 'fa-clock-o',
   'bet_match_expirations': 'fa-clock-o',
-  'order_match_expirations': 'fa-clock-o'
+  'order_match_expirations': 'fa-clock-o',
+  'rps': 'fa-trophy',
+  'rps_matches': 'fa-trophy',
+  'rpsresolves': 'fa-trophy',
+  'rps_expirations': 'fa-trophy',
+  'rps_match_expirations': 'fa-trophy'
 };
 
 var ENTITY_NOTO_COLORS = {
@@ -113,7 +123,12 @@ var ENTITY_NOTO_COLORS = {
   'bet_expirations': 'bg-color-grayDark',
   'order_expirations': 'bg-color-grayDark',
   'bet_match_expirations': 'bg-color-grayDark',
-  'order_match_expirations': 'bg-color-grayDark'
+  'order_match_expirations': 'bg-color-grayDark',
+  'rps': 'bg-color-blue',
+  'rps_matches': 'bg-color-blueLight',
+  'rpsresolves': 'bg-color-blue',
+  'rps_expirations': 'bg-color-blueLight',
+  'rps_match_expirations': 'bg-color-blueLight'
 };
 
 var BET_TYPES = {
@@ -128,6 +143,13 @@ var BET_TYPES_SHORT = {
   1: "BearCFD",
   2: "Equal",
   3: "NotEqual"
+}
+
+var BET_TYPES_ID = {
+  "BullCFD": 0,
+  "BearCFD": 1,
+  "Equal": 2,
+  "NotEqual": 3
 }
 
 var COUNTER_BET = {
@@ -186,3 +208,5 @@ var FEED_CATEGORIES = ['sports', 'politics', 'entertainment', 'economics', 'othe
 var FEED_TYPES = ['simple', 'cfd']
 
 var DONATION_ADDRESS = USE_TESTNET ? 'n4MGGJBkW9RjRKBbZfBAceHDndhywvVPV9' : '19U6MmLLumsqxXSBMB5FgYXbezgXYC6Gpe';
+
+var LIMITED_COUNTRIES = ['US'];

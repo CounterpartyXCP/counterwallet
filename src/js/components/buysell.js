@@ -807,9 +807,13 @@ function BuySellWizardViewModel() {
         
         var i = null;
         for(i=0; i < Math.min(10, data['base_ask_book'].length); i++) { //limit to 10 entries
+          data['base_ask_book'][i]['base_asset'] = data['base_asset'];
+          data['base_ask_book'][i]['quote_asset'] = data['quote_asset'];
           self.askBook.push(new OrderBookEntryItemModel(data['base_ask_book'][i]));  
         }
         for(i=0; i < Math.min(10, data['base_bid_book'].length); i++) { //limit to 10 entries
+          data['base_bid_book'][i]['base_asset'] = data['base_asset'];
+          data['base_bid_book'][i]['quote_asset'] = data['quote_asset'];
           self.bidBook.push(new OrderBookEntryItemModel(data['base_bid_book'][i]));  
         }
         self.bidAskMedian(data['bid_ask_median']);
@@ -825,6 +829,8 @@ function BuySellWizardViewModel() {
       //^ hack...rows seem to hang around and be duplicated otherwise
       
       for(var i=0; i < data['raw_orders'].length; i++) {
+        data['raw_orders'][i]['base_asset'] = data['base_asset'];
+        data['raw_orders'][i]['quote_asset'] = data['quote_asset'];
         self.openOrders.push(new OpenOrderItemModel(data['raw_orders'][i], true));
       }
       //now that we have the complete data, show the orders listing

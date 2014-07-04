@@ -112,11 +112,10 @@ function AssetViewModel(props) {
                 quantity: 0,
                 asset: self.ASSET,
                 divisible: self.DIVISIBLE,
-                description: self.description(),
-                lock: true,
+                description: 'LOCK',
                 callable_: self.CALLABLE,
-                call_date: self.CALLDATE,
-                call_price: self.CALLPRICE,
+                call_date: self.CALLDATE ? self.CALLDATE : null,
+                call_price: self.CALLPRICE ? self.CALLPRICE : null,
                 transfer_destination: null
               },
               function(txHash, data, endpoint) {

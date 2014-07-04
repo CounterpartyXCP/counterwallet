@@ -472,6 +472,66 @@ function decodeJsonBet(jsonBetBase64) {
   return jsonBet;
 }
 
+function expireDate(expire_index) {
+  var expire_in = expire_index - WALLET.networkBlockHeight();
+  return new Date((new Date()).getTime() + (expire_in * APPROX_SECONDS_PER_BLOCK * 1000));
+}
+
+function genRandom() {
+  var random = new Uint8Array(16);
+            
+  if (window.crypto && window.crypto.getRandomValues) {
+    window.crypto.getRandomValues(random); // Catch no entropy here.
+  } else if (window.msCrypto && window.msCrypto.getRandomValues) {
+    window.msCrypto.getRandomValues(random);
+  } else {
+    var errText = "Your browser lacks a way to securely generate random values. Please use a different, newer browser.";
+    bootbox.alert(errText);
+    assert(false, errText);
+  }
+
+  return Crypto.util.bytesToHex(random);
+}
+
+function doubleHash(hexstr) {
+  return bitcore.util.sha256(bitcore.util.sha256(Crypto.util.hexToBytes(hexstr))).toString('hex');
+}
+
+function checkCountry(action, callback) {
+
+  if (LIMITED_FEATURES && (RESTRICTED_AREA.indexOf(action) != -1)) {
+    
+    var message = 'It appears that you are located in a country in which we are legally unable to provide services. <br> If you are using <b>Tor Browser</b> from a country in which the use of this website is allowed, please press the blue "New Identity" button and this problem will be solved immediately.';
+
+    bootbox.dialog({
+      title: "Country warning",
+      message: message,
+      buttons: {
+        "cancel": {
+          label: "Cancel",
+          className: "btn-danger",
+          callback: function() {
+            bootbox.hideAll();
+            return false;
+          }
+        },
+        "continue": {
+          label: "New Identity",
+          className: "btn-primary",
+          callback: function() {
+            LIMITED_FEATURES = false;
+            callback();
+          }
+        }
+      }
+    });
+
+  } else {
+    callback();
+  }
+
+}
+
 //Helper for closure-based inheritance (see http://www.ruzee.com/blog/2008/12/javascript-inheritance-via-prototypes-and-closures)
 (function(){
   CClass = function(){};

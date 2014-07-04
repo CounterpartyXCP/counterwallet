@@ -104,6 +104,9 @@ function getLinkForCPData(type, dataID, dataTitle, htmlize) {
 function getTxHashLink(hash) {
   // TODO: add link to blockscan when possible
   var shortHash = hash.substr(hash.length-5);
+  if (hash.length == 128) {
+    shortHash += '...' + hash.substr(64, 5);
+  }
   var link = '<span rel="tooltip" title="'+hash+'" data-placement="top" data-container="body" class="shortHash">'+shortHash+'</span>';
 
   return link;

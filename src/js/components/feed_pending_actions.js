@@ -60,8 +60,8 @@ PendingActionViewModel.calcText = function(category, data) {
     desc = "Pending <b>" + data['bet_type'] + "</b> bet on feed @ <Ad>"
       + getLinkForCPData('address', data['feed_address'], getAddressLabel(data['feed_address'])) + "</Ad><br/>"
       + "Wager: <Am>"
-      + numberWithCommas(normalizeQuantity(data['wager'])) + "</Am> <As>XCP</As>, Counterwager: <Am>"
-      + numberWithCommas(normalizeQuantity(data['counterwager'])) + "</Am> <As>XCP</As>";  
+      + numberWithCommas(normalizeQuantity(data['wager_quantity'])) + "</Am> <As>XCP</As>, Counterwager: <Am>"
+      + numberWithCommas(normalizeQuantity(data['counterwager_quantity'])) + "</Am> <As>XCP</As>";  
   } else if(category == 'dividends') {
     var divUnitDivisible = WALLET.getAddressObj(data['source']).getAssetObj(data['dividend_asset']).DIVISIBLE;
     desc = "Pending dividend payment of <Am>" + numberWithCommas(normalizeQuantity(data['quantity_per_unit'], divUnitDivisible)) + "</Am> <As>"
@@ -72,6 +72,11 @@ PendingActionViewModel.calcText = function(category, data) {
     desc = "Pending callback for <Am>" + (data['fraction'] * 100).toFixed(4) + "%</Am> outstanding on token <As>" + data['asset'] + "</As>";
   } else if(category == 'btcpays') {
     desc = "Pending BTC Payment from <Ad>" + getAddressLabel(data['source']) + "</Ad>";
+  } else if(category == 'rps') {
+    desc  = "Pending RPS game with <Ad>" + getAddressLabel(data['source']) + "</Ad>: ";
+    desc += " <Am>"+numberWithCommas(normalizeQuantity(data['wager'])) + '</Am> <As>XCP</As>';
+  } else if(category == 'rpsresolves') {
+    desc  = "Pending RPS resolution with <Ad>" + getAddressLabel(data['source']) + "</Ad>";
   } else {
     desc = "UNHANDLED TRANSACTION CATEGORY";
   }
@@ -88,7 +93,7 @@ function PendingActionFeedViewModel() {
   self.entries = ko.observableArray([]); //pending actions beyond pending BTCpays
   self.lastUpdated = ko.observable(new Date());
   self.ALLOWED_CATEGORIES = [
-    'sends', 'orders', 'issuances', 'broadcasts', 'bets', 'dividends', 'burns', 'cancels', 'callbacks', 'btcpays'
+    'sends', 'orders', 'issuances', 'broadcasts', 'bets', 'dividends', 'burns', 'cancels', 'callbacks', 'btcpays', 'rps', 'rpsresolves'
     //^ pending actions are only allowed for these categories
   ];
   
@@ -102,6 +107,13 @@ function PendingActionFeedViewModel() {
         return sellingBTC ? item : null;
     }).length;
   }, self);
+
+  self.pendingRPS = ko.computed(function() {
+    return $.map(self.entries(), function(item) { 
+        var game = 'rps' == item.CATEGORY;
+        return game ? item : null;
+    }).length;
+  }, self);
   
   self.getLocalStorageKey = function() {
     return 'pendingActions_' + WALLET.identifier();
@@ -109,7 +121,7 @@ function PendingActionFeedViewModel() {
 
   self.add = function(txHash, category, data, when) {
     if(typeof(when)==='undefined') when = new Date();
-    assert(self.ALLOWED_CATEGORIES.indexOf(category)!=-1, "Illegal pending action category");
+    assert(self.ALLOWED_CATEGORIES.indexOf(category)!=-1, "Illegal pending action category: " + category);
     var pendingAction = new PendingActionViewModel(txHash, category, data, when);
     if(!pendingAction.ACTION_TEXT) return; //not something we need to display and/or add to the list
     self.entries.unshift(pendingAction); //place at top (i.e. newest at top)
@@ -182,7 +194,7 @@ function PendingActionFeedViewModel() {
 
     //construct a new pending info storage object that doesn't include any hashes that we get no data back on
     var newPendingActionsStorage = [], pendingAction = null;
-    failoverAPI("get_btc_txns_status", [txHashes], function(txInfo, endpoint) {
+    failoverAPI("get_chain_txns_status", [txHashes], function(txInfo, endpoint) {
       for(i=0; i < txInfo.length; i++) {
         pendingAction = $.grep(pendingActionsStorage, function(e) { return e['txHash'] == txInfo[i]['tx_hash']; })[0];
         if(pendingAction && txInfo[i]['confirmations'] == 0) { //still pending

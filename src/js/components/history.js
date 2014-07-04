@@ -127,11 +127,11 @@ function TransactionHistoryItemViewModel(data) {
   if (data['status'] && data['status']=='expired') {
     $.jqlog.debug(data);
   }
-  
+
   var self = this;
   self.DATA = data;
   self.TX_INDEX = self.DATA['tx_index'] || self.DATA['tx1_index'] || '';
-  self.TX_HASH = self.DATA['tx_hash'] || self.DATA['order_hash'] || self.DATA['tx1_hash'] || '';
+  self.TX_HASH = self.DATA['tx_hash'] || self.DATA['order_hash'] || self.DATA['id'] || '';
   self.BLOCK_INDEX = self.DATA['block_index'] || self.DATA['tx1_block_index'];
   self.BLOCK_TIME = self.DATA['_block_time'];
   self.RAW_TX_TYPE = self.DATA['_category'];

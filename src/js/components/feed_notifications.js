@@ -1,3 +1,4 @@
+NOTIFIED_RPS_RESULT = {};
 
 function NotificationViewModel(category, message) {
   var self = this;
@@ -11,6 +12,7 @@ function NotificationViewModel(category, message) {
   self.MESSAGE_TEXT = NotificationViewModel.calcText(category, message);
   
 }
+
 NotificationViewModel.calcIconClass = function(category) {
   /*
    * Possible categories:
@@ -98,7 +100,7 @@ NotificationViewModel.calcText = function(category, message) {
         desc = "Token <As>" + message['asset'] + "</As> had its description changed from <b>" + assetObj.description()
           + "</b> to <b>" + message['description'] + "</b>";
       } else {
-        var additionalQuantity = message['quantity'] - assetObj.rawSupply();
+        var additionalQuantity = message['quantity'];
         if(additionalQuantity) {
           desc = "Additional <Am>" + smartFormat(normalizeQuantity(additionalQuantity, assetObj.DIVISIBLE))
             + "</Am> units issued for token <As>" + message['asset'] + "</As>";
@@ -165,7 +167,98 @@ NotificationViewModel.calcText = function(category, message) {
       desc = "A bet match between your address <Ad>" + getAddressLabel(message['tx1_address'])
         + "</Ad> and address <Ad>" + getAddressLabel(message['tx0_address']) + "</Ad> has expired";
     }
-  }  
+
+
+  } else if(category == 'rps'  && WALLET.getAddressObj(message['source'])) {
+
+    desc  = "You play Rock-Paper-Scissors with <Am>" + smartFormat(normalizeQuantity(message['wager']))+ "</Am> <As>XCP</As>";
+    desc += " with <Ad>"+ getAddressLabel(message['source']) + "</Ad>";
+
+  } else if(category == 'rpsresolves' && WALLET.getAddressObj(message['source'])) {
+
+    var move_names = ['NA', 'ROCK', 'PAPER', 'SCISSORS', 'SPOCK', 'LIZARD'];
+    var move_name = move_names[message['move']] || message['move']
+    desc  = "Your move <Am>"+ move_name +"</Am> with <Ad>" + getAddressLabel(message['source']) + "</Ad> is confirmed";
+
+  } else if(category == 'rps_expirations' && WALLET.getAddressObj(message['source'])) {
+
+    desc = "Your RPS game ID <b>" + message['rps_index'] + "</b> from address <Ad>" + getAddressLabel(message['source']) + "</Ad> has expired";
+
+  } else if(category == "rps_match_expirations") {
+
+    if(WALLET.getAddressObj(message['tx0_address']) && WALLET.getAddressObj(message['tx1_address'])) {
+      desc = "A RPS match between your addresses <Ad>" + getAddressLabel(message['tx0_address'])
+        + "</Ad> and <Ad>" + getAddressLabel(message['tx1_address']) + "</Ad> has expired";
+    } else if(WALLET.getAddressObj(message['tx0_address'])) {
+      desc = "A RPS match between your address <Ad>" + getAddressLabel(message['tx0_address'])
+        + "</Ad> and address <Ad>" + getAddressLabel(message['tx1_address']) + "</Ad> has expired";
+    } else if(WALLET.getAddressObj(message['tx1_address'])) {
+      desc = "A RPS match between your address <Ad>" + getAddressLabel(message['tx1_address'])
+        + "</Ad> and address <Ad>" + getAddressLabel(message['tx0_address']) + "</Ad> has expired";
+    }
+
+  } else if(category == "rps_matches") {
+
+    if (!message['tx0_address']) {
+
+      var params = {
+        filters: [
+          {field: 'id', op: '=', value: message['rps_match_id']}
+        ]
+      }
+
+      var onReceiveRpsMatch = function(data) {
+        for (var i in data) {
+          var rps_match = data[i];
+          NOTIFICATION_FEED.add(category, rps_match);
+        }        
+      }
+
+      failoverAPI('get_rps_matches', params, onReceiveRpsMatch);
+
+    } else {
+        
+        if (WALLET.getAddressObj(message['tx0_address'])) {
+          if  (message['status'] == "concluded: first player wins") {
+            desc = "RPS: You win " + smartFormat(normalizeQuantity(message['wager']))+ "</Am> <As>XCP</As>" + 
+                   " with <Ad>" + getAddressLabel(message['tx0_address']) + "</Ad>";
+          } else if  (message['status'] == "concluded: second player wins") {
+            desc = "RPS: You lose " + smartFormat(normalizeQuantity(message['wager']))+ "</Am> <As>XCP</As>" + 
+                   " with <Ad>" + getAddressLabel(message['tx0_address']) + "</Ad>";
+          } else if  (message['status'] == "concluded: tie") {
+            desc = "RPS: Tie with <Ad>" + getAddressLabel(message['tx0_address']) + "</Ad>";
+          }
+          if (desc) {
+            desc += " (" + message['tx0_index'] + ")";
+          }
+        }
+
+        if (WALLET.getAddressObj(message['tx1_address'])) {
+          if  (message['status'] == "concluded: first player wins") {
+            desc = "RPS: You lose " + smartFormat(normalizeQuantity(message['wager']))+ "</Am> <As>XCP</As>" + 
+                   " with <Ad>" + getAddressLabel(message['tx1_address']) + "</Ad>";
+          } else if  (message['status'] == "concluded: second player wins") {
+            desc = "RPS: You win " + smartFormat(normalizeQuantity(message['wager']))+ "</Am> <As>XCP</As>" + 
+                   " with <Ad>" + getAddressLabel(message['tx1_address']) + "</Ad>";
+          } else if  (message['status'] == "concluded: tie") {
+            desc = "RPS: Tie with <Ad>" + getAddressLabel(message['tx1_address']) + "</Ad>";
+          }
+          if (desc) {
+            desc += " (" + message['tx1_index'] + ")";
+          }
+        }
+
+
+
+        if (desc && NOTIFIED_RPS_RESULT[desc]) {
+          desc = null;
+        } else if (desc) {
+          NOTIFIED_RPS_RESULT[desc] = true;
+        }
+      
+    }
+
+  }
 
   if(desc) {
     desc = desc.replace(/<Am>/g, '<b class="notoQuantityColor">').replace(/<\/Am>/g, '</b>');

@@ -1,5 +1,8 @@
 INIT_FUNC = {};
 PROCESSED_BTCPAY = {};
+USER_COUNTRY = '';
+LIMITED_FEATURES = false;
+RESTRICTED_AREA = [];
 
 function initIndex() { //main page
   window.LOGON_VIEW_MODEL = new LogonViewModel();
@@ -18,7 +21,6 @@ function initIndex() { //main page
   window.WAITING_BTCPAY_FEED = new WaitingBTCPayFeedViewModel();
   window.BTCPAY_FEED = new BTCPayFeedViewModel();
   
-  window.OPEN_ORDER_FEED = new OpenOrderFeedViewModel();
   window.NOTIFICATION_FEED = new NotificationFeedViewModel();
   
   window.SUPPORT_MODAL = new SupportModalViewModel();
@@ -34,7 +36,6 @@ function initIndex() { //main page
     ko.applyBindings(CHAT_SET_HANDLE_MODAL, document.getElementById("chatSetHandleModal"));
     ko.applyBindings(PENDING_ACTION_FEED, document.getElementById("pendingActionFeed"));
     ko.applyBindings(BTCPAY_FEED, document.getElementById("btcPayFeed"));
-    ko.applyBindings(OPEN_ORDER_FEED, document.getElementById("openOrderFeed"));
     ko.applyBindings(NOTIFICATION_FEED, document.getElementById("notificationFeed"));        
     ko.applyBindings(SUPPORT_MODAL, document.getElementById("supportModal"));
     ko.applyBindings(DONATE_MODAL, document.getElementById("donateModal"));
@@ -75,6 +76,7 @@ function initIndex() { //main page
       }, 500);
       
     }
+
   });
 }
 initIndex(); //call it now, as this script is loaded on index page load
@@ -245,12 +247,6 @@ function initFeedNotifications() {
 INIT_FUNC['pages/feed_notifications.html'] = initFeedNotifications;
 
 
-function initFeedOpenOrders() {
-  ko.applyBindings(OPEN_ORDER_FEED, document.getElementById("openOrderFeedContent"));
-}
-INIT_FUNC['pages/feed_open_orders.html'] = initFeedOpenOrders;
-
-
 function initFeedPendingActions() {
   ko.applyBindings(PENDING_ACTION_FEED, document.getElementById("pendingActionFeedContent"));
 }
@@ -356,6 +352,7 @@ function initBetting() {
   FEED_BROWSER.init();
 }
 INIT_FUNC['pages/betting.html'] = initBetting;
+RESTRICTED_AREA.push('pages/betting.html');
 
 
 function initOpenBets() {
@@ -371,6 +368,7 @@ function initOpenBets() {
   });
 }
 INIT_FUNC['pages/openbets.html'] = initOpenBets;
+RESTRICTED_AREA.push('pages/openbets.html');
 
 function initMatchedBets() {
   pageSetUp();
@@ -386,3 +384,39 @@ function initMatchedBets() {
  
 }
 INIT_FUNC['pages/matchedbets.html'] = initMatchedBets;
+RESTRICTED_AREA.push('pages/matchedbets.html');
+
+
+function initOpenOrders() {
+  pageSetUp();
+  window.OPEN_ORDERS = new OpenOrdersViewModel();
+  ko.applyBindings(OPEN_ORDERS, document.getElementById("openorders"));
+
+  OPEN_ORDERS.init();
+
+}
+INIT_FUNC['pages/openorders.html'] = initOpenOrders;
+
+function initOrderMatches() {
+  pageSetUp();
+  window.ORDER_MATCHES = new OrderMatchesViewModel();
+  ko.applyBindings(ORDER_MATCHES, document.getElementById("ordermatches"));
+
+  ORDER_MATCHES.init();
+
+}
+INIT_FUNC['pages/ordermatches.html'] = initOrderMatches;
+
+function initRPS() {
+  pageSetUp();
+  window.RPS = new RpsViewModel();
+  ko.applyBindings(RPS, document.getElementById("rps"));
+
+  RPS.init();
+
+}
+INIT_FUNC['pages/rps.html'] = initRPS;
+RESTRICTED_AREA.push('pages/rps.html');
+
+// restricted action
+RESTRICTED_AREA.push('dividend');

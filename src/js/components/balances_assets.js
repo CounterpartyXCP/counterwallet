@@ -127,8 +127,8 @@ function CreateAssetModalViewModel() {
         divisible: self.divisible(),
         description: self.description(),
         callable_: self.callable(),
-        call_date: self.callDate() ? parseInt(self.callDate().getTime() / 1000) : null, //epoch ts
-        call_price: parseFloat(self.callPrice()) || null, //float
+        call_date: self.callable() ? parseInt(self.callDate().getTime() / 1000) : null, //epoch ts
+        call_price: self.callable() ? parseFloat(self.callPrice()) : null, //float
         transfer_destination: null
       },
       function(txHash, data, endpoint) {
@@ -210,8 +210,8 @@ function IssueAdditionalAssetModalViewModel() {
         divisible: self.asset().DIVISIBLE,
         description: self.asset().description(),
         callable_: self.asset().CALLABLE,
-        call_date: self.asset().CALLDATE,
-        call_price: self.asset().CALLPRICE,
+        call_date: self.asset().CALLDATE ? self.asset().CALLDATE : null,
+        call_price: self.asset().CALLPRICE ? self.asset().CALLPRICE : null,
         transfer_destination: null
       },
       function(txHash, data, endpoint) {
@@ -276,8 +276,8 @@ function TransferAssetModalViewModel() {
         divisible: self.asset().DIVISIBLE,
         description: self.asset().description(),
         callable_: self.asset().CALLABLE,
-        call_date: self.asset().CALLDATE,
-        call_price: self.asset().CALLPRICE,
+        call_date: self.asset().CALLDATE ? self.asset().CALLDATE : null,
+        call_price: self.asset().CALLPRICE ? self.asset().CALLPRICE : null,
         transfer_destination: self.destAddress()
       },
       function(txHash, data, endpoint) {
@@ -357,8 +357,8 @@ function ChangeAssetDescriptionModalViewModel() {
         divisible: self.asset().DIVISIBLE,
         description: self.newDescription(),
         callable_: self.asset().CALLABLE,
-        call_date: self.asset().CALLDATE,
-        call_price: self.asset().CALLPRICE,
+        call_date: self.asset().CALLDATE ? self.asset().CALLDATE : null,
+        call_price: self.asset().CALLPRICE ? self.asset().CALLPRICE : null,
         transfer_destination: null
       },
       function(txHash, data, endpoint) {
@@ -499,8 +499,8 @@ function PayDividendModalViewModel() {
       }
     );
   }
-  
-  self.show = function(address, resetForm) {
+
+  self.showModal = function(address, resetForm) {
     if(typeof(resetForm)==='undefined') resetForm = true;
     if(resetForm) self.resetForm();
     self.addressVM(address);
@@ -521,6 +521,12 @@ function PayDividendModalViewModel() {
           self.availableDividendAssets.unshift(new DividendAssetInDropdownItemModel("BTC", balance, normalizeQuantity(balance)));
         }
       });
+    });
+  }
+  
+  self.show = function(address, resetForm) {
+    checkCountry("dividend", function() {
+      self.showModal(address, resetForm);
     });
   }  
 
