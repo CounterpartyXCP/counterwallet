@@ -248,7 +248,7 @@ function RpsViewModel() {
       source: self.sourceAddress(),
       wager: denormalizeQuantity(self.wager()),
       possible_moves: parseInt(self.possibleMoves()),
-      expiration: self.expiration(),
+      expiration: parseInt(self.expiration()),
       move_random_hash: moveParams['move_random_hash']
     }
     var onSuccess = function(txHash, data, endpoint) {

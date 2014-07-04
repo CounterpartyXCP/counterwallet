@@ -14,21 +14,24 @@ function MessageFeed() {
 
   self.rpsresolveQueue = null;
   self.rpsresolveErrors = {};
-  self.openRpsKey = 'openRps_' + WALLET.identifier();
+
+  self.openRpsKey = ko.computed(function() {
+    return 'openRps_' + WALLET.identifier();
+  }, self);
 
   self.setOpenRPS = function(source, hash, moveParam) {
-    var openRps = localStorage.getObject(self.openRpsKey) || {};
+    var openRps = localStorage.getObject(self.openRpsKey()) || {};
     var cwk = WALLET.getAddressObj(source).KEY;
     var moveParamStr = JSON.stringify(moveParam);
     var cryptedMoveParam = cwk.encrypt(moveParamStr);
-    openRps[hash] = cryptedMoveParam;
+    openRps[source + "_" + hash] = cryptedMoveParam;
 
-    localStorage.setObject(self.openRpsKey, openRps);
+    localStorage.setObject(self.openRpsKey(), openRps);
   }
 
   self.getOpenRPS = function(source, hash) {
-    var openRps = localStorage.getObject(self.openRpsKey) || {};
-    var cryptedMoveParam = openRps[hash];
+    var openRps = localStorage.getObject(self.openRpsKey()) || {};
+    var cryptedMoveParam = openRps[source + "_" + hash];
 
     if (cryptedMoveParam) {
       var cwk = WALLET.getAddressObj(source).KEY;
@@ -38,58 +41,42 @@ function MessageFeed() {
     return null;
   }
 
-  self.deleteOpenRPS = function(hash) {
-    var openRps = localStorage.getObject(self.openRpsKey) || {};
-    delete openRps[hash];
-    localStorage.setObject(self.openRpsKey, openRps);
+  self.deleteOpenRPS = function(source, hash) {
+    var openRps = localStorage.getObject(self.openRpsKey()) || {};
+    delete openRps[source + "_" + hash];
+    localStorage.setObject(self.openRpsKey(), openRps);
   }
 
   self.onRpsMatch = function(rps_match, callback) {
-    $.jqlog.debug("on open rps: ");
-    $.jqlog.debug(rps_match);
 
-    var source = null;
-    var hash = null;
-    if (WALLET.getAddressObj(rps_match['tx0_address']) 
-        && (rps_match['status'] == 'pending' 
-            || rps_match['status'] == 'pending and resolved')) {
-
-      source = rps_match['tx0_address'];
-      hash = rps_match['tx0_hash'];
-
-    } else if (WALLET.getAddressObj(rps_match['tx1_address']) 
-               && (rps_match['status'] == 'pending'
-                   || rps_match['status'] == 'resolved and pending')) {
-
-      source = rps_match['tx1_address'];
-      hash = rps_match['tx1_hash'];
-
-    }
-
-    if (source && hash) {
-
-      var moveParam = self.getOpenRPS(source, hash);
-      if (moveParam) {
-        self.resolvePendingRpsMatch(hash, moveParam, rps_match, callback);
+    var resolveRps = function(source, hash) {
+      if (source && hash) {
+        var moveParam = self.getOpenRPS(source, hash);
+        if (moveParam) {
+          self.resolvePendingRpsMatch(hash, moveParam, rps_match, callback);
+        } else {
+          $.jqlog.debug('RANDOM LOST: '+rps_match['id']);
+          if (callback) callback();
+        }
       } else {
-        $.jqlog.debug('RANDOM LOST: '+rps_match['id']);
-        if (callback) callback();
+        $.jqlog.debug('NO NEED RESOLVE: '+rps_match['id']);     
       }
-
-    } else {
-
-      $.jqlog.debug('NO NEED RESOLVE: '+rps_match['id']);     
-
     }
+
+    if (WALLET.getAddressObj(rps_match['tx0_address']) 
+        && (rps_match['status'] == 'pending' || rps_match['status'] == 'pending and resolved')) {
+      resolveRps(rps_match['tx0_address'], rps_match['tx0_hash']);
+    } 
+
+    if (WALLET.getAddressObj(rps_match['tx1_address']) 
+               && (rps_match['status'] == 'pending' || rps_match['status'] == 'resolved and pending')) {
+      resolveRps(rps_match['tx1_address'], rps_match['tx1_hash']);
+    }
+
+    
   }
 
   self.resolvePendingRpsMatch = function(tx_hash, moveParam, rps_match, callback) {
-    $.jqlog.debug("resolvePendingRpsMatch: ");
-    $.jqlog.debug(rps_match);
-    $.jqlog.debug(tx_hash);
-    $.jqlog.debug(moveParam);
-
-    
 
     // wait 10 secondes to avoid -22 bitcoind error
     setTimeout(function() {
@@ -99,13 +86,13 @@ function MessageFeed() {
 
       var onSuccess = function(txHash, data, endpoint) {
         $.jqlog.debug('onSuccess');
-        self.deleteOpenRPS(tx_hash);
+        self.deleteOpenRPS(moveParam['source'], tx_hash);
         if (callback) callback();
       }
 
       var onError = function() {
 
-        $.jqlog.debug('ERROR. RETRY ');
+        $.jqlog.debug('RESOLVE RPS ERROR. RETRY.');
 
         self.rpsresolveErrors[rps_match['id']] = self.rpsresolveErrors[rps_match['id']] || 0;
         self.rpsresolveErrors[rps_match['id']] += 1;
