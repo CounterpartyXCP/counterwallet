@@ -134,6 +134,7 @@
                       <th>Move</th>   
                       <th>Counter move</th>
                       <th>Game</th>
+                      <th>Expiration</th>
                     </tr>
                   </thead>
                   <tbody data-bind="foreach: { data: myGames, as: 'game' }">
@@ -145,6 +146,7 @@
                       <td data-bind="text: game.move_str"></td>
                       <td data-bind="text: game.countermove_str"></td>
                       <td data-bind="text: game.game_type"></td> 
+                      <td data-bind="html: game.expiration"></td>
                     </tr>
                   </tbody>
                 </table>
