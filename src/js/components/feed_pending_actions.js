@@ -13,6 +13,7 @@ PendingActionViewModel.calcText = function(category, data) {
   //This is data as it is specified from the relevant create_ API request parameters (NOT as it comes in from the message feed)
   var desc = "";
   var divisible = null;
+  var pending = data['mempool'] ? 'Unconfirmed' : 'Pending';
   //The category being allowable was checked in the factory class
   if(data['source'] && data['asset'])
     divisible = data['divisible'] !== undefined ? data['divisible'] : (data['_divisible'] !== undefined ? data['_divisible'] : WALLET.getAddressObj(data['source']).getAssetObj(data['asset']).DIVISIBLE);
@@ -20,25 +21,25 @@ PendingActionViewModel.calcText = function(category, data) {
     // otherwise, get it from an existing asset in our wallet
 
   if(category == 'burns') {
-    desc = "Pending burn of <Am>" + normalizeQuantity(data['quantity']) + "</Am> <As>BTC</As>";
+    desc = pending + " burn of <Am>" + normalizeQuantity(data['quantity']) + "</Am> <As>BTC</As>";
   } else if(category == 'sends') {
-    desc = "Pending send of <Am>" + numberWithCommas(normalizeQuantity(data['quantity'], divisible)) + "</Am> <As>" + data['asset']
+    desc = pending + " send of <Am>" + numberWithCommas(normalizeQuantity(data['quantity'], divisible)) + "</Am> <As>" + data['asset']
       + "</As> from <Ad>" + getLinkForCPData('address', data['source'],  getAddressLabel(data['source'])) + "</Ad>"
       + " to <Ad>" + getLinkForCPData('address', data['destination'],  getAddressLabel(data['destination'])) + "</Ad>"; 
   } else if(category == 'orders') {
-    desc = "Pending order to sell <Am>" + numberWithCommas(normalizeQuantity(data['give_quantity'], data['_give_divisible']))
+    desc = pending + " order to sell <Am>" + numberWithCommas(normalizeQuantity(data['give_quantity'], data['_give_divisible']))
       + "</Am> <As>" + data['give_asset'] + "</As> for <Am>"
       + numberWithCommas(normalizeQuantity(data['get_quantity'], data['_get_divisible'])) + "</Am> <As>"
       + data['get_asset'] + "</As>";
   } else if(category == 'issuances') {
     if(data['transfer_destination']) {
-      desc = "Pending transfer of token <As>" + data['asset'] + "</As> from <Ad>"
+      desc = pending + " transfer of token <As>" + data['asset'] + "</As> from <Ad>"
         + getLinkForCPData('address', data['source'], getAddressLabel(data['source'])) + "</Ad> to <Ad>"
         + getLinkForCPData('address', data['transfer_destination'], getAddressLabel(data['transfer_destination'])) + "</Ad>"; 
     } else if(data['locked']) {
-      desc = "Pending lock of token <As>" + data['asset'] + "</As> against additional issuance";
+      desc = pending + " lock of token <As>" + data['asset'] + "</As> against additional issuance";
     } else if(data['quantity'] == 0) {
-      desc = "Pending change of description for token <As>" + data['asset'] + "</As> to <b>" + data['description'] + "</b>";
+      desc = pending + " change of description for token <As>" + data['asset'] + "</As> to <b>" + data['description'] + "</b>";
     } else {
       //See if this is a new issuance or not
       var assetObj = null;
@@ -47,17 +48,17 @@ PendingActionViewModel.calcText = function(category, data) {
         assetObj = WALLET.getAddressObj(addressesWithAsset[0]).getAssetObj(data['asset']);
       
       if(assetObj) { //the asset exists in our wallet already somewhere, so it's an additional issuance of more units for it
-        desc = "Pending issuance of <Am>" + numberWithCommas(normalizeQuantity(data['quantity'], data['divisible']))
+        desc = pending + " issuance of <Am>" + numberWithCommas(normalizeQuantity(data['quantity'], data['divisible']))
           + "</Am> additional units for token <As>" + data['asset'] + "</As>";
       } else { //new issuance
-        desc = "Pending creation of token <As>" + data['asset'] + "</As> with initial quantity of <Am>"
+        desc = pending + " creation of token <As>" + data['asset'] + "</As> with initial quantity of <Am>"
           + numberWithCommas(normalizeQuantity(data['quantity'], data['divisible'])) + "</Am> units";
       }
     }
   } else if(category == 'broadcasts') {
-    desc = "Pending broadcast:<br/>Text: " + data['text'] + "<br/>Value:" + data['value'];
+    desc = pending + " broadcast:<br/>Text: " + data['text'] + "<br/>Value:" + data['value'];
   } else if(category == 'bets') {
-    desc = "Pending <b>" + data['bet_type'] + "</b> bet on feed @ <Ad>"
+    desc = pending + " <b>" + data['bet_type'] + "</b> bet on feed @ <Ad>"
       + getLinkForCPData('address', data['feed_address'], getAddressLabel(data['feed_address'])) + "</Ad><br/>"
       + "Wager: <Am>"
       + numberWithCommas(normalizeQuantity(data['wager_quantity'])) + "</Am> <As>XCP</As>, Counterwager: <Am>"
@@ -67,25 +68,25 @@ PendingActionViewModel.calcText = function(category, data) {
     var divUnitDivisible;
     if (WALLET.getAddressObj(data['source'])) {
       divUnitDivisible = WALLET.getAddressObj(data['source']).getAssetObj(data['dividend_asset']).DIVISIBLE;
-      desc = "Pending dividend payment ";
+      desc = pending + " dividend payment ";
     } else {
       divUnitDivisible = data['dividend_asset_divisible'];
-      desc = "Pending dividend reception ";
+      desc = pending + " dividend reception ";
     }
     desc += "of <Am>" + numberWithCommas(normalizeQuantity(data['quantity_per_unit'], divUnitDivisible)) + "</Am> <As>"
         + data['dividend_asset'] + "</As> on token <As>" + data['asset'] + "</As>";
   
   } else if(category == 'cancels') {
-    desc = "Pending cancellation of " + data['_type'] + " ID <b>" + data['_tx_index'] + "</b>";
+    desc = pending + " cancellation of " + data['_type'] + " ID <b>" + data['_tx_index'] + "</b>";
   } else if(category == 'callbacks') {
-    desc = "Pending callback for <Am>" + (data['fraction'] * 100).toFixed(4) + "%</Am> outstanding on token <As>" + data['asset'] + "</As>";
+    desc = pending + " callback for <Am>" + (data['fraction'] * 100).toFixed(4) + "%</Am> outstanding on token <As>" + data['asset'] + "</As>";
   } else if(category == 'btcpays') {
-    desc = "Pending BTC Payment from <Ad>" + getAddressLabel(data['source']) + "</Ad>";
+    desc = pending + " BTC Payment from <Ad>" + getAddressLabel(data['source']) + "</Ad>";
   } else if(category == 'rps') {
-    desc  = "Pending RPS game with <Ad>" + getAddressLabel(data['source']) + "</Ad>: ";
+    desc  = pending + "  RPS game with <Ad>" + getAddressLabel(data['source']) + "</Ad>: ";
     desc += " <Am>"+numberWithCommas(normalizeQuantity(data['wager'])) + '</Am> <As>XCP</As>';
   } else if(category == 'rpsresolves') {
-    desc  = "Pending RPS resolution with <Ad>" + getAddressLabel(data['source']) + "</Ad>";
+    desc  = pending + " RPS resolution with <Ad>" + getAddressLabel(data['source']) + "</Ad>";
   } else if(category == 'order_matches') {
 
     if (WALLET.getAddressObj(data['tx1_address']) && data['forward_asset'] == 'BTC' && data['_status'] == 'pending') {      

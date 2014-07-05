@@ -279,6 +279,7 @@ function MessageFeed() {
   self.parseMempoolTransaction = function(txHash, category, message) {
 
     message['bindings'] = JSON.parse(message['bindings']);
+    message['bindings']['mempool'] = true;
 
     var displayTx = false;
     
