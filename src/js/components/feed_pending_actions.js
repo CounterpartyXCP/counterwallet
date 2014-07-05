@@ -158,6 +158,7 @@ function PendingActionFeedViewModel() {
     
     self.lastUpdated(new Date());
     PendingActionFeedViewModel.modifyBalancePendingFlag(category, data, true);
+    WALLET.refreshBTCBalances();
   }
 
   self.remove = function(txHash, category, btcRefreshSpecialLogic) {

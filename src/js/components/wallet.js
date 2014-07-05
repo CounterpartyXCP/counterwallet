@@ -95,7 +95,13 @@ function WalletViewModel() {
     assert(addressObj);
     var assetObj = addressObj.getAssetObj(asset);
     if(!assetObj) return 0; //asset not in wallet
-    return normalized ? assetObj.normalizedBalance() : assetObj.rawBalance();
+    if (asset != 'BTC') {
+      return normalized ? assetObj.normalizedBalance() : assetObj.rawBalance();
+    } else {
+      var bal = assetObj.normalizedBalance() + assetObj.unconfirmedBalance();
+      return normalized ? bal : denormalizeQuantity(bal);
+    }
+    
   }
 
   self.getPubkey = function(address) {
@@ -104,7 +110,7 @@ function WalletViewModel() {
     return addressObj.PUBKEY;
   }
 
-  self.updateBalance = function(address, asset, rawBalance) {
+  self.updateBalance = function(address, asset, rawBalance, unconfirmedRawBal) {
     //Update a balance for a specific asset on a specific address. Requires that the asset exist
     var addressObj = self.getAddressObj(address);
     assert(addressObj);
@@ -117,7 +123,17 @@ function WalletViewModel() {
         addressObj.addOrUpdateAsset(asset, assetsInfo[0], rawBalance);
       });    
     } else {
-      assetObj.rawBalance(rawBalance);  
+      assetObj.rawBalance(rawBalance); 
+      if (asset == 'BTC' && unconfirmedRawBal) {
+        $.jqlog.debug('unconfirmedRawBal: ' +unconfirmedRawBal);
+        $.jqlog.debug('rawBalance: ' +rawBalance);
+         $.jqlog.debug('unconfirmedBalance: ' +normalizeQuantity(rawBalance + unconfirmedRawBal));
+        assetObj.unconfirmedBalance(normalizeQuantity(unconfirmedRawBal));
+        assetObj.balanceChangePending(true);
+      } else if (asset == 'BTC') {
+        assetObj.unconfirmedBalance(0);
+        assetObj.balanceChangePending(false);
+      }
     }
     return true;
   }
@@ -282,7 +298,7 @@ function WalletViewModel() {
         // the (confirmed) balance will be decreased by the ENTIRE quantity of that txout, even though they may be getting
         // some/most of it back as change. To avoid people being confused over this, with BTC in particular, we should
         // display the unconfirmed portion of the balance in addition to the confirmed balance, as it will include the change output
-        self.updateBalance(data[i]['addr'], "BTC", data[i]['confirmedRawBal']);
+        self.updateBalance(data[i]['addr'], "BTC", data[i]['confirmedRawBal'], data[i]['unconfirmedRawBal']);
         
         addressObj = self.getAddressObj(data[i]['addr']);
         assert(addressObj, "Cannot find address in wallet for refreshing BTC balances!");
@@ -319,7 +335,7 @@ function WalletViewModel() {
       //insight down or spazzing, set all BTC balances out to null
       var addressObj = null;
       for(var i=0; i < addresses.length; i++) {
-        self.updateBalance(addresses[i], "BTC", null); //null = UNKNOWN
+        self.updateBalance(addresses[i], "BTC", null, null); //null = UNKNOWN
         addressObj = self.getAddressObj(addresses[i]);
         addressObj.numPrimedTxouts(null); //null = UNKNOWN
         addressObj.numPrimedTxoutsIncl0Confirms(null); //null = UNKNOWN

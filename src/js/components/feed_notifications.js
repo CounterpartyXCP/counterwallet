@@ -296,6 +296,7 @@ function NotificationFeedViewModel(initialCount) {
     //if the number of entries are over 40, remove the oldest one
     if(self.entries().length > 40) self.entries.pop();
     self.lastUpdated(new Date());
+    WALLET.refreshBTCBalances();
   }
 }
 
