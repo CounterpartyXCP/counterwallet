@@ -120,14 +120,22 @@ function LogonViewModel() {
             label: "Continue",
             className: "btn-primary",
             callback: function() {
-              multiAPINewest("get_preferences", {wallet_id: WALLET.identifier()}, 'last_updated', self.onReceivedPreferences);
+              multiAPINewest("get_preferences", {
+                'wallet_id': WALLET.identifier(),
+                'network': USE_TESTNET ? 'testnet' : 'mainnet',
+                'for_login': true
+              }, 'last_updated', self.onReceivedPreferences);
             }
           }
         }
       });
     } else {
       //Grab preferences
-      multiAPINewest("get_preferences", {wallet_id: WALLET.identifier()}, 'last_updated', self.onReceivedPreferences);
+      multiAPINewest("get_preferences", {
+        'wallet_id': WALLET.identifier(),
+        'network': USE_TESTNET ? 'testnet' : 'mainnet',
+        'for_login': true
+      }, 'last_updated', self.onReceivedPreferences);
     }
   }
   

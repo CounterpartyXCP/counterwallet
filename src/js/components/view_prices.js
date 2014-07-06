@@ -1,7 +1,6 @@
 
 var AssetPairMarketInfoItemModel = function(entry) {
   this.MARKET = entry['base_asset'] + '/' + entry['quote_asset'];
-  this.MARKET_ALT = entry['quote_asset'] + '/' + entry['base_asset'];
   this.BASE_ASSET = entry['base_asset'];
   this.QUOTE_ASSET = entry['quote_asset'];
   this.LOWEST_ASK = entry['lowest_ask'];
@@ -18,7 +17,7 @@ var AssetPairMarketInfoItemModel = function(entry) {
 var OrderBookEntryItemModel = function(entry) {
   this.BASE_ASSET = entry['base_asset'];
   this.QUOTE_ASSET = entry['quote_asset'];
-  this.UNIT_PRICE = entry['unit_price'] + ' ' + entry['quote_asset'] + '/' + entry['base_asset'];
+  this.UNIT_PRICE = entry['unit_price'] + ' ' + entry['base_asset'] + '/' + entry['quote_asset'];
   this.QTY_AND_COUNT = smartFormat(entry['quantity']) + ' ' + entry['base_asset'] + ' (' + entry['count'] + ')';
   this.DEPTH = smartFormat(entry['depth'], 10) + ' ' + entry['base_asset'];
 };
@@ -27,7 +26,7 @@ var OpenOrderItemModel = function(entry, isBuySell) {
   this.PARENT = isBuySell ? BUY_SELL : VIEW_PRICES;
   this.TX_ID = getTxHashLink(entry['tx_hash']) + ViewPricesViewModel.deriveIsOnlineForBTCPayment(entry['give_asset'], entry['_is_online']);
   this.WHEN_CREATED = new Date(entry['block_time']);
-  this.PRICE = this.PARENT.deriveOpenOrderAssetPrice(entry['get_asset'], entry['get_quantity'], entry['give_asset'], entry['give_quantity']) + ' ' + entry['quote_asset'] + '/' + entry['base_asset'];
+  this.PRICE = this.PARENT.deriveOpenOrderAssetPrice(entry['get_asset'], entry['get_quantity'], entry['give_asset'], entry['give_quantity']) + ' ' + entry['base_asset'] + '/' + entry['quote_asset'];
   this.BUY_QTY_LEFT = this.PARENT.deriveOpenOrderAssetQuantity(entry['get_asset'], entry['get_remaining']) + ' ' + entry['get_asset'] + ' ' + ViewPricesViewModel.deriveOpenOrderBuySellLeft(entry['get_quantity'], entry['get_remaining']);
   this.SELL_QTY_LEFT = this.PARENT.deriveOpenOrderAssetQuantity(entry['give_asset'], entry['give_remaining']) + ' ' + entry['give_asset'] + ' ' + ViewPricesViewModel.deriveOpenOrderBuySellLeft(entry['give_quantity'], entry['give_remaining']);
   this.EXPIRES_IN = ViewPricesViewModel.deriveOpenOrderExpiresIn(entry['block_index'], entry['expiration']);
@@ -45,7 +44,7 @@ var TradeHistoryItemModel = function(entry) {
   this.ADDRESS_2 = getLinkForCPData('address', entry['order_match_tx1_address']);
   this.QUANTITY_BASE = smartFormat(entry['base_quantity_normalized']) + ' ' + entry['base_asset'];
   this.QUANTITY_QUOTE = smartFormat(entry['quote_quantity_normalized']) + ' ' + entry['quote_asset'];
-  this.UNIT_PRICE = entry['unit_price'] + ' ' + entry['quote_asset'] + '/' + entry['base_asset'];
+  this.UNIT_PRICE = entry['unit_price'] + ' ' + entry['base_asset'] + '/' + entry['quote_asset'];
   this.RAW_BLOCK_INDEX = entry['block_index'];
   this.RAW_BLOCK_TIME = entry['block_time'];
   this.RAW_QUANTITY_BASE = entry['base_quantity_normalized'];

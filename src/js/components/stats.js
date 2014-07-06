@@ -18,6 +18,10 @@ function StatsHistoryViewModel() {
 
     failoverAPI("get_wallet_stats", {}, function(data, endpoint) {
       self.walletGraphData = data['wallet_stats'];
+      $.each(self.walletGraphData, function(i, value) {
+        value['marker'] = { enabled : true, radius : 3 };
+      });
+      
       self.totalMainnetWallets = data['num_wallets_mainnet'];
       $('#totalMainnetWallets').text(self.totalMainnetWallets);
       self.totalTestnetWallets = data['num_wallets_testnet'];
@@ -29,15 +33,18 @@ function StatsHistoryViewModel() {
   }
   
   self.doTxChart = function() {
-    $('#transactionStatHistory').highcharts({
+    $('#transactionStatHistory').highcharts('StockChart', {
        chart: {
-            type: 'column',
-            zoomType: 'x',
-            maxZoom: 48 * 3600 * 1000
+          type: 'column',
+          zoomType: 'x',
+          maxZoom: 48 * 3600 * 1000
         },
         title: {
-            text: 'Transaction Count by Day'
+          text: ''
         },
+        rangeSelector: {
+          selected: 0
+        },        
         xAxis: {
           type: 'datetime',
           title: {
@@ -45,56 +52,64 @@ function StatsHistoryViewModel() {
           }
         },
         yAxis: {
-            min: 0,
-            title: {
-                text: '# Transactions'
-            },
-            stackLabels: {
-                enabled: true,
-                style: {
-                    fontWeight: 'bold',
-                    color: (Highcharts.theme && Highcharts.theme.textColor) || 'gray'
-                }
+          min: 0,
+          title: {
+            text: '# Transactions'
+          },
+          stackLabels: {
+            enabled: true,
+            style: {
+              fontWeight: 'bold',
+              color: (Highcharts.theme && Highcharts.theme.textColor) || 'gray'
             }
+          }
         },
         legend: {
-            align: 'right',
-            verticalAlign: 'top',
-            floating: true,
-            backgroundColor: (Highcharts.theme && Highcharts.theme.background2) || 'white',
-            borderColor: '#CCC',
-            borderWidth: 1,
-            shadow: false
+          enabled: true,
+          align: 'right',
+          verticalAlign: 'top',
+          floating: true,
+          backgroundColor: (Highcharts.theme && Highcharts.theme.background2) || 'white',
+          borderColor: '#CCC',
+          borderWidth: 1,
+          shadow: false
         },
         tooltip: {
-            formatter: function() {
-                return '<b>'+ moment(this.x).format('MMM Do YYYY') +'</b><br/>'+
-                    this.series.name +': '+ this.y +'<br/>'+
-                    'Total: '+ this.point.stackTotal;
-            }
+          shared: false,
+          formatter: function() {
+            var text = '<b>' + moment(this.x).format('MMM Do YYYY') + '</b><br/>';
+            if(this.x == this.series.data[this.series.data.length-1].x) //last day...add a label that it's partial
+              text += '<b>**PARTIAL DAY**</b><br/>';
+            text += this.series.name + ': ' + this.y + '<br/>' + 'Total: ' + this.point.stackTotal;
+            return text;
+          }
         },
         credits: {
-            enabled: false
+          enabled: false
         },        
         plotOptions: {
-            column: {
-                stacking: 'normal'
-            }
+          column: {
+            stacking: 'normal'
+          }
         },      
         series: self.txGraphData
     });    
   }
   
   self.doWalletChart = function() {
-    $('#walletStatHistory').highcharts({
+    //$('#walletStatHistory').highcharts({
+    $('#walletStatHistory').highcharts('StockChart', {
        chart: {
-            type: 'line',
-            zoomType: 'x',
-            maxZoom: 48 * 3600 * 1000
+          type: 'line',
+          zoomType: 'x',
+          maxZoom: 48 * 3600 * 1000
         },
         title: {
-            text: 'Wallet Activity by Day'
+          text: ''
         },
+        rangeSelector: {
+          selected: 0
+        },        
         xAxis: {
           type: 'datetime',
           title: {
@@ -102,40 +117,46 @@ function StatsHistoryViewModel() {
           }
         },
         yAxis: {
-            min: 0,
-            title: {
-                text: '#'
-            },
-            stackLabels: {
-                enabled: true,
-                style: {
-                    fontWeight: 'bold',
-                    color: (Highcharts.theme && Highcharts.theme.textColor) || 'gray'
-                }
+          min: 0,
+          title: {
+            text: '#'
+          },
+          stackLabels: {
+            enabled: true,
+            style: {
+              fontWeight: 'bold',
+              color: (Highcharts.theme && Highcharts.theme.textColor) || 'gray'
             }
+          }
         },
         legend: {
-            align: 'right',
-            verticalAlign: 'top',
-            floating: true,
-            backgroundColor: (Highcharts.theme && Highcharts.theme.background2) || 'white',
-            borderColor: '#CCC',
-            borderWidth: 1,
-            shadow: false
+          enabled: true,
+          align: 'right',
+          verticalAlign: 'top',
+          floating: true,
+          backgroundColor: (Highcharts.theme && Highcharts.theme.background2) || 'white',
+          borderColor: '#CCC',
+          borderWidth: 1,
+          shadow: false
         },
         tooltip: {
-            formatter: function() {
-                return '<b>'+ moment(this.x).format('MMM Do YYYY') +'</b><br/>'+
-                    this.series.name +': '+ this.y;
-            }
+          shared: false,
+          formatter: function() {
+            console.log(this);
+            var text = '<b>'+ moment(this.x).format('MMM Do YYYY') +'</b><br/>';
+            if(this.x == this.series.data[this.series.data.length-1].x) //last day...add a label that it's partial
+              text += '<b>**PARTIAL DAY**</b><br/>';
+            text += this.series.name +': '+ this.y;
+            return text;
+          }
         },
         credits: {
-            enabled: false
+          enabled: false
         },        
         plotOptions: {
-            column: {
-                stacking: 'normal'
-            }
+          column: {
+            stacking: 'normal'
+          }
         },      
         series: self.walletGraphData
     });    
@@ -159,8 +180,14 @@ function StatsTransactionHistoryViewModel() {
       //clear table data and populate with the new data (which comes in the order of newest to oldest)
       data.reverse();
       for(var i = 0; i< data.length; i++) {
-        //if(data[i]['_category']; == 'credit' || data[i]['_category']; == 'debit')
-        if(data[i]['_command'] != 'insert')
+        //Filter out all non insert db statements
+        if(data[i]['_command'] !== 'insert')
+          continue;
+        //Filter out credits, debits
+        if(data[i]['_category'] === 'credits' || data[i]['_category'] === 'debits')
+          continue;
+        //Filter out orders where the asset field is not defined
+        if(data[i]['_category'] === 'order' && (!data[i]['give_asset'] || !data[i]['get_asset']))
           continue;
         self.transactions.push(new TransactionHistoryItemViewModel(data[i])); 
       }
