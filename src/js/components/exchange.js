@@ -54,7 +54,7 @@ function OpenOrdersViewModel() {
     }
 
     var onSuccess = function(txHash, data, endpoint) {
-      bootbox.alert("<b>Your order were canceled successfully.</b> " + ACTION_PENDING_NOTICE);
+      bootbox.alert("<b>Your order was canceled successfully.</b> " + ACTION_PENDING_NOTICE);
     }
 
     WALLET.doTransaction(order.source, "create_cancel", params, onSuccess);
