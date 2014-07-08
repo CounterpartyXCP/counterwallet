@@ -216,9 +216,9 @@ var USER_COUNTRY = '';
 var RESTRICTED_AREA = {
   'pages/betting.html': ['US'],
   'pages/openbets.html': ['US'],
-  'pages/matchedbets.html': ['US', 'MA'],
+  'pages/matchedbets.html': ['US'],
   'pages/rps.html': ['US'],
-  'dividend': ['US', 'MA']
+  'dividend': ['US']
 }
 
 
