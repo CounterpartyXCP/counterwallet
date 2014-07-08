@@ -230,6 +230,12 @@ function ViewPricesViewModel() {
       setTimeout(self.fetchAssetPairMarketInfo, VIEW_PRICES_ASSET_PAIRS_REFRESH_EVERY);
     });
   }
+
+  self.selectTopPair = function(item) {
+    self.asset1(item.BASE_ASSET);
+    self.asset2(item.QUOTE_ASSET);
+    $.jqlog.debug(item);
+  }
   
   self.fetchLatestTrades = function() {
     if(self.recievedMarketData())
@@ -527,47 +533,82 @@ ViewPricesViewModel.doChart = function(dispAssetPair, chartDiv, data) {
       
   //graph.highcharts('StockChart', {
   chartDiv.highcharts('StockChart', {
+
       title: {
-          text: dispAssetPair
+        text: dispAssetPair
       },
-      yAxis: [{
-          title: {
-              text: 'Price'
-          },
-          height: 200,
-          lineWidth: 2
-      }, {
-          title: {
-              text: 'Volume'
-          },
-          top: 300,
-          height: 100,
-          offset: 0,
-          lineWidth: 2
-      }],
-      
-      tooltip: {
-          crosshairs: true,
-          shared: true,
-          valueDecimals: 8
-      },      
+      xAxis: {
+        type: 'datetime'
+      },
+      legend: {
+        enabled: false
+      },
+      plotOptions: {
+        candlestick: {
+          color: '#f01717',
+          upColor: '#0ab92b'
+        },
+        volume: {
+          color: '#0000FF'
+        }
+      },
+      scrollbar: {
+        enabled: false
+      },
+      navigator: {
+        enabled: true
+      },
       rangeSelector: {
-          selected: 0
+        enabled: false,       
+        inputEnabled: false
       },
-      
-      /*legend: {
-          enabled: true,
-          layout: 'vertical',
-          align: 'right',
-          verticalAlign: 'middle',
-          borderWidth: 0
-      },*/      
+      tooltip: {
+        crosshairs: true,
+        shared: true,
+        valueDecimals: 8
+      },
+      credits: {
+        enabled: false
+      },
+
+      yAxis: [{
+        labels: { 
+          style: { 
+            color: '#CC3300'
+          }
+        },
+        title: { 
+          text: 'Price', 
+          style: { color: '#CC3300' }
+        }
+      }, {
+        title: { 
+          text: 'Amount', 
+          style: { color: '#4572A7' } 
+        },
+        labels: { 
+          style: { 
+            color: '#4572A7' 
+          }
+        },
+        opposite: true
+      }],   
       
       series: [
+      {
+          type: 'column',
+          name: 'Volume',
+          data: volume,
+          yAxis: 1,
+          dataGrouping: {
+            units: groupingUnits
+          }
+      },
       {
           type: 'candlestick',
           name: dispAssetPair,
           data: ohlc,
+          yAxis: 0,
           dataGrouping: {
             units: groupingUnits
           }
@@ -589,19 +630,7 @@ ViewPricesViewModel.doChart = function(dispAssetPair, chartDiv, data) {
           type: 'trendline',
           algorithm: 'SMA',
           periods: 7
-      },
-      {
-          type: 'column',
-          name: 'Volume',
-          data: volume,
-          yAxis: 1,
-          dataGrouping: {
-            units: groupingUnits
-          }
-      }],
-      credits: {
-        enabled: false
-      }
+      }]
   });
 }
 

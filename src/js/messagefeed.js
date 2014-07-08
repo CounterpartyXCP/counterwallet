@@ -479,7 +479,7 @@ function MessageFeed() {
       }
       //Also, if this is a new asset creation, or a transfer to an address that doesn't have the asset yet
       if(WALLET.getAddressObj(message['issuer']) && addressesWithAsset.length && !(addressesWithAsset.indexOf(message['issuer']) != -1)) {
-        failoverAPI("get_asset_info", {'assets': [message['asset']]}, function(assetsInfo, endpoint) {
+        failoverAPI("get_asset_info", {'assets': [message['asset']]}, function(assetsInfo, endpoint) {1
           WALLET.getAddressObj(message['issuer']).addOrUpdateAsset(message['asset'], assetsInfo[0], null); //will show with a 0 balance
         });    
       }

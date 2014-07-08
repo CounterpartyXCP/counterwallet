@@ -7,7 +7,7 @@
   </div>
 </div>
 
-<section id="widget-grid" class="ordersGrid"> <!-- widget grid -->
+<section id="widget-grid" class="ordersGrid assetSelector"> <!-- widget grid -->
   <div class="row"> <!-- row -->
     <article class="col-xs-12 col-sm-12 col-md-12 col-lg-12"> <!-- NEW WIDGET START -->
       <!-- Widget ID (each widget will need unique ID)-->
@@ -18,33 +18,33 @@
             <div class="clearfix"></div>
           </header>
           <div> <!-- widget div-->
-            <div class="widget-body min-height-0" data-bind="validationOptions: { insertMessages: false }"> <!-- widget content -->
+            <div class="widget-body min-height-0" style="min-height:0 !important" data-bind="validationOptions: { insertMessages: false }"> <!-- widget content -->
                 <div class="row">
-                    <section class="col col-lg-3 col-sm-6">
+                    <section class="col col-lg-2 col-sm-4">
                         <label for="asset1" class="control-label font-medlg">First Token</label>
                         <label class="input">
-                            <input type="text" id="asset1" name="asset1" class="form-control input-lg" type="text" placeholder="Asset name" data-bind="value: asset1" />
+                            <input type="text" id="asset1" name="asset1" class="form-control input" type="text" placeholder="Asset name" data-bind="value: asset1" />
                         </label>
                         <br/><span class="errorColor" data-bind="validationMessage: asset1"></span>
                     </section>
-                    <section class="col col-lg-3 col-sm-6">
+                    <section class="col col-lg-2 col-sm-4">
                         <label for="asset2" class="control-label font-medlg">Second Token</label>
                         <label class="input">
-                            <input type="text" id="asset2" name="asset2" class="form-control input-lg" type="text" placeholder="Asset name" data-bind="value: asset2" />
+                            <input type="text" id="asset2" name="asset2" class="form-control input" type="text" placeholder="Asset name" data-bind="value: asset2" />
                         </label>
                         <br/><span class="errorColor" data-bind="validationMessage: asset2"></span>
                     </section>
                     <section data-bind="visible: asset1() == 'BTC' || asset2() == 'BTC'" class="col col-lg-3 col-sm-6">
                         <label for="minBTCFeeProvidedPct" class="control-label font-medlg">Min BTC % Fee Provided</label>
                         <label class="input">
-                            <input type="text" name="minBTCFeeProvidedPct" class="form-control input-lg" type="text" data-bind="value: minBTCFeeProvidedPct, valueUpdate: 'input'" />
+                            <input type="text" name="minBTCFeeProvidedPct" class="form-control input" type="text" data-bind="value: minBTCFeeProvidedPct, valueUpdate: 'input'" />
                         </label>
                         <br/><span class="errorColor" data-bind="validationMessage: minBTCFeeProvidedPct"></span>
                     </section>
                     <section data-bind="visible: asset1() == 'BTC' || asset2() == 'BTC'" class="col col-lg-3 col-sm-6">
                         <label for="maxBTCFeeRequiredPct" class="control-label font-medlg">Max BTC % Fee Required</label>
                         <label class="input">
-                            <input type="text" name="maxBTCFeeRequiredPct" class="form-control input-lg" type="text" data-bind="value: maxBTCFeeRequiredPct, valueUpdate: 'input'" />
+                            <input type="text" name="maxBTCFeeRequiredPct" class="form-control input" type="text" data-bind="value: maxBTCFeeRequiredPct, valueUpdate: 'input'" />
                         </label>
                         <br/><span class="errorColor" data-bind="validationMessage: maxBTCFeeRequiredPct"></span>
                     </section>
@@ -112,7 +112,7 @@
                         </tr>
                     </thead>
                     <tbody data-bind="foreach: assetPairMarketInfo">
-                        <tr>
+                        <tr data-bind="click: $parent.selectTopPair">
                             <td data-bind="text: MARKET"></td>
                             <td>
                                 <span data-bind="text: LOWEST_ASK"></span>

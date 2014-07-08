@@ -86,6 +86,10 @@ table.orderBook td {
 }
 
 .buySellPriceHistory {
-  height: 500px;
+  height: 280px;
   min-width: 500px;
+}
+
+.assetSelector section.col {
+  height: 65px;
 }
