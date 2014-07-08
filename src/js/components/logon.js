@@ -86,11 +86,7 @@ function LogonViewModel() {
       // set user country
       USER_COUNTRY = data['country'];
       $.jqlog.debug('USER_COUNTRY: '+USER_COUNTRY);
-      if (LIMITED_COUNTRIES.indexOf(USER_COUNTRY) != -1) {
-        LIMITED_FEATURES = true;
-      }
-      $.jqlog.debug('LIMITED_FEATURES: '+LIMITED_FEATURES);
-
+      
       multiAPI("is_wallet_online", [WALLET.identifier()], self.onIsWalletOnline);
 
     },

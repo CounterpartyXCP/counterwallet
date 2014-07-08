@@ -1,8 +1,5 @@
 INIT_FUNC = {};
 PROCESSED_BTCPAY = {};
-USER_COUNTRY = '';
-LIMITED_FEATURES = false;
-RESTRICTED_AREA = [];
 
 function initIndex() { //main page
   window.LOGON_VIEW_MODEL = new LogonViewModel();
@@ -352,8 +349,6 @@ function initBetting() {
   FEED_BROWSER.init();
 }
 INIT_FUNC['pages/betting.html'] = initBetting;
-RESTRICTED_AREA.push('pages/betting.html');
-
 
 function initOpenBets() {
   pageSetUp();
@@ -368,7 +363,6 @@ function initOpenBets() {
   });
 }
 INIT_FUNC['pages/openbets.html'] = initOpenBets;
-RESTRICTED_AREA.push('pages/openbets.html');
 
 function initMatchedBets() {
   pageSetUp();
@@ -384,8 +378,6 @@ function initMatchedBets() {
  
 }
 INIT_FUNC['pages/matchedbets.html'] = initMatchedBets;
-RESTRICTED_AREA.push('pages/matchedbets.html');
-
 
 function initOpenOrders() {
   pageSetUp();
@@ -416,7 +408,3 @@ function initRPS() {
 
 }
 INIT_FUNC['pages/rps.html'] = initRPS;
-RESTRICTED_AREA.push('pages/rps.html');
-
-// restricted action
-RESTRICTED_AREA.push('dividend');

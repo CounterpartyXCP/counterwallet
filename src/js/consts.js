@@ -208,6 +208,20 @@ var FEED_TYPES = ['simple', 'cfd']
 
 var DONATION_ADDRESS = USE_TESTNET ? 'n4MGGJBkW9RjRKBbZfBAceHDndhywvVPV9' : '19U6MmLLumsqxXSBMB5FgYXbezgXYC6Gpe';
 
-var LIMITED_COUNTRIES = ['US'];
-
 var APPROX_SECONDS_PER_BLOCK = USE_TESTNET ? 20 * 60 : 8 * 60; //a *rough* estimate on how many seconds per each block (used for estimating open order time left until expiration, etc)
+
+var USER_COUNTRY = '';
+
+// restricted action
+var RESTRICTED_AREA = {
+  'pages/betting.html': ['US'],
+  'pages/openbets.html': ['US'],
+  'pages/matchedbets.html': ['US', 'MA'],
+  'pages/rps.html': ['US'],
+  'dividend': ['US', 'MA']
+}
+
+
+
+
+

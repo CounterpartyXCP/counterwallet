@@ -499,28 +499,20 @@ function doubleHash(hexstr) {
 
 function checkCountry(action, callback) {
 
-  if (LIMITED_FEATURES && (RESTRICTED_AREA.indexOf(action) != -1)) {
+  if (RESTRICTED_AREA[action] && RESTRICTED_AREA[action].indexOf(USER_COUNTRY) != -1) {
     
-    var message = 'It appears that you are located in a country in which we are legally unable to provide services. <br> If you are using <b>Tor Browser</b> from a country in which the use of this website is allowed, please press the blue "New Identity" button and this problem will be solved immediately.';
+    var message = 'It appears that you are located in a country in which we are legally unable to provide services.';
 
     bootbox.dialog({
       title: "Country warning",
       message: message,
       buttons: {
         "cancel": {
-          label: "Cancel",
+          label: "Close",
           className: "btn-danger",
           callback: function() {
             bootbox.hideAll();
             return false;
-          }
-        },
-        "continue": {
-          label: "New Identity",
-          className: "btn-primary",
-          callback: function() {
-            LIMITED_FEATURES = false;
-            callback();
           }
         }
       }
