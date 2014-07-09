@@ -17,9 +17,9 @@ var AssetPairMarketInfoItemModel = function(entry) {
 var OrderBookEntryItemModel = function(entry) {
   this.BASE_ASSET = entry['base_asset'];
   this.QUOTE_ASSET = entry['quote_asset'];
-  this.UNIT_PRICE = entry['unit_price'] + ' ' + entry['base_asset'] + '/' + entry['quote_asset'];
-  this.QTY_AND_COUNT = smartFormat(entry['quantity']) + ' ' + entry['base_asset'] + ' (' + entry['count'] + ')';
-  this.DEPTH = smartFormat(entry['depth'], 10) + ' ' + entry['base_asset'];
+  this.UNIT_PRICE = entry['unit_price'];
+  this.QTY_AND_COUNT = smartFormat(entry['quantity']) + ' (' + entry['count'] + ')';
+  this.DEPTH = smartFormat(entry['depth'], 10);
 };
 
 var OpenOrderItemModel = function(entry, isBuySell) {
@@ -45,6 +45,7 @@ var TradeHistoryItemModel = function(entry) {
   this.QUANTITY_BASE = smartFormat(entry['base_quantity_normalized']) + ' ' + entry['base_asset'];
   this.QUANTITY_QUOTE = smartFormat(entry['quote_quantity_normalized']) + ' ' + entry['quote_asset'];
   this.UNIT_PRICE = entry['unit_price'] + ' ' + entry['base_asset'] + '/' + entry['quote_asset'];
+  this.RAW_UNIT_PRICE = smartFormat(entry['unit_price']);
   this.RAW_BLOCK_INDEX = entry['block_index'];
   this.RAW_BLOCK_TIME = entry['block_time'];
   this.RAW_QUANTITY_BASE = entry['base_quantity_normalized'];
@@ -90,6 +91,7 @@ function ViewPricesViewModel() {
   self.MARKET_DATA_REFRESH_TIMERID = null;
   self.recievedMarketData = ko.observable(false); 
   self.currentMarketUnitPrice = ko.observable();
+  self.currentMarketPrice = ko.observable();
   
   self.asset1 = ko.observable('').extend({
     required: true,
@@ -214,6 +216,9 @@ function ViewPricesViewModel() {
       return; //stop auto refreshing
     
     failoverAPI("get_asset_pair_market_info", {'limit': VIEW_PRICES_NUM_ASSET_PAIRS}, function(data, endpoint) {
+      $.jqlog.debug('DATA:');
+      $.jqlog.debug(data);
+
       self.assetPairMarketInfo([]);
       $('#assetPairMarketInfo').dataTable().fnClearTable();
 
@@ -249,6 +254,7 @@ function ViewPricesViewModel() {
       for(var i=0; i < data.length; i++) {
         trades.push(new TradeHistoryItemModel(data[i]));
       }
+
       self.latestTrades(trades);
       if(self.latestTrades().length) {
         runDataTables('#latestTrades', true, {
@@ -329,9 +335,12 @@ function ViewPricesViewModel() {
       deferred.resolve();
       self.tradeHistory([]);
       for(var i=0; i < data.length; i++) {
-        self.tradeHistory.push(new TradeHistoryItemModel(data[i]));
+        var item = new TradeHistoryItemModel(data[i]);
+        if (i==0) self.currentMarketPrice(item.RAW_UNIT_PRICE);
+        self.tradeHistory.push(item);
       }
       if(self.tradeHistory().length) {
+
         runDataTables('#tradeHistory', true, { "aaSorting": [ [0, 'desc'] ] });
       }
     }, function(jqXHR, textStatus, errorThrown, endpoint) {
@@ -458,6 +467,15 @@ function ViewPricesViewModel() {
       tradeHistory.fnAdjustColumnSizing();
     }
   }
+
+  self.selectSellOrder = function(order) {
+    $.jqlog.debug(order);
+  }
+
+  self.selectBuyOrder = function(order) {
+    $.jqlog.debug(order);
+  }
+
 };
 
 ViewPricesViewModel.deriveOpenOrderExpiresIn = function(blockIndexCreatedAt, expiration) {
@@ -534,9 +552,7 @@ ViewPricesViewModel.doChart = function(dispAssetPair, chartDiv, data) {
   //graph.highcharts('StockChart', {
   chartDiv.highcharts('StockChart', {
 
-      title: {
-        text: dispAssetPair
-      },
+
       xAxis: {
         type: 'datetime'
       },

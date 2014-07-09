@@ -1,20 +1,82 @@
-<div class="row">
-  <div class="col-xs-12 col-sm-7 col-md-7 col-lg-4">
-    <h1 class="page-title txt-color-blueDark">
-      <i class="fa fa-bar-chart-o fa-fw "></i> 
-        View Prices
-    </h1>
-  </div>
-</div>
+
 
 <section id="widget-grid" class="ordersGrid assetSelector"> <!-- widget grid -->
-  <div class="row"> <!-- row -->
+<div class="row">
+  <div class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
+
+    <h1 class="page-title txt-color-blueDark" data-bind="visible: !recievedMarketData()">
+      <i class="fa fa-bar-chart-o fa-fw "></i>      
+      Decentralized Exchange
+    </h1>
+
+    <h1 class="page-title txt-color-blueDark" data-bind="visible: recievedMarketData()">
+      <i class="fa fa-bar-chart-o fa-fw "></i>         
+      <span style="font-size:inherit;margin-right:50px" data-bind="text: dispAssetPair"></span> 
+      <span class="marketPrice" data-bind="visible: currentMarketPrice, text: currentMarketPrice"></span>
+      <a id="changeMarket" class="btn btn-primary" style="vertical-align:text-bottom;">Change Market</a>
+    </h1>
+
+  </div>
+</div>
+  <div data-bind="fadeVisibleInOnly: !recievedMarketData() && assetPairMarketInfo().length > 0" class="row"> <!-- row -->
+    <article class="col-xs-12 col-sm-12 col-md-12 col-lg-12"> <!-- NEW WIDGET START -->
+      <div class="jarviswidget defaultWidgetColor" id="wid-id-assetPairMarketInfo" data-widget-editbutton="false" data-widget-sortable="false" data-widget-deletebutton="false" data-widget-colorbutton="false" data-widget-fullscreenbutton="false" data-widget-togglebutton="false"  data-widget-grid="false">
+        <header>
+            <span class="widget-icon"> <i class="fa fa-chain"></i> </span>
+            <h3>Top Pairs</h3>
+            <div class="clearfix"></div>
+        </header>
+        <div> <!-- widget div-->
+            <div class="widget-body no-padding"> <!-- widget content -->
+                <div class="widget-body-toolbar">
+                </div>
+                <table id="assetPairMarketInfo" class="table table-striped table-hover datatable_basic">
+                    <thead>
+                        <tr>
+                            <th>Market</th>
+                            <th>Lowest Ask</th>
+                            <th>Highest Bid</th>
+                            <th>Order Depth</th>
+                            <th>24h Order Vol</th>
+                            <th>24h % Change</th>
+                            <th>24hr Vol (XCP)</th>
+                            <th>24hr Vol (BTC)</th>
+                        </tr>
+                    </thead>
+                    <tbody data-bind="foreach: assetPairMarketInfo">
+                        <tr data-bind="click: $parent.selectTopPair">
+                            <td data-bind="text: MARKET"></td>
+                            <td>
+                                <span data-bind="text: LOWEST_ASK"></span>
+                                <span data-bind="text: MARKET, visible: LOWEST_ASK"></span>
+                            </td>
+                            <td>
+                                <span data-bind="text: HIGHEST_BID"></span>
+                                <span data-bind="text: MARKET, visible: HIGHEST_BID"></span>
+                            </td> 
+                            <td data-bind="text: ORDER_DEPTH"></td>
+                            <td data-bind="text: ORDER_VOL_24H"></td>
+                            <td data-bind="text: PCT_CHANGE_24H, class: PCT_CHANGE_24H_CSS_CLASS"></td>
+                            <td data-bind="text: XCP_VOL_24H"></td>
+                            <td data-bind="text: BTC_VOL_24H"></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div> <!-- end widget content -->
+        </div> <!-- end widget div -->
+      </div> <!-- end widget -->
+    </article> <!-- WIDGET END -->
+
+  </div> <!-- end row -->
+  
+  <div class="row" data-bind="fadeVisibleInOnly: !recievedMarketData()"> <!-- row -->
+    
     <article class="col-xs-12 col-sm-12 col-md-12 col-lg-12"> <!-- NEW WIDGET START -->
       <!-- Widget ID (each widget will need unique ID)-->
-      <div class="jarviswidget defaultWidgetColor" id="wid-id-orderInputSelection" data-widget-editbutton="false" data-widget-deletebutton="false">
+      <div class="jarviswidget defaultWidgetColor" id="wid-id-orderInputSelection" data-widget-editbutton="false" data-widget-sortable="false" data-widget-deletebutton="false" data-widget-colorbutton="false" data-widget-fullscreenbutton="false" data-widget-togglebutton="false"  data-widget-grid="false" >
           <header>
             <span class="widget-icon"> <i class="fa fa-rocket"></i> </span>
-            <h3>Select Tokens</h3>
+            <h3>Select Another pair</h3>
             <div class="clearfix"></div>
           </header>
           <div> <!-- widget div-->
@@ -61,16 +123,11 @@
 
   <div class="row" data-bind="fadeVisibleInOnly: validationModelBaseOrders.isValid() && recievedMarketData() && currentMarketUnitPrice() != 0">
     <article class="col-xs-12 col-sm-12 col-md-12 col-lg-12"> <!-- NEW WIDGET START -->
-      <div class="jarviswidget defaultWidgetColor" id="wid-id-priceCharts" data-widget-editbutton="false"  data-widget-deletebutton="false"
+      <div class="jarviswidget defaultWidgetColor" id="wid-id-priceCharts" data-widget-editbutton="false" data-widget-sortable="false" data-widget-deletebutton="false" data-widget-colorbutton="false" data-widget-fullscreenbutton="false" data-widget-togglebutton="false"  data-widget-grid="false"
        data-bind="fadeVisibleInOnly: validationModelBaseOrders.isValid() && recievedMarketData() && currentMarketUnitPrice() != 0">
         <header>
             <span class="widget-icon"> <i class="fa fa-bar-chart-o"></i> </span>
             <h3>Price History for <span data-bind="text: dispAssetPair"></span></h3>
-            <div class="widget-toolbar" role="menu" data-bind="visible: currentMarketUnitPrice"> 
-                <div class="label label-success">
-                    <i class="fa fa-retweet"></i>&nbsp;Market Price: <span data-bind="text: currentMarketUnitPrice"></span>
-                </div>
-            </div>
             <div class="clearfix"></div>
         </header>
         <div> <!-- widget div-->
@@ -86,271 +143,170 @@
     </article> <!-- WIDGET END -->
   </div> <!-- end row -->
 
-  <div data-bind="fadeVisibleInOnly: !recievedMarketData() && assetPairMarketInfo().length > 0" class="row"> <!-- row -->
-    <article class="col-xs-12 col-sm-12 col-md-12 col-lg-12"> <!-- NEW WIDGET START -->
-      <div class="jarviswidget defaultWidgetColor" id="wid-id-assetPairMarketInfo" data-widget-editbutton="false" data-widget-deletebutton="false">
-        <header>
-            <span class="widget-icon"> <i class="fa fa-chain"></i> </span>
-            <h3>Top Pairs</h3>
-            <div class="clearfix"></div>
-        </header>
-        <div> <!-- widget div-->
-            <div class="widget-body no-padding"> <!-- widget content -->
-                <div class="widget-body-toolbar">
-                </div>
-                <table id="assetPairMarketInfo" class="table table-striped table-hover datatable_basic">
-                    <thead>
-                        <tr>
-                            <th>Market</th>
-                            <th>Lowest Ask</th>
-                            <th>Highest Bid</th>
-                            <th>Order Depth</th>
-                            <th>24h Order Vol</th>
-                            <th>24h % Change</th>
-                            <th>24hr Vol (XCP)</th>
-                            <th>24hr Vol (BTC)</th>
-                        </tr>
-                    </thead>
-                    <tbody data-bind="foreach: assetPairMarketInfo">
-                        <tr data-bind="click: $parent.selectTopPair">
-                            <td data-bind="text: MARKET"></td>
-                            <td>
-                                <span data-bind="text: LOWEST_ASK"></span>
-                                <span data-bind="text: MARKET, visible: LOWEST_ASK"></span>
-                            </td>
-                            <td>
-                                <span data-bind="text: HIGHEST_BID"></span>
-                                <span data-bind="text: MARKET, visible: HIGHEST_BID"></span>
-                            </td> 
-                            <td data-bind="text: ORDER_DEPTH"></td>
-                            <td data-bind="text: ORDER_VOL_24H"></td>
-                            <td data-bind="text: PCT_CHANGE_24H, class: PCT_CHANGE_24H_CSS_CLASS"></td>
-                            <td data-bind="text: XCP_VOL_24H"></td>
-                            <td data-bind="text: BTC_VOL_24H"></td>
-                        </tr>
-                    </tbody>
-                </table>
-            </div> <!-- end widget content -->
-        </div> <!-- end widget div -->
-      </div> <!-- end widget -->
-    </article> <!-- WIDGET END -->
-  </div> <!-- end row -->
   
-  <div data-bind="fadeVisibleInOnly: !recievedMarketData() && latestTrades().length > 0" class="row"> <!-- row -->
-    <article class="col-xs-12 col-sm-12 col-md-12 col-lg-12"> <!-- NEW WIDGET START -->
-      <div class="jarviswidget defaultWidgetColor" id="wid-id-latestTrades" data-widget-editbutton="false" data-widget-deletebutton="false">
-        <header>
-            <span class="widget-icon"> <i class="fa fa-exchange"></i> </span>
-            <h3>Latest Trades</h3>
-            <div class="clearfix"></div>
-        </header>
-        <div> <!-- widget div-->
-            <div class="widget-body no-padding"> <!-- widget content -->
-                <div class="widget-body-toolbar">
-                </div>
-                <table id="latestTrades" class="table table-striped table-hover datatable_basic">
-                    <thead>
-                        <tr>
-                            <th>Block</th>
-                            <th>Block Time</th>
-                            <th>Order 1</th>
-                            <th>Address 1</th>
-                            <th>Order 2</th>
-                            <th>Address 2</th>
-                            <th>Quantity Base</span></th>
-                            <th>Quantity Quote</span></th>
-                            <th>Unit Price</th>
-                        </tr>
-                    </thead>
-                    <tbody data-bind="foreach: latestTrades">
-                        <tr>
-                            <td data-bind="html: BLOCK_INDEX"></td>
-                            <td data-bind="text: BLOCK_TIME"></td>
-                            <td data-bind="html: ORDER_1"></td> 
-                            <td data-bind="html: ADDRESS_1"></td>
-                            <td data-bind="html: ORDER_2"></td>
-                            <td data-bind="html: ADDRESS_2"></td>
-                            <td data-bind="text: QUANTITY_BASE"></td>
-                            <td data-bind="text: QUANTITY_QUOTE"></td>
-                            <td data-bind="text: UNIT_PRICE"></td>
-                            
-                            <td data-bind="text: RAW_BLOCK_INDEX" class="display-none"></td>
-                            <td data-bind="text: RAW_BLOCK_TIME" class="display-none"></td>
-                            <td data-bind="text: RAW_QUANTITY_BASE" class="display-none"></td>
-                            <td data-bind="text: RAW_QUANTITY_QUOTE" class="display-none"></td>
-                        </tr>
-                    </tbody>
-                </table>
-            </div> <!-- end widget content -->
-        </div> <!-- end widget div -->
-      </div> <!-- end widget -->
-    </article> <!-- WIDGET END -->
-  </div> <!-- end row -->
-
   <div class="row">
-    <article class="col-xs-12 col-sm-12 col-md-12 col-lg-12"> <!-- NEW WIDGET START -->
+
+    <article class="col-xs-6 col-sm-6 col-md-6 col-lg-6"> <!-- NEW WIDGET START -->
       <div class="jarviswidget defaultWidgetColor" id="wid-id-orderBook" data-widget-editbutton="false" data-widget-deletebutton="false"
-       data-bind="fadeVisibleInOnly: validationModelBaseOrders.isValid() && recievedMarketData() && currentMarketUnitPrice() != 0">
+       data-widget-colorbutton="false" data-widget-fullscreenbutton="false" data-widget-togglebutton="false" data-widget-sortable="false" data-widget-grid="false" data-bind="fadeVisibleInOnly: validationModelBaseOrders.isValid() && recievedMarketData()">
         <header>
             <span class="widget-icon"> <i class="fa fa-sort-amount-desc"></i> </span>
-            <h3>Order book for <span data-bind="text: dispAssetPair"></span></h3>
-            <div class="widget-toolbar" role="menu" data-bind="visible: bidAskMedian"> 
-                <div class="label label-info">
-                    <i class="fa fa-adjust"></i>&nbsp;Bid-Ask Median: <span data-bind="text: bidAskMedian"></span>
-                </div>
-            </div>
-            <div class="widget-toolbar" role="menu" data-bind="visible: bidAskSpread"> 
-                <div class="label label-info">
-                    <i class="fa fa-arrows-h"></i>&nbsp;Spread: <span data-bind="text: bidAskSpread"></span>
-                </div>
-            </div>
+            <h3 data-bind="text: 'Buy ' + baseAsset"></h3>
             <div class="clearfix"></div>
         </header>
         <div> <!-- widget div-->
-            <div class="widget-body"> <!-- widget content -->
-                <div class="row">
-                    <div class="col-md-6">
-                        <table class="orderBook table table-striped table-bordered table-condensed">
-                            <thead>
-                                <tr class="info">
-                                    <th colspan="3"><center><b>Selling <span data-bind="text: baseAsset"></span></b></center></th>
-                                </tr>
-                                <tr>
-                                    <th>Unit Price</th>
-                                    <th>Quantity (Count)</th>
-                                    <th>Depth</th>
-                                </tr>
-                            </thead>
-                            <tbody data-bind="foreach: askBook"> <!-- ascending order -->
-                                <tr>
-                                    <td data-bind="text: UNIT_PRICE"></td>
-                                    <td data-bind="text: QTY_AND_COUNT"></td> <!-- quantity (count) -->
-                                    <td data-bind="text: DEPTH"></td>
-                                </tr>
-                            </tbody>
-                        </table>
-                    </div>
-                    <div class="col-md-6">
-                        <table class="orderBook table table-striped table-bordered table-condensed">
-                            <thead>
-                                <tr class="success">
-                                    <th colspan="3"><center><b>Buying <span data-bind="text: baseAsset"></span></b></center></th>
-                                </tr>
-                                <tr>
-                                    <th>Unit Price</th>
-                                    <th>Quantity (Count)</th>
-                                    <th>Depth</th>
-                                </tr>
-                            </thead>
-                            <tbody data-bind="foreach: bidBook"> <!-- descending order -->
-                                <tr>
-                                    <td data-bind="text: UNIT_PRICE"></td>
-                                    <td data-bind="text: QTY_AND_COUNT"></td> <!-- quantity (count) -->
-                                    <td data-bind="text: DEPTH"></td>
-                                </tr>
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
+            <div class="widget-body no-padding"> <!-- widget content -->
+
+                
+
             </div> <!-- end widget content -->
         </div> <!-- end widget div -->
       </div> <!-- end widget -->
     </article> <!-- WIDGET END -->
+
+    <article class="col-xs-6 col-sm-6 col-md-6 col-lg-6"> <!-- NEW WIDGET START -->
+      <div class="jarviswidget defaultWidgetColor" id="wid-id-orderBook" data-widget-editbutton="false" data-widget-deletebutton="false"
+       data-widget-colorbutton="false" data-widget-fullscreenbutton="false" data-widget-togglebutton="false" data-widget-sortable="false" data-widget-grid="false" data-bind="fadeVisibleInOnly: validationModelBaseOrders.isValid() && recievedMarketData()">
+        <header>
+            <span class="widget-icon"> <i class="fa fa-sort-amount-desc"></i> </span>
+            <h3 data-bind="text: 'Sell ' + baseAsset"></h3>
+            <div class="clearfix"></div>
+        </header>
+        <div> <!-- widget div-->
+            <div class="widget-body no-padding"> <!-- widget content -->
+
+                <table class="table buySellForm">
+                  <tbody> 
+                      <tr>
+                        <td>Lowest ask price</td>
+                        <td>0.1</td> 
+                        <td data-bind="text: baseAsset + '/' + quoteAsset"></td>
+                      </tr>
+                      <tr>
+                        <td>Address</td>
+                        <td colspan="2">...</td>
+                      </tr>
+                      <tr class="bold">
+                        <td>Your balance</td>
+                        <td>0.1</td> 
+                        <td data-bind="text: baseAsset"></td>
+                      </tr>
+                      <tr>
+                        <td>Obtainable</td>
+                        <td>0.1</td> 
+                        <td data-bind="text: baseAsset"></td>
+                      </tr>
+                      <tr>
+                        <td>Price</td>
+                        <td>
+                          <input type="text" class="form-control input-sm" type="text"/>
+                        </td> 
+                        <td data-bind="text: baseAsset + '/' + quoteAsset"></td>
+                      </tr>
+                      <tr>
+                        <td>Amount</td>
+                        <td>
+                          <input type="text" class="form-control input-sm" type="text"/>
+                        </td> 
+                        <td data-bind="text: baseAsset"></td>
+                      </tr>
+                      <tr>
+                        <td>Total</td>
+                        <td>
+                          <input type="text" class="form-control input-sm" type="text"/>
+                        </td> 
+                        <td data-bind="text: quoteAsset"></td>
+                      </tr>
+                      <tr>
+                        <td>Fee</td>
+                        <td>0.1</td> 
+                        <td>BTC</td>
+                      </tr>
+                  </tbody>
+                </table>
+            
+            </div> <!-- end widget content -->
+        </div> <!-- end widget div -->
+      </div> <!-- end widget -->
+    </article> <!-- WIDGET END -->
+
   </div> <!-- end row -->  
 
-  <!-- avoid looping ko-widgets here (like we used to do with this widget and the next to avoid duplicated code)...
-      just bear it and repeat the HTML code... looping the jarvis widgets with knockout causes odd bugs -->
-  <div class="row" data-bind="fadeVisibleInOnly: $root.validationModelBaseOrders.isValid() && $root.recievedMarketData() && $root.asset1OpenBuyOrders().length">
-    <article class="col-xs-12 col-sm-12 col-md-12 col-lg-12"> <!-- NEW WIDGET START -->
-      <div class="jarviswidget defaultWidgetColor" id="wid-id-openOrders-buying" data-widget-editbutton="false" data-widget-deletebutton="false">
-        <header>
-            <span class="widget-icon"> <i class="fa fa-circle-o"></i> </span>
-            <h3>Open Orders Buying <span data-bind="text: $root.asset1()"></span></h3>
-            <div class="clearfix"></div>
-        </header>
-        <div> <!-- widget div-->
-            <div class="widget-body no-padding"> <!-- widget content -->
-                <div class="widget-body-toolbar">
-                </div>
-                <table id="asset1OpenBuyOrders" class="table table-striped table-hover datatable_basic">
-                    <thead>
-                        <tr>
-                            <th>Tx ID</th>
-                            <th>When Created</th>
-                            <th>Price</th>
-                            <th>Buy Qty Left</th>
-                            <th>Sell Qty Left</th>
-                            <th>Expires In</th>
-                            <th data-bind="visible: $root.asset1() === 'BTC'">Fee Required Left</th>
-                            <th data-bind="visible: $root.asset2() === 'BTC'">Fee Provided Left</th>
-                        </tr>
-                    </thead>
-                    <tbody data-bind="foreach: $root.asset1OpenBuyOrders">
-                        <tr>
-                            <td data-bind="html: TX_ID"></td>
-                            <td data-bind="timeago: WHEN_CREATED"></td>
-                            <td data-bind="text: PRICE"></td>
-                            <td data-bind="html: BUY_QTY_LEFT"></td>
-                            <td data-bind="html: SELL_QTY_LEFT"></td>
-                            <td data-bind="html: EXPIRES_IN"></td>
-                            <td data-bind="visible: $root.asset1() === 'BTC', html: FEE_REQUIRED_LEFT"></td>                            
-                            <td data-bind="visible: $root.asset2() === 'BTC', html: FEE_PROVIDED_LEFT"></td>
-                        </tr>
-                    </tbody>
-                </table>
-            </div> <!-- end widget content -->
-        </div> <!-- end widget div -->
-      </div> <!-- end widget -->
-    </article> <!-- WIDGET END -->
-  </div> <!-- end row -->
+
   
-  <div class="row" data-bind="fadeVisibleInOnly: $root.validationModelBaseOrders.isValid() && $root.recievedMarketData() && $root.asset2OpenBuyOrders().length">
-    <article class="col-xs-12 col-sm-12 col-md-12 col-lg-12"> <!-- NEW WIDGET START -->
-      <div class="jarviswidget defaultWidgetColor" id="wid-id-openOrders-selling" data-widget-editbutton="false" data-widget-deletebutton="false">
+  <div class="row">
+
+    <article class="col-xs-6 col-sm-6 col-md-6 col-lg-6"> <!-- NEW WIDGET START -->
+      <div class="jarviswidget defaultWidgetColor" id="wid-id-orderBook" data-widget-editbutton="false" data-widget-deletebutton="false"
+       data-widget-colorbutton="false" data-widget-fullscreenbutton="false" data-widget-togglebutton="false" data-widget-sortable="false" data-widget-grid="false" data-bind="fadeVisibleInOnly: validationModelBaseOrders.isValid() && recievedMarketData() && currentMarketUnitPrice() != 0">
         <header>
-            <span class="widget-icon"> <i class="fa fa-circle-o"></i> </span>
-            <h3>Open Orders Buying <span data-bind="text: $root.asset2()"></span></h3>
+            <span class="widget-icon"> <i class="fa fa-sort-amount-desc"></i> </span>
+            <h3>Buy orders</h3>
             <div class="clearfix"></div>
         </header>
         <div> <!-- widget div-->
             <div class="widget-body no-padding"> <!-- widget content -->
-                <div class="widget-body-toolbar">
-                </div>
-                <table id="asset2OpenBuyOrders" class="table table-striped table-hover datatable_basic">
+
+                <table class="orderBook table table-striped table-bordered table-condensed">
                     <thead>
                         <tr>
-                            <th>Tx ID</th>
-                            <th>When Created</th>
-                            <th>Price</th>
-                            <th>Buy Qty Left</th>
-                            <th>Sell Qty Left</th>
-                            <th>Expires In</th>
-                            <th data-bind="visible: $root.asset2() == 'BTC'">Fee Required Left</th>
-                            <th data-bind="visible: $root.asset1() == 'BTC'">Fee Provided Left</th>
+                            <th>Unit Price [<span data-bind="text: baseAsset + '/' + quoteAsset"></span>]</th>
+                            <th>Quantity [<span data-bind="text: baseAsset"></span>] (Count)</th>
+                            <th>Depth [<span data-bind="text: baseAsset"></span>]</th>
                         </tr>
                     </thead>
-                    <tbody data-bind="foreach: $root.asset2OpenBuyOrders">
-                        <tr>
-                            <td data-bind="html: TX_ID"></td>
-                            <td data-bind="timeago: WHEN_CREATED"></td>
-                            <td data-bind="text: PRICE"></td>
-                            <td data-bind="html: BUY_QTY_LEFT"></td>
-                            <td data-bind="html: SELL_QTY_LEFT"></td>
-                            <td data-bind="html: EXPIRES_IN"></td>
-                            <td data-bind="visible: $root.asset2() === 'BTC', html: FEE_REQUIRED_LEFT"></td>                            
-                            <td data-bind="visible: $root.asset1() === 'BTC', html: FEE_PROVIDED_LEFT"></td>
+                    <tbody data-bind="foreach: bidBook"> <!-- descending order -->
+                        <tr data-bind="click: $parent.selectBuyOrder">
+                            <td data-bind="text: UNIT_PRICE"></td>
+                            <td data-bind="text: QTY_AND_COUNT"></td> <!-- quantity (count) -->
+                            <td data-bind="text: DEPTH"></td>
                         </tr>
                     </tbody>
                 </table>
+
             </div> <!-- end widget content -->
         </div> <!-- end widget div -->
       </div> <!-- end widget -->
     </article> <!-- WIDGET END -->
-  </div> <!-- end row -->
+
+    <article class="col-xs-6 col-sm-6 col-md-6 col-lg-6"> <!-- NEW WIDGET START -->
+      <div class="jarviswidget defaultWidgetColor" id="wid-id-orderBook" data-widget-editbutton="false" data-widget-deletebutton="false"
+       data-widget-colorbutton="false" data-widget-fullscreenbutton="false" data-widget-togglebutton="false" data-widget-sortable="false" data-widget-grid="false" data-bind="fadeVisibleInOnly: validationModelBaseOrders.isValid() && recievedMarketData() && currentMarketUnitPrice() != 0">
+        <header>
+            <span class="widget-icon"> <i class="fa fa-sort-amount-desc"></i> </span>
+            <h3>Sell orders</h3>
+            <div class="clearfix"></div>
+        </header>
+        <div> <!-- widget div-->
+            <div class="widget-body no-padding"> <!-- widget content -->
+   
+                <table class="orderBook table table-striped table-bordered table-condensed">
+                    <thead>
+                        <tr>
+                            <th>Unit Price [<span data-bind="text: baseAsset + '/' + quoteAsset"></span>]</th>
+                            <th>Quantity [<span data-bind="text: baseAsset"></span>] (Count)</th>
+                            <th>Depth [<span data-bind="text: baseAsset"></span>]</th>
+                        </tr>
+                    </thead>
+                    <tbody data-bind="foreach: askBook"> <!-- ascending order -->
+                        <tr data-bind="click: $parent.selectSellOrder">
+                            <td data-bind="text: UNIT_PRICE"></td>
+                            <td data-bind="text: QTY_AND_COUNT"></td> <!-- quantity (count) -->
+                            <td data-bind="text: DEPTH"></td>
+                        </tr>
+                    </tbody>
+                </table>
+            
+            </div> <!-- end widget content -->
+        </div> <!-- end widget div -->
+      </div> <!-- end widget -->
+    </article> <!-- WIDGET END -->
+
+  </div> <!-- end row -->  
 
   <div class="row" data-bind="fadeVisibleInOnly: validationModelBaseOrders.isValid() && recievedMarketData() && tradeHistory().length > 0">
     <article class="col-xs-12 col-sm-12 col-md-12 col-lg-12"> <!-- NEW WIDGET START -->
-      <div class="jarviswidget defaultWidgetColor" id="wid-id-tradeHistory" data-widget-editbutton="false" data-widget-deletebutton="false">
+      <div class="jarviswidget defaultWidgetColor" id="wid-id-tradeHistory" data-widget-editbutton="false" data-widget-sortable="false" data-widget-deletebutton="false" data-widget-colorbutton="false" data-widget-fullscreenbutton="false" data-widget-togglebutton="false" data-widget-grid="false">
         <header>
             <span class="widget-icon"> <i class="fa fa-circle"></i> </span>
             <h3>Completed Trades for <span data-bind="text: dispAssetPair"></span></h3>
@@ -365,10 +321,6 @@
                         <tr>
                             <th>Block</th>
                             <th>Block Time</th>
-                            <th>Order 1</th>
-                            <th>Address 1</th>
-                            <th>Order 2</th>
-                            <th>Address 2</th>
                             <th>Quantity <span data-bind="text: baseAsset"></span></th>
                             <th>Quantity <span data-bind="text: quoteAsset"></span></th>
                             <th>Unit Price</th>
@@ -376,12 +328,8 @@
                     </thead>
                     <tbody data-bind="foreach: tradeHistory">
                         <tr>
-                            <td data-bind="html: BLOCK"></td>
+                            <td data-bind="html: BLOCK_INDEX"></td>
                             <td data-bind="text: BLOCK_TIME"></td>
-                            <td data-bind="html: ORDER_1"></td> 
-                            <td data-bind="html: ADDRESS_1"></td>
-                            <td data-bind="html: ORDER_2"></td>
-                            <td data-bind="html: ADDRESS_2"></td>
                             <td data-bind="text: QUANTITY_BASE"></td>
                             <td data-bind="text: QUANTITY_QUOTE"></td>
                             <td data-bind="text: UNIT_PRICE"></td>

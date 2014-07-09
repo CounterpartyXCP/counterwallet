@@ -86,10 +86,34 @@ table.orderBook td {
 }
 
 .buySellPriceHistory {
-  height: 280px;
+  height: 250px;
   min-width: 500px;
 }
 
 .assetSelector section.col {
   height: 65px;
+}
+
+span.marketPrice {
+  font-size:inherit;
+  display:inline-block;
+  margin-right:50px;
+  padding-left:10px;
+  padding-right: 10px;
+  -webkit-border-radius: 5px;
+  -moz-border-radius: 5px;
+  border-radius: 5px;
+  border: 1px solid #000;
+}
+
+#assetPairMarketInfo td {
+  cursor: pointer;
+}
+
+table.buySellForm tbody tr td {
+  vertical-align: middle;
+}
+
+table.buySellForm tr.bold td {
+  font-weight: bold;
 }
