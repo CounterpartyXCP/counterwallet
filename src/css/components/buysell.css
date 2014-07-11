@@ -104,7 +104,19 @@ span.marketPrice {
   -moz-border-radius: 5px;
   border-radius: 5px;
   border: 1px solid #000;
+  font-weight: bold;
+  color: #E0AE6D;
+  background: #F5F5F5;
+
 }
+
+.pairTitle {
+  font-size:inherit;
+  font-weight:bold;
+  margin-right:10px;
+  display:inline-block;
+}
+
 
 #assetPairMarketInfo td {
   cursor: pointer;
@@ -115,5 +127,24 @@ table.buySellForm tbody tr td {
 }
 
 table.buySellForm tr.bold td {
-  font-weight: bold;
+  font-weight: bolder;
+  color: #f60!important;
+}
+
+div.sellForm {
+  border: 1px solid #ebbdac;
+  background: #ffeddf;
+}
+
+div.buyForm {
+  border: 1px solid #9EC7CF;
+  background: #E9FAF3;
+}
+
+table.buySellForm .number {
+  text-align: right;
+}
+
+table.confirmOrderBox td {
+  padding: 5px !important;
 }

@@ -15,10 +15,12 @@ var AssetPairMarketInfoItemModel = function(entry) {
 };
 
 var OrderBookEntryItemModel = function(entry) {
+  $.jqlog.debug(entry);
   this.BASE_ASSET = entry['base_asset'];
   this.QUOTE_ASSET = entry['quote_asset'];
   this.UNIT_PRICE = entry['unit_price'];
   this.QTY_AND_COUNT = smartFormat(entry['quantity']) + ' (' + entry['count'] + ')';
+  this.TOTAL = smartFormat(mulFloat(entry['unit_price'], entry['quantity']));
   this.DEPTH = smartFormat(entry['depth'], 10);
 };
 
@@ -91,8 +93,7 @@ function ViewPricesViewModel() {
   self.MARKET_DATA_REFRESH_TIMERID = null;
   self.recievedMarketData = ko.observable(false); 
   self.currentMarketUnitPrice = ko.observable();
-  self.currentMarketPrice = ko.observable();
-  
+
   self.asset1 = ko.observable('').extend({
     required: true,
     ordersIsExistingAssetName: self
@@ -143,6 +144,14 @@ function ViewPricesViewModel() {
     if(!self.assetPair()) return null;
     return self.assetPair()[0] == self.asset1() ? self.asset2() : self.asset1();
   }, self);
+  self.baseAssetIsDivisible = ko.computed(function() {
+    if(!self.assetPair()) return null;
+    return self.assetPair()[0] == self.asset1IsDivisible() ? self.asset1IsDivisible() : self.asset2IsDivisible();
+  }, self);
+  self.quoteAssetIsDivisible = ko.computed(function() {
+    if(!self.assetPair()) return null;
+    return self.assetPair()[0] == self.asset1IsDivisible() ? self.asset2IsDivisible() : self.asset1IsDivisible();
+  }, self);
   
   self.delayedBTCFeeSelection = ko.computed(function() {
     return self.minBTCFeeProvidedPct().toString() + '-' + self.maxBTCFeeRequiredPct().toString(); //don't care about the value, we just want to be notified here
@@ -182,7 +191,417 @@ function ViewPricesViewModel() {
     minBTCFeeProvidedPct: self.minBTCFeeProvidedPct,
     maxBTCFeeRequiredPct: self.maxBTCFeeRequiredPct
   });
+
+
+  self.balances = {};
+  self.currentMarketPrice = ko.observable();
+  self.marketProgression24h = ko.observable();
+
+  self.marketProgression24hDisp = ko.computed(function() {
+    var span = $('<span></span>').css('font-size', '12px').css('color', '#000');
+    if (self.marketProgression24h()==0) {
+      span.text('0%');
+    } else if (self.marketProgression24h()>0) {
+      span.text('+' + self.marketProgression24h() + '%').addClass('txt-color-greenDark');
+    } else {
+      span.text('-' + self.marketProgression24h() + '%').addClass('txt-color-red');
+    }
+    return $('<div>').append(span).html();
+  });
+
+  /********************************************
+
+  SELL FORM BEGIN
   
+  ********************************************/
+
+  self.highestBidPrice = ko.observable();
+  self.sellPrice = ko.observable();
+  self.sellAmount = ko.observable(0);
+  self.sellTotal = ko.observable(0);
+  self.sellPriceHasFocus = ko.observable();
+  self.sellAmountHasFocus = ko.observable();
+  self.sellTotalHasFocus = ko.observable();
+  self.obtainableForSell = ko.observable();
+  self.selectedAddressForSell = ko.observable();
+  self.availableBalanceForSell = ko.observable();
+
+  self.availableAddressesForSell = ko.computed(function() { //stores BuySellAddressInDropdownItemModel objects
+    if(!self.baseAsset()) return null; //must have a sell asset selected
+    //Get a list of all of my available addresses with the specified sell asset balance
+    var addresses = WALLET.getAddressesList(true);
+    var addressesWithBalance = [];
+    var bal = null, address = null, addressObj = null;
+    for(var i = 0; i < addresses.length; i++) {
+      address = addresses[i][0];
+      addressObj = WALLET.getAddressObj(address);
+      bal = WALLET.getBalance(address, self.baseAsset());
+      if(addressObj.IS_WATCH_ONLY) continue; //don't list watch addresses, obviously
+      if(bal) {
+        addressesWithBalance.push(new BuySellAddressInDropdownItemModel(addresses[i][0], addresses[i][1], self.baseAsset(), bal));  
+        self.balances[addresses[i][0] + '_' + self.baseAsset()] = parseFloat(bal);     
+      } 
+    }
+    
+    addressesWithBalance.sort(function(left, right) {
+      return left.BALANCE == right.BALANCE ? 0 : (left.BALANCE > right.BALANCE ? -1 : 1);
+    });
+
+    return addressesWithBalance;
+  }, self);
+
+  self.selectedAddressForSell.subscribe(function(value) {
+    var bal = self.balances[value + '_' + self.baseAsset()];
+    self.availableBalanceForSell(bal);
+    self.obtainableForSell(mulFloat(bal, self.highestBidPrice()));
+  })
+
+  self.sellPrice.subscribe(function(price) {
+    if (!self.sellPriceHasFocus() || !self.sellAmount()) return;
+    self.sellTotal(mulFloat(self.sellAmount(), price));
+  })
+  
+  self.sellAmount.subscribe(function(amount) {
+    if (!self.sellAmountHasFocus() || !self.sellPrice()) return;
+    self.sellTotal(mulFloat(self.sellPrice(), amount));
+  })
+
+  self.sellTotal.subscribe(function(total) {
+    if (!self.sellTotalHasFocus() || !self.sellPrice()) return;
+    self.sellAmount(divFloat(total, self.sellPrice()));
+  })
+
+  self.sellAmount.extend({
+    required: true,
+    isValidPositiveQuantity: self,
+    validation: {
+      validator: function (val, self) {
+        return parseFloat(val) <= self.availableBalanceForSell();
+      },
+      message: 'Amount entered exceeds the address balance.',
+      params: self
+    }    
+  });
+
+  self.sellValidation = ko.validatedObservable({
+    sellAmount: self.sellAmount
+  });
+
+  self.sellFee = ko.computed(function() {
+    var give_quantity = denormalizeQuantity(self.sellAmount(), self.baseAssetIsDivisible());
+    var fee_provided = MIN_FEE;
+    
+    if (self.baseAsset() == 'BTC') {
+      fee_provided = mulFloat(give_quantity, FEE_FRACTION_PROVIDED_DEFAULT_PCT/100);
+      fee_provided = Math.ceil(fee_provided);
+    }
+
+    return normalizeQuantity(fee_provided);
+  });
+
+  self.selectBuyOrder = function(order) {
+    $.jqlog.debug(order);
+    self.sellPrice(parseFloat(order.UNIT_PRICE));
+    var amount = Math.min(self.availableBalanceForSell(), parseFloat(order.DEPTH));
+    self.sellAmount(amount);
+    if (self.sellPrice()) {
+      self.sellTotal(mulFloat(self.sellPrice(), amount));
+    }
+  }
+
+  self.setMaxSellAmount = function() {
+    var amount = self.availableBalanceForSell();
+    self.sellAmount(amount);
+    if (self.sellPrice()) {
+      self.sellTotal(mulFloat(self.sellPrice(), amount));
+    } 
+  }
+
+  self.doSell = function() {
+    var give_quantity = denormalizeQuantity(self.sellAmount(), self.baseAssetIsDivisible());
+    var get_quantity = denormalizeQuantity(self.sellTotal(), self.quoteAssetIsDivisible());
+    var fee_required = 0;
+    var fee_provided = MIN_FEE;
+    var expiration = ORDER_DEFAULT_EXPIRATION;
+
+    if (self.quoteAsset() == 'BTC') {
+      fee_required = mulFloat(get_quantity, FEE_FRACTION_REQUIRED_DEFAULT_PCT/100);
+      fee_required = Math.ceil(fee_required);
+    }
+
+    if (self.baseAsset() == 'BTC') {
+      fee_provided = mulFloat(give_quantity, FEE_FRACTION_PROVIDED_DEFAULT_PCT/100);
+      fee_provided = Math.ceil(fee_provided);
+      expiration = ORDER_BTCSELL_DEFAULT_EXPIRATION;
+    }
+
+    var params = {
+      source: self.selectedAddressForSell(),
+      give_quantity: give_quantity,
+      give_asset: self.baseAsset(),
+      _give_divisible: self.baseAssetIsDivisible(),
+      get_quantity: get_quantity,
+      get_asset: self.quoteAsset(),
+      _get_divisible: self.quoteAssetIsDivisible(),
+      fee_required: fee_required,
+      fee_provided: fee_provided,
+      expiration: expiration
+    }
+
+    var onSuccess = function(txHash, data, endpoint) {
+      bootbox.alert("Your order for <b class='notoQuantityColor'>" + self.sellTotal() + "</b>"
+       + " <b class='notoAssetColor'>" + self.quoteAsset() + "</b> has been placed. "
+       + ACTION_PENDING_NOTICE);
+       
+      //if the order involes selling BTC, then we want to notify the servers of our wallet_id so folks can see if our
+      // wallet is "online", in order to determine if we'd be able to best make the necessary BTCpay
+      if(self.baseAsset() == 'BTC') {
+        multiAPI("record_btc_open_order", [WALLET.identifier(), txHash]);
+      }
+    }
+
+    $.jqlog.debug(params);
+    WALLET.doTransaction(self.selectedAddressForSell(), "create_order", params, onSuccess);
+  }
+
+  self.sell = function() {
+    if (!self.sellValidation.isValid()) {
+      self.sellValidation.errors.showAllMessages();
+      return false;
+    }
+
+    message  = '<table class="confirmOrderBox">';
+    message += '<tr><td><b>Price: </b></td><td style="text-align:right">' + self.sellPrice() + '</td><td>' + self.quoteAsset() + '/' + self.baseAsset() + '</td></tr>';
+    message += '<tr><td><b>Amount: </b></td><td style="text-align:right">' + self.sellAmount() + '</td><td>' + self.baseAsset() + '</td></tr>';
+    message += '<tr><td><b>Total: </b></td><td style="text-align:right">' + self.sellTotal() + '</td><td>' + self.quoteAsset() + '</td></tr>';
+    message += '</table>';
+
+    bootbox.dialog({
+      title: "Confirm your order",
+      message: message,
+      buttons: {
+        "cancel": {
+          label: "Close",
+          className: "btn-danger",
+          callback: function() {
+            bootbox.hideAll();
+            return false;
+          }
+        },
+        "confirm": {
+          label: "Confirm Order",
+          className: "btn-primary",
+          callback: function() {
+            bootbox.hideAll();
+            self.doSell();
+            return true;
+          }
+        }
+
+      }
+    });
+
+  }
+  /* SELL FORM END */
+
+  /********************************************
+
+  BUY FORM BEGIN
+  
+  ********************************************/
+
+  self.lowestAskPrice = ko.observable();
+  self.buyPrice = ko.observable();
+  self.buyAmount = ko.observable(0);
+  self.buyTotal = ko.observable(0);
+  self.buyPriceHasFocus = ko.observable();
+  self.buyAmountHasFocus = ko.observable();
+  self.buyTotalHasFocus = ko.observable();
+  self.obtainableForBuy = ko.observable();
+  self.selectedAddressForBuy = ko.observable();
+  self.availableBalanceForBuy = ko.observable();
+
+  self.availableAddressesForBuy = ko.computed(function() { //stores BuySellAddressInDropdownItemModel objects
+    if(!self.quoteAsset()) return null; //must have a sell asset selected
+    //Get a list of all of my available addresses with the specified sell asset balance
+    var addresses = WALLET.getAddressesList(true);
+    var addressesWithBalance = [];
+    var bal = null, address = null, addressObj = null;
+    for(var i = 0; i < addresses.length; i++) {
+      address = addresses[i][0];
+      addressObj = WALLET.getAddressObj(address);
+      bal = WALLET.getBalance(address, self.quoteAsset());
+      if(addressObj.IS_WATCH_ONLY) continue; //don't list watch addresses, obviously
+      if(bal) {
+        addressesWithBalance.push(new BuySellAddressInDropdownItemModel(addresses[i][0], addresses[i][1], self.quoteAsset(), bal));  
+        self.balances[addresses[i][0] + '_' + self.quoteAsset()] = parseFloat(bal);     
+      } 
+    }
+    
+    addressesWithBalance.sort(function(left, right) {
+      return left.BALANCE == right.BALANCE ? 0 : (left.BALANCE > right.BALANCE ? -1 : 1);
+    });
+
+    return addressesWithBalance;
+  }, self);
+
+  self.selectedAddressForBuy.subscribe(function(value) {
+    var bal = self.balances[value + '_' + self.quoteAsset()];
+    self.availableBalanceForBuy(bal);
+    if (self.lowestAskPrice()) {
+      self.obtainableForBuy(divFloat(bal, self.lowestAskPrice()));  
+    }
+  })
+
+  self.buyPrice.subscribe(function(price) {
+    if (!self.buyPriceHasFocus() || !self.buyAmount()) return;
+    self.buyTotal(mulFloat(self.buyAmount(), price));
+  })
+  
+  self.buyAmount.subscribe(function(amount) {
+    if (!self.buyAmountHasFocus() || !self.buyPrice()) return;
+    self.buyTotal(mulFloat(self.buyPrice(), amount));
+  })
+
+  self.buyTotal.subscribe(function(total) {
+    if (!self.buyTotalHasFocus() || !self.buyPrice()) return;
+    self.buyAmount(divFloat(total, self.buyPrice()));
+  })
+
+  self.buyTotal.extend({
+    required: true,
+    isValidPositiveQuantity: self,
+    validation: {
+      validator: function (val, self) {
+        return parseFloat(val) <= self.availableBalanceForBuy();
+      },
+      message: 'Amount entered exceeds the address balance.',
+      params: self
+    }    
+  });
+
+  self.buyValidation = ko.validatedObservable({
+    buyTotal: self.buyTotal
+  });
+
+  self.buyFee = ko.computed(function() {
+    var give_quantity = denormalizeQuantity(self.buyTotal(), self.quoteAssetIsDivisible());
+    var fee_provided = MIN_FEE;
+
+    if (self.quoteAsset() == 'BTC') {
+      fee_provided = mulFloat(give_quantity, FEE_FRACTION_PROVIDED_DEFAULT_PCT/100);
+      fee_provided = Math.ceil(fee_provided);
+    }
+
+    return normalizeQuantity(fee_provided);
+  });
+
+  self.selectSellOrder = function(order) {
+    $.jqlog.debug(order);
+    self.buyPrice(parseFloat(order.UNIT_PRICE));
+    var amount = Math.min(self.availableBalanceForBuy(), parseFloat(order.DEPTH));
+    self.buyAmount(amount);
+    if (self.buyPrice()) {
+      self.buyTotal(mulFloat(self.buyPrice(), amount));
+    }
+  }
+
+  self.setMaxBuyAmount = function() {
+    var total = self.availableBalanceForBuy();
+    self.buyTotal(total);
+    if (self.buyPrice()) {
+      self.buyAmount(divFloat(total, self.buyPrice()));
+    } 
+  }
+
+  self.doBuy = function() {
+    var give_quantity = denormalizeQuantity(self.buyTotal(), self.quoteAssetIsDivisible());
+    var get_quantity = denormalizeQuantity(self.buyAmount(), self.baseAssetIsDivisible());
+    var fee_required = 0;
+    var fee_provided = MIN_FEE;
+    var expiration = ORDER_DEFAULT_EXPIRATION;
+
+    if (self.baseAsset() == 'BTC') {
+      fee_required = mulFloat(get_quantity, FEE_FRACTION_REQUIRED_DEFAULT_PCT/100);
+      fee_required = Math.ceil(fee_required);
+    }
+
+    if (self.quoteAsset() == 'BTC') {
+      fee_provided = mulFloat(give_quantity, FEE_FRACTION_PROVIDED_DEFAULT_PCT/100);
+      fee_provided = Math.ceil(fee_provided);
+      expiration = ORDER_BTCSELL_DEFAULT_EXPIRATION;
+    }
+
+    var params = {
+      source: self.selectedAddressForBuy(),
+      give_quantity: give_quantity,
+      give_asset: self.quoteAsset(),
+      _give_divisible: self.quoteAssetIsDivisible(),
+      get_quantity: get_quantity,
+      get_asset: self.baseAsset(),
+      _get_divisible: self.baseAssetIsDivisible(),
+      fee_required: fee_required,
+      fee_provided: fee_provided,
+      expiration: expiration
+    }
+
+    var onSuccess = function(txHash, data, endpoint) {
+      bootbox.alert("Your order for <b class='notoQuantityColor'>" + self.buyTotal() + "</b>"
+       + " <b class='notoAssetColor'>" + self.quoteAsset() + "</b> has been placed. "
+       + ACTION_PENDING_NOTICE);
+       
+      //if the order involes selling BTC, then we want to notify the servers of our wallet_id so folks can see if our
+      // wallet is "online", in order to determine if we'd be able to best make the necessary BTCpay
+      if(self.quoteAsset() == 'BTC') {
+        multiAPI("record_btc_open_order", [WALLET.identifier(), txHash]);
+      }
+    }
+
+    $.jqlog.debug(params);
+    WALLET.doTransaction(self.selectedAddressForBuy(), "create_order", params, onSuccess);
+  }
+
+  self.buy = function() {
+    if (!self.buyValidation.isValid()) {
+      self.buyValidation.errors.showAllMessages();
+      return false;
+    }
+
+    message  = '<table class="confirmOrderBox">';
+    message += '<tr><td><b>Price: </b></td><td style="text-align:right">' + self.buyPrice() + '</td><td>' + self.quoteAsset() + '/' + self.baseAsset() + '</td></tr>';
+    message += '<tr><td><b>Amount: </b></td><td style="text-align:right">' + self.buyAmount() + '</td><td>' + self.baseAsset() + '</td></tr>';
+    message += '<tr><td><b>Total: </b></td><td style="text-align:right">' + self.buyTotal() + '</td><td>' + self.quoteAsset() + '</td></tr>';
+    message += '</table>';
+
+    bootbox.dialog({
+      title: "Confirm your order",
+      message: message,
+      buttons: {
+        "cancel": {
+          label: "Close",
+          className: "btn-danger",
+          callback: function() {
+            bootbox.hideAll();
+            return false;
+          }
+        },
+        "confirm": {
+          label: "Confirm Order",
+          className: "btn-primary",
+          callback: function() {
+            bootbox.hideAll();
+            self.doBuy();
+            return true;
+          }
+        }
+
+      }
+    });
+
+  }
+  /* BUY FORM END */
+
+
   self.init = function() {
     self.fetchAssetPairMarketInfo();
     self.fetchLatestTrades();
@@ -239,6 +658,7 @@ function ViewPricesViewModel() {
   self.selectTopPair = function(item) {
     self.asset1(item.BASE_ASSET);
     self.asset2(item.QUOTE_ASSET);
+    self.marketProgression24h(item.PCT_CHANGE_24H);
     $.jqlog.debug(item);
   }
   
@@ -332,6 +752,10 @@ function ViewPricesViewModel() {
   self.metricsRefreshTradeHistory = function() {
     var deferred = $.Deferred();
     failoverAPI("get_trade_history", {'asset1': self.asset1(), 'asset2': self.asset2()}, function(data, endpoint) {
+
+      $.jqlog.debug('TRADE HISROTY');
+      $.jqlog.debug(data);
+      
       deferred.resolve();
       self.tradeHistory([]);
       for(var i=0; i < data.length; i++) {
@@ -367,12 +791,24 @@ function ViewPricesViewModel() {
       for(i=0; i < Math.min(10, data['base_ask_book'].length); i++) { //limit to 10 entries
         data['base_ask_book'][i]['base_asset'] = data['base_asset'];
         data['base_ask_book'][i]['quote_asset'] = data['quote_asset'];
-        self.askBook.push(new OrderBookEntryItemModel(data['base_ask_book'][i]));  
+        var item = new OrderBookEntryItemModel(data['base_ask_book'][i]);
+        self.askBook.push(item);  
+        if (i==0) {
+          self.lowestAskPrice(item.UNIT_PRICE);
+          self.buyPrice(item.UNIT_PRICE);
+          self.obtainableForBuy(divFloat(self.availableBalanceForBuy(), self.lowestAskPrice()));
+        }
       }
       for(i=0; i < Math.min(10, data['base_bid_book'].length); i++) { //limit to 10 entries
         data['base_bid_book'][i]['base_asset'] = data['base_asset'];
         data['base_bid_book'][i]['quote_asset'] = data['quote_asset'];
-        self.bidBook.push(new OrderBookEntryItemModel(data['base_bid_book'][i]));  
+        var item = new OrderBookEntryItemModel(data['base_bid_book'][i]);
+        self.bidBook.push(item);  
+        if (i==0) {
+          self.highestBidPrice(item.UNIT_PRICE);
+          self.sellPrice(item.UNIT_PRICE);
+          self.obtainableForSell(mulFloat(self.availableBalanceForSell(), self.highestBidPrice()));
+        }
       }
       self.bidAskMedian(data['bid_ask_median']);
       self.bidAskSpread(data['bid_ask_spread']);
@@ -466,14 +902,6 @@ function ViewPricesViewModel() {
       }
       tradeHistory.fnAdjustColumnSizing();
     }
-  }
-
-  self.selectSellOrder = function(order) {
-    $.jqlog.debug(order);
-  }
-
-  self.selectBuyOrder = function(order) {
-    $.jqlog.debug(order);
   }
 
 };

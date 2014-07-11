@@ -3,6 +3,7 @@ var BuySellAddressInDropdownItemModel = function(address, label, asset, balance)
   this.ADDRESS = address;
   this.LABEL = label;
   this.SELECT_LABEL = (label ? ("<b>" + label + "</b><br/>" + address + "<br/>" + asset + " Bal: " + balance) : (address + "<br/>" + asset + " Bal: " + balance));
+  this.BALANCE = parseFloat(balance);
 };
 
 ko.validation.rules['isValidQtyForSellAssetDivisibility'] = {
