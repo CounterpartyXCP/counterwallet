@@ -38,22 +38,60 @@
             <div class="clearfix"></div>
           </header>
           <div> <!-- widget div-->
-            <div class="widget-body min-height-0" style="min-height:0 !important" data-bind="validationOptions: { insertMessages: false }"> <!-- widget content -->
-                <div class="row">
-                    <section class="col col-lg-2 col-sm-4">
+            <div class="widget-body min-height-0 no-padding" style="min-height:0 !important" data-bind="validationOptions: { insertMessages: false }"> <!-- widget content -->
+                <div class="row" style="height:90px">
+                    <section class="col col-lg-2 col-sm-2">
+                      <div style="padding:10px">
                         <label for="asset1" class="control-label font-medlg">First Token</label>
                         <label class="input">
                             <input type="text" id="asset1" name="asset1" class="form-control input" type="text" placeholder="Asset name" data-bind="value: asset1" />
                         </label>
                         <br/><span class="errorColor" data-bind="validationMessage: asset1"></span>
+                      </div>
                     </section>
-                    <section class="col col-lg-2 col-sm-4">
+                    <section class="col col-lg-2 col-sm-2">
+                      <div style="padding:10px">
                         <label for="asset2" class="control-label font-medlg">Second Token</label>
                         <label class="input">
                             <input type="text" id="asset2" name="asset2" class="form-control input" type="text" placeholder="Asset name" data-bind="value: asset2" />
                         </label>
                         <br/><span class="errorColor" data-bind="validationMessage: asset2"></span>
+                      </div>
                     </section>
+
+                    <section class="col col-lg-8 col-sm-8 topPairsSelector">
+                      <div style="padding:5px">
+                        <a class="btn btn-default btn-xs" href="javascript:void(0);">XCP/BTC</a>
+                        <a class="btn btn-default btn-xs" href="javascript:void(0);">NOCALLABLE/BTC</a>
+                        <a class="btn btn-default btn-xs" href="javascript:void(0);">GOOGLE/BTC</a>
+                        <a class="btn btn-default btn-xs" href="javascript:void(0);">BING/BTC</a>
+                        <a class="btn btn-default btn-xs" href="javascript:void(0);">FACEBOOK/BTC</a>
+                        <a class="btn btn-default btn-xs" href="javascript:void(0);">XCP/BTC</a>
+                        <a class="btn btn-default btn-xs" href="javascript:void(0);">XCP/BTC</a>
+                        <a class="btn btn-default btn-xs" href="javascript:void(0);">XCP/BTC</a>
+                        <a class="btn btn-default btn-xs" href="javascript:void(0);">XCP/BTC</a>
+                        <a class="btn btn-default btn-xs" href="javascript:void(0);">XCP/BTC</a>
+                        <a class="btn btn-default btn-xs" href="javascript:void(0);">XCP/BTC</a>
+                        <a class="btn btn-default btn-xs" href="javascript:void(0);">XCP/BTC</a>
+                        <a class="btn btn-default btn-xs" href="javascript:void(0);">XCP/BTC</a>
+                        <a class="btn btn-default btn-xs" href="javascript:void(0);">XCP/BTC</a>
+                        <a class="btn btn-default btn-xs" href="javascript:void(0);">XCP/BTC</a>
+                        <a class="btn btn-default btn-xs" href="javascript:void(0);">XCP/BTC</a>
+                        <a class="btn btn-default btn-xs" href="javascript:void(0);">XCP/BTC</a>
+                        <a class="btn btn-default btn-xs" href="javascript:void(0);">XCP/BTC</a>
+                        <a class="btn btn-default btn-xs" href="javascript:void(0);">XCP/BTC</a>
+                        <a class="btn btn-default btn-xs" href="javascript:void(0);">XCP/BTC</a>
+                        <a class="btn btn-default btn-xs" href="javascript:void(0);">XCP/BTC</a>
+                        <a class="btn btn-default btn-xs" href="javascript:void(0);">XCP/BTC</a>
+                        <a class="btn btn-default btn-xs" href="javascript:void(0);">XCP/BTC</a>
+                        <a class="btn btn-default btn-xs" href="javascript:void(0);">XCP/BTC</a>
+                        <a class="btn btn-default btn-xs" href="javascript:void(0);">XCP/BTC</a>
+                        <a class="btn btn-default btn-xs" href="javascript:void(0);">XCP/BTC</a>
+                        <a class="btn btn-default btn-xs" href="javascript:void(0);">XCP/BTC</a>
+                      </div>
+                    </section>
+
+                    <div style="display:none">
                     <section data-bind="visible: asset1() == 'BTC' || asset2() == 'BTC'" class="col col-lg-3 col-sm-6">
                         <label for="minBTCFeeProvidedPct" class="control-label font-medlg">Min BTC % Fee Provided</label>
                         <label class="input">
@@ -68,6 +106,8 @@
                         </label>
                         <br/><span class="errorColor" data-bind="validationMessage: maxBTCFeeRequiredPct"></span>
                     </section>
+                    </div>
+
                 </div>
             </div>
          </div> <!-- end widget div -->

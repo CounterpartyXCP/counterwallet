@@ -148,3 +148,8 @@ table.buySellForm .number {
 table.confirmOrderBox td {
   padding: 5px !important;
 }
+
+section.topPairsSelector a {
+  float: left;
+  margin: 2px;
+}
