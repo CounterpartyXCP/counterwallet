@@ -125,9 +125,6 @@ function WalletViewModel() {
     } else {
       assetObj.rawBalance(rawBalance); 
       if (asset == 'BTC' && unconfirmedRawBal) {
-        $.jqlog.debug('unconfirmedRawBal: ' +unconfirmedRawBal);
-        $.jqlog.debug('rawBalance: ' +rawBalance);
-         $.jqlog.debug('unconfirmedBalance: ' +normalizeQuantity(rawBalance + unconfirmedRawBal));
         assetObj.unconfirmedBalance(normalizeQuantity(unconfirmedRawBal));
         assetObj.balanceChangePending(true);
       } else if (asset == 'BTC') {

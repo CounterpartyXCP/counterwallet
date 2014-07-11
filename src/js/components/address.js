@@ -92,9 +92,25 @@ function AddressViewModel(key, address, initialLabel) {
       };
       self.assets.push(new AssetViewModel(assetProps)); //add new
       setTimeout(function() {
+
         $('#address-wid-' + self.ADDRESS + ' .dropdown-toggle').last().dropdown();
+
+        $('#address-wid-' + self.ADDRESS + ' .asset-item:last-child .assetBtn').unbind('click');
+        $('#address-wid-' + self.ADDRESS + ' .asset-item:last-child .assetBtn').click(function (event) {
+          var menu = $(this).parent().find('ul');
+          if (menu.css('display')=='block') {
+            menu.hide();
+          } else {
+            menu.show();
+          }
+          menu.mouseleave(function() {
+            menu.hide();
+            menu.unbind('mouseleave');
+          })
+        });
+
       }, 1000);
-      
+
     } else {
       //update existing. NORMALLY this logic is really only reached from the messages feed, however, we can have the
       // case where if we have a sweep operation for instance (which will show up as an asset transfer and credit
