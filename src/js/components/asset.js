@@ -49,7 +49,7 @@ function AssetViewModel(props) {
   
   self.dispBalance = ko.computed(function() {
     var confirmed = self.normalizedBalance() === null ? '??' : smartFormat(self.normalizedBalance(), true);
-    var unconfirmedBal = self.normalizedBalance() + self.unconfirmedBalance();
+    var unconfirmedBal = addFloat(self.normalizedBalance(), self.unconfirmedBalance());
     var unconfirmed = unconfirmedBal != self.normalizedBalance() ? ' <span style="font-size:11px">(' + smartFormat(unconfirmedBal, true) + ')</span>' : '';
     return confirmed + unconfirmed;
   }, self);
