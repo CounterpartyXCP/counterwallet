@@ -91,6 +91,10 @@ function AddressViewModel(key, address, initialLabel) {
         callPrice: assetInfo['call_price']
       };
       self.assets.push(new AssetViewModel(assetProps)); //add new
+      setTimeout(function() {
+        $('#address-wid-' + self.ADDRESS + ' .dropdown-toggle').last().dropdown();
+      }, 1000);
+      
     } else {
       //update existing. NORMALLY this logic is really only reached from the messages feed, however, we can have the
       // case where if we have a sweep operation for instance (which will show up as an asset transfer and credit
