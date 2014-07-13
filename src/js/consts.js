@@ -187,8 +187,8 @@ function qs(key) {
 // IS_DEV is enabled if the initial (root) URL access has ?dev=1
 // USE_TESTNET is enabled if the initial (root) URL access has ?testnet=1, OR the hostname visited starts with 'testnet' (e.g. testnet.myhost.com)
 var IS_DEV = (location.pathname == "/" && qs("dev") && qs("dev") != '0' ? true : false);
-var USE_TESTNET = (   ((location.pathname == "/" || location.pathname == "/src/" || location.pathname == "/build/") && qs("testnet") && qs("testnet") != '0')
-                   || location.hostname.indexOf('testnet') == 0 ? true : false
+var USE_TESTNET = (   (((location.pathname == "/" || location.pathname == "/src/" || location.pathname == "/build/") && qs("testnet") && qs("testnet") != '0')
+                   || location.hostname.indexOf('testnet') != -1) ? true : false
                   );
 
 var TESTNET_PASSPHRASE = qs("passphrase");
