@@ -15,10 +15,11 @@ PendingActionViewModel.calcText = function(category, data) {
   var divisible = null;
   var pending = data['mempool'] ? 'Unconfirmed' : 'Pending';
   //The category being allowable was checked in the factory class
-  if(data['source'] && data['asset'])
+  if(data['source'] && data['asset']) {
     divisible = data['divisible'] !== undefined ? data['divisible'] : (data['_divisible'] !== undefined ? data['_divisible'] : WALLET.getAddressObj(data['source']).getAssetObj(data['asset']).DIVISIBLE);
     //^ if the asset is being created, data['divisible'] should be present (or [_divisible] if coming in from message feed oftentimes),
     // otherwise, get it from an existing asset in our wallet
+  }
 
   if(category == 'burns') {
     desc = pending + " burn of <Am>" + normalizeQuantity(data['quantity']) + "</Am> <As>BTC</As>";

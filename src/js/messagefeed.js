@@ -325,6 +325,7 @@ function MessageFeed() {
 
     $.jqlog.info("feed:receive IDX=" + message['_message_index']);
 
+    //Handle zeroconf transactions
     if (message['_message_index'] == 'mempool') {
       self.parseMempoolTransaction(txHash, category, message);
       return;
@@ -420,18 +421,6 @@ function MessageFeed() {
     // because we need to be able to remove a pending action that was marked invalid as well)
     PENDING_ACTION_FEED.remove(txHash, category);
   
-    //filter out any invalid messages for action processing itself
-    // TODO: set a list of status for each category in consts.js
-    /*
-    assert(message['_status'].startsWith('valid')
-      || message['_status'].startsWith('invalid')
-      || message['_status'].startsWith('pending') //order matches for BTC
-      || message['_status'].startsWith('open') //orders and bets
-      || message['_status'].startsWith('cancelled') //orders and bets
-      || message['_status'].startsWith('completed') //order match (non-BTC, or BTC match where BTCPay has been made)
-      || message['_status'].startsWith('expired'));
-    */
-    
     if(message['_status'].startsWith('invalid'))
       return; //ignore message
     if(message['_status'] == 'expired') {
@@ -589,13 +578,13 @@ function MessageFeed() {
       $.jqlog.error("Unknown message category: " + category);
     }
 
-    if (["rps", "rps_matches", "rpsresolves", "rps_expirations", "rps_match_expirations"].indexOf(category)) {
+    //handle some extra RPS-related tasks
+    if (["rps", "rps_matches", "rpsresolves", "rps_expirations", "rps_match_expirations"].indexOf(category) != -1) {
       try {
         RPS.updateOpenGames();
       } catch(err) {
         $.jqlog.debug(err.message);
       }
-      
     }
   }
 
