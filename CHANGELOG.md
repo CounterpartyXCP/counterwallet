@@ -8,6 +8,7 @@
 **Fixes:**
 * Fixed issue with asset name validation (length checking was incorrect)
 * Fixed issue with History page not showing balance history properly anymore
+* Fixed up and improved stats page
 * Numerous minor fixes
 
 ### v1.2.2 (~2014-06-25) ###
