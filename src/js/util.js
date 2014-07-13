@@ -501,7 +501,7 @@ function checkCountry(action, callback) {
 
   if (RESTRICTED_AREA[action] && RESTRICTED_AREA[action].indexOf(USER_COUNTRY) != -1) {
     
-    var message = 'It appears that you are located in a country in which we are legally unable to provide services.';
+    var message = 'It appears that you are located in a country in which we are legally unable to provide this service.';
 
     bootbox.dialog({
       title: "Country warning",

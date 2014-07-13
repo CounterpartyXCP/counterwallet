@@ -59,8 +59,8 @@
 <div id="gettingStartedNotice" data-bind="fadeVisibleInOnly: WALLET.isNew() && !WALLET.isOldWallet() && window._BALANCES_HAS_LOADED_ALREADY === undefined" class="alert alert-success alert-block">
     <a class="close" data-dismiss="alert" href="#">×</a>
     <h4 class="alert-heading padding-bottom-10">Welcome to Counterwallet!</h4>
-    We've created three addresses for you, which serve as both Bitcoin and Counterparty addresses.
-    To start using the wallet, simply send some BTC or XCP to any one of them (just single click on the address string
+    We've created an address for you to get started. You can send and receive both bitcoin and Counterparty tokens with it.
+    To start using the wallet, simply send some BTC or XCP to the address (just single click on the address string
     itself to select it, then copy that text, which you can then give to others or use to
     send funds to). <span data-bind="visible: USE_TESTNET">Note that, on testnet, you can use a
     <b><a href="https://en.bitcoin.it/wiki/Bitcoin_faucet" target="_blank">Testnet faucet</a> to get BTC to start with</b>.</span>
@@ -70,6 +70,7 @@
     an order, create a token, etc), <b>it doesn't take effect immediately as it must first be confirmed on the Bitcoin blockchain</b>.
     Counterwallet lets you know this by displaying your actions under the <b>Pending Actions</b> panel (the Clock icon on the top bar), and then moving
     them to the <b>Notifications</b> panel (the Checkbox icon) automatically once the network has successfully confirmed them.
+    You'll also see the future expected value in parenthesis next to the current balance to better alert you that the change is pending.
     Note that depending on the speed at which blocks are solved, it could take anywhere from 2 to 40 minutes for your actions to be confirmed.<br/><br/>
 </div>
 

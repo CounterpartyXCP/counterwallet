@@ -40,9 +40,26 @@ function CreateAssetModalViewModel() {
   self.name = ko.observable('').extend({
     required: true,
     pattern: {
-      message: 'Must be between 4-24 uppercase letters only (A-Z) & cannot start with the letter A.',
-      params: '^[B-Z][A-Z]{3,23}$'
+      message: "Must contain uppercase letters only (A-Z), be at least 4 characters in length, and cannot start with 'A'.",
+      params: '^[B-Z][A-Z]{3,}$'
     },
+    validation: {
+      validator: function (val, self) {
+        //Check length
+        var n = 0;
+        for(var i=0; i < val.length; i++) {
+          n *= 26;
+          assert(B26_DIGITS.indexOf(val[i]) != -1); //should have been checked already
+          n += B26_DIGITS.indexOf(val[i]); 
+        }
+        
+        console.log("n is: " + n);
+        assert(n >= Math.pow(26, 3)); //should have been checked already
+        return n <= MAX_INT;
+      },
+      message: 'Asset name is too long, or too short',
+      params: self
+    },    
     assetNameIsTaken: self
   });
   self.description = ko.observable('').extend({

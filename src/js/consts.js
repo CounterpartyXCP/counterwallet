@@ -5,7 +5,7 @@ var VERSION = "1.3.0 BETA";
 
 var IS_MOBILE_OR_TABLET = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
 var PREFERENCES = {}; //set when logging in
-var MAX_ADDRESSES = 20; //totall arbitrary :)
+
 var MAX_INT = Math.pow(2, 63) - 1;
 var UNIT = 100000000; //# satoshis in whole
 var MIN_FEE = 20000; // in satoshis (== .0002 BTC)
@@ -17,6 +17,9 @@ var MAX_ASSET_DESC_LENGTH = 41; //42, minus a null term character?
 var FEE_FRACTION_REQUIRED_DEFAULT_PCT = .9   //0.90% of total order
 var FEE_FRACTION_PROVIDED_DEFAULT_PCT = 1    //1.00% of total order
 var FEE_FRACTION_DEFAULT_FILTER = .95
+
+var DEFAULT_NUM_ADDRESSES = 1; //default number of addresses to generate. Go with 1 for now to be more newbie friendly
+var MAX_ADDRESSES = 20; //totall arbitrary :)
 
 //Order expiration
 var ORDER_DEFAULT_EXPIRATION = 1000; //num blocks until expiration (at ~9 min per block this is ~6.75 days)
@@ -31,13 +34,13 @@ var VIEW_PRICES_LATEST_TRADES_REFRESH_EVERY = 5 * 60 * 1000; //refresh latest tr
 
 var MARKET_INFO_REFRESH_EVERY = 5 * 60 * 1000; //refresh market info every 5 minutes while enabled (on buy/sell page, and view prices page) 
 
-var DEFAULT_NUM_ADDRESSES = 3; //default number of addresses to generate
-
 var CHAT_NUM_USERS_ONLINE_REFRESH_EVERY = 5 * 60 * 1000; //refresh online user count every 5 minutes while enabled
 
 var NUM_BLOCKS_TO_WAIT_FOR_BTCPAY = 6; //number of blocks to wait until the user can make a BTCpay on an order match where they owe BTC
 
 var ALLOW_UNCONFIRMED_INPUTS = true;  // allow use unconfirmed unspents
+
+var B26_DIGITS = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
 
 var ACTION_PENDING_NOTICE = "<b><u>This action will take some time to complete</u></b>, and will appear as a Pending Action until"
   + " confirmed on the network. <b class='errorColor'>Until that time, the wallet will not reflect the change. Please be patient.</b>";
