@@ -1,6 +1,6 @@
 
-var TIMEOUT_FAILOVER_API = 2000; // 2 seconds
-var TIMEOUT_MULTI_API = 4000; // 4 seconds
+var TIMEOUT_FAILOVER_API = 2000; // 2 seconds (in ms)
+var TIMEOUT_MULTI_API = 4000; // 4 seconds (in ms)
 
 //Inlude a .url param in every jqXHR object -- http://stackoverflow.com/a/11980396
 $.ajaxSetup({
@@ -163,7 +163,8 @@ function _makeJSONAPICall(destType, endpoints, method, params, timeout, onSucces
   if(httpMethod == "POST") {
     var extraAJAXOpts = {
       'contentType': 'application/json; charset=utf-8',
-      'dataType': 'json'
+      'dataType': 'json',
+      'timeout': timeout
     }
     
     if(destType == "counterwalletd") {
@@ -192,6 +193,7 @@ function _makeJSONAPICall(destType, endpoints, method, params, timeout, onSucces
     var qs = null;
     var extraAJAXOpts = {
       'crossDomain': true,
+      'timeout': timeout
     }
     
     if(destType == "counterwalletd") {
