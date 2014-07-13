@@ -14,21 +14,24 @@ function MessageFeed() {
 
   self.rpsresolveQueue = null;
   self.rpsresolveErrors = {};
-  self.openRpsKey = 'openRps_' + WALLET.identifier();
+
+  self.openRpsKey = ko.computed(function() {
+    return 'openRps_' + WALLET.identifier();
+  }, self);
 
   self.setOpenRPS = function(source, hash, moveParam) {
-    var openRps = localStorage.getObject(self.openRpsKey) || {};
+    var openRps = localStorage.getObject(self.openRpsKey()) || {};
     var cwk = WALLET.getAddressObj(source).KEY;
     var moveParamStr = JSON.stringify(moveParam);
     var cryptedMoveParam = cwk.encrypt(moveParamStr);
-    openRps[hash] = cryptedMoveParam;
+    openRps[source + "_" + hash] = cryptedMoveParam;
 
-    localStorage.setObject(self.openRpsKey, openRps);
+    localStorage.setObject(self.openRpsKey(), openRps);
   }
 
   self.getOpenRPS = function(source, hash) {
-    var openRps = localStorage.getObject(self.openRpsKey) || {};
-    var cryptedMoveParam = openRps[hash];
+    var openRps = localStorage.getObject(self.openRpsKey()) || {};
+    var cryptedMoveParam = openRps[source + "_" + hash];
 
     if (cryptedMoveParam) {
       var cwk = WALLET.getAddressObj(source).KEY;
@@ -38,58 +41,42 @@ function MessageFeed() {
     return null;
   }
 
-  self.deleteOpenRPS = function(hash) {
-    var openRps = localStorage.getObject(self.openRpsKey) || {};
-    delete openRps[hash];
-    localStorage.setObject(self.openRpsKey, openRps);
+  self.deleteOpenRPS = function(source, hash) {
+    var openRps = localStorage.getObject(self.openRpsKey()) || {};
+    delete openRps[source + "_" + hash];
+    localStorage.setObject(self.openRpsKey(), openRps);
   }
 
   self.onRpsMatch = function(rps_match, callback) {
-    $.jqlog.debug("on open rps: ");
-    $.jqlog.debug(rps_match);
 
-    var source = null;
-    var hash = null;
-    if (WALLET.getAddressObj(rps_match['tx0_address']) 
-        && (rps_match['status'] == 'pending' 
-            || rps_match['status'] == 'pending and resolved')) {
-
-      source = rps_match['tx0_address'];
-      hash = rps_match['tx0_hash'];
-
-    } else if (WALLET.getAddressObj(rps_match['tx1_address']) 
-               && (rps_match['status'] == 'pending'
-                   || rps_match['status'] == 'resolved and pending')) {
-
-      source = rps_match['tx1_address'];
-      hash = rps_match['tx1_hash'];
-
-    }
-
-    if (source && hash) {
-
-      var moveParam = self.getOpenRPS(source, hash);
-      if (moveParam) {
-        self.resolvePendingRpsMatch(hash, moveParam, rps_match, callback);
+    var resolveRps = function(source, hash) {
+      if (source && hash) {
+        var moveParam = self.getOpenRPS(source, hash);
+        if (moveParam) {
+          self.resolvePendingRpsMatch(hash, moveParam, rps_match, callback);
+        } else {
+          $.jqlog.debug('RANDOM LOST: '+rps_match['id']);
+          if (callback) callback();
+        }
       } else {
-        $.jqlog.debug('RANDOM LOST: '+rps_match['id']);
-        if (callback) callback();
+        $.jqlog.debug('NO NEED RESOLVE: '+rps_match['id']);     
       }
-
-    } else {
-
-      $.jqlog.debug('NO NEED RESOLVE: '+rps_match['id']);     
-
     }
+
+    if (WALLET.getAddressObj(rps_match['tx0_address']) 
+        && (rps_match['status'] == 'pending' || rps_match['status'] == 'pending and resolved')) {
+      resolveRps(rps_match['tx0_address'], rps_match['tx0_hash']);
+    } 
+
+    if (WALLET.getAddressObj(rps_match['tx1_address']) 
+               && (rps_match['status'] == 'pending' || rps_match['status'] == 'resolved and pending')) {
+      resolveRps(rps_match['tx1_address'], rps_match['tx1_hash']);
+    }
+
+    
   }
 
   self.resolvePendingRpsMatch = function(tx_hash, moveParam, rps_match, callback) {
-    $.jqlog.debug("resolvePendingRpsMatch: ");
-    $.jqlog.debug(rps_match);
-    $.jqlog.debug(tx_hash);
-    $.jqlog.debug(moveParam);
-
-    
 
     // wait 10 secondes to avoid -22 bitcoind error
     setTimeout(function() {
@@ -99,13 +86,13 @@ function MessageFeed() {
 
       var onSuccess = function(txHash, data, endpoint) {
         $.jqlog.debug('onSuccess');
-        self.deleteOpenRPS(tx_hash);
+        self.deleteOpenRPS(moveParam['source'], tx_hash);
         if (callback) callback();
       }
 
       var onError = function() {
 
-        $.jqlog.debug('ERROR. RETRY ');
+        $.jqlog.debug('RESOLVE RPS ERROR. RETRY.');
 
         self.rpsresolveErrors[rps_match['id']] = self.rpsresolveErrors[rps_match['id']] || 0;
         self.rpsresolveErrors[rps_match['id']] += 1;
@@ -288,15 +275,62 @@ function MessageFeed() {
       setTimeout(function() { self.checkMessageQueue(); }, 1000);
     }
   }
+
+  self.parseMempoolTransaction = function(txHash, category, message) {
+
+    message['bindings'] = JSON.parse(message['bindings']);
+    message['bindings']['mempool'] = true;
+
+    var displayTx = false;
+    
+    if (!WALLET.getAddressObj(message['bindings']['source'])) {
+      if (category=='sends' || category=='btcpays') {
+        if (WALLET.getAddressObj(message['bindings']['destination'])) {
+          displayTx = true;
+        }
+      } else if (category == 'issuances' && message['bindings']['transfer']) {
+        if (WALLET.getAddressObj(message['bindings']['issuer'])) {
+          message['bindings']['transfer_destination'] = message['bindings']['issuer'];
+          displayTx = true;
+        }
+      } else if (category == 'dividends' || category == 'callbacks') {
+        if (WALLET.isAssetHolder(message['bindings']['asset'])) {
+          displayTx = true;
+        }
+      }
+    }
+
+    if (displayTx) {
+      WALLET.searchDivisibility(message['bindings']['asset'] || 'BTC', function(divisibility) {
+        message['bindings']['divisible'] = divisibility;
+        message['bindings']['tx_index'] = message['_message_index'];
+        if (category == 'dividends') {
+          WALLET.searchDivisibility(message['bindings']['dividend_asset'], function(asset_divisibility) {
+            message['bindings']['dividend_asset_divisible'] = asset_divisibility;
+            PENDING_ACTION_FEED.add(txHash, category, message['bindings']);
+          });
+        } else {
+          PENDING_ACTION_FEED.add(txHash, category, message['bindings']);
+        }
+      });
+    }
+    
+  }
   
   self.parseMessageWithFeedGapDetection = function(txHash, category, message) {
     if(!message || (message.substring && message.startswith("<html>"))) return;
     //^ sometimes nginx can trigger this via its proxy handling it seems, with a blank payload (or a html 502 Bad Gateway
     // payload) -- especially if the backend server reloads. Just ignore it.
     assert(self.lastMessageIndexReceived(), "lastMessageIndexReceived is not defined!");
-  
+
     $.jqlog.info("feed:receive IDX=" + message['_message_index']);
-  
+
+    //Handle zeroconf transactions
+    if (message['_message_index'] == 'mempool') {
+      self.parseMempoolTransaction(txHash, category, message);
+      return;
+    }
+
     //Ignore old messages if they are ever thrown at us
     if(message['_message_index'] <= self.lastMessageIndexReceived()) {
       $.jqlog.warn("Received message_index is <= lastMessageIndexReceived: " + JSON.stringify(message));
@@ -387,18 +421,6 @@ function MessageFeed() {
     // because we need to be able to remove a pending action that was marked invalid as well)
     PENDING_ACTION_FEED.remove(txHash, category);
   
-    //filter out any invalid messages for action processing itself
-    // TODO: set a list of status for each category in consts.js
-    /*
-    assert(message['_status'].startsWith('valid')
-      || message['_status'].startsWith('invalid')
-      || message['_status'].startsWith('pending') //order matches for BTC
-      || message['_status'].startsWith('open') //orders and bets
-      || message['_status'].startsWith('cancelled') //orders and bets
-      || message['_status'].startsWith('completed') //order match (non-BTC, or BTC match where BTCPay has been made)
-      || message['_status'].startsWith('expired'));
-    */
-    
     if(message['_status'].startsWith('invalid'))
       return; //ignore message
     if(message['_status'] == 'expired') {
@@ -499,12 +521,13 @@ function MessageFeed() {
         self.OPEN_ORDERS.push(message);
       }
     } else if(category == "order_matches") {
+
       if(message['_btc_below_dust_limit'])
         return; //ignore any order match involving BTC below the dust limit
       
       //Look to order matches when determining to do a BTCpay
       //If the order_matches message doesn't have a tx0_address/tx1_address field, then we don't need to do anything with it
-      if(   (WALLET.getAddressObj(message['tx0_address']) && message['forward_asset'] == 'BTC' && message['_status'] == 'pending')
+      if ((WALLET.getAddressObj(message['tx0_address']) && message['forward_asset'] == 'BTC' && message['_status'] == 'pending')
          || (WALLET.getAddressObj(message['tx1_address']) && message['backward_asset'] == 'BTC' && message['_status'] == 'pending')) {
         //Register this as an "upcoming" BTCpay
         var btcPayData = WaitingBTCPayFeedViewModel.makeBTCPayData(message); 
@@ -515,7 +538,13 @@ function MessageFeed() {
           $.jqlog.debug("dust order_matches "+btcPayData['orderMatchID']+" : "+btcPayData['btcQuantityRaw']);
         }  
         
+      } else if ((WALLET.getAddressObj(message['tx1_address']) && message['forward_asset'] == 'BTC' && message['_status'] == 'pending')
+         || (WALLET.getAddressObj(message['tx0_address']) && message['backward_asset'] == 'BTC' && message['_status'] == 'pending')) {
+
+        PENDING_ACTION_FEED.add(txHash, category, message);
+
       }
+
     } else if(category == "order_expirations") {
       //Remove the order from the open orders list
       self.removeOrder(message['order_hash']);
@@ -549,13 +578,13 @@ function MessageFeed() {
       $.jqlog.error("Unknown message category: " + category);
     }
 
-    if (["rps", "rps_matches", "rpsresolves", "rps_expirations", "rps_match_expirations"].indexOf(category)) {
+    //handle some extra RPS-related tasks
+    if (["rps", "rps_matches", "rpsresolves", "rps_expirations", "rps_match_expirations"].indexOf(category) != -1) {
       try {
         RPS.updateOpenGames();
       } catch(err) {
         $.jqlog.debug(err.message);
       }
-      
     }
   }
 

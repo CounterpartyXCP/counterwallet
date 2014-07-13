@@ -149,7 +149,7 @@
           <li class="">
             <a href="#"><i class="fa fa-lg fa-fw fa-exchange"></i> <span class="menu-item-parent">Exchange</span></a>
             <ul>
-              <li><a href="pages/view_prices.html"><i class="fa fa-lg fa-fw fa-bar-chart-o"></i> View Prices</a></li>
+              <li><a href="pages/view_prices.html"><i class="fa fa-lg fa-fw fa-bar-chart-o"></i> View Market Prices</a></li>
               <li><a href="pages/buysell.html"><i class="fa fa-lg fa-fw fa-share"></i> Buy &amp; Sell</a></li>
               <li><a href="pages/openorders.html"><i class="fa fa-lg fa-fw fa-circle-o"></i> Open Orders</a></li>
               <li><a href="pages/ordermatches.html"><i class="fa fa-lg fa-fw fa-book"></i> My Order History</a></li>
@@ -163,7 +163,7 @@
               <li><a href="pages/matchedbets.html"><i class="fa fa-lg fa-fw fa-book"></i> My Bet History</a></li>
             </ul>
           </li>
-          <li class="" style="display:none">
+          <li class="">
             <a href="#"><i class="fa fa-lg fa-fw fa-trophy"></i> <span class="menu-item-parent">Gaming</span></a>
             <ul>
               <li><a href="pages/rps.html"><i class="fa-lg fa-fw glyphicon glyphicon-hand-right"></i> Rock-Paper-Scissors</a></li>
@@ -250,6 +250,12 @@
             </div>
           </div>
         </div>
+
+        <div data-bind="visible: !USE_TESTNET" class="alert alert-info" class="margin-bottom-0">
+           <p><i class="fa-fw fa fa-rocket"></i>&nbsp;New to Counterwallet, and want to just play around?
+               <b><a href="https://testnet.counterwallet.co" target="_blank">Try Counterwallet Testnet!</a></b> 
+           </p>
+         </div>
 
         <div class="panel panel-info">
           <div class="panel-heading">

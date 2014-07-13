@@ -1313,7 +1313,6 @@ function BroadcastModalViewModel() {
 
   self.submitForm = function() {
     if (!self.validationModel.isValid()) {
-      $.jqlog.debug('ERRORS');
       self.validationModel.errors.showAllMessages();
       return false;
     }    

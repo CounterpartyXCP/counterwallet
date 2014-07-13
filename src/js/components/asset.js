@@ -10,6 +10,8 @@ function AssetViewModel(props) {
   self.rawBalance = ko.observable(props['rawBalance'] || (self.ASSET == 'BTC' ? null : 0));
   //^ raw (not normalized) (for BTC/XCP, default to null to show '??' instead of 0, until the balance is populated)
   self.rawSupply = ko.observable(props['rawSupply'] || 0); //raw
+  self.SUPPLY = normalizeQuantity(self.rawSupply(), self.DIVISIBLE);
+  self.holdersSupply = self.rawSupply() - self.rawBalance();
   self.description = ko.observable(props['description'] || '');
   self.CALLABLE = props['callable'] !== undefined ? props['callable'] : false;
   self.CALLDATE = props['callDate'] || null;
@@ -29,11 +31,6 @@ function AssetViewModel(props) {
     if(self.rawBalance() === null) return null;
     return normalizeQuantity(self.rawBalance(), self.DIVISIBLE);
   }, self);
-
-  self.dispBalance = ko.computed(function() {
-    if(self.normalizedBalance() === null) return "??";
-    return smartFormat(self.normalizedBalance()); 
-  }, self);
   
   self.normalizedTotalIssued = ko.computed(function() {
     return normalizeQuantity(self.rawSupply(), self.DIVISIBLE);
@@ -47,9 +44,14 @@ function AssetViewModel(props) {
     if(!self.CALLDATE) return null;
     return moment(self.CALLDATE * 1000).format("MMM Do YYYY, h:mm:ss a");
   }, self);
+
+  self.unconfirmedBalance = ko.observable(0);
   
   self.dispBalance = ko.computed(function() {
-    return self.normalizedBalance() === null ? '??' : smartFormat(self.normalizedBalance(), true);
+    var confirmed = self.normalizedBalance() === null ? '??' : smartFormat(self.normalizedBalance(), true);
+    var unconfirmedBal = addFloat(self.normalizedBalance(), self.unconfirmedBalance());
+    var unconfirmed = unconfirmedBal != self.normalizedBalance() ? ' <span style="font-size:11px">(' + smartFormat(unconfirmedBal, true) + ')</span>' : '';
+    return confirmed + unconfirmed;
   }, self);
   
   self.dispBalancePadding = ko.computed(function() {

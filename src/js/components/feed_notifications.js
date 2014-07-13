@@ -233,22 +233,24 @@ NotificationViewModel.calcText = function(category, message) {
           }
         }
 
+        var desc2 = "";
         if (WALLET.getAddressObj(message['tx1_address'])) {
           if  (message['status'] == "concluded: first player wins") {
-            desc = "RPS: You lose " + smartFormat(normalizeQuantity(message['wager']))+ "</Am> <As>XCP</As>" + 
+            desc2 = "RPS: You lose " + smartFormat(normalizeQuantity(message['wager']))+ "</Am> <As>XCP</As>" + 
                    " with <Ad>" + getAddressLabel(message['tx1_address']) + "</Ad>";
           } else if  (message['status'] == "concluded: second player wins") {
-            desc = "RPS: You win " + smartFormat(normalizeQuantity(message['wager']))+ "</Am> <As>XCP</As>" + 
+            desc2 = "RPS: You win " + smartFormat(normalizeQuantity(message['wager']))+ "</Am> <As>XCP</As>" + 
                    " with <Ad>" + getAddressLabel(message['tx1_address']) + "</Ad>";
           } else if  (message['status'] == "concluded: tie") {
-            desc = "RPS: Tie with <Ad>" + getAddressLabel(message['tx1_address']) + "</Ad>";
+            desc2 = "RPS: Tie with <Ad>" + getAddressLabel(message['tx1_address']) + "</Ad>";
           }
           if (desc) {
-            desc += " (" + message['tx1_index'] + ")";
+            desc2 += " (" + message['tx1_index'] + ")";
+          }
+          if (desc2 != "") {
+            desc = desc + '<br />' + desc2;
           }
         }
-
-
 
         if (desc && NOTIFIED_RPS_RESULT[desc]) {
           desc = null;
@@ -294,6 +296,7 @@ function NotificationFeedViewModel(initialCount) {
     //if the number of entries are over 40, remove the oldest one
     if(self.entries().length > 40) self.entries.pop();
     self.lastUpdated(new Date());
+    WALLET.refreshBTCBalances();
   }
 }
 

@@ -40,9 +40,26 @@ function CreateAssetModalViewModel() {
   self.name = ko.observable('').extend({
     required: true,
     pattern: {
-      message: 'Must be between 4-24 uppercase letters only (A-Z) & cannot start with the letter A.',
-      params: '^[B-Z][A-Z]{3,23}$'
+      message: "Must contain uppercase letters only (A-Z), be at least 4 characters in length, and cannot start with 'A'.",
+      params: '^[B-Z][A-Z]{3,}$'
     },
+    validation: {
+      validator: function (val, self) {
+        //Check length
+        var n = 0;
+        for(var i=0; i < val.length; i++) {
+          n *= 26;
+          assert(B26_DIGITS.indexOf(val[i]) != -1); //should have been checked already
+          n += B26_DIGITS.indexOf(val[i]); 
+        }
+        
+        console.log("n is: " + n);
+        assert(n >= Math.pow(26, 3)); //should have been checked already
+        return n <= MAX_INT;
+      },
+      message: 'Asset name is too long, or too short',
+      params: self
+    },    
     assetNameIsTaken: self
   });
   self.description = ko.observable('').extend({
@@ -403,7 +420,22 @@ function PayDividendModalViewModel() {
       params: '^[B-Z][A-Z]{3,23}$'
     },
     assetNameExists: self,
-    rateLimit: { timeout: 500, method: "notifyWhenChangesStop" }
+    rateLimit: { timeout: 500, method: "notifyWhenChangesStop" },
+    validation:  {
+      validator: function (val, self) {
+        if(self.assetData() === null) return true; //wait until dividend asset chosen to validate
+        
+        var supply = new Decimal(normalizeQuantity(self.assetData().supply, self.assetData().divisible));
+        // we substract user balance for this asset
+        var userAsset = self.addressVM().getAssetObj(self.assetName());
+        if (userAsset) {
+          supply = supply.sub(new Decimal(userAsset.normalizedBalance()));
+        }
+        return supply > 0
+      },
+      message: 'No dividend to distribute.',
+      params: self
+    }
   });
   // TODO: DRY! we already make a query to check if assetName exists
   self.assetName.subscribe(function(name) {
@@ -420,14 +452,14 @@ function PayDividendModalViewModel() {
   self.quantityPerUnit = ko.observable('').extend({
     required: true,
     isValidPositiveQuantity: self,
-    validation: {
+    validation: [{
       validator: function (val, self) {
         if(self.dividendAssetBalRemainingPostPay() === null) return true; //wait until dividend asset chosen to validate
         return self.dividendAssetBalRemainingPostPay() >= 0;
       },
       message: 'The total distribution would exceed the address\' balance for the selected Distribution Token.',
       params: self
-    }    
+    }]
   });
   
   self.totalPay = ko.computed(function() {
@@ -465,7 +497,8 @@ function PayDividendModalViewModel() {
   
   self.validationModel = ko.validatedObservable({
     quantityPerUnit: self.quantityPerUnit,
-    selectedDividendAsset: self.selectedDividendAsset
+    selectedDividendAsset: self.selectedDividendAsset,
+    assetName: self.assetName
   });
 
   self.resetForm = function() {
@@ -475,15 +508,15 @@ function PayDividendModalViewModel() {
     self.validationModel.errors.showAllMessages(false);
   }
   
-  self.submitForm = function() {
-    if (!self.validationModel.isValid()) {
-      self.validationModel.errors.showAllMessages();
-      return false;
-    }    
+  self.submitForm = function() {   
     $('#payDividendModal form').submit();
   }
   
   self.doAction = function() {
+    if (!self.validationModel.isValid()) {
+      self.validationModel.errors.showAllMessages();
+      return false;
+    }
     //do the additional issuance (specify non-zero quantity, no transfer destination)
     WALLET.doTransaction(self.addressVM().ADDRESS, "create_dividend",
       { source: self.addressVM().ADDRESS,

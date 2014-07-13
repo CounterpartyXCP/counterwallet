@@ -187,6 +187,12 @@ function RpsViewModel() {
       } else {
         game['game_type'] = data[i]['possible_moves']+ 'moves'
       }
+      if (data[i]['status'] == 'pending' || data[i]['status'] == 'open') {
+        game['expiration'] = '~ ' + expireDate(data[i]['expiration']) + ' (' + data[i]['expiration'] + ')';
+      } else {
+        game['expiration'] = '-';
+      }
+      
       games.push(game);
     }
     self.pendingRPS(displayWarning);
@@ -248,13 +254,15 @@ function RpsViewModel() {
       source: self.sourceAddress(),
       wager: denormalizeQuantity(self.wager()),
       possible_moves: parseInt(self.possibleMoves()),
-      expiration: self.expiration(),
+      expiration: parseInt(self.expiration()),
       move_random_hash: moveParams['move_random_hash']
     }
     var onSuccess = function(txHash, data, endpoint) {
       MESSAGE_FEED.setOpenRPS(self.sourceAddress(), txHash, moveParams);
 
-      var warn = '<b class="errorColor">Please stay logged in so that the game(s) can be properly resolved. Be careful, if you close the Wallet before the end of the game you can lose money!!</b><br />';
+      var warn = '<b class="errorColor">Please stay logged in so that the game(s) can be properly resolved.' 
+      warn += ' Once your game has been matched, it will take one more block for the game to complete.'
+      warn += ' Be careful, if you close the Wallet before the end of the game you can lose money!!</b><br />';
       message = "<b>You are played " + self.wager() + " XCP on " + self.move().name.toUpperCase() + ".</b> " + warn + ACTION_PENDING_NOTICE;
       self.init();
       bootbox.alert(message);

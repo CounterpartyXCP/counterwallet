@@ -85,12 +85,9 @@ function LogonViewModel() {
 
       // set user country
       USER_COUNTRY = data['country'];
-      $.jqlog.debug('USER_COUNTRY: '+USER_COUNTRY);
-      if (LIMITED_COUNTRIES.indexOf(USER_COUNTRY) != -1) {
-        LIMITED_FEATURES = true;
-      }
-      $.jqlog.debug('LIMITED_FEATURES: '+LIMITED_FEATURES);
-
+      $.jqlog.debug('USER_COUNTRY: ' + USER_COUNTRY);
+      
+      //See if any servers show the wallet as online (this will return the a true result, if any server shows the wallet as online)
       multiAPI("is_wallet_online", [WALLET.identifier()], self.onIsWalletOnline);
 
     },
@@ -120,14 +117,22 @@ function LogonViewModel() {
             label: "Continue",
             className: "btn-primary",
             callback: function() {
-              multiAPINewest("get_preferences", {wallet_id: WALLET.identifier()}, 'last_updated', self.onReceivedPreferences);
+              multiAPINewest("get_preferences", {
+                'wallet_id': WALLET.identifier(),
+                'network': USE_TESTNET ? 'testnet' : 'mainnet',
+                'for_login': true
+              }, 'last_updated', self.onReceivedPreferences);
             }
           }
         }
       });
     } else {
       //Grab preferences
-      multiAPINewest("get_preferences", {wallet_id: WALLET.identifier()}, 'last_updated', self.onReceivedPreferences);
+      multiAPINewest("get_preferences", {
+        'wallet_id': WALLET.identifier(),
+        'network': USE_TESTNET ? 'testnet' : 'mainnet',
+        'for_login': true
+      }, 'last_updated', self.onReceivedPreferences);
     }
   }
   
@@ -419,9 +424,10 @@ function LogonPasswordModalViewModel() {
   self.doAction = function() {
     //simply fill in the data back into the passphrase field and close the dialog
     $('#password').val(self.dispFullPassphrase());
+    $('#password').change();
     self.resetForm(); //clear out the dialog too, for security
     self.shown(false);
-    $('#walletLogin').click();
+    LOGON_VIEW_MODEL.openWallet();
   }
 }
 
