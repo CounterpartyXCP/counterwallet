@@ -63,17 +63,14 @@ function initIndex() { //main page
       DONATE_MODAL.show();
       return false;
     });
-    $.jqlog.debug('passphrase:');
-    $.jqlog.debug(TESTNET_PASSPHRASE);
-    if (TESTNET_PASSPHRASE && USE_TESTNET) {
+    if (USE_TESTNET && TESTNET_PASSPHRASE) {
+      $.jqlog.debug('Testnet passphrase specified: ' + TESTNET_PASSPHRASE);
       $('#password').val(TESTNET_PASSPHRASE);
       $('#password').change();
       setTimeout(function() {
         $('#loginform').submit();
       }, 500);
-      
     }
-
   });
 }
 initIndex(); //call it now, as this script is loaded on index page load
