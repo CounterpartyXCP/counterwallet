@@ -1314,6 +1314,7 @@ function checkURL() {
 
 }
 
+//COUNTERWALLET: START MOD
 function loadPage(url, container) {
   $.ajax({
     type : "GET",
@@ -1336,6 +1337,9 @@ function loadPage(url, container) {
       //call page initialization code, as necessary
       if(INIT_FUNC.hasOwnProperty(url)) {
         INIT_FUNC[url]();
+        
+        //Track the page view in google analytics
+        _gaq.push(['_trackPageview', url]);
       }
 
       e.delay(50).animate({ opacity : '1.0' }, 300);
@@ -1346,6 +1350,7 @@ function loadPage(url, container) {
     async : false
   });
 }
+//COUNTERWALLET: END MOD
 
 //COUNTERWALLET: START MOD
 function loadURL(url, container) {
