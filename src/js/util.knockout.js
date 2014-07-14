@@ -124,8 +124,8 @@ ko.validation.rules['isNotSameBitcoinAddress'] = {
 
 ko.validation.rules['isValidPositiveQuantity'] = {
     validator: function (val, self) {
-      $.jqlog.debug("isValidPositiveQuantity:" + val)
-      $.jqlog.debug(val.toString().match(/^[0-9]*\.?[0-9]{0,8}$/) && parseFloat(val) > 0)
+      //$.jqlog.debug("isValidPositiveQuantity:" + val)
+      //$.jqlog.debug(val.toString().match(/^[0-9]*\.?[0-9]{0,8}$/) && parseFloat(val) > 0)
 
       return val.toString().match(/^[0-9]*\.?[0-9]{0,8}$/) && parseFloat(val) > 0;
     },

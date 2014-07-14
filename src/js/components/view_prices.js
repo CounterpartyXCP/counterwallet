@@ -159,6 +159,10 @@ function ViewPricesViewModel() {
     if(newValue == null || !self.validationModelBaseOrders.isValid()) return;
     //Get asset divisibility
     self.recievedMarketData(false);
+    
+    //Track user choice
+    trackEvent('Exchange', 'ViewPrices', self.dispAssetPair());
+    
     failoverAPI("get_asset_info", [[self.asset1(), self.asset2()]], function(assetsInfo, endpoint) {
       self.asset1IsDivisible(assetsInfo[0]['divisible']);
       self.asset2IsDivisible(assetsInfo[1]['divisible']);

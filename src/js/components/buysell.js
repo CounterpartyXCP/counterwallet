@@ -600,6 +600,7 @@ function BuySellWizardViewModel() {
           self.askDepth(null);
         } else if(current == 2) {
           assert(self.assetPair(), "Token pair is not set");
+          trackEvent('Exchange', 'BuySell', self.dispAssetPair());
           self.selectedBuyQuantity.isModified(false);
           self.customSellAsEntry.isModified(false);
           $('a[href="#tab2"] span.title').text("Select Amounts (" + self.dispAssetPair() + ")");

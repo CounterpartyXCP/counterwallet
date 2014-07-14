@@ -1337,9 +1337,7 @@ function loadPage(url, container) {
       //call page initialization code, as necessary
       if(INIT_FUNC.hasOwnProperty(url)) {
         INIT_FUNC[url]();
-        
-        //Track the page view in google analytics
-        _gaq.push(['_trackPageview', url]);
+        trackPageView(url);
       }
 
       e.delay(50).animate({ opacity : '1.0' }, 300);

@@ -44,6 +44,7 @@ function ChangeAddressLabelModalViewModel() {
       WALLET.getAddressObj(self.address()).label(label); //update was a success
       self.shown(false);
     });
+    trackEvent('Balances', 'ChangeAddressLabel');
   }
   
   self.show = function(address, existingLabel, resetForm) {
@@ -56,6 +57,7 @@ function ChangeAddressLabelModalViewModel() {
     self.newLabel(existingLabel);
     self.shown(true);
     selectText('newAddressLabel');
+    trackDialogShow('ChangeAddressLabel');
   }  
 
   self.hide = function() {
@@ -158,6 +160,7 @@ function CreateNewAddressModalViewModel() {
         setTimeout(checkURL, 400); //necessary to use setTimeout so that the modal properly hides before we refresh the page
       }
     });
+    trackEvent('Balances', self.forWatchOnly() ? 'CreateNewWatchAddress' : 'CreateNewAddress');
   }
   
   self.show = function(forWatchOnly, resetForm) {
@@ -165,6 +168,7 @@ function CreateNewAddressModalViewModel() {
     if(resetForm) self.resetForm();
     self.forWatchOnly(forWatchOnly);
     self.shown(true);
+    trackDialogShow(forWatchOnly ? 'CreateNewWatchAddress' : 'CreateNewAddress');
   }  
 
   self.hide = function() {
@@ -268,6 +272,7 @@ function SendModalViewModel() {
       }
     );
     self.shown(false);
+    trackEvent('Balances', 'Send');
   }
   
   self.show = function(fromAddress, asset, rawBalance, isDivisible, resetForm) {
@@ -284,6 +289,7 @@ function SendModalViewModel() {
     self.rawBalance(rawBalance);
     self.divisible(isDivisible);
     self.shown(true);
+    trackDialogShow('Send');
   }  
 
   self.hide = function() {
@@ -614,7 +620,6 @@ function SweepModalViewModel() {
   }
 
   self.sendBtcForFees = function(callback) {
-    
     var cwk = new CWPrivateKey(self.privateKeyForFees());
     var pubkey = cwk.getPub();
     
@@ -951,7 +956,6 @@ function SweepModalViewModel() {
   }
   
   self.doAction = function() {
-
     var cwk = new CWPrivateKey(self.privateKey());
     var pubkey = cwk.getPub();
 
@@ -1040,6 +1044,8 @@ function SweepModalViewModel() {
         self.mergeOutputs(cwk, pubkey, doSweep);
       }
     }
+    
+    trackEvent('Balances', self.fromOldWallet() ? 'SweepFromOldWallet' : 'Sweep');
 
     if (self.missingBtcForFees>0 && self.privateKeyForFeesValidated.isValid()!='') {
       // send btc to pay fees then launch sweeping
@@ -1047,9 +1053,6 @@ function SweepModalViewModel() {
     } else {
       launchSweep();
     }
-    
-    
-  
   }
   
   self.show = function(resetForm, fromOldWallet, excludeOldAddress) {
@@ -1059,13 +1062,12 @@ function SweepModalViewModel() {
 
     if (resetForm) self.resetForm(fromOldWallet);
     self.shown(true);
+    trackDialogShow(fromOldWallet ? 'SweepFromOldWallet' : 'Sweep');
   }  
 
   self.hide = function() {
     self.shown(false);
   }
-  
-   
 }
 
 
@@ -1105,6 +1107,7 @@ function SignMessageModalViewModel() {
     if(resetForm) self.resetForm();
     self.address(address);
     self.shown(true);
+    trackDialogShow('SignMessage');
   }  
 
   self.hide = function() {
@@ -1118,6 +1121,7 @@ function SignMessageModalViewModel() {
     var signedMessage = key.signMessage(self.message(), format);
     self.signedMessage(signedMessage);
     $("#signedMessage").effect("highlight", {}, 1500);
+    trackEvent('Balances', 'SignMessage');    
     //Keep the form up after signing, the user will manually press Close to close it...
   }
 }
@@ -1197,6 +1201,7 @@ function TestnetBurnModalViewModel() {
           + " <b class='notoAssetColor'>XCP</b>. " + ACTION_PENDING_NOTICE);
       }
     );
+    trackEvent('Balances', 'TestnetBurn');
   }
   
   self.show = function(address, resetForm) {
@@ -1214,6 +1219,7 @@ function TestnetBurnModalViewModel() {
       
       self.btcAlreadyBurned(normalizeQuantity(totalBurned));
       self.shown(true);
+      trackDialogShow('TestnetBurn');
     });
   }  
 
@@ -1238,6 +1244,7 @@ function DisplayPrivateKeyModalViewModel() {
     if(resetForm) self.resetForm();
     self.address(address);
     self.shown(true);
+    trackDialogShow('DisplayPrivateKey');
   }  
 
   self.hide = function() {
@@ -1246,7 +1253,8 @@ function DisplayPrivateKeyModalViewModel() {
   
   self.displayPrivateKey = function() {
     var wif = WALLET.getAddressObj(self.address()).KEY.getWIF();
-    self.privateKeyText(wif); 
+    self.privateKeyText(wif);
+    trackEvent('Balances', 'DisplayPrivateKey');
   }
 }
 
@@ -1301,10 +1309,10 @@ function BroadcastModalViewModel() {
   self.show = function(addressObj, resetForm) {
     if(typeof(resetForm)==='undefined') resetForm = true;
     if(resetForm) self.resetForm();
-    console.log(addressObj);
     self.addressObj = addressObj;
     self.address(self.addressObj.ADDRESS);
     self.shown(true);
+    trackDialogShow('Broadcast');
   }  
 
   self.hide = function() {
@@ -1321,7 +1329,6 @@ function BroadcastModalViewModel() {
   }
 
   self.doAction = function() {
-   
     var params = {
       source: self.address(),
       fee_fraction: Decimal.round(new Decimal(self.feeFraction()).div(100), 8, Decimal.MidpointRounding.ToEven).toFloat(),
@@ -1342,6 +1349,7 @@ function BroadcastModalViewModel() {
     }
 
     WALLET.doTransaction(self.address(), "create_broadcast", params, onSuccess, onError);
+    trackEvent('Balances', 'Broadcast');
   }
 }
 
@@ -1366,12 +1374,12 @@ function SignTransactionModalViewModel() {
     self.validationModel.errors.showAllMessages(false);
   }
   
-  
   self.show = function(address, resetForm) {
     if(typeof(resetForm)==='undefined') resetForm = true;
     if(resetForm) self.resetForm();
     self.address(address);
     self.shown(true);
+    trackDialogShow('SignTransaction');
   }  
 
   self.hide = function() {
@@ -1391,11 +1399,13 @@ function SignTransactionModalViewModel() {
     }   
     self.signedTx(signed);
     $("#signedMessage").effect("highlight", {}, 1500);
+    trackEvent('Balances', 'SignTransaction');
     //Keep the form up after signing, the user will manually press Close to close it...
   }
 
   self.signAndBroadcastTransaction = function() {
     self.signTransaction();
+    trackEvent('Balances', 'BroadcastTransaction');
     if (self.validTx()) {
       var onSuccess = function(txHash, endpoint) {
         self.shown(false);
