@@ -372,7 +372,6 @@ function initMatchedBets() {
   $(window).on('hashchange', function() {
     $(window).off("resize", MATCHED_BETS.dataTableResponsive);
   });
- 
 }
 INIT_FUNC['pages/matchedbets.html'] = initMatchedBets;
 
@@ -382,7 +381,6 @@ function initOpenOrders() {
   ko.applyBindings(OPEN_ORDERS, document.getElementById("openorders"));
 
   OPEN_ORDERS.init();
-
 }
 INIT_FUNC['pages/openorders.html'] = initOpenOrders;
 
@@ -392,7 +390,6 @@ function initOrderMatches() {
   ko.applyBindings(ORDER_MATCHES, document.getElementById("ordermatches"));
 
   ORDER_MATCHES.init();
-
 }
 INIT_FUNC['pages/ordermatches.html'] = initOrderMatches;
 
@@ -402,6 +399,5 @@ function initRPS() {
   ko.applyBindings(RPS, document.getElementById("rps"));
 
   RPS.init();
-
 }
 INIT_FUNC['pages/rps.html'] = initRPS;
