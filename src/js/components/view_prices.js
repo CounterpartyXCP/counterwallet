@@ -20,6 +20,7 @@ var OrderBookEntryItemModel = function(entry) {
   this.QUOTE_ASSET = entry['quote_asset'];
   this.UNIT_PRICE = entry['unit_price'];
   this.QTY_AND_COUNT = smartFormat(entry['quantity']) + ' (' + entry['count'] + ')';
+  this.QUANTITY = smartFormat(entry['quantity']);
   this.TOTAL = smartFormat(mulFloat(entry['unit_price'], entry['quantity']));
   this.DEPTH = smartFormat(entry['depth'], 10);
 };
@@ -109,22 +110,8 @@ function ViewPricesViewModel() {
       params: self
     }    
   });
-  self.minBTCFeeProvidedPct = ko.observable(FEE_FRACTION_DEFAULT_FILTER).extend({
-    required: {
-      message: "This field is required.",
-      onlyIf: function () { return self.asset1() == 'BTC' || self.asset2() == 'BTC'; }
-    },
-    isValidPositiveQuantityOrZero: self,
-    max: 100
-  });
-  self.maxBTCFeeRequiredPct = ko.observable(FEE_FRACTION_DEFAULT_FILTER).extend({
-    required: {
-      message: "This field is required.",
-      onlyIf: function () { return self.asset1() == 'BTC' || self.asset2() == 'BTC'; }
-    },
-    isValidPositiveQuantityOrZero: self,
-    max: 100
-  });
+  self.minBTCFeeProvidedPct = ko.observable(FEE_FRACTION_DEFAULT_FILTER);
+  self.maxBTCFeeRequiredPct = ko.observable(FEE_FRACTION_DEFAULT_FILTER);
 
   self.assetPair = ko.computed(function() {
     if(!self.asset1() || !self.asset2()) return null;
@@ -168,6 +155,8 @@ function ViewPricesViewModel() {
   self.delayedAssetPairSelection = ko.computed(self.assetPair).extend({ rateLimit: { method: "notifyWhenChangesStop", timeout: 400 } });
   self.delayedAssetPairSelection.subscribeChanged(function(newValue, prevValue) {
     if(newValue == null || !self.validationModelBaseOrders.isValid()) return;
+    self.fetchOpenUserOrders();
+    self.fetchUserLastTrades();
     //Get asset divisibility
     self.recievedMarketData(false);
     
@@ -602,7 +591,78 @@ function ViewPricesViewModel() {
   /* BUY FORM END */
 
 
+  /********************************************
+
+  TOP USER PAIRS BEGIN
+  
+  ********************************************/
+
+  self.topUserPairs = ko.observableArray([]);
+
+  self.displayTopUserPairs = function(data) {
+    $.jqlog.debug(data);
+    self.topUserPairs(data);
+  }
+
+  self.fetchTopUserPairs = function() {
+    var params = {
+      'addresses': WALLET.getAddressesList(),
+      'max_pairs': 12
+    }
+    failoverAPI('get_users_pairs', params, self.displayTopUserPairs);
+  }
+
+  self.selectTopUserPair = function(item) {
+    self.asset1(item.base_asset);
+    self.asset2(item.quote_asset);
+    self.marketProgression24h(0);
+  }
+  /* TOP USER PAIRS END */
+
+  self.userOpenOrders = ko.observableArray([]);
+
+  self.displayOpenUserOrders = function(data) {
+    for (var i in data) {
+      data[i].amount = normalizeQuantity(data[i].amount, self.baseAssetIsDivisible());
+      data[i].total = normalizeQuantity(data[i].total, self.baseAssetIsDivisible());
+    }
+    self.userOpenOrders(data);
+  }
+
+  self.fetchOpenUserOrders = function() {
+    self.userOpenOrders([]);
+    var params = {
+      'asset1': self.asset1(),
+      'asset2': self.asset2(),
+      'addresses': WALLET.getAddressesList()
+    }
+    failoverAPI('get_market_orders', params, self.displayOpenUserOrders);
+  }
+
+  self.userLastTrades = ko.observableArray([]);
+
+  self.displayUserLastTrades = function(data) {
+    $.jqlog.debug(data);
+    for (var i in data) {
+      data[i].amount = normalizeQuantity(data[i].amount, self.baseAssetIsDivisible());
+      data[i].total = normalizeQuantity(data[i].total, self.baseAssetIsDivisible());
+      data[i].block_time = moment(data[i].block_time * 1000).format('YYYY/MM/DD hh:mm:ss A Z');
+    }
+    self.userLastTrades(data);
+  }
+
+  self.fetchUserLastTrades = function() {
+    self.userOpenOrders([]);
+    var params = {
+      'asset1': self.asset1(),
+      'asset2': self.asset2(),
+      'addresses': WALLET.getAddressesList()
+    }
+    failoverAPI('get_market_trades', params, self.displayUserLastTrades);
+  }
+
   self.init = function() {
+    self.fetchTopUserPairs();
     self.fetchAssetPairMarketInfo();
     self.fetchLatestTrades();
     
@@ -635,8 +695,6 @@ function ViewPricesViewModel() {
       return; //stop auto refreshing
     
     failoverAPI("get_asset_pair_market_info", {'limit': VIEW_PRICES_NUM_ASSET_PAIRS}, function(data, endpoint) {
-      $.jqlog.debug('DATA:');
-      $.jqlog.debug(data);
 
       self.assetPairMarketInfo([]);
       $('#assetPairMarketInfo').dataTable().fnClearTable();
@@ -665,9 +723,10 @@ function ViewPricesViewModel() {
   self.fetchLatestTrades = function() {
     if(self.recievedMarketData())
       return; //stop auto refreshing
+
+    self.latestTrades([]);
       
     failoverAPI("get_trade_history", {'limit': VIEW_PRICES_NUM_LATEST_TRADES}, function(data, endpoint) {
-      self.latestTrades([]);
       $('#latestTrades').dataTable().fnClearTable();
       
       var trades = [];
@@ -751,13 +810,14 @@ function ViewPricesViewModel() {
 
   self.metricsRefreshTradeHistory = function() {
     var deferred = $.Deferred();
+    self.currentMarketPrice(null);
+
     failoverAPI("get_trade_history", {'asset1': self.asset1(), 'asset2': self.asset2()}, function(data, endpoint) {
 
-      $.jqlog.debug('TRADE HISROTY');
-      $.jqlog.debug(data);
-      
       deferred.resolve();
       self.tradeHistory([]);
+      $('#tradeHistory').dataTable().fnClearTable();
+
       for(var i=0; i < data.length; i++) {
         var item = new TradeHistoryItemModel(data[i]);
         if (i==0) self.currentMarketPrice(item.RAW_UNIT_PRICE);
@@ -782,9 +842,11 @@ function ViewPricesViewModel() {
       'min_pct_fee_provided': self.minBTCFeeProvidedPct() / 100,
     };
 
+    self.bidBook([])
+    self.askBook([])
+
     failoverAPI("get_order_book_simple", args, function(data, endpoint) {
-      $.jqlog.debug('get_order_book_simple:');
-      $.jqlog.debug(data);
+      
       deferred.resolve();
       //set up order book display
       var i = null;

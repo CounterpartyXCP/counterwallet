@@ -149,7 +149,28 @@ table.confirmOrderBox td {
   padding: 5px !important;
 }
 
-section.topPairsSelector a {
-  float: left;
-  margin: 2px;
+
+div.topPairsGrid a {
+  display:block;
+  float:left;
+  margin: 0;
+  padding:4px;
+  border: 1px solid #CCC;
+  font-size: 12px;
+  line-height: 20px;
+  text-decoration: none;
+  color:#000;
+  width:25%;
+  overflow: hidden;
+  text-align: center;
+}
+
+td.BUY {
+  color:#108710;
+  text-align: center !important;
+}
+
+td.SELL {
+  color:#F00;
+  text-align: center !important;
 }

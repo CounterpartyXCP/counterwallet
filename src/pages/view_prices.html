@@ -1,35 +1,56 @@
-
-
 <section id="widget-grid" class="ordersGrid assetSelector" data-bind="validationOptions: { insertMessages: false }"> <!-- widget grid -->
-<div class="row">
-  <div class="col-xs-12 col-sm-12 col-md-12 col-lg-12" data-bind="visible: !recievedMarketData()">
-    <h1 class="page-title txt-color-blueDark">
-      <i class="fa fa-bar-chart-o fa-fw "></i>      
-      Decentralized Exchange Markets
-    </h1>
-  </div>
+  <div class="row">
+    <div class="col-xs-12 col-sm-12 col-md-12 col-lg-12" data-bind="visible: !recievedMarketData()">
+      <h1 class="page-title txt-color-blueDark">
+        <i class="fa fa-bar-chart-o fa-fw "></i>      
+        Decentralized Exchange Markets
+      </h1>
+    </div>
 
-  <div class="col-xs-4 col-sm-4 col-md-4 col-lg-4" data-bind="visible: recievedMarketData()">
-    <h1>
-      <a id="changeMarket" class="btn btn-primary" style="vertical-align:text-bottom;">
-        <span class="fa fa-arrow-left"><span>
-        Markets
-      </a>
-    </h1>
-  </div>
+    <div class="col-xs-4 col-sm-4 col-md-4 col-lg-4" data-bind="visible: recievedMarketData()">
+      <h1>
+        <a id="changeMarket" class="btn btn-primary" style="vertical-align:text-bottom;">
+          <span class="fa fa-arrow-left"><span>
+          All Markets
+        </a>
+      </h1>
+    </div>
 
-  <div class="col-xs-4 col-sm-4 col-md-4 col-lg-4" data-bind="visible: recievedMarketData()">
-    <h1 style="text-align:center">
-      <div class="pairTitle" style="" data-bind="text: dispAssetPair"></div> 
-      <span class="marketPrice" data-bind="visible: currentMarketPrice, html: currentMarketPrice + ' ' + marketProgression24hDisp"></span>
-    </h1>
-  </div>
+    <div class="col-xs-4 col-sm-4 col-md-4 col-lg-4" data-bind="visible: recievedMarketData()">
+      <h1 class="page-title txt-color-blueDark" style="text-align:center">
+        <div class="pairTitle" style="" data-bind="text: dispAssetPair"></div> 
+        <span class="marketPrice" data-bind="visible: currentMarketPrice, html: currentMarketPrice + ' ' + marketProgression24hDisp"></span>
+      </h1>
+    </div>
 
-</div>
+  </div>
 
   <div class="row"> <!-- row -->
+
+
+    <article class="col-xs-6 col-sm-6 col-md-6 col-lg-6"> <!-- NEW WIDGET START -->
+      <!-- Widget ID (each widget will need unique ID)-->
+      <div class="jarviswidget defaultWidgetColor" id="wid-id-orderInputSelection" data-widget-editbutton="false" data-widget-sortable="false" data-widget-deletebutton="false" data-widget-colorbutton="false" data-widget-fullscreenbutton="false" data-widget-togglebutton="false"  data-widget-grid="false" >
+          <header>
+            <span class="widget-icon"> <i class="fa fa-rocket"></i> </span>
+            <h3>Top pairs</h3>
+            <div class="clearfix"></div>
+          </header>
+          <div> <!-- widget div-->
+            <div class="widget-body min-height-0 no-padding" style="min-height:0 !important" data-bind="validationOptions: { insertMessages: false }"> <!-- widget content -->
+                
+              <div class="topPairsGrid" data-bind="foreach: topUserPairs">
+                <a href="#" data-bind="click: $parent.selectTopUserPair">
+                  <span data-bind="text:base_asset"></span>/<span data-bind="text:quote_asset"></span>
+                </a>
+              </div>
+                
+            </div>
+         </div> <!-- end widget div -->
+      </div> <!-- end widget -->
+    </article> <!-- WIDGET END -->
     
-    <article class="col-xs-12 col-sm-12 col-md-12 col-lg-12"> <!-- NEW WIDGET START -->
+    <article class="col-xs-6 col-sm-6 col-md-6 col-lg-6"> <!-- NEW WIDGET START -->
       <!-- Widget ID (each widget will need unique ID)-->
       <div class="jarviswidget defaultWidgetColor" id="wid-id-orderInputSelection" data-widget-editbutton="false" data-widget-sortable="false" data-widget-deletebutton="false" data-widget-colorbutton="false" data-widget-fullscreenbutton="false" data-widget-togglebutton="false"  data-widget-grid="false" >
           <header>
@@ -40,7 +61,7 @@
           <div> <!-- widget div-->
             <div class="widget-body min-height-0 no-padding" style="min-height:0 !important" data-bind="validationOptions: { insertMessages: false }"> <!-- widget content -->
                 <div class="row" style="height:90px">
-                    <section class="col col-lg-2 col-sm-2">
+                    <section class="col col-lg-6 col-sm-6">
                       <div style="padding:10px">
                         <label for="asset1" class="control-label font-medlg">First Token</label>
                         <label class="input">
@@ -49,7 +70,7 @@
                         <br/><span class="errorColor" data-bind="validationMessage: asset1"></span>
                       </div>
                     </section>
-                    <section class="col col-lg-2 col-sm-2">
+                    <section class="col col-lg-6 col-sm-6">
                       <div style="padding:10px">
                         <label for="asset2" class="control-label font-medlg">Second Token</label>
                         <label class="input">
@@ -58,61 +79,12 @@
                         <br/><span class="errorColor" data-bind="validationMessage: asset2"></span>
                       </div>
                     </section>
-
-                    <section class="col col-lg-8 col-sm-8 topPairsSelector">
-                      <div style="padding:5px">
-                        <a class="btn btn-default btn-xs" href="javascript:void(0);">XCP/BTC</a>
-                        <a class="btn btn-default btn-xs" href="javascript:void(0);">NOCALLABLE/BTC</a>
-                        <a class="btn btn-default btn-xs" href="javascript:void(0);">GOOGLE/BTC</a>
-                        <a class="btn btn-default btn-xs" href="javascript:void(0);">BING/BTC</a>
-                        <a class="btn btn-default btn-xs" href="javascript:void(0);">FACEBOOK/BTC</a>
-                        <a class="btn btn-default btn-xs" href="javascript:void(0);">XCP/BTC</a>
-                        <a class="btn btn-default btn-xs" href="javascript:void(0);">XCP/BTC</a>
-                        <a class="btn btn-default btn-xs" href="javascript:void(0);">XCP/BTC</a>
-                        <a class="btn btn-default btn-xs" href="javascript:void(0);">XCP/BTC</a>
-                        <a class="btn btn-default btn-xs" href="javascript:void(0);">XCP/BTC</a>
-                        <a class="btn btn-default btn-xs" href="javascript:void(0);">XCP/BTC</a>
-                        <a class="btn btn-default btn-xs" href="javascript:void(0);">XCP/BTC</a>
-                        <a class="btn btn-default btn-xs" href="javascript:void(0);">XCP/BTC</a>
-                        <a class="btn btn-default btn-xs" href="javascript:void(0);">XCP/BTC</a>
-                        <a class="btn btn-default btn-xs" href="javascript:void(0);">XCP/BTC</a>
-                        <a class="btn btn-default btn-xs" href="javascript:void(0);">XCP/BTC</a>
-                        <a class="btn btn-default btn-xs" href="javascript:void(0);">XCP/BTC</a>
-                        <a class="btn btn-default btn-xs" href="javascript:void(0);">XCP/BTC</a>
-                        <a class="btn btn-default btn-xs" href="javascript:void(0);">XCP/BTC</a>
-                        <a class="btn btn-default btn-xs" href="javascript:void(0);">XCP/BTC</a>
-                        <a class="btn btn-default btn-xs" href="javascript:void(0);">XCP/BTC</a>
-                        <a class="btn btn-default btn-xs" href="javascript:void(0);">XCP/BTC</a>
-                        <a class="btn btn-default btn-xs" href="javascript:void(0);">XCP/BTC</a>
-                        <a class="btn btn-default btn-xs" href="javascript:void(0);">XCP/BTC</a>
-                        <a class="btn btn-default btn-xs" href="javascript:void(0);">XCP/BTC</a>
-                        <a class="btn btn-default btn-xs" href="javascript:void(0);">XCP/BTC</a>
-                        <a class="btn btn-default btn-xs" href="javascript:void(0);">XCP/BTC</a>
-                      </div>
-                    </section>
-
-                    <div style="display:none">
-                    <section data-bind="visible: asset1() == 'BTC' || asset2() == 'BTC'" class="col col-lg-3 col-sm-6">
-                        <label for="minBTCFeeProvidedPct" class="control-label font-medlg">Min BTC % Fee Provided</label>
-                        <label class="input">
-                            <input type="text" name="minBTCFeeProvidedPct" class="form-control input" type="text" data-bind="value: minBTCFeeProvidedPct, valueUpdate: 'input'" />
-                        </label>
-                        <br/><span class="errorColor" data-bind="validationMessage: minBTCFeeProvidedPct"></span>
-                    </section>
-                    <section data-bind="visible: asset1() == 'BTC' || asset2() == 'BTC'" class="col col-lg-3 col-sm-6">
-                        <label for="maxBTCFeeRequiredPct" class="control-label font-medlg">Max BTC % Fee Required</label>
-                        <label class="input">
-                            <input type="text" name="maxBTCFeeRequiredPct" class="form-control input" type="text" data-bind="value: maxBTCFeeRequiredPct, valueUpdate: 'input'" />
-                        </label>
-                        <br/><span class="errorColor" data-bind="validationMessage: maxBTCFeeRequiredPct"></span>
-                    </section>
-                    </div>
-
                 </div>
             </div>
          </div> <!-- end widget div -->
       </div> <!-- end widget -->
     </article> <!-- WIDGET END -->
+
   </div> <!-- end row -->
 
 
@@ -121,7 +93,7 @@
       <div class="jarviswidget defaultWidgetColor" id="wid-id-assetPairMarketInfo" data-widget-editbutton="false" data-widget-sortable="false" data-widget-deletebutton="false" data-widget-colorbutton="false" data-widget-fullscreenbutton="false" data-widget-togglebutton="false"  data-widget-grid="false">
         <header>
             <span class="widget-icon"> <i class="fa fa-chain"></i> </span>
-            <h3>Top Pairs</h3>
+            <h3>All Pairs</h3>
             <div class="clearfix"></div>
         </header>
         <div> <!-- widget div-->
@@ -193,6 +165,91 @@
       </div> <!-- end widget -->
     </article> <!-- WIDGET END -->
   </div> <!-- end row -->
+
+
+  <div class="row" data-bind="visible: userOpenOrders().length > 0">
+
+    <article class="col-xs-6 col-sm-6 col-md-6 col-lg-6"> <!-- NEW WIDGET START -->
+      <div class="jarviswidget defaultWidgetColor" id="wid-id-orderBook" data-widget-editbutton="false" data-widget-deletebutton="false"
+       data-widget-colorbutton="false" data-widget-fullscreenbutton="false" data-widget-togglebutton="false" data-widget-sortable="false" data-widget-grid="false" data-bind="fadeVisibleInOnly: validationModelBaseOrders.isValid() && recievedMarketData()">
+        <header>
+            <span class="widget-icon"> <i class="fa fa-sort-amount-desc"></i> </span>
+            <h3>My Trades History</h3>
+            <div class="clearfix"></div>
+        </header>
+        <div> <!-- widget div-->
+            <div class="widget-body no-padding"> <!-- widget content -->
+              <div class="custom-scroll table-responsive" style="height:200px; overflow-y: scroll;">
+                <table class="orderBook table table-striped table-bordered table-condensed">
+                    <thead>
+                        <tr>
+                            <th>Block Time</th>
+                            <th>Type</th>
+                            <th>Price [<span data-bind="text: quoteAsset"></span>]</th>
+                            <th>Amount [<span data-bind="text: baseAsset"></span>]</th>
+                            <th>Total [<span data-bind="text: quoteAsset"></span>]</th>
+                            <th>Status</th>
+                        </tr>
+                    </thead>
+                    <tbody data-bind="foreach: userLastTrades"> <!-- descending order -->
+                        <tr>
+                            <td data-bind="text: block_time" style="white-space:nowrap"></td>
+                            <td data-bind="text: type, attr: {class: type}"></td>
+                            <td data-bind="text: price"></td>
+                            <td data-bind="text: amount"></td> <!-- quantity (count) -->
+                            <td data-bind="text: total"></td>
+                            <td data-bind="text: status"></td>
+                        </tr>
+                    </tbody>
+                </table>
+              </div>
+            </div> <!-- end widget content -->
+        </div> <!-- end widget div -->
+      </div> <!-- end widget -->
+    </article> <!-- WIDGET END -->
+
+    <article class="col-xs-6 col-sm-6 col-md-6 col-lg-6"> <!-- NEW WIDGET START -->
+      <div class="jarviswidget defaultWidgetColor" id="wid-id-orderBook" data-widget-editbutton="false" data-widget-deletebutton="false"
+       data-widget-colorbutton="false" data-widget-fullscreenbutton="false" data-widget-togglebutton="false" data-widget-sortable="false" data-widget-grid="false" data-bind="fadeVisibleInOnly: validationModelBaseOrders.isValid() && recievedMarketData()">
+        <header>
+            <span class="widget-icon"> <i class="fa fa-sort-amount-desc"></i> </span>
+            <h3>My Open Orders</h3>
+            <div class="clearfix"></div>
+        </header>
+        <div> <!-- widget div-->
+            <div class="widget-body no-padding"> <!-- widget content -->
+                <div class="custom-scroll table-responsive" style="height:200px; overflow-y: scroll;">
+                  <table class="orderBook table table-striped table-bordered table-condensed">
+                      <thead>
+                          <tr>
+                              <th>Type</th>
+                              <th>Price [<span data-bind="text: quoteAsset + '/' + baseAsset"></span>]</th>
+                              <th>Amount [<span data-bind="text: baseAsset"></span>]</th>
+                              <th>Total [<span data-bind="text: quoteAsset"></span>]</th>
+                              <th>Completion</th>
+                              <th>Action</th>
+                          </tr>
+                      </thead>
+                      <tbody data-bind="foreach: userOpenOrders"> <!-- descending order -->
+                          <tr>
+                              <td data-bind="text: type, attr: {class: type}"></td>
+                              <td data-bind="text: price"></td>
+                              <td data-bind="text: amount"></td> <!-- quantity (count) -->
+                              <td data-bind="text: total"></td>
+                              <td data-bind="text: completion"></td>
+                              <td>
+                                <a href="#" class="btn btn-default btn-xs">Cancel</a>
+                              </td>
+                          </tr>
+                      </tbody>
+                  </table>
+                </div>
+            </div> <!-- end widget content -->
+        </div> <!-- end widget div -->
+      </div> <!-- end widget -->
+    </article> <!-- WIDGET END -->
+
+  </div> <!-- end row -->  
 
   
   <div class="row">
@@ -366,14 +423,14 @@
                     <thead>
                         <tr>
                             <th>Price [<span data-bind="text: quoteAsset + '/' + baseAsset"></span>]</th>
-                            <th>Amount [<span data-bind="text: baseAsset"></span>] (Count)</th>
+                            <th>Amount [<span data-bind="text: baseAsset"></span>]</th>
                             <th>Total [<span data-bind="text: quoteAsset"></span>]</th>
                         </tr>
                     </thead>
                     <tbody data-bind="foreach: askBook"> <!-- ascending order -->
                         <tr data-bind="click: $parent.selectSellOrder">
                             <td data-bind="text: UNIT_PRICE"></td>
-                            <td data-bind="text: QTY_AND_COUNT"></td> <!-- quantity (count) -->
+                            <td data-bind="text: QUANTITY"></td> <!-- quantity (count) -->
                             <td data-bind="text: TOTAL"></td>
                         </tr>
                     </tbody>
@@ -399,14 +456,14 @@
                     <thead>
                         <tr>
                             <th>Price [<span data-bind="text: quoteAsset + '/' + baseAsset"></span>]</th>
-                            <th>Quantity [<span data-bind="text: baseAsset"></span>] (Count)</th>
+                            <th>Amount [<span data-bind="text: baseAsset"></span>]</th>
                             <th>Total [<span data-bind="text: quoteAsset"></span>]</th>
                         </tr>
                     </thead>
                     <tbody data-bind="foreach: bidBook"> <!-- descending order -->
                         <tr data-bind="click: $parent.selectBuyOrder">
                             <td data-bind="text: UNIT_PRICE"></td>
-                            <td data-bind="text: QTY_AND_COUNT"></td> <!-- quantity (count) -->
+                            <td data-bind="text: QUANTITY"></td> <!-- quantity (count) -->
                             <td data-bind="text: TOTAL"></td>
                         </tr>
                     </tbody>
