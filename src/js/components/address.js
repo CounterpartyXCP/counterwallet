@@ -10,8 +10,8 @@ function AddressViewModel(key, address, initialLabel) {
   self.ADDRESS = address;
   self.PUBKEY = key ? key.getPub() : ''; //hex string
 
-  self.lastSort = '';
-  self.lastSortDirection = '';
+  self.lastSort = ko.observable('');
+  self.lastSortDirection = ko.observable('');
   
   self.label = ko.observable(initialLabel);
   self.numPrimedTxouts = ko.observable(null);
@@ -226,7 +226,7 @@ function AddressViewModel(key, address, initialLabel) {
 
   self.sortAssetsByName = function() {
     //Sort assets by asset name
-    var reverseSort = self.lastSort == 'sortAssetsByName' && self.lastSortDirection == 'asc';
+    var reverseSort = self.lastSort() == 'sortAssetsByName' && self.lastSortDirection() == 'asc';
     
     if(reverseSort) {
       self.assets.sort(function(left, right) {
@@ -238,13 +238,13 @@ function AddressViewModel(key, address, initialLabel) {
       });
     }
 
-    self.lastSortDirection = (self.lastSort == 'sortAssetsByName' && self.lastSortDirection == 'asc') ? 'desc' : 'asc';
-    self.lastSort = 'sortAssetsByName';
+    self.lastSortDirection((self.lastSort() == 'sortAssetsByName' && self.lastSortDirection() == 'asc') ? 'desc' : 'asc');
+    self.lastSort('sortAssetsByName');
   }
 
   self.sortAssetsByBalance = function() {
     //Sort assets by balance
-    var reverseSort = self.lastSort == 'sortAssetsByBalance' && self.lastSortDirection == 'asc';
+    var reverseSort = self.lastSort() == 'sortAssetsByBalance' && self.lastSortDirection() == 'asc';
 
     if(reverseSort) {
       self.assets.sort(function(left, right) {
@@ -256,8 +256,8 @@ function AddressViewModel(key, address, initialLabel) {
       });
     }    
 
-    self.lastSortDirection = (self.lastSort == 'sortAssetsByBalance' && self.lastSortDirection == 'asc') ? 'desc' : 'asc';
-    self.lastSort = 'sortAssetsByBalance';
+    self.lastSortDirection((self.lastSort() == 'sortAssetsByBalance' && self.lastSortDirection() == 'asc') ? 'desc' : 'asc');
+    self.lastSort('sortAssetsByBalance');
   }
 
   self.showAllAssets = function() {

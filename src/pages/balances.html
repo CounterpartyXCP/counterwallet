@@ -85,7 +85,12 @@
         <div class="jarviswidget" data-bind="attr: {'id': 'address-wid-' + ADDRESS}" data-widget-deletebutton="false" data-widget-editbutton="false">
           <header>
             <span class="widget-icon"> <i class="fa" data-bind="css: { 'fa-arrow-circle-o-right': !IS_WATCH_ONLY, 'fa-eye': IS_WATCH_ONLY }"></i> </span>
-            <h3 class="jarviswidget-ctrls"><span class="addressLabelText" href="#" data-bind="text: label, click: changeLabel"></span><span data-bind="visible: IS_WATCH_ONLY">&nbsp;&nbsp;(Watch Only)</span></h3>
+            <h3 class="jarviswidget-ctrls">
+                <span class="addressLabelText" href="#" data-bind="text: label, click: changeLabel"></span>
+                <div data-bind="visible: assetFilter()" class="label label-warning margin-left-5">Filtered</div>
+                <div data-bind="visible: lastSort()" class="label label-info margin-left-5">Sorted</div>
+                <div data-bind="visible: IS_WATCH_ONLY" class="label label-info margin-left-5">Watch Only</div>
+            </h3>
             <div class="widget-toolbar">
               <div class="btn-group">
                 <button class="btn dropdown-toggle btn-xs btn-primary" data-toggle="dropdown"><i class="fa fa-bars"></i> Address Actions <i class="fa fa-caret-down"></i></button>                
