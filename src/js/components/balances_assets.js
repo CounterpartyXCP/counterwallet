@@ -52,8 +52,6 @@ function CreateAssetModalViewModel() {
           assert(B26_DIGITS.indexOf(val[i]) != -1); //should have been checked already
           n += B26_DIGITS.indexOf(val[i]); 
         }
-        
-        console.log("n is: " + n);
         assert(n >= Math.pow(26, 3)); //should have been checked already
         return n <= MAX_INT;
       },
@@ -156,6 +154,7 @@ function CreateAssetModalViewModel() {
       }
     );
     self.shown(false);
+    trackEvent('Assets', 'CreateAsset');
   }
   
   self.show = function(address, resetForm) {
@@ -163,6 +162,7 @@ function CreateAssetModalViewModel() {
     if(resetForm) self.resetForm();
     self.address(address);
     self.shown(true);
+    trackDialogShow('CreateAsset');
   }  
 
   self.hide = function() {
@@ -238,6 +238,7 @@ function IssueAdditionalAssetModalViewModel() {
           + ACTION_PENDING_NOTICE);
       }
     );
+    trackEvent('Assets', 'IssueAdditionalAsset');
   }
   
   self.show = function(address, divisible, asset, resetForm) {
@@ -247,6 +248,7 @@ function IssueAdditionalAssetModalViewModel() {
     self.divisible(divisible);
     self.asset(asset);
     self.shown(true);
+    trackDialogShow('IssueAdditionalAsset');
   }  
 
   self.hide = function() {
@@ -304,6 +306,7 @@ function TransferAssetModalViewModel() {
           + ACTION_PENDING_NOTICE);
       }
     );
+    trackEvent('Assets', 'TransferAsset');
   }
   
   self.show = function(sourceAddress, asset, resetForm) {
@@ -312,6 +315,7 @@ function TransferAssetModalViewModel() {
     self.address(sourceAddress);
     self.asset(asset);
     self.shown(true);
+    trackDialogShow('TransferAsset');
   }  
 
   self.hide = function() {
@@ -384,6 +388,7 @@ function ChangeAssetDescriptionModalViewModel() {
           + " changed to <b>" + self.newDescription() + "</b>. " + ACTION_PENDING_NOTICE);
       }
     );
+    trackEvent('Assets', 'ChangeAssetDescription');
   }
   
   self.show = function(address, asset, resetForm) {
@@ -392,6 +397,7 @@ function ChangeAssetDescriptionModalViewModel() {
     self.address(address);
     self.asset(asset);
     self.shown(true);
+    trackDialogShow('ChangeAssetDescription');
   }  
 
   self.hide = function() {
@@ -531,6 +537,7 @@ function PayDividendModalViewModel() {
           + " <b class='notoAssetColor'>" + self.assetData().asset + "</b>. " + ACTION_PENDING_NOTICE);
       }
     );
+    trackEvent('Assets', 'PayDividend');
   }
 
   self.showModal = function(address, resetForm) {
@@ -540,6 +547,7 @@ function PayDividendModalViewModel() {
     self.assetName('');
     self.assetData(null);
     self.shown(true);
+    trackDialogShow('PayDividend');
     
     //Get the balance of ALL assets at this address
     failoverAPI("get_normalized_balances", [[address.ADDRESS]], function(data, endpoint) {
@@ -558,6 +566,7 @@ function PayDividendModalViewModel() {
   }
   
   self.show = function(address, resetForm) {
+    trackDialogShow('PayDividendAttempt');
     checkCountry("dividend", function() {
       self.showModal(address, resetForm);
     });
@@ -680,6 +689,7 @@ function CallAssetModalViewModel() {
           + ACTION_PENDING_NOTICE);
       }
     );
+    trackEvent('Assets', 'CallAsset');
   }
   
   self.show = function(address, asset, resetForm) {
@@ -703,6 +713,7 @@ function CallAssetModalViewModel() {
       return;
     }
     self.shown(true);
+    trackDialogShow('CallAsset');
   }  
 
   self.hide = function() {
@@ -812,6 +823,7 @@ function ShowAssetInfoModalViewModel() {
     );   
     
     self.shown(true);
+    trackDialogShow('ShowAssetInfo');
   }  
 
   self.hide = function() {

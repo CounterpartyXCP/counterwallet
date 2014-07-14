@@ -99,6 +99,7 @@ function LogonViewModel() {
 
   self.onIsWalletOnline = function(isOnline, endpoint) {
     if(isOnline) {
+      trackEvent("Login", "Wallet", "IsAlreadyOnline");
       var message = "<b class='errorColor'>You appear to be logged into Counterwallet elsewhere.</b> It's not safe to be logged into the same wallet account from multiple devices at the same time. If you are sure that this is not the case, press Continue. Otherwise, please press Cancel, logout from your other device, and try again.";
       
       bootbox.dialog({
@@ -159,6 +160,7 @@ function LogonViewModel() {
     } else { //could not find user stored preferences
       //No server had the preferences
       $.jqlog.log("Stored preferences NOT found on server(s). Creating new...");
+      trackEvent("Login", "NewWallet", USE_TESTNET ? "Testnet" : "Mainnet");
       WALLET.isNew(true);
       
       //no stored preferences on any server(s) in the federation, go with the default...
@@ -191,7 +193,6 @@ function LogonViewModel() {
   }
   
   self.genAddress = function(mustSavePreferencesToServer) {
-    
     var i = WALLET.addresses().length;
     var address = WALLET.addAddress();
     var addressHash = hashToB64(address);
@@ -253,6 +254,12 @@ function LogonViewModel() {
     
     //Update the wallet balances (isAtLogon = true)
     self.updateBalances(self.openWalletPt4);
+    
+    trackEvent("Login", "Wallet", "Size", PREFERENCES['num_addresses_used']);
+    trackEvent("Login", "Network", USE_TESTNET ? "Testnet" : "Mainnet");
+    trackEvent("Login", "Country", USER_COUNTRY || 'UNKNOWN');
+    trackEvent("Login", "Language", PREFERENCES['selected_lang']);
+    trackEvent("Login", "Theme", PREFERENCES['selected_theme']);
   }
     
   self.openWalletPt4 = function() {

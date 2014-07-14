@@ -405,6 +405,29 @@ function reduce(numerator,denominator){
   return [numerator/gcd, denominator/gcd];
 }
 
+function getCurrentPage() {
+  return(window.location.hash.replace('#', '/'));
+}
+
+function trackPageView(url) {
+  //Track a page view via google analytics
+  if(typeof(url)==='undefined') url = getCurrentPage();
+  _gaq.push(['_trackPageview', url]);
+}
+
+function trackDialogShow(dialogName) {
+  //Track the display of a dialog via google analytics
+  _gaq.push(['_trackPageview', getCurrentPage() + '#' + dialogName]);
+}
+
+function trackEvent(category, action, label, value) {
+  //Track some kind of user event via google analytics
+  var data = ['_trackEvent', category, action];
+  if(typeof(label)!=='undefined') data.push(label);
+  if(typeof(value)!=='undefined') data.push(value); //this is an INTEGER value
+  _gaq.push(data);
+}
+
 function isValidURL(str) {
   var pattern = /^(https?:\/\/)?((([a-z\d]([a-z\d-]*[a-z\d])*)\.)+[a-z]{2,}|((\d{1,3}\.){3}\d{1,3}))(\:\d+)?(\/[-a-z\d%_.~+]*)*(\?[;&a-z\d%_.~+=-]*)?(\#[-a-z\d_]*)?$/i;
 
