@@ -155,8 +155,7 @@ function ViewPricesViewModel() {
   self.delayedAssetPairSelection = ko.computed(self.assetPair).extend({ rateLimit: { method: "notifyWhenChangesStop", timeout: 400 } });
   self.delayedAssetPairSelection.subscribeChanged(function(newValue, prevValue) {
     if(newValue == null || !self.validationModelBaseOrders.isValid()) return;
-    self.fetchOpenUserOrders();
-    self.fetchUserLastTrades();
+    
     //Get asset divisibility
     self.recievedMarketData(false);
     
@@ -170,6 +169,8 @@ function ViewPricesViewModel() {
       self.metricsStartAutoRefresh(function() {
         self.recievedMarketData(true);
       }); //start periodically refreshing the data display
+      self.fetchOpenUserOrders();
+      self.fetchUserLastTrades();
     });    
   });
   
@@ -591,12 +592,8 @@ function ViewPricesViewModel() {
   /* BUY FORM END */
 
 
-  /********************************************
 
-  TOP USER PAIRS BEGIN
-  
-  ********************************************/
-
+  /* TOP USER PAIRS */
   self.topUserPairs = ko.observableArray([]);
 
   self.displayTopUserPairs = function(data) {
@@ -617,14 +614,14 @@ function ViewPricesViewModel() {
     self.asset2(item.quote_asset);
     self.marketProgression24h(0);
   }
-  /* TOP USER PAIRS END */
-
+  
+  /* USER OPEN ORDERS */
   self.userOpenOrders = ko.observableArray([]);
 
   self.displayOpenUserOrders = function(data) {
     for (var i in data) {
       data[i].amount = normalizeQuantity(data[i].amount, self.baseAssetIsDivisible());
-      data[i].total = normalizeQuantity(data[i].total, self.baseAssetIsDivisible());
+      data[i].total = normalizeQuantity(data[i].total, self.quoteAssetIsDivisible());
     }
     self.userOpenOrders(data);
   }
@@ -639,13 +636,14 @@ function ViewPricesViewModel() {
     failoverAPI('get_market_orders', params, self.displayOpenUserOrders);
   }
 
+  /* USER OPEN ORDERS */
   self.userLastTrades = ko.observableArray([]);
 
   self.displayUserLastTrades = function(data) {
     $.jqlog.debug(data);
     for (var i in data) {
       data[i].amount = normalizeQuantity(data[i].amount, self.baseAssetIsDivisible());
-      data[i].total = normalizeQuantity(data[i].total, self.baseAssetIsDivisible());
+      data[i].total = normalizeQuantity(data[i].total, self.quoteAssetIsDivisible());
       data[i].block_time = moment(data[i].block_time * 1000).format('YYYY/MM/DD hh:mm:ss A Z');
     }
     self.userLastTrades(data);
@@ -661,10 +659,52 @@ function ViewPricesViewModel() {
     failoverAPI('get_market_trades', params, self.displayUserLastTrades);
   }
 
+  /* ALL PAIRS LIST */
+  self.allPairs = ko.observableArray([]);
+
+  self.displayAllPairs = function(data) {
+    for (var i in data) {
+      data[i].volume = normalizeQuantity(data[i].volume, data[i].divisible);
+      data[i].supply = normalizeQuantity(data[i].supply, data[i].divisible);
+      data[i].market_cap = normalizeQuantity(data[i].market_cap, data[i].divisible);
+      if (parseFloat(data[i].progression) > 0) {
+        data[i].prog_class = 'UP';
+        data[i].progression = '+' + data[i].progression;
+      } else if (parseFloat(data[i].progression) < 0) {
+        data[i].prog_class = 'DOWN'
+      } else {
+        data[i].prog_class = '';
+      }
+      data[i].progression += '%';
+
+      if (parseFloat(data[i].trend) > 0) {
+        data[i].price_class = 'UP';
+      } else if (parseFloat(data[i].trend) < 0) {
+        data[i].price_class = 'DOWN';
+      } else {
+        data[i].price_class = '';
+      }
+    }
+    self.allPairs(data);
+    if(self.allPairs().length) {
+      runDataTables('#assetPairMarketInfo', true, { "aaSorting": [ [0, 'asc'] ] });
+    }
+  }
+
+  self.fetchAllPairs = function() {
+    try {
+      self.allPairs([]);
+      $('#assetPairMarketInfo').dataTable().fnClearTable();
+    } catch(e) {}
+    failoverAPI('get_markets_list', [], self.displayAllPairs);
+  }
+
   self.init = function() {
     self.fetchTopUserPairs();
-    self.fetchAssetPairMarketInfo();
-    self.fetchLatestTrades();
+    self.fetchAllPairs();
+
+    //self.fetchAssetPairMarketInfo();
+    //self.fetchLatestTrades();
     
     //Get a list of all assets
     failoverAPI("get_asset_names", {}, function(data, endpoint) {
@@ -714,9 +754,9 @@ function ViewPricesViewModel() {
   }
 
   self.selectTopPair = function(item) {
-    self.asset1(item.BASE_ASSET);
-    self.asset2(item.QUOTE_ASSET);
-    self.marketProgression24h(item.PCT_CHANGE_24H);
+    self.asset1(item.base_asset);
+    self.asset2(item.quote_asset);
+    self.marketProgression24h(item.progression);
     $.jqlog.debug(item);
   }
   

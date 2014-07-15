@@ -174,3 +174,19 @@ td.SELL {
   color:#F00;
   text-align: center !important;
 }
+
+td.UP {
+  color:#108710;
+}
+
+td.DOWN {
+  color:#F00;
+}
+
+td.number {
+  text-align: right;
+}
+
+tr.centerHeader th {
+  text-align: center !important;
+}

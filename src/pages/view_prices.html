@@ -88,7 +88,7 @@
   </div> <!-- end row -->
 
 
-  <div data-bind="fadeVisibleInOnly: !recievedMarketData() && assetPairMarketInfo().length > 0" class="row"> <!-- row -->
+  <div data-bind="fadeVisibleInOnly: !recievedMarketData() && allPairs().length > 0" class="row"> <!-- row -->
     <article class="col-xs-12 col-sm-12 col-md-12 col-lg-12"> <!-- NEW WIDGET START -->
       <div class="jarviswidget defaultWidgetColor" id="wid-id-assetPairMarketInfo" data-widget-editbutton="false" data-widget-sortable="false" data-widget-deletebutton="false" data-widget-colorbutton="false" data-widget-fullscreenbutton="false" data-widget-togglebutton="false"  data-widget-grid="false">
         <header>
@@ -102,33 +102,33 @@
                 </div>
                 <table id="assetPairMarketInfo" class="table table-striped table-hover datatable_basic">
                     <thead>
-                        <tr>
+                        <tr class="centerHeader">
+                            <th>#</th>
                             <th>Market</th>
-                            <th>Lowest Ask</th>
-                            <th>Highest Bid</th>
-                            <th>Order Depth</th>
-                            <th>24h Order Vol</th>
-                            <th>24h % Change</th>
-                            <th>24hr Vol (XCP)</th>
-                            <th>24hr Vol (BTC)</th>
+                            <th>Price</th>
+                            <th>24h Volume</th>
+                            <th>Supply</th>
+                            <th>Market Cap</th>
+                            <th>24h Change</th>
                         </tr>
                     </thead>
-                    <tbody data-bind="foreach: assetPairMarketInfo">
+                    <tbody data-bind="foreach: allPairs">
                         <tr data-bind="click: $parent.selectTopPair">
-                            <td data-bind="text: MARKET"></td>
-                            <td>
-                                <span data-bind="text: LOWEST_ASK"></span>
-                                <span data-bind="text: MARKET, visible: LOWEST_ASK"></span>
+                            <td class="number" data-bind="text: pos"></td>
+                            <td style="with-space:nowrap">
+                                <b><span data-bind="text: base_asset"></span></b> / <span data-bind="text: quote_asset"></span>
                             </td>
-                            <td>
-                                <span data-bind="text: HIGHEST_BID"></span>
-                                <span data-bind="text: MARKET, visible: HIGHEST_BID"></span>
+                            <td style="text-align:right" data-bind="attr: {class: price_class}">
+                                <span data-bind="text: price"></span>
+                                <span data-bind="text: quote_asset"></span>
+                            </td>
+                            <td class="number">
+                                <span data-bind="text: volume || '0'"></span>
+                                <span data-bind="text: quote_asset"></span>
                             </td> 
-                            <td data-bind="text: ORDER_DEPTH"></td>
-                            <td data-bind="text: ORDER_VOL_24H"></td>
-                            <td data-bind="text: PCT_CHANGE_24H, class: PCT_CHANGE_24H_CSS_CLASS"></td>
-                            <td data-bind="text: XCP_VOL_24H"></td>
-                            <td data-bind="text: BTC_VOL_24H"></td>
+                            <td class="number" data-bind="text: supply"></td>
+                            <td class="number" data-bind="text: market_cap"></td>
+                            <td style="text-align:center" data-bind="text: progression, attr: {class: prog_class}"></td>
                         </tr>
                     </tbody>
                 </table>
