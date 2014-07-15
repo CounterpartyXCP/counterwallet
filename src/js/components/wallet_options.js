@@ -83,7 +83,7 @@ function WalletOptionsModalViewModel() {
   }  
 
   self.getReflectedHostInfo = function() {
-    failoverAPI("get_reflected_host_info", [], function(data, endpoint) {
+    failoverAPI("get_reflected_host_info", {}, function(data, endpoint) {
       $.jqlog.debug(data);
 
       self.myIPAddr(data['ip']);

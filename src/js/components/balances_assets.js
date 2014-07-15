@@ -15,8 +15,7 @@ ko.validation.rules['assetNameExists'] = {
   async: true,
   message: 'Token name does not exist',
   validator: function (val, self, callback) {
-    failoverAPI("get_issuances",
-      {'filters': {'field': 'asset', 'op': '==', 'value': val}},
+    failoverAPI("get_issuances", {'filters': {'field': 'asset', 'op': '==', 'value': val}},
       function(data, endpoint) {
         $.jqlog.debug("asset exists: "+data.length);
         return data.length ? callback(true) : callback(false) //empty list -> false (valid = false)
@@ -445,7 +444,7 @@ function PayDividendModalViewModel() {
   });
   // TODO: DRY! we already make a query to check if assetName exists
   self.assetName.subscribe(function(name) {
-    failoverAPI("get_asset_info", [[name]], function(assetsData, endpoint) {
+    failoverAPI("get_asset_info", {'assets': [name]}, function(assetsData, endpoint) {
       self.assetData(assetsData[0]);
     });
   });
@@ -550,7 +549,7 @@ function PayDividendModalViewModel() {
     trackDialogShow('PayDividend');
     
     //Get the balance of ALL assets at this address
-    failoverAPI("get_normalized_balances", [[address.ADDRESS]], function(data, endpoint) {
+    failoverAPI("get_normalized_balances", {'addresses': [address.ADDRESS]}, function(data, endpoint) {
       for(var i=0; i < data.length; i++) {
         if(data[i]['quantity'] !== null && data[i]['quantity'] !== 0)
           self.availableDividendAssets.push(new DividendAssetInDropdownItemModel(data[i]['asset'], data[i]['quantity'], data[i]['normalized_quantity']));
@@ -800,7 +799,7 @@ function ShowAssetInfoModalViewModel() {
     self.history([]); //clear until we have the data from the API call below...
     
     //Fetch the asset history and populate the table with it
-    failoverAPI("get_asset_extended_info", {asset: assetObj.ASSET},
+    failoverAPI("get_asset_extended_info", {'asset': assetObj.ASSET},
       function(ext_info, endpoint) {
         if(!ext_info)
           return; //asset has no extended info
@@ -814,7 +813,7 @@ function ShowAssetInfoModalViewModel() {
       }
     );   
     
-    failoverAPI("get_asset_history", {asset: assetObj.ASSET, reverse: true},
+    failoverAPI("get_asset_history", {'asset': assetObj.ASSET, 'reverse': true},
       function(history, endpoint) {
         for(var i=0; i < history.length; i++) {
           self.history.push(new AssetHistoryItemModel(history[i]));

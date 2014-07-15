@@ -216,7 +216,7 @@ function PendingActionFeedViewModel() {
 
     //construct a new pending info storage object that doesn't include any hashes that we get no data back on
     var newPendingActionsStorage = [], pendingAction = null;
-    failoverAPI("get_chain_txns_status", [txHashes], function(txInfo, endpoint) {
+    failoverAPI("get_chain_txns_status", {'txn_hashes': txHashes}, function(txInfo, endpoint) {
       for(i=0; i < txInfo.length; i++) {
         pendingAction = $.grep(pendingActionsStorage, function(e) { return e['txHash'] == txInfo[i]['tx_hash']; })[0];
         if(pendingAction && txInfo[i]['confirmations'] == 0) { //still pending
@@ -265,7 +265,7 @@ PendingActionFeedViewModel.modifyBalancePendingFlag = function(category, data, f
     if (addrObj) {
       var assetObj = addrObj.getAssetObj(asset);
       if (!assetObj && flagSetting) {
-        failoverAPI("get_asset_info", [[asset]], function(assetsInfo, endpoint) {
+        failoverAPI("get_asset_info", {'assets': [asset]}, function(assetsInfo, endpoint) {
           addrObj.addOrUpdateAsset(asset, assetsInfo[0], 0);
           assetObj = addrObj.getAssetObj(asset);
           updateAssetObj(assetObj, quantity, dividend);

@@ -479,7 +479,7 @@ function BuySellWizardViewModel() {
 
   self.init = function() {
     //Get a list of all assets
-    failoverAPI("get_asset_names", [], function(data, endpoint) {
+    failoverAPI("get_asset_names", {}, function(data, endpoint) {
       self.allAssets(data);
       
       //Set up typeahead bindings manually for now (can't get knockout and typeahead playing well together...)
@@ -523,7 +523,7 @@ function BuySellWizardViewModel() {
           return item == newValue;
       });    
       if (match) {
-        failoverAPI("get_asset_info", [[newValue]], function(assetsInfo, endpoint) {
+        failoverAPI("get_asset_info", {'assets': [newValue]}, function(assetsInfo, endpoint) {
           $.jqlog.debug(newValue+" divisibility: "+assetsInfo[0]['divisible']);
           self.buyAssetIsDivisible(assetsInfo[0]['divisible']);
         });
@@ -675,7 +675,7 @@ function BuySellWizardViewModel() {
               //if the order involes selling BTC, then we want to notify the servers of our wallet_id so folks can see if our
               // wallet is "online", in order to determine if we'd be able to best make the necessary BTCpay
               if(self.sellAsset() == 'BTC') {
-                multiAPI("record_btc_open_order", [WALLET.identifier(), txHash]);
+                multiAPI("record_btc_open_order", {'wallet_id': WALLET.identifier(), 'order_tx_hash': txHash});
               }
                
               checkURL(); //reset the form and take the user back to the first tab by just refreshing the page
@@ -720,7 +720,7 @@ function BuySellWizardViewModel() {
     if(self.currentTab() != 2) return;
     var deferred = $.Deferred();
     //get the market price (if available) for display
-    failoverAPI("get_market_price_summary", [self.buyAsset(), self.sellAsset()], function(data, endpoint) {
+    failoverAPI("get_market_price_summary", {'asset1': self.buyAsset(), 'asset2': self.sellAsset()}, function(data, endpoint) {
       self.currentMarketUnitPrice(data['market_price'] || 0);
       //^ use 0 to signify that we got the data, but that there is no established market price
       deferred.resolve();
@@ -734,7 +734,7 @@ function BuySellWizardViewModel() {
     if(self.currentTab() != 2) return;
     var deferred = $.Deferred();
     //now that an asset pair is picked, we can show a price chart for that pair
-    failoverAPI("get_market_price_history", [self.buyAsset(), self.sellAsset()], function(data, endpoint) {
+    failoverAPI("get_market_price_history", {'asset1': self.buyAsset(), 'asset2': self.sellAsset()}, function(data, endpoint) {
       deferred.resolve();
       if(data.length) {
         self.showPriceChart(true);

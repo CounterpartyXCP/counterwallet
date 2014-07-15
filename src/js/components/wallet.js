@@ -119,7 +119,7 @@ function WalletViewModel() {
       assert(asset != "XCP" && asset != "BTC", "BTC or XCP not present in the address?"); //these should be already in each address
       //we're trying to update the balance of an asset that doesn't yet exist at this address
       //fetch the asset info from the server, and then use that in a call to addressObj.addOrUpdateAsset
-      failoverAPI("get_asset_info", [[asset]], function(assetsInfo, endpoint) {
+      failoverAPI("get_asset_info", {'assets': [asset]}, function(assetsInfo, endpoint) {
         addressObj.addOrUpdateAsset(asset, assetsInfo[0], rawBalance);
       });    
     } else {
@@ -214,7 +214,7 @@ function WalletViewModel() {
     }
     // else make a query to counterpartyd
     if (divisible == -1) {
-      failoverAPI("get_asset_info", [[asset]], function(assetsInfo, endpoint) {
+      failoverAPI("get_asset_info", {'assets': [asset]}, function(assetsInfo, endpoint) {
         callback(assetsInfo[0]['divisible']);
         return;
       }); 
@@ -240,7 +240,7 @@ function WalletViewModel() {
     //update all counterparty asset balances for the specified address (including XCP)
     //Note: after login, this normally never needs to be called (except when adding a watch address),
     // as counterparty asset balances are updated automatically via the messages feed
-    failoverAPI("get_normalized_balances", [addresses],
+    failoverAPI("get_normalized_balances", {'addresses': addresses},
       function(balancesData, endpoint) {
         $.jqlog.debug("Got initial balances: " + JSON.stringify(balancesData));
         
@@ -255,7 +255,7 @@ function WalletViewModel() {
           if(assets.indexOf(balancesData[i]['asset'])==-1)
           assets.push(balancesData[i]['asset']);
         }
-        failoverAPI("get_asset_info", [assets], function(assetsInfo, endpoint) {
+        failoverAPI("get_asset_info", {'assets': assets}, function(assetsInfo, endpoint) {
           for(i=0; i < assetsInfo.length; i++) {
             for(j=0; j < balancesData.length; j++) {
               if(balancesData[j]['asset'] != assetsInfo[i]['asset']) continue;
