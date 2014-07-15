@@ -329,7 +329,6 @@ function initViewPrices() {
   
   $(window).resize(VIEW_PRICES.dataTableResponsive);
   $(window).on('hashchange', function() {
-    VIEW_PRICES.metricsStopAutoRefresh(); //just in case
     $(window).off("resize", VIEW_PRICES.dataTableResponsive);
   });
 

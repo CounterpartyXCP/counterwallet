@@ -1,60 +1,4 @@
 
-var AssetPairMarketInfoItemModel = function(entry) {
-  this.MARKET = entry['base_asset'] + '/' + entry['quote_asset'];
-  this.BASE_ASSET = entry['base_asset'];
-  this.QUOTE_ASSET = entry['quote_asset'];
-  this.LOWEST_ASK = entry['lowest_ask'];
-  this.HIGHEST_BID = entry['highest_bid'];
-  this.ORDER_DEPTH = entry['open_orders_count'];
-  this.ORDER_VOL_24H = entry['completed_trades_count'];
-  this.PCT_CHANGE_24H = entry['24h_pct_change'];
-  this.XCP_VOL_24H = entry['24h_vol_in_xcp'];
-  this.BTC_VOL_24H = entry['24h_vol_in_btc'];
-
-  this.PCT_CHANGE_24H_CSS_CLASS = this.PCT_CHANGE_24H > 0 ? 'txt-color-green' : (this.PCT_CHANGE_24H < 0 ? 'txt-color-red' : 'initial');
-};
-
-var OrderBookEntryItemModel = function(entry) {
-  $.jqlog.debug(entry);
-  this.BASE_ASSET = entry['base_asset'];
-  this.QUOTE_ASSET = entry['quote_asset'];
-  this.UNIT_PRICE = entry['unit_price'];
-  this.QTY_AND_COUNT = smartFormat(entry['quantity']) + ' (' + entry['count'] + ')';
-  this.QUANTITY = smartFormat(entry['quantity']);
-  this.TOTAL = smartFormat(mulFloat(entry['unit_price'], entry['quantity']));
-  this.DEPTH = smartFormat(entry['depth'], 10);
-};
-
-var OpenOrderItemModel = function(entry, isBuySell) {
-  this.PARENT = isBuySell ? BUY_SELL : VIEW_PRICES;
-  this.TX_ID = getTxHashLink(entry['tx_hash']) + ViewPricesViewModel.deriveIsOnlineForBTCPayment(entry['give_asset'], entry['_is_online']);
-  this.WHEN_CREATED = new Date(entry['block_time']);
-  this.PRICE = this.PARENT.deriveOpenOrderAssetPrice(entry['get_asset'], entry['get_quantity'], entry['give_asset'], entry['give_quantity']) + ' ' + entry['base_asset'] + '/' + entry['quote_asset'];
-  this.BUY_QTY_LEFT = this.PARENT.deriveOpenOrderAssetQuantity(entry['get_asset'], entry['get_remaining']) + ' ' + entry['get_asset'] + ' ' + ViewPricesViewModel.deriveOpenOrderBuySellLeft(entry['get_quantity'], entry['get_remaining']);
-  this.SELL_QTY_LEFT = this.PARENT.deriveOpenOrderAssetQuantity(entry['give_asset'], entry['give_remaining']) + ' ' + entry['give_asset'] + ' ' + ViewPricesViewModel.deriveOpenOrderBuySellLeft(entry['give_quantity'], entry['give_remaining']);
-  this.EXPIRES_IN = ViewPricesViewModel.deriveOpenOrderExpiresIn(entry['block_index'], entry['expiration']);
-  this.FEE_REQUIRED_LEFT = smartFormat(normalizeQuantity(entry['fee_required_remaining'])) + ' BTC ' + ViewPricesViewModel.deriveOpenOrderBuySellLeft(entry['fee_required'], entry['fee_required_remaining']);
-  this.FEE_PROVIDED_LEFT = smartFormat(normalizeQuantity(entry['fee_provided_remaining'])) + ' BTC ' + ViewPricesViewModel.deriveOpenOrderBuySellLeft(entry['fee_provided'], entry['fee_provided_remaining']);
-  this.ORDER = entry;
-};
-
-var TradeHistoryItemModel = function(entry) {
-  this.BLOCK_INDEX = getLinkForBlock(entry['block_index']);
-  this.BLOCK_TIME = moment(entry['block_time']).format('MMM Do YYYY, h:mm:ss a');
-  this.ORDER_1 = getTxHashLink(entry['order_match_id'].substr(0,64));
-  this.ADDRESS_1 = getLinkForCPData('address', entry['order_match_tx0_address']);
-  this.ORDER_2 = getTxHashLink(entry['order_match_id'].substr(64));
-  this.ADDRESS_2 = getLinkForCPData('address', entry['order_match_tx1_address']);
-  this.QUANTITY_BASE = smartFormat(entry['base_quantity_normalized']) + ' ' + entry['base_asset'];
-  this.QUANTITY_QUOTE = smartFormat(entry['quote_quantity_normalized']) + ' ' + entry['quote_asset'];
-  this.UNIT_PRICE = entry['unit_price'] + ' ' + entry['base_asset'] + '/' + entry['quote_asset'];
-  this.RAW_UNIT_PRICE = smartFormat(entry['unit_price']);
-  this.RAW_BLOCK_INDEX = entry['block_index'];
-  this.RAW_BLOCK_TIME = entry['block_time'];
-  this.RAW_QUANTITY_BASE = entry['base_quantity_normalized'];
-  this.RAW_QUANTITY_QUOTE = entry['quote_quantity_normalized'];
-}
-
 ko.validation.rules['ordersIsExistingAssetName'] = {
   validator: function (asset, self) {
     if(asset == 'XCP' || asset == 'BTC') return true;
@@ -69,31 +13,20 @@ ko.validation.registerExtenders();
 
 function ViewPricesViewModel() {
   var self = this;
-  self.MY_ADDRESSES = WALLET.getAddressesList();
+  self.dexHome = ko.observable(true);
+
   self._lastWindowWidth = null;
   
   self.latestTrades = ko.observableArray([]); //populated with the VIEW_PRICES_NUM_LATEST_TRADES latest trades (of any asset pair)
-  self.assetPairMarketInfo = ko.observableArray([]); //populated with top pair level market info
   self.allAssets = ko.observableArray([]);
   //^ a list of all existing assets (for choosing which asset to buy)
   self.tradeHistory = ko.observableArray([]);
   //^ a list of the last X trades for the specified asset pair
   self.askBook = ko.observableArray([]);
   self.bidBook = ko.observableArray([]);
-  self.bidAskMedian = ko.observable(null);
-  self.bidAskSpread = ko.observable(null);
-  self.bidDepth = ko.observable(null);
-  self.askDepth = ko.observable(null);
 
-  self.openBuyOrdersHelper = ko.observableArray(['1', '2']);
   self.asset1IsDivisible = ko.observable(null);
   self.asset2IsDivisible = ko.observable(null);
-  self.asset1OpenBuyOrders = ko.observableArray([]);
-  self.asset2OpenBuyOrders = ko.observableArray([]);
-  
-  self.MARKET_DATA_REFRESH_TIMERID = null;
-  self.recievedMarketData = ko.observable(false); 
-  self.currentMarketUnitPrice = ko.observable();
 
   self.asset1 = ko.observable('').extend({
     required: true,
@@ -125,53 +58,27 @@ function ViewPricesViewModel() {
   }, self);
   self.baseAsset = ko.computed(function() {
     if(!self.assetPair()) return null;
-    return self.assetPair()[0] == self.asset1() ? self.asset1() : self.asset2();
+    return self.assetPair()[0];
   }, self);
   self.quoteAsset = ko.computed(function() {
     if(!self.assetPair()) return null;
-    return self.assetPair()[0] == self.asset1() ? self.asset2() : self.asset1();
+    return self.assetPair()[1];
   }, self);
   self.baseAssetIsDivisible = ko.computed(function() {
     if(!self.assetPair()) return null;
-    return self.assetPair()[0] == self.asset1IsDivisible() ? self.asset1IsDivisible() : self.asset2IsDivisible();
+    return self.baseAsset() == self.asset1() ? self.asset1IsDivisible() : self.asset2IsDivisible();
   }, self);
   self.quoteAssetIsDivisible = ko.computed(function() {
     if(!self.assetPair()) return null;
-    return self.assetPair()[0] == self.asset1IsDivisible() ? self.asset2IsDivisible() : self.asset1IsDivisible();
+    return self.quoteAsset() == self.asset1() ? self.asset1IsDivisible() : self.asset2IsDivisible();
   }, self);
-  
-  self.delayedBTCFeeSelection = ko.computed(function() {
-    return self.minBTCFeeProvidedPct().toString() + '-' + self.maxBTCFeeRequiredPct().toString(); //don't care about the value, we just want to be notified here
-  }).extend({ rateLimit: { method: "notifyWhenChangesStop", timeout: 400 } });
-
-  //SUBSCRIBED CALLBACKS
-  //auto refresh the order book tuned to the entered fee, if it applies
-  self.delayedBTCFeeSelection.subscribeChanged(function(newValue, prevValue) {
-    if(!self.validationModelBaseOrders.isValid()) return;
-    if(self.asset1() != 'BTC' && self.asset2() != 'BTC') return;
-    self.metricsRefreshOrderBook(); //refresh the order book
-  });
   
   self.delayedAssetPairSelection = ko.computed(self.assetPair).extend({ rateLimit: { method: "notifyWhenChangesStop", timeout: 400 } });
   self.delayedAssetPairSelection.subscribeChanged(function(newValue, prevValue) {
     if(newValue == null || !self.validationModelBaseOrders.isValid()) return;
-    
-    //Get asset divisibility
-    self.recievedMarketData(false);
-    
-    //Track user choice
-    trackEvent('Exchange', 'ViewPrices', self.dispAssetPair());
-    
-    failoverAPI("get_asset_info", {'assets': [self.asset1(), self.asset2()]}, function(assetsInfo, endpoint) {
-      self.asset1IsDivisible(assetsInfo[0]['divisible']);
-      self.asset2IsDivisible(assetsInfo[1]['divisible']);
-      self.metricsStopAutoRefresh(); //stop autorefresh if currently happening, so that the new asset selection data can be pulled up
-      self.metricsStartAutoRefresh(function() {
-        self.recievedMarketData(true);
-      }); //start periodically refreshing the data display
-      self.fetchOpenUserOrders();
-      self.fetchUserLastTrades();
-    });    
+    self.dexHome(false);
+    self.metricsRefreshPriceChart();
+    failoverAPI('get_market_details', [self.asset1(), self.asset2()], self.displayMarketDetails);
   });
   
   //VALIDATION MODELS  
@@ -291,8 +198,8 @@ function ViewPricesViewModel() {
 
   self.selectBuyOrder = function(order) {
     $.jqlog.debug(order);
-    self.sellPrice(parseFloat(order.UNIT_PRICE));
-    var amount = Math.min(self.availableBalanceForSell(), parseFloat(order.DEPTH));
+    self.sellPrice(parseFloat(order.price));
+    var amount = Math.min(self.availableBalanceForSell(), parseFloat(order.base_depth));
     self.sellAmount(amount);
     if (self.sellPrice()) {
       self.sellTotal(mulFloat(self.sellPrice(), amount));
@@ -488,8 +395,8 @@ function ViewPricesViewModel() {
 
   self.selectSellOrder = function(order) {
     $.jqlog.debug(order);
-    self.buyPrice(parseFloat(order.UNIT_PRICE));
-    var amount = Math.min(self.availableBalanceForBuy(), parseFloat(order.DEPTH));
+    self.buyPrice(parseFloat(order.price));
+    var amount = parseFloat(order.base_depth);
     self.buyAmount(amount);
     if (self.buyPrice()) {
       self.buyTotal(mulFloat(self.buyPrice(), amount));
@@ -608,20 +515,16 @@ function ViewPricesViewModel() {
     }
     failoverAPI('get_users_pairs', params, self.displayTopUserPairs);
   }
-
-  self.selectTopUserPair = function(item) {
-    self.asset1(item.base_asset);
-    self.asset2(item.quote_asset);
-    self.marketProgression24h(0);
-  }
   
   /* USER OPEN ORDERS */
   self.userOpenOrders = ko.observableArray([]);
 
   self.displayOpenUserOrders = function(data) {
+    $.jqlog.debug(data);
     for (var i in data) {
       data[i].amount = normalizeQuantity(data[i].amount, self.baseAssetIsDivisible());
       data[i].total = normalizeQuantity(data[i].total, self.quoteAssetIsDivisible());
+      data[i].price = parseFloat(data[i].price);
     }
     self.userOpenOrders(data);
   }
@@ -645,6 +548,7 @@ function ViewPricesViewModel() {
       data[i].amount = normalizeQuantity(data[i].amount, self.baseAssetIsDivisible());
       data[i].total = normalizeQuantity(data[i].total, self.quoteAssetIsDivisible());
       data[i].block_time = moment(data[i].block_time * 1000).format('YYYY/MM/DD hh:mm:ss A Z');
+      data[i].price = parseFloat(data[i].price);
     }
     self.userLastTrades(data);
   }
@@ -684,6 +588,7 @@ function ViewPricesViewModel() {
       } else {
         data[i].price_class = '';
       }
+      data[i].price = parseFloat(data[i].price);
     }
     self.allPairs(data);
     if(self.allPairs().length) {
@@ -699,12 +604,96 @@ function ViewPricesViewModel() {
     failoverAPI('get_markets_list', [], self.displayAllPairs);
   }
 
+  /* MARKET DETAILS */
+
+  self.displayMarketDetails = function(data) {
+    $.jqlog.debug(data);
+
+    if (self.asset1() == data['base_asset']) {
+      self.asset1IsDivisible(data['base_asset_divisible']);
+      self.asset2IsDivisible(data['quote_asset_divisible']);
+    } else {
+      self.asset1IsDivisible(data['quote_asset_divisible']);
+      self.asset2IsDivisible(data['base_asset_divisible']);
+    }
+
+    self.currentMarketPrice(parseFloat(data['price']));
+    self.marketProgression24h(data['progression']);
+
+    self.bidBook([])
+    self.askBook([])
+    try { $('#asset1OpenBuyOrders').dataTable().fnClearTable(); } catch(err) { }
+    try { $('#asset2OpenBuyOrders').dataTable().fnClearTable(); } catch(err) { }
+
+    base_depth = 0;
+    for (i in data['buy_orders']) {
+      data['buy_orders'][i]['price'] = parseFloat(data['buy_orders'][i]['price']);
+      data['buy_orders'][i]['amount'] = normalizeQuantity(data['buy_orders'][i]['amount'], data['base_asset_divisible']);
+      data['buy_orders'][i]['total'] = normalizeQuantity(data['buy_orders'][i]['total'], data['quote_asset_divisible']);
+      data['buy_orders'][i]['base_depth'] = data['buy_orders'][i]['amount'] + base_depth;
+      base_depth = data['buy_orders'][i]['base_depth'];
+    }
+    base_depth = 0;
+    for (i in data['sell_orders']) {
+      data['sell_orders'][i]['price'] = parseFloat(data['sell_orders'][i]['price']);
+      data['sell_orders'][i]['amount'] = normalizeQuantity(data['sell_orders'][i]['amount'], data['base_asset_divisible']);
+      data['sell_orders'][i]['total'] = normalizeQuantity(data['sell_orders'][i]['total'], data['quote_asset_divisible']);
+      data['sell_orders'][i]['base_depth'] = data['sell_orders'][i]['amount'] + base_depth;
+      base_depth = data['sell_orders'][i]['base_depth'];
+    }
+
+    self.bidBook(data['buy_orders'])
+    self.askBook(data['sell_orders'])
+
+    if (data['buy_orders'].length > 0) {
+      self.lowestAskPrice(data['buy_orders'][0]['price']);
+      self.buyPrice(data['buy_orders'][0]['price']);
+      self.obtainableForBuy(divFloat(self.availableBalanceForBuy(), self.lowestAskPrice()));
+    } else {
+      self.lowestAskPrice();
+      self.buyPrice();
+      self.obtainableForBuy();
+    }
+
+    if (data['sell_orders'].length > 0) {
+      self.highestBidPrice(data['sell_orders'][0]['price']);
+      self.sellPrice(data['sell_orders'][0]['price']);
+      self.obtainableForSell(divFloat(self.availableBalanceForSell(), self.highestBidPrice()));
+    } else {
+      self.highestBidPrice();
+      self.sellPrice();
+      self.obtainableForSell();
+    }
+
+    self.tradeHistory([]);
+    try { $('#tradeHistory').dataTable().fnClearTable(); } catch(err) { }
+
+    for (var i in data['last_trades']) {
+      data['last_trades'][i]['price'] = parseFloat(data['last_trades'][i]['price']);
+      $.jqlog.debug(self.baseAsset() + ' : '+self.baseAssetIsDivisible());
+      $.jqlog.debug(self.quoteAsset() + ' : '+self.quoteAssetIsDivisible())
+      data['last_trades'][i].amount = normalizeQuantity(data['last_trades'][i].amount, self.baseAssetIsDivisible());
+      data['last_trades'][i].total = normalizeQuantity(data['last_trades'][i].total, self.quoteAssetIsDivisible());
+      data['last_trades'][i].block_time = moment(data['last_trades'][i].block_time * 1000).format('YYYY/MM/DD hh:mm:ss A Z');
+    }
+    self.tradeHistory(data['last_trades']);
+    if(self.tradeHistory().length) {
+      runDataTables('#tradeHistory', true, { "aaSorting": [ [1, 'desc'] ] });
+    }
+
+    self.fetchOpenUserOrders();
+    self.fetchUserLastTrades();
+
+  }
+
+  self.fetchMarketDetails = function(item) {
+    self.asset1(item.base_asset);
+    self.asset2(item.quote_asset);
+  }
+
   self.init = function() {
     self.fetchTopUserPairs();
     self.fetchAllPairs();
-
-    //self.fetchAssetPairMarketInfo();
-    //self.fetchLatestTrades();
     
     //Get a list of all assets
     failoverAPI("get_asset_names", {}, function(data, endpoint) {
@@ -729,110 +718,6 @@ function ViewPricesViewModel() {
       });
     });
   }
-  
-  self.fetchAssetPairMarketInfo = function() {
-    if(self.recievedMarketData())
-      return; //stop auto refreshing
-    
-    failoverAPI("get_asset_pair_market_info", {'limit': VIEW_PRICES_NUM_ASSET_PAIRS}, function(data, endpoint) {
-
-      self.assetPairMarketInfo([]);
-      $('#assetPairMarketInfo').dataTable().fnClearTable();
-
-      var pair_data = [];
-      for(var i=0; i < data.length; i++) {
-        pair_data.push(new AssetPairMarketInfoItemModel(data[i]));
-      }
-      self.assetPairMarketInfo(pair_data);
-      if(self.assetPairMarketInfo().length) {
-        runDataTables('#assetPairMarketInfo', true, { "aaSorting": [ [4, 'desc'] ] });
-      }
-      
-      //kick off the next update to fire after a delay
-      setTimeout(self.fetchAssetPairMarketInfo, VIEW_PRICES_ASSET_PAIRS_REFRESH_EVERY);
-    });
-  }
-
-  self.selectTopPair = function(item) {
-    self.asset1(item.base_asset);
-    self.asset2(item.quote_asset);
-    self.marketProgression24h(item.progression);
-    $.jqlog.debug(item);
-  }
-  
-  self.fetchLatestTrades = function() {
-    if(self.recievedMarketData())
-      return; //stop auto refreshing
-
-    self.latestTrades([]);
-      
-    failoverAPI("get_trade_history", {'limit': VIEW_PRICES_NUM_LATEST_TRADES}, function(data, endpoint) {
-      $('#latestTrades').dataTable().fnClearTable();
-      
-      var trades = [];
-      for(var i=0; i < data.length; i++) {
-        trades.push(new TradeHistoryItemModel(data[i]));
-      }
-
-      self.latestTrades(trades);
-      if(self.latestTrades().length) {
-        runDataTables('#latestTrades', true, {
-          "aaSorting": [ [1, 'desc'] ],
-          "aoColumns": [
-           {"sType": "numeric", "iDataSort": 9}, //block ID
-           {"sType": "numeric", "iDataSort": 10}, //datetime
-           {"sType": "string"}, //order 1
-           {"sType": "string"}, //address 1
-           {"sType": "string"}, //order 2
-           {"sType": "string"}, //address 2
-           {"sType": "numeric", "iDataSort": 11}, //quantity base
-           {"sType": "numeric", "iDataSort": 12}, //quantity quote
-           {"sType": "numeric"}, //unit price
-           {"bVisible": false}, //block index RAW
-           {"bVisible": false}, //block datetime RAW
-           {"bVisible": false}, //quantity base RAW
-           {"bVisible": false}  //quantity quote RAW
-         ]
-        });
-      }
-      
-      //kick off the next update to fire after a delay
-      setTimeout(self.fetchLatestTrades, VIEW_PRICES_LATEST_TRADES_REFRESH_EVERY);
-    });
-  }
-  
-  self.metricsStartAutoRefresh = function(callback) {
-    if(self.MARKET_DATA_REFRESH_TIMERID) return; //already auto refreshing
-    $.jqlog.debug("Auto-refreshing market data for " + self.dispAssetPair() + ' ...');
-    var d1 = self.metricsRefreshMarketUnitPrice();
-    var d2 = self.metricsRefreshPriceChart();
-    var d3 = self.metricsRefreshTradeHistory();
-    var d4 = self.metricsRefreshOrderBook();
-    $.when(d1, d2, d3, d4).done(function(d1, d2, d3, d4) {
-      self.MARKET_DATA_REFRESH_TIMERID = setTimeout(self.metricsStartAutoRefresh, MARKET_INFO_REFRESH_EVERY);
-      if(callback) callback();
-    });
-  }
-  
-  self.metricsStopAutoRefresh = function() {
-    if(self.MARKET_DATA_REFRESH_TIMERID) { //stop auto update of market data
-      clearTimeout(self.MARKET_DATA_REFRESH_TIMERID);
-      self.MARKET_DATA_REFRESH_TIMERID = null;
-    }
-  }
-
-  self.metricsRefreshMarketUnitPrice = function() {
-    var deferred = $.Deferred();
-    //get the market price (if available) for display
-    failoverAPI("get_market_price_summary", {'asset1': self.asset1(), 'asset2': self.asset2()}, function(data, endpoint) {
-      self.currentMarketUnitPrice(data['market_price'] || 0);
-      //^ use 0 to signify that we got the data, but that there is no established market price
-      deferred.resolve();
-    }, function(jqXHR, textStatus, errorThrown, endpoint) {
-      deferred.resolve();
-      return defaultErrorHandler(jqXHR, textStatus, errorThrown, endpoint);
-    });
-  }
           
   self.metricsRefreshPriceChart = function() {
     var deferred = $.Deferred();
@@ -846,136 +731,6 @@ function ViewPricesViewModel() {
       deferred.resolve();
       return defaultErrorHandler(jqXHR, textStatus, errorThrown, endpoint);
     });
-  }
-
-  self.metricsRefreshTradeHistory = function() {
-    var deferred = $.Deferred();
-    self.currentMarketPrice(null);
-
-    failoverAPI("get_trade_history", {'asset1': self.asset1(), 'asset2': self.asset2()}, function(data, endpoint) {
-
-      deferred.resolve();
-      self.tradeHistory([]);
-      $('#tradeHistory').dataTable().fnClearTable();
-
-      for(var i=0; i < data.length; i++) {
-        var item = new TradeHistoryItemModel(data[i]);
-        if (i==0) self.currentMarketPrice(item.RAW_UNIT_PRICE);
-        self.tradeHistory.push(item);
-      }
-      if(self.tradeHistory().length) {
-
-        runDataTables('#tradeHistory', true, { "aaSorting": [ [0, 'desc'] ] });
-      }
-    }, function(jqXHR, textStatus, errorThrown, endpoint) {
-      deferred.resolve();
-      return defaultErrorHandler(jqXHR, textStatus, errorThrown, endpoint);
-    });
-  }
-
-  self.metricsRefreshOrderBook = function() {
-    var deferred = $.Deferred();
-    var args = {
-      'asset1': self.asset1(),
-      'asset2': self.asset2(),
-      'max_pct_fee_required': self.maxBTCFeeRequiredPct() / 100,
-      'min_pct_fee_provided': self.minBTCFeeProvidedPct() / 100,
-    };
-
-    self.bidBook([])
-    self.askBook([])
-
-    failoverAPI("get_order_book_simple", args, function(data, endpoint) {
-      
-      deferred.resolve();
-      //set up order book display
-      var i = null;
-      for(i=0; i < Math.min(10, data['base_ask_book'].length); i++) { //limit to 10 entries
-        data['base_ask_book'][i]['base_asset'] = data['base_asset'];
-        data['base_ask_book'][i]['quote_asset'] = data['quote_asset'];
-        var item = new OrderBookEntryItemModel(data['base_ask_book'][i]);
-        self.askBook.push(item);  
-        if (i==0) {
-          self.lowestAskPrice(item.UNIT_PRICE);
-          self.buyPrice(item.UNIT_PRICE);
-          self.obtainableForBuy(divFloat(self.availableBalanceForBuy(), self.lowestAskPrice()));
-        }
-      }
-      for(i=0; i < Math.min(10, data['base_bid_book'].length); i++) { //limit to 10 entries
-        data['base_bid_book'][i]['base_asset'] = data['base_asset'];
-        data['base_bid_book'][i]['quote_asset'] = data['quote_asset'];
-        var item = new OrderBookEntryItemModel(data['base_bid_book'][i]);
-        self.bidBook.push(item);  
-        if (i==0) {
-          self.highestBidPrice(item.UNIT_PRICE);
-          self.sellPrice(item.UNIT_PRICE);
-          self.obtainableForSell(mulFloat(self.availableBalanceForSell(), self.highestBidPrice()));
-        }
-      }
-      self.bidAskMedian(data['bid_ask_median']);
-      self.bidAskSpread(data['bid_ask_spread']);
-      self.bidDepth(data['bid_depth']);
-      self.askDepth(data['ask_depth']);
-      
-      try { $('#asset1OpenBuyOrders').dataTable().fnClearTable(); } catch(err) { }
-      try { $('#asset2OpenBuyOrders').dataTable().fnClearTable(); } catch(err) { }
-      //split raw_orders into buy orders for asset1 and asset2
-      for(var i=0; i < data['raw_orders'].length; i++) {
-        data['raw_orders'][i]['base_asset'] = data['base_asset'];
-        data['raw_orders'][i]['quote_asset'] = data['quote_asset'];
-        if(data['raw_orders'][i]['get_asset'] == self.asset1())
-          self.asset1OpenBuyOrders.push(new OpenOrderItemModel(data['raw_orders'][i], false));
-        else {
-          assert(data['raw_orders'][i]['get_asset'] == self.asset2());
-          self.asset2OpenBuyOrders.push(new OpenOrderItemModel(data['raw_orders'][i], false));
-        }
-      }
-      if(self.asset1OpenBuyOrders().length) {
-        runDataTables('#asset1OpenBuyOrders', true, { "aaSorting": [ [0, 'desc'] ] });
-      }
-      if(self.asset2OpenBuyOrders().length) {
-        runDataTables('#asset2OpenBuyOrders', true, { "aaSorting": [ [0, 'desc'] ] });
-      }
-    }, function(jqXHR, textStatus, errorThrown, endpoint) {
-      deferred.resolve();
-      return defaultErrorHandler(jqXHR, textStatus, errorThrown, endpoint);
-    });
-  }
-  
-  self.normalizeAssetQuantity = function(asset, quantity) {
-    //helper function for showing pending trades
-    if(!self.validationModelBaseOrders.isValid()) return;
-    if(asset != self.asset1() && asset != self.asset2()) return; //in process of changing assets
-    assert(asset && quantity, "Asset and/or quantity not present, or quantity is zero: " + quantity);
-    if(asset == self.asset1()) {
-      return normalizeQuantity(quantity, self.asset1IsDivisible());
-    } else {
-      assert(asset == self.asset2());
-      return normalizeQuantity(quantity, self.asset2IsDivisible());
-    }
-  }
-
-  self.deriveOpenOrderAssetQuantity = function(asset, quantity) {
-    return smartFormat(self.normalizeAssetQuantity(asset, quantity));
-  }
-
-  self.deriveOpenOrderAssetPrice = function(asset1, quantity1, asset2, quantity2) {
-    //helper function for showing pending trades
-    if(!self.validationModelBaseOrders.isValid()) return;
-    if((asset1 != self.asset1() && asset1 != self.asset2()) || (asset2 != self.asset1() && asset2 != self.asset2())) return; //in process of changing assets
-    assert(asset1 && quantity1, "Asset1 and/or quantity1 not present");
-    assert(asset2 && quantity2, "Asset2 and/or quantity2 not present");
-    var derivedQuantity1 = self.normalizeAssetQuantity(asset1, quantity1);
-    var derivedQuantity2 = self.normalizeAssetQuantity(asset2, quantity2);
-
-    if(asset1 == self.baseAsset()) {
-      if(!derivedQuantity1) return; //in process of changing assets
-      return smartFormat(Decimal.round(new Decimal(derivedQuantity2).div(derivedQuantity1), 8, Decimal.MidpointRounding.ToEven).toFloat());
-    } else {
-      assert(asset2 == self.baseAsset());
-      if(!derivedQuantity2) return; //in process of changing assets
-      return smartFormat(Decimal.round(new Decimal(derivedQuantity1).div(derivedQuantity2), 8, Decimal.MidpointRounding.ToEven).toFloat());
-    }
   }
   
   self.dataTableResponsive = function(e) {
@@ -1008,43 +763,6 @@ function ViewPricesViewModel() {
 
 };
 
-ViewPricesViewModel.deriveOpenOrderExpiresIn = function(blockIndexCreatedAt, expiration) {
-  assert(WALLET.networkBlockHeight());
-  //Outputs HTML
-  var blockLifetime = WALLET.networkBlockHeight() - blockIndexCreatedAt;
-  var timeLeft = expiration - blockLifetime;
-  var labelType = null;
-
-  if(timeLeft < 0) {
-    labelType = 'danger'; //red
-  } else if(timeLeft > 5) { // > 5
-    labelType = 'success'; //green
-  } else if(timeLeft >= 3) { //5, 4, 3
-    labelType = 'warning'; //yellow
-  } else { //2, 1, 0
-    labelType = 'danger'; //red
-  }
-  return '<span class="label label-' + labelType + '">' + (timeLeft >= 0 ? 'In ' + timeLeft + (timeLeft == 1 ? ' block' : ' blocks') : 'EXPIRED') + '</span>';
-}
-
-ViewPricesViewModel.deriveOpenOrderBuySellLeft = function(whole, part) {
-  var pctLeft = (whole == 0 && part == 0) ? 1 : part / whole;
-  if(pctLeft >= .30) { //30%+ 
-    labelType = 'green';
-  } else if(pctLeft >= .15) { //15%+
-    labelType = 'yellow'; 
-  } else if(pctLeft >= .10) { //10%+
-    labelType = 'orange';
-  } else { //less than 10%
-    labelType = 'red'; 
-  }
-  return '<span class="pull-right label opacity-70pct padding-5 bg-color-' + labelType + '">' + smartFormat(pctLeft * 100, null, 0) + '%</span>';
-}
-
-ViewPricesViewModel.deriveIsOnlineForBTCPayment = function(give_asset, _is_online) {
-  if(give_asset != 'BTC') return '';
-  return '<span class="padding-left-5" class="fa fa-circle txt-color-' + (_is_online ? 'green' : 'yellow') + ' pull-left" title="' + (_is_online ? 'User is online for BTC payment' : 'User is offline or unknown') + '"></span>';
-}
 
 ViewPricesViewModel.doChart = function(dispAssetPair, chartDiv, data) {
   // split the data set into ohlc and volume

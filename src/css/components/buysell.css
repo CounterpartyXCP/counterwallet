@@ -97,7 +97,6 @@ table.orderBook td {
 span.marketPrice {
   font-size:inherit;
   display:inline-block;
-  margin-right:50px;
   padding-left:10px;
   padding-right: 10px;
   -webkit-border-radius: 5px;
@@ -117,6 +116,12 @@ span.marketPrice {
   display:inline-block;
 }
 
+#changeMarket {
+
+  position: absolute;
+  left:0;
+  top:10px;
+}
 
 #assetPairMarketInfo td {
   cursor: pointer;
