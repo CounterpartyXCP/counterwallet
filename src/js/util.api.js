@@ -409,14 +409,15 @@ function multiAPIConsensus(method, params, onSuccess, onConsensusError, onSysErr
       return onSysError(results[i-1]['jqXHR'], results[i-1]['textStatus'], results[i-1]['errorThrown'], results[i-1]['endpoint']);
     }
     
-    var consensusResult = null;
+    //xnova(7-14-14): DISABLE CONSENSUS API CHECKING FOR NOW UNTIL WE FIX THE OCCASIONAL CONSENSUS ISSUES WE GET AND MAKE IT MORE RELIABLE
+    /*var consensusResult = null;
     for(i=0; i < successResults.length; i++) {
       if(i == 0) {
         consensusResult = successResults[i];
       } else if(successResults[i] != consensusResult) {
         return onConsensusError(successResults); //not all consensus data matches
       }
-    }
+    }*/
     
     //if here, all is well
     if(onSuccess) {
