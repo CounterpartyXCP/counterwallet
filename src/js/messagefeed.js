@@ -112,12 +112,12 @@ function MessageFeed() {
 
     var myAddresses = WALLET.getAddressesList();
     var params = {
-      filters: [
-        {field: 'tx0_address', op: 'IN', value: myAddresses},
-        {field: 'tx1_address', op: 'IN', value: myAddresses}
+      'filters': [
+        {'field': 'tx0_address', 'op': 'IN', 'value': myAddresses},
+        {'field': 'tx1_address', 'op': 'IN', 'value': myAddresses}
       ],
-      filterop: 'OR',
-      status: ['pending', 'pending and resolved', 'resolved and pending']
+      'filterop': 'OR',
+      'status': ['pending', 'pending and resolved', 'resolved and pending']
     }
 
     var onReceivePendingRpsMatches = function(data) {
@@ -357,7 +357,7 @@ function MessageFeed() {
     for(var i=self.lastMessageIndexReceived()+1; i < message['_message_index']; i++) {
       missingMessageIndexes.push(i);
     }
-    failoverAPI("get_messagefeed_messages_by_index", [missingMessageIndexes], function(missingMessageData, endpoint) {
+    failoverAPI("get_messagefeed_messages_by_index", {'message_indexes': missingMessageIndexes}, function(missingMessageData, endpoint) {
       var missingTxHash = null;
       for(var i=0; i < missingMessageData.length; i++) {
         missingTxHash = self.getTxHash(missingMessageData[i]);
@@ -479,7 +479,7 @@ function MessageFeed() {
       }
       //Also, if this is a new asset creation, or a transfer to an address that doesn't have the asset yet
       if(WALLET.getAddressObj(message['issuer']) && addressesWithAsset.length && !(addressesWithAsset.indexOf(message['issuer']) != -1)) {
-        failoverAPI("get_asset_info", [[message['asset']]], function(assetsInfo, endpoint) {
+        failoverAPI("get_asset_info", {'assets': [message['asset']]}, function(assetsInfo, endpoint) {
           WALLET.getAddressObj(message['issuer']).addOrUpdateAsset(message['asset'], assetsInfo[0], null); //will show with a 0 balance
         });    
       }

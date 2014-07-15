@@ -449,13 +449,13 @@ function SweepModalViewModel() {
     if(!address || address=='') return;
 
     //Get the balance of ALL assets at this address
-    failoverAPI("get_normalized_balances", [[address]], function(balancesData, endpoint) {
+    failoverAPI("get_normalized_balances", {'addresses': [address]}, function(balancesData, endpoint) {
       var assets = [], assetInfo = null;
       for(var i=0; i < balancesData.length; i++) {
         assets.push(balancesData[i]['asset']);
       }
       //get info on the assets, since we need this for the create_issuance call during the sweep (to take ownership of the asset)
-      failoverAPI("get_asset_info", [assets], function(assetsData, endpoint) {
+      failoverAPI("get_asset_info", {'assets': assets}, function(assetsData, endpoint) {
         //Create an SweepAssetInDropdownItemModel item
         for(var i=0; i < balancesData.length; i++) {
           assetInfo = $.grep(assetsData, function(e) { return e['asset'] == balancesData[i]['asset']; })[0]; //O(n^2)

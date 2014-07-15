@@ -345,17 +345,15 @@ function FeedBrowserViewModel() {
   self.loadCounterBets = function() {
     if (!self.betType() ||  !self.feed() || !self.deadline() || (!self.targetValue() && self.feed().info_data.type == 'binary')) return false;
     var params = {
-      bet_type: COUNTER_BET[self.betType()],
-      feed_address: self.feed().source,    
-      deadline: moment(self.deadline()).unix(),
-      leverage: self.leverage()
+      'bet_type': COUNTER_BET[self.betType()],
+      'feed_address': self.feed().source,    
+      'deadline': moment(self.deadline()).unix(),
+      'leverage': self.leverage()
     };
     if (self.feed().info_data.type == 'binary') {
-      params.target_value = self.targetValue();
+      params['target_value'] = self.targetValue();
     }
     var onCounterbetsLoaded = function(data) {
-      $.jqlog.debug("onCounterbetsLoaded");
-      $.jqlog.debug(data);
       // prepare data for display. TODO: optimize, all in one loop
       var displayedData = []
       for (var b = data.length-1; b>=0; b--) {

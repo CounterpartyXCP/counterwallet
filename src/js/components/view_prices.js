@@ -163,7 +163,7 @@ function ViewPricesViewModel() {
     //Track user choice
     trackEvent('Exchange', 'ViewPrices', self.dispAssetPair());
     
-    failoverAPI("get_asset_info", [[self.asset1(), self.asset2()]], function(assetsInfo, endpoint) {
+    failoverAPI("get_asset_info", {'assets': [self.asset1(), self.asset2()]}, function(assetsInfo, endpoint) {
       self.asset1IsDivisible(assetsInfo[0]['divisible']);
       self.asset2IsDivisible(assetsInfo[1]['divisible']);
       self.metricsStopAutoRefresh(); //stop autorefresh if currently happening, so that the new asset selection data can be pulled up
@@ -186,7 +186,7 @@ function ViewPricesViewModel() {
     self.fetchLatestTrades();
     
     //Get a list of all assets
-    failoverAPI("get_asset_names", [], function(data, endpoint) {
+    failoverAPI("get_asset_names", {}, function(data, endpoint) {
       data = ['XCP', 'BTC'].concat(data);
       self.allAssets(data);
       
@@ -293,7 +293,7 @@ function ViewPricesViewModel() {
   self.metricsRefreshMarketUnitPrice = function() {
     var deferred = $.Deferred();
     //get the market price (if available) for display
-    failoverAPI("get_market_price_summary", [self.asset1(), self.asset2()], function(data, endpoint) {
+    failoverAPI("get_market_price_summary", {'asset1': self.asset1(), 'asset2': self.asset2()}, function(data, endpoint) {
       self.currentMarketUnitPrice(data['market_price'] || 0);
       //^ use 0 to signify that we got the data, but that there is no established market price
       deferred.resolve();
@@ -306,7 +306,7 @@ function ViewPricesViewModel() {
   self.metricsRefreshPriceChart = function() {
     var deferred = $.Deferred();
     //now that an asset pair is picked, we can show a price chart for that pair
-    failoverAPI("get_market_price_history", [self.asset1(), self.asset2()], function(data, endpoint) {
+    failoverAPI("get_market_price_history", {'asset1': self.asset1(), 'asset2': self.asset2()}, function(data, endpoint) {
       deferred.resolve();
       if(data.length) {
         ViewPricesViewModel.doChart(self.dispAssetPair(), $('#priceHistory'), data);
