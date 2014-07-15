@@ -40,6 +40,7 @@ Notably, Internet Explorer is **not** supported, due to its lack of full Content
 - IOS Safari 7+
 - Android Browser 4.4+
 - Chrome for Android 33+
+- Chrome for iOS 35+
 - Firefox for Android 26+
 
 
