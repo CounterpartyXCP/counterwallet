@@ -277,6 +277,7 @@ function initStats() {
   
   ko.applyBindings(STATS_TXN_HISTORY, document.getElementById("wid-id-statsTxnHistory"));
   ko.applyBindings(STATS_HISTORY, document.getElementById("wid-id-statsHistory"));
+  ko.applyBindings(STATS_HISTORY, document.getElementById("wid-id-walletHistory"));
   
   STATS_HISTORY.init();
   STATS_TXN_HISTORY.init();
