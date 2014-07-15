@@ -142,7 +142,6 @@ function StatsHistoryViewModel() {
         tooltip: {
           shared: false,
           formatter: function() {
-            console.log(this);
             var text = '<b>'+ moment(this.x).format('MMM Do YYYY') +'</b><br/>';
             if(this.x == this.series.data[this.series.data.length-1].x) //last day...add a label that it's partial
               text += '<b>**PARTIAL DAY**</b><br/>';

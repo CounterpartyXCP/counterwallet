@@ -400,8 +400,8 @@ function MessageFeed() {
     if(message['block_index'])
       WALLET.networkBlockHeight(message['block_index']);
       
-    //filter out non insert messages for now, EXCEPT for order messages (so that we get notified when the remaining qty, etc decrease)
-    if(message['_command'] != 'insert' && (category != "orders" && category != "rps_matches"))
+    //filter out non insert messages for now, EXCEPT for order, bet and rps_matches messages (so that we get notified when the remaining qty, etc decrease)
+    if(message['_command'] != 'insert' && (category != "orders" && category != "bets" && category != "rps_matches"))
       return;
 
     //If we received an action originating from an address in our wallet that was marked invalid by the network, let the user know
@@ -423,7 +423,7 @@ function MessageFeed() {
   
     if(message['_status'].startsWith('invalid'))
       return; //ignore message
-    if(message['_status'] == 'expired') {
+    if(message['_status'] == 'expired' && category != "rps_matches") {
       //ignore expired orders and bets, but we have order_expirations and bet_expiration inserts that we DO look at
       assert(category == "orders" || category == "bets", "Got an 'expired' message for a category of: " + category);
       return;
