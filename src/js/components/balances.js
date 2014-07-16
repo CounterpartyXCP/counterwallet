@@ -157,7 +157,7 @@ function CreateNewAddressModalViewModel() {
         setTimeout(function() { WALLET.refreshCounterpartyBalances([newAddress], checkURL)});
       } else {
         //Otherwise (a new non-watch address), just refresh the page
-        setTimeout(checkURL, 400); //necessary to use setTimeout so that the modal properly hides before we refresh the page
+        setTimeout(checkURL, 800); //necessary to use setTimeout so that the modal properly hides before we refresh the page
       }
     });
     trackEvent('Balances', self.forWatchOnly() ? 'CreateNewWatchAddress' : 'CreateNewAddress');

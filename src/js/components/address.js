@@ -7,6 +7,8 @@ function AddressViewModel(key, address, initialLabel) {
   //^ if null, then this is a WATCH ONLY address
   self.IS_WATCH_ONLY = !self.KEY;
   
+  self.DIVIDEND_DISABLED = isFeatureDisabled('dividend');
+  
   self.ADDRESS = address;
   self.PUBKEY = key ? key.getPub() : ''; //hex string
 

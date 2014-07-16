@@ -146,7 +146,7 @@
           <li class="">
             <a href="pages/balances.html"><i class="fa fa-lg fa-fw fa-user"></i> <span class="menu-item-parent">My Balances</span></a>
           </li>          
-          <li class="">
+          <li class="" data-bind="visible: !isFeatureDisabled('exchange')">
             <a href="#"><i class="fa fa-lg fa-fw fa-exchange"></i> <span class="menu-item-parent">Exchange</span></a>
             <ul>
               <li><a href="pages/view_prices.html"><i class="fa fa-lg fa-fw fa-bar-chart-o"></i> View Market Prices</a></li>
@@ -155,7 +155,7 @@
               <li><a href="pages/ordermatches.html"><i class="fa fa-lg fa-fw fa-book"></i> My Order History</a></li>
             </ul>
           </li>
-          <li class="">
+          <li class="" data-bind="visible: !isFeatureDisabled('betting')">
             <a href="#"><i class="fa fa-lg fa-fw fa-bullseye"></i> <span class="menu-item-parent">Betting</span></a>
             <ul>
               <li><a href="pages/betting.html"><i class="fa fa-lg fa-fw fa-share"></i> Make a Bet</a></li>
@@ -163,21 +163,27 @@
               <li><a href="pages/matchedbets.html"><i class="fa fa-lg fa-fw fa-book"></i> My Bet History</a></li>
             </ul>
           </li>
-          <li class="">
+          <li class="" data-bind="visible: !isFeatureDisabled('rps')">
             <a href="#"><i class="fa fa-lg fa-fw fa-trophy"></i> <span class="menu-item-parent">Gaming</span></a>
             <ul>
               <li><a href="pages/rps.html"><i class="fa-lg fa-fw glyphicon glyphicon-hand-right"></i> Rock-Paper-Scissors</a></li>
             </ul>
           </li>
-          <li class="">
+          <li class="" data-bind="visible: !isFeatureDisabled('history')">
             <a href="pages/history.html"><i class="fa fa-lg fa-fw fa-book"></i> <span class="menu-item-parent">History</span></a>
           </li>
           <li class="">
             <a href="#"><i class="fa fa-lg fa-fw fa-plus"></i> <span class="menu-item-parent">More</span></a>
             <ul>
-                <li><a href="pages/portfolio.html"><i class="fa fa-lg fa-fw fa-tasks"></i> My Portfolio</a></li>
-                <li><a href="pages/leaderboard.html"><i class="fa fa-lg fa-fw fa-trophy"></i> Top Assets</a></li>
-                <li><a href="pages/stats.html"><i class="fa fa-lg fa-fw fa-crosshairs"></i> Network Stats</a></li>
+                <li data-bind="visible: !isFeatureDisabled('portfolio')">
+                    <a href="pages/portfolio.html"><i class="fa fa-lg fa-fw fa-tasks"></i> My Portfolio</a>
+                </li>
+                <li data-bind="visible: !isFeatureDisabled('leaderboard')">
+                    <a href="pages/leaderboard.html"><i class="fa fa-lg fa-fw fa-trophy"></i> Top Assets</a>
+                </li>
+                <li data-bind="visible: !isFeatureDisabled('stats')">
+                    <a href="pages/stats.html"><i class="fa fa-lg fa-fw fa-crosshairs"></i> Network Stats</a>
+                </li>
             </ul>
           </li>
         </ul>

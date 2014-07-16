@@ -206,14 +206,14 @@ var ROLLBAR_ACCESS_TOKEN = null; //will be set in counterwallet.js
 var TRANSACTION_DELAY = 5000 // delay between transaction to avoid error -22 (vin reused)
 var TRANSACTION_MAX_RETRY = 5 // max retry when transaction failed (don't include first transaction, so 3 retry means 4 queries)
 
-var FEED_CATEGORIES = ['sports', 'politics', 'entertainment', 'economics', 'other']
-var FEED_TYPES = ['simple', 'cfd']
-
 var DONATION_ADDRESS = USE_TESTNET ? 'n4MGGJBkW9RjRKBbZfBAceHDndhywvVPV9' : '19U6MmLLumsqxXSBMB5FgYXbezgXYC6Gpe';
 
 var APPROX_SECONDS_PER_BLOCK = USE_TESTNET ? 20 * 60 : 8 * 60; //a *rough* estimate on how many seconds per each block (used for estimating open order time left until expiration, etc)
 
 var USER_COUNTRY = ''; //set in login.js
+
+var DISABLED_FEATURES_SUPPORTED = ['betting', 'rps', 'dividend', 'exchange', 'leaderboard', 'portfolio', 'stats', 'history']; //what can be disabled
+var DISABLED_FEATURES = []; //set in counterwallet.js
 
 // restricted action
 var RESTRICTED_AREA = {
