@@ -43,8 +43,6 @@ function ViewPricesViewModel() {
       params: self
     }    
   });
-  self.minBTCFeeProvidedPct = ko.observable(FEE_FRACTION_DEFAULT_FILTER);
-  self.maxBTCFeeRequiredPct = ko.observable(FEE_FRACTION_DEFAULT_FILTER);
 
   self.assetPair = ko.computed(function() {
     if(!self.asset1() || !self.asset2()) return null;
@@ -78,15 +76,19 @@ function ViewPricesViewModel() {
     if(newValue == null || !self.validationModelBaseOrders.isValid()) return;
     self.dexHome(false);
     self.metricsRefreshPriceChart();
-    failoverAPI('get_market_details', [self.asset1(), self.asset2()], self.displayMarketDetails);
+    var params = {
+      'asset1': self.asset2(),
+      'asset2': self.asset1(),
+      'min_fee_provided': WALLET_OPTIONS_MODAL.minBTCFeeProvidedPct(),
+      'max_fee_required': WALLET_OPTIONS_MODAL.maxBTCFeeRequiredPct()
+    }
+    failoverAPI('get_market_details', params, self.displayMarketDetails);
   });
   
   //VALIDATION MODELS  
   self.validationModelBaseOrders = ko.validatedObservable({
     asset1: self.asset1,
-    asset2: self.asset2,
-    minBTCFeeProvidedPct: self.minBTCFeeProvidedPct,
-    maxBTCFeeRequiredPct: self.maxBTCFeeRequiredPct
+    asset2: self.asset2
   });
 
 
@@ -189,7 +191,7 @@ function ViewPricesViewModel() {
     var fee_provided = MIN_FEE;
     
     if (self.baseAsset() == 'BTC') {
-      fee_provided = mulFloat(give_quantity, FEE_FRACTION_PROVIDED_DEFAULT_PCT/100);
+      fee_provided = mulFloat(give_quantity, WALLET_OPTIONS_MODAL.defaultBTCFeeProvidedPct()/100);
       fee_provided = Math.ceil(fee_provided);
     }
 
@@ -222,12 +224,12 @@ function ViewPricesViewModel() {
     var expiration = ORDER_DEFAULT_EXPIRATION;
 
     if (self.quoteAsset() == 'BTC') {
-      fee_required = mulFloat(get_quantity, FEE_FRACTION_REQUIRED_DEFAULT_PCT/100);
+      fee_required = mulFloat(get_quantity, WALLET_OPTIONS_MODAL.defaultBTCFeeRequiredPct()/100);
       fee_required = Math.ceil(fee_required);
     }
 
     if (self.baseAsset() == 'BTC') {
-      fee_provided = mulFloat(give_quantity, FEE_FRACTION_PROVIDED_DEFAULT_PCT/100);
+      fee_provided = mulFloat(give_quantity, WALLET_OPTIONS_MODAL.defaultBTCFeeProvidedPct()/100);
       fee_provided = Math.ceil(fee_provided);
       expiration = ORDER_BTCSELL_DEFAULT_EXPIRATION;
     }
@@ -386,7 +388,7 @@ function ViewPricesViewModel() {
     var fee_provided = MIN_FEE;
 
     if (self.quoteAsset() == 'BTC') {
-      fee_provided = mulFloat(give_quantity, FEE_FRACTION_PROVIDED_DEFAULT_PCT/100);
+      fee_provided = mulFloat(give_quantity, WALLET_OPTIONS_MODAL.defaultBTCFeeProvidedPct()/100);
       fee_provided = Math.ceil(fee_provided);
     }
 
@@ -419,12 +421,12 @@ function ViewPricesViewModel() {
     var expiration = ORDER_DEFAULT_EXPIRATION;
 
     if (self.baseAsset() == 'BTC') {
-      fee_required = mulFloat(get_quantity, FEE_FRACTION_REQUIRED_DEFAULT_PCT/100);
+      fee_required = mulFloat(get_quantity, WALLET_OPTIONS_MODAL.defaultBTCFeeRequiredPct()/100);
       fee_required = Math.ceil(fee_required);
     }
 
     if (self.quoteAsset() == 'BTC') {
-      fee_provided = mulFloat(give_quantity, FEE_FRACTION_PROVIDED_DEFAULT_PCT/100);
+      fee_provided = mulFloat(give_quantity, WALLET_OPTIONS_MODAL.defaultBTCFeeProvidedPct()/100);
       fee_provided = Math.ceil(fee_provided);
       expiration = ORDER_BTCSELL_DEFAULT_EXPIRATION;
     }
@@ -505,6 +507,15 @@ function ViewPricesViewModel() {
 
   self.displayTopUserPairs = function(data) {
     $.jqlog.debug(data);
+    for (var p in data) {
+      var classes = []
+      if (data[p]['trend']>0) classes.push('txt-color-greenDark');
+      else if (data[p]['trend']<0) classes.push('txt-color-red');
+      if (parseFloat(data[p]['progression'])>0) classes.push('progression-up');
+      else if (parseFloat(data[p]['progression'])<0) classes.push('progression-down');
+      if (data[p]['my_order_count']) classes.push('with-open-order');
+      data[p]['pair_classes'] = classes.join(" ");
+    }
     self.topUserPairs(data);
   }
 
@@ -534,7 +545,9 @@ function ViewPricesViewModel() {
     var params = {
       'asset1': self.asset1(),
       'asset2': self.asset2(),
-      'addresses': WALLET.getAddressesList()
+      'addresses': WALLET.getAddressesList(),
+      'min_fee_provided': WALLET_OPTIONS_MODAL.minBTCFeeProvidedPct(),
+      'max_fee_required': WALLET_OPTIONS_MODAL.maxBTCFeeRequiredPct()
     }
     failoverAPI('get_market_orders', params, self.displayOpenUserOrders);
   }
@@ -733,33 +746,22 @@ function ViewPricesViewModel() {
     });
   }
   
-  self.dataTableResponsive = function(e) {
-    // Responsive design for our data tables and more on this page
-    var newWindowWidth = $(window).width();
-    if(self._lastWindowWidth && newWindowWidth == self._lastWindowWidth) return;
-    self._lastWindowWidth = newWindowWidth;
-    
-    if($('#tradeHistory').hasClass('dataTable')) {
-      var tradeHistory = $('#tradeHistory').dataTable();
-      if(newWindowWidth < 1250) { //hide some...
-        tradeHistory.fnSetColumnVis(1, false); //hide blocktime
-        tradeHistory.fnSetColumnVis(2, false); //hide Order 1
-        tradeHistory.fnSetColumnVis(4, false); //hide Order 2
-      }
-      if(newWindowWidth <= 1000) { //hide even more...
-        tradeHistory.fnSetColumnVis(3, false); //hide address 1
-        tradeHistory.fnSetColumnVis(5, false); //hide address 2
-      }
-      if(newWindowWidth >= 1250) { //show it all, baby
-        tradeHistory.fnSetColumnVis(1, true); //show blocktime
-        tradeHistory.fnSetColumnVis(2, true); //show Order 1
-        tradeHistory.fnSetColumnVis(3, true); //show address 1
-        tradeHistory.fnSetColumnVis(4, true); //show Order 2
-        tradeHistory.fnSetColumnVis(5, true); //show address 5
-      }
-      tradeHistory.fnAdjustColumnSizing();
+  self.cancelOpenOrder = function(order) {
+    var params = {
+      offer_hash: order.tx_hash,
+      source: order.source,
+      _type: 'order',
+      _tx_index: order.tx_index
     }
+
+    var onSuccess = function(txHash, data, endpoint) {
+      bootbox.alert("<b>Your order was canceled successfully.</b> " + ACTION_PENDING_NOTICE);
+    }
+
+    WALLET.doTransaction(order.source, "create_cancel", params, onSuccess);
   }
+
+
 
 };
 

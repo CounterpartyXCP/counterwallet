@@ -25,6 +25,16 @@ function WalletOptionsModalViewModel() {
   self.myIPAddr = ko.observable('');
   self.myCookie = ko.observable('');
   self.myCountry = ko.observable('');
+
+  var pctValidator = {
+    required: true,
+    isValidPositiveQuantityOrZero: self,
+    max: 100
+  }
+  self.minBTCFeeProvidedPct = ko.observable(FEE_FRACTION_DEFAULT_FILTER).extend(pctValidator);
+  self.maxBTCFeeRequiredPct = ko.observable(FEE_FRACTION_DEFAULT_FILTER).extend(pctValidator);
+  self.defaultBTCFeeProvidedPct = ko.observable(FEE_FRACTION_PROVIDED_DEFAULT_PCT).extend(pctValidator);
+  self.defaultBTCFeeRequiredPct = ko.observable(FEE_FRACTION_REQUIRED_DEFAULT_PCT).extend(pctValidator);
   
   self.dispMyCookiePresent = ko.computed(function() {
     return self.myCookie() ? 'Present' : 'None';

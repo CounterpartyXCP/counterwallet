@@ -326,11 +326,6 @@ function initViewPrices() {
   ko.applyBindings(VIEW_PRICES, document.getElementsByClassName("ordersGrid")[0]);
   
   VIEW_PRICES.init(true);
-  
-  $(window).resize(VIEW_PRICES.dataTableResponsive);
-  $(window).on('hashchange', function() {
-    $(window).off("resize", VIEW_PRICES.dataTableResponsive);
-  });
 
   $('#changeMarket').click(function() {
     loadURL('pages/view_prices.html', $('#content'));

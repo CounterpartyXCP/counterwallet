@@ -195,3 +195,15 @@ td.number {
 tr.centerHeader th {
   text-align: center !important;
 }
+
+.progression-up {
+  background-color: #E5F7DD;
+}
+
+.progression-down {
+  background-color: #FAEAEE;
+}
+
+.with-open-order {
+  font-weight: bold;
+}

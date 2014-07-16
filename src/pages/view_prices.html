@@ -44,7 +44,7 @@
             <div class="widget-body min-height-0 no-padding" style="min-height:0 !important" data-bind="validationOptions: { insertMessages: false }"> <!-- widget content -->
                 
               <div class="topPairsGrid" data-bind="foreach: topUserPairs">
-                <a href="#" data-bind="click: $parent.fetchMarketDetails">
+                <a href="#" data-bind="click: $parent.fetchMarketDetails, attr: {class: pair_classes}">
                   <span data-bind="text:base_asset"></span>/<span data-bind="text:quote_asset"></span>
                 </a>
               </div>
@@ -241,7 +241,7 @@
                               <td data-bind="text: total"></td>
                               <td data-bind="text: completion"></td>
                               <td>
-                                <a href="#" class="btn btn-default btn-xs">Cancel</a>
+                                <a href="#" class="btn btn-default btn-xs" data-bind="click: cancelOrder">Cancel</a>
                               </td>
                           </tr>
                       </tbody>
