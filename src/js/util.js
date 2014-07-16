@@ -520,31 +520,57 @@ function doubleHash(hexstr) {
   return bitcore.util.sha256(bitcore.util.sha256(Crypto.util.hexToBytes(hexstr))).toString('hex');
 }
 
+function isFeatureDisabled(feature) {
+  return DISABLED_FEATURES.indexOf(feature) != -1;
+}
+
 function checkCountry(action, callback) {
 
   if (RESTRICTED_AREA[action] && RESTRICTED_AREA[action].indexOf(USER_COUNTRY) != -1) {
     
     var message = 'It appears that you are located in a country in which we are legally unable to provide this service.';
 
-    bootbox.dialog({
-      title: "Country warning",
-      message: message,
-      buttons: {
-        "cancel": {
-          label: "Close",
-          className: "btn-danger",
-          callback: function() {
-            bootbox.hideAll();
-            return false;
+    if(USE_TESTNET) { //allow the user to bust on through this alert on testnet
+      bootbox.dialog({
+        title: "Country warning",
+        message: message + "<br/><br/>Since you are on testnet, you can choose to proceeed anyway.",
+        buttons: {
+          "success": {
+            label: "Proceed Anyway",
+            className: "btn-success",
+            callback: function() {
+              callback();
+            }
+          },
+          "cancel": {
+            label: "Close",
+            className: "btn-danger",
+            callback: function() {
+              bootbox.hideAll();
+              return false;
+            }
           }
         }
-      }
-    });
-
+      });      
+    } else { 
+      bootbox.dialog({
+        title: "Country warning",
+        message: message,
+        buttons: {
+          "cancel": {
+            label: "Close",
+            className: "btn-danger",
+            callback: function() {
+              bootbox.hideAll();
+              return false;
+            }
+          }
+        }
+      });
+    }
   } else {
     callback();
   }
-
 }
 
 //Helper for closure-based inheritance (see http://www.ruzee.com/blog/2008/12/javascript-inheritance-via-prototypes-and-closures)

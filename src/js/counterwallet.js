@@ -101,6 +101,16 @@ function loadServersListAndSettings() {
     produceCWServerList();
     initGoogleAnalytics();
     initRollbar();
+    
+    //Init list of disabled features
+    assert(data['disabledFeatures'] instanceof Array, "'disabledFeatures' field in returned servers.json file is not an array");
+    for(var i=0; i < data['disabledFeatures']; i++) {
+      if(DISABLED_FEATURES_SUPPORTED.indexOf(data['disabledFeatures'][i]) == -1) {
+        assert(data['disabledFeatures'] instanceof Array, "'disabledFeatures' field has invalid entry '" + data['disabledFeatures'][i]
+          + "'. Supported entries are: " + DISABLED_FEATURES_SUPPORTED.join(', '));
+      }
+    }
+    DISABLED_FEATURES = data['disabledFeatures'] || [];
   }).fail(function() {
     //File not found, just use the local box as the API server
     cwURLs([ location.origin ]);

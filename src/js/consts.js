@@ -215,6 +215,9 @@ var APPROX_SECONDS_PER_BLOCK = USE_TESTNET ? 20 * 60 : 8 * 60; //a *rough* estim
 
 var USER_COUNTRY = ''; //set in login.js
 
+var DISABLED_FEATURES_SUPPORTED = ['betting', 'rps', 'dividend', 'exchange', 'leaderboard', 'portfolio', 'stats', 'history']; //what can be disabled
+var DISABLED_FEATURES = []; //set in counterwallet.js
+
 // restricted action
 var RESTRICTED_AREA = {
   'pages/betting.html': ['US'],
