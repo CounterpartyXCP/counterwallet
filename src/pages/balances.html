@@ -97,16 +97,16 @@
                 <ul class="dropdown-menu pull-right">
                   <li><a data-bind="click: showQRCode" href="#">Show QR Code</a></li>
                   <li><a data-bind="click: showPrivateKey" href="#">Show Private Key</a></li>
-                  <li><a data-bind="visible: !IS_WATCH_ONLY, click: signMessage" href="#">Sign Message</a></li>  
-                  <li><a data-bind="visible: !IS_WATCH_ONLY, click: signTransaction" href="#">Sign Transaction</a></li>               
-                  <li><a data-bind="visible: IS_WATCH_ONLY, click: removeWatch" href="#">Remove Address</a></li>
+                  <li data-bind="visible: !IS_WATCH_ONLY"><a data-bind="click: signMessage" href="#">Sign Message</a></li>  
+                  <li data-bind="visible: !IS_WATCH_ONLY"><a data-bind="click: signTransaction" href="#">Sign Transaction</a></li>               
+                  <li data-bind="visible: IS_WATCH_ONLY"><a data-bind="click: removeWatch" href="#">Remove Address</a></li>
 
                   <li class="divider"></li><li class="dropdown-header">Issuance...</li>                 
-                  <li><a data-bind="visible: !IS_WATCH_ONLY, click: createAsset" href="#">Create a Token (Asset)</a></li>                
-                  <li><a data-bind="visible: !IS_WATCH_ONLY && !isFeatureDisabled('dividend'), click: payDividend" href="#">Pay Distribution</a></li>
+                  <li data-bind="visible: !IS_WATCH_ONLY"><a data-bind="click: createAsset" href="#">Create a Token (Asset)</a></li>                
+                  <li data-bind="visible: !IS_WATCH_ONLY && !DIVIDEND_DISABLED"><a data-bind="click: payDividend" href="#">Pay Distribution</a></li>
 
                   <li class="divider"></li><li class="dropdown-header">Betting...</li>  
-                  <li><a data-bind="visible: !IS_WATCH_ONLY, click: broadcast" href="#">Broadcast</a></li>
+                  <li data-bind="visible: !IS_WATCH_ONLY"><a data-bind="click: broadcast" href="#">Broadcast</a></li>
 
                   <li class="divider"></li><li class="dropdown-header">Sort by...</li>
                   <li><a data-bind="click: sortAssetsByName" href="#">Name</a></li>
