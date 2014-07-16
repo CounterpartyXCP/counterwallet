@@ -103,7 +103,7 @@
 
                   <li class="divider"></li><li class="dropdown-header">Issuance...</li>                 
                   <li data-bind="visible: !IS_WATCH_ONLY"><a data-bind="click: createAsset" href="#">Create a Token (Asset)</a></li>                
-                  <li data-bind="visible: !IS_WATCH_ONLY && !DIVIDEND_DISABLED"><a data-bind="click: payDividend" href="#">Pay Distribution</a></li>
+                  <li data-bind="visible: !IS_WATCH_ONLY && FEATURE_DIVIDEND"><a data-bind="click: payDividend" href="#">Pay Distribution</a></li>
 
                   <li class="divider"></li><li class="dropdown-header">Betting...</li>  
                   <li data-bind="visible: !IS_WATCH_ONLY"><a data-bind="click: broadcast" href="#">Broadcast</a></li>

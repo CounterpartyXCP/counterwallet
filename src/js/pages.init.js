@@ -93,6 +93,16 @@ function initBalances() {
   window.BROADCAST_MODAL = new BroadcastModalViewModel();
   window.SIGN_TRANSACTION_MODAL = new SignTransactionModalViewModel();
   
+  ko.applyBindings({
+    FEATURE_EXCHANGE: disabledFeatures.indexOf('exchange') == -1,
+    FEATURE_BETTING: disabledFeatures.indexOf('betting') == -1,
+    FEATURE_RPS: disabledFeatures.indexOf('rps') == -1,
+    FEATURE_HISTORY: disabledFeatures.indexOf('history') == -1,
+    FEATURE_PORTFOLIO: disabledFeatures.indexOf('portfolio') == -1,
+    FEATURE_LEADERBOARD: disabledFeatures.indexOf('leaderboard') == -1,
+    FEATURE_STATS: disabledFeatures.indexOf('stats') == -1
+  }, document.getElementById("left-panel"));
+  
   ko.applyBindings({}, document.getElementById("gettingStartedNotice"));
   ko.applyBindings({}, document.getElementById("pendingBTCPayNotice"));
   ko.applyBindings({}, document.getElementById("oldWalletDetectedNotice"));

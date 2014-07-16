@@ -523,10 +523,6 @@ function doubleHash(hexstr) {
   return bitcore.util.sha256(bitcore.util.sha256(Crypto.util.hexToBytes(hexstr))).toString('hex');
 }
 
-function isFeatureDisabled(feature) {
-  return DISABLED_FEATURES.indexOf(feature) != -1;
-}
-
 function checkCountry(action, callback) {
 
   if (RESTRICTED_AREA[action] && RESTRICTED_AREA[action].indexOf(USER_COUNTRY) != -1) {

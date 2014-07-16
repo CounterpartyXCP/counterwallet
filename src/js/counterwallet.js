@@ -49,6 +49,7 @@ $.timeago.settings.allowFuture = true;
 var cwURLs = ko.observableArray([]);
 var cwBaseURLs = ko.observableArray([]);
 var cwAPIUrls = ko.observableArray([]);
+var disabledFeatures = ko.observableArray([]);
 
 function produceCWServerList() {
   cwURLs(shuffle(cwURLs())); //randomly shuffle the list to decide the server try order...
@@ -111,8 +112,9 @@ function loadServersListAndSettings() {
             + "'. Supported entries are: " + DISABLED_FEATURES_SUPPORTED.join(', '));
         }
       }
+      $.jqlog.debug("Disabled features: " + data['disabledFeatures']);
     }
-    DISABLED_FEATURES = data['disabledFeatures'] || [];
+    disabledFeatures(data['disabledFeatures'] || []);
   }).fail(function() {
     //File not found, just use the local box as the API server
     cwURLs([ location.origin ]);
