@@ -74,6 +74,7 @@ function ViewPricesViewModel() {
   self.delayedAssetPairSelection = ko.computed(self.assetPair).extend({ rateLimit: { method: "notifyWhenChangesStop", timeout: 400 } });
   self.delayedAssetPairSelection.subscribeChanged(function(newValue, prevValue) {
     if(newValue == null || !self.validationModelBaseOrders.isValid()) return;
+    self.baseAssetImageUrl('');
     self.dexHome(false);
     self.metricsRefreshPriceChart();
     var params = {
@@ -83,6 +84,9 @@ function ViewPricesViewModel() {
       'max_fee_required': WALLET_OPTIONS_MODAL.maxBTCFeeRequiredPct()
     }
     failoverAPI('get_market_details', params, self.displayMarketDetails);
+
+    $('a.top_user_pair').removeClass('selected_pair');
+    $('a.top_user_pair.pair_' + self.baseAsset() + self.quoteAsset()).addClass('selected_pair');
   });
   
   //VALIDATION MODELS  
@@ -95,6 +99,7 @@ function ViewPricesViewModel() {
   self.balances = {};
   self.currentMarketPrice = ko.observable();
   self.marketProgression24h = ko.observable();
+  self.baseAssetImageUrl = ko .observable('');
 
   self.marketProgression24hDisp = ko.computed(function() {
     var span = $('<span></span>').css('font-size', '12px').css('color', '#000');
@@ -199,7 +204,6 @@ function ViewPricesViewModel() {
   });
 
   self.selectBuyOrder = function(order) {
-    $.jqlog.debug(order);
     self.sellPrice(parseFloat(order.price));
     var amount = Math.min(self.availableBalanceForSell(), parseFloat(order.base_depth));
     self.sellAmount(amount);
@@ -259,7 +263,6 @@ function ViewPricesViewModel() {
       }
     }
 
-    $.jqlog.debug(params);
     WALLET.doTransaction(self.selectedAddressForSell(), "create_order", params, onSuccess);
   }
 
@@ -396,7 +399,6 @@ function ViewPricesViewModel() {
   });
 
   self.selectSellOrder = function(order) {
-    $.jqlog.debug(order);
     self.buyPrice(parseFloat(order.price));
     var amount = parseFloat(order.base_depth);
     self.buyAmount(amount);
@@ -456,7 +458,6 @@ function ViewPricesViewModel() {
       }
     }
 
-    $.jqlog.debug(params);
     WALLET.doTransaction(self.selectedAddressForBuy(), "create_order", params, onSuccess);
   }
 
@@ -500,20 +501,18 @@ function ViewPricesViewModel() {
   }
   /* BUY FORM END */
 
-
-
   /* TOP USER PAIRS */
   self.topUserPairs = ko.observableArray([]);
 
   self.displayTopUserPairs = function(data) {
-    $.jqlog.debug(data);
     for (var p in data) {
-      var classes = []
+      var classes = ['top_user_pair'];
       if (data[p]['trend']>0) classes.push('txt-color-greenDark');
       else if (data[p]['trend']<0) classes.push('txt-color-red');
       if (parseFloat(data[p]['progression'])>0) classes.push('progression-up');
       else if (parseFloat(data[p]['progression'])<0) classes.push('progression-down');
       if (data[p]['my_order_count']) classes.push('with-open-order');
+      classes.push("pair_" + data[p]['base_asset'] + data[p]['quote_asset']);
       data[p]['pair_classes'] = classes.join(" ");
     }
     self.topUserPairs(data);
@@ -531,7 +530,6 @@ function ViewPricesViewModel() {
   self.userOpenOrders = ko.observableArray([]);
 
   self.displayOpenUserOrders = function(data) {
-    $.jqlog.debug(data);
     for (var i in data) {
       data[i].amount = normalizeQuantity(data[i].amount, self.baseAssetIsDivisible());
       data[i].total = normalizeQuantity(data[i].total, self.quoteAssetIsDivisible());
@@ -556,7 +554,6 @@ function ViewPricesViewModel() {
   self.userLastTrades = ko.observableArray([]);
 
   self.displayUserLastTrades = function(data) {
-    $.jqlog.debug(data);
     for (var i in data) {
       data[i].amount = normalizeQuantity(data[i].amount, self.baseAssetIsDivisible());
       data[i].total = normalizeQuantity(data[i].total, self.quoteAssetIsDivisible());
@@ -620,7 +617,10 @@ function ViewPricesViewModel() {
   /* MARKET DETAILS */
 
   self.displayMarketDetails = function(data) {
-    $.jqlog.debug(data);
+
+    if (data['base_asset_infos'] && data['base_asset_infos']['valid_image']) {
+      self.baseAssetImageUrl(assetImageUrl(data['base_asset']));
+    }
 
     if (self.asset1() == data['base_asset']) {
       self.asset1IsDivisible(data['base_asset_divisible']);
@@ -683,8 +683,6 @@ function ViewPricesViewModel() {
 
     for (var i in data['last_trades']) {
       data['last_trades'][i]['price'] = parseFloat(data['last_trades'][i]['price']);
-      $.jqlog.debug(self.baseAsset() + ' : '+self.baseAssetIsDivisible());
-      $.jqlog.debug(self.quoteAsset() + ' : '+self.quoteAssetIsDivisible())
       data['last_trades'][i].amount = normalizeQuantity(data['last_trades'][i].amount, self.baseAssetIsDivisible());
       data['last_trades'][i].total = normalizeQuantity(data['last_trades'][i].total, self.quoteAssetIsDivisible());
       data['last_trades'][i].block_time = moment(data['last_trades'][i].block_time * 1000).format('YYYY/MM/DD hh:mm:ss A Z');
@@ -825,8 +823,9 @@ ViewPricesViewModel.doChart = function(dispAssetPair, chartDiv, data) {
         enabled: true
       },
       rangeSelector: {
-        enabled: false,       
-        inputEnabled: false
+        /*enabled: false,       
+        inputEnabled: false,*/
+        selected: 0
       },
       tooltip: {
         crosshairs: true,

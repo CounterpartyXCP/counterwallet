@@ -41,6 +41,7 @@
 
 table.orderBook td {
     text-align: right;
+    cursor: pointer;
 }
 
 .buySellRow {
@@ -114,6 +115,15 @@ span.marketPrice {
   font-weight:bold;
   margin-right:10px;
   display:inline-block;
+}
+
+.pairTitle span {
+  font-size:24px;
+}
+
+.pairTitle img {
+  width: 24px;
+  height: 24px;
 }
 
 #changeMarket {
@@ -206,4 +216,10 @@ tr.centerHeader th {
 
 .with-open-order {
   font-weight: bold;
+}
+
+a.top_user_pair.selected_pair {
+  background-color: #57889c !important;
+  color:#FFF !important;
+  font-weight: bold  !important;
 }
