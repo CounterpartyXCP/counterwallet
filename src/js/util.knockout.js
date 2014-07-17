@@ -1,4 +1,8 @@
 
+var isBound = function(id) {
+  return !!ko.dataFor(document.getElementById(id));
+};
+
 ko.subscribable.fn.trimmed = function() {
     return ko.computed({
         read: function() {
