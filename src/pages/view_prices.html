@@ -8,14 +8,13 @@
     </div>
 
     <div class="col-xs-12 col-sm-12 col-md-12 col-lg-12" data-bind="visible: !dexHome()">
-
       <h1 style="text-align:center;position:relative;margin:0">
         <a id="changeMarket" class="btn btn-primary" style="vertical-align:text-bottom;">
           <span class="fa fa-arrow-left"><span>
           All Markets
         </a>
         <div class="pairTitle page-title txt-color-blueDark">
-          <img data-bind="attr: {src: baseAssetImageUrl()}, visible: baseAssetImageUrl()!=''" />
+          <img src="/" data-bind="attr: {src: baseAssetImageUrl()}, visible: baseAssetImageUrl()!=''" />
           <span data-bind="text: dispAssetPair"></span>
         </div> 
         <span class="marketPrice" data-bind="visible: currentMarketPrice, html: currentMarketPrice + ' ' + marketProgression24hDisp"></span>
