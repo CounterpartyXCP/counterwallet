@@ -80,7 +80,7 @@ function ExchangeViewModel() {
   self.delayedAssetPairSelection = ko.computed(self.assetPair).extend({ rateLimit: { method: "notifyWhenChangesStop", timeout: 400 } });
   self.delayedAssetPairSelection.subscribeChanged(function(newValue, prevValue) {
     if(newValue == null || !self.validationModelBaseOrders.isValid()) return;
-    self.baseAssetImageUrl('');
+    self.baseAssetImage('');
     self.dexHome(false);   
     self.fetchMarketDetails();
     $('a.top_user_pair').removeClass('selected_pair');
@@ -97,7 +97,7 @@ function ExchangeViewModel() {
   self.balances = {};
   self.currentMarketPrice = ko.observable();
   self.marketProgression24h = ko.observable();
-  self.baseAssetImageUrl = ko .observable('');
+  self.baseAssetImage = ko .observable('');
 
   self.marketProgression24hDisp = ko.computed(function() {
     var span = $('<span></span>').css('font-size', '12px').css('color', '#000');
@@ -617,7 +617,7 @@ function ExchangeViewModel() {
   self.displayMarketDetails = function(data) {
 
     if (data['base_asset_infos'] && data['base_asset_infos']['valid_image']) {
-      self.baseAssetImageUrl(assetImageUrl(data['base_asset']));
+      self.baseAssetImage(assetImageUrl(data['base_asset']));
     }
 
     if (self.asset1() == data['base_asset']) {

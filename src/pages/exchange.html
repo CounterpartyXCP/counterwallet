@@ -14,7 +14,7 @@
           All Markets
         </a>
         <div class="pairTitle page-title txt-color-blueDark">
-          <img src="/" data-bind="attr: {src: baseAssetImageUrl()}, visible: baseAssetImageUrl()!=''" />
+          <img data-bind="attr: {src: baseAssetImage()}, visible: baseAssetImage()!=''" />
           <span data-bind="text: dispAssetPair"></span>
         </div> 
         <span class="marketPrice" data-bind="visible: currentMarketPrice, html: currentMarketPrice + ' ' + marketProgression24hDisp"></span>
