@@ -124,8 +124,8 @@
                                 <span data-bind="text: volume || '0'"></span>
                                 <span data-bind="text: quote_asset"></span>
                             </td> 
-                            <td class="number" data-bind="text: supply"></td>
-                            <td class="number" data-bind="text: market_cap"></td>
+                            <td class="number" data-bind="text: supply + ' ' + base_asset"></td>
+                            <td class="number" data-bind="text: market_cap + ' ' + quote_asset"></td>
                             <td style="text-align:center" data-bind="text: progression, attr: {class: prog_class}"></td>
                         </tr>
                     </tbody>
