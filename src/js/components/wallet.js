@@ -12,6 +12,12 @@ function WalletViewModel() {
   self.isNew = ko.observable(false); //set to true if we can't find the user's prefs when logging on. if set, we'll show some intro text on their login, etc.
   self.isSellingBTC = ko.observable(false); //updated by the btcpay feed
   self.isOldWallet = ko.observable(false);
+
+  self.networkBlockHeight.subscribe(function(newBlockIndex) {
+    try {
+      EXCHANGE.refresh();
+    } catch(e) {}
+  });
   
   self.addAddress = function(type, address, armoryPubKey) {
     assert(['normal', 'watch', 'armory'].indexOf(type) != -1);

@@ -14,7 +14,7 @@
           All Markets
         </a>
         <div class="pairTitle page-title txt-color-blueDark">
-          <img src="/" data-bind="attr: {src: baseAssetImageUrl()}, visible: baseAssetImageUrl()!=''" />
+          <img data-bind="attr: {src: baseAssetImage()}, visible: baseAssetImage()!=''" />
           <span data-bind="text: dispAssetPair"></span>
         </div> 
         <span class="marketPrice" data-bind="visible: currentMarketPrice, html: currentMarketPrice + ' ' + marketProgression24hDisp"></span>
@@ -38,7 +38,7 @@
             <div class="widget-body min-height-0 no-padding" style="min-height:0 !important" data-bind="validationOptions: { insertMessages: false }"> <!-- widget content -->
                 
               <div class="topPairsGrid" data-bind="foreach: topUserPairs">
-                <a href="#" data-bind="click: $parent.fetchMarketDetails, attr: {class: pair_classes}">
+                <a href="#" data-bind="click: $parent.selectMarket, attr: {class: pair_classes}">
                   <span data-bind="text:base_asset"></span>/<span data-bind="text:quote_asset"></span>
                 </a>
               </div>
@@ -111,7 +111,7 @@
                         </tr>
                     </thead>
                     <tbody data-bind="foreach: allPairs">
-                        <tr data-bind="click: $parent.fetchMarketDetails">
+                        <tr data-bind="click: $parent.selectMarket">
                             <td class="number" data-bind="text: pos"></td>
                             <td style="with-space:nowrap">
                                 <b><span data-bind="text: base_asset"></span></b> / <span data-bind="text: quote_asset"></span>
@@ -124,8 +124,8 @@
                                 <span data-bind="text: volume || '0'"></span>
                                 <span data-bind="text: quote_asset"></span>
                             </td> 
-                            <td class="number" data-bind="text: supply"></td>
-                            <td class="number" data-bind="text: market_cap"></td>
+                            <td class="number" data-bind="text: supply + ' ' + base_asset"></td>
+                            <td class="number" data-bind="text: market_cap + ' ' + quote_asset"></td>
                             <td style="text-align:center" data-bind="text: progression, attr: {class: prog_class}"></td>
                         </tr>
                     </tbody>
