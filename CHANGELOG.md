@@ -1,3 +1,12 @@
+### v1.4.0 (Unreleased) ###
+**Enhancements:**
+* Added new DEx interface
+* Added Armory Offline signing support
+
+**Fixes:**
+* Numerous minor fixes
+* Minor UI tweaks
+
 ### v1.3.0 (~2014-07-13) ###
 **Enhancements:**
 * Added Rock-Paper-Scissors
