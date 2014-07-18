@@ -374,6 +374,13 @@ function feedImageUrl(image_name) {
   return url;
 }
 
+function assetImageUrl(image_name) {
+  var url = cwBaseURLs()[0];
+  url += USE_TESTNET ? '/_t_asset_img/' : '/_asset_img/';
+  url += image_name + '.png';
+  return url;
+}
+
 function timestampToString(timestamp) {
   return moment(timestamp * 1000).format("MMM Do YYYY, h:mm:ss a");
 }

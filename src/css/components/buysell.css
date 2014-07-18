@@ -41,6 +41,7 @@
 
 table.orderBook td {
     text-align: right;
+    cursor: pointer;
 }
 
 .buySellRow {
@@ -86,6 +87,139 @@ table.orderBook td {
 }
 
 .buySellPriceHistory {
-  height: 500px;
+  height: 250px;
   min-width: 500px;
+}
+
+.assetSelector section.col {
+  height: 65px;
+}
+
+span.marketPrice {
+  font-size:inherit;
+  display:inline-block;
+  padding-left:10px;
+  padding-right: 10px;
+  -webkit-border-radius: 5px;
+  -moz-border-radius: 5px;
+  border-radius: 5px;
+  border: 1px solid #000;
+  font-weight: bold;
+  color: #E0AE6D;
+  background: #F5F5F5;
+
+}
+
+.pairTitle {
+  font-size:inherit;
+  font-weight:bold;
+  margin-right:10px;
+  display:inline-block;
+}
+
+.pairTitle span {
+  font-size:24px;
+}
+
+.pairTitle img {
+  width: 24px;
+  height: 24px;
+}
+
+#changeMarket {
+
+  position: absolute;
+  left:0;
+  top:10px;
+}
+
+#assetPairMarketInfo td {
+  cursor: pointer;
+}
+
+table.buySellForm tbody tr td {
+  vertical-align: middle;
+}
+
+table.buySellForm tr.bold td {
+  font-weight: bolder;
+  color: #f60!important;
+}
+
+div.sellForm {
+  border: 1px solid #ebbdac;
+  background: #ffeddf;
+}
+
+div.buyForm {
+  border: 1px solid #9EC7CF;
+  background: #E9FAF3;
+}
+
+table.buySellForm .number {
+  text-align: right;
+}
+
+table.confirmOrderBox td {
+  padding: 5px !important;
+}
+
+
+div.topPairsGrid a {
+  display:block;
+  float:left;
+  margin: 0;
+  padding:4px;
+  border: 1px solid #CCC;
+  font-size: 12px;
+  line-height: 20px;
+  text-decoration: none;
+  color:#000;
+  width:25%;
+  overflow: hidden;
+  text-align: center;
+}
+
+td.BUY {
+  color:#108710;
+  text-align: center !important;
+}
+
+td.SELL {
+  color:#F00;
+  text-align: center !important;
+}
+
+td.UP {
+  color:#108710;
+}
+
+td.DOWN {
+  color:#F00;
+}
+
+td.number {
+  text-align: right;
+}
+
+tr.centerHeader th {
+  text-align: center !important;
+}
+
+.progression-up {
+  background-color: #E5F7DD;
+}
+
+.progression-down {
+  background-color: #FAEAEE;
+}
+
+.with-open-order {
+  font-weight: bold;
+}
+
+a.top_user_pair.selected_pair {
+  background-color: #57889c !important;
+  color:#FFF !important;
+  font-weight: bold  !important;
 }

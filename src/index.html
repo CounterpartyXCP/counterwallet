@@ -146,11 +146,10 @@
           <li class="">
             <a href="pages/balances.html"><i class="fa fa-lg fa-fw fa-user"></i> <span class="menu-item-parent">My Balances</span></a>
           </li>          
-          <li class="" data-bind="visible: FEATURE_EXCHANGE">
+          <li class="">
             <a href="#"><i class="fa fa-lg fa-fw fa-exchange"></i> <span class="menu-item-parent">Exchange</span></a>
             <ul>
-              <li><a href="pages/view_prices.html"><i class="fa fa-lg fa-fw fa-bar-chart-o"></i> View Market Prices</a></li>
-              <li><a href="pages/buysell.html"><i class="fa fa-lg fa-fw fa-share"></i> Buy &amp; Sell</a></li>
+              <li><a href="pages/view_prices.html"><i class="fa fa-lg fa-fw fa-bar-chart-o"></i> Markets</a></li>
               <li><a href="pages/openorders.html"><i class="fa fa-lg fa-fw fa-circle-o"></i> Open Orders</a></li>
               <li><a href="pages/ordermatches.html"><i class="fa fa-lg fa-fw fa-book"></i> My Order History</a></li>
             </ul>
@@ -477,6 +476,43 @@
                       payments for matched orders where you owe BTC. <b>It is highly recommended you keep this on.</b> If not
                       enabled, you must manually settle any required BTC payments within a 10 block limit (approximately 80-100 minutes).</div>
               </div></section>
+
+              <section><div class="row">
+                <div class="col col-sm-12">
+                  <div class="note txt-color-red">
+                      Don't change followings parameters, unless you know exactly what you are doing.<br />
+                      If you change them, your BTC orders could not match.<br />
+                      These parameters are not persistent.
+                  </div>
+                </div>
+              </section>
+
+              <section><div class="row">
+                <div class="col col-sm-6">Defaut fee provided</div>
+                <div class="col col-sm-6">
+                  <input style="text-align:right" name="defaultBTCFeeProvidedPct" type="text" data-bind="value: defaultBTCFeeProvidedPct">%
+                </div>
+              </section>
+              <section><div class="row">
+                <div class="col col-sm-6">Defaut fee required</div>
+                <div class="col col-sm-6">
+                  <input style="text-align:right" name="defaultBTCFeeRequiredPct" type="text" data-bind="value: defaultBTCFeeRequiredPct">%
+                </div>
+              </section>
+
+              <section><div class="row">
+                <div class="col col-sm-6">Order book minimum fee provided filter</div>
+                <div class="col col-sm-6">
+                  <input style="text-align:right" name="minBTCFeeProvidedPct" type="text" data-bind="value: minBTCFeeProvidedPct">%
+                </div>
+              </section>
+              <section><div class="row">
+                <div class="col col-sm-6">Order book maximum fee required filter</div>
+                <div class="col col-sm-5">
+                  <input style="text-align:right" name="maxBTCFeeRequiredPct" type="text" data-bind="value: maxBTCFeeRequiredPct">%
+                </div>
+              </section>
+
               <section><div class="row">
                 <div class="col col-sm-2">Reset State</div>
                 <div class="col col-sm-10">
