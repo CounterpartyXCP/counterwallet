@@ -84,14 +84,13 @@ function MessageFeed() {
       moveParam['rps_match_id'] = rps_match['id'];
       if (moveParam['move_random_hash']) delete moveParam['move_random_hash'];
 
-      var onSuccess = function(txHash, data, endpoint) {
+      var onSuccess = function(txHash, data, endpoint, addressType, armoryUTx) {
         $.jqlog.debug('onSuccess');
         self.deleteOpenRPS(moveParam['source'], tx_hash);
         if (callback) callback();
       }
 
       var onError = function() {
-
         $.jqlog.debug('RESOLVE RPS ERROR. RETRY.');
 
         self.rpsresolveErrors[rps_match['id']] = self.rpsresolveErrors[rps_match['id']] || 0;

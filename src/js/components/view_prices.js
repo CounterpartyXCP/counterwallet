@@ -251,10 +251,10 @@ function ViewPricesViewModel() {
       expiration: expiration
     }
 
-    var onSuccess = function(txHash, data, endpoint) {
-      bootbox.alert("Your order for <b class='notoQuantityColor'>" + self.sellTotal() + "</b>"
-       + " <b class='notoAssetColor'>" + self.quoteAsset() + "</b> has been placed. "
-       + ACTION_PENDING_NOTICE);
+    var onSuccess = function(txHash, data, endpoint, addressType, armoryUTx) {
+      var message = "Your order for <b class='notoQuantityColor'>" + self.sellTotal() + "</b>"
+       + " <b class='notoAssetColor'>" + self.quoteAsset() + "</b> " + (armoryUTx ? "will be" : "has been") + " placed. ";
+      WALLET.showTransactionCompleteDialog(message + ACTION_PENDING_NOTICE, message, armoryUTx);
        
       //if the order involes selling BTC, then we want to notify the servers of our wallet_id so folks can see if our
       // wallet is "online", in order to determine if we'd be able to best make the necessary BTCpay
@@ -446,10 +446,10 @@ function ViewPricesViewModel() {
       expiration: expiration
     }
 
-    var onSuccess = function(txHash, data, endpoint) {
-      bootbox.alert("Your order for <b class='notoQuantityColor'>" + self.buyTotal() + "</b>"
-       + " <b class='notoAssetColor'>" + self.quoteAsset() + "</b> has been placed. "
-       + ACTION_PENDING_NOTICE);
+    var onSuccess = function(txHash, data, endpoint, addressType, armoryUTx) {
+      var message = "Your order for <b class='notoQuantityColor'>" + self.buyTotal() + "</b>"
+       + " <b class='notoAssetColor'>" + self.baseAsset() + "</b> " + (armoryUTx ? "will be" : "has been") + " placed. ";
+      WALLET.showTransactionCompleteDialog(message + ACTION_PENDING_NOTICE, message, armoryUTx);
        
       //if the order involes selling BTC, then we want to notify the servers of our wallet_id so folks can see if our
       // wallet is "online", in order to determine if we'd be able to best make the necessary BTCpay
@@ -752,8 +752,9 @@ function ViewPricesViewModel() {
       _tx_index: order.tx_index
     }
 
-    var onSuccess = function(txHash, data, endpoint) {
-      bootbox.alert("<b>Your order was canceled successfully.</b> " + ACTION_PENDING_NOTICE);
+    var onSuccess = function(txHash, data, endpoint, addressType, armoryUTx) {
+      WALLET.showTransactionCompleteDialog("<b>Your order was canceled successfully.</b> " + ACTION_PENDING_NOTICE,
+        "<b>Your order will be canceled.</b>", armoryUTx);
     }
 
     WALLET.doTransaction(order.source, "create_cancel", params, onSuccess);

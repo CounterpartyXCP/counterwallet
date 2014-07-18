@@ -51,6 +51,7 @@ var DEFAULT_PREFERENCES = {
   'selected_theme': 'ultraLight',
   'selected_lang': 'en-us',
   'watch_only_addresses': [],
+  'armory_offline_addresses': [],
   'auto_btcpay': true, //default to auto BTC payments being enabled
   'has_accepted_license': false
 };

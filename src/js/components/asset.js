@@ -120,8 +120,9 @@ function AssetViewModel(props) {
                 call_price: self.CALLPRICE ? self.CALLPRICE : null,
                 transfer_destination: null
               },
-              function(txHash, data, endpoint) {
-                bootbox.alert("Your token has been locked and no more units of the token may be issued. " + ACTION_PENDING_NOTICE);
+              function(txHash, data, endpoint, addressType, armoryUTx) {
+                var message = "Your token " + (armoryUTx ? "will be" : "has been") + " locked. No more units of the token may be issued.";
+                WALLET.showTransactionCompleteDialog(message + ACTION_PENDING_NOTICE, message, armoryUTx);
               }
             );
           }

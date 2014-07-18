@@ -1,16 +1,23 @@
 
-function AddressViewModel(key, address, initialLabel) {
+function AddressViewModel(type, key, address, initialLabel, armoryPubKey) {
   //An address on a wallet
+  //type is one of: normal, watch, armory
+  assert(['normal', 'watch', 'armory'].indexOf(type) != -1);
+  assert((type == 'normal' && key) || (type == 'watch' && !key) || (type == 'armory' && !key));
+  assert((type == 'armory' && armoryPubKey) || !armoryPubKey); //only used with armory addresses
+
   var self = this;
   
   self.KEY = key; //  key : the HierarchicalKey bitcore object
-  //^ if null, then this is a WATCH ONLY address
-  self.IS_WATCH_ONLY = !self.KEY;
-  
-  self.FEATURE_DIVIDEND = disabledFeatures.indexOf('dividend') == -1;
-  
+  self.TYPE = type;
   self.ADDRESS = address;
-  self.PUBKEY = key ? key.getPub() : ''; //hex string
+  self.PUBKEY = type == 'armory' ? armoryPubKey : (key ? key.getPub() : ''); //hex string
+
+  //Accessors for ease of use in templates...
+  self.FEATURE_DIVIDEND = disabledFeatures.indexOf('dividend') == -1;
+  self.IS_NORMAL = (type == 'normal');
+  self.IS_WATCH_ONLY = (type == 'watch');
+  self.IS_ARMORY_OFFLINE = (type == 'armory');
 
   self.lastSort = ko.observable('');
   self.lastSortDirection = ko.observable('');
@@ -178,12 +185,13 @@ function AddressViewModel(key, address, initialLabel) {
     DISPLAY_PRIVATE_KEY_MODAL.show(self.ADDRESS);
   }
   
-  self.removeWatch = function() { //possible for watch only addresses only
-    assert(self.IS_WATCH_ONLY, 'Only watch-only addresses can be removed.');
-    WALLET.addresses().remove(self);
+  self.remove = function() { //possible for watch only addresses only
+    assert(self.TYPE != 'normal', 'Only watch-only or armory addresses can be removed.');
+    WALLET.addresses.remove(self);
     
     //update the preferences with this address removed
-    PREFERENCES['watch_only_addresses'].remove(self.ADDRESS);
+    var arr = PREFERENCES[self.TYPE == 'watch' ? 'watch_only_addresses' : 'armory_offline_addresses'];
+    arr = arrayRemove(arr, self.ADDRESS);
     multiAPI("store_preferences", {'wallet_id': WALLET.identifier(), 'preferences': PREFERENCES}, function() {
       checkURL(); //refresh the page without this address listed on it
     });
@@ -195,6 +203,11 @@ function AddressViewModel(key, address, initialLabel) {
 
   self.signTransaction = function() {
     SIGN_TRANSACTION_MODAL.show(self.ADDRESS);
+  }
+  
+  self.armoryBroadcastTransaction = function() {
+    assert(self.IS_ARMORY_OFFLINE);
+    ARMORY_BROADCAST_TRANSACTION.show(self.ADDRESS);
   }
 
   self.createAsset = function() {
@@ -250,11 +263,11 @@ function AddressViewModel(key, address, initialLabel) {
 
     if(reverseSort) {
       self.assets.sort(function(left, right) {
-        return left.rawBalance() == right.rawBalance() ? 0 : (right.rawBalance() < left.rawBalance() ? -1 : 1)
+        return left.normalizedBalance() == right.normalizedBalance() ? 0 : (right.normalizedBalance() < left.normalizedBalance() ? -1 : 1)
       });
     } else {
       self.assets.sort(function(left, right) {
-        return left.rawBalance() == right.rawBalance() ? 0 : (left.rawBalance() < right.rawBalance() ? -1 : 1)
+        return left.normalizedBalance() == right.normalizedBalance() ? 0 : (left.normalizedBalance() < right.normalizedBalance() ? -1 : 1)
       });
     }    
 

@@ -9,6 +9,11 @@ span.addressLabelText {
   cursor:pointer;
 }
 
+textarea.armoryUTxTextarea {
+    font-size: 10px;
+    font-weight: normal;
+}
+
 div#showAssetInfoModal table {
   width:95%;
   margin: 0 auto;

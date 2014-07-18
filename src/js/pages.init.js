@@ -92,6 +92,7 @@ function initBalances() {
   window.DISPLAY_PRIVATE_KEY_MODAL = new DisplayPrivateKeyModalViewModel();
   window.BROADCAST_MODAL = new BroadcastModalViewModel();
   window.SIGN_TRANSACTION_MODAL = new SignTransactionModalViewModel();
+  window.ARMORY_BROADCAST_TRANSACTION = new ArmoryBroadcastTransactionModalViewModel();
   
   ko.applyBindings({}, document.getElementById("gettingStartedNotice"));
   ko.applyBindings({}, document.getElementById("pendingBTCPayNotice"));
@@ -105,6 +106,8 @@ function initBalances() {
   ko.applyBindings(DISPLAY_PRIVATE_KEY_MODAL, document.getElementById("displayPrivateKeyModal"));
   ko.applyBindings(BROADCAST_MODAL, document.getElementById("broadcastModal"));
   ko.applyBindings(SIGN_TRANSACTION_MODAL, document.getElementById("signTransactionModal"));
+  ko.applyBindings(ARMORY_BROADCAST_TRANSACTION, document.getElementById("armoryBroadcastTransactionModal"));
+  
   if(!isBound("left-panel")) {
     ko.applyBindings({
       FEATURE_EXCHANGE: disabledFeatures.indexOf('exchange') == -1,
@@ -136,13 +139,19 @@ function initBalances() {
   
   $(document).ready(function() {
       //Some misc jquery event handlers
-      $('#createAddress, #createWatchOnlyAddress').click(function(e) {
+      $('#createAddress, #createWatchOnlyAddress, #createArmoryOfflineAddress').click(function(e) {
         if(WALLET.addresses().length >= MAX_ADDRESSES) {
           bootbox.alert("You already have the max number of addresses for a single wallet (<b>"
             + MAX_ADDRESSES + "</b>). Please create a new wallet (i.e. different passphrase) for more.");
           return false;
         }
-        CREATE_NEW_ADDRESS_MODAL.show($(this).attr('id') == 'createWatchOnlyAddress');
+
+        var addressType = 'normal';        
+        if($(this).attr('id') == 'createWatchOnlyAddress')
+          addressType = 'watch'; 
+        else if($(this).attr('id') == 'createArmoryOfflineAddress')
+          addressType = 'armory'; 
+        CREATE_NEW_ADDRESS_MODAL.show(addressType);
         e.preventDefault(); //prevent the location hash from changing
       });
       

@@ -17,7 +17,7 @@ ko.validation.rules['assetNameExists'] = {
   validator: function (val, self, callback) {
     failoverAPI("get_issuances", {'filters': {'field': 'asset', 'op': '==', 'value': val}},
       function(data, endpoint) {
-        $.jqlog.debug("asset exists: "+data.length);
+        $.jqlog.debug("Asset exists: " + data.length);
         return data.length ? callback(true) : callback(false) //empty list -> false (valid = false)
       }
     );   
@@ -145,11 +145,13 @@ function CreateAssetModalViewModel() {
         call_price: self.callable() ? parseFloat(self.callPrice()) : null, //float
         transfer_destination: null
       },
-      function(txHash, data, endpoint) {
-        bootbox.alert("Your token <b class='notoAssetColor'>" + self.name() + "</b>"
-          + " has been created.<br/><br/>It will automatically appear under the appropriate address once the network"
+      function(txHash, data, endpoint, addressType, armoryUTx) {
+        var message = "Your token <b class='notoAssetColor'>" + self.name() + "</b> "
+          + (armoryUTx ? "will be created" : "has been created") + ".<br/><br/>"
+          + "It will automatically appear under the appropriate address once the network"
           + " has confirmed it, and your address <b class='notoAddrColor'>" + getAddressLabel(self.address())
-          +  "</b> will be deducted by <b class='notoQuantityColor'>" + ASSET_CREATION_FEE_XCP + "</b> <b class='notoAssetColor'>XCP</b>.");
+          +  "</b> will be deducted by <b class='notoQuantityColor'>" + ASSET_CREATION_FEE_XCP + "</b> <b class='notoAssetColor'>XCP</b>. ";
+        WALLET.showTransactionCompleteDialog(message + ACTION_PENDING_NOTICE, message, armoryUTx);
       }
     );
     self.shown(false);
@@ -230,11 +232,13 @@ function IssueAdditionalAssetModalViewModel() {
         call_price: self.asset().CALLABLE ? self.asset().CALLPRICE : null,
         transfer_destination: null
       },
-      function(txHash, data, endpoint) {
+      function(txHash, data, endpoint, addressType, armoryUTx) {
         self.shown(false);
-        bootbox.alert("You have issued <b class='notoQuantityColor'>" + self.additionalIssue() + "</b> additional"
-          + " quantity on your token <b class='notoAssetColor'>" + self.asset().ASSET + "</b>. "
-          + ACTION_PENDING_NOTICE);
+        
+        var message = "You " + (armoryUTx ? "will be issuing" : "have issued") + " <b class='notoQuantityColor'>"
+          + self.additionalIssue() + "</b> additional" + " quantity on your token <b class='notoAssetColor'>"
+          + self.asset().ASSET + "</b>. ";
+        WALLET.showTransactionCompleteDialog(message + ACTION_PENDING_NOTICE, message, armoryUTx);
       }
     );
     trackEvent('Assets', 'IssueAdditionalAsset');
@@ -298,11 +302,12 @@ function TransferAssetModalViewModel() {
         call_price: self.asset().CALLABLE ? self.asset().CALLPRICE : null,
         transfer_destination: self.destAddress()
       },
-      function(txHash, data, endpoint) {
+      function(txHash, data, endpoint, addressType, armoryUTx) {
         self.shown(false);
-        bootbox.alert("<b class='notoAssetColor'>" + self.asset().ASSET + "</b> has been transferred to "
-          + " <b class='notoAddressColor'>" + self.destAddress() + "</b>. "
-          + ACTION_PENDING_NOTICE);
+        
+        var message = "<b class='notoAssetColor'>" + self.asset().ASSET + "</b> " + (armoryUTx ? "will be" : "has been")
+          + " transferred to <b class='notoAddressColor'>" + self.destAddress() + "</b>. ";
+        WALLET.showTransactionCompleteDialog(message + ACTION_PENDING_NOTICE, message, armoryUTx);
       }
     );
     trackEvent('Assets', 'TransferAsset');
@@ -381,10 +386,12 @@ function ChangeAssetDescriptionModalViewModel() {
         call_price: self.asset().CALLABLE ? self.asset().CALLPRICE : null,
         transfer_destination: null
       },
-      function(txHash, data, endpoint) {
+      function(txHash, data, endpoint, addressType, armoryUTx) {
         self.shown(false);
-        bootbox.alert("The description for token <b class='notoAssetColor'>" + self.asset().ASSET + "</b> has been"
-          + " changed to <b>" + self.newDescription() + "</b>. " + ACTION_PENDING_NOTICE);
+
+        var message = "The description for token <b class='notoAssetColor'>" + self.asset().ASSET + "</b> "
+          + (armoryUTx ? "will be" : "has been") + " changed to <b>" + self.newDescription() + "</b>. ";
+        WALLET.showTransactionCompleteDialog(message + ACTION_PENDING_NOTICE, message, armoryUTx);
       }
     );
     trackEvent('Assets', 'ChangeAssetDescription');
@@ -529,11 +536,13 @@ function PayDividendModalViewModel() {
         asset: self.assetData().asset,
         dividend_asset: self.selectedDividendAsset()
       },
-      function(txHash, data, endpoint) {
+      function(txHash, data, endpoint, addressType, armoryUTx) {
         self.shown(false);
-        bootbox.alert("You have paid a distribution of <b class='notoQuantityColor'>" + self.quantityPerUnit() + "</b>"
-          + " <b class='notoAssetColor'>" + self.selectedDividendAsset() + "</b> per outstanding unit to holders of token"
-          + " <b class='notoAssetColor'>" + self.assetData().asset + "</b>. " + ACTION_PENDING_NOTICE);
+        
+        var message = "You " + (armoryUTx ? "will be paying" : "have paid") + " a distribution of <b class='notoQuantityColor'>"
+          + self.quantityPerUnit() + "</b>" + " <b class='notoAssetColor'>" + self.selectedDividendAsset()
+          + "</b> per outstanding unit to holders of token" + " <b class='notoAssetColor'>" + self.assetData().asset + "</b>. ";
+        WALLET.showTransactionCompleteDialog(message + ACTION_PENDING_NOTICE, message, armoryUTx);
       }
     );
     trackEvent('Assets', 'PayDividend');
@@ -680,12 +689,14 @@ function CallAssetModalViewModel() {
         fraction: Decimal.round(new Decimal(self.percentageToCall()).div(100), 8, Decimal.MidpointRounding.ToEven).toFloat(),
         asset: self.asset()
       },
-      function(txHash, data, endpoint) {
+      function(txHash, data, endpoint, addressType, armoryUTx) {
         self.shown(false);
-        bootbox.alert("You have called back <b class='notoQuantityColor'>" + self.percentageToCall() + "%</b>"
+
+        var message = "You " + (armoryUTx ? "will be calling back" : "have called back")
+          + " <b class='notoQuantityColor'>" + self.percentageToCall() + "%</b>"
           + " of token <b class='notoAssetColor'>" + self.asset() + "</b>"
-          + " for the price of <b class='notoQuantityColor'>" + self.totalXCPPay() + "</b> <b class='notoAssetColor'>XCP</b>. "
-          + ACTION_PENDING_NOTICE);
+          + " for the price of <b class='notoQuantityColor'>" + self.totalXCPPay() + "</b> <b class='notoAssetColor'>XCP</b>. ";
+        WALLET.showTransactionCompleteDialog(message + ACTION_PENDING_NOTICE, message, armoryUTx);
       }
     );
     trackEvent('Assets', 'CallAsset');

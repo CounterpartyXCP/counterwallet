@@ -517,8 +517,9 @@ function FeedBrowserViewModel() {
       target_value: self.targetValue(),
       leverage: self.leverage()
     }
-    var onSuccess = function(txHash, data, endpoint) {
-      bootbox.alert("<b>Your bet were sent successfully.</b> " + ACTION_PENDING_NOTICE);
+    var onSuccess = function(txHash, data, endpoint, addressType, armoryUTx) {
+      var message = "<b>Your bet " + (armoryUTx ? "will be" : "was") + self.wager() + " sent. ";
+      WALLET.showTransactionCompleteDialog(message + ACTION_PENDING_NOTICE, message, armoryUTx);
     }
     WALLET.doTransaction(self.sourceAddress(), "create_bet", params, onSuccess);
   }
@@ -690,8 +691,9 @@ function OpenBetsViewModel() {
       _tx_index: bet.tx_index
     }
 
-    var onSuccess = function(txHash, data, endpoint) {
-      bootbox.alert("<b>Your bet was canceled successfully.</b> " + ACTION_PENDING_NOTICE);
+    var onSuccess = function(txHash, data, endpoint, addressType, armoryUTx) {
+      var message = "<b>Your bet " + (armoryUTx ? "will be" : "was") + self.wager() + " cancelled. ";
+      WALLET.showTransactionCompleteDialog(message + ACTION_PENDING_NOTICE, message, armoryUTx);
     }
 
     WALLET.doTransaction(bet.address, "create_cancel", params, onSuccess);

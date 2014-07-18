@@ -66,15 +66,31 @@ function ChangeAddressLabelModalViewModel() {
 }
 
 
+ko.validation.rules['canGetAddressPubKey'] = {
+      async: true,
+      message: 'Can\'t find the public key for this address. Please make a transaction with it and try again.',
+      validator: function (val, self, callback) {
+        if(self.addressType() != 'armory') return true; //only necessary for armory offline addresses
+        failoverAPI("get_pubkey_for_address", {'address': val},
+          function(data, endpoint) {
+            self.armoryPubKey(data);
+            return data ? callback(true) : callback(false)
+          }
+        );   
+      }
+    };
+
 function CreateNewAddressModalViewModel() {
   var self = this;
   self.shown = ko.observable(false);
 
-  self.forWatchOnly = ko.observable(null);
+  self.addressType = ko.observable(null); //addressType is one of: normal, watch, or armory
+  self.armoryPubKey = ko.observable(null); //only set with armory offline addresses
   self.watchAddress = ko.observable('').extend({
+    isValidBitcoinAddressIfSpecified: self,
     validation: [{
       validator: function (val, self) {
-        return self.forWatchOnly() ? val : true;
+        return (self.addressType() == 'watch' || self.addressType() == 'armory') ? val : true;
       },
       message: 'This field is required.',
       params: self
@@ -85,8 +101,8 @@ function CreateNewAddressModalViewModel() {
       },
       message: 'This address is already in your wallet.',
       params: self
-    }],    
-    isValidBitcoinAddressIfSpecified: self,
+    }],
+    canGetAddressPubKey: self
   });
   self.description = ko.observable('').extend({
     required: true,
@@ -105,17 +121,25 @@ function CreateNewAddressModalViewModel() {
   });
   
   self.dispWindowTitle = ko.computed(function() {
-    return self.forWatchOnly() ? 'Add Watch Address' : 'Create New Address';
+    return self.addressType() == 'normal' ? 'Create New Address' : (
+      self.addressType() == 'watch' ? 'Add Watch Address' : 'Add Armory Offline Address');
   }, self);
 
   self.resetForm = function() {
-    self.forWatchOnly(null);
+    self.addressType(null);
     self.watchAddress('');
     self.description('');
     self.validationModel.errors.showAllMessages(false);
   }
   
   self.submitForm = function() {
+    if(self.addressType() == 'armory' && self.watchAddress.isValidating()) {
+      setTimeout(function() { //wait a bit and call again
+        self.submitForm();
+      }, 50);
+      return;
+    }
+    
     if (!self.validationModel.isValid()) {
       self.validationModel.errors.showAllMessages();
       return false;
@@ -126,20 +150,23 @@ function CreateNewAddressModalViewModel() {
 
   self.doAction = function() {
     var newAddress = null;
-
-    if(!self.forWatchOnly()) {
-      newAddress = WALLET.addAddress();
+    
+    if(self.addressType() == 'normal') {
+      newAddress = WALLET.addAddress(self.addressType());
     } else {
-      newAddress = self.watchAddress();
-      WALLET.addWatchOnlyAddress(newAddress);
+      newAddress = self.watchAddress(); //watch or armory
+      newAddress = WALLET.addAddress(self.addressType(), newAddress, self.armoryPubKey());
     }
 
     //update PREFs
     var newAddressHash = hashToB64(newAddress);
-    if(!self.forWatchOnly()) {
+    if(self.addressType() == 'normal') {
       PREFERENCES['num_addresses_used'] += 1;
-    } else {
+    } else if(self.addressType() == 'watch') {
       PREFERENCES['watch_only_addresses'].push(newAddress); //can't use the hash here, unfortunately
+    } else {
+      assert(self.addressType() == 'armory');
+      PREFERENCES['armory_offline_addresses'].push({'address': newAddress, 'pubkey_hex': self.armoryPubKey()}); //can't use the hash here, unfortunately
     }
     var sanitizedDescription = self.description().stripTags();
     PREFERENCES['address_aliases'][newAddressHash] = sanitizedDescription;
@@ -151,8 +178,8 @@ function CreateNewAddressModalViewModel() {
     multiAPI("store_preferences", {'wallet_id': WALLET.identifier(), 'preferences': PREFERENCES}, function(data, endpoint) {
       self.shown(false);
       
-      if(self.forWatchOnly()) {
-        //If we created a watch address, refresh the counterparty balances with this new address
+      if(self.addressType() != 'normal') {
+        //If we created a watch or armory address, refresh the counterparty balances with this new address
         //btc address balances will refresh on the refresh of the balances page itself
         setTimeout(function() { WALLET.refreshCounterpartyBalances([newAddress], checkURL)});
       } else {
@@ -160,15 +187,17 @@ function CreateNewAddressModalViewModel() {
         setTimeout(checkURL, 800); //necessary to use setTimeout so that the modal properly hides before we refresh the page
       }
     });
-    trackEvent('Balances', self.forWatchOnly() ? 'CreateNewWatchAddress' : 'CreateNewAddress');
+    trackEvent('Balances', self.addressType() == 'normal' ? 'CreateNewAddress' : (
+      self.addressType() == 'watch' ? 'CreateNewWatchAddress' : 'CreateNewArmoryOfflineAddress'));
   }
   
-  self.show = function(forWatchOnly, resetForm) {
+  self.show = function(addressType, resetForm) {
     if(typeof(resetForm)==='undefined') resetForm = true;
     if(resetForm) self.resetForm();
-    self.forWatchOnly(forWatchOnly);
+    self.addressType(addressType);
     self.shown(true);
-    trackDialogShow(forWatchOnly ? 'CreateNewWatchAddress' : 'CreateNewAddress');
+    trackDialogShow(self.addressType() == 'normal' ? 'CreateNewAddress' : (
+      self.addressType() == 'watch' ? 'CreateNewWatchAddress' : 'CreateNewArmoryOfflineAddress'));
   }  
 
   self.hide = function() {
@@ -267,12 +296,13 @@ function SendModalViewModel() {
         asset: self.asset(),
         _divisible: self.divisible()
       },
-      function(txHash, data, endpoint) {
-        bootbox.alert("<b>Your funds were sent successfully.</b> " + ACTION_PENDING_NOTICE);
+      function(txHash, data, endpoint, addressType, armoryUTx) {
+        var message = "<b>Your funds " + (armoryUTx ? "will be" : "were") + " sent. ";
+        WALLET.showTransactionCompleteDialog(message + ACTION_PENDING_NOTICE, message, armoryUTx);
       }
     );
     self.shown(false);
-    trackEvent('Balances', 'Send');
+    trackEvent('Balances', 'Send', self.asset());
   }
   
   self.show = function(fromAddress, asset, rawBalance, isDivisible, resetForm) {
@@ -1193,12 +1223,14 @@ function TestnetBurnModalViewModel() {
       { source: self.address(),
         quantity: denormalizeQuantity(self.btcBurnQuantity()),
       },
-      function(txHash, data, endpoint) {
+      function(txHash, data, endpoint, addressType, armoryUTx) {
         self.shown(false);
-        bootbox.alert("You have burned <b class='notoQuantityColor'>" + self.btcBurnQuantity() + "</b>"
+
+        var message = "You " + (armoryUTx ? "will be burning" : "have burned") + " <b class='notoQuantityColor'>" + self.btcBurnQuantity() + "</b>"
           + " <b class='notoAssetColor'>BTC</b> for approximately"
           + " <b class='notoQuantityColor'>" + self.quantityXCPToBeCreated() + "</b>"
-          + " <b class='notoAssetColor'>XCP</b>. " + ACTION_PENDING_NOTICE);
+          + " <b class='notoAssetColor'>XCP</b>. ";
+        WALLET.showTransactionCompleteDialog(message + ACTION_PENDING_NOTICE, message, armoryUTx);
       }
     );
     trackEvent('Balances', 'TestnetBurn');
@@ -1338,9 +1370,10 @@ function BroadcastModalViewModel() {
     }
     //$.jqlog.debug(params); 
     
-    var onSuccess = function(txHash, data, endpoint) {
+    var onSuccess = function(txHash, data, endpoint, addressType, armoryUTx) {
       self.hide();
-      bootbox.alert("Broadcast done.");
+      WALLET.showTransactionCompleteDialog("Broadcast transmitted. " + ACTION_PENDING_NOTICE,
+        "Broadcast to be transmitted", armoryUTx);
     }
 
     var onError = function(jqXHR, textStatus, errorThrown, endpoint) {
@@ -1371,6 +1404,7 @@ function SignTransactionModalViewModel() {
     self.address(null);
     self.unsignedTx('');
     self.signedTx('');
+    self.validTx(false);
     self.validationModel.errors.showAllMessages(false);
   }
   
@@ -1416,5 +1450,62 @@ function SignTransactionModalViewModel() {
     }
   }
 }
+
+function ArmoryBroadcastTransactionModalViewModel() {
+  var self = this;
+  self.shown = ko.observable(false);
+  self.address = ko.observable(null); //address string, not an Address object
+  self.signedTx = ko.observable('').extend({
+    required: true,
+  });
+  
+  self.validationModel = ko.validatedObservable({
+    signedTx: self.signedTx
+  });
+  
+  self.resetForm = function() {
+    self.address(null);
+    self.signedTx('');
+    self.validationModel.errors.showAllMessages(false);
+  }
+  
+  self.show = function(address, resetForm) {
+    if(typeof(resetForm)==='undefined') resetForm = true;
+    if(resetForm) self.resetForm();
+    self.address(address);
+    self.shown(true);
+    trackDialogShow('ArmoryBroadcastTransaction');
+  }  
+
+  self.hide = function() {
+    self.shown(false);
+  }
+  
+  self.submitForm = function() {
+    if (!self.validationModel.isValid()) {
+      self.validationModel.errors.showAllMessages();
+      return false;
+    }    
+    //data entry is valid...submit to the server
+    $('#armoryBroadcastTransactionModal form').submit();
+  }
+
+  self.doAction = function() {
+    var onSuccess = function(txHash, data, endpoint, addressType, armoryUTx) {
+      self.hide();
+      var message = "Transaction successful broadcast!<br/><br/>Transaction ID: " + txHash;
+      WALLET.showTransactionCompleteDialog(message, message, armoryUTx);
+    }
+
+    WALLET.doTransaction(self.address(), "broadcast_armory_tx", {'signed_tx_ascii': self.signedTx()},
+      function(txHash, data, endpoint, addressType, armoryUTx) { //Now broadcast the txn!
+        WALLET.doTransaction(self.address(), "broadcast_tx", {'signed_tx_hex': data}, onSuccess);
+      }
+    );
+    trackEvent('Balances', 'ArmoryBroadcastTransaction');
+  }
+}
+
+
 /*NOTE: Any code here is only triggered the first time the page is visited. Put JS that needs to run on the
   first load and subsequent ajax page switches in the .html <script> tag*/

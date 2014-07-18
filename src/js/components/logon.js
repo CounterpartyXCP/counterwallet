@@ -194,7 +194,7 @@ function LogonViewModel() {
   
   self.genAddress = function(mustSavePreferencesToServer) {
     var i = WALLET.addresses().length;
-    var address = WALLET.addAddress();
+    var address = WALLET.addAddress('normal');
     var addressHash = hashToB64(address);
 
     if(PREFERENCES.address_aliases[addressHash] === undefined) { //no existing label. we need to set one
@@ -225,15 +225,15 @@ function LogonViewModel() {
   self.openWalletPt3 = function(mustSavePreferencesToServer) {
     var i = null;
     
-    //add in the watch only addresses
-    if(PREFERENCES['watch_only_addresses'] === undefined) {
-      PREFERENCES['watch_only_addresses'] = [];
-      mustSavePreferencesToServer = true;
+    //add in the armory and watch only addresses
+    for(i=0; i < PREFERENCES['armory_offline_addresses'].length; i++) {
+      WALLET.addAddress('armory',
+        PREFERENCES['armory_offline_addresses'][i]['address'],
+        PREFERENCES['armory_offline_addresses'][i]['pubkey_hex']);
     }
     for(i=0; i < PREFERENCES['watch_only_addresses'].length; i++) {
-      WALLET.addWatchOnlyAddress(PREFERENCES['watch_only_addresses'][i]);
+      WALLET.addAddress('watch', PREFERENCES['watch_only_addresses'][i]);
     }
-    
     /* hide the login div and show the other divs */
     $('#logon').hide();
     $('#header').show();

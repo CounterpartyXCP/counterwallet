@@ -53,8 +53,9 @@ function OpenOrdersViewModel() {
       _tx_index: order.tx_index
     }
 
-    var onSuccess = function(txHash, data, endpoint) {
-      bootbox.alert("<b>Your order was canceled successfully.</b> " + ACTION_PENDING_NOTICE);
+    var onSuccess = function(txHash, data, endpoint, addressType, armoryUTx) {
+      WALLET.showTransactionCompleteDialog("<b>Your order was canceled successfully.</b> " + ACTION_PENDING_NOTICE,
+        "<b>Your order will be cancelled.</b>", armoryUTx);
     }
 
     WALLET.doTransaction(order.source, "create_cancel", params, onSuccess);

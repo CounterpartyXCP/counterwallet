@@ -97,9 +97,12 @@ function WaitingBTCPayViewModel(btcPayData) {
             callback: function() {
               //complete the BTCpay. Start by getting the current BTC balance for the address
               WALLET.doTransaction(self.BTCPAY_DATA['myAddr'], "create_btcpay",
-                { order_match_id: self.BTCPAY_DATA['orderMatchID'], source: self.BTCPAY_DATA['myAddr'], destBtcPay: self.BTCPAY_DATA['btcDestAddr'] },
-                function(txHash, data, endpoint) { 
-                  //remove the BTC payment from the notifications
+                { order_match_id: self.BTCPAY_DATA['orderMatchID'],
+                  source: self.BTCPAY_DATA['myAddr'],
+                  destBtcPay: self.BTCPAY_DATA['btcDestAddr']
+                },
+                function(txHash, data, endpoint, addressType, armoryUTx) {
+                  //remove the BTC payment from the notifications (even armory tx at this point...)
                   WAITING_BTCPAY_FEED.remove(self.BTCPAY_DATA['orderMatchID']);
                 }
               );
@@ -344,14 +347,15 @@ function UpcomingBTCPayFeedViewModel() {
          //user has the sufficient balance
         WALLET.doTransaction(btcPayData['myAddr'], "create_btcpay",
           { order_match_id: btcPayData['orderMatchID'], source: btcPayData['myAddr'], destBtcPay: btcPayData['btcDestAddr'] },
-          function(txHash, data, endpoint) {
+          function(txHash, data, endpoint, addressType, armoryUTx) {
             //notify the user of the automatic BTC payment
-            bootbox.alert("Automatic <b class='notoAssetColor'>BTC</b> payment of "
+            var message = "Automatic <b class='notoAssetColor'>BTC</b> payment of "
               + "<b class='notoQuantityColor'>" + btcPayData['btcQuantity'] + "</b>"
               + " <b class='notoAssetColor'>BTC</b> made from address"
               + " <b class='notoAddrColor'>" + btcPayData['myAddr'] + "</b> for"
               + " <b class='notoQuantityColor'>" + btcPayData['otherOrderQuantity'] + "</b> "
-              + " <b class='notoAssetColor'>" + btcPayData['otherOrderAsset'] + "</b>. " + ACTION_PENDING_NOTICE);
+              + " <b class='notoAssetColor'>" + btcPayData['otherOrderAsset'] + "</b>. ";
+            WALLET.showTransactionCompleteDialog(message + ACTION_PENDING_NOTICE, message, armoryUTx);
           }, function() {
             WAITING_BTCPAY_FEED.add(btcPayData);
             bootbox.alert("There was an error processing an automatic <b class='notoAssetColor'>BTC</b> payment."
@@ -363,7 +367,7 @@ function UpcomingBTCPayFeedViewModel() {
 
         //The user doesn't have the necessary balance on the address... let them know and add the BTC as pending
         WAITING_BTCPAY_FEED.add(btcPayData);
-        bootbox.alert("A payment on a matched order for "
+        WALLET.showTransactionCompleteDialog("A payment on a matched order for "
           + "<b class='notoQuantityColor'>" + btcPayData['btcQuantity'] + "</b>"
           + "<b class='notoAssetColor'>BTC</b> is required, however, the address that made the order ("
           + "<b class='notoAddrColor'>" + getAddressLabel(btcPayData['myAddr']) + "</b>"
@@ -398,13 +402,14 @@ function UpcomingBTCPayFeedViewModel() {
             callback: function() {
               WALLET.doTransaction(btcPayData['myAddr'], "create_btcpay",
                 { order_match_id: btcPayData['orderMatchID'], source: btcPayData['myAddr'], destBtcPay: btcPayData['btcDestAddr'] },
-                function(txHash, data, endpoint) {
+                function(txHash, data, endpoint, addressType, armoryUTx) {
                   //notify the user of the automatic BTC payment
-                  bootbox.alert("Automatic <b class='notoAssetColor'>BTC</b> payment of"
-                    + " <b class='notoQuantityColor'>" + btcPayData['btcQuantity'] + "</b> <b class='notoAssetColor'>BTC</b>"
-                    + " made from address <b class='notoAddressColor'>" + getAddressLabel(btcPayData['myAddr']) + "</b>"
+                  var message = "Automatic <b class='notoAssetColor'>BTC</b> payment of"
+                    + " <b class='notoQuantityColor'>" + btcPayData['btcQuantity'] + "</b> <b class='notoAssetColor'>BTC</b> "
+                    + (armoryUTx ? 'to be made' : 'made') + " from address <b class='notoAddressColor'>" + getAddressLabel(btcPayData['myAddr']) + "</b>"
                     + " for <b class='notoQuantityColor'>" + btcPayData['otherOrderQuantity'] + "</b>"
-                    + " <b class='notoAssetColor'>" + btcPayData['otherOrderAsset'] + "</b>. " + ACTION_PENDING_NOTICE);
+                    + " <b class='notoAssetColor'>" + btcPayData['otherOrderAsset'] + "</b>. ";
+                  WALLET.showTransactionCompleteDialog(message + ACTION_PENDING_NOTICE, message, armoryUTx);
                 }, function() {
                   WAITING_BTCPAY_FEED.add(btcPayData);
                   bootbox.alert("There was an error processing an automatic <b class='notoAssetColor'>BTC</b> payment."

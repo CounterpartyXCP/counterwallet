@@ -13,44 +13,49 @@ function WalletViewModel() {
   self.isSellingBTC = ko.observable(false); //updated by the btcpay feed
   self.isOldWallet = ko.observable(false);
   
-  self.addAddress = function() {
-    //adds a key to the wallet, making a new address object on the wallet in the process
-    //(assets must still be attached to this address, with updateBalances() or other means...)
-    //also, a label should already exist for the address in PREFERENCES.address_aliases by the time this is called
-
-    //derive an address from the key (for the appropriate network)
-    var i = self.addresses().length;
+  self.addAddress = function(type, address, armoryPubKey) {
+    assert(['normal', 'watch', 'armory'].indexOf(type) != -1);
+    assert((type == 'normal' && !address) || (address));
+    assert((type == 'armory' && armoryPubKey) || !armoryPubKey); //only used with armory addresses
     
-    // m : masterkery / 0' : first private derivation / 0 : external account / i : index
-    var key = self.BITCOIN_WALLET.getAddressKey(i);
-    var address = key.getAddress();
-
-
-    //Make sure this address doesn't already exist in the wallet (sanity check)
-    assert(!self.getAddressObj(address), "Cannot addAddress: address already exists in wallet!");
-    //see if there's a label already for this address that's stored in PREFERENCES, and use that if so
-    var addressHash = hashToB64(address);
-    //^ we store in prefs by a hash of the address so that the server data (if compromised) cannot reveal address associations
-    var label = PREFERENCES.address_aliases[addressHash] || "My Address #" + (i + 1);
-    //^ an alias is made when a watch address is made, so this should always be found
-
-    self.addresses.push(new AddressViewModel(key, address, label)); //add new
-    $.jqlog.debug("Wallet address added: " + address + " -- hash: " + addressHash + " -- label: " + label + " -- index: " + i);
+    if(type == 'normal') {
+      //adds a key to the wallet, making a new address object on the wallet in the process
+      //(assets must still be attached to this address, with updateBalances() or other means...)
+      //also, a label should already exist for the address in PREFERENCES.address_aliases by the time this is called
+  
+      //derive an address from the key (for the appropriate network)
+      var i = self.addresses().length;
+      
+      // m : masterkery / 0' : first private derivation / 0 : external account / i : index
+      var key = self.BITCOIN_WALLET.getAddressKey(i);
+      var address = key.getAddress();
+  
+      //Make sure this address doesn't already exist in the wallet (sanity check)
+      assert(!self.getAddressObj(address), "Cannot addAddress: address already exists in wallet!");
+      //see if there's a label already for this address that's stored in PREFERENCES, and use that if so
+      var addressHash = hashToB64(address);
+      //^ we store in prefs by a hash of the address so that the server data (if compromised) cannot reveal address associations
+      var label = PREFERENCES.address_aliases[addressHash] || "My Address #" + (i + 1);
+      //^ an alias is made when a watch address is made, so this should always be found
+  
+      self.addresses.push(new AddressViewModel(type, key, address, label)); //add new
+      $.jqlog.debug("Wallet address added: " + address + " -- hash: "
+        + addressHash + " -- label: " + label + " -- index: " + i);
+    } else {
+      //adds a watch only address to the wallet
+      //a label should already exist for the address in PREFERENCES.address_aliases by the time this is called
+      assert(!self.getAddressObj(address), "Cannot addAddress: watch/armory address already exists in wallet!");
+      var addressHash = hashToB64(address);
+      var label = PREFERENCES.address_aliases[addressHash] || "UNKNOWN LABEL";
+  
+      self.addresses.push(new AddressViewModel(type, null, address, label, armoryPubKey)); //add new
+      $.jqlog.debug("Watch-only or armory wallet address added: " + address + " -- hash: "
+        + addressHash + " -- label: " + label + " -- armoryPubKey: " + armoryPubKey);
+    }
 
     return address;
   }
   
-  self.addWatchOnlyAddress = function(address) {
-    //adds a watch only address to the wallet
-    //a label should already exist for the address in PREFERENCES.address_aliases by the time this is called
-    assert(!self.getAddressObj(address), "Cannot addWatchOnlyAddress: address already exists in wallet!");
-    var addressHash = hashToB64(address);
-    var label = PREFERENCES.address_aliases[addressHash] || "UNKNOWN LABEL";
-
-    self.addresses.push(new AddressViewModel(null, address, label)); //add new
-    $.jqlog.debug("Watch-only wallet address added: " + address + " -- hash: " + addressHash + " -- label: " + label);
-  }
-
   self.getAddressesList = function(withLabel) {
     if(typeof(withLabel)==='undefined') withLabel = false;
     var addresses = [];
@@ -82,7 +87,7 @@ function WalletViewModel() {
   }
   
   self.getAddressObj = function(address) {
-    //given an address string, return a reference to the cooresponding AddressViewModel object
+    //given an address string, return a reference to the corresponding AddressViewModel object
     return ko.utils.arrayFirst(self.addresses(), function(a) {
       return a.ADDRESS == address;
     });
@@ -474,16 +479,21 @@ function WalletViewModel() {
   }
   
   self.doTransaction = function(address, action, data, onSuccess, onError) {
+    var addressObj = WALLET.getAddressObj(address);
+    
+    //should not ever be a watch only wallet
+    assert(!addressObj.IS_WATCH_ONLY);
+    
     //specify the pubkey for a multisig tx
     assert(data['encoding'] === undefined);
     assert(data['pubkey'] === undefined);
     data['encoding'] = 'multisig';
-    data['pubkey'] = WALLET.getAddressObj(address).PUBKEY;
+    data['pubkey'] = addressObj.PUBKEY;
     //find and specify the verifyDestAddr
 
     if (ALLOW_UNCONFIRMED_INPUTS && supportUnconfirmedChangeParam(action)) {
       data['allow_unconfirmed_inputs'] = true;
-    }    
+    }
     
     //hacks for passing in some data that should be sent to PENDING_ACTION_FEED.add(), but not the create_ API call
     // here we only have to worry about what we create a txn for (so not order matches, debits/credits, etc)
@@ -514,26 +524,48 @@ function WalletViewModel() {
         $.jqlog.debug("TXN CREATED. numTotalEndpoints="
           + numTotalEndpoints + ", numConsensusEndpoints="
           + numConsensusEndpoints + ", RAW HEX=" + unsignedTxHex);
-
-        WALLET.signAndBroadcastTx(address, unsignedTxHex, function(txHash, endpoint) {
-          //register this as a pending transaction
-          var category = action.replace('create_', '') + 's'; //hack
-          if (category == 'rpss') category = 'rps';
-          if(data['source'] === undefined) data['source'] = address;
-          if(action == 'create_order') {
-            data['_give_divisible'] = extra1;
-            data['_get_divisible'] = extra2;
-          } else if(action == 'create_cancel') {
-            data['_type'] = extra1;
-            data['_tx_index'] = extra2;
-          } else if(action == 'create_send') {
-            data['_divisible'] = extra1;
-          }
-          PENDING_ACTION_FEED.add(txHash, category, data);
           
-          return onSuccess ? onSuccess(txHash, data, endpoint) : null;
-        }, onError, verifyDestAddr);
+        //if the address is an armory wallet, then generate an offline transaction to get signed
+        if(addressObj.IS_ARMORY_OFFLINE) {
+          multiAPIConsensus("create_armory_utx", {'unsigned_tx_hex': unsignedTxHex, 'public_key_hex': addressObj.PUBKEY},
+            function(asciiUTx, numTotalEndpoints, numConsensusEndpoints) {
+              //DO not add to pending action feed (it will be added automatically via zeroconf when the p2p network sees the tx)
+              $.jqlog.debug("ARMORY UTX GENERATED: " + asciiUTx);
+              return onSuccess ? onSuccess(null, data, null, 'armory', asciiUTx) : null;
+            }
+          );
+          return;
+        } else {
+          WALLET.signAndBroadcastTx(address, unsignedTxHex, function(txHash, endpoint) {
+            //register this as a pending transaction
+            var category = action.replace('create_', '') + 's'; //hack
+            if (category == 'rpss') category = 'rps';
+            if(data['source'] === undefined) data['source'] = address;
+            if(action == 'create_order') {
+              data['_give_divisible'] = extra1;
+              data['_get_divisible'] = extra2;
+            } else if(action == 'create_cancel') {
+              data['_type'] = extra1;
+              data['_tx_index'] = extra2;
+            } else if(action == 'create_send') {
+              data['_divisible'] = extra1;
+            }
+            PENDING_ACTION_FEED.add(txHash, category, data);
+            
+            return onSuccess ? onSuccess(txHash, data, endpoint, 'normal', null) : null;
+          }, onError, verifyDestAddr);
+        }
     });
+  }
+  
+  self.showTransactionCompleteDialog = function(text, armoryText, armoryUTx) {
+    if(armoryUTx) {
+      bootbox.alert((armoryText || text) + "<br/><br/>To complete the transaction, please copy over and sign the text below on your"
+        + " offline Armory system, then bring back to Counterwallet to broadcast:</br>"
+        + "<textarea class=\"form-control armoryUTxTextarea\" rows=\"20\">" + armoryUTx + "</textarea>");
+    } else {
+      bootbox.alert(text);
+    }
   }
 }
 

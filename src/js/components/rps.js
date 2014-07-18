@@ -257,16 +257,19 @@ function RpsViewModel() {
       expiration: parseInt(self.expiration()),
       move_random_hash: moveParams['move_random_hash']
     }
-    var onSuccess = function(txHash, data, endpoint) {
+    var onSuccess = function(txHash, data, endpoint, addressType, armoryUTx) {
       MESSAGE_FEED.setOpenRPS(self.sourceAddress(), txHash, moveParams);
 
       var warn = '<b class="errorColor">Please stay logged in so that the game(s) can be properly resolved.' 
       warn += ' Once your game has been matched, it will take one more block for the game to complete.'
       warn += ' Be careful, if you close the Wallet before the end of the game you can lose money!!</b><br />';
-      message = "<b>You are played " + self.wager() + " XCP on " + self.move().name.toUpperCase() + ".</b> " + warn + ACTION_PENDING_NOTICE;
+      
+      var message = "<b>You " + (armoryUTx ? "will be placing" : "have placed") + self.wager() + " XCP on "
+        + self.move().name.toUpperCase() + ".</b> " + warn;
+      
       self.init();
-      bootbox.alert(message);
       self.pendingRPS(true);
+      WALLET.showTransactionCompleteDialog(message + ACTION_PENDING_NOTICE, message, armoryUTx);
     }
     WALLET.doTransaction(self.sourceAddress(), "create_rps", param, onSuccess);
     return false; 

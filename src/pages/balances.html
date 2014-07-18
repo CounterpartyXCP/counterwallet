@@ -15,6 +15,9 @@
                 <a id="createAddress" href="#">Create Regular Address</a>
             </li>
             <li>
+                <a id="createArmoryOfflineAddress" href="#">Create Armory Offline Address</a>
+            </li>
+            <li>
                 <a id="createWatchOnlyAddress" href="#">Create Watch Only Address</a>
             </li>
         </ul>
@@ -87,26 +90,28 @@
             <span class="widget-icon"> <i class="fa" data-bind="css: { 'fa-arrow-circle-o-right': !IS_WATCH_ONLY, 'fa-eye': IS_WATCH_ONLY }"></i> </span>
             <h3 class="jarviswidget-ctrls">
                 <span class="addressLabelText" href="#" data-bind="text: label, click: changeLabel"></span>
-                <div data-bind="visible: assetFilter()" class="label label-warning margin-left-5">Filtered</div>
-                <div data-bind="visible: lastSort()" class="label label-info margin-left-5">Sorted</div>
-                <div data-bind="visible: IS_WATCH_ONLY" class="label label-info margin-left-5">Watch Only</div>
+                <div data-bind="visible: assetFilter()" class="label label-warning margin-left-5"><i class="fa fa-filter"></i>&nbsp;Filtered</div>
+                <div data-bind="visible: lastSort()" class="label label-info margin-left-5"><i class="fa fa-sort-amount-asc"></i>&nbsp;Sorted</div>
+                <div data-bind="visible: IS_WATCH_ONLY" class="label label-success margin-left-5"><i class="fa fa-eye"></i>&nbsp;Watch Only</div>
+                <div data-bind="visible: IS_ARMORY_OFFLINE" class="label label-success margin-left-5"><i class="fa fa-lock"></i>&nbsp;Armory Offline</div>
             </h3>
             <div class="widget-toolbar">
               <div class="btn-group">
                 <button class="btn dropdown-toggle btn-xs btn-primary" data-toggle="dropdown"><i class="fa fa-bars"></i> Address Actions <i class="fa fa-caret-down"></i></button>                
                 <ul class="dropdown-menu pull-right">
                   <li><a data-bind="click: showQRCode" href="#">Show QR Code</a></li>
-                  <li><a data-bind="click: showPrivateKey" href="#">Show Private Key</a></li>
-                  <li data-bind="visible: !IS_WATCH_ONLY"><a data-bind="click: signMessage" href="#">Sign Message</a></li>  
-                  <li data-bind="visible: !IS_WATCH_ONLY"><a data-bind="click: signTransaction" href="#">Sign Transaction</a></li>               
-                  <li data-bind="visible: IS_WATCH_ONLY"><a data-bind="click: removeWatch" href="#">Remove Address</a></li>
+                  <li data-bind="visible: IS_NORMAL"><a data-bind="click: showPrivateKey" href="#">Show Private Key</a></li>
+                  <li data-bind="visible: IS_NORMAL"><a data-bind="click: signMessage" href="#">Sign Message</a></li>  
+                  <li data-bind="visible: IS_NORMAL"><a data-bind="click: signTransaction" href="#">Sign Transaction</a></li>               
+                  <li data-bind="visible: IS_ARMORY_OFFLINE"><a data-bind="click: armoryBroadcastTransaction" href="#">Broadcast Transaction</a></li>               
+                  <li data-bind="visible: !IS_NORMAL"><a data-bind="click: remove" href="#">Remove Address</a></li>
 
                   <li class="divider"></li><li class="dropdown-header">Issuance...</li>                 
                   <li data-bind="visible: !IS_WATCH_ONLY"><a data-bind="click: createAsset" href="#">Create a Token (Asset)</a></li>                
                   <li data-bind="visible: !IS_WATCH_ONLY && FEATURE_DIVIDEND"><a data-bind="click: payDividend" href="#">Pay Distribution</a></li>
 
                   <li class="divider"></li><li class="dropdown-header">Betting...</li>  
-                  <li data-bind="visible: !IS_WATCH_ONLY"><a data-bind="click: broadcast" href="#">Broadcast</a></li>
+                  <li data-bind="visible: !IS_WATCH_ONLY"><a data-bind="click: broadcast" href="#">Feed Broadcast</a></li>
 
                   <li class="divider"></li><li class="dropdown-header">Sort by...</li>
                   <li><a data-bind="click: sortAssetsByName" href="#">Name</a></li>
@@ -164,6 +169,7 @@
     </div> <!-- balances container, foreach: address -->
 </section> <!-- end widget grid -->
 
+
 <!-- modal for change address label -->
 <div data-bind="showModal: shown" id="changeAddressLabelModal" class="modal fade" data-backdrop="static" data-keyboard="false" tabindex="-1" role="dialog" aria-labelledby="changeAddressLabelModal" aria-hidden="true">
   <div class="modal-dialog">
@@ -195,7 +201,8 @@
     </div><!-- /.modal-content -->
   </div><!-- /.modal-dialog -->
 </div><!-- /.modal -->
-  
+
+
 <!-- modal for new address -->
 <div data-bind="showModal: shown" id="createNewAddressModal" class="modal fade" data-keyboard="false" tabindex="-1" role="dialog" aria-labelledby="createNewAddressModal" aria-hidden="true">
   <div class="modal-dialog">
@@ -205,16 +212,19 @@
         <h4 class="modal-title" data-bind="text: dispWindowTitle"></h4>
       </div>
       <div class="modal-body no-padding">
-        <div data-bind="visible: !forWatchOnly()">
+        <div data-bind="visible: addressType() == 'normal'">
             <p class="formPadded">Enter the description you'd like to use for this new address.<br/><br/>
             <b class="errorColor">Please NOTE that once you create a new address, you cannot delete it.</b></p>
         </div>
-        <div data-bind="visible: forWatchOnly()">
+        <div data-bind="visible: addressType() == 'watch'">
             <p class="formPadded">Please enter the info for the address you would like to add into your wallet as a watch-only address.</p>
+        </div>
+        <div data-bind="visible: addressType() == 'armory'">
+            <p class="formPadded">Please enter the info for the address you would like to add into your wallet as an Offline Armory address.</p>
         </div>
         
         <form class="smart-form" data-bind="submit: doAction"><fieldset>
-          <section data-bind="visible: forWatchOnly()"><div class="row">
+          <section data-bind="visible: addressType() != 'normal'"><div class="row">
             <label class="control-label col col-sm-2">Address</label>
             <div class="col col-sm-10">
                 <label class="input"><i class="icon-append fa fa-tag"></i>
@@ -239,6 +249,7 @@
     </div><!-- /.modal-content -->
   </div><!-- /.modal-dialog -->
 </div><!-- /.modal -->
+
 
 <!-- modal for send -->
 <div data-bind="showModal: shown, validationOptions: { insertMessages: false }" id="sendModal" class="modal fade" data-backdrop="static" data-keyboard="false" tabindex="-1" role="dialog" aria-labelledby="sendModal" aria-hidden="true">
@@ -289,6 +300,7 @@
     </div><!-- /.modal-content -->
   </div><!-- /.modal-dialog -->
 </div><!-- /.modal -->
+
 
 <!-- modal for sweep (import) -->
 <div data-bind="showModal: shown, validationOptions: { insertMessages: false }" id="sweepModal" class="modal fade" data-backdrop="static" data-keyboard="false" tabindex="-1" role="dialog" aria-labelledby="sweepModal" aria-hidden="true">
@@ -377,6 +389,7 @@
   </div><!-- /.modal-dialog -->
 </div><!-- /.modal -->
 
+
 <!-- modal for sign message -->
 <div data-bind="showModal: shown" id="signMessageModal" class="modal fade" data-backdrop="static" data-keyboard="false" tabindex="-1" role="dialog" aria-labelledby="signMessageModal" aria-hidden="true">
   <div class="modal-dialog">
@@ -417,7 +430,7 @@
             <label class="control-label col col-sm-2">Signed Message</label>
             <div class="col col-sm-10">
                 <label class="textarea">
-                    <textarea id="signedMessage" rows="3" class="custom-scroll" data-bind="fadeInText: signedMessage" disabled="disabled"></textarea>
+                    <textarea id="signedMessage" rows="3" class="custom-scroll" data-bind="fadeInText: signedMessage" readonly="readonly"></textarea>
                 </label>
                 <div class="note">The signed message appears above.</div>
             </div>
@@ -431,6 +444,7 @@
     </div><!-- /.modal-content -->
   </div><!-- /.modal-dialog -->
 </div><!-- /.modal -->
+
 
 <!-- modal for testnet burning -->
 <div data-bind="showModal: shown" id="testnetBurnModal" class="modal fade" data-backdrop="static" data-keyboard="false" tabindex="-1" role="dialog" aria-labelledby="testnetBurnModal" aria-hidden="true">
@@ -469,6 +483,7 @@
   </div><!-- /.modal-dialog -->
 </div><!-- /.modal -->
 
+
 <!-- modal for display private key -->
 <div data-bind="showModal: shown" id="displayPrivateKeyModal" class="modal fade" data-backdrop="static" data-keyboard="false" tabindex="-1" role="dialog" aria-labelledby="displayPrivateKeyModal" aria-hidden="true">
   <div class="modal-dialog">
@@ -493,6 +508,7 @@
     </div><!-- /.modal-content -->
   </div><!-- /.modal-dialog -->
 </div><!-- /.modal -->
+
 
 <!-- modal for create asset -->
 <div data-bind="showModal: shown" id="createAssetModal" class="modal fade" data-backdrop="static" data-keyboard="false" tabindex="-1" role="dialog" aria-labelledby="createAssetModal" aria-hidden="true">
@@ -589,6 +605,7 @@
   </div><!-- /.modal-dialog -->
 </div><!-- /.modal -->
 
+
 <!-- modal for asset issue additional -->
 <div data-bind="showModal: shown" id="issueAdditionalAssetModal" class="modal fade" data-backdrop="static" data-keyboard="false" tabindex="-1" role="dialog" aria-labelledby="issueAdditionalAssetModal" aria-hidden="true">
   <div class="modal-dialog">
@@ -654,6 +671,7 @@
   </div><!-- /.modal-dialog -->
 </div><!-- /.modal -->
 
+
 <!-- modal for asset change description -->
 <div data-bind="showModal: shown" id="changeAssetDescriptionModal" class="modal fade" data-backdrop="static" data-keyboard="false" tabindex="-1" role="dialog" aria-labelledby="changeAssetDescriptionModal" aria-hidden="true">
   <div class="modal-dialog">
@@ -689,6 +707,7 @@
     </div><!-- /.modal-content -->
   </div><!-- /.modal-dialog -->
 </div><!-- /.modal -->
+
 
 <!-- modal for pay dividend -->
 <div data-bind="showModal: shown" id="payDividendModal" class="modal fade" data-backdrop="static" data-keyboard="false" tabindex="-1" role="dialog" aria-labelledby="payDividendModal" aria-hidden="true">
@@ -749,6 +768,7 @@
   </div><!-- /.modal-dialog -->
 </div><!-- /.modal -->
 
+
 <!-- modal for call asset -->
 <div data-bind="showModal: shown" id="callAssetModal" class="modal fade" data-backdrop="static" data-keyboard="false" tabindex="-1" role="dialog" aria-labelledby="callAssetModal" aria-hidden="true">
   <div class="modal-dialog">
@@ -794,6 +814,7 @@
     </div><!-- /.modal-content -->
   </div><!-- /.modal-dialog -->
 </div><!-- /.modal -->
+
 
 <!-- modal for show asset info -->
 <div data-bind="showModal: shown" id="showAssetInfoModal" class="modal fade" data-backdrop="static" data-keyboard="false" tabindex="-1" role="dialog" aria-labelledby="showAssetInfoModal" aria-hidden="true">
@@ -1029,6 +1050,38 @@
         <button type="button" class="btn btn-default" data-bind="click: hide">Close</button>
         <button type="button" data-bind="click: signTransaction" class="btn btn-primary">Sign</button>
         <button type="button" data-bind="click: signAndBroadcastTransaction" class="btn btn-primary">Sign And Broadcast</button>
+      </div>
+    </div><!-- /.modal-content -->
+  </div><!-- /.modal-dialog -->
+</div><!-- /.modal -->
+
+
+<!-- modal for armory broadcast transaction -->
+<div data-bind="showModal: shown" id="armoryBroadcastTransactionModal" class="modal fade" data-backdrop="static" data-keyboard="false" tabindex="-1" role="dialog" aria-labelledby="armoryBroadcastTransactionModal" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" data-bind="click: hide" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+        <h4 class="modal-title">Broadcast Armory Transaction</h4>
+      </div>
+      <div class="modal-body no-padding">
+        <p class="formPadded">Broadcast transaction from address <b data-bind="text: address"></b>.</p>
+
+        <form class="smart-form" data-bind="submit: doAction"><fieldset>
+          <section><div class="row">
+            <label class="control-label col col-sm-2">Signed transaction</label>
+            <div class="col col-sm-10">
+                <label class="textarea">
+                    <textarea rows="20" class="custom-scroll armoryUTxTextarea" data-bind="value: signedTx, valueUpdate : 'input'"></textarea>
+                </label>
+                <div class="note">Enter the signed transaction from the Offline Armory system.</div>
+            </div>
+          </div></section>
+        </fieldset></form>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-default" data-bind="click: hide">Close</button>
+        <button type="button" data-bind="click: submitForm" class="btn btn-warning">Broadcast</button>
       </div>
     </div><!-- /.modal-content -->
   </div><!-- /.modal-dialog -->
