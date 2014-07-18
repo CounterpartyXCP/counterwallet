@@ -15,7 +15,7 @@ function WalletViewModel() {
   
   self.networkBlockHeight.subscribe(function(newBlockIndex) {
     try {
-      VIEW_PRICES.refresh();
+      EXCHANGE.refresh();
     } catch(e) {}
   });
 
