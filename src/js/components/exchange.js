@@ -250,6 +250,8 @@ function ExchangeViewModel() {
     }
 
     var onSuccess = function(txHash, data, endpoint) {
+      trackEvent('Exchange', 'Sell', self.dispAssetPair());
+
       bootbox.alert("Your order for <b class='notoQuantityColor'>" + self.sellTotal() + "</b>"
        + " <b class='notoAssetColor'>" + self.quoteAsset() + "</b> has been placed. "
        + ACTION_PENDING_NOTICE);
@@ -445,6 +447,8 @@ function ExchangeViewModel() {
     }
 
     var onSuccess = function(txHash, data, endpoint) {
+      trackEvent('Exchange', 'Buy', self.dispAssetPair());
+      
       bootbox.alert("Your order for <b class='notoQuantityColor'>" + self.buyTotal() + "</b>"
        + " <b class='notoAssetColor'>" + self.quoteAsset() + "</b> has been placed. "
        + ACTION_PENDING_NOTICE);
@@ -698,6 +702,7 @@ function ExchangeViewModel() {
   self.selectMarket = function(item) {
     self.asset1(item.base_asset);
     self.asset2(item.quote_asset);
+    trackEvent('Exchange', 'MarketSelected', self.dispAssetPair());
   }
 
   self.fetchMarketDetails = function(item) {
@@ -771,6 +776,7 @@ function ExchangeViewModel() {
     }
 
     var onSuccess = function(txHash, data, endpoint) {
+      trackEvent('Exchange', 'OrderCanceled');
       bootbox.alert("<b>Your order was canceled successfully.</b> " + ACTION_PENDING_NOTICE);
     }
 
@@ -975,6 +981,7 @@ function OpenOrdersViewModel() {
     }
 
     var onSuccess = function(txHash, data, endpoint, addressType, armoryUTx) {
+      trackEvent('OpenOrders', 'OrderCancelled');
       WALLET.showTransactionCompleteDialog("<b>Your order was canceled successfully.</b> " + ACTION_PENDING_NOTICE,
         "<b>Your order will be cancelled.</b>", armoryUTx);
     }
