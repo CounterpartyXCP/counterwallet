@@ -75,16 +75,8 @@ function ViewPricesViewModel() {
   self.delayedAssetPairSelection.subscribeChanged(function(newValue, prevValue) {
     if(newValue == null || !self.validationModelBaseOrders.isValid()) return;
     self.baseAssetImageUrl('');
-    self.dexHome(false);
-    self.metricsRefreshPriceChart();
-    var params = {
-      'asset1': self.asset2(),
-      'asset2': self.asset1(),
-      'min_fee_provided': WALLET_OPTIONS_MODAL.minBTCFeeProvidedPct(),
-      'max_fee_required': WALLET_OPTIONS_MODAL.maxBTCFeeRequiredPct()
-    }
-    failoverAPI('get_market_details', params, self.displayMarketDetails);
-
+    self.dexHome(false);   
+    self.fetchMarketDetails();
     $('a.top_user_pair').removeClass('selected_pair');
     $('a.top_user_pair.pair_' + self.baseAsset() + self.quoteAsset()).addClass('selected_pair');
   });
@@ -259,7 +251,7 @@ function ViewPricesViewModel() {
       //if the order involes selling BTC, then we want to notify the servers of our wallet_id so folks can see if our
       // wallet is "online", in order to determine if we'd be able to best make the necessary BTCpay
       if(self.baseAsset() == 'BTC') {
-        multiAPI("record_btc_open_order", [WALLET.identifier(), txHash]);
+        multiAPI("record_btc_open_order", {'wallet_id': WALLET.identifier(), 'order_tx_hash': txHash});
       }
     }
 
@@ -454,7 +446,7 @@ function ViewPricesViewModel() {
       //if the order involes selling BTC, then we want to notify the servers of our wallet_id so folks can see if our
       // wallet is "online", in order to determine if we'd be able to best make the necessary BTCpay
       if(self.quoteAsset() == 'BTC') {
-        multiAPI("record_btc_open_order", [WALLET.identifier(), txHash]);
+        multiAPI("record_btc_open_order", {'wallet_id': WALLET.identifier(), 'order_tx_hash': txHash});
       }
     }
 
@@ -697,9 +689,20 @@ function ViewPricesViewModel() {
 
   }
 
-  self.fetchMarketDetails = function(item) {
+  self.selectMarket = function(item) {
     self.asset1(item.base_asset);
     self.asset2(item.quote_asset);
+  }
+
+  self.fetchMarketDetails = function(item) {
+    self.metricsRefreshPriceChart();
+    var params = {
+      'asset1': self.asset2(),
+      'asset2': self.asset1(),
+      'min_fee_provided': WALLET_OPTIONS_MODAL.minBTCFeeProvidedPct(),
+      'max_fee_required': WALLET_OPTIONS_MODAL.maxBTCFeeRequiredPct()
+    }
+    failoverAPI('get_market_details', params, self.displayMarketDetails);
   }
 
   self.init = function() {
@@ -728,6 +731,15 @@ function ViewPricesViewModel() {
           self.asset2(datum); //gotta do a manual update...doesn't play well with knockout
       });
     });
+  }
+
+  self.refresh = function() {
+    if (self.dexHome()) {
+      self.fetchTopUserPairs();
+      self.fetchAllPairs();
+    } else {
+      self.fetchMarketDetails();
+    }
   }
           
   self.metricsRefreshPriceChart = function() {
