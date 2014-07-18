@@ -214,31 +214,6 @@ function initBalances() {
 }
 INIT_FUNC['pages/balances.html'] = initBalances;
 
-
-function initBuySell() {
-  pageSetUp(); //init smartadmin featureset
-  
-  //This code is run on each visit to the page
-  window.BUY_SELL = new BuySellWizardViewModel();
-  
-  ko.applyBindings(BUY_SELL, document.getElementsByClassName("buySellGrid")[0]);
-    
-  BUY_SELL.init();
-  
-  $(window).resize(BUY_SELL.dataTableResponsive);
-  $(window).on('hashchange', function() {
-    BUY_SELL._tab2StopAutoRefresh(); //just in case
-    $(window).off("resize", BUY_SELL.dataTableResponsive);
-  });
-  
-  //due to CSP, we can't use javascript:void(0) anymore...so prevent wizard links from resetting the location hash here
-  $('#buySellWizard .pager .next, #buySellWizard .pager .previous').click(function(e) {
-    e.preventDefault();
-  });
-}
-INIT_FUNC['pages/buysell.html'] = initBuySell;
-
-
 function initFeedBTCPays() {
   ko.applyBindings(WAITING_BTCPAY_FEED, document.getElementById("waitingBTCPayFeedContent"));
   ko.applyBindings(UPCOMING_BTCPAY_FEED, document.getElementById("upcomingBTCPayFeedContent"));
@@ -315,23 +290,23 @@ function initLeaderboard() {
 INIT_FUNC['pages/leaderboard.html'] = initLeaderboard;
 
 
-function initViewPrices() {
+function initExchange() {
   // Hack to resolve books widgets positions
-  localStorage.removeItem('Plugin_position_pages/view_prices.html_widget-grid');
+  localStorage.removeItem('Plugin_position_pages/exchange.html_widget-grid');
   
   pageSetUp(); //init smartadmin featureset
   
   //This code is run on each visit to the page
-  window.VIEW_PRICES = new ViewPricesViewModel();
-  ko.applyBindings(VIEW_PRICES, document.getElementsByClassName("ordersGrid")[0]);
+  window.EXCHANGE = new ExchangeViewModel();
+  ko.applyBindings(EXCHANGE, document.getElementsByClassName("ordersGrid")[0]);
   
-  VIEW_PRICES.init(true);
+  EXCHANGE.init(true);
 
   $('#changeMarket').click(function() {
-    loadURL('pages/view_prices.html', $('#content'));
+    loadURL('pages/exchange.html', $('#content'));
   });
 }
-INIT_FUNC['pages/view_prices.html'] = initViewPrices;
+INIT_FUNC['pages/exchange.html'] = initExchange;
 
 
 function initPortfolio() {

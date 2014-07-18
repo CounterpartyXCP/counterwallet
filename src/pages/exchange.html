@@ -38,7 +38,7 @@
             <div class="widget-body min-height-0 no-padding" style="min-height:0 !important" data-bind="validationOptions: { insertMessages: false }"> <!-- widget content -->
                 
               <div class="topPairsGrid" data-bind="foreach: topUserPairs">
-                <a href="#" data-bind="click: $parent.fetchMarketDetails, attr: {class: pair_classes}">
+                <a href="#" data-bind="click: $parent.selectMarket, attr: {class: pair_classes}">
                   <span data-bind="text:base_asset"></span>/<span data-bind="text:quote_asset"></span>
                 </a>
               </div>
@@ -111,7 +111,7 @@
                         </tr>
                     </thead>
                     <tbody data-bind="foreach: allPairs">
-                        <tr data-bind="click: $parent.fetchMarketDetails">
+                        <tr data-bind="click: $parent.selectMarket">
                             <td class="number" data-bind="text: pos"></td>
                             <td style="with-space:nowrap">
                                 <b><span data-bind="text: base_asset"></span></b> / <span data-bind="text: quote_asset"></span>

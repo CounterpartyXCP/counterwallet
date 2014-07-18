@@ -13,6 +13,12 @@ function WalletViewModel() {
   self.isSellingBTC = ko.observable(false); //updated by the btcpay feed
   self.isOldWallet = ko.observable(false);
   
+  self.networkBlockHeight.subscribe(function(newBlockIndex) {
+    try {
+      EXCHANGE.refresh();
+    } catch(e) {}
+  });
+
   self.addAddress = function() {
     //adds a key to the wallet, making a new address object on the wallet in the process
     //(assets must still be attached to this address, with updateBalances() or other means...)
