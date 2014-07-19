@@ -483,7 +483,7 @@ function WalletViewModel() {
   }
   
   self.doTransaction = function(address, action, data, onSuccess, onError) {
-    assert(['sign_tx', 'broadcast_tx', 'convert_armory_signedtx_to_raw_hex'].indexOf(action) !== -1,
+    assert(['sign_tx', 'broadcast_tx', 'convert_armory_signedtx_to_raw_hex'].indexOf(action) === -1,
       'Specified action not supported through this function. please use appropriate primatives');
     
     var addressObj = WALLET.getAddressObj(address);
@@ -491,14 +491,12 @@ function WalletViewModel() {
     //should not ever be a watch only wallet
     assert(!addressObj.IS_WATCH_ONLY);
     
-    if(action !== 'convert_armory_signedtx_to_raw_hex') {
-      //specify the pubkey for a multisig tx
-      assert(data['encoding'] === undefined);
-      assert(data['pubkey'] === undefined);
-      data['encoding'] = 'multisig';
-      data['pubkey'] = addressObj.PUBKEY;
-      //find and specify the verifyDestAddr
-    }
+    //specify the pubkey for a multisig tx
+    assert(data['encoding'] === undefined);
+    assert(data['pubkey'] === undefined);
+    data['encoding'] = 'multisig';
+    data['pubkey'] = addressObj.PUBKEY;
+    //find and specify the verifyDestAddr
 
     if (ALLOW_UNCONFIRMED_INPUTS && supportUnconfirmedChangeParam(action)) {
       data['allow_unconfirmed_inputs'] = true;
@@ -534,9 +532,6 @@ function WalletViewModel() {
         $.jqlog.debug("TXN CREATED. numTotalEndpoints="
           + numTotalEndpoints + ", numConsensusEndpoints="
           + numConsensusEndpoints + ", RAW HEX=" + unsignedTxHex);
-          
-        if(action == 'broadcast_tx' || action === 'sign_tx')
-          return;
           
         //if the address is an armory wallet, then generate an offline transaction to get signed
         if(addressObj.IS_ARMORY_OFFLINE) {

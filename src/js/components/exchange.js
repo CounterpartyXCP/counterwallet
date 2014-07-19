@@ -249,16 +249,16 @@ function ExchangeViewModel() {
       expiration: expiration
     }
 
-    var onSuccess = function(txHash, data, endpoint) {
+    var onSuccess = function(txHash, data, endpoint, addressType, armoryUTx) {
       trackEvent('Exchange', 'Sell', self.dispAssetPair());
-
-      bootbox.alert("Your order for <b class='notoQuantityColor'>" + self.sellTotal() + "</b>"
-       + " <b class='notoAssetColor'>" + self.quoteAsset() + "</b> has been placed. "
-       + ACTION_PENDING_NOTICE);
+      
+      var message = "Your order to sell <b class='notoQuantityColor'>" + self.sellAmount() + "</b>"
+       + " <b class='notoAssetColor'>" + self.baseAsset() + "</b> " + (armoryUTx ? "will be placed" : "has been placed") + ". "; 
+      WALLET.showTransactionCompleteDialog(message + ACTION_PENDING_NOTICE, message, armoryUTx);
        
       //if the order involes selling BTC, then we want to notify the servers of our wallet_id so folks can see if our
       // wallet is "online", in order to determine if we'd be able to best make the necessary BTCpay
-      if(self.baseAsset() == 'BTC') {
+      if(self.baseAsset() == 'BTC' && addressType !== 'armory') {
         multiAPI("record_btc_open_order", {'wallet_id': WALLET.identifier(), 'order_tx_hash': txHash});
       }
     }
@@ -446,16 +446,16 @@ function ExchangeViewModel() {
       expiration: expiration
     }
 
-    var onSuccess = function(txHash, data, endpoint) {
+    var onSuccess = function(txHash, data, endpoint, addressType, armoryUTx) {
       trackEvent('Exchange', 'Buy', self.dispAssetPair());
       
-      bootbox.alert("Your order for <b class='notoQuantityColor'>" + self.buyTotal() + "</b>"
-       + " <b class='notoAssetColor'>" + self.quoteAsset() + "</b> has been placed. "
-       + ACTION_PENDING_NOTICE);
-       
+      var message = "Your order to buy <b class='notoQuantityColor'>" + self.buyAmount() + "</b>"
+       + " <b class='notoAssetColor'>" + self.baseAsset() + "</b> " + (armoryUTx ? "will be placed" : "has been placed") + ". "; 
+      WALLET.showTransactionCompleteDialog(message + ACTION_PENDING_NOTICE, message, armoryUTx);
+      
       //if the order involes selling BTC, then we want to notify the servers of our wallet_id so folks can see if our
       // wallet is "online", in order to determine if we'd be able to best make the necessary BTCpay
-      if(self.quoteAsset() == 'BTC') {
+      if(self.quoteAsset() == 'BTC' && addressType !== 'armory') {
         multiAPI("record_btc_open_order", {'wallet_id': WALLET.identifier(), 'order_tx_hash': txHash});
       }
     }
@@ -775,16 +775,14 @@ function ExchangeViewModel() {
       _tx_index: order.tx_index
     }
 
-    var onSuccess = function(txHash, data, endpoint) {
+    var onSuccess = function(txHash, data, endpoint, addressType, armoryUTx) {
       trackEvent('Exchange', 'OrderCanceled');
-      bootbox.alert("<b>Your order was canceled successfully.</b> " + ACTION_PENDING_NOTICE);
+      WALLET.showTransactionCompleteDialog("<b>Your order was canceled successfully.</b> " + ACTION_PENDING_NOTICE,
+        "<b>Your order will be cancelled.</b>", armoryUTx);
     }
-
+    
     WALLET.doTransaction(order.source, "create_cancel", params, onSuccess);
   }
-
-
-
 };
 
 
@@ -988,7 +986,6 @@ function OpenOrdersViewModel() {
 
     WALLET.doTransaction(order.source, "create_cancel", params, onSuccess);
   }
-  
 }
 
 function OrderMatchesViewModel() {
