@@ -4,6 +4,7 @@
 * Added Armory Offline signing support
 
 **Fixes:**
+* Significant performance and reliability improvements (on the counterblockd side)
 * Numerous minor fixes
 * Minor UI tweaks
 

@@ -10,8 +10,8 @@ span.addressLabelText {
 }
 
 textarea.armoryUTxTextarea {
-    font-size: 10px;
-    font-weight: normal;
+    font-size: 10px !important;
+    font-weight: normal !important;
 }
 
 div#showAssetInfoModal table {

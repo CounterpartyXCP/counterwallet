@@ -1496,12 +1496,13 @@ function ArmoryBroadcastTransactionModalViewModel() {
       var message = "Transaction successful broadcast!<br/><br/>Transaction ID: " + txHash;
       WALLET.showTransactionCompleteDialog(message, message, armoryUTx);
     }
-
-    WALLET.doTransaction(self.address(), "broadcast_armory_tx", {'signed_tx_ascii': self.signedTx()},
-      function(txHash, data, endpoint, addressType, armoryUTx) { //Now broadcast the txn!
-        WALLET.doTransaction(self.address(), "broadcast_tx", {'signed_tx_hex': data}, onSuccess);
+    
+    failoverAPI("convert_armory_signedtx_to_raw_hex", {'signed_tx_ascii': self.signedTx()},
+      function(data, endpoint) {
+        WALLET.broadcastSignedTx(data, onSuccess);
       }
     );
+    
     trackEvent('Balances', 'ArmoryBroadcastTransaction');
   }
 }
