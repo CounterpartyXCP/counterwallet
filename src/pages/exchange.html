@@ -1,11 +1,15 @@
 <section id="widget-grid" class="ordersGrid assetSelector" data-bind="validationOptions: { insertMessages: false }"> <!-- widget grid -->
   <div class="row">
-    <div class="col-xs-12 col-sm-12 col-md-12 col-lg-12" data-bind="visible: dexHome()">
+    <div class="col-xs-12 col-sm-7 col-md-7 col-lg-4" data-bind="visible: dexHome()">
       <h1 class="page-title txt-color-blueDark">
-        <i class="fa fa-bar-chart-o fa-fw "></i>      
-        Decentralized Exchange Markets
+        <i class="fa fa-bar-chart-o fa-fw "></i> 
+          Decentralized Exchange Markets 
       </h1>
     </div>
+    <div class="pull-right sectionHeaderButtonBar" data-bind="visible: dexHome()">
+        <button id="exchangeHelp" type="button" class="btn btn-success"><i class="fa fa-question-circle"></i>&nbsp;Page Help</button>
+    </div>
+
 
     <div class="col-xs-12 col-sm-12 col-md-12 col-lg-12" data-bind="visible: !dexHome()">
       <h1 style="text-align:center;position:relative;margin:0">

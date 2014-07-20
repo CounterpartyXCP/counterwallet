@@ -50,7 +50,7 @@ function initIndex() { //main page
       return false;
     });
     $('#support').click(function(e) {
-      SUPPORT_MODAL.show();
+      SUPPORT_MODAL.show('general');
       return false;
     });
     $('#loginform').submit(function() {
@@ -161,6 +161,9 @@ function initBalances() {
       $('#sweepOldWallet').click(function() {
         SWEEP_MODAL.show(true, true);
       });
+      $('#balanceHelp').click(function() {
+        SUPPORT_MODAL.show('balancesPage');
+      });
 
       //temporary
       if (WALLET.BITCOIN_WALLET.useOldHierarchicalKey) {
@@ -169,7 +172,7 @@ function initBalances() {
         $('#sweepFunds').hide();
       }
       $('#support_havingIssuesLink').click(function(e) {
-        SUPPORT_MODAL.show();
+        SUPPORT_MODAL.show('general');
         return false;
       });
         
@@ -311,6 +314,9 @@ function initExchange() {
   
   EXCHANGE.init(true);
 
+  $('#exchangeHelp').click(function() {
+    SUPPORT_MODAL.show('exchangePage');
+  });
   $('#changeMarket').click(function() {
     loadURL('pages/exchange.html', $('#content'));
   });

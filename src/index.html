@@ -449,7 +449,7 @@
             <button type="button" data-bind="click: hide" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
             <h4 class="modal-title">Wallet Options <b class="pull-right padding-right-10">v<span data-bind="text: VERSION"></span></b></h4>
           </div>
-          <div class="modal-body no-padding">
+          <div class="modal-body">
             
             <form class="smart-form"><fieldset>
               <section><div class="row">
@@ -568,15 +568,38 @@
         <div class="modal-content">
           <div class="modal-header">
             <button type="button" data-bind="click: hide" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
-            <h4 class="modal-title">Having Issues?</h4><br/>
-            <p>If you are having issues using Counterwallet, please try the following:</p>
-            <ul>
-                <li>Ask in Counterwallet chat: Click on the <b>Show Chat</b> link on the left menubar, and ask your question there. Someone may know the answer.</li>
-                <li>Especially if you think you have found a bug in Counterwallet, you can post your question or issue in <a href="https://forums.counterparty.co/index.php?topic=188.0" target="_blank">this thread</a> in the <a href="https://forums.counterparty.co/" target="_blank">Counterparty forums</a>.</li>
-                <li>If all else fails, you can email the Counterparty developers at <a href="mailto: dev@counterparty.co">dev@counterparty.co</a>. Please avoid the use of this for trivial issues, and/or non-bugs.</li>
-            </ul>
+            <h4 class="modal-title" data-bind="visible: type == 'general'">Having Issues?</h4>
+            <h4 class="modal-title" data-bind="visible: type != 'general'">Common Questions for this Page</h4>
           </div>
-          <div class="modal-body no-padding">
+          <div class="modal-body padding-top-0 padding-bottom-0">
+            <div data-bind="visible: type == 'general'">
+                <h5>If you are having issues using Counterwallet, please try the following:</h5>
+                <ul>
+                    <li>Ask in Counterwallet chat: Click on the <b>Show Chat</b> link on the left menubar, and ask your question there. Someone may know the answer.</li>
+                    <li>Especially if you think you have found a bug in Counterwallet, you can post your question or issue in <a href="https://forums.counterparty.co/index.php?topic=188.0" target="_blank">this thread</a> in the <a href="https://forums.counterparty.co/" target="_blank">Counterparty forums</a>.</li>
+                    <li>If all else fails, you can email the Counterparty developers at <a href="mailto: dev@counterparty.co">dev@counterparty.co</a>. Please avoid the use of this for trivial issues, and/or non-bugs.</li>
+                </ul>
+            </div>
+            <div data-bind="visible: type == 'balancesPage'">
+                <h5>Answers to common questions. Just click the one you're interested in:</h5>
+                <ul>
+                    <li><a href="https://www.counterparty.co/resources/faqs/i-sent-funds-to-a-crowdsale-vending-machine-why-didnt-they-show-up/" target="_blank">I sent funds to a crowdsale vending machine, why didn’t they show up?</a></li>
+                    <li><a href="https://www.counterparty.co/resources/faqs/i-sent-btc-to-counterwallet-why-doesnt-it-show-up/" target="_blank">I sent BTC to Counterwallet, why doesn't it show up?</a></li>
+                    <li><a href="https://www.counterparty.co/resources/faqs/address-i-added-in-counterwallet-is-not-showing-why/" target="_blank">An address I added in Counterwallet is not showing -- why?</a></li>
+                    <li><a href="https://www.counterparty.co/resources/faqs/does-counterwallet-support-two-factor-authentication/" target="_blank">Does Counterwallet support two-factor authentication?</a></li>
+                    <li><a href="https://www.counterparty.co/resources/faqs/where-can-i-buy-xcp/" target="_blank">Where can I buy XCP?</a></li>
+                    <li><a href="https://www.counterparty.co/resources/faqs/how-do-i-get-support-for-counterwallet-issues/" target="_blank">I have another issue...</a></li>
+                </ul>
+            </div>
+            <div data-bind="visible: type == 'exchangePage'">
+                <h5>Answers to common questions. Just click the one you're interested in:</h5>
+                <ul>
+                    <li><a href="https://www.counterparty.co/resources/faqs/what-does-something-like-xcpbtc-mean-in-counterwallet/" target="_blank">What does something like “XCP/BTC” mean, in Counterwallet?</a></li>
+                    <li><a href="https://www.counterparty.co/resources/faqs/where-can-i-buy-xcp/" target="_blank">Where can I buy XCP?</a></li>
+                    <li><a href="https://www.counterparty.co/resources/faqs/how-do-i-get-support-for-counterwallet-issues/" target="_blank">I have another issue...</a></li>
+                </ul>
+            </div>
+
           </div>
           <div class="modal-footer">
             <button type="button" class="btn btn-default" data-bind="click: hide">Okay</button>

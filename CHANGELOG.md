@@ -2,6 +2,7 @@
 **Enhancements:**
 * Added new DEx interface
 * Added Armory Offline signing support
+* Added page-level help for balances and exchanges (with more coming in the future, as necessary)
 
 **Fixes:**
 * Significant performance and reliability improvements (on the counterblockd side)

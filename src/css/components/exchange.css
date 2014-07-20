@@ -129,8 +129,8 @@ span.marketPrice {
 #changeMarket {
 
   position: absolute;
-  left:0;
-  top:10px;
+  left: 0px;
+  top: 0px;
 }
 
 #assetPairMarketInfo td {

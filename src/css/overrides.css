@@ -124,6 +124,9 @@ span.logoText {
 .smart-style-0 #header span.logoText { /* override for a specific style */
     color: black;
 }
+.page-title {
+    margin-top: 0px;
+}
 
 #logo-group span.activity-parent { /* custom style */
   margin-left: 10px;
