@@ -149,6 +149,18 @@ function ExchangeViewModel() {
       return left.BALANCE == right.BALANCE ? 0 : (left.BALANCE > right.BALANCE ? -1 : 1);
     });
 
+    if (addressesWithBalance.length == 0) {
+      $('#sellButton').addClass('disabled');
+      $('div.sellForm').addClass('disabled');
+      self.availableBalanceForSell(0);
+      self.obtainableForSell(0);
+    } else {
+      $('#sellButton').removeClass('disabled');
+      $('div.sellForm').removeClass('disabled');
+    }
+
+    
+
     return addressesWithBalance;
   }, self);
 
@@ -343,6 +355,16 @@ function ExchangeViewModel() {
     addressesWithBalance.sort(function(left, right) {
       return left.BALANCE == right.BALANCE ? 0 : (left.BALANCE > right.BALANCE ? -1 : 1);
     });
+
+    if (addressesWithBalance.length == 0) {
+      $('#buyButton').addClass('disabled');
+      $('div.buyForm').addClass('disabled');
+      self.availableBalanceForBuy(0);
+      self.obtainableForBuy(0);
+    } else {
+      $('#buyButton').removeClass('disabled');
+      $('div.buyForm').removeClass('disabled');
+    }
 
     return addressesWithBalance;
   }, self);
@@ -706,6 +728,12 @@ function ExchangeViewModel() {
   }
 
   self.fetchMarketDetails = function(item) {
+    self.highestBidPrice(0);
+    self.lowestAskPrice(0);
+    self.sellPrice(0);
+    self.buyPrice(0);
+    self.obtainableForSell(0);
+    self.obtainableForBuy(0);
     self.metricsRefreshPriceChart();
     var params = {
       'asset1': self.asset2(),

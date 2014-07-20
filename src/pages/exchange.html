@@ -292,21 +292,21 @@
                       <tr>
                         <td>Price</td>
                         <td>
-                          <input type="text" class="form-control input-sm number" type="text" data-bind="value: buyPrice, hasFocus: buyPriceHasFocus, valueUpdate: 'input'"/>
+                          <input type="text" class="form-control input-sm number" type="text" data-bind="value: buyPrice, hasFocus: buyPriceHasFocus, valueUpdate: 'input', enable: availableBalanceForBuy() > 0"/>
                         </td> 
                         <td data-bind="text: quoteAsset + '/' + baseAsset"></td>
                       </tr>
                       <tr>
                         <td>Amount</td>
                         <td>
-                          <input type="text" class="form-control input-sm number" type="text" data-bind="value: buyAmount, hasFocus: buyAmountHasFocus, valueUpdate: 'input'"/>
+                          <input type="text" class="form-control input-sm number" type="text" data-bind="value: buyAmount, hasFocus: buyAmountHasFocus, valueUpdate: 'input', enable: availableBalanceForBuy() > 0"/>
                         </td> 
                         <td data-bind="text: baseAsset"></td>
                       </tr>
                       <tr>
                         <td>Total</td>
                         <td>
-                          <input type="text" class="form-control input-sm number" type="text" data-bind="value: buyTotal, hasFocus: buyTotalHasFocus, valueUpdate: 'input'"/>
+                          <input type="text" class="form-control input-sm number" type="text" data-bind="value: buyTotal, hasFocus: buyTotalHasFocus, valueUpdate: 'input', enable: availableBalanceForBuy() > 0"/>
                           <span class="invalid text-danger" data-bind="validationMessage: buyTotal"></span>
                         </td> 
                         <td data-bind="text: quoteAsset"></td>
@@ -345,7 +345,7 @@
                       <tr>
                         <td>Address</td>
                         <td colspan="2">
-                          <select id="sellFromAddress" data-bind="options: availableAddressesForSell, optionsValue: 'ADDRESS', optionsText: 'SELECT_LABEL', select2: {  minimumResultsForSearch: 10, escapeMarkup: 'direct' }, value: selectedAddressForSell" style="width:250px"></select>
+                          <select id="sellFromAddress" data-bind="options: availableAddressesForSell, optionsValue: 'ADDRESS', optionsText: 'SELECT_LABEL', select2: {  minimumResultsForSearch: 10, escapeMarkup: 'direct' }, value: selectedAddressForSell, enable: availableBalanceForSell() > 0" style="width:250px"></select>
                         </td>
                       </tr>
                       <tr class="bold">
@@ -366,14 +366,14 @@
                       <tr>
                         <td>Price</td>
                         <td>
-                          <input type="text" class="form-control input-sm number" type="text" data-bind="value: sellPrice, hasFocus: sellPriceHasFocus, valueUpdate: 'input'"/>
+                          <input type="text" class="form-control input-sm number" type="text" data-bind="value: sellPrice, hasFocus: sellPriceHasFocus, valueUpdate: 'input', enable: availableBalanceForSell() > 0"/>
                         </td> 
                         <td data-bind="text: quoteAsset + '/' + baseAsset"></td>
                       </tr>
                       <tr>
                         <td>Amount</td>
                         <td>
-                          <input type="text" class="form-control input-sm number" type="text" data-bind="value: sellAmount, hasFocus: sellAmountHasFocus, valueUpdate: 'input'"/>
+                          <input type="text" class="form-control input-sm number" type="text" data-bind="value: sellAmount, hasFocus: sellAmountHasFocus, valueUpdate: 'input', enable: availableBalanceForSell() > 0"/>
                           <span class="invalid text-danger" data-bind="validationMessage: sellAmount"></span>
                         </td> 
                         <td data-bind="text: baseAsset"></td>
@@ -381,7 +381,7 @@
                       <tr>
                         <td>Total</td>
                         <td>
-                          <input type="text" class="form-control input-sm number" type="text" data-bind="value: sellTotal, hasFocus: sellTotalHasFocus, valueUpdate: 'input'"/>
+                          <input type="text" class="form-control input-sm number" type="text" data-bind="value: sellTotal, hasFocus: sellTotalHasFocus, valueUpdate: 'input', enable: availableBalanceForSell() > 0"/>
                         </td> 
                         <td data-bind="text: quoteAsset"></td>
                       </tr>
