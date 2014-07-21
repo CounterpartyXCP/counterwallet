@@ -277,7 +277,7 @@ function _multiAPIPrimative(method, params, onFinished) {
             }
           }
           if(allNotCaughtUp) {
-            alert("The server(s) are currently updating and/or not caught up to the blockchain. Logging you out."
+            bootbox.alert("The server(s) are currently updating and/or not caught up to the blockchain. Logging you out."
               + " Please try logging in again later. (Most likely this message is due to the server being updated.)")
             location.reload(false); //log the user out to avoid ruckus
             return;
@@ -323,7 +323,7 @@ function failoverAPI(method, params, onSuccess, onError) {
     // probably returning 525s or updating (or messed up somehow) and we should just log the client out to be safe about it.
     // This is probably a good choice for now... 
     if(jqXHR && jqXHR.status == '525') {
-      alert("The server(s) are currently updating and/or not caught up to the blockchain. Logging you out. Please try logging in again later. (e:failoverAPI)")
+      bootbox.alert("The server(s) are currently updating and/or not caught up to the blockchain. Logging you out. Please try logging in again later. (e:failoverAPI)")
       location.reload(false); //log the user out to avoid ruckus
       return;
     }
@@ -388,11 +388,14 @@ function multiAPIConsensus(method, params, onSuccess, onConsensusError, onSysErr
       if (noBtcPos != -1) {
         var endMessage = textStatus.indexOf(")", noBtcPos) + 1;
 
-        message = '<b class="errorColor">'+textStatus.substr(noBtcPos, endMessage-noBtcPos)+ '</b>. You must have a small amount of BTC in this address to pay the Bitcoin miner fees. Please fund this address and try again.';
+        message = '<b class="errorColor">' + textStatus.substr(noBtcPos, endMessage-noBtcPos)
+          + '</b>. You must have a small amount of BTC in this address to pay the Bitcoin miner fees. Please fund this address and try again.<br/><br/>'
+          + '<a href="https://www.counterparty.co/resources/faqs/why-do-i-need-small-amounts-of-bitcoin-to-do-things-in-counterwallet/" target="_blank">More information on why this is necessary.</a>';
       
       } else {
         message = describeError(jqXHR, textStatus, errorThrown);
-        message = "multiAPIConsensus: Parallel call failed (no server returned success). Method: " + method + "; Last error: " + message;
+        message = "Sorry, we got an error when trying to do the requested action: '" + message + "' (API method: " + method + ").<br/><br/>"
+          + "If this persists, please click on the question mark button on the top right-hand corner of the screen for support options.";
       }
       bootbox.alert(message);
     };
