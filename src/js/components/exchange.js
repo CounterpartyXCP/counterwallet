@@ -664,19 +664,29 @@ function ExchangeViewModel() {
 
     base_depth = 0;
     for (i in data['buy_orders']) {
-      data['buy_orders'][i]['price'] = parseFloat(data['buy_orders'][i]['price']);
-      data['buy_orders'][i]['amount'] = normalizeQuantity(data['buy_orders'][i]['amount'], data['base_asset_divisible']);
-      data['buy_orders'][i]['total'] = normalizeQuantity(data['buy_orders'][i]['total'], data['quote_asset_divisible']);
-      data['buy_orders'][i]['base_depth'] = data['buy_orders'][i]['amount'] + base_depth;
-      base_depth = data['buy_orders'][i]['base_depth'];
+      if ((data['base_asset'] == 'BTC' && data['buy_orders'][i]['amount'] < BTC_ORDER_MIN_AMOUNT) || 
+          (data['quote_asset'] == 'BTC' && data['buy_orders'][i]['total'] < BTC_ORDER_MIN_AMOUNT)) {
+        data['buy_orders'].splice(i, 1);
+      } else {
+        data['buy_orders'][i]['price'] = parseFloat(data['buy_orders'][i]['price']);
+        data['buy_orders'][i]['amount'] = normalizeQuantity(data['buy_orders'][i]['amount'], data['base_asset_divisible']);
+        data['buy_orders'][i]['total'] = normalizeQuantity(data['buy_orders'][i]['total'], data['quote_asset_divisible']);
+        data['buy_orders'][i]['base_depth'] = data['buy_orders'][i]['amount'] + base_depth;
+        base_depth = data['buy_orders'][i]['base_depth'];
+      }
     }
     base_depth = 0;
     for (i in data['sell_orders']) {
-      data['sell_orders'][i]['price'] = parseFloat(data['sell_orders'][i]['price']);
-      data['sell_orders'][i]['amount'] = normalizeQuantity(data['sell_orders'][i]['amount'], data['base_asset_divisible']);
-      data['sell_orders'][i]['total'] = normalizeQuantity(data['sell_orders'][i]['total'], data['quote_asset_divisible']);
-      data['sell_orders'][i]['base_depth'] = data['sell_orders'][i]['amount'] + base_depth;
-      base_depth = data['sell_orders'][i]['base_depth'];
+      if ((data['base_asset'] == 'BTC' && data['sell_orders'][i]['amount'] < BTC_ORDER_MIN_AMOUNT) || 
+          (data['quote_asset'] == 'BTC' && data['sell_orders'][i]['total'] < BTC_ORDER_MIN_AMOUNT)) {
+        data['sell_orders'].splice(i, 1);
+      } else {
+        data['sell_orders'][i]['price'] = parseFloat(data['sell_orders'][i]['price']);
+        data['sell_orders'][i]['amount'] = normalizeQuantity(data['sell_orders'][i]['amount'], data['base_asset_divisible']);
+        data['sell_orders'][i]['total'] = normalizeQuantity(data['sell_orders'][i]['total'], data['quote_asset_divisible']);
+        data['sell_orders'][i]['base_depth'] = data['sell_orders'][i]['amount'] + base_depth;
+        base_depth = data['sell_orders'][i]['base_depth'];
+      }
     }
 
     self.bidBook(data['buy_orders'])

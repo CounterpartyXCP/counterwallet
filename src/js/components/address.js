@@ -150,14 +150,16 @@ function AddressViewModel(type, key, address, initialLabel, armoryPubKey) {
         match.locked(assetInfo['locked']);
       } else {
         //handle issuance increases
-        assert(match.description() == assetInfo['description']); //description change was handled earlier
-        assert(match.owner() == (assetInfo['issuer'])); //transfer change was handled earlier
-        assert(!assetInfo['locked']); //lock change was handled earlier
-        assert(match.rawSupply() != assetInfo['quantity']);
+        //assert(match.description() == assetInfo['description']); //description change was handled earlier
+        //assert(match.owner() == (assetInfo['issuer'])); //transfer change was handled earlier
+        //assert(!assetInfo['locked']); //lock change was handled earlier
+        //assert(match.rawSupply() != assetInfo['quantity']);
         $.jqlog.debug("Updating token " + asset + " @ " + self.ADDRESS + " # issued units. Orig #: "
-          + match.rawSupply() + ", new #: " + assetInfo['quantity']);
+          + match.rawSupply() + ", new #: " + assetInfo['quantity']+ ", unconfirmed bal #: " + match.unconfirmedBalance());
         match.rawSupply(assetInfo['quantity']);
       }
+      
+
     }
   }
   

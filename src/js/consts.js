@@ -14,9 +14,10 @@ var MULTISIG_DUST_SIZE = 5430 * 2;
 var MIN_PRIME_BALANCE = 50000; //in satoshis ... == .0005
 var ASSET_CREATION_FEE_XCP = 0.5; //in normalized XCP
 var MAX_ASSET_DESC_LENGTH = 41; //42, minus a null term character?
-var FEE_FRACTION_REQUIRED_DEFAULT_PCT = .9   //0.90% of total order
-var FEE_FRACTION_PROVIDED_DEFAULT_PCT = 1    //1.00% of total order
-var FEE_FRACTION_DEFAULT_FILTER = .95
+var FEE_FRACTION_REQUIRED_DEFAULT_PCT = .9;   //0.90% of total order
+var FEE_FRACTION_PROVIDED_DEFAULT_PCT = 1;   //1.00% of total order
+var FEE_FRACTION_DEFAULT_FILTER = .95;
+var BTC_ORDER_MIN_AMOUNT = 0.01;
 
 var DEFAULT_NUM_ADDRESSES = 1; //default number of addresses to generate. Go with 1 for now to be more newbie friendly
 var MAX_ADDRESSES = 20; //totall arbitrary :)
