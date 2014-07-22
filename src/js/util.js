@@ -72,45 +72,6 @@ array1ContainsOneOfArray2 = function(arr1, arr2) {
   return false;
 }
 
-/*if (typeof Array.prototype.contains != 'function') {
-  Array.prototype.contains = function(element){
-      return this.indexOf(element) > -1;
-  };
-}
-
-if (typeof Array.prototype.last != 'function') {
-    Array.prototype.last = function(){
-        return this[this.length - 1];
-    };
-};
-
-if (typeof Array.prototype.remove != 'function') {
-  Array.prototype.remove = function() { //http://stackoverflow.com/a/3955096
-      var what, a = arguments, L = a.length, ax;
-      while (L && this.length) {
-          what = a[--L];
-          while ((ax = this.indexOf(what)) !== -1) {
-              this.splice(ax, 1);
-          }
-      }
-      return this;
-  };
-}
-
-if (typeof Array.prototype.unique != 'function') {
-  Array.prototype.unique = function() { //modified from http://stackoverflow.com/a/9229821
-      var prim = {"boolean":{}, "number":{}, "string":{}}, obj = [];
-  
-      return this.filter(function(x) {
-          var t = typeof x;
-          return (t in prim) ? 
-              !prim[t][x] && (prim[t][x] = 1) :
-              obj.indexOf(x) < 0 && obj.push(x);
-      });
-  }
-}
-*/
-
 function range(start, count) {
   return Array.apply(0, Array(count)).map(function (element, index) { 
      return index + start;  
