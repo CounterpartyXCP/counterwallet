@@ -678,11 +678,17 @@ function ExchangeViewModel() {
 
     base_depth = 0;
     var buy_orders = [];
+
     for (var i in data['buy_orders']) {
       if ((data['base_asset'] == 'BTC' && data['buy_orders'][i]['amount'] < BTC_ORDER_MIN_AMOUNT) || 
           (data['quote_asset'] == 'BTC' && data['buy_orders'][i]['total'] < BTC_ORDER_MIN_AMOUNT)) {
         data['buy_orders'][i]['exclude'] = true;
       } else {
+        if (base_depth == 0) {
+          self.lowestAskPrice(data['buy_orders'][i]['price']);
+          self.buyPrice(data['buy_orders'][i]['price']);
+          self.obtainableForBuy(divFloat(self.availableBalanceForBuy(), self.lowestAskPrice()));
+        }
         data['buy_orders'][i]['exclude'] = false;
         data['buy_orders'][i]['price'] = parseFloat(data['buy_orders'][i]['price']);
         data['buy_orders'][i]['amount'] = normalizeQuantity(data['buy_orders'][i]['amount'], data['base_asset_divisible']);
@@ -698,6 +704,11 @@ function ExchangeViewModel() {
           data['sell_orders'][i]['price'] <= data['buy_orders'][0]['price']) {
         data['sell_orders'][i]['exclude'] = true;
       } else {
+        if (base_depth == 0) {
+          self.highestBidPrice(data['sell_orders'][i]['price']);
+          self.sellPrice(data['sell_orders'][i]['price']);
+          self.obtainableForSell(divFloat(self.availableBalanceForSell(), self.highestBidPrice()));
+        }
         data['sell_orders'][i]['exclude'] = false;
         data['sell_orders'][i]['price'] = parseFloat(data['sell_orders'][i]['price']);
         data['sell_orders'][i]['amount'] = normalizeQuantity(data['sell_orders'][i]['amount'], data['base_asset_divisible']);
@@ -709,26 +720,6 @@ function ExchangeViewModel() {
 
     self.bidBook(data['buy_orders'])
     self.askBook(data['sell_orders'])
-
-    if (data['buy_orders'].length > 0) {
-      self.lowestAskPrice(data['buy_orders'][0]['price']);
-      self.buyPrice(data['buy_orders'][0]['price']);
-      self.obtainableForBuy(divFloat(self.availableBalanceForBuy(), self.lowestAskPrice()));
-    } else {
-      self.lowestAskPrice();
-      self.buyPrice();
-      self.obtainableForBuy();
-    }
-
-    if (data['sell_orders'].length > 0) {
-      self.highestBidPrice(data['sell_orders'][0]['price']);
-      self.sellPrice(data['sell_orders'][0]['price']);
-      self.obtainableForSell(divFloat(self.availableBalanceForSell(), self.highestBidPrice()));
-    } else {
-      self.highestBidPrice();
-      self.sellPrice();
-      self.obtainableForSell();
-    }
 
     self.tradeHistory([]);
     try { $('#tradeHistory').dataTable().fnClearTable(); } catch(err) { }
