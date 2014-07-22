@@ -663,11 +663,13 @@ function ExchangeViewModel() {
     try { $('#asset2OpenBuyOrders').dataTable().fnClearTable(); } catch(err) { }
 
     base_depth = 0;
-    for (i in data['buy_orders']) {
+    var buy_orders = [];
+    for (var i in data['buy_orders']) {
       if ((data['base_asset'] == 'BTC' && data['buy_orders'][i]['amount'] < BTC_ORDER_MIN_AMOUNT) || 
           (data['quote_asset'] == 'BTC' && data['buy_orders'][i]['total'] < BTC_ORDER_MIN_AMOUNT)) {
-        data['buy_orders'].splice(i, 1);
+        data['buy_orders'][i]['exclude'] = true;
       } else {
+        data['buy_orders'][i]['exclude'] = false;
         data['buy_orders'][i]['price'] = parseFloat(data['buy_orders'][i]['price']);
         data['buy_orders'][i]['amount'] = normalizeQuantity(data['buy_orders'][i]['amount'], data['base_asset_divisible']);
         data['buy_orders'][i]['total'] = normalizeQuantity(data['buy_orders'][i]['total'], data['quote_asset_divisible']);
@@ -676,11 +678,13 @@ function ExchangeViewModel() {
       }
     }
     base_depth = 0;
-    for (i in data['sell_orders']) {
+    for (var i in data['sell_orders']) {
       if ((data['base_asset'] == 'BTC' && data['sell_orders'][i]['amount'] < BTC_ORDER_MIN_AMOUNT) || 
-          (data['quote_asset'] == 'BTC' && data['sell_orders'][i]['total'] < BTC_ORDER_MIN_AMOUNT)) {
-        data['sell_orders'].splice(i, 1);
+          (data['quote_asset'] == 'BTC' && data['sell_orders'][i]['total'] < BTC_ORDER_MIN_AMOUNT) ||
+          data['sell_orders'][i]['price'] <= data['buy_orders'][0]['price']) {
+        data['sell_orders'][i]['exclude'] = true;
       } else {
+        data['sell_orders'][i]['exclude'] = false;
         data['sell_orders'][i]['price'] = parseFloat(data['sell_orders'][i]['price']);
         data['sell_orders'][i]['amount'] = normalizeQuantity(data['sell_orders'][i]['amount'], data['base_asset_divisible']);
         data['sell_orders'][i]['total'] = normalizeQuantity(data['sell_orders'][i]['total'], data['quote_asset_divisible']);

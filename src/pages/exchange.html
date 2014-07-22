@@ -429,7 +429,7 @@
                           </tr>
                       </thead>
                       <tbody data-bind="foreach: askBook"> <!-- ascending order -->
-                          <tr data-bind="click: $parent.selectSellOrder">
+                          <tr data-bind="click: $parent.selectSellOrder, visible: !exclude">
                               <td data-bind="text: price"></td>
                               <td data-bind="text: amount"></td> <!-- quantity (count) -->
                               <td data-bind="text: total"></td>
@@ -462,7 +462,7 @@
                           </tr>
                       </thead>
                       <tbody data-bind="foreach: bidBook"> <!-- descending order -->
-                          <tr data-bind="click: $parent.selectBuyOrder">
+                          <tr data-bind="click: $parent.selectBuyOrder, visible: !exclude">
                               <td data-bind="text: price"></td>
                               <td data-bind="text: amount"></td> <!-- quantity (count) -->
                               <td data-bind="text: total"></td>
