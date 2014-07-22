@@ -13,8 +13,11 @@ function checkArgsType(args, types) {
 }
 
 function numberWithCommas(x) {
+  //print a number with commas, as appropriate (http://stackoverflow.com/a/2901298)
   if(!isNumber(x)) return x;
-  return _.rstrip(_.numberFormat(parseFloat(x), 8, '.', ','), '0');
+  var parts = x.toString().split(".");
+  parts[0] = parts[0].replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+  return parts.join(".");
 }
 
 function isNumber(n) {

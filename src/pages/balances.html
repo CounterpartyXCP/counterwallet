@@ -101,6 +101,23 @@
                   <li data-bind="visible: IS_NORMAL"><a data-bind="click: signTransaction" href="#">Sign Transaction</a></li>               
                   <li data-bind="visible: IS_ARMORY_OFFLINE"><a data-bind="click: armoryBroadcastTransaction" href="#">Broadcast Transaction</a></li>               
                   <li data-bind="visible: !IS_NORMAL"><a data-bind="click: remove" href="#">Remove Address</a></li>
+                  
+                  <li class="menu-item dropdown dropdown-submenu">
+                    <a href="#" class="dropdown-toggle" data-toggle="dropdown">Sort By</a>
+                        <ul class="dropdown-menu">
+                          <li><a data-bind="click: sortAssetsByName" href="#">Name</a></li>
+                          <li><a data-bind="click: sortAssetsByBalance" href="#">Balance</a></li>
+                        </ul>
+                  </li>                  
+                  <li class="menu-item dropdown dropdown-submenu">
+                    <a href="#" class="dropdown-toggle" data-toggle="dropdown">Filter By</a>
+                        <ul class="dropdown-menu">
+                          <li><a data-bind="click: showAllAssets" href="#">Show All</a></li>
+                          <li><a data-bind="click: showBaseAssetsOnly" href="#">Show XCP &amp; BTC Only</a></li>
+                          <li><a data-bind="click: showMyAssetsOnly" href="#">Show My Tokens Only</a></li>
+                          <li><a data-bind="click: showOthersAssetsOnly" href="#">Show Other Tokens Only</a></li>
+                        </ul>
+                  </li>                  
 
                   <li class="divider"></li><li class="dropdown-header">Issuance...</li>                 
                   <li data-bind="visible: !IS_WATCH_ONLY"><a data-bind="click: createAsset" href="#">Create a Token (Asset)</a></li>                
@@ -108,17 +125,6 @@
 
                   <li class="divider"></li><li class="dropdown-header">Betting...</li>  
                   <li data-bind="visible: !IS_WATCH_ONLY"><a data-bind="click: broadcast" href="#">Feed Broadcast</a></li>
-
-                  <li class="divider"></li><li class="dropdown-header">Sort by...</li>
-                  <li><a data-bind="click: sortAssetsByName" href="#">Name</a></li>
-                  <li><a data-bind="click: sortAssetsByBalance" href="#">Balance</a></li>
-                  
-                  <li class="divider"></li><li class="dropdown-header">Filter by...</li>
-                  <li><a data-bind="click: showAllAssets" href="#">Show All</a></li>
-                  <li><a data-bind="click: showBaseAssetsOnly" href="#">Show XCP &amp; BTC Only</a></li>
-                  <li><a data-bind="click: showMyAssetsOnly" href="#">Show My Tokens Only</a></li>
-                  <li><a data-bind="click: showOthersAssetsOnly" href="#">Show Other Tokens Only</a></li>
-
                 </ul>
               </div>
             </div>
