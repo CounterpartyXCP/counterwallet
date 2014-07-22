@@ -50,6 +50,12 @@ function ExchangeViewModel() {
     }    
   });
 
+  self.selectedQuoteAsset = ko.observable();
+  self.selectedQuoteAsset.subscribe(function(value) {
+    if (value == 'BTC' || value == 'XCP') self.asset2(value);
+    else self.asset2('');
+  })
+
   self.assetPair = ko.computed(function() {
     if(!self.asset1() || !self.asset2()) return null;
     var pair = assetsToAssetPair(self.asset1(), self.asset2());
@@ -79,7 +85,15 @@ function ExchangeViewModel() {
   
   self.delayedAssetPairSelection = ko.computed(self.assetPair).extend({ rateLimit: { method: "notifyWhenChangesStop", timeout: 400 } });
   self.delayedAssetPairSelection.subscribeChanged(function(newValue, prevValue) {
-    if(newValue == null || !self.validationModelBaseOrders.isValid()) return;
+    if(newValue == null || !self.validationModelBaseOrders.isValid() || self.asset1() == self.asset2()) {
+      self.dexHome(true);
+      return;
+    }
+    self.buyAmount(0);
+    self.sellAmount(0);
+    self.buyTotal(0);
+    self.sellTotal(0);
+    $('table.buySellForm span.invalid').hide() // hack
     self.baseAssetImage('');
     self.dexHome(false);   
     self.fetchMarketDetails();
@@ -664,11 +678,17 @@ function ExchangeViewModel() {
 
     base_depth = 0;
     var buy_orders = [];
+
     for (var i in data['buy_orders']) {
       if ((data['base_asset'] == 'BTC' && data['buy_orders'][i]['amount'] < BTC_ORDER_MIN_AMOUNT) || 
           (data['quote_asset'] == 'BTC' && data['buy_orders'][i]['total'] < BTC_ORDER_MIN_AMOUNT)) {
         data['buy_orders'][i]['exclude'] = true;
       } else {
+        if (base_depth == 0) {
+          self.lowestAskPrice(data['buy_orders'][i]['price']);
+          self.buyPrice(data['buy_orders'][i]['price']);
+          self.obtainableForBuy(divFloat(self.availableBalanceForBuy(), self.lowestAskPrice()));
+        }
         data['buy_orders'][i]['exclude'] = false;
         data['buy_orders'][i]['price'] = parseFloat(data['buy_orders'][i]['price']);
         data['buy_orders'][i]['amount'] = normalizeQuantity(data['buy_orders'][i]['amount'], data['base_asset_divisible']);
@@ -684,6 +704,11 @@ function ExchangeViewModel() {
           data['sell_orders'][i]['price'] <= data['buy_orders'][0]['price']) {
         data['sell_orders'][i]['exclude'] = true;
       } else {
+        if (base_depth == 0) {
+          self.highestBidPrice(data['sell_orders'][i]['price']);
+          self.sellPrice(data['sell_orders'][i]['price']);
+          self.obtainableForSell(divFloat(self.availableBalanceForSell(), self.highestBidPrice()));
+        }
         data['sell_orders'][i]['exclude'] = false;
         data['sell_orders'][i]['price'] = parseFloat(data['sell_orders'][i]['price']);
         data['sell_orders'][i]['amount'] = normalizeQuantity(data['sell_orders'][i]['amount'], data['base_asset_divisible']);
@@ -695,26 +720,6 @@ function ExchangeViewModel() {
 
     self.bidBook(data['buy_orders'])
     self.askBook(data['sell_orders'])
-
-    if (data['buy_orders'].length > 0) {
-      self.lowestAskPrice(data['buy_orders'][0]['price']);
-      self.buyPrice(data['buy_orders'][0]['price']);
-      self.obtainableForBuy(divFloat(self.availableBalanceForBuy(), self.lowestAskPrice()));
-    } else {
-      self.lowestAskPrice();
-      self.buyPrice();
-      self.obtainableForBuy();
-    }
-
-    if (data['sell_orders'].length > 0) {
-      self.highestBidPrice(data['sell_orders'][0]['price']);
-      self.sellPrice(data['sell_orders'][0]['price']);
-      self.obtainableForSell(divFloat(self.availableBalanceForSell(), self.highestBidPrice()));
-    } else {
-      self.highestBidPrice();
-      self.sellPrice();
-      self.obtainableForSell();
-    }
 
     self.tradeHistory([]);
     try { $('#tradeHistory').dataTable().fnClearTable(); } catch(err) { }
@@ -737,7 +742,12 @@ function ExchangeViewModel() {
 
   self.selectMarket = function(item) {
     self.asset1(item.base_asset);
-    self.asset2(item.quote_asset);
+    if (item.quote_asset == 'BTC' || item.quote_asset == 'XCP') {
+      self.selectedQuoteAsset(item.quote_asset);
+    } else {
+      self.selectedQuoteAsset('Other');
+      self.asset2(item.quote_asset);
+    }
     trackEvent('Exchange', 'MarketSelected', self.dispAssetPair());
   }
 
@@ -776,7 +786,10 @@ function ExchangeViewModel() {
       assets.initialize();
       $('#asset1, #asset2').typeahead(null, {
         source: assets.ttAdapter(),
-        displayKey: function(obj) { return obj }
+        displayKey: function(obj) { 
+          $.jqlog.debug(obj);
+          return obj; 
+        }
       }).on('typeahead:selected', function($e, datum) {
         if($($e.target).attr('name') == 'asset1')
           self.asset1(datum); //gotta do a manual update...doesn't play well with knockout

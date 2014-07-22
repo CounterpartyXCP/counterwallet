@@ -320,6 +320,7 @@ function initExchange() {
   $('#changeMarket').click(function() {
     loadURL('pages/exchange.html', $('#content'));
   });
+
 }
 INIT_FUNC['pages/exchange.html'] = initExchange;
 

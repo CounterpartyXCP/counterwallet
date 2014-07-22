@@ -227,3 +227,11 @@ a.top_user_pair.selected_pair {
   color:#FFF !important;
   font-weight: bold  !important;
 }
+
+div.buySellBtnGroup .radioBtn  {
+  border-color:  #CCC;
+}
+
+#wid-id-select-other-pair input[type=text] {
+  text-transform: uppercase !important;
+}
