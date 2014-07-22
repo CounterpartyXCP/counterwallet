@@ -405,7 +405,7 @@ function MessageFeed() {
 
     //If we received an action originating from an address in our wallet that was marked invalid by the network, let the user know
     // (do this even in cases where the entry does not exist in pendingActions, as the user could have logged out and back in)
-    if(message['_status'] && message['_status'].startsWith('invalid') && WALLET.getAddressObj(message['source'])) {
+    if(message['_status'] && _.startsWith(message['_status'], 'invalid') && WALLET.getAddressObj(message['source'])) {
       var actionText = PendingActionViewModel.calcText(category, message); //nice "good enough" shortcut method here
       bootbox.alert("<b class='errorColor'>Network processing of the following action failed:</b><br/><br/>"
         + actionText + "<br/><br/><b>Reason:</b> " + message['_status']);
@@ -420,7 +420,7 @@ function MessageFeed() {
     // because we need to be able to remove a pending action that was marked invalid as well)
     PENDING_ACTION_FEED.remove(txHash, category);
   
-    if(message['_status'].startsWith('invalid'))
+    if(_.startsWith(message['_status'], 'invalid'))
       return; //ignore message
     if(message['_status'] == 'expired' && category != "rps_matches") {
       //ignore expired orders and bets, but we have order_expirations and bet_expiration inserts that we DO look at

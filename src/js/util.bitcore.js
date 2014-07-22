@@ -303,7 +303,7 @@ CWBitcore.checkTransactionDest = function(txHex, source, dest) {
   var tx = CWBitcore.parseRawTransaction(txHex);    
   for (var i=0; i<tx.outs.length; i++) {
       var addresses = CWBitcore.extractAddressFromTxOut(tx.outs[i]).split(',');
-      var containsSource = array1ContainsOneOfArray2(addresses, source) != -1;
+      var containsSource = _.intersection(addresses, source).length > 0;
       var containsDest = addresses.indexOf(dest) != -1;
       if (!containsSource && !containsDest) {
         return false;

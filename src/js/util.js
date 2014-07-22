@@ -1,5 +1,10 @@
-function assert(condition, message) { if (!condition) throw message || "Assertion failed"; }
-function checkArgType(arg, type) { assert((typeof arg).toLowerCase() == type.toLowerCase(), "Invalid argument type"); }
+function assert(condition, message) {
+  if (!condition) throw message || "Assertion failed";
+}
+
+function checkArgType(arg, type) {
+  assert((typeof arg).toLowerCase() == type.toLowerCase(), "Invalid argument type");
+}
 
 function checkArgsType(args, types) {
   for (var a=0; a<args.length; a++) {
@@ -7,87 +12,9 @@ function checkArgsType(args, types) {
   }
 }
 
-
-/*
- * STRING PROTOTYPES
- */
-
-if (typeof String.prototype.startsWith != 'function') {
-  // see below for better implementation!
-  String.prototype.startsWith = function (str){
-    return this.indexOf(str) == 0;
-  };
-}
-
-if (typeof String.prototype.endsWith != 'function') {
-  String.prototype.endsWith = function(suffix) {
-      return this.indexOf(suffix, this.length - suffix.length) !== -1;
-  };
-}
-
-if (typeof String.prototype.stripTags != 'function') {
-  String.prototype.stripTags = function(element){
-      return this.replace(/(<([^>]+)>)/ig,"");
-  };
-}
-
-if (typeof String.prototype.capitalize != 'function') {
-  String.prototype.capitalize = function() {
-      return this.charAt(0).toUpperCase() + this.slice(1);
-  }
-}
-
-
-/*
- * ARRAY PROTOTYPES
- */
-
-// Array.prototype breaks Bitcore
-
-arrayRemove = function(arr, what) { 
-  var ax;
-  while ((ax = arr.indexOf(what)) !== -1) {
-    arr.splice(ax, 1);
-  }
-  return arr;
-};
-
-arrayUnique = function(arr) { //modified from http://stackoverflow.com/a/9229821
-    var prim = {"boolean":{}, "number":{}, "string":{}}, obj = [];
-
-    return arr.filter(function(x) {
-        var t = typeof x;
-        return (t in prim) ? 
-            !prim[t][x] && (prim[t][x] = 1) :
-            obj.indexOf(x) < 0 && obj.push(x);
-    });
-}
-
-array1ContainsOneOfArray2 = function(arr1, arr2) {
-  for (var i in arr2) {
-    if (arr1.indexOf(arr2[i]) != -1) {
-      return true;
-    }
-  }
-  return false;
-}
-
-function range(start, count) {
-  return Array.apply(0, Array(count)).map(function (element, index) { 
-     return index + start;  
-  });
-}
-
-
-/*
- * OTHER METHODS
- */
 function numberWithCommas(x) {
-  if(x === undefined || x === null) return x;
-  //print a number with commas, as appropriate (http://stackoverflow.com/a/2901298)
-  var parts = x.toString().split(".");
-  parts[0] = parts[0].replace(/\B(?=(\d{3})+(?!\d))/g, ",");
-  return parts.join(".");
+  if(!isNumber(x)) return x;
+  return _.rstrip(_.numberFormat(parseFloat(x), 8, '.', ','), '0');
 }
 
 function isNumber(n) {
@@ -124,29 +51,6 @@ function selectText(element) {
         selection.removeAllRanges();
         selection.addRange(range);
     }
-}
-
-function shuffle(array) {
-  //http://stackoverflow.com/a/2450976
-  var currentIndex = array.length
-    , temporaryValue
-    , randomIndex
-    ;
-
-  // While there remain elements to shuffle...
-  while (0 !== currentIndex) {
-
-    // Pick a remaining element...
-    randomIndex = Math.floor(Math.random() * currentIndex);
-    currentIndex -= 1;
-
-    // And swap it with the current element.
-    temporaryValue = array[currentIndex];
-    array[currentIndex] = array[randomIndex];
-    array[randomIndex] = temporaryValue;
-  }
-
-  return array;
 }
 
 function noExponents(n) {
@@ -324,10 +228,6 @@ function deepCompare () {
   return true;
 }
 
-function capitaliseFirstLetter(string) {
-  return string.charAt(0).toUpperCase() + string.slice(1);
-}
-
 function feedImageUrl(image_name) {
   var url = cwBaseURLs()[0];
   url += USE_TESTNET ? '/_t_feed_img/' : '/_feed_img/';
@@ -365,7 +265,7 @@ function round(amount, decimals) {
 }
 
 // Reduce a fraction by finding the Greatest Common Divisor and dividing by it.
-function reduce(numerator,denominator){
+function reduce(numerator, denominator){
   var gcd = function gcd(a,b){
     return b ? gcd(b, a%b) : a;
   };

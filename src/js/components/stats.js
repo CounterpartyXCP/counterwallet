@@ -10,7 +10,7 @@ function StatsHistoryViewModel() {
   self.init = function() {
     failoverAPI("get_transaction_stats", {}, function(data, endpoint) {
       for(var i=0; i < data.length; i++) {
-          data[i]['name'] = data[i]['name'].capitalize().replace(/_/g, ' ');
+          data[i]['name'] = _.capitalize(data[i]['name']).replace(/_/g, ' ');
       }
       self.txGraphData = data;
       self.doTxChart();
@@ -174,7 +174,6 @@ function StatsTransactionHistoryViewModel() {
   
   self.init = function() {
     //Initialize out the initial list of messages
-    //var messageIndexes = range(MESSAGE_FEED.lastMessageIndexReceived() - 100, 100);
     failoverAPI("get_last_n_messages", {count: 50}, function(data, endpoint) {
       //clear table data and populate with the new data (which comes in the order of newest to oldest)
       data.reverse();

@@ -193,10 +193,10 @@ function AddressViewModel(type, key, address, initialLabel, armoryPubKey) {
     
     //update the preferences with this address removed
     if(self.TYPE === 'watch') {
-      arrayRemove(PREFERENCES['watch_only_addresses'], self.ADDRESS);  
+      PREFERENCES['watch_only_addresses']= _.without(PREFERENCES['watch_only_addresses'], self.ADDRESS);  
     } else {
       assert(self.TYPE === 'armory');
-      PREFERENCES['armory_offline_addresses'] = PREFERENCES['armory_offline_addresses'].filter(
+      PREFERENCES['armory_offline_addresses'] = _.filter(PREFERENCES['armory_offline_addresses'], 
         function (el) { return el.address !== self.ADDRESS; });
     }
     

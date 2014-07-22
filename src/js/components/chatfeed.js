@@ -337,8 +337,8 @@ function ChatFeedViewModel() {
         if(self.lines()[i].HANDLE)
           handles.push(self.lines()[i].HANDLE);
       }
-      handles = arrayUnique(handles);
-      handles = arrayRemove(handles, self.handle()); //our own handle should not be a candidate for tab completion
+      handles = _.uniq(handles);
+      handles = _.without(handles, self.handle()); //our own handle should not be a candidate for tab completion
       
       var toComplete = null;
       var lastWord = words[words.length-1];
@@ -374,7 +374,7 @@ function ChatFeedViewModel() {
     if(!text) return; //no empty lines
     assert(self.feedConnections.length >= 1, "Not connected to any chat servers!");
     
-    if(text.startsWith('/')) { //chat command
+    if(_.startsWith(text, '/')) { //chat command
       var parts = text.replace('/', '').split(' ');
       var command = parts[0];
       var args = parts.slice(1);
