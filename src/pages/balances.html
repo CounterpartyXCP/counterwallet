@@ -92,7 +92,7 @@
                 <div data-bind="visible: IS_ARMORY_OFFLINE" class="label label-success margin-left-5"><i class="fa fa-lock"></i>&nbsp;Armory Offline</div>
             </h3>
             <div class="widget-toolbar">
-              <div class="btn-group">
+              <div class="btn-group btn-group-dropup">
                 <button class="btn dropdown-toggle btn-xs btn-primary" data-toggle="dropdown"><i class="fa fa-bars"></i> Address Actions <i class="fa fa-caret-down"></i></button>                
                 <ul class="dropdown-menu pull-right">
                   <li><a data-bind="click: showQRCode" href="#">Show QR Code</a></li>
@@ -128,7 +128,7 @@
           <div> <!-- widget div-->
             <div class="widget-body" data-bind="attr: {'id': 'address-balances-' + ADDRESS}, foreach: filteredAssets"> <!-- widget content -->
               <div class="asset-item" data-bind="css: { btc: ASSET === 'BTC', xcp: ASSET === 'XCP', myasset: isMine(), othersasset: !isMine() && (ASSET !== 'BTC' && ASSET !== 'XCP') }">
-                <div class="btn-group"> <!-- asset level action button -->
+                <div class="btn-group btn-group-dropup"> <!-- asset level action button -->
                   <button type="button" class="btn btn-default dropdown-toggle assetBtn"><span class="caret"></span></button>
                   <ul class="dropdown-menu" role="menu">
                     <li><a data-bind="visible: !$parent.IS_WATCH_ONLY, click: send" href="#">Send</a></li>

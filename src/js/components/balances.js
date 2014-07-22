@@ -36,7 +36,7 @@ function ChangeAddressLabelModalViewModel() {
   
   self.doAction = function() {
     var addressHash = hashToB64(self.address());
-    var label = $("<div/>").html(self.newLabel()).text().stripTags();
+    var label = _.stripTags($("<div/>").html(self.newLabel()).text());
     //^ remove any HTML tags from the text
     PREFERENCES.address_aliases[addressHash] = label;
     //^ update the preferences on the server 
@@ -168,7 +168,7 @@ function CreateNewAddressModalViewModel() {
       assert(self.addressType() == 'armory');
       PREFERENCES['armory_offline_addresses'].push({'address': newAddress, 'pubkey_hex': self.armoryPubKey()}); //can't use the hash here, unfortunately
     }
-    var sanitizedDescription = self.description().stripTags();
+    var sanitizedDescription = _.stripTags(self.description());
     PREFERENCES['address_aliases'][newAddressHash] = sanitizedDescription;
     
     //manually set the address in this case to get around the chicken and egg issue here (and have client side match the server)

@@ -9,6 +9,9 @@ $.jqlog.debug = function(object, options) {
     $.jqlog.info(object, options);
 }
 
+//Mix-in underscore.string to underscore namespace
+_.mixin(_.string.exports());
+
 //IE does not include support for location.origin ...
 if (!window.location.origin) {
   window.location.origin = window.location.protocol + "//" + window.location.hostname + (window.location.port ? ':' + window.location.port: '');
@@ -52,7 +55,7 @@ var cwAPIUrls = ko.observableArray([]);
 var disabledFeatures = ko.observableArray([]);
 
 function produceCWServerList() {
-  cwURLs(shuffle(cwURLs())); //randomly shuffle the list to decide the server try order...
+  cwURLs(_.shuffle(cwURLs())); //randomly shuffle the list to decide the server try order...
   $.jqlog.debug("MultiAPI Backends: " + JSON.stringify(cwURLs()));
   
   cwBaseURLs(jQuery.map(cwURLs(), function(element) {
@@ -133,6 +136,41 @@ function warningOnExit() {
     return "If you log out, any Bitcoin sell orders you have open will probably not be filled.";
   }
 }
+
+function autoDropUpDropdowns() {
+  //FROM: http://stackoverflow.com/a/22263501
+  //USAGE: Add 'btn-group-dropup' class to any 'btn-group' div that contains
+  // a dropdown that should automatically drop-up if necessary
+  (function() {
+    // require menu height + margin, otherwise convert to drop-up
+    var dropUpMarginBottom = 100;
+  
+    function dropUp() {
+      var windowHeight = $(window).height();
+      $(".btn-group-dropup").each(function() {
+        var dropDownMenuHeight, 
+            rect = this.getBoundingClientRect();
+        // only toggle menu's that are visible on the current page
+        if (rect.top > windowHeight) {
+          return;
+        }
+        // if you know height of menu - set on parent, eg. `data-menu="100"`
+        dropDownMenuHeight = $(this).data('menu');
+        if (dropDownMenuHeight == null) {
+          dropDownMenuHeight = $(this).children('.dropdown-menu').height();
+        }
+        $(this).toggleClass("dropup", ((windowHeight - rect.bottom) < (dropDownMenuHeight + dropUpMarginBottom)) && (rect.top > dropDownMenuHeight));
+      });
+    };
+  
+    // bind to load & scroll - but debounce scroll with `underscorejs`
+    $(window).bind({
+      "resize scroll touchstart touchmove mousewheel": _.debounce(dropUp, 100),
+      "load": dropUp
+    });
+  }).call(this);  
+}
+
 
 /***********
  * POST-JQUERY INIT
@@ -247,6 +285,8 @@ $(document).ready(function() {
     close: false,
     closeESC: false
   });
+  
+  autoDropUpDropdowns();
   
   loadServersListAndSettings();
 
