@@ -1,4 +1,6 @@
 {
+    "src/vendors/underscore/underscore.js": "4ff3cee1cbfde8b0bacdc5c2680dd732441cd28f9ede436afb2e80c81a79105c",
+    "src/vendors/underscore.string/lib/underscore.string.js": "6c8f2e90e6a5a9f15c2de7e79128e5bfe452f1a495bba7eff56905f6353413de",
     "src/vendors/jquery/jquery.min.js": "3558f7ba20898221ec2e8009435d5777bba35e64ab31efe2070e40286e0fd00b",
     "src/vendors/jquery-ui/ui/minified/jquery.ui.core.min.js": "78996194f22e3222b74387cfaa6c0fe5b1190c25789092cd1bd3f3e4189e0fbd",
     "src/vendors/jquery-ui/ui/minified/jquery.ui.widget.min.js": "22f3f51640e610f79dca41e1a82cee4962e5c807a3e3fdd4a64f3695516053b8",
