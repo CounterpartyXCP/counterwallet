@@ -192,8 +192,14 @@ function AddressViewModel(type, key, address, initialLabel, armoryPubKey) {
     WALLET.addresses.remove(self);
     
     //update the preferences with this address removed
-    var arr = PREFERENCES[self.TYPE == 'watch' ? 'watch_only_addresses' : 'armory_offline_addresses'];
-    arr = arrayRemove(arr, self.ADDRESS);
+    if(self.TYPE === 'watch') {
+      arrayRemove(PREFERENCES['watch_only_addresses'], self.ADDRESS);  
+    } else {
+      assert(self.TYPE === 'armory');
+      PREFERENCES['armory_offline_addresses'] = PREFERENCES['armory_offline_addresses'].filter(
+        function (el) { return el.address !== self.ADDRESS; });
+    }
+    
     WALLET.storePreferences(function() {
       checkURL(); //refresh the page without this address listed on it
     });
