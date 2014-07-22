@@ -89,6 +89,11 @@ function ExchangeViewModel() {
       self.dexHome(true);
       return;
     }
+    self.buyAmount(0);
+    self.sellAmount(0);
+    self.buyTotal(0);
+    self.sellTotal(0);
+    $('table.buySellForm span.invalid').hide() // hack
     self.baseAssetImage('');
     self.dexHome(false);   
     self.fetchMarketDetails();
