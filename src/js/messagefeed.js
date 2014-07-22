@@ -472,16 +472,18 @@ function MessageFeed() {
       // balance goes to zero, via the credit and debit handler
     } else if(category == "dividends") {
     } else if(category == "issuances") {
+
       var addressesWithAsset = WALLET.getAddressesWithAsset(message['asset']);
       for(var i=0; i < addressesWithAsset.length; i++) {
         WALLET.getAddressObj(addressesWithAsset[i]).addOrUpdateAsset(message['asset'], message, null);
       }
       //Also, if this is a new asset creation, or a transfer to an address that doesn't have the asset yet
       if(WALLET.getAddressObj(message['issuer']) && addressesWithAsset.length && !(addressesWithAsset.indexOf(message['issuer']) != -1)) {
-        failoverAPI("get_asset_info", {'assets': [message['asset']]}, function(assetsInfo, endpoint) {1
+        failoverAPI("get_asset_info", {'assets': [message['asset']]}, function(assetsInfo, endpoint) {
           WALLET.getAddressObj(message['issuer']).addOrUpdateAsset(message['asset'], assetsInfo[0], null); //will show with a 0 balance
         });    
       }
+
     } else if(category == "sends") {
       //the effects of a send are handled based on the credit and debit messages it creates, so nothing to do here
     } else if(category == "orders") {

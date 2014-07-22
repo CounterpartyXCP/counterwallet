@@ -149,6 +149,18 @@ function ExchangeViewModel() {
       return left.BALANCE == right.BALANCE ? 0 : (left.BALANCE > right.BALANCE ? -1 : 1);
     });
 
+    if (addressesWithBalance.length == 0) {
+      $('#sellButton').addClass('disabled');
+      $('div.sellForm').addClass('disabled');
+      self.availableBalanceForSell(0);
+      self.obtainableForSell(0);
+    } else {
+      $('#sellButton').removeClass('disabled');
+      $('div.sellForm').removeClass('disabled');
+    }
+
+    
+
     return addressesWithBalance;
   }, self);
 
@@ -343,6 +355,16 @@ function ExchangeViewModel() {
     addressesWithBalance.sort(function(left, right) {
       return left.BALANCE == right.BALANCE ? 0 : (left.BALANCE > right.BALANCE ? -1 : 1);
     });
+
+    if (addressesWithBalance.length == 0) {
+      $('#buyButton').addClass('disabled');
+      $('div.buyForm').addClass('disabled');
+      self.availableBalanceForBuy(0);
+      self.obtainableForBuy(0);
+    } else {
+      $('#buyButton').removeClass('disabled');
+      $('div.buyForm').removeClass('disabled');
+    }
 
     return addressesWithBalance;
   }, self);
@@ -641,20 +663,34 @@ function ExchangeViewModel() {
     try { $('#asset2OpenBuyOrders').dataTable().fnClearTable(); } catch(err) { }
 
     base_depth = 0;
-    for (i in data['buy_orders']) {
-      data['buy_orders'][i]['price'] = parseFloat(data['buy_orders'][i]['price']);
-      data['buy_orders'][i]['amount'] = normalizeQuantity(data['buy_orders'][i]['amount'], data['base_asset_divisible']);
-      data['buy_orders'][i]['total'] = normalizeQuantity(data['buy_orders'][i]['total'], data['quote_asset_divisible']);
-      data['buy_orders'][i]['base_depth'] = data['buy_orders'][i]['amount'] + base_depth;
-      base_depth = data['buy_orders'][i]['base_depth'];
+    var buy_orders = [];
+    for (var i in data['buy_orders']) {
+      if ((data['base_asset'] == 'BTC' && data['buy_orders'][i]['amount'] < BTC_ORDER_MIN_AMOUNT) || 
+          (data['quote_asset'] == 'BTC' && data['buy_orders'][i]['total'] < BTC_ORDER_MIN_AMOUNT)) {
+        data['buy_orders'][i]['exclude'] = true;
+      } else {
+        data['buy_orders'][i]['exclude'] = false;
+        data['buy_orders'][i]['price'] = parseFloat(data['buy_orders'][i]['price']);
+        data['buy_orders'][i]['amount'] = normalizeQuantity(data['buy_orders'][i]['amount'], data['base_asset_divisible']);
+        data['buy_orders'][i]['total'] = normalizeQuantity(data['buy_orders'][i]['total'], data['quote_asset_divisible']);
+        data['buy_orders'][i]['base_depth'] = data['buy_orders'][i]['amount'] + base_depth;
+        base_depth = data['buy_orders'][i]['base_depth'];
+      }
     }
     base_depth = 0;
-    for (i in data['sell_orders']) {
-      data['sell_orders'][i]['price'] = parseFloat(data['sell_orders'][i]['price']);
-      data['sell_orders'][i]['amount'] = normalizeQuantity(data['sell_orders'][i]['amount'], data['base_asset_divisible']);
-      data['sell_orders'][i]['total'] = normalizeQuantity(data['sell_orders'][i]['total'], data['quote_asset_divisible']);
-      data['sell_orders'][i]['base_depth'] = data['sell_orders'][i]['amount'] + base_depth;
-      base_depth = data['sell_orders'][i]['base_depth'];
+    for (var i in data['sell_orders']) {
+      if ((data['base_asset'] == 'BTC' && data['sell_orders'][i]['amount'] < BTC_ORDER_MIN_AMOUNT) || 
+          (data['quote_asset'] == 'BTC' && data['sell_orders'][i]['total'] < BTC_ORDER_MIN_AMOUNT) ||
+          data['sell_orders'][i]['price'] <= data['buy_orders'][0]['price']) {
+        data['sell_orders'][i]['exclude'] = true;
+      } else {
+        data['sell_orders'][i]['exclude'] = false;
+        data['sell_orders'][i]['price'] = parseFloat(data['sell_orders'][i]['price']);
+        data['sell_orders'][i]['amount'] = normalizeQuantity(data['sell_orders'][i]['amount'], data['base_asset_divisible']);
+        data['sell_orders'][i]['total'] = normalizeQuantity(data['sell_orders'][i]['total'], data['quote_asset_divisible']);
+        data['sell_orders'][i]['base_depth'] = data['sell_orders'][i]['amount'] + base_depth;
+        base_depth = data['sell_orders'][i]['base_depth'];
+      }
     }
 
     self.bidBook(data['buy_orders'])
@@ -706,6 +742,12 @@ function ExchangeViewModel() {
   }
 
   self.fetchMarketDetails = function(item) {
+    self.highestBidPrice(0);
+    self.lowestAskPrice(0);
+    self.sellPrice(0);
+    self.buyPrice(0);
+    self.obtainableForSell(0);
+    self.obtainableForBuy(0);
     self.metricsRefreshPriceChart();
     var params = {
       'asset1': self.asset2(),

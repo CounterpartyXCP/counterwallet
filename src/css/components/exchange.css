@@ -160,6 +160,10 @@ table.buySellForm .number {
   text-align: right;
 }
 
+div.buyForm.disabled, div.sellForm.disabled {
+  background-color: #CCC !important;
+}
+
 table.confirmOrderBox td {
   padding: 5px !important;
 }
