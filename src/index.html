@@ -37,6 +37,7 @@
     <link rel="stylesheet" type="text/css" media="screen" href="css/components/exchange.css">
     <link rel="stylesheet" type="text/css" media="screen" href="css/components/betting.css">
     <link rel="stylesheet" type="text/css" media="screen" href="css/components/rps.css">
+    <link rel="stylesheet" type="text/css" media="screen" href="css/components/simplebuy.css">
     <!-- endbuild -->
 
     <!-- FAVICONS -->
@@ -165,6 +166,7 @@
               <i class="fa fa-lg fa-fw fa-exchange"></i> <span class="menu-item-parent" data-bind="locale: 'exchange'"></span>
             </a>
             <ul>
+<<<<<<< HEAD
               <li>
                 <a href="pages/exchange.html">
                   <i class="fa fa-lg fa-fw fa-bar-chart-o"></i> <span data-bind="locale: 'markets'"></span>
@@ -180,6 +182,12 @@
                   <i class="fa fa-lg fa-fw fa-book"></i> <span data-bind="locale: 'my_order_history'"></span>
                 </a>
               </li>
+=======
+              <li><a href="pages/exchange.html"><i class="fa fa-lg fa-fw fa-bar-chart-o"></i> Markets</a></li>
+              <li><a href="pages/openorders.html"><i class="fa fa-lg fa-fw fa-circle-o"></i> Open Orders</a></li>
+              <li><a href="pages/ordermatches.html"><i class="fa fa-lg fa-fw fa-book"></i> My Order History</a></li>
+              <li><a href="pages/simplebuy.html"><i class="fa fa-lg fa-fw fa-book"></i> Simple Buy</a></li>
+>>>>>>> simplebuy step 1
             </ul>
           </li>
           <li class="" data-bind="visible: FEATURE_BETTING">
@@ -1041,6 +1049,7 @@
     <script src="js/components/betting.js"></script>
     <script src="js/components/donate.js"></script>
     <script src="js/components/rps.js"></script>
+    <script src="js/components/simplebuy.js"></script>
 
     <script src="js/smartadmin.app.js"></script> <!-- custom app.js -->
     <!-- ^ unfortunately we have to mod the file itself, instead of dynamically override o_O -->

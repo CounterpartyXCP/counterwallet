@@ -432,3 +432,12 @@ function initRPS() {
   RPS.init();
 }
 INIT_FUNC['pages/rps.html'] = initRPS;
+
+function initSimpleBuy() {
+  pageSetUp();
+  window.SIMPLE_BUY = new SimpleBuyViewModel();
+  ko.applyBindings(SIMPLE_BUY, document.getElementById("simplebuy"));
+
+  SIMPLE_BUY.init();
+}
+INIT_FUNC['pages/simplebuy.html'] = initSimpleBuy;

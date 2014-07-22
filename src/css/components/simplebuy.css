@@ -1,0 +1,15 @@
+div.vennd-machine {
+  padding-left: 120px;
+}
+
+div.vennd-machine img {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100px;
+  height: 100px;
+}
+
+div.vennd-machine h4 {
+  font-weight: bold;
+}
