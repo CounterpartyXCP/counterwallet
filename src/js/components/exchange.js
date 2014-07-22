@@ -50,6 +50,12 @@ function ExchangeViewModel() {
     }    
   });
 
+  self.selectedQuoteAsset = ko.observable();
+  self.selectedQuoteAsset.subscribe(function(value) {
+    if (value == 'BTC' || value == 'XCP') self.asset2(value);
+    else self.asset2('');
+  })
+
   self.assetPair = ko.computed(function() {
     if(!self.asset1() || !self.asset2()) return null;
     var pair = assetsToAssetPair(self.asset1(), self.asset2());
@@ -79,7 +85,10 @@ function ExchangeViewModel() {
   
   self.delayedAssetPairSelection = ko.computed(self.assetPair).extend({ rateLimit: { method: "notifyWhenChangesStop", timeout: 400 } });
   self.delayedAssetPairSelection.subscribeChanged(function(newValue, prevValue) {
-    if(newValue == null || !self.validationModelBaseOrders.isValid()) return;
+    if(newValue == null || !self.validationModelBaseOrders.isValid() || self.asset1() == self.asset2()) {
+      self.dexHome(true);
+      return;
+    }
     self.baseAssetImage('');
     self.dexHome(false);   
     self.fetchMarketDetails();
@@ -737,7 +746,12 @@ function ExchangeViewModel() {
 
   self.selectMarket = function(item) {
     self.asset1(item.base_asset);
-    self.asset2(item.quote_asset);
+    if (item.quote_asset == 'BTC' || item.quote_asset == 'XCP') {
+      self.selectedQuoteAsset(item.quote_asset);
+    } else {
+      self.selectedQuoteAsset('Other');
+      self.asset2(item.quote_asset);
+    }
     trackEvent('Exchange', 'MarketSelected', self.dispAssetPair());
   }
 
@@ -776,7 +790,10 @@ function ExchangeViewModel() {
       assets.initialize();
       $('#asset1, #asset2').typeahead(null, {
         source: assets.ttAdapter(),
-        displayKey: function(obj) { return obj }
+        displayKey: function(obj) { 
+          $.jqlog.debug(obj);
+          return obj; 
+        }
       }).on('typeahead:selected', function($e, datum) {
         if($($e.target).attr('name') == 'asset1')
           self.asset1(datum); //gotta do a manual update...doesn't play well with knockout

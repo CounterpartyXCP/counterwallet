@@ -63,22 +63,36 @@
           <div> <!-- widget div-->
             <div class="widget-body min-height-0 no-padding" style="min-height:0 !important" data-bind="validationOptions: { insertMessages: false }"> <!-- widget content -->
                 <div class="row" style="height:90px">
-                    <section class="col col-lg-6 col-sm-6">
+                    <section class="col col-lg-4 col-sm-4">
                       <div style="padding:10px">
-                        <label for="asset1" class="control-label font-medlg">First Token</label>
-                        <label class="input">
+                        <label for="asset1" class="control-label font-medlg">Base Token</label>
+                        <label class="input" style="margin-bottom:0">
                             <input type="text" id="asset1" name="asset1" class="form-control input" type="text" placeholder="Asset name" data-bind="value: asset1" />
                         </label>
-                        <br/><span class="errorColor" data-bind="validationMessage: asset1"></span>
+                        <span class="errorColor" data-bind="validationMessage: asset1"></span>
                       </div>
                     </section>
-                    <section class="col col-lg-6 col-sm-6">
+                    <section class="col-md-4">
                       <div style="padding:10px">
-                        <label for="asset2" class="control-label font-medlg">Second Token</label>
+                        <label for="asset2" class="control-label font-medlg">Quote Token</label>
+                        <div class="btn-group buySellBtnGroup" data-toggle="buttons" style="margin-bottom:0">
+                          <label class="radioBtn btn" data-bind="css: { 'btn-success': selectedQuoteAsset() == 'XCP', 'active': selectedQuoteAsset() == 'XCP'}">
+                            <input type="radio" value="XCP" data-bind="btnGroupChecked: selectedQuoteAsset">XCP</label>
+                            <!-- , attr: {disabled: selectedSellAsset() == 'XCP' ? 'disabled' : null }" -->
+                          <label class="radioBtn btn" data-bind="css: { 'btn-success': selectedQuoteAsset() == 'BTC', 'active': selectedQuoteAsset() == 'BTC'}">
+                            <input type="radio" value="BTC" data-bind="btnGroupChecked: selectedQuoteAsset">BTC</label>
+                          <label class="radioBtn btn" data-bind="css: { 'btn-success': selectedQuoteAsset() == 'Other', 'active': selectedQuoteAsset() == 'Other'}">
+                            <input type="radio" value="Other" data-bind="btnGroupChecked: selectedQuoteAsset">Other</label>
+                        </div>
+                        <span class="errorColor" data-bind="validationMessage: asset2"></span>
+                      </div>
+                    </section>
+                    <section class="col col-lg-4 col-sm-4" data-bind="visible: selectedQuoteAsset() == 'Other'">
+                      <div style="padding:10px">
+                        <label for="asset2" class="control-label font-medlg">&nbsp;</label>
                         <label class="input">
                             <input type="text" id="asset2" name="asset2" class="form-control input" type="text" placeholder="Asset name" data-bind="value: asset2" />
                         </label>
-                        <br/><span class="errorColor" data-bind="validationMessage: asset2"></span>
                       </div>
                     </section>
                 </div>
