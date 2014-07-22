@@ -108,7 +108,7 @@ function WalletOptionsModalViewModel() {
 
   self.hide = function() {
     if(self.ORIG_PREFERENCES_JSON != JSON.stringify(PREFERENCES)) { //only update the preferences if they have changed
-      multiAPI("store_preferences", {'wallet_id': WALLET.identifier(), 'preferences': PREFERENCES});
+      self.storePreferences();
     }
     self.shown(false);
   }  

@@ -575,6 +575,21 @@ function WalletViewModel() {
       bootbox.alert(text);
     }
   }
+
+  self.storePreferences = function(callback, for_login) {
+    var params = {
+      'wallet_id': WALLET.identifier(),
+      'preferences': PREFERENCES,
+      'network': USE_TESTNET ? 'testnet' : 'mainnet',
+      'referer': ORIG_REFERER
+    };
+    if (for_login) {
+      params['for_login'] = true;
+    }
+    multiAPI("store_preferences", params, callback);
+    var now = Math.round((new Date()).getTime() / 1000);
+    localStorage.setObject(WALLET.identifier() + '_preferences', {'last_updated': now, 'preferences':PREFERENCES});
+  }
 }
 
 /*NOTE: Any code here is only triggered the first time the page is visited. Put JS that needs to run on the

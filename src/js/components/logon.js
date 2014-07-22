@@ -138,14 +138,24 @@ function LogonViewModel() {
   }
   
   self.onReceivedPreferences = function(data) {
+    $.jqlog.debug('PREFERENCES:');
+    $.jqlog.debug(data);
     //Initialize chat feeds (even through the chat pane will remain closed by default and the user has not started chatting)
     CHAT_FEED.init();
 
     var mustSavePreferencesToServer = false;
     
+    // check if there is preferences stored in local storage
+    var localPref = localStorage.getObject(WALLET.identifier() + '_preferences');
+
     if(data) { //user stored preferences located successfully
       assert(data && data.hasOwnProperty('preferences'), "Invalid stored preferences");
+      
       PREFERENCES = data['preferences'];
+      // check if local storage pref are more recent
+      if (localPref && localPref['last_updated'] && localPref['last_updated'] > data['last_updated']) {
+        PREFERENCES = localPref['preferences'];
+      }
       
       //Provide defaults for any missing fields in the stored preferences object
       for(var prop in DEFAULT_PREFERENCES) {
@@ -157,14 +167,18 @@ function LogonViewModel() {
           }
         }
       }
+
     } else { //could not find user stored preferences
       //No server had the preferences
       $.jqlog.log("Stored preferences NOT found on server(s). Creating new...");
       trackEvent("Login", "NewWallet", USE_TESTNET ? "Testnet" : "Mainnet");
       WALLET.isNew(true);
-      
-      //no stored preferences on any server(s) in the federation, go with the default...
-      PREFERENCES = DEFAULT_PREFERENCES;
+      //no stored preferences on any server(s) in the federation, go with the local storage preferences or default...
+      if (localPref && localPref['preferences']) {
+        PREFERENCES = localPref['preferences'];
+      } else {
+        PREFERENCES = DEFAULT_PREFERENCES;
+      }
       mustSavePreferencesToServer = true;
     }
     
@@ -243,13 +257,7 @@ function LogonViewModel() {
     //store the preferences on the server(s) for future use
     if(mustSavePreferencesToServer) {
       $.jqlog.info("Preferences updated/generated during login. Updating on server(s)...");
-      multiAPI("store_preferences", {
-        'wallet_id': WALLET.identifier(),
-        'preferences': PREFERENCES,
-        'network': USE_TESTNET ? 'testnet' : 'mainnet',
-        'for_login': true,
-        'referer': ORIG_REFERER
-      });
+      self.storePreferences(null, true);
     }
     
     //Update the wallet balances (isAtLogon = true)

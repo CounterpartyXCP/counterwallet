@@ -194,7 +194,7 @@ function AddressViewModel(type, key, address, initialLabel, armoryPubKey) {
     //update the preferences with this address removed
     var arr = PREFERENCES[self.TYPE == 'watch' ? 'watch_only_addresses' : 'armory_offline_addresses'];
     arr = arrayRemove(arr, self.ADDRESS);
-    multiAPI("store_preferences", {'wallet_id': WALLET.identifier(), 'preferences': PREFERENCES}, function() {
+    WALLET.storePreferences(function() {
       checkURL(); //refresh the page without this address listed on it
     });
   }
