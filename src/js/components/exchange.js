@@ -687,9 +687,9 @@ function ExchangeViewModel() {
         data['buy_orders'][i]['exclude'] = true;
       } else {
         if (base_depth == 0) {
-          self.lowestAskPrice(data['buy_orders'][i]['price']);
-          self.buyPrice(data['buy_orders'][i]['price']);
-          self.obtainableForBuy(divFloat(self.availableBalanceForBuy(), self.lowestAskPrice()));
+          self.highestBidPrice(data['buy_orders'][i]['price']);
+          self.sellPrice(data['buy_orders'][i]['price']);
+          self.obtainableForSell(divFloat(self.availableBalanceForSell(), self.highestBidPrice()));
         }
         data['buy_orders'][i]['exclude'] = false;
         data['buy_orders'][i]['price'] = parseFloat(data['buy_orders'][i]['price']);
@@ -707,9 +707,9 @@ function ExchangeViewModel() {
         data['sell_orders'][i]['exclude'] = true;
       } else {
         if (base_depth == 0) {
-          self.highestBidPrice(data['sell_orders'][i]['price']);
-          self.sellPrice(data['sell_orders'][i]['price']);
-          self.obtainableForSell(divFloat(self.availableBalanceForSell(), self.highestBidPrice()));
+          self.lowestAskPrice(data['sell_orders'][i]['price']);
+          self.buyPrice(data['sell_orders'][i]['price']);
+          self.obtainableForBuy(divFloat(self.availableBalanceForBuy(), self.lowestAskPrice()));
         }
         data['sell_orders'][i]['exclude'] = false;
         data['sell_orders'][i]['price'] = parseFloat(data['sell_orders'][i]['price']);
