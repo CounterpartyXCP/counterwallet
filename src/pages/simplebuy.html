@@ -10,34 +10,61 @@
   </div>
 
   <div class="row">
+    <div class="col-xs-12 col-sm-12 col-md-12 col-lg-12 machineFilter">
+
+      <div class="btn-group" data-toggle="buttons" style="margin-bottom:0">
+        <label class="radioBtn btn" data-bind="css: { 'btn-success': machineFilter() == 'all', 'active': machineFilter() == 'all'}">
+          <input type="radio" value="all" data-bind="btnGroupChecked: machineFilter">All
+        </label>
+        <label class="radioBtn btn" data-bind="css: { 'btn-success': machineFilter() == 'vending machine', 'active': machineFilter() == 'vending machine'}">
+          <input type="radio" value="vending machine" data-bind="btnGroupChecked: machineFilter">Vending Machines
+        </label>
+        <label class="radioBtn btn" data-bind="css: { 'btn-success': machineFilter() == 'gateway', 'active': machineFilter() == 'gateway'}">
+          <input type="radio" value="gateway" data-bind="btnGroupChecked: machineFilter">Gateway
+        </label>
+        <label class="radioBtn btn" data-bind="css: { 'btn-success': machineFilter() == 'crowdsale', 'active': machineFilter() == 'crowdsale'}">
+          <input type="radio" value="crowdsale" data-bind="btnGroupChecked: machineFilter">Crowdsale
+        </label>
+      </div>
+
+    </div>
+  </div>
+
+
+ 
+
+  <div class="row">
     <div class="col-xs-12 col-sm-12 col-md-12 col-lg-12" data-bind="foreach: machines">
 
-      <div class="jarviswidget defaultWidgetColor" data-widget-editbutton="false" data-widget-deletebutton="false">
+      <div class="jarviswidget defaultWidgetColor" data-widget-editbutton="false" data-widget-deletebutton="false" data-bind="visible: $parent.machineFilter() == 'all' || $parent.machineFilter() == $data.type">
           <header>
             <span class="widget-icon"> <i class="fa fa-rocket"></i> </span>
             <h3>
-              [<span data-bind="text: type"></span>] 
               <span data-bind="text: name"></span>
+              [<span data-bind="text: type"></span>] : <b><span data-bind="text: baseasset"></span>/<span data-bind="text: quoteasset"></span></b>
+              
+
               <span class="txt-color-red" data-bind="visible: finished">(FINISHED)</span>
               <span class="txt-color-red" data-bind="visible: pending">(PENDING)</span>
             </h3>
             <div class="clearfix"></div>
           </header>
-          <div> <!-- widget div-->
+          <div data-bind="attr: {class: machineclass}"> <!-- widget div-->
             <div class="widget-body vennd-machine"> <!-- widget content -->
               <a data-bind="attr: {href: url}" target="_blank">
                 <img data-bind="attr: {src: image}" style="width:100px" />
               </a>
-              <h4 data-bind="text: title"></h4>
-              <p class="description" data-bind="text: description"></p>
-              <ul class="specs" data-bind="foreach: attributes">
-                <li><span data-bind="text: label"></span>: <b data-bind="text: value"></b></li>
-              </ul>
-              <p>
-                <a data-bind="attr: {href: url}, text: url" target="_blank"></a>
-              </p>
-              <a class="btn btn-default btn-primary" data-bind="click: $parent.buy, visible: !finished && !pending">BUY <span data-bind="text: base_asset"></span></a>
-              <a class="btn btn-default btn-primary" data-bind="click: $parent.sell, visible: type == 'gateway' && !finished && !pending">SELL <span data-bind="text: base_asset"></span></a>
+              <div style="padding-left:120px">
+                <h4 data-bind="text: title"></h4>
+                <p class="description" data-bind="text: description"></p>
+                <ul class="specs" data-bind="foreach: attributes">
+                  <li data-bind="attr: {class: attrclass}"><span data-bind="text: label"></span>: <b data-bind="text: value"></b></li>
+                </ul>
+              </div>
+              <div style="text-align:center">
+                <a class="btn btn-default btn-primary" data-bind="click: $parent.buy, visible: !finished && !pending">BUY <span data-bind="text: baseasset"></span></a>
+                <a class="btn btn-default btn-primary" data-bind="click: $parent.sell, visible: type == 'gateway' && !finished && !pending">SELL <span data-bind="text: baseasset"></span></a>
+              </div>
             </div>
          </div> <!-- end widget div -->
       </div> <!-- end widget -->

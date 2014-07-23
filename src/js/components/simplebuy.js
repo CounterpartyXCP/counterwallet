@@ -4,6 +4,7 @@ function SimpleBuyViewModel() {
   var self = this;
   
   self.machines = ko.observableArray([]);
+  self.machineFilter = ko.observable('all');
 
   self.init = function() {
     failoverAPI('get_vennd_machine', [], self.prepareMachinesData);
@@ -23,46 +24,61 @@ function SimpleBuyViewModel() {
 
         attributes.push({
           'label': 'Min. amount',
-          'value': data[m]['min-amount'] + ' ' + data[m]['quote-asset']
+          'value': data[m]['min-amount'] + ' ' + data[m]['quote-asset'],
+          'attrclass': 'min-amount'
         });
         attributes.push({
           'label': 'Max. amount',
-          'value': data[m]['max-amount'] + ' ' + data[m]['quote-asset']
+          'value': data[m]['max-amount'] + ' ' + data[m]['quote-asset'],
+          'attrclass': 'max-amount'
         });
-        attributes.push({
-          'label': 'Reserve balance',
-          'value': data[m]['base-reserve'] + ' ' + data[m]['base-asset']
-        });
+        if (data[m]['base-reserve']) {
+          attributes.push({
+            'label': 'Reserve balance',
+            'value': data[m]['base-reserve'] + ' ' + data[m]['base-asset'],
+            'attrclass': 'reserve'
+
+          });
+        }
         attributes.push({
           'label': 'Current price',
-          'value': data[m]['price'] + ' ' + data[m]['quote-asset']
+          'value': data[m]['price'] + ' ' + data[m]['quote-asset'],
+          'attrclass': 'price'
         });
         attributes.push({
           'label': 'Fees',
-          'value': (data[m]['fees']*100) + '%'
+          'value': (data[m]['fees']*100) + '%',
+          'attrclass': 'fees'
         })
 
       } else if (data[m]['type'] == 'gateway') {
 
         attributes.push({
           'label': 'Min. amount',
-          'value': data[m]['min-amount'] + ' ' + data[m]['quote-asset'] + ' or ' + data[m]['min-amount'] + ' ' + data[m]['base-asset']
+          'value': data[m]['min-amount'] + ' ' + data[m]['quote-asset'] + ' or ' + data[m]['min-amount'] + ' ' + data[m]['base-asset'],
+          'attrclass': 'min-amount'
         });
         attributes.push({
           'label': 'Max. amount',
-          'value': data[m]['max-amount'] + ' ' + data[m]['quote-asset'] + ' or ' + data[m]['max-amount'] + ' ' + data[m]['base-asset']
+          'value': data[m]['max-amount'] + ' ' + data[m]['quote-asset'] + ' or ' + data[m]['max-amount'] + ' ' + data[m]['base-asset'],
+          'attrclass': 'max-amount'
         });
-        attributes.push({
-          'label': 'Reserve balance',
-          'value': data[m]['base-reserve'] + ' ' + data[m]['base-asset'] + ' and ' + data[m]['quote-reserve'] + ' ' + data[m]['quote-asset']
-        });
+        if (data[m]['base-reserve'] && data[m]['quote-reserve']) {
+          attributes.push({
+            'label': 'Reserve balance',
+            'value': data[m]['base-reserve'] + ' ' + data[m]['base-asset'] + ' and ' + data[m]['quote-reserve'] + ' ' + data[m]['quote-asset'],
+            'attrclass': 'reserve'
+          });
+        }
         attributes.push({
           'label': 'Current price',
-          'value':  ' 1 ' + data[m]['quote-asset'] + ' <-> 1 ' + data[m]['base-asset']
+          'value':  ' 1 ' + data[m]['quote-asset'] + ' <-> 1 ' + data[m]['base-asset'],
+          'attrclass': 'price'
         });
         attributes.push({
           'label': 'Fees',
-          'value': (data[m]['fees'] * 100) + '%'
+          'value': (data[m]['fees'] * 100) + '%',
+          'attrclass': 'fees'
         })
 
       } else if (data[m]['type'] == 'crowdsale') {
@@ -76,19 +92,30 @@ function SimpleBuyViewModel() {
 
         attributes.push({
           'label': 'Start',
-          'value':  moment(data[m]['start'] * 1000).format("MMM Do YYYY, h:mm:ss a")
+          'value':  moment(data[m]['start'] * 1000).format("MMM Do YYYY, h:mm:ss a"),
+          'attrclass': 'date'
         });
         attributes.push({
           'label': 'End',
-          'value':  moment(data[m]['end'] * 1000).format("MMM Do YYYY, h:mm:ss a")
+          'value':  moment(data[m]['end'] * 1000).format("MMM Do YYYY, h:mm:ss a"),
+          'attrclass': 'date'
         });
         attributes.push({
           'label': 'Amount reached',
-          'value':  data[m]['amount-reached'] + ' ' + data[m]['quote-asset']
+          'value':  data[m]['amount-reached'] + ' ' + data[m]['quote-asset'],
+          'attrclass': 'amount-reached'
         });
       }
+      attributes.push({
+        'label': 'Confirmations required',
+        'value':  data[m]['confirmations-required'],
+        'attrclass': 'confirmations-required'
+      });
 
       data[m]['attributes'] = attributes;
+      data[m]['machineclass'] = (data[m]['finished'] || data[m]['pending']) ? 'pendingMachine' : '';
+      data[m]['baseasset'] = data[m]['base-asset'];
+      data[m]['quoteasset'] = data[m]['quote-asset'];
     }
     $.jqlog.debug(data);
     self.machines(data);

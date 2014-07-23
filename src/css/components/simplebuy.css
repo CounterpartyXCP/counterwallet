@@ -1,5 +1,5 @@
 div.vennd-machine {
-  padding-left: 120px;
+
 }
 
 div.vennd-machine img {
@@ -8,6 +8,7 @@ div.vennd-machine img {
   left: 0;
   width: 100px;
   height: 100px;
+  border:1px solid #000;
 }
 
 div.vennd-machine h4 {
@@ -17,4 +18,21 @@ div.vennd-machine h4 {
 div.vennd-machine ul.specs li {
 	margin: 0;
 	padding: 0;
+}
+
+div.vennd-machine ul.specs li.price,
+div.vennd-machine ul.specs li.fees {
+	font-size: 16px;
+}
+
+div.pendingMachine {
+	background-color: #CCC !important;
+}
+
+div.machineFilter label.radioBtn {
+	border-color:#CCC;
+}
+
+div.machineFilter {
+	margin-bottom: 30px;
 }
