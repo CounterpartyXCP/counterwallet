@@ -13,3 +13,8 @@ div.vennd-machine img {
 div.vennd-machine h4 {
   font-weight: bold;
 }
+
+div.vennd-machine ul.specs li {
+	margin: 0;
+	padding: 0;
+}

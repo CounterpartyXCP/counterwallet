@@ -436,7 +436,10 @@ INIT_FUNC['pages/rps.html'] = initRPS;
 function initSimpleBuy() {
   pageSetUp();
   window.SIMPLE_BUY = new SimpleBuyViewModel();
+  window.VEND_MODAL = new VendingMachineViewModel();
+
   ko.applyBindings(SIMPLE_BUY, document.getElementById("simplebuy"));
+  ko.applyBindings(VEND_MODAL, document.getElementById("vendModal"));
 
   SIMPLE_BUY.init();
 }

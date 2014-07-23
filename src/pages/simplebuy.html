@@ -12,12 +12,14 @@
   <div class="row">
     <div class="col-xs-12 col-sm-12 col-md-12 col-lg-12" data-bind="foreach: machines">
 
-      <div class="jarviswidget defaultWidgetColor" data-widget-editbutton="false" data-widget-deletebutton="false" data-bind="visible: type == 'vending machine'">
+      <div class="jarviswidget defaultWidgetColor" data-widget-editbutton="false" data-widget-deletebutton="false">
           <header>
             <span class="widget-icon"> <i class="fa fa-rocket"></i> </span>
             <h3>
               [<span data-bind="text: type"></span>] 
               <span data-bind="text: name"></span>
+              <span class="txt-color-red" data-bind="visible: finished">(FINISHED)</span>
+              <span class="txt-color-red" data-bind="visible: pending">(PENDING)</span>
             </h3>
             <div class="clearfix"></div>
           </header>
@@ -28,84 +30,80 @@
               </a>
               <h4 data-bind="text: title"></h4>
               <p class="description" data-bind="text: description"></p>
-              <p class="specs">
-                Min. amount: <b>0.1 BTC</b><br />
-                Max. amount: <b>10 BTC</b><br />
-                Reserve balance: <b>10000 XCP</b><br />
-                Current price: <b>0.004 BTC</b><br />
-                Fees: <b>1%</b>
-              </p>
+              <ul class="specs" data-bind="foreach: attributes">
+                <li><span data-bind="text: label"></span>: <b data-bind="text: value"></b></li>
+              </ul>
               <p>
                 <a data-bind="attr: {href: url}, text: url" target="_blank"></a>
               </p>
-              <a class="btn btn-default btn-primary">BUY XCP</a>
+              <a class="btn btn-default btn-primary" data-bind="click: $parent.buy, visible: !finished && !pending">BUY <span data-bind="text: base_asset"></span></a>
+              <a class="btn btn-default btn-primary" data-bind="click: $parent.sell, visible: type == 'gateway' && !finished && !pending">SELL <span data-bind="text: base_asset"></span></a>
             </div>
          </div> <!-- end widget div -->
       </div> <!-- end widget -->
-
-
-      <div class="jarviswidget defaultWidgetColor" data-widget-editbutton="false" data-widget-deletebutton="false" data-bind="visible: type == 'gateway'">
-          <header>
-            <span class="widget-icon"> <i class="fa fa-rocket"></i> </span>
-            <h3>
-              [<span data-bind="text: type"></span>] 
-              <span data-bind="text: name"></span>
-            </h3>
-            <div class="clearfix"></div>
-          </header>
-          <div> <!-- widget div-->
-            <div class="widget-body vennd-machine"> <!-- widget content -->
-              <a data-bind="attr: {href: url}" target="_blank">
-                <img data-bind="attr: {src: image}" style="width:100px" />
-              </a>
-              <h4 data-bind="text: title"></h4>
-              <p class="description" data-bind="text: description"></p>
-              <p class="specs">
-                Min. amount: <b>0.1 BTC or 0.1 XBTC</b><br />
-                Max. amount: <b>10 BTC or 10 XBTC</b><br />
-                Reserve balance: <b>100 BTC and 100 XBTC</b><br />
-                Current price: <b>1 XBTC <-> 1 BTC</b><br />
-                Fees: <b>1%</b>
-              </p>
-              <p>
-                <a data-bind="attr: {href: url}, text: url" target="_blank"></a>
-              </p>
-              <a class="btn btn-default btn-primary">BUY XBTC</a>
-              <a class="btn btn-default btn-primary">SELL XBTC</a>
-            </div>
-         </div> <!-- end widget div -->
-      </div> <!-- end widget -->
-      
-      <div class="jarviswidget defaultWidgetColor" data-widget-editbutton="false" data-widget-deletebutton="false" data-bind="visible: type == 'crowdsale'">
-            <header>
-              <span class="widget-icon"> <i class="fa fa-rocket"></i> </span>
-              <h3>
-                [<span data-bind="text: type"></span>] 
-                <span data-bind="text: name"></span>
-              </h3>
-              <div class="clearfix"></div>
-            </header>
-            <div> <!-- widget div-->
-              <div class="widget-body vennd-machine"> <!-- widget content -->
-              <a data-bind="attr: {href: url}" target="_blank">
-                <img data-bind="attr: {src: image}" style="width:100px" />
-              </a>
-              <h4 data-bind="text: title"></h4>
-              <p class="description" data-bind="text: description"></p>
-                <p class="specs">
-                  Start: <b>Monday 18 July 2014</b><br />
-                  End: <b>Monday 18 August 2014</b><br />
-                  Amount reached: <b>500 BTC </b>
-                </p>
-                <p>
-                  <a data-bind="attr: {href: url}, text: url" target="_blank"></a>
-                </p>
-                <a class="btn btn-default btn-primary">BUY STORJCOIN X</a>
-              </div>
-           </div> <!-- end widget div -->
-        </div> <!-- end widget -->
 
     </div>
   </div>
 
 </div>
+
+<!-- modal for vend machine -->
+<div data-bind="showModal: shown, validationOptions: { insertMessages: false }" id="vendModal" class="modal fade" data-backdrop="static" data-keyboard="false" tabindex="-1" role="dialog" aria-labelledby="vendModal" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" data-bind="click: hide" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+        <h4 class="modal-title">
+          [<span data-bind="text: type"></span>] 
+          <span data-bind="text: name"></span>
+        </h4>
+      </div>
+      <div class="modal-body no-padding">
+        <p class="formPadded" data-bind="text: description"></p>
+        
+        <form class="smart-form"><fieldset>
+
+          <div class="row" data-bind="visible: noBalance">
+            <div class="col col-sm-10" >
+              <div class="txt-color-red">You have no <span data-bind="text: currency"></span> in your Wallet</div>
+            </div>
+          </div>
+
+
+          <section data-bind="visible: !noBalance"><div class="row">
+            <label class="control-label col col-sm-2">Send with:</label>
+            <div class="col col-sm-10">
+              <select class="form-control" style="width: 350px;vertical-align: top;margin-right: 12px;" name="source" data-bind="options: availableAddresses, optionsValue: 'address', optionsText: 'label', value: sourceAddress, select2: { minimumResultsForSearch: 10, escapeMarkup: 'direct' }"></select>
+            </div>
+          </div></section>
+
+          <section data-bind="visible: !noBalance"><div class="row">
+            <label class="control-label col col-sm-2">Send Amount:</label>
+            <div class="col col-sm-10">
+                <label class="input inline-block">
+                  <div class="input-group">
+                    <span class="input-group-addon"><i class="fa fa-arrow-circle-o-up fa-lg fa-fw"></i></span>
+                    <input name="quantity" style="width:70%" class="form-control input-lg" data-bind="value: quantity, valueUpdate: 'input', attr: {placeholder: 'Enter quantity'}" type="text"/>
+                    <span data-bind="text: currency" style="font-size:20px; line-height:44px"></span>
+                  </div>
+                </label>
+                <span class="invalid" data-bind="validationMessage: quantity"></span>
+            </div>
+          </section>
+          <p class="formPaddedBot" data-bind="fadeVisibleInOnly: quantity">
+            You are choosing to send 
+            <b>
+              <span class="sellColor" data-bind="text: quantity"></span>
+              <span class="sellColor" data-bind="text: currency"></span> 
+            </b>
+           
+          </p>
+        </fieldset></form>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-default" data-bind="click: hide">Cancel</button>
+        <button type="button" class="btn btn-primary" data-bind="click: send, visible: !noBalance">Send</button>
+      </div>
+    </div><!-- /.modal-content -->
+  </div><!-- /.modal-dialog -->
+</div><!-- /.modal -->
