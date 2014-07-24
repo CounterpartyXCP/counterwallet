@@ -19,67 +19,55 @@ function SimpleBuyViewModel() {
       data[m]['pending'] = false;
 
       var now = Math.round((new Date()).getTime() / 1000);
-      var attributes = []
-      if (data[m]['type'] == 'vending machine') {
+      var attributes = {
+        'buy': [],
+        'sell': []
+      };
+      var sellAttributes = [];
 
-        attributes.push({
-          'label': 'Min. amount',
-          'value': data[m]['min-amount'] + ' ' + data[m]['quote-asset'],
-          'attrclass': 'min-amount'
-        });
-        attributes.push({
-          'label': 'Max. amount',
-          'value': data[m]['max-amount'] + ' ' + data[m]['quote-asset'],
-          'attrclass': 'max-amount'
-        });
-        if (data[m]['base-reserve']) {
-          attributes.push({
-            'label': 'Reserve balance',
-            'value': data[m]['base-reserve'] + ' ' + data[m]['base-asset'],
-            'attrclass': 'reserve'
+      if (data[m]['type'] == 'gateway') {
 
-          });
+        for (var t in {'buy':1, 'sell':1}) {
+
+          if (data[m][t]) {
+
+            var baseAsset = t == 'buy' ? data[m]['base-asset'] : data[m]['quote-asset'];
+            var quoteAsset = t == 'sell' ? data[m]['base-asset'] : data[m]['quote-asset'];
+
+            attributes[t].push({
+              'label': 'Min. amount',
+              'value': data[m][t]['min-amount'] + ' ' + quoteAsset,
+              'attrclass': 'min-amount'
+            });
+            attributes[t].push({
+              'label': 'Max. amount',
+              'value': data[m][t]['max-amount'] + ' ' + quoteAsset,
+              'attrclass': 'max-amount'
+            });
+            if (data[m][t]['reserve']) {
+              attributes[t].push({
+                'label': 'Reserve balance',
+                'value': data[m][t]['reserve'] + ' ' + baseAsset,
+                'attrclass': 'reserve'
+              });
+            }
+            attributes[t].push({
+              'label': 'Confirmations required',
+              'value':  data[m][t]['confirmations-required'],
+              'attrclass': 'confirmations-required'
+            });
+            attributes[t].push({
+              'label': 'Current price',
+              'value':  data[m][t]['price'] + ' ' + data[m]['quote-asset'],
+              'attrclass': 'price'
+            });
+            attributes[t].push({
+              'label': 'Fees',
+              'value': (data[m][t]['fees'] * 100) + '%',
+              'attrclass': 'fees'
+            });
+          }
         }
-        attributes.push({
-          'label': 'Current price',
-          'value': data[m]['price'] + ' ' + data[m]['quote-asset'],
-          'attrclass': 'price'
-        });
-        attributes.push({
-          'label': 'Fees',
-          'value': (data[m]['fees']*100) + '%',
-          'attrclass': 'fees'
-        })
-
-      } else if (data[m]['type'] == 'gateway') {
-
-        attributes.push({
-          'label': 'Min. amount',
-          'value': data[m]['min-amount'] + ' ' + data[m]['quote-asset'] + ' or ' + data[m]['min-amount'] + ' ' + data[m]['base-asset'],
-          'attrclass': 'min-amount'
-        });
-        attributes.push({
-          'label': 'Max. amount',
-          'value': data[m]['max-amount'] + ' ' + data[m]['quote-asset'] + ' or ' + data[m]['max-amount'] + ' ' + data[m]['base-asset'],
-          'attrclass': 'max-amount'
-        });
-        if (data[m]['base-reserve'] && data[m]['quote-reserve']) {
-          attributes.push({
-            'label': 'Reserve balance',
-            'value': data[m]['base-reserve'] + ' ' + data[m]['base-asset'] + ' and ' + data[m]['quote-reserve'] + ' ' + data[m]['quote-asset'],
-            'attrclass': 'reserve'
-          });
-        }
-        attributes.push({
-          'label': 'Current price',
-          'value':  ' 1 ' + data[m]['quote-asset'] + ' <-> 1 ' + data[m]['base-asset'],
-          'attrclass': 'price'
-        });
-        attributes.push({
-          'label': 'Fees',
-          'value': (data[m]['fees'] * 100) + '%',
-          'attrclass': 'fees'
-        })
 
       } else if (data[m]['type'] == 'crowdsale') {
 
@@ -90,32 +78,35 @@ function SimpleBuyViewModel() {
           data[m]['pending'] = true;
         }
 
-        attributes.push({
+        attributes['buy'].push({
           'label': 'Start',
           'value':  moment(data[m]['start'] * 1000).format("MMM Do YYYY, h:mm:ss a"),
           'attrclass': 'date'
         });
-        attributes.push({
+        attributes['buy'].push({
           'label': 'End',
           'value':  moment(data[m]['end'] * 1000).format("MMM Do YYYY, h:mm:ss a"),
           'attrclass': 'date'
         });
-        attributes.push({
+        attributes['buy'].push({
+          'label': 'Confirmations required',
+          'value':  data[m]['buy']['confirmations-required'],
+          'attrclass': 'confirmations-required'
+        });
+        attributes['buy'].push({
           'label': 'Amount reached',
           'value':  data[m]['amount-reached'] + ' ' + data[m]['quote-asset'],
           'attrclass': 'amount-reached'
         });
+
       }
-      attributes.push({
-        'label': 'Confirmations required',
-        'value':  data[m]['confirmations-required'],
-        'attrclass': 'confirmations-required'
-      });
+      
 
       data[m]['attributes'] = attributes;
       data[m]['machineclass'] = (data[m]['finished'] || data[m]['pending']) ? 'pendingMachine' : '';
       data[m]['baseasset'] = data[m]['base-asset'];
       data[m]['quoteasset'] = data[m]['quote-asset'];
+      data[m]['doubleway'] = attributes['sell'].length > 0;
     }
     $.jqlog.debug(data);
     self.machines(data);
@@ -186,10 +177,10 @@ function VendingMachineViewModel() {
     self.balances = {};
     if (action == 'buy') {
       self.currency(machine['quote-asset']);
-      self.desinationAddress(machine['buy-address']);
+      self.desinationAddress(machine['buy']['address']);
     } else {
       self.currency(machine['base-asset']);
-      self.desinationAddress(machine['sell-address']);
+      self.desinationAddress(machine['sell']['address']);
     }
     var addresses = WALLET.getAddressesList(true);
     var options = []

@@ -4,7 +4,7 @@
     <div class="col-xs-12 col-sm-7 col-md-7 col-lg-6">
       <h1 class="page-title txt-color-blueDark">
         <i class="fa fa-rocket"></i> 
-        Simple Buy with Vennd machine
+        Quick Buy with Vennd machine
       </h1>
     </div>
   </div>
@@ -16,9 +16,6 @@
         <label class="radioBtn btn" data-bind="css: { 'btn-success': machineFilter() == 'all', 'active': machineFilter() == 'all'}">
           <input type="radio" value="all" data-bind="btnGroupChecked: machineFilter">All
         </label>
-        <label class="radioBtn btn" data-bind="css: { 'btn-success': machineFilter() == 'vending machine', 'active': machineFilter() == 'vending machine'}">
-          <input type="radio" value="vending machine" data-bind="btnGroupChecked: machineFilter">Vending Machines
-        </label>
         <label class="radioBtn btn" data-bind="css: { 'btn-success': machineFilter() == 'gateway', 'active': machineFilter() == 'gateway'}">
           <input type="radio" value="gateway" data-bind="btnGroupChecked: machineFilter">Gateway
         </label>
@@ -29,9 +26,6 @@
 
     </div>
   </div>
-
-
- 
 
   <div class="row">
     <div class="col-xs-12 col-sm-12 col-md-12 col-lg-12" data-bind="foreach: machines">
@@ -50,21 +44,49 @@
             <div class="clearfix"></div>
           </header>
           <div data-bind="attr: {class: machineclass}"> <!-- widget div-->
+
             <div class="widget-body vennd-machine"> <!-- widget content -->
+
               <a data-bind="attr: {href: url}" target="_blank">
                 <img data-bind="attr: {src: image}" style="width:100px" />
               </a>
+
               <div style="padding-left:120px">
+
                 <h4 data-bind="text: title"></h4>
                 <p class="description" data-bind="text: description"></p>
-                <ul class="specs" data-bind="foreach: attributes">
-                  <li data-bind="attr: {class: attrclass}"><span data-bind="text: label"></span>: <b data-bind="text: value"></b></li>
-                </ul>
+
+                <div class="row">
+                  
+                  <div class="col-xs-6 col-sm-6 col-md-6 col-lg-6">
+                    <div style="padding:20px; background-color:#E9FAF3" data-bind="attr: {class: machineclass}">
+                      <ul class="specs" data-bind="foreach: attributes['buy']">
+                        <li data-bind="attr: {class: attrclass}"><span data-bind="text: label"></span>: <b data-bind="text: value"></b></li>
+                      </ul>
+                      <div style="text-align:center">
+                        <a class="btn btn-default btn-primary" data-bind="click: $parent.buy, visible: !finished && !pending">
+                          BUY <span data-bind="text: baseasset"></span>
+                        </a>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="col-xs-6 col-sm-6 col-md-6 col-lg-6" data-bind="visible: doubleway">
+                    <div style="padding:20px; background-color:#ffeddf">
+                      <ul class="specs" data-bind="foreach: attributes['sell']">
+                        <li data-bind="attr: {class: attrclass}"><span data-bind="text: label"></span>: <b data-bind="text: value"></b></li>
+                      </ul>
+                      <div style="text-align:center">
+                        <a class="btn btn-default btn-primary" data-bind="click: $parent.sell, visible: type == 'gateway' && !finished && !pending">
+                          SELL <span data-bind="text: baseasset"></span>
+                        </a>
+                      </div>
+                    </div>
+                  </div>
+
+                </div>       
+
               </div>
-              <div style="text-align:center">
-                <a class="btn btn-default btn-primary" data-bind="click: $parent.buy, visible: !finished && !pending">BUY <span data-bind="text: baseasset"></span></a>
-                <a class="btn btn-default btn-primary" data-bind="click: $parent.sell, visible: type == 'gateway' && !finished && !pending">SELL <span data-bind="text: baseasset"></span></a>
-              </div>
+              
             </div>
          </div> <!-- end widget div -->
       </div> <!-- end widget -->

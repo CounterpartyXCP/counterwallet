@@ -15,6 +15,10 @@ div.vennd-machine h4 {
   font-weight: bold;
 }
 
+div.vennd-machine ul.specs {
+  padding-left: 20px !important;
+}
+
 div.vennd-machine ul.specs li {
 	margin: 0;
 	padding: 0;
