@@ -213,6 +213,7 @@ var DONATION_ADDRESS = USE_TESTNET ? 'n4MGGJBkW9RjRKBbZfBAceHDndhywvVPV9' : '19U
 var APPROX_SECONDS_PER_BLOCK = USE_TESTNET ? 20 * 60 : 8 * 60; //a *rough* estimate on how many seconds per each block (used for estimating open order time left until expiration, etc)
 
 var USER_COUNTRY = ''; //set in login.js
+var CURRENT_PAGE_URL = ''; // set in loadUrl()
 
 var DISABLED_FEATURES_SUPPORTED = ['betting', 'rps', 'dividend', 'exchange', 'leaderboard', 'portfolio', 'stats', 'history']; //what can be disabled
 var DISABLED_FEATURES = []; //set in counterwallet.js

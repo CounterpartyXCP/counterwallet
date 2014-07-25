@@ -1336,6 +1336,7 @@ function loadPage(url, container) {
       
       //call page initialization code, as necessary
       if(INIT_FUNC.hasOwnProperty(url)) {
+        CURRENT_PAGE_URL = url;
         INIT_FUNC[url]();
         trackPageView(url);
       }
