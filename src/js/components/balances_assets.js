@@ -228,8 +228,8 @@ function IssueAdditionalAssetModalViewModel() {
         divisible: self.asset().DIVISIBLE,
         description: self.asset().description(),
         callable_: self.asset().CALLABLE,
-        call_date: self.asset().CALLABLE ? self.asset().CALLDATE : null,
-        call_price: self.asset().CALLABLE ? self.asset().CALLPRICE : null,
+        call_date: self.asset().CALLABLE ? self.asset().CALLDATE : 0,
+        call_price: self.asset().CALLABLE ? self.asset().CALLPRICE : 0,
         transfer_destination: null
       },
       function(txHash, data, endpoint, addressType, armoryUTx) {
@@ -298,8 +298,8 @@ function TransferAssetModalViewModel() {
         divisible: self.asset().DIVISIBLE,
         description: self.asset().description(),
         callable_: self.asset().CALLABLE,
-        call_date: self.asset().CALLABLE ? self.asset().CALLDATE : null,
-        call_price: self.asset().CALLABLE ? self.asset().CALLPRICE : null,
+        call_date: self.asset().CALLABLE ? self.asset().CALLDATE : 0,
+        call_price: self.asset().CALLABLE ? self.asset().CALLPRICE : 0,
         transfer_destination: self.destAddress()
       },
       function(txHash, data, endpoint, addressType, armoryUTx) {
@@ -382,8 +382,8 @@ function ChangeAssetDescriptionModalViewModel() {
         divisible: self.asset().DIVISIBLE,
         description: self.newDescription(),
         callable_: self.asset().CALLABLE,
-        call_date: self.asset().CALLABLE ? self.asset().CALLDATE : null,
-        call_price: self.asset().CALLABLE ? self.asset().CALLPRICE : null,
+        call_date: self.asset().CALLABLE ? self.asset().CALLDATE : 0,
+        call_price: self.asset().CALLABLE ? self.asset().CALLPRICE : 0,
         transfer_destination: null
       },
       function(txHash, data, endpoint, addressType, armoryUTx) {
