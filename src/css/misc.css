@@ -72,3 +72,18 @@ span.modeIndicator {
 #portfolioMarketBar h2, #leaderboardMarketBar h2 {
   display: inline;
 }
+
+
+#noticeTestnet {
+  font-size: 26px;
+  font-weight: bolder;
+  color: red;
+  background-color: white;
+  display: block;
+  width: 230px;
+  position: absolute;
+  left: 50%;
+  margin-left: -115px;
+  text-transform: uppercase;
+  text-align: center;
+}
