@@ -15,7 +15,9 @@ function WalletViewModel() {
 
   self.networkBlockHeight.subscribe(function(newBlockIndex) {
     try {
-      EXCHANGE.refresh();
+      if (CURRENT_PAGE_URL == 'pages/exchange.html') {
+        EXCHANGE.refresh();
+      }
     } catch(e) {}
   });
   
