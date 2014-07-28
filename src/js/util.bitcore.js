@@ -317,6 +317,29 @@ CWBitcore.checkTransactionDest = function(txHex, source, dest) {
   return true;
 }
 
+CWBitcore.compareOutputs = function(txHexs) {
+  
+  var tx0 = CWBitcore.parseRawTransaction(txHexs[0]); 
+  for (var t = 1; t < txHexs.length; t++) {
+    var tx1 = CWBitcore.parseRawTransaction(txHexs[1]); 
+    if (tx1.outs.length != tx0.outs.length) {
+      return false;
+    }
+    for (var i=0; i<tx0.outs.length; i++) {
+      var addresses0 = CWBitcore.extractAddressFromTxOut(tx0.outs[i]).split(',').sort().join(',');
+      var addresses1 = CWBitcore.extractAddressFromTxOut(tx1.outs[i]).split(',').sort().join(',');
+      var amount0 = tx0.outs[i].getValue();
+      var amount1 = tx1.outs[i].getValue();
+
+      if (addresses0 != addresses1 || amount0 != amount1) {
+        return false;
+      }
+    }
+  }
+  return true;
+  
+}
+
 CWBitcore.encrypt = function(message, password) {
   return CryptoJS.AES.encrypt(message, password).toString();
 }
