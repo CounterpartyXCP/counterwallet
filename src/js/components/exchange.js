@@ -689,7 +689,7 @@ function ExchangeViewModel() {
         if (base_depth == 0) {
           self.highestBidPrice(data['buy_orders'][i]['price']);
           self.sellPrice(data['buy_orders'][i]['price']);
-          self.obtainableForSell(divFloat(self.availableBalanceForSell(), self.highestBidPrice()));
+          self.obtainableForSell(mulFloat(self.availableBalanceForSell(), self.highestBidPrice()));
         }
         data['buy_orders'][i]['exclude'] = false;
         data['buy_orders'][i]['price'] = parseFloat(data['buy_orders'][i]['price']);
