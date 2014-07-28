@@ -435,7 +435,9 @@ function PayDividendModalViewModel() {
     rateLimit: { timeout: 500, method: "notifyWhenChangesStop" },
     validation:  {
       validator: function (val, self) {
-        if(self.assetData() === null) return true; //wait until dividend asset chosen to validate
+        $.jqlog.debug("ASSET DATA:");
+        $.jqlog.debug(self.assetData());
+        if(!self.assetData()) return true; //wait until dividend asset chosen to validate
         
         var supply = new Decimal(normalizeQuantity(self.assetData().supply, self.assetData().divisible));
         // we substract user balance for this asset
@@ -451,6 +453,7 @@ function PayDividendModalViewModel() {
   });
   // TODO: DRY! we already make a query to check if assetName exists
   self.assetName.subscribe(function(name) {
+    if (!name) return;
     failoverAPI("get_asset_info", {'assets': [name]}, function(assetsData, endpoint) {
       self.assetData(assetsData[0]);
     });
@@ -529,13 +532,40 @@ function PayDividendModalViewModel() {
       self.validationModel.errors.showAllMessages();
       return false;
     }
-    //do the additional issuance (specify non-zero quantity, no transfer destination)
-    WALLET.doTransaction(self.addressVM().ADDRESS, "create_dividend",
-      { source: self.addressVM().ADDRESS,
-        quantity_per_unit: denormalizeQuantity(parseFloat(self.quantityPerUnit())),
-        asset: self.assetData().asset,
-        dividend_asset: self.selectedDividendAsset()
-      },
+    
+    // fetch shareholders to check transaction dest.
+    if (self.selectedDividendAsset() == 'BTC') {
+      var params = {
+        'filters': [
+          {'field': 'asset', 'op': '=', 'value': self.assetData().asset},
+          {'field': 'quantity', 'op': '>', 'value': 0}
+        ],
+        'filterop': 'AND'
+      }
+      failoverAPI('get_balances', params, self.sendDividend)
+    } else {
+      self.sendDividend();
+    }
+  }
+
+  self.sendDividend = function(data) {
+
+    var params = {
+      source: self.addressVM().ADDRESS,
+      quantity_per_unit: denormalizeQuantity(parseFloat(self.quantityPerUnit())),
+      asset: self.assetData().asset,
+      dividend_asset: self.selectedDividendAsset()
+    }
+  
+    if (data) {
+      var dests = [];
+      for (var a in data) {
+        dests.push(data[a]['address']);
+      }
+      params['_btc_dividend_dests'] = dests;
+    }
+
+    WALLET.doTransaction(self.addressVM().ADDRESS, "create_dividend", params,
       function(txHash, data, endpoint, addressType, armoryUTx) {
         self.shown(false);
         
