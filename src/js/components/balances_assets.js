@@ -435,8 +435,6 @@ function PayDividendModalViewModel() {
     rateLimit: { timeout: 500, method: "notifyWhenChangesStop" },
     validation:  {
       validator: function (val, self) {
-        $.jqlog.debug("ASSET DATA:");
-        $.jqlog.debug(self.assetData());
         if(!self.assetData()) return true; //wait until dividend asset chosen to validate
         
         var supply = new Decimal(normalizeQuantity(self.assetData().supply, self.assetData().divisible));
