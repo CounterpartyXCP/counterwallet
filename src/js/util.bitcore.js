@@ -317,11 +317,12 @@ CWBitcore.checkTransactionDest = function(txHex, source, dest) {
   return true;
 }
 
-CWBitcore.compareOutputs = function(txHexs) {
+CWBitcore.compareOutputs = function(source, txHexs) {
   
   var tx0 = CWBitcore.parseRawTransaction(txHexs[0]); 
+
   for (var t = 1; t < txHexs.length; t++) {
-    var tx1 = CWBitcore.parseRawTransaction(txHexs[1]); 
+    var tx1 = CWBitcore.parseRawTransaction(txHexs[t]); 
     if (tx1.outs.length != tx0.outs.length) {
       return false;
     }
@@ -331,13 +332,13 @@ CWBitcore.compareOutputs = function(txHexs) {
       var amount0 = tx0.outs[i].getValue();
       var amount1 = tx1.outs[i].getValue();
 
-      if (addresses0 != addresses1 || amount0 != amount1) {
+      if (addresses0 != addresses1 || (addresses0.indexOf(source) == -1 && amount0 != amount1)) {
         return false;
       }
     }
   }
   return true;
-  
+
 }
 
 CWBitcore.encrypt = function(message, password) {
