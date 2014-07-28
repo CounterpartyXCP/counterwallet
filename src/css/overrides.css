@@ -441,6 +441,11 @@ div.tooltip-inner {
   border: 1px solid #555;
 }
 
+@media only screen and (max-width : 630px) {
+  #donate {
+    display: none;
+  }
+}
 
 /** BOOTSTRAP OVERRIDES/EXTENSIONS **/
 /*dropdown submenus - from http://stackoverflow.com/a/18024991*/
