@@ -93,6 +93,8 @@ function ExchangeViewModel() {
     self.sellAmount(0);
     self.buyTotal(0);
     self.sellTotal(0);
+    self.selectedAddressForBuy(null);
+    self.selectedAddressForSell(null);
     $('table.buySellForm span.invalid').hide() // hack
     self.baseAssetImage('');
     self.dexHome(false);   
@@ -179,6 +181,7 @@ function ExchangeViewModel() {
   }, self);
 
   self.selectedAddressForSell.subscribe(function(value) {
+    if (!value) return;
     var bal = self.balances[value + '_' + self.baseAsset()];
     self.availableBalanceForSell(bal);
     self.obtainableForSell(mulFloat(bal, self.highestBidPrice()));
