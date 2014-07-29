@@ -703,7 +703,7 @@ function ExchangeViewModel() {
     for (var i in data['sell_orders']) {
       if ((data['base_asset'] == 'BTC' && data['sell_orders'][i]['amount'] < BTC_ORDER_MIN_AMOUNT) || 
           (data['quote_asset'] == 'BTC' && data['sell_orders'][i]['total'] < BTC_ORDER_MIN_AMOUNT) ||
-          data['sell_orders'][i]['price'] <= data['buy_orders'][0]['price']) {
+          (data['buy_orders'].length > 0 && data['sell_orders'][i]['price'] <= data['buy_orders'][0]['price'])) {
         data['sell_orders'][i]['exclude'] = true;
       } else {
         if (base_depth == 0) {
