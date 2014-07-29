@@ -302,10 +302,25 @@ function ExchangeViewModel() {
       return false;
     }
 
+    var buyOrders = self.bidBook();
+    var amountCumul = 0;
+    var estimatedTotalPrice = 0;
+    for (var i = 0; i < buyOrders.length; i++) {
+      if (buyOrders[i]['price'] >= self.sellPrice() && amountCumul < self.sellAmount()) {
+        var vol = Math.min(self.sellAmount() - amountCumul, buyOrders[i]['amount']);
+        estimatedTotalPrice += mulFloat(vol, buyOrders[i]['price']);
+        amountCumul += vol;
+      }
+    }
+    if (amountCumul < self.sellAmount()) {
+      estimatedTotalPrice += mulFloat(self.sellAmount() - amountCumul, self.sellPrice());
+    }
+
     message  = '<table class="confirmOrderBox">';
     message += '<tr><td><b>Price: </b></td><td style="text-align:right">' + self.sellPrice() + '</td><td>' + self.quoteAsset() + '/' + self.baseAsset() + '</td></tr>';
     message += '<tr><td><b>Amount: </b></td><td style="text-align:right">' + self.sellAmount() + '</td><td>' + self.baseAsset() + '</td></tr>';
     message += '<tr><td><b>Total: </b></td><td style="text-align:right">' + self.sellTotal() + '</td><td>' + self.quoteAsset() + '</td></tr>';
+    message += '<tr><td><b>Real estimated total: </b></td><td style="text-align:right">' + estimatedTotalPrice + '</td><td>' + self.quoteAsset() + '</td></tr>';
     message += '</table>';
 
     bootbox.dialog({
@@ -510,10 +525,31 @@ function ExchangeViewModel() {
       return false;
     }
 
+    var sellOrders = self.askBook();
+    var amountCumul = 0;
+    var estimatedTotalPrice = 0;
+    for (var i = 0; i < sellOrders.length; i++) {
+      if (sellOrders[i]['price'] <= self.buyPrice() && amountCumul < self.buyAmount()) {
+        var vol = Math.min(self.buyAmount() - amountCumul, sellOrders[i]['amount']);
+        estimatedTotalPrice += mulFloat(vol, sellOrders[i]['price']);
+        amountCumul += vol;
+      }
+    }
+    if (amountCumul < self.buyAmount()) {
+
+      estimatedTotalPrice += mulFloat(self.buyAmount() - amountCumul, self.buyPrice());
+      $.jqlog.debug('estimatedTotalPrice 2:' + estimatedTotalPrice);
+    }
+
     message  = '<table class="confirmOrderBox">';
     message += '<tr><td><b>Price: </b></td><td style="text-align:right">' + self.buyPrice() + '</td><td>' + self.quoteAsset() + '/' + self.baseAsset() + '</td></tr>';
     message += '<tr><td><b>Amount: </b></td><td style="text-align:right">' + self.buyAmount() + '</td><td>' + self.baseAsset() + '</td></tr>';
     message += '<tr><td><b>Total: </b></td><td style="text-align:right">' + self.buyTotal() + '</td><td>' + self.quoteAsset() + '</td></tr>';
+    message += '<tr><td><b>Real estimated total: </b></td><td style="text-align:right">' + estimatedTotalPrice + '</td><td>' + self.quoteAsset() + '</td></tr>';
+    if (self.quoteAsset() == 'BTC') {
+      message += '<tr><td><b>Provided fee: </b></td><td style="text-align:right">' + self.buyFee() + '</td><td>' + self.quoteAsset() + '</td></tr>';
+      message += '<tr><td colspan="3"><i>These fees are optional, go directly miners (not to us) and are non-refundable.</i></td></tr>';
+    }
     message += '</table>';
 
     bootbox.dialog({
