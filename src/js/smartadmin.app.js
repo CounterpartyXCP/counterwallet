@@ -1308,7 +1308,7 @@ function checkURL() {
   } else {
     //COUNTERWALLET: START MOD
     //Dont load anything, just reset any hash
-    window.location.hash = '';
+    //window.location.hash = '';
     //COUNTERWALLET: END MOD
   }
 

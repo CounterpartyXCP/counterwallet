@@ -39,7 +39,7 @@ function WalletOptionsModalViewModel() {
   self.showAdvancedOptions = ko.observable(false);
   self.urlPassword = ko.observable('');
   self.walletUrl = ko.computed(function() {
-    if (self.urlPassword().length > 0) {
+    if (self.urlPassword().length > 0 && WALLET.BITCOIN_WALLET) {
       return WALLET.BITCOIN_WALLET.getQuickUrl(self.urlPassword());
     }
   });

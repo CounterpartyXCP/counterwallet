@@ -197,7 +197,14 @@ var USE_TESTNET = (   (((location.pathname == "/" || location.pathname == "/src/
                   );
 
 var TESTNET_PASSPHRASE = qs("passphrase");
-var CRYPTED_PASSPHRASE = qs("cp");
+
+var CRYPTED_PASSPHRASE;
+if (location.hash.indexOf('cp=') == 1) {
+  CRYPTED_PASSPHRASE = location.hash.substr(4);
+  location.hash = '';
+}
+location.hash = '';
+
 
 var ORIG_REFERER = document.referrer;
 

@@ -100,8 +100,8 @@ CWHierarchicalKey.prototype.cryptPassphrase = function(password) {
 }
 
 CWHierarchicalKey.prototype.getQuickUrl = function(password) {
-  var url = location.protocol + '//' + location.hostname + '/?cp=';
-  url += encodeURIComponent(this.cryptPassphrase(password));
+  var url = location.protocol + '//' + location.hostname + '/#cp=';
+  url += this.cryptPassphrase(password);
   return url;
 }
 
