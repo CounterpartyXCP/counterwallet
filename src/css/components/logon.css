@@ -20,8 +20,9 @@
     padding-bottom: 0px;
 }
 
-#password {
+#password, #passwordDecrypt, #cryptedPassphrase {
     width: 100%;
+    margin-bottom: 5px;
 }
 
 #generated {

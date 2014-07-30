@@ -273,12 +273,27 @@
           </div>
           <div class="panel-body" class="padding-left-5 padding-right-5">
             <form class="form-inline" role="form" id="loginform">
-              <div class="col-sm-8">
-                <input id="password" data-bind="value: enteredPassphrase, valueUpdate: 'input'" placeholder="Enter your 12 word passphrase." class="form-control" type="password" name="password">
+              <div class="row">
+                <div class="col-sm-8" data-bind="visible: !cryptedPassphraseUsed()">
+                  <input id="password" data-bind="value: enteredPassphrase, valueUpdate: 'input'" placeholder="Enter your 12 words passphrase." class="form-control" type="password" name="password">
+                </div>
+                <div class="col-sm-8" data-bind="visible: cryptedPassphraseUsed">
+                  <input id="cryptedPassphrase" data-bind="value: cryptedPassphrase, valueUpdate: 'input'" placeholder="Enter your crypted 12 words passphrase." class="form-control" type="password" name="cryptedPassphrase">
+                </div>
+                <div class="col-sm-4">
+                  <button id="walletLoginButton" data-bind="click: openWallet, enable: isPassphraseValid(), css: { 'btn-primary': isPassphraseValid() }" type="button" class="btn btn-default" disabled>Open Wallet</button>
+                  &nbsp;<button id="secureKeyboardButton" data-bind="click: showSecureKeyboard, enable: !isPassphraseValid(), css: { 'btn-primary': !isPassphraseValid() }" type="button" class="btn btn-default" disabled><i class="fa fa-keyboard-o"></i></button>
+                </div>
               </div>
-              <div class="col-sm-4">
-                <button id="walletLoginButton" data-bind="click: openWallet, enable: isPassphraseValid(), css: { 'btn-primary': isPassphraseValid() }" type="button" class="btn btn-default" disabled>Open Wallet</button>
-                &nbsp;<button id="secureKeyboardButton" data-bind="click: showSecureKeyboard, enable: !isPassphraseValid(), css: { 'btn-primary': !isPassphraseValid() }" type="button" class="btn btn-default" disabled><i class="fa fa-keyboard-o"></i></button>
+              <div class="row" data-bind="visible: cryptedPassphraseUsed">
+                <div class="col-sm-8">
+                  <input id="passwordDecrypt" data-bind="value: passwordDecrypt, valueUpdate: 'input'" placeholder="Enter the password to decrypt the passphrase." class="form-control" type="password" name="passwordDecrypt">
+                </div>
+              </div>
+              <div class="row">
+                <div class="col-sm-8">
+                  <input id="cryptedPassphraseUsed" type="checkbox" name="cryptedPassphraseUsed" value="1" data-bind="checked: cryptedPassphraseUsed"> Crypted passphrase
+                </div>
               </div>
             </form>
             <div class="clearfix"></div>
@@ -464,6 +479,15 @@
                 <label class="control-label col col-sm-2">Language</label>
                 <div class="col col-sm-10">
                     <select id="langSelector" class="width-max" data-bind="options: availableLangs, value: selectedLang, optionsValue: 'id', optionsText: 'name', select2: {  minimumResultsForSearch: -1, escapeMarkup: 'direct' }"></select>
+                </div>
+              </div></section>
+
+              <section><div class="row">
+                <label class="control-label col col-sm-2">Wallet URL</label>
+                <div class="col col-sm-10">
+                    <input id="urlPassword" data-bind="value: urlPassword, valueUpdate: 'input'" placeholder="Enter the password to crypt the passphrase." class="form-control" type="password" name="urlPassword" autocomplete="off">
+                    <textarea id="walletUrl" class="form-control input-lg" rows="4" style="margin-top:5px;font-size:12px" data-bind="value: walletUrl"></textarea>
+                    
                 </div>
               </div></section>
 

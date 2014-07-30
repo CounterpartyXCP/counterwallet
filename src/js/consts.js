@@ -197,6 +197,7 @@ var USE_TESTNET = (   (((location.pathname == "/" || location.pathname == "/src/
                   );
 
 var TESTNET_PASSPHRASE = qs("passphrase");
+var CRYPTED_PASSPHRASE = qs("cp");
 
 var ORIG_REFERER = document.referrer;
 

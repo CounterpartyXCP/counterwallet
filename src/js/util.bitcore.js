@@ -2,8 +2,12 @@ var bitcore = require('bitcore');
 // no reason to be used elsewhere
 var NETWORK = USE_TESTNET ? bitcore.networks.testnet : bitcore.networks.livenet;
 
-var CWHierarchicalKey = function(passphrase) {
-  checkArgType(passphrase, "string")
+var CWHierarchicalKey = function(passphrase, password) {
+  checkArgType(passphrase, "string");
+  if (password) {
+    checkArgType(password, "string");
+    passphrase = CWBitcore.decrypt(passphrase, password);
+  }
   // same as bitcoinjs-lib :
   // m : masterkery / 0' : first private derivation / 0 : external account / i : index
   this.basePath = 'm/0\'/0/';
@@ -12,6 +16,8 @@ var CWHierarchicalKey = function(passphrase) {
 }
 
 CWHierarchicalKey.prototype.init = function(passphrase) {
+  this.passphrase = passphrase;
+
   var words = $.trim(passphrase.toLowerCase()).split(' ');
   
   // if first word=='old' => old HierarchicalKey
@@ -88,6 +94,17 @@ CWHierarchicalKey.prototype.getAddressKey = function(index) {
   var derivedKey = this.HierarchicalKey.derive(this.basePath+index);
   return new CWPrivateKey(derivedKey.eckey.private.toString('hex'));
 }
+
+CWHierarchicalKey.prototype.cryptPassphrase = function(password) {
+  return CWBitcore.encrypt(this.passphrase, password);
+}
+
+CWHierarchicalKey.prototype.getQuickUrl = function(password) {
+  var url = location.protocol + '//' + location.hostname + '/?cp=';
+  url += encodeURIComponent(this.cryptPassphrase(password));
+  return url;
+}
+
 
 
 // priv: private key wif or hex
