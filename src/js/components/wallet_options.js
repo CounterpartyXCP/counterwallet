@@ -35,6 +35,8 @@ function WalletOptionsModalViewModel() {
   self.maxBTCFeeRequiredPct = ko.observable(FEE_FRACTION_DEFAULT_FILTER).extend(pctValidator);
   self.defaultBTCFeeProvidedPct = ko.observable(FEE_FRACTION_PROVIDED_DEFAULT_PCT).extend(pctValidator);
   self.defaultBTCFeeRequiredPct = ko.observable(FEE_FRACTION_REQUIRED_DEFAULT_PCT).extend(pctValidator);
+
+  self.showAdvancedOptions = ko.observable(false);
   
   self.dispMyCookiePresent = ko.computed(function() {
     return self.myCookie() ? 'Present' : 'None';
@@ -108,7 +110,7 @@ function WalletOptionsModalViewModel() {
 
   self.hide = function() {
     if(self.ORIG_PREFERENCES_JSON != JSON.stringify(PREFERENCES)) { //only update the preferences if they have changed
-      self.storePreferences();
+      WALLET.storePreferences();
     }
     self.shown(false);
   }  
