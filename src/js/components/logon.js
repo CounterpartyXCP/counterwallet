@@ -6,7 +6,10 @@ function LogonViewModel() {
   self.enteredPassphrase = ko.observable('');
   self.generatedPassphrase = ko.observable('');
   self.walletGenProgressVal = ko.observable(0);
-  
+  self.passwordDecrypt = ko.observable('');
+  self.cryptedPassphraseUsed = ko.observable(CRYPTED_PASSPHRASE ? true : false);
+  self.cryptedPassphrase = ko.observable(CRYPTED_PASSPHRASE);
+
   self.USE_TESTNET = USE_TESTNET;
   self.IS_DEV = IS_DEV;
 
@@ -29,14 +32,26 @@ function LogonViewModel() {
       words.shift();
     }
      
-     var valid = true;
-     words.forEach(function (word) {
-       if (Mnemonic.words.indexOf(word) == -1) {
-          valid = false;
-       }
-     });
-     return valid;
+    var valid = true;
+    words.forEach(function (word) {
+     if (Mnemonic.words.indexOf(word) == -1) {
+        valid = false;
+     }
+    });
+    return valid;
   }, self);
+
+  self.decryptEnteredPassphrase = function() {
+    if (!self.cryptedPassphraseUsed() || !self.passwordDecrypt() ||  !self.cryptedPassphrase()) return;
+    try {
+      var decryptedPassphrase = CWBitcore.decrypt(self.cryptedPassphrase(), self.passwordDecrypt());
+      self.enteredPassphrase(decryptedPassphrase);
+    } catch(e) {
+      $.jqlog.debug('error: ' + e)
+    }
+  }
+  self.cryptedPassphrase.subscribe(self.decryptEnteredPassphrase);
+  self.passwordDecrypt.subscribe(self.decryptEnteredPassphrase);
   
   self.generatePassphrase = function() {
     var m = new Mnemonic(128); //128 bits of entropy (12 word passphrase)

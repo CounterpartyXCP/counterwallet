@@ -48,7 +48,7 @@ function WaitingBTCPayViewModel(btcPayData) {
   }, self);
   
   self.approxExpiresInTime = ko.computed(function() {
-    return new Date((new Date()).getTime() + (self.expiresInNumBlocks() * APPROX_SECONDS_PER_BLOCK * 1000));
+    return self.now().getTime() + (self.expiresInNumBlocks() * APPROX_SECONDS_PER_BLOCK * 1000);
   }, self);
   
   self.displayColor = ko.computed(function() {
@@ -255,9 +255,10 @@ function UpcomingBTCPayViewModel(btcPayData) {
   }, self);
   
   self.approxTimeUntilEligible = ko.computed(function() {
-    return new Date((new Date()).getTime() + (self.numBlocksUntilEligible() * APPROX_SECONDS_PER_BLOCK * 1000));
+    return self.now().getTime() + (self.numBlocksUntilEligible() * APPROX_SECONDS_PER_BLOCK * 1000);
   }, self);
 }
+
 function UpcomingBTCPayFeedViewModel() {
   /* when an order match occurs where we owe BTC, a btcpay transaction should be made. Due to the potential of a 
    * blockchain reorg happening at any time, we delay the btcpay by 6 or so blocks so that (barring some kind of catastrophic

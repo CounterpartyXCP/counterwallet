@@ -35,6 +35,14 @@ function WalletOptionsModalViewModel() {
   self.maxBTCFeeRequiredPct = ko.observable(FEE_FRACTION_DEFAULT_FILTER).extend(pctValidator);
   self.defaultBTCFeeProvidedPct = ko.observable(FEE_FRACTION_PROVIDED_DEFAULT_PCT).extend(pctValidator);
   self.defaultBTCFeeRequiredPct = ko.observable(FEE_FRACTION_REQUIRED_DEFAULT_PCT).extend(pctValidator);
+
+  self.showAdvancedOptions = ko.observable(false);
+  self.urlPassword = ko.observable('');
+  self.walletUrl = ko.computed(function() {
+    if (self.urlPassword().length > 0 && WALLET.BITCOIN_WALLET) {
+      return WALLET.BITCOIN_WALLET.getQuickUrl(self.urlPassword());
+    }
+  });
   
   self.dispMyCookiePresent = ko.computed(function() {
     return self.myCookie() ? 'Present' : 'None';
@@ -74,6 +82,9 @@ function WalletOptionsModalViewModel() {
   });
   
   self.show = function(resetForm) {
+    document.getElementById('urlPassword').autocomplete = 'off';
+    self.urlPassword('');
+
     if(typeof(resetForm) === 'undefined') resetForm = true;
     self.ORIG_PREFERENCES_JSON = JSON.stringify(PREFERENCES); //store to be able to tell if we need to update prefs on the server
 
@@ -108,7 +119,7 @@ function WalletOptionsModalViewModel() {
 
   self.hide = function() {
     if(self.ORIG_PREFERENCES_JSON != JSON.stringify(PREFERENCES)) { //only update the preferences if they have changed
-      self.storePreferences();
+      WALLET.storePreferences();
     }
     self.shown(false);
   }  

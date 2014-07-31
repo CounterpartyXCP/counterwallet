@@ -1,7 +1,7 @@
 /***********
  * GLOBAL CONSTANTS
  ***********/
-var VERSION = "1.4.0 BETA";
+var VERSION = "1.5.0PRE BETA";
 
 var IS_MOBILE_OR_TABLET = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
 var PREFERENCES = {}; //set when logging in
@@ -198,6 +198,14 @@ var USE_TESTNET = (   (((location.pathname == "/" || location.pathname == "/src/
 
 var TESTNET_PASSPHRASE = qs("passphrase");
 
+var CRYPTED_PASSPHRASE;
+if (location.hash.indexOf('cp=') == 1) {
+  CRYPTED_PASSPHRASE = location.hash.substr(4);
+  location.hash = '';
+}
+location.hash = '';
+
+
 var ORIG_REFERER = document.referrer;
 
 //CONSTANTS THAT DEPEND ON IS_DEV / USE_TESTNET
@@ -227,6 +235,7 @@ var RESTRICTED_AREA = {
   'dividend': ['US']
 }
 
+var MAX_SUPPORT_CASE_PROBLEM_LEN = 4096;
 
 
 

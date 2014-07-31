@@ -23,7 +23,20 @@ ko.validation.rules['assetNameExists'] = {
     );   
   }
 };
-
+ko.validation.rules['isValidAssetNameLength'] = {
+    validator: function (val, self) {
+      //Check length
+      var n = 0;
+      for(var i=0; i < val.length; i++) {
+        n *= 26;
+        assert(B26_DIGITS.indexOf(val[i]) != -1); //should have been checked already
+        n += B26_DIGITS.indexOf(val[i]); 
+      }
+      assert(n >= Math.pow(26, 3)); //should have been checked already
+      return n <= MAX_INT;
+    },
+    message: 'Asset name is too long, or too short'
+};
 ko.validation.rules['isValidAssetDescription'] = {
     validator: function (val, self) {
       return byteCount(val) <= MAX_ASSET_DESC_LENGTH;
@@ -42,21 +55,7 @@ function CreateAssetModalViewModel() {
       message: "Must contain uppercase letters only (A-Z), be at least 4 characters in length, and cannot start with 'A'.",
       params: '^[B-Z][A-Z]{3,}$'
     },
-    validation: {
-      validator: function (val, self) {
-        //Check length
-        var n = 0;
-        for(var i=0; i < val.length; i++) {
-          n *= 26;
-          assert(B26_DIGITS.indexOf(val[i]) != -1); //should have been checked already
-          n += B26_DIGITS.indexOf(val[i]); 
-        }
-        assert(n >= Math.pow(26, 3)); //should have been checked already
-        return n <= MAX_INT;
-      },
-      message: 'Asset name is too long, or too short',
-      params: self
-    },    
+    isValidAssetNameLength: self,
     assetNameIsTaken: self
   });
   self.description = ko.observable('').extend({
@@ -353,7 +352,7 @@ function ChangeAssetDescriptionModalViewModel() {
 
   self.dispCharactersRemaining = ko.computed(function() {
     if(!self.newDescription() || self.newDescription().length > MAX_ASSET_DESC_LENGTH) return '';
-    return ' (<b>' + (MAX_ASSET_DESC_LENGTH - byteCount(self.newDescription())) + '</b> bytes remaining)'
+    return ' (<b>' + (MAX_ASSET_DESC_LENGTH - byteCount(self.newDescription())) + '</b> bytes remaining)';
   }, self);
     
   self.validationModel = ko.validatedObservable({
@@ -428,14 +427,15 @@ function PayDividendModalViewModel() {
   self.assetName = ko.observable('').extend({
     required: true,
     pattern: {
-      message: 'Must be between 4-24 uppercase letters only (A-Z) & cannot start with the letter A.',
-      params: '^[B-Z][A-Z]{3,23}$'
+      message: "Must contain uppercase letters only (A-Z), be at least 4 characters in length, and cannot start with 'A'.",
+      params: '^[B-Z][A-Z]{3,}$'
     },
+    isValidAssetNameLength: self,
     assetNameExists: self,
     rateLimit: { timeout: 500, method: "notifyWhenChangesStop" },
     validation:  {
       validator: function (val, self) {
-        if(self.assetData() === null) return true; //wait until dividend asset chosen to validate
+        if(!self.assetData()) return true; //wait until dividend asset chosen to validate
         
         var supply = new Decimal(normalizeQuantity(self.assetData().supply, self.assetData().divisible));
         // we substract user balance for this asset
@@ -451,6 +451,7 @@ function PayDividendModalViewModel() {
   });
   // TODO: DRY! we already make a query to check if assetName exists
   self.assetName.subscribe(function(name) {
+    if (!name) return;
     failoverAPI("get_asset_info", {'assets': [name]}, function(assetsData, endpoint) {
       self.assetData(assetsData[0]);
     });
@@ -529,13 +530,40 @@ function PayDividendModalViewModel() {
       self.validationModel.errors.showAllMessages();
       return false;
     }
-    //do the additional issuance (specify non-zero quantity, no transfer destination)
-    WALLET.doTransaction(self.addressVM().ADDRESS, "create_dividend",
-      { source: self.addressVM().ADDRESS,
-        quantity_per_unit: denormalizeQuantity(parseFloat(self.quantityPerUnit())),
-        asset: self.assetData().asset,
-        dividend_asset: self.selectedDividendAsset()
-      },
+    
+    // fetch shareholders to check transaction dest.
+    if (self.selectedDividendAsset() == 'BTC') {
+      var params = {
+        'filters': [
+          {'field': 'asset', 'op': '=', 'value': self.assetData().asset},
+          {'field': 'quantity', 'op': '>', 'value': 0}
+        ],
+        'filterop': 'AND'
+      }
+      failoverAPI('get_balances', params, self.sendDividend)
+    } else {
+      self.sendDividend();
+    }
+  }
+
+  self.sendDividend = function(data) {
+
+    var params = {
+      source: self.addressVM().ADDRESS,
+      quantity_per_unit: denormalizeQuantity(parseFloat(self.quantityPerUnit())),
+      asset: self.assetData().asset,
+      dividend_asset: self.selectedDividendAsset()
+    }
+  
+    if (data) {
+      var dests = [];
+      for (var a in data) {
+        dests.push(data[a]['address']);
+      }
+      params['_btc_dividend_dests'] = dests;
+    }
+
+    WALLET.doTransaction(self.addressVM().ADDRESS, "create_dividend", params,
       function(txHash, data, endpoint, addressType, armoryUTx) {
         self.shown(false);
         

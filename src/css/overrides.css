@@ -441,6 +441,11 @@ div.tooltip-inner {
   border: 1px solid #555;
 }
 
+@media only screen and (max-width : 630px) {
+  #donate {
+    display: none;
+  }
+}
 
 /** BOOTSTRAP OVERRIDES/EXTENSIONS **/
 /*dropdown submenus - from http://stackoverflow.com/a/18024991*/
@@ -488,4 +493,11 @@ div.tooltip-inner {
     -webkit-border-radius:6px 0 6px 6px;
     -moz-border-radius:6px 0 6px 6px;
     border-radius:6px 0 6px 6px;
+}
+
+
+.prefFieldPercent {
+  width: 80% !important;
+  text-align: right;
+  display: inline-block !important;
 }

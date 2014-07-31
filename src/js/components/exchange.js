@@ -93,6 +93,8 @@ function ExchangeViewModel() {
     self.sellAmount(0);
     self.buyTotal(0);
     self.sellTotal(0);
+    self.selectedAddressForBuy(null);
+    self.selectedAddressForSell(null);
     $('table.buySellForm span.invalid').hide() // hack
     self.baseAssetImage('');
     self.dexHome(false);   
@@ -179,6 +181,7 @@ function ExchangeViewModel() {
   }, self);
 
   self.selectedAddressForSell.subscribe(function(value) {
+    if (!value) return;
     var bal = self.balances[value + '_' + self.baseAsset()];
     self.availableBalanceForSell(bal);
     self.obtainableForSell(mulFloat(bal, self.highestBidPrice()));
@@ -299,10 +302,25 @@ function ExchangeViewModel() {
       return false;
     }
 
+    var buyOrders = self.bidBook();
+    var amountCumul = 0;
+    var estimatedTotalPrice = 0;
+    for (var i = 0; i < buyOrders.length; i++) {
+      if (buyOrders[i]['price'] >= self.sellPrice() && amountCumul < self.sellAmount()) {
+        var vol = Math.min(self.sellAmount() - amountCumul, buyOrders[i]['amount']);
+        estimatedTotalPrice += mulFloat(vol, buyOrders[i]['price']);
+        amountCumul += vol;
+      }
+    }
+    if (amountCumul < self.sellAmount()) {
+      estimatedTotalPrice += mulFloat(self.sellAmount() - amountCumul, self.sellPrice());
+    }
+
     message  = '<table class="confirmOrderBox">';
     message += '<tr><td><b>Price: </b></td><td style="text-align:right">' + self.sellPrice() + '</td><td>' + self.quoteAsset() + '/' + self.baseAsset() + '</td></tr>';
     message += '<tr><td><b>Amount: </b></td><td style="text-align:right">' + self.sellAmount() + '</td><td>' + self.baseAsset() + '</td></tr>';
     message += '<tr><td><b>Total: </b></td><td style="text-align:right">' + self.sellTotal() + '</td><td>' + self.quoteAsset() + '</td></tr>';
+    message += '<tr><td><b>Real estimated total: </b></td><td style="text-align:right">' + estimatedTotalPrice + '</td><td>' + self.quoteAsset() + '</td></tr>';
     message += '</table>';
 
     bootbox.dialog({
@@ -507,10 +525,31 @@ function ExchangeViewModel() {
       return false;
     }
 
+    var sellOrders = self.askBook();
+    var amountCumul = 0;
+    var estimatedTotalPrice = 0;
+    for (var i = 0; i < sellOrders.length; i++) {
+      if (sellOrders[i]['price'] <= self.buyPrice() && amountCumul < self.buyAmount()) {
+        var vol = Math.min(self.buyAmount() - amountCumul, sellOrders[i]['amount']);
+        estimatedTotalPrice += mulFloat(vol, sellOrders[i]['price']);
+        amountCumul += vol;
+      }
+    }
+    if (amountCumul < self.buyAmount()) {
+
+      estimatedTotalPrice += mulFloat(self.buyAmount() - amountCumul, self.buyPrice());
+      $.jqlog.debug('estimatedTotalPrice 2:' + estimatedTotalPrice);
+    }
+
     message  = '<table class="confirmOrderBox">';
     message += '<tr><td><b>Price: </b></td><td style="text-align:right">' + self.buyPrice() + '</td><td>' + self.quoteAsset() + '/' + self.baseAsset() + '</td></tr>';
     message += '<tr><td><b>Amount: </b></td><td style="text-align:right">' + self.buyAmount() + '</td><td>' + self.baseAsset() + '</td></tr>';
     message += '<tr><td><b>Total: </b></td><td style="text-align:right">' + self.buyTotal() + '</td><td>' + self.quoteAsset() + '</td></tr>';
+    message += '<tr><td><b>Real estimated total: </b></td><td style="text-align:right">' + estimatedTotalPrice + '</td><td>' + self.quoteAsset() + '</td></tr>';
+    if (self.quoteAsset() == 'BTC') {
+      message += '<tr><td><b>Provided fee: </b></td><td style="text-align:right">' + self.buyFee() + '</td><td>' + self.quoteAsset() + '</td></tr>';
+      message += '<tr><td colspan="3"><i>These fees are optional, go directly miners (not to us) and are non-refundable.</i></td></tr>';
+    }
     message += '</table>';
 
     bootbox.dialog({
@@ -689,7 +728,7 @@ function ExchangeViewModel() {
         if (base_depth == 0) {
           self.highestBidPrice(data['buy_orders'][i]['price']);
           self.sellPrice(data['buy_orders'][i]['price']);
-          self.obtainableForSell(divFloat(self.availableBalanceForSell(), self.highestBidPrice()));
+          self.obtainableForSell(mulFloat(self.availableBalanceForSell(), self.highestBidPrice()));
         }
         data['buy_orders'][i]['exclude'] = false;
         data['buy_orders'][i]['price'] = parseFloat(data['buy_orders'][i]['price']);
@@ -703,7 +742,7 @@ function ExchangeViewModel() {
     for (var i in data['sell_orders']) {
       if ((data['base_asset'] == 'BTC' && data['sell_orders'][i]['amount'] < BTC_ORDER_MIN_AMOUNT) || 
           (data['quote_asset'] == 'BTC' && data['sell_orders'][i]['total'] < BTC_ORDER_MIN_AMOUNT) ||
-          data['sell_orders'][i]['price'] <= data['buy_orders'][0]['price']) {
+          (data['buy_orders'].length > 0 && data['sell_orders'][i]['price'] <= data['buy_orders'][0]['price'])) {
         data['sell_orders'][i]['exclude'] = true;
       } else {
         if (base_depth == 0) {

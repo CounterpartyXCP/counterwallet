@@ -98,6 +98,7 @@ function loadServersListAndSettings() {
     assert(data['servers'] && data['servers'] instanceof Array, "'servers' field in returned servers.json file is not an array");
     ROLLBAR_ACCESS_TOKEN = data['rollbarAccessToken'] || ''; 
     GOOGLE_ANALYTICS_UAID = (!USE_TESTNET ? data['googleAnalyticsUA'] : data['googleAnalyticsUA-testnet']) || '';
+    
     if(!data['servers'].length)
       cwURLs([ location.origin ]);
     else

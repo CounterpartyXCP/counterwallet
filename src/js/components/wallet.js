@@ -526,6 +526,9 @@ function WalletViewModel() {
     delete data['destBtcPay'];
     if (action == "create_burn") {
       verifyDestAddr = TESTNET_UNSPENDABLE;
+    } else if (action == "create_dividend" && data['dividend_asset'] == 'BTC') {
+      verifyDestAddr = data['_btc_dividend_dests'];
+      delete data['_btc_dividend_dests'];
     }
     
     //Do the transaction
