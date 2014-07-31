@@ -235,6 +235,7 @@ var RESTRICTED_AREA = {
   'dividend': ['US']
 }
 
+var MAX_SUPPORT_CASE_PROBLEM_LEN = 4096;
 
 
 

@@ -142,7 +142,7 @@ function _encodeForJSONRPCOverGET(params) {
 }
 
 function _makeJSONAPICall(destType, endpoints, method, params, timeout, onSuccess, onError, httpMethod) {
-  /*Makes a JSON RPC API call to a specific counterpartyd/counterwalletd endpoint.
+  /*Makes a JSON RPC API call to a specific counterpartyd/counterblockd endpoint.
    
     -endpoints: The specific API endpoint URL string to make the API request to.
      If a list of endpoint URLs are specified instead of a single URL, then we attempt the request
@@ -159,7 +159,7 @@ function _makeJSONAPICall(destType, endpoints, method, params, timeout, onSucces
   if(typeof(httpMethod)==='undefined') httpMethod = "POST"; //default to POST
   assert(httpMethod == "POST" || httpMethod == "GET", "Invalid HTTP method");
   
-  //make JSON API call to counterwalletd
+  //make JSON API call to counterblockd
   if(httpMethod == "POST") {
     var extraAJAXOpts = {
       'contentType': 'application/json; charset=utf-8',
@@ -167,7 +167,7 @@ function _makeJSONAPICall(destType, endpoints, method, params, timeout, onSucces
       'timeout': timeout
     }
     
-    if(destType == "counterwalletd") {
+    if(destType == "counterblockd") {
       fetchData(endpoints,
         onSuccess, onError,
         JSON.stringify({
@@ -177,7 +177,7 @@ function _makeJSONAPICall(destType, endpoints, method, params, timeout, onSucces
           "params": params
         }), extraAJAXOpts, true);
     } else if(destType == "counterpartyd") {
-      //make JSON API call to counterwalletd, which will proxy it to counterpartyd
+      //make JSON API call to counterblockd, which will proxy it to counterpartyd
       fetchData(endpoints,
         onSuccess, onError,
         JSON.stringify({
@@ -196,7 +196,7 @@ function _makeJSONAPICall(destType, endpoints, method, params, timeout, onSucces
       'timeout': timeout
     }
     
-    if(destType == "counterwalletd") {
+    if(destType == "counterblockd") {
       qs = $.param({
         "jsonrpc": "2.0",
         "id": 0,
@@ -205,7 +205,7 @@ function _makeJSONAPICall(destType, endpoints, method, params, timeout, onSucces
       });
       fetchData(_formulateEndpoints(endpoints, qs), onSuccess, onError, null, extraAJAXOpts, true);
     } else if(destType == "counterpartyd") {
-      //make JSON API call to counterwalletd, which will proxy it to counterpartyd
+      //make JSON API call to counterblockd, which will proxy it to counterpartyd
       qs = $.param({
         "jsonrpc": "2.0",
         "id": 0,
@@ -230,9 +230,9 @@ function _getDestTypeFromMethod(method) {
       'get_order_book_simple', 'get_order_book_buysell', 'get_trade_history',
       'record_btc_open_order', 'cancel_btc_open_order', 'get_bets', 'get_user_bets', 'get_feed', 'get_feeds_by_source',
       'parse_base64_feed', 'get_open_rps_count', 'get_user_rps', 
-      'get_users_pairs', 'get_market_orders', 'get_market_trades', 'get_markets_list', 'get_market_details',
-      'get_pubkey_for_address', 'create_armory_utx', 'convert_armory_signedtx_to_raw_hex'].indexOf(method) >= 0) {
-    destType = "counterwalletd";
+      'get_users_pairs', 'get_market_orders', 'get_market_trades', 'get_markets_list', 'get_market_details', 'get_asset_names',
+      'get_pubkey_for_address', 'create_armory_utx', 'convert_armory_signedtx_to_raw_hex', 'create_support_case'].indexOf(method) >= 0) {
+    destType = "counterblockd";
   }
   return destType;
 }
@@ -295,8 +295,8 @@ function _multiAPIPrimative(method, params, onFinished) {
 /*
  AVAILABLE API CALL METHODS:
  * failoverAPI: Used for all counterpartyd get_ API requests (for now...later we may want to move to multiAPINewest)
- * multiAPI: Used for storing counterwalletd state data (store_preferences, store_chat_handle, etc)
- * multiAPINewest: Used for fetching state data from counterwalletd (e.g. get_preferences, get_chat_handle)
+ * multiAPI: Used for storing counterblockd state data (store_preferences, store_chat_handle, etc)
+ * multiAPINewest: Used for fetching state data from counterblockd (e.g. get_preferences, get_chat_handle)
  * multiAPIConsensus: Used for all counterpartyd create_ API requests
 */
 

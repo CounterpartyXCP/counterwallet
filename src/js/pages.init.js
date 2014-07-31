@@ -21,8 +21,8 @@ function initIndex() { //main page
   window.NOTIFICATION_FEED = new NotificationFeedViewModel();
   
   window.SUPPORT_MODAL = new SupportModalViewModel();
-  
   window.DONATE_MODAL = new DonationViewModel();
+  window.CREATE_SUPPORT_CASE_VIEW_MODEL = new CreateSupportCaseViewModel();
 
   $(document).ready(function() {
     ko.applyBindings(LOGON_VIEW_MODEL, document.getElementById("logon"));
@@ -36,7 +36,8 @@ function initIndex() { //main page
     ko.applyBindings(NOTIFICATION_FEED, document.getElementById("notificationFeed"));        
     ko.applyBindings(SUPPORT_MODAL, document.getElementById("supportModal"));
     ko.applyBindings(DONATE_MODAL, document.getElementById("donateModal"));
-            
+    ko.applyBindings(CREATE_SUPPORT_CASE_VIEW_MODEL, document.getElementById("createSupportCaseModal"));
+    
     //so that knockout is run on the DOM sections and global context is accessible...
     ko.applyBindings({}, document.getElementById("noticeTestnet"));
     ko.applyBindings({}, document.getElementById("noticeDevMode"));
@@ -83,6 +84,10 @@ function initIndex() { //main page
         });
     });
 
+    $('.showCreateSupportCase').click(function(e) {
+      SUPPORT_MODAL.hide(); //oftentimes it will be up...don't want layers of modals
+      CREATE_SUPPORT_CASE_VIEW_MODEL.show();
+    });
   });
 }
 initIndex(); //call it now, as this script is loaded on index page load

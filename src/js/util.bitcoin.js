@@ -53,7 +53,7 @@ function smartFormat(num, truncateDecimalPlacesAtMin, truncateDecimalPlacesTo) {
 
 //TODO: refactor with a "currencies" list in conf
 function assetsToAssetPair(asset1, asset2) {
-  //NOTE: This MUST use the same logic/rules as counterwalletd's assets_to_asset_pair() function in lib/util.py
+  //NOTE: This MUST use the same logic/rules as counterblockd's assets_to_asset_pair() function in lib/util.py
   var base = null;
   var quote = null;
   

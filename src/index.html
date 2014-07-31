@@ -594,7 +594,7 @@
     </div><!-- /.modal -->
     
     <!-- modal for support window (in logged in interface) -->
-    <div data-bind="showModal: shown" id="supportModal" class="modal fade" data-backdrop="static" data-keyboard="false" tabindex="-1" role="dialog" aria-labelledby="supportModal" aria-hidden="true">
+    <div data-bind="showModal: shown" id="supportModal" class="modal" data-backdrop="static" data-keyboard="false" tabindex="-1" role="dialog" aria-labelledby="supportModal" aria-hidden="true">
       <div class="modal-dialog">
         <div class="modal-content">
           <div class="modal-header">
@@ -606,9 +606,9 @@
             <div data-bind="visible: type == 'general'">
                 <h5>If you are having issues using Counterwallet, please try the following:</h5>
                 <ul>
-                    <li>Ask in Counterwallet chat: Click on the <b>Show Chat</b> link on the left menubar, and ask your question there. Someone may know the answer.</li>
-                    <li>Especially if you think you have found a bug in Counterwallet, you can post your question or issue in <a href="https://forums.counterparty.co/index.php?topic=188.0" target="_blank">this thread</a> in the <a href="https://forums.counterparty.co/" target="_blank">Counterparty forums</a>.</li>
-                    <li>If all else fails, you can email the Counterparty developers at <a href="mailto: dev@counterparty.co">dev@counterparty.co</a>. Please avoid the use of this for trivial issues, and/or non-bugs.</li>
+                    <li><b>Ask in Counterwallet chat:</b> Click on the <b>Show Chat</b> link on the left menubar, and ask your question there. Someone may know the answer.</li>
+                    <li><b>Check out our forums:</b> You can post your question or issue in <a href="https://forums.counterparty.co/index.php/board,13.0.html" target="_blank">the Counterparty support forums</a>.</li>
+                    <li><b>Open a support ticket:</b> If all else fails, you may <a href="#" class="showCreateSupportCase">open a support ticket</a>.</li>
                 </ul>
             </div>
             <div data-bind="visible: type == 'balancesPage'">
@@ -624,6 +624,8 @@
                     <li><a href="https://www.counterparty.co/xcp/" target="_blank">Where can I buy XCP?</a></li>
                     <li><a href="https://www.counterparty.co/?p=2251" target="_blank">I have another issue...</a></li>
                 </ul>
+                <h5 class="margin-bottom-0">For other questions, please ask in <a href="https://forums.counterparty.co/index.php/board,13.0.html" target="_blank">the Counterparty support forums</a>.</h5> 
+                <h5>For bugs, you may <a href="#" class="showCreateSupportCase">open a support ticket</a>.</h5>
             </div>
             <div data-bind="visible: type == 'exchangePage'">
                 <h5>Answers to common questions. Just click the one you're interested in:</h5>
@@ -634,6 +636,8 @@
                     <li><a href="https://www.counterparty.co/?p=2265" target="_blank">Why does it cost me a little Bitcoin to cancel an order!?</a></li>
                     <li><a href="https://www.counterparty.co/?p=2251" target="_blank">I have another issue...</a></li>
                 </ul>
+                <h5 class="margin-bottom-0">For other questions, please ask in <a href="https://forums.counterparty.co/index.php/board,13.0.html" target="_blank">the Counterparty support forums</a>.</h5> 
+                <h5>For bugs, you may <a href="#" class="showCreateSupportCase">open a support ticket</a>.</h5>
             </div>
 
           </div>
@@ -706,6 +710,73 @@
           <div class="modal-footer">
             <button type="button" class="btn btn-default" data-bind="click: hide">Cancel</button>
             <button type="button" class="btn btn-primary" data-bind="click: submitDonation">Send</button>
+          </div>
+        </div><!-- /.modal-content -->
+      </div><!-- /.modal-dialog -->
+    </div><!-- /.modal -->
+    
+    <!-- modal for opening a support case -->
+    <div data-bind="showModal: shown" id="createSupportCaseModal" class="modal" data-backdrop="static" data-keyboard="false" tabindex="-1" role="dialog" aria-labelledby="createSupportCaseModal" aria-hidden="true">
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <div class="modal-header">
+            <button type="button" data-bind="click: hide" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+            <h4 class="modal-title">Create Support Case</h4>
+          </div>
+          <div class="modal-body no-padding">
+            <div class="formPadded">
+                <p>Create a support case by filling out the information below.</p>
+                <p><b>Please only create a case only if your question is not answered in
+                    <a href="http://support.counterparty.co/" target="_blank">our knowledge base</a>.</b></p>
+            </div>
+            
+            <form class="smart-form" data-bind="submit: doAction"><fieldset>
+              <section><div class="row">
+                <label class="control-label col col-sm-2">Your Name</label>
+                <div class="col col-sm-10">
+                    <label class="input"><i class="icon-append fa fa-user"></i>
+                        <input name="name" data-bind="value: name" type="text"/>
+                    </label>
+                </div>
+              </div></section>
+
+              <section><div class="row">
+                <label class="control-label col col-sm-2">Your Email Address</label>
+                <div class="col col-sm-10">
+                    <label class="input"><i class="icon-append fa fa-envelope"></i>
+                        <input name="email" data-bind="value: email" type="text"/>
+                    </label>
+                    <div class="note">Required so that we can provide a response to you.</div>
+                </div>
+              </div></section>
+                
+              <section><div class="row">
+                <label class="control-label col col-sm-2">Problem Description</label>
+                <div class="col col-sm-10">
+                    <label class="textarea">
+                        <textarea rows="3" class="custom-scroll" data-bind="value: problem, valueUpdate : 'input'"></textarea>
+                    </label>
+                    <div class="note">Enter an in-depth description of your problem<span data-bind="html: dispCharactersRemaining"></span>.</div>
+                </div>
+              </div></section>
+              
+              <section><div class="row">
+                <div class="col col-sm-2"></div>
+                <div class="col col-sm-10">
+                  <label class="checkbox">
+                    <input name="includeScreenshot" type="checkbox" data-bind="checked: includeScreenshot">
+                    <i></i>Include screenshot
+                  </label>
+                  <div class="note">Check this box to include a screenshot, which helps us better diagnose the issue.</div>
+              </div></section>
+              
+            </fieldset></form>
+            <div class="formPaddedBot">We will try to get back to you within <b>24 hours</b>, via email, to the address you have provided.
+            </div>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-default" data-bind="click: hide">Cancel</button>
+            <button type="button" data-bind="click: submitForm" class="btn btn-info">Create Case</button>
           </div>
         </div><!-- /.modal-content -->
       </div><!-- /.modal-dialog -->
@@ -784,12 +855,13 @@
     <script src="vendors/cryptojs/rollups/hmac-sha512.js"></script>
     <script src="vendors/cryptojs/rollups/aes.js"></script>
 
-    <!--  bitcore -->
+    <!-- bitcore -->
     <script src="vendors/bitcore/browser/bundle.js"></script>
 
+    <!-- others -->
     <script src="vendors/iso8601-js-period/iso8601.min.js"></script>
-
     <script src="vendors/queue/queue.min.js"></script>
+    <script src="vendors/htmlcanvas/build/html2canvas.js"></script>
 
     <!-- endbuild -->
 

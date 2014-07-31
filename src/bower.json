@@ -36,6 +36,7 @@
         "mocha": "1.18.2",
         "chai": "1.9.1",
         "iso8601-js-period": "https://github.com/nezasa/iso8601-js-period.git#v0.2.0.0",
-        "queue": "https://github.com/mbostock/queue.git#v1.0.7"
+        "queue": "https://github.com/mbostock/queue.git#v1.0.7",
+        "htmlcanvas": "git://github.com/xnova/html2canvas.git#33e96032800a71e2ea8d0cff556ec940412a8527"
     }
 }

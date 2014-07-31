@@ -23,7 +23,20 @@ ko.validation.rules['assetNameExists'] = {
     );   
   }
 };
-
+ko.validation.rules['isValidAssetNameLength'] = {
+    validator: function (val, self) {
+      //Check length
+      var n = 0;
+      for(var i=0; i < val.length; i++) {
+        n *= 26;
+        assert(B26_DIGITS.indexOf(val[i]) != -1); //should have been checked already
+        n += B26_DIGITS.indexOf(val[i]); 
+      }
+      assert(n >= Math.pow(26, 3)); //should have been checked already
+      return n <= MAX_INT;
+    },
+    message: 'Asset name is too long, or too short'
+};
 ko.validation.rules['isValidAssetDescription'] = {
     validator: function (val, self) {
       return byteCount(val) <= MAX_ASSET_DESC_LENGTH;
@@ -42,21 +55,7 @@ function CreateAssetModalViewModel() {
       message: "Must contain uppercase letters only (A-Z), be at least 4 characters in length, and cannot start with 'A'.",
       params: '^[B-Z][A-Z]{3,}$'
     },
-    validation: {
-      validator: function (val, self) {
-        //Check length
-        var n = 0;
-        for(var i=0; i < val.length; i++) {
-          n *= 26;
-          assert(B26_DIGITS.indexOf(val[i]) != -1); //should have been checked already
-          n += B26_DIGITS.indexOf(val[i]); 
-        }
-        assert(n >= Math.pow(26, 3)); //should have been checked already
-        return n <= MAX_INT;
-      },
-      message: 'Asset name is too long, or too short',
-      params: self
-    },    
+    isValidAssetNameLength: self,
     assetNameIsTaken: self
   });
   self.description = ko.observable('').extend({
@@ -353,7 +352,7 @@ function ChangeAssetDescriptionModalViewModel() {
 
   self.dispCharactersRemaining = ko.computed(function() {
     if(!self.newDescription() || self.newDescription().length > MAX_ASSET_DESC_LENGTH) return '';
-    return ' (<b>' + (MAX_ASSET_DESC_LENGTH - byteCount(self.newDescription())) + '</b> bytes remaining)'
+    return ' (<b>' + (MAX_ASSET_DESC_LENGTH - byteCount(self.newDescription())) + '</b> bytes remaining)';
   }, self);
     
   self.validationModel = ko.validatedObservable({
@@ -428,9 +427,10 @@ function PayDividendModalViewModel() {
   self.assetName = ko.observable('').extend({
     required: true,
     pattern: {
-      message: 'Must be between 4-24 uppercase letters only (A-Z) & cannot start with the letter A.',
-      params: '^[B-Z][A-Z]{3,23}$'
+      message: "Must contain uppercase letters only (A-Z), be at least 4 characters in length, and cannot start with 'A'.",
+      params: '^[B-Z][A-Z]{3,}$'
     },
+    isValidAssetNameLength: self,
     assetNameExists: self,
     rateLimit: { timeout: 500, method: "notifyWhenChangesStop" },
     validation:  {

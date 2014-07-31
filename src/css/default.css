@@ -68,6 +68,19 @@
 .table-border-collapse {
   border-collapse:collapse !important;
 }
+.font-size-1-15em {
+  font-size: 1.15em !important;
+}
+.font-size-1-33em {
+  font-size: 1.33em !important;
+}
+.font-size-1-66em {
+  font-size: 1.66em !important;
+}
+.font-size-2em {
+  font-size: 2em !important;
+}
+
 
 
 .errorColor {
