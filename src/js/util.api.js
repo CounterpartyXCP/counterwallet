@@ -230,7 +230,7 @@ function _getDestTypeFromMethod(method) {
       'get_order_book_simple', 'get_order_book_buysell', 'get_trade_history',
       'record_btc_open_order', 'cancel_btc_open_order', 'get_bets', 'get_user_bets', 'get_feed', 'get_feeds_by_source',
       'parse_base64_feed', 'get_open_rps_count', 'get_user_rps', 
-      'get_users_pairs', 'get_market_orders', 'get_market_trades', 'get_markets_list', 'get_market_details', 'get_asset_names',
+      'get_users_pairs', 'get_market_orders', 'get_market_trades', 'get_markets_list', 'get_market_details',
       'get_pubkey_for_address', 'create_armory_utx', 'convert_armory_signedtx_to_raw_hex', 'create_support_case'].indexOf(method) >= 0) {
     destType = "counterblockd";
   }
