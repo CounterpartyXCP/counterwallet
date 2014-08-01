@@ -176,19 +176,13 @@ function CreateNewAddressModalViewModel() {
 
     //save prefs to server
     WALLET.storePreferences(function(data, endpoint) {
-      self.shown(false);
-      
-      if(self.addressType() != 'normal') {
-        //If we created a watch or armory address, refresh the counterparty balances with this new address
-        //btc address balances will refresh on the refresh of the balances page itself
-        setTimeout(function() { WALLET.refreshCounterpartyBalances([newAddress], checkURL)});
-      } else {
-        //Otherwise (a new non-watch address), just refresh the page
-        setTimeout(checkURL, 800); //necessary to use setTimeout so that the modal properly hides before we refresh the page
-      }
+      self.shown(false);      
+      WALLET.refreshCounterpartyBalances([newAddress]);
+      WALLET.refreshBTCBalances();
     });
     trackEvent('Balances', self.addressType() == 'normal' ? 'CreateNewAddress' : (
       self.addressType() == 'watch' ? 'CreateNewWatchAddress' : 'CreateNewArmoryOfflineAddress'));
+
   }
   
   self.show = function(addressType, resetForm) {

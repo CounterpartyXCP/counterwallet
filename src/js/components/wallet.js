@@ -275,7 +275,7 @@ function WalletViewModel() {
               WALLET.getAddressObj(balancesData[j]['address']).addOrUpdateAsset(
                 assetsInfo[i]['asset'], assetsInfo[i], balancesData[j]['quantity']);
               numBalProcessed += 1;
-              if(numBalProcessed == balancesData.length) return onSuccess();
+              if(numBalProcessed == balancesData.length && onSuccess) return onSuccess();
             }
           }
         });
