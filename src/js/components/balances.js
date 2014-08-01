@@ -219,8 +219,15 @@ function SendModalViewModel() {
     isValidBitcoinAddress: self,
     isNotSameBitcoinAddress: self
   });
-  self.quantity = ko.observable().extend({
-    required: true,
+  
+  self.quantity = ko.observable();
+  
+  self.computedQuantity = ko.computed(function() {
+  	return (self.quantity() + "").replace(",","");
+  });
+  
+  self.computedQuantity.extend({
+  	required: true,
     isValidPositiveQuantity: self,
     isValidQtyForDivisibility: self,
     validation: {
@@ -232,9 +239,10 @@ function SendModalViewModel() {
       },
       message: 'Quantity entered exceeds your current balance.',
       params: self
-    }    
+    }   
+
   });
-  
+    
   self.normalizedBalance = ko.computed(function() {
     if(self.address() === null || self.rawBalance() === null) return null;
     return normalizeQuantity(self.rawBalance(), self.divisible());
@@ -245,9 +253,9 @@ function SendModalViewModel() {
   }, self);
   
   self.normalizedBalRemaining = ko.computed(function() {
-    if(!isNumber(self.quantity())) return null;
+    if(!isNumber(self.computedQuantity())) return null;
     var curBalance = normalizeQuantity(self.rawBalance(), self.divisible());
-    var balRemaining = Decimal.round(new Decimal(curBalance).sub(parseFloat(self.quantity())), 8, Decimal.MidpointRounding.ToEven).toFloat();
+    var balRemaining = Decimal.round(new Decimal(curBalance).sub(parseFloat(self.computedQuantity())), 8, Decimal.MidpointRounding.ToEven).toFloat();
     if(balRemaining < 0) return null;
     return balRemaining;
   }, self);
@@ -262,7 +270,7 @@ function SendModalViewModel() {
   
   self.validationModel = ko.validatedObservable({
     destAddress: self.destAddress,
-    quantity: self.quantity
+    quantity: self.computedQuantity()
   });  
   
   self.resetForm = function() {
@@ -276,6 +284,7 @@ function SendModalViewModel() {
       self.validationModel.errors.showAllMessages();
       return false;
     }    
+    self.quantity(self.computedQuantity());
     //data entry is valid...submit to the server
     $('#sendModal form').submit();
   }
