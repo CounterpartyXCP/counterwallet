@@ -227,7 +227,7 @@ function SendModalViewModel() {
   });
   
   self.computedQuantity.extend({
-  	required: true,
+    required: true,
     isValidPositiveQuantity: self,
     isValidQtyForDivisibility: self,
     validation: {
@@ -240,7 +240,6 @@ function SendModalViewModel() {
       message: 'Quantity entered exceeds your current balance.',
       params: self
     }   
-
   });
     
   self.normalizedBalance = ko.computed(function() {
