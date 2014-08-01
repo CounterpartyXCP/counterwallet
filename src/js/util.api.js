@@ -417,15 +417,6 @@ function multiAPIConsensus(method, params, onSuccess, onConsensusError, onSysErr
     if (!CWBitcore.compareOutputs(params['source'], successResults)) {
       return onConsensusError(successResults); //not all consensus data matches
     }
-    //xnova(7-14-14): DISABLE CONSENSUS API CHECKING FOR NOW UNTIL WE FIX THE OCCASIONAL CONSENSUS ISSUES WE GET AND MAKE IT MORE RELIABLE
-    /*var consensusResult = null;
-    for(i=0; i < successResults.length; i++) {
-      if(i == 0) {
-        consensusResult = successResults[i];
-      } else if(successResults[i] != consensusResult) {
-        return onConsensusError(successResults); //not all consensus data matches
-      }
-    }*/
     
     //if here, all is well
     if(onSuccess) {

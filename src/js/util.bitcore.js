@@ -182,7 +182,7 @@ CWPrivateKey.prototype.signRawTransaction = function(unsignedHex) {
 }
 
 CWPrivateKey.prototype.checkTransactionDest = function(txHex, destAdress) {
-  checkArgsType(arguments, ["string", "string"]);
+  checkArgsType(arguments, ["string", "object"]);
   try {
     return CWBitcore.checkTransactionDest(txHex, this.getAddresses(), destAdress);
   } catch (err) {
@@ -191,7 +191,7 @@ CWPrivateKey.prototype.checkTransactionDest = function(txHex, destAdress) {
 }
 
 CWPrivateKey.prototype.checkAndSignRawTransaction = function(unsignedHex, destAdress) {
-  checkArgsType(arguments, ["string", "string"]);
+  checkArgsType(arguments, ["string", "object"]);
   if (this.checkTransactionDest(unsignedHex, destAdress)) {
     return this.signRawTransaction(unsignedHex);
   }
@@ -313,15 +313,16 @@ CWBitcore.extractChangeTxoutValue = function(source, txHex) {
 
 // source: array with compressed and uncompressed address.
 // so we don't care how the used library parse the transaction.
+// TODO: check the pubkey instead
 CWBitcore.checkTransactionDest = function(txHex, source, dest) { 
-  checkArgsType(arguments, ["string", "object", "string"]);
+  checkArgsType(arguments, ["string", "object", "object"]);
 
   // unserialize raw transaction
   var tx = CWBitcore.parseRawTransaction(txHex);    
   for (var i=0; i<tx.outs.length; i++) {
       var addresses = CWBitcore.extractAddressFromTxOut(tx.outs[i]).split(',');
       var containsSource = _.intersection(addresses, source).length > 0;
-      var containsDest = addresses.indexOf(dest) != -1;
+      var containsDest = _.intersection(addresses, dest).length > 0;
       if (!containsSource && !containsDest) {
         return false;
       } else if (addresses.length>1) {
