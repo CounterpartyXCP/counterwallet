@@ -81,7 +81,7 @@ function ChatFeedViewModel() {
     
     //Kick off refreshing of user count
     self.updateOnlineUserCount(); //initial call    
-    setTimeout(function() {
+    setInterval(function() {
       self.updateOnlineUserCount();
     }, CHAT_NUM_USERS_ONLINE_REFRESH_EVERY); 
   }
