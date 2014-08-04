@@ -22,6 +22,18 @@ function AssetViewModel(props) {
   self.issuanceQtyChangePending = ko.observable(false);
   //^ similar, but for the "Issued" text on owned assets
 
+  self.escrowedBalance = ko.observable(props['rawEscrowedBalance']);
+
+  self.dispEscrowedBalance = ko.computed(function() {
+    if (self.escrowedBalance()) {
+      return '/ Escr: ' + normalizeQuantity(self.escrowedBalance(), self.DIVISIBLE);
+    }
+  }, self);
+
+  self.updateEscrowedBalance = function(delta) {
+    self.escrowedBalance(self.escrowedBalance() + delta);
+  }
+
   self.isMine = ko.computed(function() {
     if(self.ASSET == 'BTC' || self.ASSET == 'XCP') return null; //special value for BTC and XCP
     return self.owner() == self.ADDRESS;
