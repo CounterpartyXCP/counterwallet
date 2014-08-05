@@ -20,7 +20,7 @@ var FEE_FRACTION_DEFAULT_FILTER = .95;
 var BTC_ORDER_MIN_AMOUNT = 0.01;
 
 var DEFAULT_NUM_ADDRESSES = 1; //default number of addresses to generate. Go with 1 for now to be more newbie friendly
-var MAX_ADDRESSES = 20; //totall arbitrary :)
+var MAX_ADDRESSES = 20; //totally arbitrary :)
 
 //Order expiration
 var ORDER_DEFAULT_EXPIRATION = 1000; //num blocks until expiration (at ~9 min per block this is ~6.75 days)
