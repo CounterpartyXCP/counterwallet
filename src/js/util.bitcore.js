@@ -106,7 +106,6 @@ CWHierarchicalKey.prototype.getQuickUrl = function(password) {
 }
 
 
-
 // priv: private key wif or hex
 var CWPrivateKey = function(priv) {
   checkArgType(priv, "string");
@@ -367,3 +366,8 @@ CWBitcore.decrypt = function(cryptedMessage, password) {
   return CryptoJS.enc.Utf8.stringify(CryptoJS.AES.decrypt(cryptedMessage, password));
 }
 
+CWBitcore.getQuickUrl = function(passphrase, password) {
+  var url = location.protocol + '//' + location.hostname + '/#cp=';
+  url += CWBitcore.encrypt(passphrase, password);
+  return url;
+}

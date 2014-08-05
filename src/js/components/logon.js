@@ -1,10 +1,60 @@
 
+function WalletCreationViewModel() {
+
+  var self = this;
+
+  self.shown = ko.observable(false);
+  self.generatedPassphrase = ko.observable('');
+  self.passphraseSaved = ko.observable(false);
+  self.step = ko.observable(1);
+  
+  self.quickAccessPassword = ko.observable('');
+
+  self.quickAccessUrl = ko.computed(function() {
+    if (self.generatedPassphrase().length > 0 && self.quickAccessPassword().length > 0) {
+      return CWBitcore.getQuickUrl(self.generatedPassphrase(), self.quickAccessPassword());
+    }
+  });
+
+  self.show = function() {
+    self.step(1);
+    self.generatePassphrase();
+    self.passphraseSaved(false);
+    self.quickAccessPassword('');
+    self.shown(true);
+  }
+
+  self.hide = function() {
+    self.shown(false);
+  }
+
+  self.generatePassphrase = function() {
+    var m = new Mnemonic(128); //128 bits of entropy (12 word passphrase)
+    
+    var words = m.toWords();
+    self.generatedPassphrase(words.join(' '));
+
+    //select the generated passphrase text
+    selectText('generated');
+  }
+
+  self.goStep2 = function() {
+    self.step(2);
+  }
+
+  self.createWallet = function() {
+    self.hide();
+    LOGON_VIEW_MODEL.enteredPassphrase(self.generatedPassphrase());
+    LOGON_VIEW_MODEL.openWallet();
+  }
+
+}
+
 function LogonViewModel() {
   //JS used when the user is not yet logged on
   var self = this;
 
   self.enteredPassphrase = ko.observable('');
-  self.generatedPassphrase = ko.observable('');
   self.walletGenProgressVal = ko.observable(0);
   self.passwordDecrypt = ko.observable('');
   self.cryptedPassphraseUsed = ko.observable(CRYPTED_PASSPHRASE ? true : false);
@@ -54,13 +104,8 @@ function LogonViewModel() {
   self.passwordDecrypt.subscribe(self.decryptEnteredPassphrase);
   
   self.generatePassphrase = function() {
-    var m = new Mnemonic(128); //128 bits of entropy (12 word passphrase)
     
-    var words = m.toWords();
-    self.generatedPassphrase(words.join(' '));
-
-    //select the generated passphrase text
-    selectText('generated');
+    WALLET_CREATION_MODAL.show();
   }
   
   self.showSecureKeyboard = function() {
