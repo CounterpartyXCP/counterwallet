@@ -101,3 +101,10 @@ span.modeIndicator {
     display:none;
   }
 }
+
+textarea.quickAccessUrl {
+  margin-top: 5px;
+  font-size: 12px;
+  cursor:text !important;
+  background-color: #FFF !important;
+}

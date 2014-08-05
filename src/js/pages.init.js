@@ -75,7 +75,7 @@ function initIndex() { //main page
       }, 500);
     }
 
-    $("#walletUrl, #quickAccessPassword").focus(function() {
+    $("#walletUrl, #quickAccessUrl").focus(function() {
         var $this = $(this);
         $this.select();
         // Work around Chrome's little problem
