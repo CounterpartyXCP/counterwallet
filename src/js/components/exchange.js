@@ -189,17 +189,17 @@ function ExchangeViewModel() {
 
   self.sellPrice.subscribe(function(price) {
     if (!self.sellPriceHasFocus() || !self.sellAmount()) return;
-    self.sellTotal(mulFloat(self.sellAmount(), price));
+    self.sellTotal(smartFormat(mulFloat(self.sellAmount(), price)));
   })
   
   self.sellAmount.subscribe(function(amount) {
     if (!self.sellAmountHasFocus() || !self.sellPrice()) return;
-    self.sellTotal(mulFloat(self.sellPrice(), amount));
+    self.sellTotal(smartFormat(mulFloat(self.sellPrice(), amount)));
   })
 
   self.sellTotal.subscribe(function(total) {
     if (!self.sellTotalHasFocus() || !self.sellPrice()) return;
-    self.sellAmount(divFloat(total, self.sellPrice()));
+    self.sellAmount(smartFormat(divFloat(total, self.sellPrice())));
   })
 
   self.sellAmount.extend({
@@ -231,11 +231,11 @@ function ExchangeViewModel() {
   });
 
   self.selectBuyOrder = function(order) {
-    self.sellPrice(parseFloat(order.price));
+    self.sellPrice(smartFormat(parseFloat(order.price)));
     var amount = Math.min(self.availableBalanceForSell(), parseFloat(order.base_depth));
-    self.sellAmount(amount);
+    self.sellAmount(smartFormat(amount));
     if (self.sellPrice()) {
-      self.sellTotal(mulFloat(self.sellPrice(), amount));
+      self.sellTotal(smartFormat(mulFloat(self.sellPrice(), amount)));
     }
     self.selectSellOrder(order);
   }
@@ -315,6 +315,8 @@ function ExchangeViewModel() {
     if (amountCumul < self.sellAmount()) {
       estimatedTotalPrice += mulFloat(self.sellAmount() - amountCumul, self.sellPrice());
     }
+
+    estimatedTotalPrice = smartFormat(estimatedTotalPrice);
 
     message  = '<table class="confirmOrderBox">';
     message += '<tr><td><b>Price: </b></td><td style="text-align:right">' + self.sellPrice() + '</td><td>' + self.quoteAsset() + '/' + self.baseAsset() + '</td></tr>';
@@ -412,17 +414,17 @@ function ExchangeViewModel() {
 
   self.buyPrice.subscribe(function(price) {
     if (!self.buyPriceHasFocus() || !self.buyAmount()) return;
-    self.buyTotal(mulFloat(self.buyAmount(), price));
+    self.buyTotal(smartFormat(mulFloat(self.buyAmount(), price)));
   })
   
   self.buyAmount.subscribe(function(amount) {
     if (!self.buyAmountHasFocus() || !self.buyPrice()) return;
-    self.buyTotal(mulFloat(self.buyPrice(), amount));
+    self.buyTotal(smartFormat(mulFloat(self.buyPrice(), amount)));
   })
 
   self.buyTotal.subscribe(function(total) {
     if (!self.buyTotalHasFocus() || !self.buyPrice()) return;
-    self.buyAmount(divFloat(total, self.buyPrice()));
+    self.buyAmount(smartFormat(divFloat(total, self.buyPrice())));
   })
 
   self.buyTotal.extend({
@@ -454,11 +456,11 @@ function ExchangeViewModel() {
   });
 
   self.selectSellOrder = function(order) {
-    self.buyPrice(parseFloat(order.price));
+    self.buyPrice(smartFormat(parseFloat(order.price)));
     var amount = parseFloat(order.base_depth);
-    self.buyAmount(amount);
+    self.buyAmount(smartFormat(amount));
     if (self.buyPrice()) {
-      self.buyTotal(mulFloat(self.buyPrice(), amount));
+      self.buyTotal(smartFormat(mulFloat(self.buyPrice(), amount)));
     }
     self.selectBuyOrder(order);
   }
@@ -541,6 +543,8 @@ function ExchangeViewModel() {
       $.jqlog.debug('estimatedTotalPrice 2:' + estimatedTotalPrice);
     }
 
+    estimatedTotalPrice = smartFormat(estimatedTotalPrice);
+
     message  = '<table class="confirmOrderBox">';
     message += '<tr><td><b>Price: </b></td><td style="text-align:right">' + self.buyPrice() + '</td><td>' + self.quoteAsset() + '/' + self.baseAsset() + '</td></tr>';
     message += '<tr><td><b>Amount: </b></td><td style="text-align:right">' + self.buyAmount() + '</td><td>' + self.baseAsset() + '</td></tr>';
@@ -610,9 +614,9 @@ function ExchangeViewModel() {
 
   self.displayOpenUserOrders = function(data) {
     for (var i in data) {
-      data[i].amount = normalizeQuantity(data[i].amount, self.baseAssetIsDivisible());
-      data[i].total = normalizeQuantity(data[i].total, self.quoteAssetIsDivisible());
-      data[i].price = parseFloat(data[i].price);
+      data[i].amount = smartFormat(normalizeQuantity(data[i].amount, self.baseAssetIsDivisible()));
+      data[i].total = smartFormat(normalizeQuantity(data[i].total, self.quoteAssetIsDivisible()));
+      data[i].price = smartFormat(parseFloat(data[i].price));
     }
     self.userOpenOrders(data);
   }
@@ -634,10 +638,10 @@ function ExchangeViewModel() {
 
   self.displayUserLastTrades = function(data) {
     for (var i in data) {
-      data[i].amount = normalizeQuantity(data[i].amount, self.baseAssetIsDivisible());
-      data[i].total = normalizeQuantity(data[i].total, self.quoteAssetIsDivisible());
+      data[i].amount = smartFormat(normalizeQuantity(data[i].amount, self.baseAssetIsDivisible()));
+      data[i].total = smartFormat(normalizeQuantity(data[i].total, self.quoteAssetIsDivisible()));
       data[i].block_time = moment(data[i].block_time * 1000).format('YYYY/MM/DD hh:mm:ss A Z');
-      data[i].price = parseFloat(data[i].price);
+      data[i].price = smartFormat(parseFloat(data[i].price));
     }
     self.userLastTrades(data);
   }
@@ -657,9 +661,9 @@ function ExchangeViewModel() {
 
   self.displayAllPairs = function(data) {
     for (var i in data) {
-      data[i].volume = normalizeQuantity(data[i].volume, data[i].divisible);
-      data[i].supply = normalizeQuantity(data[i].supply, data[i].divisible);
-      data[i].market_cap = normalizeQuantity(data[i].market_cap, data[i].divisible);
+      data[i].volume = smartFormat(normalizeQuantity(data[i].volume, data[i].divisible));
+      data[i].supply = smartFormat(normalizeQuantity(data[i].supply, data[i].divisible));
+      data[i].market_cap = smartFormat(normalizeQuantity(data[i].market_cap, data[i].divisible));
       if (parseFloat(data[i].progression) > 0) {
         data[i].prog_class = 'UP';
         data[i].progression = '+' + data[i].progression;
@@ -677,7 +681,7 @@ function ExchangeViewModel() {
       } else {
         data[i].price_class = '';
       }
-      data[i].price = parseFloat(data[i].price);
+      data[i].price = smartFormat(parseFloat(data[i].price));
     }
     self.allPairs(data);
     if(self.allPairs().length) {
@@ -709,7 +713,7 @@ function ExchangeViewModel() {
       self.asset2IsDivisible(data['base_asset_divisible']);
     }
 
-    self.currentMarketPrice(parseFloat(data['price']));
+    self.currentMarketPrice(smartFormat(parseFloat(data['price'])));
     self.marketProgression24h(data['progression']);
 
     self.bidBook([])
@@ -729,12 +733,12 @@ function ExchangeViewModel() {
         if (base_depth == 0) {
           self.highestBidPrice(data['buy_orders'][i]['price']);
           self.sellPrice(data['buy_orders'][i]['price']);
-          self.obtainableForSell(mulFloat(self.availableBalanceForSell(), self.highestBidPrice()));
+          self.obtainableForSell(smartFormat(mulFloat(self.availableBalanceForSell(), self.highestBidPrice())));
         }
         data['buy_orders'][i]['exclude'] = false;
-        data['buy_orders'][i]['price'] = parseFloat(data['buy_orders'][i]['price']);
-        data['buy_orders'][i]['amount'] = normalizeQuantity(data['buy_orders'][i]['amount'], data['base_asset_divisible']);
-        data['buy_orders'][i]['total'] = normalizeQuantity(data['buy_orders'][i]['total'], data['quote_asset_divisible']);
+        data['buy_orders'][i]['price'] = smartFormat(parseFloat(data['buy_orders'][i]['price']));
+        data['buy_orders'][i]['amount'] = smartFormat(normalizeQuantity(data['buy_orders'][i]['amount'], data['base_asset_divisible']));
+        data['buy_orders'][i]['total'] = smartFormat(normalizeQuantity(data['buy_orders'][i]['total'], data['quote_asset_divisible']));
         data['buy_orders'][i]['base_depth'] = data['buy_orders'][i]['amount'] + base_depth;
         base_depth = data['buy_orders'][i]['base_depth'];
       }
@@ -748,12 +752,12 @@ function ExchangeViewModel() {
         if (base_depth == 0) {
           self.lowestAskPrice(data['sell_orders'][i]['price']);
           self.buyPrice(data['sell_orders'][i]['price']);
-          self.obtainableForBuy(divFloat(self.availableBalanceForBuy(), self.lowestAskPrice()));
+          self.obtainableForBuy(smartFormat(divFloat(self.availableBalanceForBuy(), self.lowestAskPrice())));
         }
         data['sell_orders'][i]['exclude'] = false;
-        data['sell_orders'][i]['price'] = parseFloat(data['sell_orders'][i]['price']);
-        data['sell_orders'][i]['amount'] = normalizeQuantity(data['sell_orders'][i]['amount'], data['base_asset_divisible']);
-        data['sell_orders'][i]['total'] = normalizeQuantity(data['sell_orders'][i]['total'], data['quote_asset_divisible']);
+        data['sell_orders'][i]['price'] = smartFormat(parseFloat(data['sell_orders'][i]['price']));
+        data['sell_orders'][i]['amount'] = smartFormat(normalizeQuantity(data['sell_orders'][i]['amount'], data['base_asset_divisible']));
+        data['sell_orders'][i]['total'] = smartFormat(normalizeQuantity(data['sell_orders'][i]['total'], data['quote_asset_divisible']));
         data['sell_orders'][i]['base_depth'] = data['sell_orders'][i]['amount'] + base_depth;
         base_depth = data['sell_orders'][i]['base_depth'];
       }
@@ -766,9 +770,9 @@ function ExchangeViewModel() {
     try { $('#tradeHistory').dataTable().fnClearTable(); } catch(err) { }
 
     for (var i in data['last_trades']) {
-      data['last_trades'][i]['price'] = parseFloat(data['last_trades'][i]['price']);
-      data['last_trades'][i].amount = normalizeQuantity(data['last_trades'][i].amount, self.baseAssetIsDivisible());
-      data['last_trades'][i].total = normalizeQuantity(data['last_trades'][i].total, self.quoteAssetIsDivisible());
+      data['last_trades'][i]['price'] = smartFormat(parseFloat(data['last_trades'][i]['price']));
+      data['last_trades'][i].amount = smartFormat(normalizeQuantity(data['last_trades'][i].amount, self.baseAssetIsDivisible()));
+      data['last_trades'][i].total = smartFormat(normalizeQuantity(data['last_trades'][i].total, self.quoteAssetIsDivisible()));
       data['last_trades'][i].block_time = moment(data['last_trades'][i].block_time * 1000).format('YYYY/MM/DD hh:mm:ss A Z');
     }
     self.tradeHistory(data['last_trades']);
