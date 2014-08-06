@@ -26,7 +26,7 @@ function AssetViewModel(props) {
 
   self.dispEscrowedBalance = ko.computed(function() {
     if (self.escrowedBalance()) {
-      return '/ Escr: ' + normalizeQuantity(self.escrowedBalance(), self.DIVISIBLE);
+      return '/ Escr: ' + smartFormat(normalizeQuantity(self.escrowedBalance(), self.DIVISIBLE));
     }
   }, self);
 
