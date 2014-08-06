@@ -51,25 +51,24 @@ function smartFormat(num, truncateDecimalPlacesAtMin, truncateDecimalPlacesTo) {
   return numberWithCommas(noExponents(num));
 }
 
-//TODO: refactor with a "currencies" list in conf
 function assetsToAssetPair(asset1, asset2) {
   //NOTE: This MUST use the same logic/rules as counterblockd's assets_to_asset_pair() function in lib/util.py
   var base = null;
   var quote = null;
-  
-  if(asset1 == 'BTC' || asset2 == 'BTC') {
-      base = asset1 == 'BTC' ? asset2 : asset1;
-      quote = asset1 == 'BTC' ? asset1 : asset2;
-  } else if(asset1 == 'XBTC' || asset2 == 'XBTC') {
-      base = asset1 == 'XBTC' ? asset2 : asset1;
-      quote = asset1 == 'XBTC' ? asset1 : asset2;
-  } else if(asset1 == 'XCP' || asset2 == 'XCP') {
-      base = asset1 == 'XCP' ? asset2 : asset1;
-      quote = asset1 == 'XCP' ? asset1 : asset2;
-  } else  {
-      base = asset1 < asset2 ? asset1 : asset2;
-      quote = asset1 < asset2 ? asset2 : asset1;
+
+  for (var i in QUOTE_ASSETS) {
+    if (asset1 == QUOTE_ASSETS[i] || asset2 == QUOTE_ASSETS[i]) {
+      base = asset1 == QUOTE_ASSETS[i] ? asset2 : asset1;
+      quote = asset1 == QUOTE_ASSETS[i] ? asset1 : asset2;
+      break;
+    }
   }
+
+  if (!base) {
+    base = asset1 < asset2 ? asset1 : asset2;
+    quote = asset1 < asset2 ? asset2 : asset1;
+  }
+  
   return [base, quote];
 }
 

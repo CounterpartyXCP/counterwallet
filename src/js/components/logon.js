@@ -145,7 +145,9 @@ function LogonViewModel() {
 
       // set user country
       USER_COUNTRY = data['country'];
-      $.jqlog.debug('USER_COUNTRY: ' + USER_COUNTRY);
+      
+      // set quote assets
+      QUOTE_ASSETS = data['quote_assets']
       
       //See if any servers show the wallet as online (this will return the a true result, if any server shows the wallet as online)
       multiAPI("is_wallet_online", {'wallet_id': WALLET.identifier()}, self.onIsWalletOnline);
