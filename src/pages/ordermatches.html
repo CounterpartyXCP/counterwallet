@@ -27,6 +27,7 @@
                   <thead>
                     <tr>
                       <th>Status</th>
+                      <th>Block</th>
                       <th>Address</th>
                       <th>Sell quantity</th>
                       <th>Buy quantity</th>     
@@ -35,6 +36,7 @@
                   <tbody data-bind="foreach: { data: orderMatches, as: 'orderMatch' }">
                     <tr>
                       <td style="text-align:center" data-bind="html: orderMatch.status_html"></td> 
+                      <td style="text-align:center" data-bind="text: orderMatch.block_index"></td>
                       <td style="white-space:nowrap" data-bind="text: orderMatch.address_label"></td> 
                       <td class="number" data-bind="text: orderMatch.give_quantity_str"></td>
                       <td class="number" data-bind="text: orderMatch.get_quantity_str"></td>

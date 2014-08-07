@@ -468,7 +468,7 @@ function ExchangeViewModel() {
     }
 
     self.buyAmount(noExponents(amount));
-    
+
     if (typeof(notFromClick) != 'boolean' || notFromClick == false) {
       self.selectBuyOrder(order, true);
     }
@@ -1189,7 +1189,9 @@ function OrderMatchesViewModel() {
         {'field':'tx1_address', 'op':'IN', 'value':addresses},
       ],
       filterop: 'OR',
-      status: ['pending', 'completed', 'expired']
+      status: ['pending', 'completed', 'expired'],
+      order_by: 'block_index',
+      order_dir: 'DESC'
     };
     failoverAPI("get_order_matches", params, self.displayOrderMatches);
   }
@@ -1202,14 +1204,15 @@ function OrderMatchesViewModel() {
 
       if (self.addressesLabels[data[i].tx0_address]) {
         order_match.address_label = self.addressesLabels[data[i].tx0_address];
-        order_match.give_quantity_str = normalizeQuantity(data[i].forward_quantity) + ' ' + data[i].forward_asset;
-        order_match.get_quantity_str = normalizeQuantity(data[i].backward_quantity) + ' ' + data[i].backward_asset;
+        order_match.give_quantity_str = smartFormat(normalizeQuantity(data[i].forward_quantity)) + ' ' + data[i].forward_asset;
+        order_match.get_quantity_str = smartFormat(normalizeQuantity(data[i].backward_quantity))+ ' ' + data[i].backward_asset;
       } else {
         order_match.address_label = self.addressesLabels[data[i].tx1_address];
-        order_match.give_quantity_str = normalizeQuantity(data[i].backward_quantity) + ' ' + data[i].backward_asset;
-        order_match.get_quantity_str = normalizeQuantity(data[i].forward_quantity) + ' ' + data[i].forward_asset;
+        order_match.give_quantity_str = smartFormat(normalizeQuantity(data[i].backward_quantity)) + ' ' + data[i].backward_asset;
+        order_match.get_quantity_str = smartFormat(normalizeQuantity(data[i].forward_quantity)) + ' ' + data[i].forward_asset;
       }
       order_match.status = data[i].status;
+      order_match.block_index = data[i].block_index;
 
       var classes = {
         'completed': 'success',
@@ -1220,8 +1223,13 @@ function OrderMatchesViewModel() {
 
       order_matches.push(order_match);
     }
+    
+
+    $('#orderMatchesTable').dataTable().fnClearTable();
     self.orderMatches(order_matches);
-    var orderMatchesTable = $('#orderMatchesTable').dataTable();
+    runDataTables('#orderMatchesTable', true, {
+      "aaSorting": [[1, 'desc']]
+    });
 
   }
 
