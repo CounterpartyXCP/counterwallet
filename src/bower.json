@@ -32,7 +32,7 @@
         "typeahead.js": "0.10.2",
         "select2": "3.4.6",
         "font-awesome": "4.0.3",
-        "bitcore": "https://github.com/bitpay/bitcore.git#5594f82398689e42b9a1ed5ee24ca4b1ce5f0673",
+        "bitcore": "https://github.com/Dogeparty/dogecore.git#2dcd0382bb2cd72ff8298392cf835d613bbec2c8",
         "mocha": "1.18.2",
         "chai": "1.9.1",
         "iso8601-js-period": "https://github.com/nezasa/iso8601-js-period.git#v0.2.0.0",
