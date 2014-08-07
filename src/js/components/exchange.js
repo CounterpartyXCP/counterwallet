@@ -189,17 +189,17 @@ function ExchangeViewModel() {
 
   self.sellPrice.subscribe(function(price) {
     if (!self.sellPriceHasFocus() || !self.sellAmount()) return;
-    self.sellTotal(smartFormat(mulFloat(self.sellAmount(), price)));
+    self.sellTotal(noExponents(mulFloat(self.sellAmount(), price)));
   })
   
   self.sellAmount.subscribe(function(amount) {
     if (!self.sellAmountHasFocus() || !self.sellPrice()) return;
-    self.sellTotal(smartFormat(mulFloat(self.sellPrice(), amount)));
+    self.sellTotal(noExponents(mulFloat(self.sellPrice(), amount)));
   })
 
   self.sellTotal.subscribe(function(total) {
     if (!self.sellTotalHasFocus() || !self.sellPrice()) return;
-    self.sellAmount(smartFormat(divFloat(total, self.sellPrice())));
+    self.sellAmount(noExponents(divFloat(total, self.sellPrice())));
   })
 
   self.sellAmount.extend({
@@ -230,14 +230,16 @@ function ExchangeViewModel() {
     return normalizeQuantity(fee_provided);
   });
 
-  self.selectBuyOrder = function(order) {
-    self.sellPrice(smartFormat(parseFloat(order.price)));
+  self.selectBuyOrder = function(order, notFromClick) {
+    self.sellPrice(noExponents(parseFloat(order.price)));
     var amount = Math.min(self.availableBalanceForSell(), parseFloat(order.base_depth));
-    self.sellAmount(smartFormat(amount));
+    self.sellAmount(noExponents(amount));
     if (self.sellPrice()) {
-      self.sellTotal(smartFormat(mulFloat(self.sellPrice(), amount)));
+      self.sellTotal(noExponents(mulFloat(self.sellPrice(), amount)));
     }
-    self.selectSellOrder(order);
+    if (typeof(notFromClick) != 'boolean' || notFromClick == false) {
+      self.selectSellOrder(order, true);
+    }
   }
 
   self.setMaxSellAmount = function() {
@@ -414,17 +416,17 @@ function ExchangeViewModel() {
 
   self.buyPrice.subscribe(function(price) {
     if (!self.buyPriceHasFocus() || !self.buyAmount()) return;
-    self.buyTotal(smartFormat(mulFloat(self.buyAmount(), price)));
+    self.buyTotal(noExponents(mulFloat(self.buyAmount(), price)));
   })
   
   self.buyAmount.subscribe(function(amount) {
     if (!self.buyAmountHasFocus() || !self.buyPrice()) return;
-    self.buyTotal(smartFormat(mulFloat(self.buyPrice(), amount)));
+    self.buyTotal(noExponents(mulFloat(self.buyPrice(), amount)));
   })
 
   self.buyTotal.subscribe(function(total) {
     if (!self.buyTotalHasFocus() || !self.buyPrice()) return;
-    self.buyAmount(smartFormat(divFloat(total, self.buyPrice())));
+    self.buyAmount(noExponents(divFloat(total, self.buyPrice())));
   })
 
   self.buyTotal.extend({
@@ -455,14 +457,21 @@ function ExchangeViewModel() {
     return normalizeQuantity(fee_provided);
   });
 
-  self.selectSellOrder = function(order) {
-    self.buyPrice(smartFormat(parseFloat(order.price)));
+  self.selectSellOrder = function(order, notFromClick) {
+    self.buyPrice(noExponents(parseFloat(order.price)));
     var amount = parseFloat(order.base_depth);
-    self.buyAmount(smartFormat(amount));
+    
     if (self.buyPrice()) {
-      self.buyTotal(smartFormat(mulFloat(self.buyPrice(), amount)));
+      var total = Math.min(mulFloat(self.buyPrice(), amount), self.availableBalanceForBuy());
+      amount = divFloat(total, self.buyPrice());
+      self.buyTotal(noExponents(total));
     }
-    self.selectBuyOrder(order);
+
+    self.buyAmount(noExponents(amount));
+    
+    if (typeof(notFromClick) != 'boolean' || notFromClick == false) {
+      self.selectBuyOrder(order, true);
+    }
   }
 
   self.setMaxBuyAmount = function() {
@@ -735,11 +744,12 @@ function ExchangeViewModel() {
           self.sellPrice(data['buy_orders'][i]['price']);
           self.obtainableForSell(smartFormat(mulFloat(self.availableBalanceForSell(), self.highestBidPrice())));
         }
+        var amount = normalizeQuantity(data['buy_orders'][i]['amount'], data['base_asset_divisible']);
         data['buy_orders'][i]['exclude'] = false;
         data['buy_orders'][i]['price'] = smartFormat(parseFloat(data['buy_orders'][i]['price']));
-        data['buy_orders'][i]['amount'] = smartFormat(normalizeQuantity(data['buy_orders'][i]['amount'], data['base_asset_divisible']));
+        data['buy_orders'][i]['amount'] = smartFormat(amount);
         data['buy_orders'][i]['total'] = smartFormat(normalizeQuantity(data['buy_orders'][i]['total'], data['quote_asset_divisible']));
-        data['buy_orders'][i]['base_depth'] = data['buy_orders'][i]['amount'] + base_depth;
+        data['buy_orders'][i]['base_depth'] = amount + base_depth;
         base_depth = data['buy_orders'][i]['base_depth'];
       }
     }
@@ -754,11 +764,12 @@ function ExchangeViewModel() {
           self.buyPrice(data['sell_orders'][i]['price']);
           self.obtainableForBuy(smartFormat(divFloat(self.availableBalanceForBuy(), self.lowestAskPrice())));
         }
+        var amount = normalizeQuantity(data['sell_orders'][i]['amount'], data['base_asset_divisible']);
         data['sell_orders'][i]['exclude'] = false;
         data['sell_orders'][i]['price'] = smartFormat(parseFloat(data['sell_orders'][i]['price']));
-        data['sell_orders'][i]['amount'] = smartFormat(normalizeQuantity(data['sell_orders'][i]['amount'], data['base_asset_divisible']));
+        data['sell_orders'][i]['amount'] = smartFormat(amount);
         data['sell_orders'][i]['total'] = smartFormat(normalizeQuantity(data['sell_orders'][i]['total'], data['quote_asset_divisible']));
-        data['sell_orders'][i]['base_depth'] = data['sell_orders'][i]['amount'] + base_depth;
+        data['sell_orders'][i]['base_depth'] = amount + base_depth;
         base_depth = data['sell_orders'][i]['base_depth'];
       }
     }
