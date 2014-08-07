@@ -28,8 +28,8 @@ function AddressViewModel(type, key, address, initialLabel, armoryPubKey) {
   self.numPrimedTxoutsIncl0Confirms = ko.observable(null);
 
   self.assets = ko.observableArray([
-    new AssetViewModel({address: address, asset: "BTC"}), //will be updated with data loaded from insight
-    new AssetViewModel({address: address, asset: "XCP"})  //will be updated with data loaded from counterpartyd
+    new AssetViewModel({address: address, asset: BTC}), //will be updated with data loaded from insight
+    new AssetViewModel({address: address, asset: XCP})  //will be updated with data loaded from counterpartyd
   ]);
   
   self.assetFilter = ko.observable('');
@@ -38,8 +38,8 @@ function AddressViewModel(type, key, address, initialLabel, armoryPubKey) {
       return self.assets();
     } else if(self.assetFilter() == 'base') {
       return ko.utils.arrayFilter(self.assets(), function(asset) {
-        return asset.ASSET == 'BTC' || asset.ASSET == 'XCP';
-      });      
+        return asset.ASSET == BTC || asset.ASSET == XCP;
+      });
     } else if(self.assetFilter() == 'mine') {
       return ko.utils.arrayFilter(self.assets(), function(asset) {
         return asset.isMine();
@@ -74,8 +74,8 @@ function AddressViewModel(type, key, address, initialLabel, armoryPubKey) {
     var match = ko.utils.arrayFirst(self.assets(), function(item) {
         return item.ASSET === asset;
     });
-    
-    if(asset == 'BTC' || asset == 'XCP') { //special case update
+
+    if(asset == BTC || asset == XCP) { //special case update
       assert(match); //was created when the address viewmodel was initialized...
       match.rawBalance(initialRawBalance);
       return;
@@ -221,12 +221,12 @@ function AddressViewModel(type, key, address, initialLabel, armoryPubKey) {
   self.createAsset = function() {
     if(!WALLET.canDoTransaction(self.ADDRESS)) return false;
 
-    var xcpBalance = WALLET.getBalance(self.ADDRESS, 'XCP');
+    var xcpBalance = WALLET.getBalance(self.ADDRESS, XCP);
     if(xcpBalance < ASSET_CREATION_FEE_XCP) {
-      bootbox.alert("You need at least <b class='notoAmountColor'>" + ASSET_CREATION_FEE_XCP + "</b> <b class='notoAssetColor'>XCP</b>"
+      bootbox.alert("You need at least <b class='notoAmountColor'>" + ASSET_CREATION_FEE_XCP + "</b> <b class='notoAssetColor'>" + XCP + "</b>"
         + " to create a token, however, your current balance is only"
-        + " <b class='notoAmountColor'>" + xcpBalance + "</b> <b class='notoAssetColor'>XCP</b>."
-        + "<br/><br/>Please deposit more <b class='notoAssetColor'>XCP</b> into this address and try again.");
+        + " <b class='notoAmountColor'>" + xcpBalance + "</b> <b class='notoAssetColor'>" + XCP + "</b>."
+        + "<br/><br/>Please deposit more <b class='notoAssetColor'>" + XCP + "</b> into this address and try again.");
       return false;
     }
 
@@ -301,7 +301,7 @@ function AddressViewModel(type, key, address, initialLabel, armoryPubKey) {
 
   self.getXCPBalance = function() {
     var xcpAsset =  $.grep(self.assets(), function (value) {
-        return value.ASSET == 'XCP';
+        return value.ASSET == XCP;
     });
     return xcpAsset[0].normalizedBalance();
   }

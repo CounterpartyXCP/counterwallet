@@ -95,7 +95,7 @@
                 <i class="fa fa-btc"></i><b data-bind="text: dispCount()" class="badge badge-error"></b>
             </span>
             <div class="ajax-dropdown">
-              <h2>Required BTC Pays</h2>
+              <h2>Required {{= btc}} Pays</h2>
               <div class="ajax-notifications custom-scroll"></div> <!-- notification content -->
               <span><b>Last updated:</b> <span id="pendingLastUpdated" data-bind="timeago: dispLastUpdated()"></span></span> <!-- footer -->
             </div> <!-- .ajax-dropdown -->
@@ -616,12 +616,14 @@
                 <ul>
                     <li><a href="https://www.counterparty.co/?p=2270" target="_blank">I logged in and my address is different, and I have no balance! Help!</a></li>
                     <li><a href="https://www.counterparty.co/?p=2252" target="_blank">I sent funds to a crowdsale vending machine, why didn’t they show up?</a></li>
-                    <li><a href="https://www.counterparty.co/?p=2250" target="_blank">I sent BTC to Counterwallet, why doesn't it show up?</a></li>
+                    <li><a href="https://www.counterparty.co/?p=2250" target="_blank">I sent {{= btc}} to Counterwallet, why doesn't it show up?</a></li>
                     <br/>
-                    <li><a href="https://www.counterparty.co/?p=2265" target="_blank">Why do I need small amounts of Bitcoin to do things in Counterwallet?</a></li>
+                    <li><a href="https://www.counterparty.co/?p=2265" target="_blank">Why do I need small amounts of {{= btc_name}} to do things in Counterwallet?</a></li>
                     <li><a href="https://www.counterparty.co/?p=2249" target="_blank">An address I added in Counterwallet is not showing -- why?</a></li>
                     <li><a href="https://www.counterparty.co/?p=2100" target="_blank">Does Counterwallet support two-factor authentication?</a></li>
-                    <li><a href="https://www.counterparty.co/xcp/" target="_blank">Where can I buy XCP?</a></li>
+                    {{ if (xcp_store_url) { }}
+                    <li><a href="{{= xcp_store_url}}" target="_blank">Where can I buy {{= xcp}}?</a></li>
+                    {{ } }}
                     <li><a href="https://www.counterparty.co/?p=2251" target="_blank">I have another issue...</a></li>
                 </ul>
                 <h5 class="margin-bottom-0">For other questions, please ask in <a href="https://forums.counterparty.co/index.php/board,13.0.html" target="_blank">the Counterparty support forums</a>.</h5> 
@@ -630,10 +632,12 @@
             <div data-bind="visible: type == 'exchangePage'">
                 <h5>Answers to common questions. Just click the one you're interested in:</h5>
                 <ul>
-                    <li><a href="https://www.counterparty.co/?p=2075" target="_blank">What does something like “XCP/BTC” mean, in Counterwallet?</a></li>
-                    <li><a href="https://www.counterparty.co/xcp/" target="_blank">Where can I buy XCP?</a></li>
-                    <li><a href="https://www.counterparty.co/?p=2266" target="_blank">I placed an order to buy BTC for something else. What I offered was removed from my account, but I don't see the BTC yet!</a></li>
-                    <li><a href="https://www.counterparty.co/?p=2265" target="_blank">Why does it cost me a little Bitcoin to cancel an order!?</a></li>
+                    <li><a href="https://www.counterparty.co/?p=2075" target="_blank">What does something like “{{= xcp}}/{{= btc}}” mean, in Counterwallet?</a></li>
+                    {{ if (xcp_store_url) { }}
+                    <li><a href="{{= xcp_store_url}}" target="_blank">Where can I buy {{= xcp}}?</a></li>
+                    {{ } }}
+                    <li><a href="https://www.counterparty.co/?p=2266" target="_blank">I placed an order to buy {{= btc}} for something else. What I offered was removed from my account, but I don't see the {{= btc}} yet!</a></li>
+                    <li><a href="https://www.counterparty.co/?p=2265" target="_blank">Why does it cost me a little {{= btc_name}} to cancel an order!?</a></li>
                     <li><a href="https://www.counterparty.co/?p=2251" target="_blank">I have another issue...</a></li>
                 </ul>
                 <h5 class="margin-bottom-0">For other questions, please ask in <a href="https://forums.counterparty.co/index.php/board,13.0.html" target="_blank">the Counterparty support forums</a>.</h5> 
@@ -685,11 +689,11 @@
                 </div>
                 <div class="col col-sm-4">
                   <div class="btn-group" data-toggle="buttons">
-                    <label class="radioBtn btn btn-lg" data-bind="css: { 'btn-success': donationCurrency() == 'BTC' }">
-                      <input type="radio" name="donationCurrency" value="BTC" data-bind="btnGroupChecked: donationCurrency">BTC
+                    <label class="radioBtn btn btn-lg" data-bind="css: { 'btn-success': donationCurrency() == '{{= btc}}' }">
+                      <input type="radio" name="donationCurrency" value="{{= btc}}" data-bind="btnGroupChecked: donationCurrency">{{= btc}}
                     </label>
-                    <label class="radioBtn btn btn-lg" data-bind="css: { 'btn-success': donationCurrency() == 'XCP' }">
-                      <input type="radio" name="donationCurrency" value="XCP" data-bind="btnGroupChecked: donationCurrency">XCP
+                    <label class="radioBtn btn btn-lg" data-bind="css: { 'btn-success': donationCurrency() == '{{= xcp}}' }">
+                      <input type="radio" name="donationCurrency" value="{{= xcp}}" data-bind="btnGroupChecked: donationCurrency">{{= xcp}}
                     </label>
                   </div>
                 </div>

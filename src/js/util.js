@@ -259,7 +259,7 @@ function currency(amount, unit) {
 }
 
 function satoshiToXCP(amount) {
-  return currency(amount, 'XCP');
+  return currency(amount, XCP);
 }
 
 function round(amount, decimals) {

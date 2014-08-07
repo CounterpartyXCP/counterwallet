@@ -149,7 +149,7 @@ function CreateAssetModalViewModel() {
           + (armoryUTx ? "will be created" : "has been created") + ".<br/><br/>"
           + "It will automatically appear under the appropriate address once the network"
           + " has confirmed it, and your address <b class='notoAddrColor'>" + getAddressLabel(self.address())
-          +  "</b> will be deducted by <b class='notoQuantityColor'>" + ASSET_CREATION_FEE_XCP + "</b> <b class='notoAssetColor'>XCP</b>. ";
+          +  "</b> will be deducted by <b class='notoQuantityColor'>" + ASSET_CREATION_FEE_XCP + "</b> <b class='notoAssetColor'>" + XCP + "</b>. ";
         WALLET.showTransactionCompleteDialog(message + ACTION_PENDING_NOTICE, message, armoryUTx);
       }
     );
@@ -532,7 +532,7 @@ function PayDividendModalViewModel() {
     }
     
     // fetch shareholders to check transaction dest.
-    if (self.selectedDividendAsset() == 'BTC') {
+    if (self.selectedDividendAsset() == BTC) {
       var params = {
         'filters': [
           {'field': 'asset', 'op': '=', 'value': self.assetData().asset},
@@ -595,7 +595,7 @@ function PayDividendModalViewModel() {
       //Also get the BTC balance at this address and put at head of the list
       WALLET.retrieveBTCBalance(address.ADDRESS, function(balance) {
         if(balance) {
-          self.availableDividendAssets.unshift(new DividendAssetInDropdownItemModel("BTC", balance, normalizeQuantity(balance)));
+          self.availableDividendAssets.unshift(new DividendAssetInDropdownItemModel(BTC, balance, normalizeQuantity(balance)));
         }
       });
     });
@@ -682,7 +682,7 @@ function CallAssetModalViewModel() {
 
   self.xcpBalRemainingPostCall = ko.computed(function() {
     if(self.totalXCPPay() === null) return null;
-    return Decimal.round(new Decimal(WALLET.getBalance(self.address(), 'XCP')).sub(self.totalXCPPay()), 8, Decimal.MidpointRounding.ToEven).toFloat();
+    return Decimal.round(new Decimal(WALLET.getBalance(self.address(), XCP)).sub(self.totalXCPPay()), 8, Decimal.MidpointRounding.ToEven).toFloat();
   }, self);
   
   self.xcpBalRemainingPostCallIsSet = ko.computed(function() {
@@ -723,7 +723,7 @@ function CallAssetModalViewModel() {
         var message = "You " + (armoryUTx ? "will be calling back" : "have called back")
           + " <b class='notoQuantityColor'>" + self.percentageToCall() + "%</b>"
           + " of token <b class='notoAssetColor'>" + self.asset() + "</b>"
-          + " for the price of <b class='notoQuantityColor'>" + self.totalXCPPay() + "</b> <b class='notoAssetColor'>XCP</b>. ";
+          + " for the price of <b class='notoQuantityColor'>" + self.totalXCPPay() + "</b> <b class='notoAssetColor'>" + XCP + "</b>. ";
         WALLET.showTransactionCompleteDialog(message + ACTION_PENDING_NOTICE, message, armoryUTx);
       }
     );

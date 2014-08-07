@@ -180,8 +180,8 @@ function WaitingBTCPayFeedViewModel() {
         $.jqlog.debug("Order matches: " + JSON.stringify(data));
         for(var i=0; i < data.length; i++) {
           //if the other party is the one that should be paying BTC for this specific order match, then skip it          
-          if(   WALLET.getAddressObj(data['tx0_address']) && data['forward_asset'] == 'BTC'
-             || WALLET.getAddressObj(data['tx1_address']) && data['backward_asset'] == 'BTC')
+          if(   WALLET.getAddressObj(data['tx0_address']) && data['forward_asset'] == BTC
+             || WALLET.getAddressObj(data['tx1_address']) && data['backward_asset'] == BTC)
              continue;
           
           //if here, we have a pending order match that we owe BTC for. 
@@ -219,8 +219,8 @@ function WaitingBTCPayFeedViewModel() {
 }
 WaitingBTCPayFeedViewModel.makeBTCPayData = function(data) {
   //data is a pending order match object (from a data feed message received, or from a get_orders API result)
-  var firstInPair = (WALLET.getAddressObj(data['tx0_address']) && data['forward_asset'] == 'BTC') ? true : false;
-  if(!firstInPair) if (!(WALLET.getAddressObj(data['tx1_address']) && data['backward_asset'] == 'BTC')) return false;
+  var firstInPair = (WALLET.getAddressObj(data['tx0_address']) && data['forward_asset'] == BTC) ? true : false;
+  if(!firstInPair) if (!(WALLET.getAddressObj(data['tx1_address']) && data['backward_asset'] == BTC)) return false;
   
   return {
     blockIndex: data['tx1_block_index'], //the latter block index, which is when the match was actually made
@@ -343,7 +343,7 @@ function UpcomingBTCPayFeedViewModel() {
     //If automatic BTC pays are enabled, just take care of the BTC pay right now
     if(PREFERENCES['auto_btcpay']) {
 
-      if(WALLET.getBalance(btcPayData['myAddr'], 'BTC', false) >= (btcPayData['btcQuantityRaw']) + MIN_PRIME_BALANCE) {
+      if(WALLET.getBalance(btcPayData['myAddr'], BTC, false) >= (btcPayData['btcQuantityRaw']) + MIN_PRIME_BALANCE) {
         
          //user has the sufficient balance
         WALLET.doTransaction(btcPayData['myAddr'], "create_btcpay",

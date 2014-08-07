@@ -108,7 +108,7 @@ function LogonViewModel() {
     },
     function(jqXHR, textStatus, errorThrown, endpoint) {
       var message = describeError(jqXHR, textStatus, errorThrown);
-      bootbox.alert("No counterparty servers are currently available. Please try again later. ERROR: " + message);
+      bootbox.alert("No " + XCP_NAME + " servers are currently available. Please try again later. ERROR: " + message);
     });
   }
 

@@ -2,7 +2,7 @@ function BalanceHistoryViewModel() {
   //An address on a wallet
   var self = this;
   self.selectedAsset = ko.observable('');
-  self.availableAssets = !USE_TESTNET ? ko.observableArray(["XCP", "BTC"]) : ko.observableArray(["XCP"]);
+  self.availableAssets = !USE_TESTNET ? ko.observableArray([XCP, BTC]) : ko.observableArray([XCP]);
   //^ don't load BTC as an asset on testnet, since we can't show the data (since blockchain doesn't support testnet)
   self.graphData = null;
   self.ASSET_LASTCHANGE = null;
@@ -28,7 +28,7 @@ function BalanceHistoryViewModel() {
     self.ASSET_LASTCHANGE = self.selectedAsset();
     $.jqlog.debug("Balance history: Token changed: " + self.selectedAsset());
     
-    if(self.selectedAsset() == "BTC") { //mainnet only (as we use blockchain.info for this and they don't support testnet)
+    if(self.selectedAsset() == BTC) { //mainnet only (as we use blockchain.info for this and they don't support testnet)
       var addresses = WALLET.getAddressesList();
       self.graphData = [];
       
@@ -58,7 +58,7 @@ function BalanceHistoryViewModel() {
         }).error(function(jqXHR, textStatus, errorThrown) {
           var address = /address%3D([A-Za-z0-9]+)%22/g.exec(jqXHR.url)[1];
           var addressHash = hashToB64(address);
-          $.jqlog.debug( "Could not get BTC balance from blockchain for address " + address + ": " + errorThrown);
+          $.jqlog.debug( "Could not get " + BTC + " balance from blockchain for address " + address + ": " + errorThrown);
           var addressName = PREFERENCES['address_aliases'][addressHash] ? "<b>" + PREFERENCES['address_aliases'][addressHash] + "</b> (" + address + ")" : address; 
           self.graphData.push({'name': addressName, 'data': []});
           if(self.graphData.length == addresses.length) {
@@ -164,8 +164,8 @@ function TransactionHistoryItemViewModel(data) {
     //TODO: this display of data is very elementary and basic. IMPROVE greatly in the future...
     var desc = "";
     if(self.RAW_TX_TYPE == 'burns') {
-      desc = "XCP Proof-of-Burn<br/>Burned: <Am>" + normalizeQuantity(self.DATA['burned']) + "</Am> <As>BTC</As><br/>"
-        + "Earned: <Am>" + smartFormat(normalizeQuantity(self.DATA['earned']) ) + "</Am> <As>XCP</As>";
+      desc = XCP + " Proof-of-Burn<br/>Burned: <Am>" + normalizeQuantity(self.DATA['burned']) + "</Am> <As>" + BTC + "</As><br/>"
+        + "Earned: <Am>" + smartFormat(normalizeQuantity(self.DATA['earned']) ) + "</Am> <As>" + XCP + "</As>";
     } else if(self.RAW_TX_TYPE == 'sends') {
       desc = "Send of <Am>" + smartFormat(normalizeQuantity(self.DATA['quantity'], self.DATA['_divisible'])) + "</Am> <As>" + self.DATA['asset']
         + "</As> to <Ad>" + getLinkForCPData('address', self.DATA['destination'], getAddressLabel(self.DATA['destination'])) + "</Ad>";
@@ -181,11 +181,11 @@ function TransactionHistoryItemViewModel(data) {
         + "<Ad>" + getAddressLabel(self.DATA['tx1_address']) + "</Ad> sent <Am>"
         + smartFormat(normalizeQuantity(self.DATA['backward_quantity'], self.DATA['_backward_asset_divisible']))
         + "</Am> <As>" + self.DATA['backward_asset'] + "</As>";
-      if(self.DATA['forward_asset'] == 'BTC' || self.DATA['backward_asset'] == 'BTC') {
+      if(self.DATA['forward_asset'] == BTC || self.DATA['backward_asset'] == BTC) {
         desc += " <b>(pending BTCpay)</b>";
       }
     } else if(self.RAW_TX_TYPE == 'btcpays') {
-      desc = "Payment for <Am>" + smartFormat(normalizeQuantity(self.DATA['btc_amount'])) + "</Am> <As>BTC</As>";
+      desc = "Payment for <Am>" + smartFormat(normalizeQuantity(self.DATA['btc_amount'])) + "</Am> <As>" + BTC + "</As>";
     } else if(self.RAW_TX_TYPE == 'issuances') {
       if(self.DATA['transfer']) {
         desc = "Token <As>" + self.DATA['asset'] + "</As> transferred to <Ad>"
@@ -202,15 +202,15 @@ function TransactionHistoryItemViewModel(data) {
       desc = BET_TYPES[self.DATA['bet_type']] + " bet on feed @ <Ad>"
         + getLinkForCPData('address', self.DATA['feed_address'], getAddressLabel(self.DATA['feed_address'])) + "</Ad><br/>"
         + "Odds: <b>" + reduce(self.DATA['wager_quantity'], self.DATA['counterwager_quantity']).join('/') + "</b>, Wager: <Am>"
-        + smartFormat(normalizeQuantity(self.DATA['wager_quantity'])) + "</Am> <As>XCP</As>, Counterwager: <Am>"
-        + smartFormat(normalizeQuantity(self.DATA['counterwager_quantity'])) + "</Am> <As>XCP</As>";  
+        + smartFormat(normalizeQuantity(self.DATA['wager_quantity'])) + "</Am> <As>" + XCP + "</As>, Counterwager: <Am>"
+        + smartFormat(normalizeQuantity(self.DATA['counterwager_quantity'])) + "</Am> <As>" + XCP + "</As>";  
     } else if(self.RAW_TX_TYPE == 'bet_matches') {
       desc = "For feed @ <Ad>" 
         + getLinkForCPData('address', self.DATA['feed_address'], getAddressLabel(self.DATA['feed_address']))
         + "</Ad>, <Ad>" + getAddressLabel(self.DATA['tx0_address']) + "</Ad> bet <Am>"
-        + smartFormat(normalizeQuantity(self.DATA['forward_quantity'])) + "</Am> <As>XCP</As> and <Ad>"
+        + smartFormat(normalizeQuantity(self.DATA['forward_quantity'])) + "</Am> <As>" + XCP + "</As> and <Ad>"
         + getAddressLabel(self.DATA['tx1_address']) + "</Ad> bet <Am>"
-        + smartFormat(normalizeQuantity(self.DATA['backward_quantity'])) + "</Am> <As>XCP</As>";
+        + smartFormat(normalizeQuantity(self.DATA['backward_quantity'])) + "</Am> <As>" + XCP + "</As>";
     } else if(self.RAW_TX_TYPE == 'dividends') {
       desc = "Paid <Am>" + smartFormat(normalizeQuantity(self.DATA['quantity_per_unit'])) + "</Am> <As>"+ self.DATA['dividend_asset']
         + "</As> per unit of token <As>" + self.DATA['asset'] + "</As>";
@@ -233,11 +233,11 @@ function TransactionHistoryItemViewModel(data) {
         + "</Am> <As>" + self.DATA['asset'] + "</As>";
     } else if(self.RAW_TX_TYPE == 'rps') {
       desc = "Rock-Paper-Scissors bet, Wager: <Am>"
-        + smartFormat(normalizeQuantity(self.DATA['wager'])) + "</Am> <As>XCP</As>";  
+        + smartFormat(normalizeQuantity(self.DATA['wager'])) + "</Am> <As>" + XCP + "</As>";  
     } else if(self.RAW_TX_TYPE == 'rps_matches') {
       desc = "Rock-Paper-Scissors bet matched between <Ad>" + getAddressLabel(self.DATA['tx0_address']) + "</Ad> and <Ad>"
         + getAddressLabel(self.DATA['tx1_address']) + "</Ad>, wagering <Am>"
-        + smartFormat(normalizeQuantity(self.DATA['wager'])) + "</Am> <As>XCP</As>";
+        + smartFormat(normalizeQuantity(self.DATA['wager'])) + "</Am> <As>" + XCP + "</As>";
     } else if(self.RAW_TX_TYPE == 'rpsresolves') {
       desc = "Rock-Paper-Scissors bet match <b>" + getTxHashLink(self.DATA['rps_match_id']) + "</b> resolved, source: <Ad>"
         + getAddressLabel(self.DATA['source']) + "</Ad>, winning move is <b>" + self.DATA['move'] + "</b>";

@@ -1,4 +1,10 @@
 {
   "open": "{{",
-  "close": "}}"
+  "close": "}}",
+  "xcp": "XCP",
+  "xcp_name": "Counterparty",
+  "btc": "BTC",
+  "btc_name": "Bitcoin",
+  "xcp_store_url": "https://www.counterparty.co/xcp/",
+  "testnet_faucet_url": "https://en.bitcoin.it/wiki/Bitcoin_faucet"
 }

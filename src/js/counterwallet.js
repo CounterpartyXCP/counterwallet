@@ -134,7 +134,7 @@ function needWarningOnExit() {
 
 function warningOnExit() {
   if (needWarningOnExit()) {
-    return "If you log out, any Bitcoin sell orders you have open will probably not be filled.";
+    return "If you log out, any " + BTC_NAME + " sell orders you have open will probably not be filled.";
   }
 }
 

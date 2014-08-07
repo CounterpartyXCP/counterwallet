@@ -10,7 +10,7 @@ function DonationViewModel() {
       validator: function (val, self) {
         var address = self.sourceAddress();
         var quantity = self.quantity();
-        if (self.donationCurrency() == 'XCP') {
+        if (self.donationCurrency() == XCP) {
           return parseFloat(quantity) <= self.balancesXCP[address];
         } else {
           return parseFloat(quantity) <= self.balancesBTC[address];
@@ -27,7 +27,7 @@ function DonationViewModel() {
   self.balancesXCP = {};
   self.balancesBTC = {};
 	self.quantity = ko.observable(null).extend(quantityValidator);
-  self.donationCurrency = ko.observable('BTC');
+  self.donationCurrency = ko.observable(BTC);
 
 
   self.validationModel = ko.validatedObservable({
@@ -51,10 +51,10 @@ function DonationViewModel() {
     var addresses = WALLET.getAddressesList(true);
     var options = []
     for(var i = 0; i < addresses.length; i++) {
-      var btcBalance = WALLET.getBalance(addresses[i][0], 'BTC', true);
+      var btcBalance = WALLET.getBalance(addresses[i][0], BTC, true);
       options.push({
         address: addresses[i][0], 
-        label: addresses[i][1] + ' (' + round(btcBalance, 2) + ' BTC / ' + round(addresses[i][2], 2) + ' XCP)'
+        label: addresses[i][1] + ' (' + round(btcBalance, 2) + ' ' + BTC + ' / ' + round(addresses[i][2], 2) + ' ' + XCP + ')'
       });
       self.balancesBTC[addresses[i][0]] = btcBalance;
       self.balancesXCP[addresses[i][0]] = addresses[i][2];
