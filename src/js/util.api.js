@@ -231,7 +231,8 @@ function _getDestTypeFromMethod(method) {
       'record_btc_open_order', 'cancel_btc_open_order', 'get_bets', 'get_user_bets', 'get_feed', 'get_feeds_by_source',
       'parse_base64_feed', 'get_open_rps_count', 'get_user_rps', 
       'get_users_pairs', 'get_market_orders', 'get_market_trades', 'get_markets_list', 'get_market_details',
-      'get_pubkey_for_address', 'create_armory_utx', 'convert_armory_signedtx_to_raw_hex', 'create_support_case'].indexOf(method) >= 0) {
+      'get_pubkey_for_address', 'create_armory_utx', 'convert_armory_signedtx_to_raw_hex', 'create_support_case',
+      'get_escrowed_balances'].indexOf(method) >= 0) {
     destType = "counterblockd";
   }
   return destType;
@@ -414,18 +415,14 @@ function multiAPIConsensus(method, params, onSuccess, onConsensusError, onSysErr
       return onSysError(results[i-1]['jqXHR'], results[i-1]['textStatus'], results[i-1]['errorThrown'], results[i-1]['endpoint']);
     }
     
-    if (!CWBitcore.compareOutputs(params['source'], successResults)) {
-      return onConsensusError(successResults); //not all consensus data matches
+    if(typeof successResults[0] === "string" && _.startsWith(successResults[0], ARMORY_OFFLINE_TX_PREFIX)) { //armory offline tx
+      if(_.uniq(successResults).length != 1)
+        return onConsensusError(successResults); //armory offline tx where not all consensus data matches
+    } else { //regular tx
+      assert(params['source']);
+      if (!CWBitcore.compareOutputs(params['source'], successResults))
+        return onConsensusError(successResults); //regular tx where not all consensus data matches
     }
-    //xnova(7-14-14): DISABLE CONSENSUS API CHECKING FOR NOW UNTIL WE FIX THE OCCASIONAL CONSENSUS ISSUES WE GET AND MAKE IT MORE RELIABLE
-    /*var consensusResult = null;
-    for(i=0; i < successResults.length; i++) {
-      if(i == 0) {
-        consensusResult = successResults[i];
-      } else if(successResults[i] != consensusResult) {
-        return onConsensusError(successResults); //not all consensus data matches
-      }
-    }*/
     
     //if here, all is well
     if(onSuccess) {

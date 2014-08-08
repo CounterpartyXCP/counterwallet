@@ -1,7 +1,7 @@
 /***********
  * GLOBAL CONSTANTS
  ***********/
-var VERSION = "1.5.0PRE BETA";
+var VERSION = "1.5.0PRE2 BETA";
 
 var IS_MOBILE_OR_TABLET = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
 var PREFERENCES = {}; //set when logging in
@@ -20,7 +20,7 @@ var FEE_FRACTION_DEFAULT_FILTER = .95;
 var BTC_ORDER_MIN_AMOUNT = 0.01;
 
 var DEFAULT_NUM_ADDRESSES = 1; //default number of addresses to generate. Go with 1 for now to be more newbie friendly
-var MAX_ADDRESSES = 20; //totall arbitrary :)
+var MAX_ADDRESSES = 20; //totally arbitrary :)
 
 //Order expiration
 var ORDER_DEFAULT_EXPIRATION = 1000; //num blocks until expiration (at ~9 min per block this is ~6.75 days)
@@ -45,6 +45,8 @@ var B26_DIGITS = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
 
 var ACTION_PENDING_NOTICE = "<b><u>This action will take some time to complete</u></b>, and will appear as a Pending Action until"
   + " confirmed on the network. <b class='errorColor'>Until that time, the wallet will not reflect the change. Please be patient.</b>";
+
+var ARMORY_OFFLINE_TX_PREFIX = "=====TXSIGCOLLECT-";
 
 var DEFAULT_PREFERENCES = {
   'num_addresses_used': DEFAULT_NUM_ADDRESSES,
@@ -237,6 +239,9 @@ var RESTRICTED_AREA = {
 
 var MAX_SUPPORT_CASE_PROBLEM_LEN = 4096;
 
+var QUOTE_ASSETS = [] // initalized with counterblock is_ready()
+
+var KOISREADY = false
 
 
 

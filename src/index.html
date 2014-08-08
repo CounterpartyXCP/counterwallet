@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en-us">
+<html lang="en-us" style="background-color:#FFF">
   <head>
     <meta charset="utf-8">
     <title>Counterwallet</title>
@@ -62,6 +62,8 @@
   <body class="fixed-header fixed-ribbon fixed-navigation smart-style-2" data-bind="css: {minified: IS_MOBILE_OR_TABLET }">
     <!-- default to ultra light theme (smart-style-2) -->
     <!-- also default to minfied view on mobile/tablet devices -->
+    <div id="allContentLoading">Loading...</div>
+    <div id="allContent" style="display:none">
 
     <!-- HEADER -->
     <header id="header" style="display: none">
@@ -223,22 +225,21 @@
       </div><!-- /.row -->        
     </div>    
 
-    <!-- Logged out cover div -->
-    <div id="logon">
-      <h1>Welcome to Counterwallet<span data-bind="visible: USE_TESTNET">&nbsp;Testnet</span></h1>
-      <h2>Powered by Counterparty</h2>
-      <div id="form-well">
-        <div id="createNewAcctBtnPane" data-bind="visible: generatedPassphrase().length == 0">
-          <button id="newWalletButton" data-bind="click: generatePassphrase" type="button" class="btn btn-success btn-lg">Create New Wallet</button>
-        </div>
-        <div id="newAccountInfoPane" data-bind="fadeVisible: generatedPassphrase().length > 0" class="display-none">
-          <br/>
-          <div class="panel panel-warning">
-            <div class="panel-heading">
-              <h3 class="panel-title"><b>To use Counterwallet you need a twelve word passphrase.</b></h3>
-            </div>
-            <div class="panel-body">
-              <p>We have created a passphrase for you in the box below.</p>
+    <!-- modal for wallet creation -->
+    <div data-bind="showModal: shown" id="walletCreation" class="modal fade" data-backdrop="static" data-keyboard="false" tabindex="-1" role="dialog" aria-labelledby="walletCreation" aria-hidden="true">
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <div class="modal-header">
+            <button type="button" data-bind="click: hide" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+            <h4 class="modal-title">
+                <span data-bind="visible: step() == 1">Get Your Passphrase</span>
+                <span data-bind="visible: step() == 2">Quick Access URL</span>
+            </h4>
+          </div>
+          <div class="modal-body">
+            <div data-bind="visible: step() == 1">
+              <p class="createWalletHeaderText bg-info padding-10">We have created a passphrase for you in the box below.<br/>
+                This keeps your account secure, and lets you open your wallet on multiple devices.</p> 
               <div class="width-max margin-bottom-10">
                 <span id="generated" data-bind="text: generatedPassphrase"></span>
                 <button id="generated-regenerate" data-bind="click: generatePassphrase, tooltip: {title: 'Click to generate another random passphrase.'}" class="pull-right btn btn-default" type="button"><i class="fa fa-repeat"></i></button>
@@ -251,12 +252,49 @@
                 <p class="logonWarningOtherLines">
                   If someone gets your passphrase, they gain access to your wallet.
                 </p>
+                <p class="logonWarningOtherLines">
+                  We do not store your passphrase and cannot recover it if lost.
+                </p>
               </div>
-              <p>To log into your wallet, input your passphase in the wallet login textbox below, and press the <b>Open Wallet</b> button.</p>
+              <div class="width-max">
+                <input type="checkbox" name="passphraseSaved" value="1" data-bind="checked: passphraseSaved" />
+                <label>I have written down or otherwise securely stored my passphrase</label> 
+              </div>
+            </div>
+            <div class="width-max" data-bind="visible: step() == 2">
+              <p class="createWalletHeaderText bg-info padding-10">To avoid having to type the full 12-word passphrase every time you log
+                into Counterwallet, you can <i>optionally</i> use a special <b>Quick Access URL</b> that is produced by entering
+                a password of your choosing below.
+              </p> 
+              <div class="width-max margin-bottom-10">
+                  <label>Enter a Quick Access password:</label>
+                  <input id="quickAccessPassword" data-bind="value: quickAccessPassword, valueUpdate: 'input'" placeholder="Enter the password to generate encrypted url." class="form-control" type="password" name="quickAccessPassword" autocomplete="off">
+                  <div class="width-max" data-bind="visible: quickAccessPassword()">
+                      <label class="margin-top-10">Copy down the following secret URL and use with your password for quick access:</label>
+                      <textarea id="quickAccessUrl" readonly="true" class="form-control input-lg quickAccessUrl" rows="4" data-bind="value: quickAccessUrl"></textarea>
+                  </div>                 
+              </div>
             </div>
           </div>
-        </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-default" data-bind="click: hide">Cancel</button>
+            <button id="continueWalletCreation" type="button" class="btn btn-primary" data-bind="visible: step()==1, enable: passphraseSaved, click: goStep2">Continue</button>
+            <button id="finishWalletCreation" type="button" class="btn btn-primary" data-bind="visible: step()==2, click: createWallet">Create Wallet</button>
+          </div>
+        </div><!-- /.modal-content -->
+      </div><!-- /.modal-dialog -->
+    </div><!-- /.modal -->
 
+    <!-- Logged out cover div -->
+    <div id="logon">
+      <h1>Welcome to Counterwallet<span data-bind="visible: USE_TESTNET">&nbsp;Testnet</span></h1>
+      <h2>Powered by Counterparty</h2>
+      <div id="form-well">
+
+        <div id="createNewAcctBtnPane">
+          <button id="newWalletButton" data-bind="click: generatePassphrase" type="button" class="btn btn-success btn-lg">Create New Wallet</button>
+        </div>
+        
         <div data-bind="visible: !USE_TESTNET" class="alert alert-info" class="margin-bottom-0">
            <p><i class="fa-fw fa fa-rocket"></i>&nbsp;New to Counterwallet, and want to just play around?
                <b><a href="https://testnet.counterwallet.co" target="_blank">Try Counterwallet Testnet!</a></b> 
@@ -300,7 +338,7 @@
         </div>
       </div> <!-- form-well -->
       
-       <div id="extra-info" class="container" data-bind="visible: generatedPassphrase().length === 0">
+       <div id="extra-info" class="container">
         <h3 class="sales-title margin-bottom-10">
           Counterwallet is a web-wallet for <a href="http://www.counterparty.co" target="_blank">Counterparty</a>,
           the world’s first protocol for decentralized financial tools.
@@ -481,8 +519,7 @@
                 <label class="control-label col col-sm-2">Wallet URL</label>
                 <div class="col col-sm-10">
                     <input id="urlPassword" data-bind="value: urlPassword, valueUpdate: 'input'" placeholder="Enter the password to encrypt the passphrase." class="form-control" type="password" name="urlPassword" autocomplete="off">
-                    <textarea id="walletUrl" class="form-control input-lg" rows="4" style="margin-top:5px;font-size:12px" data-bind="value: walletUrl"></textarea>
-                    
+                    <textarea id="walletUrl" class="form-control input-lg" rows="4" style="margin-top:5px;font-size:12px" data-bind="value: walletUrl"></textarea>                  
                 </div>
               </div></section>
 
@@ -782,6 +819,8 @@
         </div><!-- /.modal-content -->
       </div><!-- /.modal-dialog -->
     </div><!-- /.modal -->
+
+    </div>
 
     <!-- build:js js/counterwallet-deps-min.js -->
     <script src="vendors/underscore/underscore.js"></script>

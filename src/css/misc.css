@@ -101,3 +101,16 @@ span.modeIndicator {
     display:none;
   }
 }
+
+textarea.quickAccessUrl {
+  margin-top: 5px;
+  font-size: 12px;
+  cursor:text !important;
+  background-color: #FFF !important;
+}
+
+#allContentLoading {
+  text-align: center;
+  padding:5px;
+  font-weight: bold;
+}

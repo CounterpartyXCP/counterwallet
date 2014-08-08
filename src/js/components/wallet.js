@@ -268,19 +268,34 @@ function WalletViewModel() {
           if(assets.indexOf(balancesData[i]['asset'])==-1)
           assets.push(balancesData[i]['asset']);
         }
+        // TODO: optimize: assets infos already fetched in get_normalized_balances() in counterblockd
         failoverAPI("get_asset_info", {'assets': assets}, function(assetsInfo, endpoint) {
-          for(i=0; i < assetsInfo.length; i++) {
-            for(j=0; j < balancesData.length; j++) {
-              if(balancesData[j]['asset'] != assetsInfo[i]['asset']) continue;
-              WALLET.getAddressObj(balancesData[j]['address']).addOrUpdateAsset(
-                assetsInfo[i]['asset'], assetsInfo[i], balancesData[j]['quantity']);
-              numBalProcessed += 1;
-              if(numBalProcessed == balancesData.length) return onSuccess();
+
+          failoverAPI("get_escrowed_balances", {'addresses': addresses}, function(escrowedBalances) {
+
+            for (i=0; i < assetsInfo.length; i++) {
+              for (j=0; j < balancesData.length; j++) {
+                if (balancesData[j]['asset'] != assetsInfo[i]['asset']) continue;
+                var address = balancesData[j]['address'];
+                var asset = assetsInfo[i]['asset'];
+                var escrowedBalance = 0;
+                if (escrowedBalances[address] && escrowedBalances[address][asset]) {
+                  escrowedBalance = escrowedBalances[address][asset];
+                }
+                WALLET.getAddressObj(address).addOrUpdateAsset(asset, assetsInfo[i], balancesData[j]['quantity'], escrowedBalance);
+                numBalProcessed += 1;
+                if (numBalProcessed == balancesData.length && onSuccess) return onSuccess();
+              }
             }
-          }
+
+          });
+          
         });
+
       }
     );
+
+  
   }
 
   self.refreshBTCBalances = function(isRecurring) {
@@ -529,6 +544,9 @@ function WalletViewModel() {
     } else if (action == "create_dividend" && data['dividend_asset'] == 'BTC') {
       verifyDestAddr = data['_btc_dividend_dests'];
       delete data['_btc_dividend_dests'];
+    }
+    if (typeof(verifyDestAddr) == 'string') {
+      verifyDestAddr = [verifyDestAddr];
     }
     
     //Do the transaction
