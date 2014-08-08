@@ -44,7 +44,13 @@ Notably, Internet Explorer is **not** supported, due to its lack of full Content
 - Firefox for Android 26+
 
 
-Build Instructions
+Running Counterwallet 
+-----------------------------------------
+
+We recommend installing the dependencies through the script in [these instructions](https://github.com/CounterpartyXCP/counterpartyd_build/blob/master/docs/SettingUpAFederatedNode.rst).
+
+
+Additional Build Instructions
 -------------------
 
 ### Before running the build system:
@@ -67,11 +73,6 @@ grunt build
 ```
 grunt freeze
 ```
-
-Setting up your own Counterwallet Server
------------------------------------------
-
-See [this link](https://github.com/CounterpartyXCP/counterpartyd_build/blob/master/docs/SettingUpAFederatedNode.rst) for more info.
 
 
 Licence
