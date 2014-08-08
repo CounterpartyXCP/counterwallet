@@ -239,7 +239,7 @@
           <div class="modal-body">
             <div data-bind="visible: step() == 1">
               <p class="createWalletHeaderText bg-info padding-10">We have created a passphrase for you in the box below.<br/>
-                This keeps your account secure, and lets you open your wallet on multiple devices.</p> 
+                This passphrase lets you access your wallet and the funds it contains.</p> 
               <div class="width-max margin-bottom-10">
                 <span id="generated" data-bind="text: generatedPassphrase"></span>
                 <button id="generated-regenerate" data-bind="click: generatePassphrase, tooltip: {title: 'Click to generate another random passphrase.'}" class="pull-right btn btn-default" type="button"><i class="fa fa-repeat"></i></button>
@@ -258,7 +258,7 @@
               </div>
               <div class="width-max">
                 <input type="checkbox" name="passphraseSaved" value="1" data-bind="checked: passphraseSaved" />
-                <label>I have written down or otherwise securely stored my passphrase</label> 
+                <label>I have <u>written down</u> or otherwise <u>securely stored</u> my passphrase.</label> 
               </div>
             </div>
             <div class="width-max" data-bind="visible: step() == 2">
@@ -314,11 +314,11 @@
               <div class="row">
 
                 <div class="col-sm-8" data-bind="visible: !cryptedPassphraseUsed()">
-                  <input id="password" data-bind="value: enteredPassphrase, valueUpdate: 'input'" placeholder="Enter your 12 words passphrase." class="form-control" type="password" name="password">
+                  <input id="password" data-bind="value: enteredPassphrase, valueUpdate: 'input'" placeholder="Enter your 12 word passphrase." class="form-control" type="password" name="password">
                 </div>
  
                 <div class="col-sm-8" data-bind="visible: cryptedPassphraseUsed">
-                  <input id="passwordDecrypt" data-bind="value: passwordDecrypt, valueUpdate: 'input'" placeholder="Enter the password to decrypt the passphrase." class="form-control" type="password" name="passwordDecrypt">
+                  <input id="passwordDecrypt" data-bind="value: passwordDecrypt, valueUpdate: 'input'" placeholder="Enter your quick access password." class="form-control" type="password" name="passwordDecrypt">
                 </div>
 
                 <div class="col-sm-4">
