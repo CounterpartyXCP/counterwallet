@@ -108,3 +108,9 @@ textarea.quickAccessUrl {
   cursor:text !important;
   background-color: #FFF !important;
 }
+
+#allContentLoading {
+  text-align: center;
+  padding:5px;
+  font-weight: bold;
+}

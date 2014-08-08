@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en-us">
+<html lang="en-us" style="background-color:#FFF">
   <head>
     <meta charset="utf-8">
     <title>Counterwallet</title>
@@ -62,6 +62,8 @@
   <body class="fixed-header fixed-ribbon fixed-navigation smart-style-2" data-bind="css: {minified: IS_MOBILE_OR_TABLET }">
     <!-- default to ultra light theme (smart-style-2) -->
     <!-- also default to minfied view on mobile/tablet devices -->
+    <div id="allContentLoading">Loading...</div>
+    <div id="allContent" style="display:none">
 
     <!-- HEADER -->
     <header id="header" style="display: none">
@@ -805,6 +807,8 @@
         </div><!-- /.modal-content -->
       </div><!-- /.modal-dialog -->
     </div><!-- /.modal -->
+
+    </div>
 
     <!-- build:js js/counterwallet-deps-min.js -->
     <script src="vendors/underscore/underscore.js"></script>

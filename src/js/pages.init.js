@@ -90,6 +90,8 @@ function initIndex() { //main page
       SUPPORT_MODAL.hide(); //oftentimes it will be up...don't want layers of modals
       CREATE_SUPPORT_CASE_VIEW_MODEL.show();
     });
+    $('#allContentLoading').hide();
+    $('#allContent').show();
   });
 }
 initIndex(); //call it now, as this script is loaded on index page load
