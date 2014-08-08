@@ -22,6 +22,7 @@ function WalletCreationViewModel() {
     self.passphraseSaved(false);
     self.quickAccessPassword('');
     self.shown(true);
+    setTimeout(function() { selectText('generated') }, 200); //necessary due to fade in effect
   }
 
   self.hide = function() {

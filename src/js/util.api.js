@@ -415,8 +415,13 @@ function multiAPIConsensus(method, params, onSuccess, onConsensusError, onSysErr
       return onSysError(results[i-1]['jqXHR'], results[i-1]['textStatus'], results[i-1]['errorThrown'], results[i-1]['endpoint']);
     }
     
-    if (!CWBitcore.compareOutputs(params['source'], successResults)) {
-      return onConsensusError(successResults); //not all consensus data matches
+    if(typeof successResults[0] === "string" && _.startsWith(successResults[0], ARMORY_OFFLINE_TX_PREFIX)) { //armory offline tx
+      if(_.uniq(successResults).length != 1)
+        return onConsensusError(successResults); //armory offline tx where not all consensus data matches
+    } else { //regular tx
+      assert(params['source']);
+      if (!CWBitcore.compareOutputs(params['source'], successResults))
+        return onConsensusError(successResults); //regular tx where not all consensus data matches
     }
     
     //if here, all is well

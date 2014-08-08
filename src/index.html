@@ -231,12 +231,15 @@
         <div class="modal-content">
           <div class="modal-header">
             <button type="button" data-bind="click: hide" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
-            <h4 class="modal-title">Create New Wallet</h4>
+            <h4 class="modal-title">
+                <span data-bind="visible: step() == 1">Get Your Passphrase</span>
+                <span data-bind="visible: step() == 2">Quick Access URL</span>
+            </h4>
           </div>
           <div class="modal-body">
-
             <div data-bind="visible: step() == 1">
-              <p>We have created a passphrase for you in the box below.</p>
+              <p class="createWalletHeaderText bg-info padding-10">We have created a passphrase for you in the box below.<br/>
+                This keeps your account secure, and lets you open your wallet on multiple devices.</p> 
               <div class="width-max margin-bottom-10">
                 <span id="generated" data-bind="text: generatedPassphrase"></span>
                 <button id="generated-regenerate" data-bind="click: generatePassphrase, tooltip: {title: 'Click to generate another random passphrase.'}" class="pull-right btn btn-default" type="button"><i class="fa fa-repeat"></i></button>
@@ -249,20 +252,29 @@
                 <p class="logonWarningOtherLines">
                   If someone gets your passphrase, they gain access to your wallet.
                 </p>
+                <p class="logonWarningOtherLines">
+                  We do not store your passphrase and cannot recover it if lost.
+                </p>
               </div>
               <div class="width-max">
                 <input type="checkbox" name="passphraseSaved" value="1" data-bind="checked: passphraseSaved" />
                 <label>I have written down or otherwise securely stored my passphrase</label> 
               </div>
             </div>
-
             <div class="width-max" data-bind="visible: step() == 2">
-              <label>Quick Access</label>
-              <input id="quickAccessPassword" data-bind="value: quickAccessPassword, valueUpdate: 'input'" placeholder="Enter the password to generate encrypted url." class="form-control" type="password" name="quickAccessPassword" autocomplete="off">
-              <label class="margin-top-10">Use the following secret url with your password to access your wallet</label>
-              <textarea id="quickAccessUrl" readonly="true" class="form-control input-lg quickAccessUrl" rows="4" data-bind="value: quickAccessUrl"></textarea>                 
+              <p class="createWalletHeaderText bg-info padding-10">To avoid having to type the full 12-word passphrase every time you log
+                into Counterwallet, you can <i>optionally</i> use a special <b>Quick Access URL</b> that is produced by entering
+                a password of your choosing below.
+              </p> 
+              <div class="width-max margin-bottom-10">
+                  <label>Enter a Quick Access password:</label>
+                  <input id="quickAccessPassword" data-bind="value: quickAccessPassword, valueUpdate: 'input'" placeholder="Enter the password to generate encrypted url." class="form-control" type="password" name="quickAccessPassword" autocomplete="off">
+                  <div class="width-max" data-bind="visible: quickAccessPassword()">
+                      <label class="margin-top-10">Copy down the following secret URL and use with your password for quick access:</label>
+                      <textarea id="quickAccessUrl" readonly="true" class="form-control input-lg quickAccessUrl" rows="4" data-bind="value: quickAccessUrl"></textarea>
+                  </div>                 
+              </div>
             </div>
-
           </div>
           <div class="modal-footer">
             <button type="button" class="btn btn-default" data-bind="click: hide">Cancel</button>
