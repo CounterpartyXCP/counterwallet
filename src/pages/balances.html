@@ -135,7 +135,7 @@
             <div class="widget-body" data-bind="attr: {'id': 'address-balances-' + ADDRESS}, foreach: filteredAssets"> <!-- widget content -->
               <div class="asset-item" data-bind="css: { btc: ASSET === 'BTC', xcp: ASSET === 'XCP', myasset: isMine(), othersasset: !isMine() && (ASSET !== 'BTC' && ASSET !== 'XCP') }">
                 <div class="btn-group btn-group-dropup"> <!-- asset level action button -->
-                  <button type="button" data-bind="attr: {id: 'btnAsset_' + $parentContext.$index + '_' + $index }" class="btn btn-default dropdown-toggle assetBtn"><span class="caret"></span></button>
+                  <button type="button" data-bind="attr: {id: 'btn-asset-' + $parentContext.$index + '-' + $index }" class="btn btn-default dropdown-toggle assetBtn"><span class="caret"></span></button>
                   <ul class="dropdown-menu" role="menu">
                     <li><a data-bind="visible: !$parent.IS_WATCH_ONLY, click: send" href="#">Send</a></li>
                     <li><a data-bind="visible: ASSET !== 'BTC' && ASSET !== 'XCP', click: showInfo" href="#">Show Info</a></li>
@@ -154,7 +154,7 @@
                         <span data-bind="visible: issuanceQtyChangePending" title="Quantity issued change pending">
                             <i class="icon-append fa fa-spinner fa-spin"></i></span>
                     </span><br/>
-                    Bal: <span data-bind="attr: {id: 'txtBalance_' + $parentContext.$index + '_' + $index }, html: dispBalance"></span>
+                    Bal: <span data-bind="attr: {id: 'txt-balance-' + $parentContext.$index + '-' + $index }, html: dispBalance"></span>
                     <span data-bind="visible: balanceChangePending"
                         title="Balance change pending"><i class="icon-append fa fa-spinner fa-spin"></i></span></p>
                 <div class="balancesAssetIcons">
@@ -296,8 +296,8 @@
         </p>
       </div>
       <div class="modal-footer">
-        <button id="sendModalCancel" type="button" class="btn btn-default" data-bind="click: hide">Cancel</button>
-        <button id="sendModalSend" type="button" data-bind="click: submitForm" class="btn btn-primary">Send</button>
+        <button id="send-modal-cancel" type="button" class="btn btn-default" data-bind="click: hide">Cancel</button>
+        <button id="send-modal-ok" type="button" data-bind="click: submitForm" class="btn btn-primary">Send</button>
       </div>
     </div><!-- /.modal-content -->
   </div><!-- /.modal-dialog -->
