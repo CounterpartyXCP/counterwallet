@@ -238,7 +238,7 @@
           </div>
           <div class="modal-body">
             <div data-bind="visible: step() == 1">
-              <p class="createWalletHeaderText bg-info padding-10">We have created a passphrase for you in the box below.<br/>
+              <p class="createWalletHeaderText">We have created a passphrase for you in the box below.<br/>
                 This passphrase lets you access your wallet and the funds it contains.</p> 
               <div class="width-max margin-bottom-10">
                 <span id="generated" data-bind="text: generatedPassphrase"></span>
@@ -262,11 +262,12 @@
               </div>
             </div>
             <div class="width-max" data-bind="visible: step() == 2">
-              <p class="createWalletHeaderText bg-info padding-10">To avoid having to type the full 12-word passphrase every time you log
+              <p class="createWalletHeaderText">To avoid having to type the full 12-word passphrase every time you log
                 into Counterwallet, you can <i>optionally</i> use a special <b>Quick Access URL</b> that is produced by entering
-                a password of your choosing below.
-              </p> 
-              <div class="width-max margin-bottom-10">
+                a password of your choosing.
+              </p>
+              <p class="createWalletHeaderText" data-bind="visible: !showQuickAccessFrame()">If you don't know what this means, just click <b>Skip This Step</b> below.</p>
+              <div class="width-max margin-bottom-10" data-bind="visible: showQuickAccessFrame()">
                   <label>Enter a Quick Access password:</label>
                   <input id="quickAccessPassword" data-bind="value: quickAccessPassword, valueUpdate: 'input'" placeholder="Enter the password to generate encrypted url." class="form-control" type="password" name="quickAccessPassword" autocomplete="off">
                   <div class="width-max" data-bind="visible: quickAccessPassword()">
@@ -277,9 +278,11 @@
             </div>
           </div>
           <div class="modal-footer">
-            <button type="button" class="btn btn-default" data-bind="click: hide">Cancel</button>
-            <button id="continueWalletCreation" type="button" class="btn btn-primary" data-bind="visible: step()==1, enable: passphraseSaved, click: goStep2">Continue</button>
-            <button id="finishWalletCreation" type="button" class="btn btn-primary" data-bind="visible: step()==2, click: createWallet">Create Wallet</button>
+            <button type="button" class="btn btn-default" data-bind="visible: step()==1, click: hide">Cancel</button>
+            <button id="continueWalletCreation" type="button" class="btn btn-primary" data-bind="visible: step() == 1, enable: passphraseSaved, click: goToStep2">Continue</button>
+            <button id="finishWalletCreation" type="button" class="btn btn-primary" data-bind="visible: step() == 2 && !showQuickAccessFrame(), click: showQuickAccessURLGUI">Create a Quick Access URL</button>
+            <button id="finishWalletCreation" type="button" class="btn btn-primary" data-bind="visible: step() == 2 && !showQuickAccessFrame(), click: createWallet">Skip This Step</button>
+            <button id="finishWalletCreation" type="button" class="btn btn-primary" data-bind="visible: step() == 2 && showQuickAccessFrame(), click: createWallet">Create Wallet</button>
           </div>
         </div><!-- /.modal-content -->
       </div><!-- /.modal-dialog -->
