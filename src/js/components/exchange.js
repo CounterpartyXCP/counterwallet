@@ -231,12 +231,16 @@ function ExchangeViewModel() {
   });
 
   self.selectBuyOrder = function(order, notFromClick) {
-    self.sellPrice(noExponents(parseFloat(order.price)));
-    var amount = Math.min(self.availableBalanceForSell(), parseFloat(order.base_depth));
-    self.sellAmount(noExponents(amount));
-    if (self.sellPrice()) {
-      self.sellTotal(noExponents(mulFloat(self.sellPrice(), amount)));
-    }
+    var price = new Decimal(order.price);
+    var amount1 = new Decimal(self.availableBalanceForSell());
+    var amount2 = new Decimal(order.base_depth);
+    var amount = amount1.compare(amount2) > 0 ? amount2 : amount1;
+    var total = price.mul(amount);
+
+    self.sellPrice(roundAmount(price));
+    self.sellAmount(roundAmount(amount));
+    self.sellTotal(roundAmount(total));
+
     if (typeof(notFromClick) != 'boolean' || notFromClick == false) {
       self.selectSellOrder(order, true);
     }
@@ -458,16 +462,16 @@ function ExchangeViewModel() {
   });
 
   self.selectSellOrder = function(order, notFromClick) {
-    self.buyPrice(noExponents(parseFloat(order.price)));
-    var amount = parseFloat(order.base_depth);
-    
-    if (self.buyPrice()) {
-      var total = Math.min(mulFloat(self.buyPrice(), amount), self.availableBalanceForBuy());
-      amount = divFloat(total, self.buyPrice());
-      self.buyTotal(noExponents(total));
-    }
+    var price = new Decimal(order.price);
+    var amount = new Decimal(order.base_depth);
+    var total1 = price.mul(amount);
+    var total2 = new Decimal(self.availableBalanceForBuy());
+    var total = total1.compare(total2) > 0 ? total2 : total1;
+    amount = total.div(price);
 
-    self.buyAmount(noExponents(amount));
+    self.buyPrice(roundAmount(price));
+    self.buyTotal(roundAmount(total));
+    self.buyAmount(roundAmount(amount));
 
     if (typeof(notFromClick) != 'boolean' || notFromClick == false) {
       self.selectBuyOrder(order, true);
@@ -547,9 +551,7 @@ function ExchangeViewModel() {
       }
     }
     if (amountCumul < self.buyAmount()) {
-
       estimatedTotalPrice += mulFloat(self.buyAmount() - amountCumul, self.buyPrice());
-      $.jqlog.debug('estimatedTotalPrice 2:' + estimatedTotalPrice);
     }
 
     estimatedTotalPrice = smartFormat(estimatedTotalPrice);
@@ -722,7 +724,7 @@ function ExchangeViewModel() {
       self.asset2IsDivisible(data['base_asset_divisible']);
     }
 
-    self.currentMarketPrice(smartFormat(parseFloat(data['price'])));
+    self.currentMarketPrice(roundAmount(data['price']));
     self.marketProgression24h(data['progression']);
 
     self.bidBook([])
@@ -742,13 +744,20 @@ function ExchangeViewModel() {
         if (base_depth == 0) {
           self.highestBidPrice(data['buy_orders'][i]['price']);
           self.sellPrice(data['buy_orders'][i]['price']);
-          self.obtainableForSell(smartFormat(mulFloat(self.availableBalanceForSell(), self.highestBidPrice())));
+          var a = new Decimal(self.availableBalanceForSell());
+          var h = new Decimal(self.highestBidPrice());
+          var o = roundAmount(a.mul(a));
+          self.obtainableForSell(o);
         }
         var amount = normalizeQuantity(data['buy_orders'][i]['amount'], data['base_asset_divisible']);
         data['buy_orders'][i]['exclude'] = false;
-        data['buy_orders'][i]['price'] = smartFormat(parseFloat(data['buy_orders'][i]['price']));
-        data['buy_orders'][i]['amount'] = smartFormat(amount);
-        data['buy_orders'][i]['total'] = smartFormat(normalizeQuantity(data['buy_orders'][i]['total'], data['quote_asset_divisible']));
+        
+        data['buy_orders'][i]['amount'] = roundAmount(amount);
+        data['buy_orders'][i]['total'] = roundAmount(normalizeQuantity(data['buy_orders'][i]['total'], data['quote_asset_divisible']));
+        var a = new Decimal(data['buy_orders'][i]['amount']);
+        var t = new Decimal(data['buy_orders'][i]['total']);
+        var p = roundAmount(t.div(a));
+        data['buy_orders'][i]['price'] = p;
         data['buy_orders'][i]['base_depth'] = amount + base_depth;
         base_depth = data['buy_orders'][i]['base_depth'];
       }
@@ -762,13 +771,19 @@ function ExchangeViewModel() {
         if (base_depth == 0) {
           self.lowestAskPrice(data['sell_orders'][i]['price']);
           self.buyPrice(data['sell_orders'][i]['price']);
-          self.obtainableForBuy(smartFormat(divFloat(self.availableBalanceForBuy(), self.lowestAskPrice())));
+          var a = new Decimal(self.availableBalanceForBuy());
+          var l = new Decimal(self.lowestAskPrice());
+          var o = roundAmount(a.div(l));
+          self.obtainableForBuy(o);
         }
         var amount = normalizeQuantity(data['sell_orders'][i]['amount'], data['base_asset_divisible']);
         data['sell_orders'][i]['exclude'] = false;
-        data['sell_orders'][i]['price'] = smartFormat(parseFloat(data['sell_orders'][i]['price']));
-        data['sell_orders'][i]['amount'] = smartFormat(amount);
-        data['sell_orders'][i]['total'] = smartFormat(normalizeQuantity(data['sell_orders'][i]['total'], data['quote_asset_divisible']));
+        data['sell_orders'][i]['amount'] = roundAmount(amount);
+        data['sell_orders'][i]['total'] = roundAmount(normalizeQuantity(data['sell_orders'][i]['total'], data['quote_asset_divisible']));
+        var a = new Decimal(data['sell_orders'][i]['amount']);
+        var t = new Decimal(data['sell_orders'][i]['total']);
+        var p = roundAmount(t.div(a));
+        data['sell_orders'][i]['price'] = p;
         data['sell_orders'][i]['base_depth'] = amount + base_depth;
         base_depth = data['sell_orders'][i]['base_depth'];
       }
@@ -781,9 +796,9 @@ function ExchangeViewModel() {
     try { $('#tradeHistory').dataTable().fnClearTable(); } catch(err) { }
 
     for (var i in data['last_trades']) {
-      data['last_trades'][i]['price'] = smartFormat(parseFloat(data['last_trades'][i]['price']));
-      data['last_trades'][i].amount = smartFormat(normalizeQuantity(data['last_trades'][i].amount, self.baseAssetIsDivisible()));
-      data['last_trades'][i].total = smartFormat(normalizeQuantity(data['last_trades'][i].total, self.quoteAssetIsDivisible()));
+      data['last_trades'][i]['price'] = roundAmount(data['last_trades'][i]['price']);
+      data['last_trades'][i].amount = roundAmount(normalizeQuantity(data['last_trades'][i].amount, self.baseAssetIsDivisible()));
+      data['last_trades'][i].total = roundAmount(normalizeQuantity(data['last_trades'][i].total, self.quoteAssetIsDivisible()));
       data['last_trades'][i].block_time = moment(data['last_trades'][i].block_time * 1000).format('YYYY/MM/DD hh:mm:ss A Z');
     }
     self.tradeHistory(data['last_trades']);

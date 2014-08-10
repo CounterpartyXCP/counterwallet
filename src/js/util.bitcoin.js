@@ -13,6 +13,10 @@ function denormalizeQuantity(quantity, divisible) {
   //^ we have the quantity !== 0 check due to a bug in Decimal (https://github.com/hiroshi-manabe/JSDecimal/issues/2)
 }
 
+function roundAmount(amount) {
+  return Decimal.round(new Decimal(amount), 8, Decimal.MidpointRounding.ToEven).toString();
+}
+
 function addFloat(floatA, floatB) {
   var a = new Decimal(floatA);
   var b = new Decimal(floatB);
