@@ -20,6 +20,13 @@ module.exports = function (grunt) {
                     }
                 }*/
             },
+            ejs: {
+              options: require("./options"),
+              src: ["src/**/*.ejs"],
+              dest: ".",
+              expand: true,
+              ext: ".html"
+            },
             process: {
                 files: [
                     {cwd: 'src/', src: 'index.html', dest: buildDir, expand: true},
@@ -31,6 +38,13 @@ module.exports = function (grunt) {
                     {src: 'src/robots.txt', dest: buildDir+'robots.txt'},
                     {cwd: 'src/assets/', src: '*', dest: buildDir+'assets/', expand: true}
                 ]
+            }
+        },
+
+        watch: {
+            ejs: {
+                files: ["src/**/*.ejs"],
+                tasks: ["build:ejs"]
             }
         }
     }
@@ -53,6 +67,7 @@ module.exports = function (grunt) {
     grunt.initConfig(config);
 
     grunt.loadTasks('grunt-tasks');
+    grunt.loadNpmTasks('grunt-contrib-watch');
 
     grunt.registerTask('default', ['build']);
 };
