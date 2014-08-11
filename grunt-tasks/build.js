@@ -332,7 +332,7 @@ module.exports = function(grunt) {
         var config = this.options(defaultOptions);        
 
         if (this.target == 'ejs') {
-          grunt.config.set('ejs', { all: this.data });
+          grunt.config.set('ejs', this.data);
           grunt.task.run('ejs');
         }
 

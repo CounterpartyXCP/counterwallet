@@ -21,11 +21,20 @@ module.exports = function (grunt) {
                 }*/
             },
             ejs: {
-              options: require("./options"),
-              src: ["src/**/*.ejs"],
-              dest: ".",
-              expand: true,
-              ext: ".html"
+              html: {
+                options: require("./options"),
+                src: ["src/**/*.html.ejs"],
+                dest: ".",
+                expand: true,
+                ext: ".html"
+              },
+              js: {
+                options: require("./options"),
+                src: ["src/**/*.js.ejs"],
+                dest: ".",
+                expand: true,
+                ext: ".js"
+              }
             },
             process: {
                 files: [

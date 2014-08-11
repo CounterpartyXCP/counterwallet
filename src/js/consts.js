@@ -6,12 +6,6 @@ var VERSION = "1.5.0PRE BETA";
 var IS_MOBILE_OR_TABLET = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
 var PREFERENCES = {}; //set when logging in
 
-var options = require("./options");
-var BTC_NAME = options.btc_name;
-var BTC = options.btc;
-var XCP_NAME = options.xcp_name;
-var XCP = options.xcp;
-
 var MAX_INT = Math.pow(2, 63) - 1;
 var UNIT = 100000000; //# satoshis in whole
 var MIN_FEE = 20000; // in satoshis (== .0002 BTC)
