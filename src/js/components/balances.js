@@ -1168,7 +1168,7 @@ function TestnetBurnModalViewModel() {
     isValidPositiveQuantity: self,
     validation: [{
       validator: function (val, self) {
-        return parseFloat(val) > 0 && parseFloat(val) <= 1;
+        return parseFloat(val) > 0 && parseFloat(val) <= MAX_BURN_PER_ADDRESS;
       },
       message: 'Quantity entered must be between 0 and ' + MAX_BURN_PER_ADDRESS + ' ' + BTC + '.',
       params: self
