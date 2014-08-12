@@ -172,12 +172,8 @@ var BET_MATCHES_STATUS = {
 
 var LEVERAGE_UNIT = 5040;
 
-var MAINNET_UNSPENDABLE = '1CounterpartyXXXXXXXXXXXXXXXUWLpVr';
-var TESTNET_UNSPENDABLE = 'mvCounterpartyXXXXXXXXXXXXXXW24Hef';
-var TESTNET_BURN_START = 154908;
-var TESTNET_BURN_END = 4017708;
-var MAX_BURN_PER_ADDRESS = 5000000;
-
+var MAINNET_UNSPENDABLE = 'DDogepartyxxxxxxxxxxxxxxxxxxw1dfzr';
+var TESTNET_UNSPENDABLE = 'ndogepartyxxxxxxxxxxxxxxxxxxwpsZCH';
 
 /***********
  * IS_DEV / USE_TESTNET
@@ -196,6 +192,20 @@ var IS_DEV = (location.pathname == "/" && qs("dev") && qs("dev") != '0' ? true :
 var USE_TESTNET = (   (((location.pathname == "/" || location.pathname == "/src/" || location.pathname == "/build/") && qs("testnet") && qs("testnet") != '0')
                    || location.hostname.indexOf('testnet') != -1) ? true : false
                   );
+
+var BURN_START, BURN_END;
+if (USE_TESTNET) {
+  if (typeof TESTNET_BURN_START !== "undefined") {
+    BURN_START = TESTNET_BURN_START;
+    BURN_END = TESTNET_BURN_END;
+  }
+} else {
+  if (typeof LIVENET_BURN_START !== "undefined") {
+    BURN_START = LIVENET_BURN_START;
+    BURN_END = LIVENET_BURN_END;
+  }
+}
+var BURNABLE = !!BURN_START;
 
 var TESTNET_PASSPHRASE = qs("passphrase");
 

@@ -64,9 +64,9 @@
     To start using the wallet, simply send some {{= btc}} or {{= xcp}} to the address (just single click on the address string
     itself to select it, then copy that text, which you can then give to others or use to
     send funds to).
-    {{ if (testnet_faucet_url) { }}
+    {{ if (testnet.faucet_url) { }}
     <span data-bind="visible: USE_TESTNET">Note that, on testnet, you can use a
-    <b><a href="{{= testnet_faucet_url}}" target="_blank">Testnet faucet</a> to get {{= btc}} to start with</b>.</span>
+    <b><a href="{{= testnet.faucet_url}}" target="_blank">Testnet faucet</a> to get {{= btc}} to start with</b>.</span>
     {{ } }}
     <br/><br/>
     
@@ -144,7 +144,7 @@
                   <ul class="dropdown-menu" role="menu">
                     <li><a data-bind="visible: !$parent.IS_WATCH_ONLY, click: send" href="#">Send</a></li>
                     <li><a data-bind="visible: ASSET !== '{{= btc}}' && ASSET !== '{{= xcp}}', click: showInfo" href="#">Show Info</a></li>
-                    <li data-bind="visible: !$parent.IS_WATCH_ONLY && USE_TESTNET && ASSET === '{{= btc}}'"><a data-bind="click: testnetBurn" href="#">Burn for {{= xcp}}</a></li>
+                    <li data-bind="visible: !$parent.IS_WATCH_ONLY && BURNABLE && ASSET === '{{= btc}}'"><a data-bind="click: testnetBurn" href="#">Burn for {{= xcp}}</a></li>
                     <li data-bind="visible: !$parent.IS_WATCH_ONLY && isMine() && !locked()"><a data-bind="click: issueAdditional" href="#">Issue Additional</a></li>
                     <li data-bind="visible: !$parent.IS_WATCH_ONLY && isMine()"><a data-bind="click: transfer" href="#">Transfer Ownership</a></li>
                     <li data-bind="visible: !$parent.IS_WATCH_ONLY && isMine() && !locked()"><a data-bind="click: lock" href="#">Lock Token Issuance</a></li>
@@ -459,11 +459,11 @@
     <div class="modal-content">
       <div class="modal-header">
         <button type="button" data-bind="click: hide" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
-        <h4 class="modal-title">Burn {{= btc}} for {{= xcp}} (Testnet Only)</h4>
+        <h4 class="modal-title">Burn {{= btc}} for {{= xcp}}</h4>
       </div>
       <div class="modal-body no-padding">
         <p class="formPadded">
-         Create {{= xcp}} on Testnet by "burning" your test {{= btc}}. Please note that you can only burn up to <b>1 {{= btc}} total</b> for any given address.<br/><br/>
+         Create {{= xcp}} on Testnet by "burning" your test {{= btc}}. Please note that you can only burn up to <b>{{= max_burn_per_address}} {{= btc}} total</b> for any given address.<br/><br/>
          <span data-bind="visible: MAX_BURN_PER_ADDRESS - btcAlreadyBurned() > 0"><b>You may currently burn up to <span class="sellColor"><span data-bind="text: maxPossibleBurn()"></span> {{= btc}}</span> from this address.</b></span>
          <span data-bind="visible: MAX_BURN_PER_ADDRESS - btcAlreadyBurned() <= 0"><b class="errorColor">You have already burned the maximum allowed {{= btc}} from this address.</b></span>
        </p>

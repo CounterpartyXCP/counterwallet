@@ -1170,7 +1170,7 @@ function TestnetBurnModalViewModel() {
       validator: function (val, self) {
         return parseFloat(val) > 0 && parseFloat(val) <= 1;
       },
-      message: 'Quantity entered must be between 0 and 1 ' + BTC + '.',
+      message: 'Quantity entered must be between 0 and ' + MAX_BURN_PER_ADDRESS + ' ' + BTC + '.',
       params: self
     },{
       validator: function (val, self) {
@@ -1182,14 +1182,14 @@ function TestnetBurnModalViewModel() {
       validator: function (val, self) {
         return !(parseFloat(val) > MAX_BURN_PER_ADDRESS - self.btcAlreadyBurned());
       },
-      message: 'You can only burn <b>1 ' + BTC + '</b> total for any given address. Even over multiple burns, the total quantity must be less than <b>1 ' + BTC + '</b>.',
+      message: 'You can only burn <b>' + MAX_BURN_PER_ADDRESS + ' ' + BTC + '</b> total for any given address. Even over multiple burns, the total quantity must be less than <b>' + MAX_BURN_PER_ADDRESS + ' ' + BTC + '</b>.',
       params: self
     }]
   });
   
   self.quantityXCPToBeCreated = ko.computed(function() { //normalized
     if(!self.btcBurnQuantity() || !parseFloat(self.btcBurnQuantity())) return null;
-    return testnetBurnDetermineEarned(WALLET.networkBlockHeight(), self.btcBurnQuantity());
+    return burnDetermineEarned(WALLET.networkBlockHeight(), self.btcBurnQuantity());
   }, self);
   
   self.dispQuantityXCPToBeCreated = ko.computed(function() { 

@@ -6,5 +6,15 @@
   "btc": "DOGE",
   "btc_name": "Dogecoin",
   "xcp_store_url": "",
-  "testnet_faucet_url": ""
+  "max_burn_per_address": 5000000,
+  "livenet": {
+    "burning": false
+  },
+  "testnet": {
+    "faucet_url": "",
+    "burning": {
+      "start": 154908,
+      "end": 4017708
+    }
+  }
 }
