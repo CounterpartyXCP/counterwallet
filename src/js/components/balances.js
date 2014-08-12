@@ -1180,7 +1180,7 @@ function TestnetBurnModalViewModel() {
       params: self
     },{
       validator: function (val, self) {
-        return !(parseFloat(val) > 1 - self.btcAlreadyBurned());
+        return !(parseFloat(val) > MAX_BURN_PER_ADDRESS - self.btcAlreadyBurned());
       },
       message: 'You can only burn <b>1 ' + BTC + '</b> total for any given address. Even over multiple burns, the total quantity must be less than <b>1 ' + BTC + '</b>.',
       params: self
@@ -1198,7 +1198,7 @@ function TestnetBurnModalViewModel() {
   
   self.maxPossibleBurn = ko.computed(function() { //normalized
     if(self.btcAlreadyBurned() === null) return null;
-    return Math.min(1 - self.btcAlreadyBurned(), WALLET.getAddressObj(self.address()).getAssetObj(BTC).normalizedBalance())
+    return Math.min(MAX_BURN_PER_ADDRESS - self.btcAlreadyBurned(), WALLET.getAddressObj(self.address()).getAssetObj(BTC).normalizedBalance())
   }, self);
   
   self.validationModel = ko.validatedObservable({
