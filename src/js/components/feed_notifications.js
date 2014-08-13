@@ -57,10 +57,10 @@ NotificationViewModel.calcText = function(category, message) {
     }
   } else if(category == "btcpays" && (WALLET.getAddressObj(message['source']) || WALLET.getAddressObj(message['destination']))) {
     desc = "BTCPay from <Ad>" + getAddressLabel(message['source']) + "</Ad> to <Ad>" + getAddressLabel(message['destination'])
-      + "</Ad> for <Am>" + smartFormat(normalizeQuantity(message['btc_amount'])) + "</Am> <As>BTC</As>";
+      + "</Ad> for <Am>" + smartFormat(normalizeQuantity(message['btc_amount'])) + "</Am> <As>" + BTC + "</As>";
   } else if(category == "burns" && WALLET.getAddressObj(message['source'])) {
     desc = "Your address <Ad>" + getAddressLabel(message['source']) + "</Ad> has burned <Am>" + smartFormat(normalizeQuantity(message['burned']))
-      + "</Am> <As>BTC</As> for <Am>" + smartFormat(normalizeQuantity(message['earned'])) + "</Am> <As>XCP</As>";
+      + "</Am> <As>" + BTC + "</As> for <Am>" + smartFormat(normalizeQuantity(message['earned'])) + "</Am> <As>" + XCP + "</As>";
   } else if(category == "cancels" && WALLET.getAddressObj(message['source'])) {
     desc = "Order/Bid ID <b>" + message['tx_index'] + "</b> for your address <Ad>" + getAddressLabel(message['source']) + "</Ad> was cancelled";
   } else if(category == "callbacks" || category == "dividend") {
@@ -69,7 +69,7 @@ NotificationViewModel.calcText = function(category, message) {
     var addressesWithAsset = WALLET.getAddressesWithAsset(message['asset']);
     if(!addressesWithAsset.length) return;
     if(category == "callbacks") {
-      desc = "<As>XCP</As> balance adjusted on your address(es) <Ad>" + addressesWithAsset.join(', ')
+      desc = "<As>" + XCP + "<</As> balance adjusted on your address(es) <Ad>" + addressesWithAsset.join(', ')
         + "</Ad> due to <Am>" + (parseFloat(message['fraction']) * 100).toString()
         + "%</Am> callback option being exercised for token <As>" + message['asset'] + "</As>";
     } else {
@@ -143,16 +143,16 @@ NotificationViewModel.calcText = function(category, message) {
     }
   } else if(category == "bets" && WALLET.getAddressObj(message['source'])) {
 
-    desc = "You bet <Am>" + smartFormat(normalizeQuantity(message['wager_quantity'])) + "</Am> <As>XCP</As> on the feed @"
+    desc = "You bet <Am>" + smartFormat(normalizeQuantity(message['wager_quantity'])) + "</Am> <As>" + XCP + "</As> on the feed @"
       + " <Ad>" + getAddressLabel(message['source']) + "</Ad>";
 
   } else if(category == "bet_matches" && (WALLET.getAddressObj(message['tx0_address']) || WALLET.getAddressObj(message['tx1_address']))) {
 
     desc = "Bet @ feed <Ad>" + message['feed_address'] + "</Ad> matched between <Ad>" 
       + getAddressLabel(message['tx0_address']) + "</Ad> (gave <Am>"
-      + smartFormat(normalizeQuantity(message['forward_quantity'])) + "</Ad> <As>XCP</As>) and <Ad>"
+      + smartFormat(normalizeQuantity(message['forward_quantity'])) + "</Ad> <As>" + XCP + "</As>) and <Ad>"
       + getAddressLabel(message['tx1_address']) + "</Ad> (gave <Am>"
-      + smartFormat(normalizeQuantity(message['backward_quantity'])) + "</Ad> <As>XCP</As>)";
+      + smartFormat(normalizeQuantity(message['backward_quantity'])) + "</Ad> <As>" + XCP + "</As>)";
 
   } else if(category == "bet_expirations" && WALLET.getAddressObj(message['source'])) {
     desc = "Your bet ID <b>" + message['bet_index'] + "</b> from address <Ad>" + getAddressLabel(message['source']) + "</Ad> has expired";
@@ -171,7 +171,7 @@ NotificationViewModel.calcText = function(category, message) {
 
   } else if(category == 'rps'  && WALLET.getAddressObj(message['source'])) {
 
-    desc  = "You play Rock-Paper-Scissors with <Am>" + smartFormat(normalizeQuantity(message['wager']))+ "</Am> <As>XCP</As>";
+    desc  = "You play Rock-Paper-Scissors with <Am>" + smartFormat(normalizeQuantity(message['wager']))+ "</Am> <As>" + XCP + "</As>";
     desc += " with <Ad>"+ getAddressLabel(message['source']) + "</Ad>";
 
   } else if(category == 'rpsresolves' && WALLET.getAddressObj(message['source'])) {
@@ -220,10 +220,10 @@ NotificationViewModel.calcText = function(category, message) {
         
         if (WALLET.getAddressObj(message['tx0_address'])) {
           if  (message['status'] == "concluded: first player wins") {
-            desc = "RPS: You win " + smartFormat(normalizeQuantity(message['wager']))+ "</Am> <As>XCP</As>" + 
+            desc = "RPS: You win " + smartFormat(normalizeQuantity(message['wager']))+ "</Am> <As>" + XCP + "</As>" + 
                    " with <Ad>" + getAddressLabel(message['tx0_address']) + "</Ad>";
           } else if  (message['status'] == "concluded: second player wins") {
-            desc = "RPS: You lose " + smartFormat(normalizeQuantity(message['wager']))+ "</Am> <As>XCP</As>" + 
+            desc = "RPS: You lose " + smartFormat(normalizeQuantity(message['wager']))+ "</Am> <As>" + XCP + "</As>" + 
                    " with <Ad>" + getAddressLabel(message['tx0_address']) + "</Ad>";
           } else if  (message['status'] == "concluded: tie") {
             desc = "RPS: Tie with <Ad>" + getAddressLabel(message['tx0_address']) + "</Ad>";
@@ -236,10 +236,10 @@ NotificationViewModel.calcText = function(category, message) {
         var desc2 = "";
         if (WALLET.getAddressObj(message['tx1_address'])) {
           if  (message['status'] == "concluded: first player wins") {
-            desc2 = "RPS: You lose " + smartFormat(normalizeQuantity(message['wager']))+ "</Am> <As>XCP</As>" + 
+            desc2 = "RPS: You lose " + smartFormat(normalizeQuantity(message['wager']))+ "</Am> <As>" + XCP + "</As>" + 
                    " with <Ad>" + getAddressLabel(message['tx1_address']) + "</Ad>";
           } else if  (message['status'] == "concluded: second player wins") {
-            desc2 = "RPS: You win " + smartFormat(normalizeQuantity(message['wager']))+ "</Am> <As>XCP</As>" + 
+            desc2 = "RPS: You win " + smartFormat(normalizeQuantity(message['wager']))+ "</Am> <As>" + XCP + "</As>" + 
                    " with <Ad>" + getAddressLabel(message['tx1_address']) + "</Ad>";
           } else if  (message['status'] == "concluded: tie") {
             desc2 = "RPS: Tie with <Ad>" + getAddressLabel(message['tx1_address']) + "</Ad>";
