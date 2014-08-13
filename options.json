@@ -1,7 +1,7 @@
 {
   "open": "{{",
   "close": "}}",
-  "name": "Dogeparty Wallet",
+  "name": "Wallet",
   "xcp": "XDP",
   "xcp_name": "Dogeparty",
   "btc": "DOGE",
@@ -14,8 +14,8 @@
   "testnet": {
     "faucet_url": "",
     "burning": {
-      "start": 154908,
-      "end": 4017708
+      "start": 124678,
+      "end": 26280000
     }
   }
 }
