@@ -8,6 +8,7 @@
   "btc_name": "Dogecoin",
   "xcp_store_url": "",
   "max_burn_per_address": 5000000,
+  "homepage": "http://dogeparty.io",
   "livenet": {
     "burning": false
   },
