@@ -52,7 +52,7 @@ module.exports = function (grunt) {
 
         watch: {
             ejs: {
-                files: ["src/**/*.ejs"],
+                files: ["src/**/*.ejs", "options.json"],
                 tasks: ["build:ejs"]
             }
         }
