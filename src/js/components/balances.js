@@ -684,7 +684,7 @@ function SweepModalViewModel() {
     }
 
     var onTransactionCreated = function(unsignedTxHex, numTotalEndpoints, numConsensusEndpoints) {    
-      var signedHex = cwk.checkAndSignRawTransaction(unsignedTxHex, self.addressForPrivateKey());
+      var signedHex = cwk.checkAndSignRawTransaction(unsignedTxHex, [self.addressForPrivateKey()]);
       WALLET.broadcastSignedTx(signedHex, onTransactionBroadcasted, onBroadcastError);
     }
 
@@ -773,7 +773,7 @@ function SweepModalViewModel() {
       }
 
       var onTransactionCreated = function(unsignedTxHex, numTotalEndpoints, numConsensusEndpoints) {
-        var signedHex = key.checkAndSignRawTransaction(unsignedTxHex, self.addressForPrivateKey());
+        var signedHex = key.checkAndSignRawTransaction(unsignedTxHex, [self.addressForPrivateKey()]);
         WALLET.broadcastSignedTx(signedHex, onTransactionBroadcasted, onBroadcastError);
       }
 
@@ -808,7 +808,7 @@ function SweepModalViewModel() {
     multiAPIConsensus("create_issuance", transferData,
       function(unsignedTxHex, numTotalEndpoints, numConsensusEndpoints) {
         
-        var signedHex = key.checkAndSignRawTransaction(unsignedTxHex, self.destAddress());
+        var signedHex = key.checkAndSignRawTransaction(unsignedTxHex, [self.destAddress()]);
         WALLET.broadcastSignedTx(signedHex, function(issuanceTxHash, endpoint) { //broadcast was successful
           opsComplete.push({
             'type': 'transferOwnership',
@@ -905,7 +905,7 @@ function SweepModalViewModel() {
     multiAPIConsensus("create_send", sendData, //can send both BTC and counterparty assets
       function(unsignedTxHex, numTotalEndpoints, numConsensusEndpoints) {
         
-        var signedHex = key.checkAndSignRawTransaction(unsignedTxHex, self.destAddress());
+        var signedHex = key.checkAndSignRawTransaction(unsignedTxHex, [self.destAddress()]);
 
         WALLET.broadcastSignedTx(signedHex, function(sendTxHash, endpoint) { //broadcast was successful
           opsComplete.push({
