@@ -135,7 +135,7 @@ function burnDetermineEarned(blockHeight, burned) {
   burned = denormalizeQuantity(burned);
   var total_time = BURN_END - BURN_START;
   var partial_time = BURN_END - blockHeight;
-  var multiplier = 1000 * (1 + .5 * (partial_time / total_time)); //will be approximate
+  var multiplier = BURN_MULTIPLIER * (1 + .5 * (partial_time / total_time)); //will be approximate
   var earned = Decimal.round(new Decimal(burned).mul(multiplier), 8, Decimal.MidpointRounding.ToEven).toFloat();
   return normalizeQuantity(earned);
 }

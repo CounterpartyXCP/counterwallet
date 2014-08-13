@@ -195,7 +195,7 @@ var USE_TESTNET = (   (((location.pathname == "/" || location.pathname == "/src/
                    || location.hostname.indexOf('testnet') != -1) ? true : false
                   );
 
-var BURN_START, BURN_END;
+var BURN_START, BURN_END, BURN_MULTIPLIER = 0.001;
 if (USE_TESTNET) {
   if (typeof TESTNET_BURN_START !== "undefined") {
     BURN_START = TESTNET_BURN_START;
