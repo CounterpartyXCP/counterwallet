@@ -1,6 +1,7 @@
 {
   "open": "{{",
   "close": "}}",
+  "name": "Dogeparty Wallet",
   "xcp": "XDP",
   "xcp_name": "Dogeparty",
   "btc": "DOGE",
