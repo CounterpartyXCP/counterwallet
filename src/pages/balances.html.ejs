@@ -463,7 +463,7 @@
       </div>
       <div class="modal-body no-padding">
         <p class="formPadded">
-         Create {{= xcp}} on Testnet by "burning" your test {{= btc}}. Please note that you can only burn up to <b>{{= max_burn_per_address}} {{= btc}} total</b> for any given address.<br/><br/>
+         Create {{= xcp}} by "burning" your {{= btc}}. Please note that you can only burn up to <b>{{= max_burn_per_address}} {{= btc}} total</b> for any given address.<br/><br/>
          <span data-bind="visible: MAX_BURN_PER_ADDRESS - btcAlreadyBurned() > 0"><b>You may currently burn up to <span class="sellColor"><span data-bind="text: maxPossibleBurn()"></span> {{= btc}}</span> from this address.</b></span>
          <span data-bind="visible: MAX_BURN_PER_ADDRESS - btcAlreadyBurned() <= 0"><b class="errorColor">You have already burned the maximum allowed {{= btc}} from this address.</b></span>
        </p>
