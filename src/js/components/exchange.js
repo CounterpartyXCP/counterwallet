@@ -672,9 +672,9 @@ function ExchangeViewModel() {
 
   self.displayAllPairs = function(data) {
     for (var i in data) {
-      data[i].volume = smartFormat(normalizeQuantity(data[i].volume, data[i].divisible));
-      data[i].supply = smartFormat(normalizeQuantity(data[i].supply, data[i].divisible));
-      data[i].market_cap = smartFormat(normalizeQuantity(data[i].market_cap, data[i].divisible));
+      data[i].volume = smartFormat(normalizeQuantity(data[i].volume, data[i].quote_divisibility));
+      data[i].supply = smartFormat(normalizeQuantity(data[i].supply, data[i].base_divisibility));
+      data[i].market_cap = smartFormat(normalizeQuantity(data[i].market_cap, data[i].quote_divisibility));
       if (parseFloat(data[i].progression) > 0) {
         data[i].prog_class = 'UP';
         data[i].progression = '+' + data[i].progression;
