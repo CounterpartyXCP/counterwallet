@@ -115,7 +115,7 @@ function LogonViewModel() {
   self.onIsWalletOnline = function(isOnline, endpoint) {
     if(isOnline) {
       trackEvent("Login", "Wallet", "IsAlreadyOnline");
-      var message = "<b class='errorColor'>You appear to be logged into Counterwallet elsewhere.</b> It's not safe to be logged into the same wallet account from multiple devices at the same time. If you are sure that this is not the case, press Continue. Otherwise, please press Cancel, logout from your other device, and try again.";
+      var message = "<b class='errorColor'>You appear to be logged into Dogeparty elsewhere.</b> It's not safe to be logged into the same wallet account from multiple devices at the same time. If you are sure that this is not the case, press Continue. Otherwise, please press Cancel, logout from your other device, and try again.";
       
       bootbox.dialog({
         title: "Confirm connection",

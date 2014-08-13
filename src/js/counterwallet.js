@@ -280,8 +280,8 @@ $(document).ready(function() {
         url: 'http://www.opera.com/download/'
       }      
     },
-    header: 'Your browser is not supported with Counterwallet',
-    paragraph1: "Counterwallet's security features require a newer browser than what you are using. We recommend Chrome for the best user experience."
+    header: 'Your browser is not supported with Dogeparty Wallet',
+    paragraph1: "Dogeparty Wallet's security features require a newer browser than what you are using. We recommend Chrome for the best user experience."
       + " Also, note that Microsoft Internet Explorer is not supported due to it's lack of full support for Content-Security-Policy restrictions.",
     close: false,
     closeESC: false
