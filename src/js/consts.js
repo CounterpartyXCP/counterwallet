@@ -54,7 +54,7 @@ var DEFAULT_PREFERENCES = {
   'watch_only_addresses': [],
   'armory_offline_addresses': [],
   'auto_btcpay': true, //default to auto BTC payments being enabled
-  'has_accepted_license': false
+  'has_accepted_license': true
 };
 
 var ENTITY_NAMES = {
