@@ -515,22 +515,22 @@
 
 
               <section data-bind="visible: showAdvancedOptions"><div class="row">
-                <div class="col col-sm-2">Auto BTCPay</div>
+                <div class="col col-sm-2">Auto {{= btc}}Pay</div>
                 <div class="col col-sm-10">
                   <label class="checkbox">
                     <input name="autoBTCPayEnabled" type="checkbox" data-bind="checked: autoBTCPayEnabled">
-                    <i></i>Enable Automatic BTC Payments
+                    <i></i>Enable Automatic {{= btc}} Payments
                   </label>
-                  <div class="note">If this option is enabled, Counterwallet will automatically take care of making BTC
-                      payments for matched orders where you owe BTC. <b>It is highly recommended you keep this on.</b> If not
-                      enabled, you must manually settle any required BTC payments within a 10 block limit (approximately 80-100 minutes).</div>
+                  <div class="note">If this option is enabled, {{= name}} will automatically take care of making {{= btc}}
+                      payments for matched orders where you owe {{= btc}}. <b>It is highly recommended you keep this on.</b> If not
+                      enabled, you must manually settle any required {{= btc}} payments within a 10 block limit (approximately 80-100 minutes).</div>
               </div></section>
 
               <section data-bind="visible: showAdvancedOptions"><div class="row">
                 <div class="col col-sm-12">
                   <div class="note txt-color-red">
                       Don't change followings parameters, unless you know exactly what you are doing.<br />
-                      If you change them, your BTC orders could not match.<br />
+                      If you change them, your {{= btc}} orders could not match.<br />
                       These parameters are not persistent.
                   </div>
                 </div>

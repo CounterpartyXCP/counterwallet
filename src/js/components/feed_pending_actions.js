@@ -22,7 +22,7 @@ PendingActionViewModel.calcText = function(category, data) {
   }
 
   if(category == 'burns') {
-    desc = pending + " burn of <Am>" + normalizeQuantity(data['quantity']) + "</Am> <As>BTC</As>";
+    desc = pending + " burn of <Am>" + normalizeQuantity(data['quantity']) + "</Am> <As>" + BTC + "</As>";
   } else if(category == 'sends') {
     desc = pending + " send of <Am>" + numberWithCommas(normalizeQuantity(data['quantity'], divisible)) + "</Am> <As>" + data['asset']
       + "</As> from <Ad>" + getLinkForCPData('address', data['source'],  getAddressLabel(data['source'])) + "</Ad>"
