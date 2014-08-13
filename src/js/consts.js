@@ -8,9 +8,9 @@ var PREFERENCES = {}; //set when logging in
 
 var MAX_INT = Math.pow(2, 63) - 1;
 var UNIT = 100000000; //# satoshis in whole
-var MIN_FEE = 20000; // in satoshis (== .0002 BTC)
-var REGULAR_DUST_SIZE = 5430;
-var MULTISIG_DUST_SIZE = 5430 * 2;
+var MIN_FEE = 2 * UNIT; // in satoshis (== .0002 BTC)
+var REGULAR_DUST_SIZE = UNIT;
+var MULTISIG_DUST_SIZE = UNIT * 2;
 var MIN_PRIME_BALANCE = 50000; //in satoshis ... == .0005
 var ASSET_CREATION_FEE_XCP = 0.5; //in normalized XCP
 var MAX_ASSET_DESC_LENGTH = 41; //42, minus a null term character?
@@ -174,6 +174,8 @@ var LEVERAGE_UNIT = 5040;
 
 var MAINNET_UNSPENDABLE = 'DDogepartyxxxxxxxxxxxxxxxxxxw1dfzr';
 var TESTNET_UNSPENDABLE = 'ndogepartyxxxxxxxxxxxxxxxxxxwpsZCH';
+var MAINNET_DONATION = 'DLtFm7fnuVFHRWcUTsikccLnTyduWntHdF';
+var TESTNET_DONATION = 'xnV9kfQFxzPvSYoSuZVqRJduLxdhyziFKiZ';
 
 /***********
  * IS_DEV / USE_TESTNET
@@ -228,7 +230,7 @@ var ROLLBAR_ACCESS_TOKEN = null; //will be set in counterwallet.js
 var TRANSACTION_DELAY = 5000 // delay between transaction to avoid error -22 (vin reused)
 var TRANSACTION_MAX_RETRY = 5 // max retry when transaction failed (don't include first transaction, so 3 retry means 4 queries)
 
-var DONATION_ADDRESS = USE_TESTNET ? 'n4MGGJBkW9RjRKBbZfBAceHDndhywvVPV9' : '19U6MmLLumsqxXSBMB5FgYXbezgXYC6Gpe';
+var DONATION_ADDRESS = USE_TESTNET ? TESTNET_DONATION : MAINNET_DONATION;
 
 var APPROX_SECONDS_PER_BLOCK = USE_TESTNET ? 20 * 60 : 8 * 60; //a *rough* estimate on how many seconds per each block (used for estimating open order time left until expiration, etc)
 
