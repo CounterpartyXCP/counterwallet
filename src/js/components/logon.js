@@ -9,6 +9,7 @@ function WalletCreationViewModel() {
   self.step = ko.observable(1);
   
   self.quickAccessPassword = ko.observable('');
+  self.showQuickAccessFrame = ko.observable(false);
 
   self.quickAccessUrl = ko.computed(function() {
     if (self.generatedPassphrase().length > 0 && self.quickAccessPassword().length > 0) {
@@ -21,6 +22,7 @@ function WalletCreationViewModel() {
     self.generatePassphrase();
     self.passphraseSaved(false);
     self.quickAccessPassword('');
+    self.showQuickAccessFrame(false);
     self.shown(true);
     setTimeout(function() { selectText('generated') }, 200); //necessary due to fade in effect
   }
@@ -39,8 +41,12 @@ function WalletCreationViewModel() {
     selectText('generated');
   }
 
-  self.goStep2 = function() {
+  self.goToStep2 = function() {
     self.step(2);
+  }
+  
+  self.showQuickAccessURLGUI = function() {
+    self.showQuickAccessFrame(true);
   }
 
   self.createWallet = function() {
