@@ -66,10 +66,8 @@ function WaitingBTCPayViewModel(btcPayData) {
     } else if (self.expiresInNumBlocks()<3) {
       $.jqlog.error("Attempt to make expired btcpay: " + btcPayData['orderMatchID']);
       return false;
-    } else {
-      PROCESSED_BTCPAY[btcPayData['orderMatchID']] = true;
     }
-
+    
     //Pop up confirm dialog, and make BTC payment
     WALLET.retrieveBTCBalance(self.BTCPAY_DATA['myAddr'], function(balance) {
       if(balance < self.BTCPAY_DATA['btcQuantityRaw'] + MIN_PRIME_BALANCE) {
@@ -96,6 +94,9 @@ function WaitingBTCPayViewModel(btcPayData) {
             className: "btn-success",
             callback: function() {
               //complete the BTCpay. Start by getting the current BTC balance for the address
+              
+              PROCESSED_BTCPAY[self.BTCPAY_DATA['orderMatchID']] = true; // before the transaction and not onSuccess, to avoid two tx in parallele
+
               WALLET.doTransaction(self.BTCPAY_DATA['myAddr'], "create_btcpay",
                 { order_match_id: self.BTCPAY_DATA['orderMatchID'],
                   source: self.BTCPAY_DATA['myAddr'],
