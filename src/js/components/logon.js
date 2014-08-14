@@ -119,6 +119,13 @@ function LogonViewModel() {
     LOGON_PASSWORD_MODAL.show(); 
   }
 
+  self.setExtraInfoOpacity = function(opacity) {
+    $('#newAccountInfoPane').animate({opacity:opacity}); //fade out the new account pane if visible
+    $('#createNewAcctBtnPane').animate({opacity:opacity}); //fade out the new account button pane if visible
+    $('#extra-info').animate({opacity:opacity});
+    $('#disclaimer').animate({opacity:opacity});
+  }
+
   self.openWallet = function() {
     //Start with a gate check to make sure at least one of the servers is ready and caught up before we try to log in
     multiAPI("is_ready", {}, function(data, endpoint) {
@@ -130,10 +137,7 @@ function LogonViewModel() {
 
       //User is logging in...
       self.walletGenProgressVal(0); //reset so the progress bar hides again...
-      $('#newAccountInfoPane').animate({opacity:0}); //fade out the new account pane if visible
-      $('#createNewAcctBtnPane').animate({opacity:0}); //fade out the new account button pane if visible
-      $('#extra-info').animate({opacity:0});
-      $('#disclaimer').animate({opacity:0});
+      self.setExtraInfoOpacity(0);
       
       //generate the wallet ID from a double SHA256 hash of the passphrase and the network (if testnet)
       var hashBase = CryptoJS.SHA256(self.sanitizedEnteredPassphrase() + (USE_TESTNET ? '_testnet' : ''));
@@ -180,6 +184,7 @@ function LogonViewModel() {
             className: "btn-danger",
             callback: function() {
               bootbox.hideAll();
+              self.setExtraInfoOpacity(100);
               return false;
             }
           },
@@ -371,6 +376,11 @@ function LicenseModalViewModel() {
 
   self.hide = function() {
     self.shown(false);
+  }
+
+  self.rejectTerms = function() {
+    self.hide();
+    LOGON_VIEW_MODEL.setExtraInfoOpacity(100);
   }
   
   self.acceptTerms = function() {
