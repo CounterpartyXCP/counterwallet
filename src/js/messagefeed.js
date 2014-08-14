@@ -8,7 +8,7 @@ function MessageFeed() {
 
   self.sellBTCOrdersCount = ko.computed(function() {
     return $.map(self.OPEN_ORDERS, function(item) {       
-        return ('BTC' == item['get_asset']) ? item : null;
+        return (BTC == item['get_asset']) ? item : null;
     }).length;
   }, self);
 
@@ -152,12 +152,12 @@ function MessageFeed() {
         //TODO: maybe look at pending operations to make sure that we don't reissue a cancel call that is currently pending
         var openBTCOrdersToCancel = $.grep(data, function(e) {
           return    e['status'] == 'open'
-                 && (e['get_asset'] == 'BTC' || e['give_asset'] == 'BTC')
+                 && (e['get_asset'] == BTC || e['give_asset'] == BTC)
                  && (e['get_remaining'] <= 0 || e['give_remaining'] <= 0)
                  && !(e['get_remaining'] <= 0 && e['give_remaining'] <= 0);
         });
         for(i=0; i < openBTCOrdersToCancel.length; i++) {
-          $.jqlog.debug("Auto cancelling BTC order " + openBTCOrdersToCancel[i]['tx_hash']
+          $.jqlog.debug("Auto cancelling " + BTC + " order " + openBTCOrdersToCancel[i]['tx_hash']
             + " as the give_remaining and/or get_remaining <= 0 ...");
           WALLET.doTransaction(openBTCOrdersToCancel[i]['source'], "create_cancel", {
             offer_hash: openBTCOrdersToCancel[i]['tx_hash'],
@@ -300,7 +300,7 @@ function MessageFeed() {
     }
 
     if (displayTx) {
-      WALLET.searchDivisibility(message['bindings']['asset'] || 'BTC', function(divisibility) {
+      WALLET.searchDivisibility(message['bindings']['asset'] || BTC, function(divisibility) {
         message['bindings']['divisible'] = divisibility;
         message['bindings']['tx_index'] = message['_message_index'];
         if (category == 'dividends') {
@@ -438,7 +438,7 @@ function MessageFeed() {
     } else if(category == "credits" || category == "debits") {
       if(WALLET.getAddressObj(message['address'])) {
         //remove non-BTC/XCP asset objects that now have a zero balance from a debit
-        if(message['_balance'] == 0 && message['asset'] != "BTC" && message['asset'] != "XCP") {
+        if(message['_balance'] == 0 && message['asset'] != BTC && message['asset'] != XCP) {
           assert(category == "debits"); //a credit to a balance of zero?? Yes with unconfirmed balance>0
           var addressObj = WALLET.getAddressObj(message['address']);
           var assetObj = addressObj.getAssetObj(message['asset']);
@@ -504,10 +504,10 @@ function MessageFeed() {
           
           //if the order is for BTC and the qty remaining on either side is negative (but not on BOTH sides,
           // as it would be fully satified then and canceling would be pointless), auto cancel the order
-          if( (match['get_asset'] == 'BTC' || match['give_asset'] == 'BTC')
+          if( (match['get_asset'] == BTC || match['give_asset'] == BTC)
              && (match['give_remaining'] <= 0 || match['get_remaining'] <= 0)
              && !(match['give_remaining'] <= 0 && match['get_remaining'] <= 0)) {
-            $.jqlog.debug("Auto cancelling BTC order " + match['tx_hash']
+            $.jqlog.debug("Auto cancelling " + BTC + " order " + match['tx_hash']
               + " as the give_remaining xor get_remaining <= 0 ...");
             WALLET.doTransaction(match['source'], "create_cancel", {
               offer_hash: match['tx_hash'],
@@ -528,8 +528,8 @@ function MessageFeed() {
       
       //Look to order matches when determining to do a BTCpay
       //If the order_matches message doesn't have a tx0_address/tx1_address field, then we don't need to do anything with it
-      if ((WALLET.getAddressObj(message['tx0_address']) && message['forward_asset'] == 'BTC' && message['_status'] == 'pending')
-         || (WALLET.getAddressObj(message['tx1_address']) && message['backward_asset'] == 'BTC' && message['_status'] == 'pending')) {
+      if ((WALLET.getAddressObj(message['tx0_address']) && message['forward_asset'] == BTC && message['_status'] == 'pending')
+         || (WALLET.getAddressObj(message['tx1_address']) && message['backward_asset'] == BTC && message['_status'] == 'pending')) {
         //Register this as an "upcoming" BTCpay
         var btcPayData = WaitingBTCPayFeedViewModel.makeBTCPayData(message); 
         //Don't include in UPCOMING_BTCPAY_FEED BTCpays which are for less than the current (multisig) dust amount
@@ -539,8 +539,8 @@ function MessageFeed() {
           $.jqlog.debug("dust order_matches "+btcPayData['orderMatchID']+" : "+btcPayData['btcQuantityRaw']);
         }  
         
-      } else if ((WALLET.getAddressObj(message['tx1_address']) && message['forward_asset'] == 'BTC' && message['_status'] == 'pending')
-         || (WALLET.getAddressObj(message['tx0_address']) && message['backward_asset'] == 'BTC' && message['_status'] == 'pending')) {
+      } else if ((WALLET.getAddressObj(message['tx1_address']) && message['forward_asset'] == BTC && message['_status'] == 'pending')
+         || (WALLET.getAddressObj(message['tx0_address']) && message['backward_asset'] == BTC && message['_status'] == 'pending')) {
 
         PENDING_ACTION_FEED.add(txHash, category, message);
 

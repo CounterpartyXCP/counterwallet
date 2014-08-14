@@ -7,7 +7,7 @@ var BuySellAddressInDropdownItemModel = function(address, label, asset, balance)
 
 ko.validation.rules['ordersIsExistingAssetName'] = {
   validator: function (asset, self) {
-    if(asset == 'XCP' || asset == 'BTC') return true;
+    if(asset == XCP || asset == BTC) return true;
     var match = ko.utils.arrayFirst(self.allAssets(), function(item) {
       return item == asset;
     });
@@ -52,7 +52,7 @@ function ExchangeViewModel() {
 
   self.selectedQuoteAsset = ko.observable();
   self.selectedQuoteAsset.subscribe(function(value) {
-    if (value == 'BTC' || value == 'XCP') self.asset2(value);
+    if (value == BTC || value == XCP) self.asset2(value);
     else self.asset2('');
   })
 
@@ -222,7 +222,7 @@ function ExchangeViewModel() {
     var give_quantity = denormalizeQuantity(self.sellAmount(), self.baseAssetIsDivisible());
     var fee_provided = MIN_FEE;
     
-    if (self.baseAsset() == 'BTC') {
+    if (self.baseAsset() == BTC) {
       fee_provided = mulFloat(give_quantity, WALLET_OPTIONS_MODAL.defaultBTCFeeProvidedPct()/100);
       fee_provided = Math.ceil(fee_provided);
     }
@@ -255,12 +255,12 @@ function ExchangeViewModel() {
     var fee_provided = MIN_FEE;
     var expiration = ORDER_DEFAULT_EXPIRATION;
 
-    if (self.quoteAsset() == 'BTC') {
+    if (self.quoteAsset() == BTC) {
       fee_required = mulFloat(get_quantity, WALLET_OPTIONS_MODAL.defaultBTCFeeRequiredPct()/100);
       fee_required = Math.ceil(fee_required);
     }
 
-    if (self.baseAsset() == 'BTC') {
+    if (self.baseAsset() == BTC) {
       fee_provided = mulFloat(give_quantity, WALLET_OPTIONS_MODAL.defaultBTCFeeProvidedPct()/100);
       fee_provided = Math.ceil(fee_provided);
       expiration = ORDER_BTCSELL_DEFAULT_EXPIRATION;
@@ -288,7 +288,7 @@ function ExchangeViewModel() {
        
       //if the order involes selling BTC, then we want to notify the servers of our wallet_id so folks can see if our
       // wallet is "online", in order to determine if we'd be able to best make the necessary BTCpay
-      if(self.baseAsset() == 'BTC' && addressType !== 'armory') {
+      if(self.baseAsset() == BTC && addressType !== 'armory') {
         multiAPI("record_btc_open_order", {'wallet_id': WALLET.identifier(), 'order_tx_hash': txHash});
       }
     }
@@ -445,7 +445,7 @@ function ExchangeViewModel() {
     var give_quantity = denormalizeQuantity(self.buyTotal(), self.quoteAssetIsDivisible());
     var fee_provided = MIN_FEE;
 
-    if (self.quoteAsset() == 'BTC') {
+    if (self.quoteAsset() == BTC) {
       fee_provided = mulFloat(give_quantity, WALLET_OPTIONS_MODAL.defaultBTCFeeProvidedPct()/100);
       fee_provided = Math.ceil(fee_provided);
     }
@@ -478,12 +478,12 @@ function ExchangeViewModel() {
     var fee_provided = MIN_FEE;
     var expiration = ORDER_DEFAULT_EXPIRATION;
 
-    if (self.baseAsset() == 'BTC') {
+    if (self.baseAsset() == BTC) {
       fee_required = mulFloat(get_quantity, WALLET_OPTIONS_MODAL.defaultBTCFeeRequiredPct()/100);
       fee_required = Math.ceil(fee_required);
     }
 
-    if (self.quoteAsset() == 'BTC') {
+    if (self.quoteAsset() == BTC) {
       fee_provided = mulFloat(give_quantity, WALLET_OPTIONS_MODAL.defaultBTCFeeProvidedPct()/100);
       fee_provided = Math.ceil(fee_provided);
       expiration = ORDER_BTCSELL_DEFAULT_EXPIRATION;
@@ -511,7 +511,7 @@ function ExchangeViewModel() {
       
       //if the order involes selling BTC, then we want to notify the servers of our wallet_id so folks can see if our
       // wallet is "online", in order to determine if we'd be able to best make the necessary BTCpay
-      if(self.quoteAsset() == 'BTC' && addressType !== 'armory') {
+      if(self.quoteAsset() == BTC && addressType !== 'armory') {
         multiAPI("record_btc_open_order", {'wallet_id': WALLET.identifier(), 'order_tx_hash': txHash});
       }
     }
@@ -546,7 +546,7 @@ function ExchangeViewModel() {
     message += '<tr><td><b>Amount: </b></td><td style="text-align:right">' + self.buyAmount() + '</td><td>' + self.baseAsset() + '</td></tr>';
     message += '<tr><td><b>Total: </b></td><td style="text-align:right">' + self.buyTotal() + '</td><td>' + self.quoteAsset() + '</td></tr>';
     message += '<tr><td><b>Real estimated total: </b></td><td style="text-align:right">' + estimatedTotalPrice + '</td><td>' + self.quoteAsset() + '</td></tr>';
-    if (self.quoteAsset() == 'BTC') {
+    if (self.quoteAsset() == BTC) {
       message += '<tr><td><b>Provided fee: </b></td><td style="text-align:right">' + self.buyFee() + '</td><td>' + self.quoteAsset() + '</td></tr>';
       message += '<tr><td colspan="3"><i>These fees are optional, go directly miners (not to us) and are non-refundable.</i></td></tr>';
     }
@@ -721,8 +721,8 @@ function ExchangeViewModel() {
     var buy_orders = [];
 
     for (var i in data['buy_orders']) {
-      if ((data['base_asset'] == 'BTC' && data['buy_orders'][i]['amount'] < BTC_ORDER_MIN_AMOUNT) || 
-          (data['quote_asset'] == 'BTC' && data['buy_orders'][i]['total'] < BTC_ORDER_MIN_AMOUNT)) {
+      if ((data['base_asset'] == BTC && data['buy_orders'][i]['amount'] < BTC_ORDER_MIN_AMOUNT) || 
+          (data['quote_asset'] == BTC && data['buy_orders'][i]['total'] < BTC_ORDER_MIN_AMOUNT)) {
         data['buy_orders'][i]['exclude'] = true;
       } else {
         if (base_depth == 0) {
@@ -740,8 +740,8 @@ function ExchangeViewModel() {
     }
     base_depth = 0;
     for (var i in data['sell_orders']) {
-      if ((data['base_asset'] == 'BTC' && data['sell_orders'][i]['amount'] < BTC_ORDER_MIN_AMOUNT) || 
-          (data['quote_asset'] == 'BTC' && data['sell_orders'][i]['total'] < BTC_ORDER_MIN_AMOUNT) ||
+      if ((data['base_asset'] == BTC && data['sell_orders'][i]['amount'] < BTC_ORDER_MIN_AMOUNT) || 
+          (data['quote_asset'] == BTC && data['sell_orders'][i]['total'] < BTC_ORDER_MIN_AMOUNT) ||
           (data['buy_orders'].length > 0 && data['sell_orders'][i]['price'] <= data['buy_orders'][0]['price'])) {
         data['sell_orders'][i]['exclude'] = true;
       } else {
@@ -783,7 +783,7 @@ function ExchangeViewModel() {
 
   self.selectMarket = function(item) {
     self.asset1(item.base_asset);
-    if (item.quote_asset == 'BTC' || item.quote_asset == 'XCP') {
+    if (item.quote_asset == BTC || item.quote_asset == XCP) {
       self.selectedQuoteAsset(item.quote_asset);
     } else {
       self.selectedQuoteAsset('Other');
@@ -815,7 +815,7 @@ function ExchangeViewModel() {
     
     //Get a list of all assets
     failoverAPI("get_asset_names", {}, function(data, endpoint) {
-      data = ['XCP', 'BTC'].concat(data);
+      data = [XCP, BTC].concat(data);
       self.allAssets(data);
       
       //Set up typeahead bindings manually for now (can't get knockout and typeahead playing well together...)

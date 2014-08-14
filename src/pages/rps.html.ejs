@@ -54,7 +54,7 @@
                       <div class="btn-group" data-toggle="buttons" data-bind="foreach: wagers">
                         <label class="radioBtn btn btn-lg" data-bind="attr: {style: 'background-image:url(assets/'+picto+'.png)'}">
                           <input type="radio" name="wager" data-bind="attr: {value: wager}, btnGroupChecked: $parent.wager">
-                          <span class="amount" data-bind="text: wager + ' XCP'"></span>
+                          <span class="amount" data-bind="text: wager + ' {{= xcp}}'"></span>
                           <span class="openedCount fa  fa-hand-o-right" data-bind="html: '&nbsp;' + game_count + ' open'"></span>
                         </label>
                       </div>
@@ -78,7 +78,7 @@
                 <div class="row rpsfield margin-top-15" data-bind="visible: showAdvancedOptions">
                   <label class="col col-lg-3 control-label font-medlg">Wager:</label>
                   <div class="col col-lg-9">
-                    <input type="text"  name="wager" class="number form-control"  data-bind="value: wager, valueUpdate: 'input'" /> XCP
+                    <input type="text"  name="wager" class="number form-control"  data-bind="value: wager, valueUpdate: 'input'" /> {{= xcp}}
                     <br /><span class="invalid" data-bind="validationMessage: wager"></span>
                   </div>
                 </div>
@@ -87,7 +87,7 @@
                   <div class="col col-lg-9">
                     <input type="text"  name="expiration" class="number form-control"  data-bind="value: expiration, valueUpdate: 'input'" /> blocks
                     <br /><span class="invalid" data-bind="validationMessage: expiration"></span>
-                    <div class="note">how many blocks a counterparty has to take the other side of the game.</div>
+                    <div class="note">how many blocks a {{= xcp_name}} has to take the other side of the game.</div>
                   </div>
                 </div>
 

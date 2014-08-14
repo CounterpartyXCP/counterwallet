@@ -223,7 +223,7 @@ $(document).ready(function() {
     $.loginURL = $this.attr('href');
     
     if (needWarningOnExit()) {
-      $.logoutMSG = "<span class='bold txt-color-red'>If you log out, any Bitcoin sell orders you have open will probably not be filled.</span>";
+      $.logoutMSG = "<span class='bold txt-color-red'>If you log out, any " + BTC_NAME + " sell orders you have open will probably not be filled.</span>";
     } else {
       $.logoutMSG = $this.data('logout-msg');
     }

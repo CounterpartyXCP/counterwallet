@@ -13,3 +13,7 @@ npm-debug.log
 servers.json
 src/bitcore.html
 src/bitcoinjs.html
+src/*.html
+src/pages/*.html
+*.swp
+src/js/config.js

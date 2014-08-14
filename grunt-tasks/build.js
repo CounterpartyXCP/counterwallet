@@ -1,6 +1,7 @@
 module.exports = function(grunt) {
 
     grunt.loadNpmTasks('grunt-contrib-copy');
+    grunt.loadNpmTasks('grunt-ejs');
     var Crypto = require('cryptojs').Crypto
     var File = require('grunt-usemin/lib/file');
     var Path = require('path');
@@ -329,6 +330,11 @@ module.exports = function(grunt) {
     grunt.registerMultiTask('build', 'Build app', function() {
 
         var config = this.options(defaultOptions);        
+
+        if (this.target == 'ejs') {
+          grunt.config.set('ejs', this.data);
+          grunt.task.run('ejs');
+        }
 
         if (this.target=='process') { 
 

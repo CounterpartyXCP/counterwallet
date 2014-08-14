@@ -65,7 +65,7 @@ CWHierarchicalKey.prototype.oldHierarchicalKeyFromSeed = function(seed) {
   // "historical" reason we keep seed as string to not
   // change generated addresses from the same passphrase.
   var words = bytesToWordArray(seed);  
-  var hash = CryptoJS.HmacSHA512(words, 'Bitcoin seed');
+  var hash = CryptoJS.HmacSHA512(words, BTC_NAME + ' seed');
   hash = wordArrayToBytes(hash);
   hash = bitcore.Buffer(hash);
   

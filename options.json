@@ -1,0 +1,25 @@
+{
+  "open": "{{",
+  "close": "}}",
+  "name": "Dogeparty Wallet",
+  "xcp": "XDP",
+  "xcp_name": "Dogeparty",
+  "btc": "DOGE",
+  "btc_name": "Dogecoin",
+  "xcp_store_url": "",
+  "max_burn_per_address": 5000000,
+  "homepage": "http://dogeparty.io",
+  "livenet": {
+    "burning": {
+      "start": 335642,
+      "end":   378842
+    }
+  },
+  "testnet": {
+    "faucet_url": "",
+    "burning": {
+      "start": 124678,
+      "end": 26280000
+    }
+  }
+}

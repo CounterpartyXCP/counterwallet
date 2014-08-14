@@ -2,7 +2,7 @@
 <html lang="en-us">
   <head>
     <meta charset="utf-8">
-    <title>Counterwallet</title>
+    <title>{{= name}}</title>
     <meta content="Counterparty Wallet" name="description">
     <meta content="Counterparty Developers" name="author">
 
@@ -66,7 +66,7 @@
     <!-- HEADER -->
     <header id="header" style="display: none">
       <div id="logo-group">
-        <span id="logo"><span class="logoText">Counterwallet</span></span>
+        <span id="logo"><span class="logoText">Wallet</span></span>
         
         <span id="notificationFeed" class="activity-parent" data-contenturl="pages/feed_notifications.html", data-bind="click: ack">
             <span class="activity-dropdown">
@@ -95,7 +95,7 @@
                 <i class="fa fa-btc"></i><b data-bind="text: dispCount()" class="badge badge-error"></b>
             </span>
             <div class="ajax-dropdown">
-              <h2>Required BTC Pays</h2>
+              <h2>Required {{= btc}} Pays</h2>
               <div class="ajax-notifications custom-scroll"></div> <!-- notification content -->
               <span><b>Last updated:</b> <span id="pendingLastUpdated" data-bind="timeago: dispLastUpdated()"></span></span> <!-- footer -->
             </div> <!-- .ajax-dropdown -->
@@ -111,7 +111,7 @@
         </div> <!-- end logout button -->
 
         <div id="support" class="btn-header transparent pull-right"> <!-- help button -->
-          <span> <a href="#" title="Support"><i class="fa fa-question"></i></a> </span>
+          <!-- <span> <a href="#" title="Support"><i class="fa fa-question"></i></a> </span> -->
         </div> <!-- end help button -->
 
         <div id="fullscreen" class="btn-header transparent pull-right"> <!-- fullscreen button -->
@@ -147,28 +147,6 @@
           <li class="">
             <a href="pages/balances.html"><i class="fa fa-lg fa-fw fa-user"></i> <span class="menu-item-parent">My Balances</span></a>
           </li>          
-          <li class="">
-            <a href="#"><i class="fa fa-lg fa-fw fa-exchange"></i> <span class="menu-item-parent">Exchange</span></a>
-            <ul>
-              <li><a href="pages/exchange.html"><i class="fa fa-lg fa-fw fa-bar-chart-o"></i> Markets</a></li>
-              <li><a href="pages/openorders.html"><i class="fa fa-lg fa-fw fa-circle-o"></i> Open Orders</a></li>
-              <li><a href="pages/ordermatches.html"><i class="fa fa-lg fa-fw fa-book"></i> My Order History</a></li>
-            </ul>
-          </li>
-          <li class="" data-bind="visible: FEATURE_BETTING">
-            <a href="#"><i class="fa fa-lg fa-fw fa-bullseye"></i> <span class="menu-item-parent">Betting</span></a>
-            <ul>
-              <li><a href="pages/betting.html"><i class="fa fa-lg fa-fw fa-share"></i> Make a Bet</a></li>
-              <li><a href="pages/openbets.html"><i class="fa fa-lg fa-fw fa-circle-o"></i> Open Bets</a></li>
-              <li><a href="pages/matchedbets.html"><i class="fa fa-lg fa-fw fa-book"></i> My Bet History</a></li>
-            </ul>
-          </li>
-          <li class="" data-bind="visible: FEATURE_RPS">
-            <a href="#"><i class="fa fa-lg fa-fw fa-trophy"></i> <span class="menu-item-parent">Gaming</span></a>
-            <ul>
-              <li><a href="pages/rps.html"><i class="fa-lg fa-fw glyphicon glyphicon-hand-right"></i> Rock-Paper-Scissors</a></li>
-            </ul>
-          </li>
           <li class="" data-bind="visible: FEATURE_HISTORY">
             <a href="pages/history.html"><i class="fa fa-lg fa-fw fa-book"></i> <span class="menu-item-parent">History</span></a>
           </li>
@@ -224,24 +202,25 @@
     </div>    
 
     <!-- Logged out cover div -->
-    <div id="logon">
-      <h1>Welcome to Counterwallet<span data-bind="visible: USE_TESTNET">&nbsp;Testnet</span></h1>
+    <div id="logon" class="dogeparty">
+      <img src="images/dogeparty@2x.png" alt="Dogeparty" class="dp-logo" />
+      <h1>Welcome to {{= name}}<span data-bind="visible: USE_TESTNET">&nbsp;Testnet</span></h1>
       <h2>Powered by Counterparty</h2>
-      <div id="form-well">
+      <div id="form-well" class="form-well">
         <div id="createNewAcctBtnPane" data-bind="visible: generatedPassphrase().length == 0">
-          <button id="newWalletButton" data-bind="click: generatePassphrase" type="button" class="btn btn-success btn-lg">Create New Wallet</button>
+          <button id="newWalletButton" data-bind="click: generatePassphrase" type="button" class="btn btn-lg">Create New Wallet</button>
         </div>
         <div id="newAccountInfoPane" data-bind="fadeVisible: generatedPassphrase().length > 0" class="display-none">
           <br/>
           <div class="panel panel-warning">
             <div class="panel-heading">
-              <h3 class="panel-title"><b>To use Counterwallet you need a twelve word passphrase.</b></h3>
+              <h3 class="panel-title"><b class="panel-headline">To use {{= name}} you need <span class="nowrap">a twelve word passphrase.</span></b></h3>
             </div>
             <div class="panel-body">
               <p>We have created a passphrase for you in the box below.</p>
-              <div class="width-max margin-bottom-10">
-                <span id="generated" data-bind="text: generatedPassphrase"></span>
-                <button id="generated-regenerate" data-bind="click: generatePassphrase, tooltip: {title: 'Click to generate another random passphrase.'}" class="pull-right btn btn-default" type="button"><i class="fa fa-repeat"></i></button>
+              <div class="margin-bottom-10">
+                <div id="generated" data-bind="text: generatedPassphrase"></div>
+                <button id="generated-regenerate" data-bind="click: generatePassphrase, tooltip: {title: 'Click to generate another random passphrase.'}" class="btn btn-default btn-regenerate" type="button"><i class="fa fa-repeat"></i></button>
               </div>
               <div class="alert alert-danger" class="margin-top-10">
                 <p class="logonWarningLine1">Write your passphrase down and keep it safe.</p>
@@ -257,39 +236,33 @@
           </div>
         </div>
 
-        <div data-bind="visible: !USE_TESTNET" class="alert alert-info" class="margin-bottom-0">
-           <p><i class="fa-fw fa fa-rocket"></i>&nbsp;New to Counterwallet, and want to just play around?
-               <b><a href="https://testnet.counterwallet.co" target="_blank">Try Counterwallet Testnet!</a></b> 
+        <div data-bind="visible: !USE_TESTNET" class="testnet-note">
+          <p>
+            <span>New to {{= name}}, <span class="nowrap">and want to just play around?</span></span>
+            <br />
+            <b><a href="https://testnet.counterwallet.co" target="_blank">Try {{= name}} Testnet!</a></b> 
            </p>
          </div>
 
         <div class="panel panel-info">
           <div class="panel-heading">
             <h3 class="panel-title">
-              <b>Log Into Your <span data-bind="visible: USE_TESTNET">Testnet&nbsp;</span>Wallet</b>
-              <span data-bind="fadeVisibleInOnly: IS_DEV" class="label label-warning pull-right margin-left-5 padding-5 display-none"><i class="fa-fw fa fa-warning"></i>&nbsp;Dev Mode Enabled</span>
-              <span data-bind="fadeVisibleInOnly: USE_TESTNET" class="label label-info pull-right margin-left-5 padding-5 display-none"><i class="fa-fw fa fa-info"></i>&nbsp;Testnet In Use</span>
+              <b class="panel-headline">Log Into Your <span data-bind="visible: USE_TESTNET">Testnet&nbsp;</span>Wallet</b>
             </h3>
           </div>
           <div class="panel-body" class="padding-left-5 padding-right-5">
             <form class="form-inline" role="form" id="loginform">
               <div class="row">
-
-                <div class="col-sm-8" data-bind="visible: !cryptedPassphraseUsed()">
+                <div class="col-sm-12" data-bind="visible: !cryptedPassphraseUsed()">
                   <input id="password" data-bind="value: enteredPassphrase, valueUpdate: 'input'" placeholder="Enter your 12 words passphrase." class="form-control" type="password" name="password">
                 </div>
- 
-                <div class="col-sm-8" data-bind="visible: cryptedPassphraseUsed">
+                <div class="col-sm-12" data-bind="visible: cryptedPassphraseUsed">
                   <input id="passwordDecrypt" data-bind="value: passwordDecrypt, valueUpdate: 'input'" placeholder="Enter the password to decrypt the passphrase." class="form-control" type="password" name="passwordDecrypt">
                 </div>
-
-                <div class="col-sm-4">
-                  <button id="walletLoginButton" data-bind="click: openWallet, enable: isPassphraseValid(), css: { 'btn-primary': isPassphraseValid() }" type="button" class="btn btn-default" disabled>Open Wallet</button>
-                  &nbsp;<button id="secureKeyboardButton" data-bind="click: showSecureKeyboard, enable: !isPassphraseValid(), css: { 'btn-primary': !isPassphraseValid() }" type="button" class="btn btn-default" disabled><i class="fa fa-keyboard-o"></i></button>
+                <div class="col-sm-12">
+                  <button id="walletLoginButton" data-bind="click: openWallet, enable: isPassphraseValid(), css: { 'btn-primary-2': isPassphraseValid() }" type="button" class="btn btn-default btn-open" disabled>Open Wallet</button>
                 </div>
-
               </div>
-                            
             </form>
             <div class="clearfix"></div>
             <div data-bind="fadeVisible: walletGenProgressVal() > 0" class="progress progress-striped active margin-top-15 margin-bottom-0" class="margin-top-15 margin-bottom-0 display-none">
@@ -300,30 +273,62 @@
         </div>
       </div> <!-- form-well -->
       
-       <div id="extra-info" class="container" data-bind="visible: generatedPassphrase().length === 0">
-        <h3 class="sales-title margin-bottom-10">
-          Counterwallet is a web-wallet for <a href="http://www.counterparty.co" target="_blank">Counterparty</a>,
-          the world’s first protocol for decentralized financial tools.
-        </h3>
-        <h4 class="sales-title">
-          All transactions made with Counterwallet use an automatic escrow system to keep them secure, with no middleman required.
-        </h4>
-        <div class="row">
-          <div class="col-sm-4 col-md-4">
-            <h4 class="margin-bottom-10"><i class="fa fa-lock"></i> Secure</h4>
-            <p>All encryption is handled client-side. Neither your passphrase nor any of your private information ever leaves your browser.</p>
-            <p>Counterwallet passhrases are highly secure, so you know that your wallet is safe from all brute
-               force attacks. They are also easy to learn and hard to mistype.</p>
-          </div>
-          <div class="col-sm-4 col-md-4">
-            <h4 class="margin-bottom-10"><i class="fa fa-cloud"></i> Simple</h4>
-            <p>With Counterwallet, your passphrase is your wallet, and all of your addresses and keys are generated on-the-fly when you log in.</p>
-            <p>There are no wallet files to backup or keep private, and with your passphrase you can access your wallet from any trusted machine with a web browser.</p> 
-          </div>
-          <div class="col-sm-4 col-md-4">
-            <h4 class="margin-bottom-10"><i class="fa fa-globe"></i> Open-Source</h4>
-            <p>Counterwallet and Counterwalletd are entirely open-source, so you know that they work exactly the way that they are supposed to.</p>
-            <p>If you like, you may also even run your own Counterwallet server.</p>
+      <div class="extra-info-box">
+         <div id="extra-info" class="container extra-info" data-bind="visible: generatedPassphrase().length === 0">
+           <div class="row down-arrow-row">
+             <div class="col-xs-12">
+              <div class="down-arrow-circle">
+                <img src="images/down-arrow@2x.png" alt="" class="down-arrow" />
+              </div>
+             </div>
+           </div>
+           <div class="row">
+             <div class="col-sm-8 col-sm-offset-2">
+               <img src="images/rocket@2x.png" alt="To the moon" class="img-rocket" />
+               <h3 class="sales-title margin-bottom-10">
+                 {{= name}} is a web-wallet for <a href="{{= homepage}}" target="_blank">{{= xcp_name}}</a>,
+                 the world’s first protocol for decentralized financial tools.
+                 All transactions made with {{= name}} use an automatic escrow system to keep them secure, with no middleman required.
+               </h3>
+             </div>
+           </div>
+          <div class="row about-wallet">
+            <div class="col-sm-8 col-sm-offset-2 col-md-6 col-md-offset-3">
+              <div class="row">
+                <div class="col-sm-4 text-center">
+                  <img src="images/keys@2x.png" alt="Secure" class="img-secure" />
+                </div>
+                <div class="col-sm-8">
+                  <h4 class="margin-bottom-10">Secure</h4>
+                  <p>All encryption is handled client-side. Neither your passphrase nor any of your private information ever leaves your browser.</p>
+                  <p>{{= name}} passhrases are highly secure, so you know that your wallet is safe from all brute
+                     force attacks. They are also easy to learn and hard to mistype.</p>
+                </div>
+              </div>
+              <div class="row">
+                <div class="col-sm-4 text-center visible-xs">
+                  <img src="images/hand@2x.png" alt="Simplicity" class="img-hand" />
+                </div>
+                <div class="col-sm-8">
+                  <h4 class="margin-bottom-10">Simple</h4>
+                  <p>With {{= name}}, your passphrase is your wallet, and all of your addresses and keys are generated on-the-fly when you log in.</p>
+                  <p>There are no wallet files to backup or keep private, and with your passphrase you can access your wallet from any trusted machine with a web browser.</p> 
+                </div>
+                <div class="col-sm-4 text-center hidden-xs">
+                  <img src="images/hand@2x.png" alt="Simplicity" class="img-hand" />
+                </div>
+              </div>
+              <div class="row">
+                <div class="col-sm-4 text-center">
+                  <img src="images/globe@2x.png" alt="Open-Source" class="img-globe" />
+                </div>
+                <div class="col-sm-8">
+                  <h4 class="margin-bottom-10">Open-Source</h4>
+                  <p>{{= name}} and {{= name}}d are entirely open-source, so you know that they work exactly the way that they are supposed to.</p>
+                  <p>If you like, you may also even run your own {{= name}} server.</p>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
       </div>
@@ -488,22 +493,22 @@
 
 
               <section data-bind="visible: showAdvancedOptions"><div class="row">
-                <div class="col col-sm-2">Auto BTCPay</div>
+                <div class="col col-sm-2">Auto {{= btc}}Pay</div>
                 <div class="col col-sm-10">
                   <label class="checkbox">
                     <input name="autoBTCPayEnabled" type="checkbox" data-bind="checked: autoBTCPayEnabled">
-                    <i></i>Enable Automatic BTC Payments
+                    <i></i>Enable Automatic {{= btc}} Payments
                   </label>
-                  <div class="note">If this option is enabled, Counterwallet will automatically take care of making BTC
-                      payments for matched orders where you owe BTC. <b>It is highly recommended you keep this on.</b> If not
-                      enabled, you must manually settle any required BTC payments within a 10 block limit (approximately 80-100 minutes).</div>
+                  <div class="note">If this option is enabled, {{= name}} will automatically take care of making {{= btc}}
+                      payments for matched orders where you owe {{= btc}}. <b>It is highly recommended you keep this on.</b> If not
+                      enabled, you must manually settle any required {{= btc}} payments within a 10 block limit (approximately 80-100 minutes).</div>
               </div></section>
 
               <section data-bind="visible: showAdvancedOptions"><div class="row">
                 <div class="col col-sm-12">
                   <div class="note txt-color-red">
                       Don't change followings parameters, unless you know exactly what you are doing.<br />
-                      If you change them, your BTC orders could not match.<br />
+                      If you change them, your {{= btc}} orders could not match.<br />
                       These parameters are not persistent.
                   </div>
                 </div>
@@ -604,9 +609,9 @@
           </div>
           <div class="modal-body padding-top-0 padding-bottom-0">
             <div data-bind="visible: type == 'general'">
-                <h5>If you are having issues using Counterwallet, please try the following:</h5>
+                <h5>If you are having issues using {{= name}}, please try the following:</h5>
                 <ul>
-                    <li><b>Ask in Counterwallet chat:</b> Click on the <b>Show Chat</b> link on the left menubar, and ask your question there. Someone may know the answer.</li>
+                    <li><b>Ask in {{= name}} chat:</b> Click on the <b>Show Chat</b> link on the left menubar, and ask your question there. Someone may know the answer.</li>
                     <li><b>Check out our forums:</b> You can post your question or issue in <a href="https://forums.counterparty.co/index.php/board,13.0.html" target="_blank">the Counterparty support forums</a>.</li>
                     <li><b>Open a support ticket:</b> If all else fails, you may <a href="#" class="showCreateSupportCase">open a support ticket</a>.</li>
                 </ul>
@@ -616,12 +621,14 @@
                 <ul>
                     <li><a href="https://www.counterparty.co/?p=2270" target="_blank">I logged in and my address is different, and I have no balance! Help!</a></li>
                     <li><a href="https://www.counterparty.co/?p=2252" target="_blank">I sent funds to a crowdsale vending machine, why didn’t they show up?</a></li>
-                    <li><a href="https://www.counterparty.co/?p=2250" target="_blank">I sent BTC to Counterwallet, why doesn't it show up?</a></li>
+                    <li><a href="https://www.counterparty.co/?p=2250" target="_blank">I sent {{= btc}} to Counterwallet, why doesn't it show up?</a></li>
                     <br/>
-                    <li><a href="https://www.counterparty.co/?p=2265" target="_blank">Why do I need small amounts of Bitcoin to do things in Counterwallet?</a></li>
+                    <li><a href="https://www.counterparty.co/?p=2265" target="_blank">Why do I need small amounts of {{= btc_name}} to do things in Counterwallet?</a></li>
                     <li><a href="https://www.counterparty.co/?p=2249" target="_blank">An address I added in Counterwallet is not showing -- why?</a></li>
                     <li><a href="https://www.counterparty.co/?p=2100" target="_blank">Does Counterwallet support two-factor authentication?</a></li>
-                    <li><a href="https://www.counterparty.co/xcp/" target="_blank">Where can I buy XCP?</a></li>
+                    {{ if (xcp_store_url) { }}
+                    <li><a href="{{= xcp_store_url}}" target="_blank">Where can I buy {{= xcp}}?</a></li>
+                    {{ } }}
                     <li><a href="https://www.counterparty.co/?p=2251" target="_blank">I have another issue...</a></li>
                 </ul>
                 <h5 class="margin-bottom-0">For other questions, please ask in <a href="https://forums.counterparty.co/index.php/board,13.0.html" target="_blank">the Counterparty support forums</a>.</h5> 
@@ -630,10 +637,12 @@
             <div data-bind="visible: type == 'exchangePage'">
                 <h5>Answers to common questions. Just click the one you're interested in:</h5>
                 <ul>
-                    <li><a href="https://www.counterparty.co/?p=2075" target="_blank">What does something like “XCP/BTC” mean, in Counterwallet?</a></li>
-                    <li><a href="https://www.counterparty.co/xcp/" target="_blank">Where can I buy XCP?</a></li>
-                    <li><a href="https://www.counterparty.co/?p=2266" target="_blank">I placed an order to buy BTC for something else. What I offered was removed from my account, but I don't see the BTC yet!</a></li>
-                    <li><a href="https://www.counterparty.co/?p=2265" target="_blank">Why does it cost me a little Bitcoin to cancel an order!?</a></li>
+                    <li><a href="https://www.counterparty.co/?p=2075" target="_blank">What does something like “{{= xcp}}/{{= btc}}” mean, in Counterwallet?</a></li>
+                    {{ if (xcp_store_url) { }}
+                    <li><a href="{{= xcp_store_url}}" target="_blank">Where can I buy {{= xcp}}?</a></li>
+                    {{ } }}
+                    <li><a href="https://www.counterparty.co/?p=2266" target="_blank">I placed an order to buy {{= btc}} for something else. What I offered was removed from my account, but I don't see the {{= btc}} yet!</a></li>
+                    <li><a href="https://www.counterparty.co/?p=2265" target="_blank">Why does it cost me a little {{= btc_name}} to cancel an order!?</a></li>
                     <li><a href="https://www.counterparty.co/?p=2251" target="_blank">I have another issue...</a></li>
                 </ul>
                 <h5 class="margin-bottom-0">For other questions, please ask in <a href="https://forums.counterparty.co/index.php/board,13.0.html" target="_blank">the Counterparty support forums</a>.</h5> 
@@ -658,8 +667,8 @@
           </div>
           <div class="modal-body no-padding">
             <p class="formPadded">
-              <b>Send a donation to support Counterparty and Counterwallet development.</b><br />
-              Counterparty is non-profit, self-funded, open source and community supported.
+              <b>Send a donation to support {{= xcp_name}} and {{= name}} development.</b><br />
+              {{= xcp_name}} is non-profit, self-funded, open source and community supported.
               We appreciate any donations, and all donations go directly towards supporting future development.
             </p>
             
@@ -685,11 +694,11 @@
                 </div>
                 <div class="col col-sm-4">
                   <div class="btn-group" data-toggle="buttons">
-                    <label class="radioBtn btn btn-lg" data-bind="css: { 'btn-success': donationCurrency() == 'BTC' }">
-                      <input type="radio" name="donationCurrency" value="BTC" data-bind="btnGroupChecked: donationCurrency">BTC
+                    <label class="radioBtn btn btn-lg" data-bind="css: { 'btn-success': donationCurrency() == '{{= btc}}' }">
+                      <input type="radio" name="donationCurrency" value="{{= btc}}" data-bind="btnGroupChecked: donationCurrency">{{= btc}}
                     </label>
-                    <label class="radioBtn btn btn-lg" data-bind="css: { 'btn-success': donationCurrency() == 'XCP' }">
-                      <input type="radio" name="donationCurrency" value="XCP" data-bind="btnGroupChecked: donationCurrency">XCP
+                    <label class="radioBtn btn btn-lg" data-bind="css: { 'btn-success': donationCurrency() == '{{= xcp}}' }">
+                      <input type="radio" name="donationCurrency" value="{{= xcp}}" data-bind="btnGroupChecked: donationCurrency">{{= xcp}}
                     </label>
                   </div>
                 </div>
@@ -870,6 +879,7 @@
 
     <!-- COUNTERWALLET JS INCLUDES -->
     <!-- build:js js/counterwallet-min.js --> 
+    <script src="js/config.js"></script>
     <script src="js/consts.js"></script>
     <script src="js/mnemonic.js"></script>
     <script src="js/util.bitcore.js"></script>  

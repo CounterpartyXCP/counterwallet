@@ -108,7 +108,7 @@ function WalletViewModel() {
     assert(addressObj);
     var assetObj = addressObj.getAssetObj(asset);
     if(!assetObj) return 0; //asset not in wallet
-    if (asset != 'BTC') {
+    if (asset != BTC) {
       return normalized ? assetObj.normalizedBalance() : assetObj.rawBalance();
     } else {
       var bal = assetObj.normalizedBalance() + assetObj.unconfirmedBalance();
@@ -129,7 +129,7 @@ function WalletViewModel() {
     assert(addressObj);
     var assetObj = addressObj.getAssetObj(asset);
     if(!assetObj) {
-      assert(asset != "XCP" && asset != "BTC", "BTC or XCP not present in the address?"); //these should be already in each address
+      assert(asset != XCP && asset != BTC, BTC + " or " + XCP + " not present in the address?"); //these should be already in each address
       //we're trying to update the balance of an asset that doesn't yet exist at this address
       //fetch the asset info from the server, and then use that in a call to addressObj.addOrUpdateAsset
       failoverAPI("get_asset_info", {'assets': [asset]}, function(assetsInfo, endpoint) {
@@ -137,10 +137,10 @@ function WalletViewModel() {
       });    
     } else {
       assetObj.rawBalance(rawBalance); 
-      if (asset == 'BTC' && unconfirmedRawBal) {
+      if (asset == BTC && unconfirmedRawBal) {
         assetObj.unconfirmedBalance(normalizeQuantity(unconfirmedRawBal));
         assetObj.balanceChangePending(true);
-      } else if (asset == 'BTC') {
+      } else if (asset == BTC) {
         assetObj.unconfirmedBalance(0);
         assetObj.balanceChangePending(false);
       }
@@ -208,7 +208,7 @@ function WalletViewModel() {
   }
 
   self.searchDivisibility = function(asset, callback) {
-    if (asset == 'BTC' || asset == 'XCP') {
+    if (asset == BTC || asset == XCP) {
       callback(true);
       return;
     }
@@ -295,7 +295,7 @@ function WalletViewModel() {
     //See if we have any pending BTC send transactions listed in Pending Actions, and if so, enable some extra functionality
     // to clear them out if we sense the txn as processed
     var pendingActionsHasBTCSend = ko.utils.arrayFirst(PENDING_ACTION_FEED.entries(), function(item) {
-      return item.CATEGORY == 'sends' && item.DATA['asset'] == 'BTC'; //there is a pending BTC send
+      return item.CATEGORY == 'sends' && item.DATA['asset'] == BTC; //there is a pending BTC send
     });
     
     self.retriveBTCAddrsInfo(addresses, function(data) {
@@ -308,7 +308,7 @@ function WalletViewModel() {
         // the (confirmed) balance will be decreased by the ENTIRE quantity of that txout, even though they may be getting
         // some/most of it back as change. To avoid people being confused over this, with BTC in particular, we should
         // display the unconfirmed portion of the balance in addition to the confirmed balance, as it will include the change output
-        self.updateBalance(data[i]['addr'], "BTC", data[i]['confirmedRawBal'], data[i]['unconfirmedRawBal']);
+        self.updateBalance(data[i]['addr'], BTC, data[i]['confirmedRawBal'], data[i]['unconfirmedRawBal']);
         
         addressObj = self.getAddressObj(data[i]['addr']);
         assert(addressObj, "Cannot find address in wallet for refreshing BTC balances!");
@@ -345,12 +345,12 @@ function WalletViewModel() {
       //insight down or spazzing, set all BTC balances out to null
       var addressObj = null;
       for(var i=0; i < addresses.length; i++) {
-        self.updateBalance(addresses[i], "BTC", null, null); //null = UNKNOWN
+        self.updateBalance(addresses[i], BTC, null, null); //null = UNKNOWN
         addressObj = self.getAddressObj(addresses[i]);
         addressObj.numPrimedTxouts(null); //null = UNKNOWN
         addressObj.numPrimedTxoutsIncl0Confirms(null); //null = UNKNOWN
       }
-      bootbox.alert("Got an error when trying to sync BTC balances: " + textStatus);
+      bootbox.alert("Got an error when trying to sync " + BTC + " balances: " + textStatus);
       
       if(isRecurring && self.autoRefreshBTCBalances) {
         setTimeout(function() {
@@ -375,7 +375,7 @@ function WalletViewModel() {
   self.broadcastSignedTx = function(signedTxHex, onSuccess, onError) {
     if (signedTxHex==false) {
       bootbox.alert("Client-side transaction validation FAILED. Transaction will be aborted and NOT broadcast."
-                    + " Please contact the Counterparty development team");
+                    + " Please contact the " + XCP_NAME + " development team");
       return false;
     }
     $.jqlog.debug("RAW SIGNED HEX: " + signedTxHex);
@@ -473,11 +473,11 @@ function WalletViewModel() {
     var addressObj = self.getAddressObj(address);
     assert(!addressObj.IS_WATCH_ONLY, "Cannot perform this action on a watch only address!");
     
-    if(self.getBalance(address, "BTC", false) < MIN_PRIME_BALANCE) {
-      bootbox.alert("Cannot do this action as you have insufficient <b class='notoAssetColor'>BTC</b> at this address."
-        + "Due to Bitcoin fees, each Counterparty action requires"
-        + " approximately <b class='notoQuantityColor'>" + normalizeQuantity(MIN_PRIME_BALANCE) + "</b> <b class='notoAssetColor'>BTC</b> to perform.<br/><br/>"
-        + "Please deposit the necessary <b class='notoAssetColor'>BTC</b> into <b class='notoAddrColor'>" + getAddressLabel(address) + "</b> and try again.");
+    if(self.getBalance(address, BTC, false) < MIN_PRIME_BALANCE) {
+      bootbox.alert("Cannot do this action as you have insufficient <b class='notoAssetColor'>" + BTC + "</b> at this address."
+        + "Due to " + BTC_NAME + " fees, each " + XCP_NAME + " action requires"
+        + " approximately <b class='notoQuantityColor'>" + normalizeQuantity(MIN_PRIME_BALANCE) + "</b> <b class='notoAssetColor'>" + BTC + "</b> to perform.<br/><br/>"
+        + "Please deposit the necessary <b class='notoAssetColor'>" + BTC + "</b> into <b class='notoAddrColor'>" + getAddressLabel(address) + "</b> and try again.");
       return false;
     }
 
@@ -525,8 +525,8 @@ function WalletViewModel() {
     var verifyDestAddr = data['destination'] || data['transfer_destination'] || data['feed_address'] || data['destBtcPay'] || data['source'];
     delete data['destBtcPay'];
     if (action == "create_burn") {
-      verifyDestAddr = TESTNET_UNSPENDABLE;
-    } else if (action == "create_dividend" && data['dividend_asset'] == 'BTC') {
+      verifyDestAddr = UNSPENDABLE;
+    } else if (action == "create_dividend" && data['dividend_asset'] == BTC) {
       verifyDestAddr = data['_btc_dividend_dests'];
       delete data['_btc_dividend_dests'];
     }
@@ -574,7 +574,7 @@ function WalletViewModel() {
   self.showTransactionCompleteDialog = function(text, armoryText, armoryUTx) {
     if(armoryUTx) {
       bootbox.alert((armoryText || text) + "<br/><br/>To complete the transaction, please copy over and sign the text below on your"
-        + " offline Armory system, then bring back to Counterwallet to broadcast:</br>"
+        + " offline Armory system, then bring back to " + XCP_NAME + " to broadcast:</br>"
         + "<textarea class=\"form-control armoryUTxTextarea\" rows=\"20\">" + armoryUTx + "</textarea>");
     } else {
       bootbox.alert(text);

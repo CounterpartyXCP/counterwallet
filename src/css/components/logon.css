@@ -25,23 +25,12 @@
     margin-bottom: 5px;
 }
 
-#generated {
-  width: 85%;
-  display: inline-block;
-  padding: 6px 5px;
-  border: 1px solid #AAA;
-}
-
-#generated-regenerate {
-  width: 13%;
-}
-
 #form-well .btn-success {
   width: 250px;
 }
 
 #walletLoginButton {
-  width: 70%;
+  width: 100%;
 }
 
 #secureKeyboardButton {
@@ -53,22 +42,6 @@
   border:1px solid #CCC;
   margin-top: 80px;
   padding-top: 20px;  
-}
-
-div#logon h1 {
-  font-size: 3em;
-  text-align: center;
-}
-
-div#logon h2 {
-  font-size: 2em;
-  text-align: center;
-  padding-bottom: 5px;
-  color: #333;
-}
-
-div#logon div#form-well {
-  margin-top:40px;
 }
 
 #newWalletButton {
@@ -124,4 +97,235 @@ p.logonWarningOtherLines {
     -ms-transition: none;
     -o-transition: none;
     transition: none;
-}​
+}
+
+.dogeparty {
+  background: #42b5d5 !important;
+  color: white;
+  font-family: "Open Sans", Arial, Helvetica, Sans-Serif;
+}
+
+.dogeparty h1 {
+  font-size: 36px;
+  font-weight: bold;
+}
+
+.dogeparty h2 {
+  font-size: 20px;
+}
+
+.dogeparty h1,
+.dogeparty h2 {
+  text-align: center;
+}
+
+.dogeparty .form-well {
+  max-width: 440px !important;
+}
+
+.dogeparty .btn-lg {
+  background: #42b5d5;
+  border: 1px solid white;
+  border-radius: 4px;
+  color: white;
+  box-shadow: none !important;
+  font-size: 22px
+  font-weight: bold;
+  margin-top: 60px;
+  padding: 30px 50px;
+}
+
+.dogeparty #createNewAcctBtnPane {
+  margin-bottom: 0;
+}
+
+.dogeparty .btn-lg:hover,
+.dogeparty .btn-lg:focus {
+  left: 0;
+}
+
+.dp-logo {
+  display: block;
+  margin: 0 auto 70px;
+  height: 196px;
+  width: 196px;
+}
+
+.dogeparty .testnet-note {
+  font-size: 18px;
+  line-height: 2em;
+  margin: 60px 0 0;
+  text-align: center;
+}
+
+.testnet-note a {
+  border-bottom: 1px solid #f9ec31;
+  color: #f9ec31;
+  font-weight: normal;
+  text-decoration: none;
+}
+
+.dogeparty .panel-heading {
+  background: transparent;
+  border: 0;
+  padding: 0;
+}
+
+.dogeparty .panel-headline {
+  color: white;
+  display: block;
+  font-size: 18px;
+  margin: 0 0 20px;
+  text-align: center;
+}
+
+.dogeparty .panel-info,
+.dogeparty .panel-warning {
+  background: transparent;
+  border: 0;
+  margin-top: 60px;
+}
+
+.dogeparty .panel-body {
+  background: #40aecd;
+  border: 1px solid #38a0bd;
+  border-radius: 12px;
+  padding: 30px;
+}
+
+.dogeparty input[type="password"],
+#generated {
+  background: #f6f6f6;
+  border: 0;
+  border-radius: 4px !important;
+  margin: 0;
+  padding: 25px;
+  text-align: center;
+}
+
+#generated {
+  color: black;
+}
+
+.dogeparty .btn-open,
+.dogeparty .btn-regenerate {
+  background: #2f99b6 !important;
+  border: 0;
+  box-shadow: none !important;
+  color: white;
+  margin-top: 10px;
+  padding: 15px;
+}
+
+.dogeparty .btn-regenerate {
+  width: 100%;
+}
+
+.dogeparty .btn-primary-2 {
+  color: white;
+}
+
+.dogeparty .alert-danger p {
+  font-size: 14px;
+  text-align: left;
+}
+
+.extra-info-box {
+  background: #ececec;
+  color: #58595b;
+  margin-top: 80px;
+}
+
+.dogeparty .extra-info {
+  background: transparent !important;
+  border: 0 !important;
+  padding: 40px 0 !important;
+}
+
+.dogeparty .img-secure {
+  height: 138px;
+  width: 84px;
+}
+
+.dogeparty .img-globe {
+  height: 118px;
+  width: 100px;
+}
+
+.dogeparty .img-hand {
+  height: 135px;
+  width: 86px;
+}
+
+.dogeparty .img-rocket {
+  display: block;
+  height: 155px;
+  margin: 0 auto 60px;
+  width: 155px;
+}
+
+.about-wallet h4 {
+  color: #2fb2e0;
+  font-size: 25px;
+  font-weight: bold;
+}
+
+.about-wallet {
+  font-size: 17px;
+}
+
+.about-wallet .row {
+  margin-top: 40px !important;
+}
+
+.about-wallet img {
+  position: relative;
+  top: 50px;
+}
+
+.dogeparty .sales-title {
+  font-size: 17px;
+  font-weight: bold;
+}
+
+.dogeparty .down-arrow-row {
+  height: 0;
+  margin-bottom: 0 !important;
+  margin-top: 0 !important;
+  position: relative;
+  top: -65px;
+}
+
+.dogeparty .down-arrow-circle {
+  background: #42b5d5;
+  border-radius: 50%;
+  height: 50px;
+  margin: 0 auto;
+  text-align: center;
+  width: 50px;
+}
+
+.dogeparty .down-arrow {
+  height: 26px;
+  position: relative;
+  top: 12px;
+  width: 20px;
+}
+
+.nowrap {
+  white-space: nowrap;
+}
+
+@media (max-width: 767px) {
+
+  .about-wallet {
+    text-align: center;
+  }
+
+  .about-wallet img {
+    margin-bottom: 20px;
+    top: 0;
+  }
+
+}
+

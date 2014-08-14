@@ -38,7 +38,7 @@
         </ul>
     </div>
     
-    <button id="balanceHelp" type="button" class="btn btn-success"><i class="fa fa-question-circle"></i>&nbsp;Page Help</button>
+    <!-- <button id="balanceHelp" type="button" class="btn btn-success"><i class="fa fa-question-circle"></i>&nbsp;Page Help</button> -->
   </div>
 </div>
 
@@ -49,25 +49,30 @@
     <a href="https://forums.counterparty.co/index.php?topic=321.0" target="_blank">More info</a>.
 </div>
 
+{{ if (xcp_store_url) { }}
 <div class="alert alert-info">
     <i class="fa-fw fa fa-exchange"></i>
-    <b>Want to buy XCP?</b> Beyond using the decentralized exchange in Counterwallet, other options for purchasing XCP are
-    <a href="https://www.counterparty.co/xcp/" target="_blank">listed here</a>.
+    <b>Want to buy {{= xcp}}?</b> Beyond using the decentralized exchange in {{= name}}, other options for purchasing {{= xcp}} are
+    <a href="{{= xcp_store_url}}" target="_blank">listed here</a>.
 </div>
+{{ } }}
 
 <div id="gettingStartedNotice" data-bind="fadeVisibleInOnly: WALLET.isNew() && !WALLET.isOldWallet() && window._BALANCES_HAS_LOADED_ALREADY === undefined" class="alert alert-success alert-block">
     <a class="close" data-dismiss="alert" href="#">×</a>
-    <h4 class="alert-heading padding-bottom-10">Welcome to Counterwallet!</h4>
-    We've created an address for you to get started. You can send and receive both bitcoin and Counterparty tokens with it.
-    To start using the wallet, simply send some BTC or XCP to the address (just single click on the address string
+    <h4 class="alert-heading padding-bottom-10">Welcome to {{= name}}!</h4>
+    We've created an address for you to get started. You can send and receive both {{= btc_name}} and {{= xcp_name}} tokens with it.
+    To start using the wallet, simply send some {{= btc}} or {{= xcp}} to the address (just single click on the address string
     itself to select it, then copy that text, which you can then give to others or use to
-    send funds to). <span data-bind="visible: USE_TESTNET">Note that, on testnet, you can use a
-    <b><a href="https://en.bitcoin.it/wiki/Bitcoin_faucet" target="_blank">Testnet faucet</a> to get BTC to start with</b>.</span>
+    send funds to).
+    {{ if (testnet.faucet_url) { }}
+    <span data-bind="visible: USE_TESTNET">Note that, on testnet, you can use a
+    <b><a href="{{= testnet.faucet_url}}" target="_blank">Testnet faucet</a> to get {{= btc}} to start with</b>.</span>
+    {{ } }}
     <br/><br/>
     
-    One important thing to know before getting started is that when you perform an action in Counterwallet (i.e. place
-    an order, create a token, etc), <b>it doesn't take effect immediately as it must first be confirmed on the Bitcoin blockchain</b>.
-    Counterwallet lets you know this by displaying your actions under the <b>Pending Actions</b> panel (the Clock icon on the top bar), and then moving
+    One important thing to know before getting started is that when you perform an action in {{= name}} (i.e. place
+    an order, create a token, etc), <b>it doesn't take effect immediately as it must first be confirmed on the {{= btc_name}} blockchain</b>.
+    {{= name}} lets you know this by displaying your actions under the <b>Pending Actions</b> panel (the Clock icon on the top bar), and then moving
     them to the <b>Notifications</b> panel (the Checkbox icon) automatically once the network has successfully confirmed them.
     You'll also see the future expected value in parenthesis next to the current balance to better alert you that the change is pending.
     Note that depending on the speed at which blocks are solved, it could take anywhere from 2 to 40 minutes for your actions to be confirmed.<br/><br/>
@@ -75,7 +80,7 @@
 
 <div id="pendingBTCPayNotice" data-bind="fadeVisibleInOnly: needWarningOnExit()" class="alert alert-danger alert-block">
     <i class="fa-fw fa fa-btc"></i>
-    <strong>Sell BTC Pending:</strong> As you have one or more pending or open sell order for BTC, please stay logged in so that the order(s) can be properly filled.
+    <strong>Sell {{= btc}} Pending:</strong> As you have one or more pending or open sell order for {{= btc}}, please stay logged in so that the order(s) can be properly filled.
 </div>
 
 <section id="widget-grid" class="balancesContainer" data-bind="foreach: addresses"> <!-- widget grid -->
@@ -113,7 +118,7 @@
                     <a href="#" class="dropdown-toggle" data-toggle="dropdown">Filter By</a>
                         <ul class="dropdown-menu">
                           <li><a data-bind="click: showAllAssets" href="#">Show All</a></li>
-                          <li><a data-bind="click: showBaseAssetsOnly" href="#">Show XCP &amp; BTC Only</a></li>
+                          <li><a data-bind="click: showBaseAssetsOnly" href="#">Show {{= xcp}} &amp; {{= btc}} Only</a></li>
                           <li><a data-bind="click: showMyAssetsOnly" href="#">Show My Tokens Only</a></li>
                           <li><a data-bind="click: showOthersAssetsOnly" href="#">Show Other Tokens Only</a></li>
                         </ul>
@@ -133,13 +138,13 @@
           </header>
           <div> <!-- widget div-->
             <div class="widget-body" data-bind="attr: {'id': 'address-balances-' + ADDRESS}, foreach: filteredAssets"> <!-- widget content -->
-              <div class="asset-item" data-bind="css: { btc: ASSET === 'BTC', xcp: ASSET === 'XCP', myasset: isMine(), othersasset: !isMine() && (ASSET !== 'BTC' && ASSET !== 'XCP') }">
+              <div class="asset-item" data-bind="css: { btc: ASSET === '{{= btc}}', xcp: ASSET === '{{= xcp}}', myasset: isMine(), othersasset: !isMine() && (ASSET !== '{{= btc}}' && ASSET !== '{{= xcp}}') }">
                 <div class="btn-group btn-group-dropup"> <!-- asset level action button -->
                   <button type="button" class="btn btn-default dropdown-toggle assetBtn"><span class="caret"></span></button>
                   <ul class="dropdown-menu" role="menu">
                     <li><a data-bind="visible: !$parent.IS_WATCH_ONLY, click: send" href="#">Send</a></li>
-                    <li><a data-bind="visible: ASSET !== 'BTC' && ASSET !== 'XCP', click: showInfo" href="#">Show Info</a></li>
-                    <li data-bind="visible: !$parent.IS_WATCH_ONLY && USE_TESTNET && ASSET === 'BTC'"><a data-bind="click: testnetBurn" href="#">Burn for XCP</a></li>
+                    <li><a data-bind="visible: ASSET !== '{{= btc}}' && ASSET !== '{{= xcp}}', click: showInfo" href="#">Show Info</a></li>
+                    <li data-bind="visible: !$parent.IS_WATCH_ONLY && BURNABLE && ASSET === '{{= btc}}'"><a data-bind="click: testnetBurn" href="#">Burn for {{= xcp}}</a></li>
                     <li data-bind="visible: !$parent.IS_WATCH_ONLY && isMine() && !locked()"><a data-bind="click: issueAdditional" href="#">Issue Additional</a></li>
                     <li data-bind="visible: !$parent.IS_WATCH_ONLY && isMine()"><a data-bind="click: transfer" href="#">Transfer Ownership</a></li>
                     <li data-bind="visible: !$parent.IS_WATCH_ONLY && isMine() && !locked()"><a data-bind="click: lock" href="#">Lock Token Issuance</a></li>
@@ -273,7 +278,7 @@
             <label class="control-label col col-sm-2">Send To</label>
             <div class="col col-sm-10">
                 <label class="input"><i class="icon-append fa fa-tag"></i>
-                    <input name="destAddress" data-bind="value: destAddress, valueUpdate: 'input', attr: {placeholder: 'Enter Bitcoin address'}" type="text"/>
+                    <input name="destAddress" data-bind="value: destAddress, valueUpdate: 'input', attr: {placeholder: 'Enter {{= btc_name}} address'}" type="text"/>
                 </label>
                 <span class="invalid" data-bind="validationMessage: destAddress"></span>
             </div>
@@ -327,7 +332,7 @@
             <label class="control-label col col-sm-12">Private Key To Import</label>
             <div class="col col-sm-12">
                 <label class="input"><i class="icon-append fa fa-lock"></i>
-                    <input name="privateKey" data-bind="value: privateKey, valueUpdate: 'input', attr: {placeholder: 'Enter Bitcoin private key'}" type="text"/>
+                    <input name="privateKey" data-bind="value: privateKey, valueUpdate: 'input', attr: {placeholder: 'Enter {{= btc_name}} private key'}" type="text"/>
                 </label>
                 <span class="invalid" data-bind="validationMessage: privateKey"></span>
                 <div class="note">Enter the unencrypted private key to the address with the tokens you want to move over.</div>
@@ -365,7 +370,7 @@
             <label class="control-label col col-sm-12">Private Key used to pay fees</label>
             <div class="col col-sm-12">
                 <label class="input"><i class="icon-append fa fa-lock"></i>
-                    <input name="privateKeyForFees" data-bind="value: privateKeyForFees, valueUpdate: 'input', attr: {placeholder: 'Enter Bitcoin private key'}" type="text"/>
+                    <input name="privateKeyForFees" data-bind="value: privateKeyForFees, valueUpdate: 'input', attr: {placeholder: 'Enter {{= btc_name}} private key'}" type="text"/>
                 </label>
                 <span class="invalid" data-bind="validationMessage: privateKeyForFees"></span>
                 <span class="note" data-bind="text: addressForFeesBalanceMessage, visible:addressForFeesBalanceMessage()!=''"></span>
@@ -454,17 +459,17 @@
     <div class="modal-content">
       <div class="modal-header">
         <button type="button" data-bind="click: hide" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
-        <h4 class="modal-title">Burn BTC for XCP (Testnet Only)</h4>
+        <h4 class="modal-title">Burn {{= btc}} for {{= xcp}}</h4>
       </div>
       <div class="modal-body no-padding">
         <p class="formPadded">
-         Create XCP on Testnet by "burning" your test BTC. Please note that you can only burn up to <b>1 BTC total</b> for any given address.<br/><br/>
-         <span data-bind="visible: 1 - btcAlreadyBurned() > 0"><b>You may currently burn up to <span class="sellColor"><span data-bind="text: maxPossibleBurn()"></span> BTC</span> from this address.</b></span>
-         <span data-bind="visible: 1 - btcAlreadyBurned() <= 0"><b class="errorColor">You have already burned the maximum allowed BTC from this address.</b></span>
+         Create {{= xcp}} by "burning" your {{= btc}}. Please note that you can only burn up to <b>{{= max_burn_per_address}} {{= btc}} total</b> for any given address.<br/><br/>
+         <span data-bind="visible: MAX_BURN_PER_ADDRESS - btcAlreadyBurned() > 0"><b>You may currently burn up to <span class="sellColor"><span data-bind="text: maxPossibleBurn()"></span> {{= btc}}</span> from this address.</b></span>
+         <span data-bind="visible: MAX_BURN_PER_ADDRESS - btcAlreadyBurned() <= 0"><b class="errorColor">You have already burned the maximum allowed {{= btc}} from this address.</b></span>
        </p>
        <form class="smart-form" data-bind="submit: doAction"><fieldset>
           <section><div class="row">
-            <label class="control-label col col-sm-2">BTC to Burn</label>
+            <label class="control-label col col-sm-2">{{= btc}} to Burn</label>
             <div class="col col-sm-10">
                 <label class="input"><i class="icon-append fa fa-fire"></i>
                     <input name="additionalIssue" data-bind="value: btcBurnQuantity, valueUpdate: 'input'" type="text"/>
@@ -474,7 +479,7 @@
         </fieldset></form>
         <p class="formPaddedBot bold" data-bind="fadeVisibleInOnly: validationModel.isValid()">
             After burning, you will have approximately
-            <b class="buyColor"><span data-bind="text: dispQuantityXCPToBeCreated"></span> XCP</b> created at this address.
+            <b class="buyColor"><span data-bind="text: dispQuantityXCPToBeCreated"></span> {{= xcp}}</b> created at this address.
         </p>
       </div>
       <div class="modal-footer">
@@ -522,7 +527,7 @@
       </div>
       <div class="modal-body no-padding">
         <p class="formPadded">Please note that a <b class="notoQuantityColor"><span data-bind="text: ASSET_CREATION_FEE_XCP"></span></b>
-        <b class="notoAssetColor">XCP</b> fee will be deducted from your balance upon successful creation.</p>
+        <b class="notoAssetColor">{{= xcp}}</b> fee will be deducted from your balance upon successful creation.</p>
         
         <form class="smart-form" data-bind="submit: doAction"><fieldset>
           <section><div class="row">
@@ -594,7 +599,7 @@
                 <label class="input">
                     <input name="assetCallPrice" type="text" data-bind="value: callPrice, valueUpdate: 'input'"/>
                 </label>
-                <div class="note">The <b>XCP price per unit</b> that the owner of the token may call it back for.</div>
+                <div class="note">The <b>{{= xcp}} price per unit</b> that the owner of the token may call it back for.</div>
             </div>
           </div></section>
         </fieldset></form>                    
@@ -650,7 +655,7 @@
         <h4 class="modal-title">Transfer Token</h4>
       </div>
       <div class="modal-body no-padding">
-        <p class="formPadded">Enter the <b>Bitcoin address</b> you would like to perminently transfer ownership of this token to.
+        <p class="formPadded">Enter the <b>{{= btc_name}} address</b> you would like to perminently transfer ownership of this token to.
             (Be aware that this will not transfer the actual units of this token that you own to this address -- you can do that with a separate Send transaction.)
             <br/><br/><b class="errorRed">Please NOTE that this action is irreversable!</b></p>
         
@@ -720,7 +725,7 @@
         <h4 class="modal-title">Pay Distribution/Dividend</h4>
       </div>
       <div class="modal-body no-padding">
-        <p class="formPadded">Use this form to pay holders of any token a distribution using XCP or any other token.
+        <p class="formPadded">Use this form to pay holders of any token a distribution using {{= xcp}} or any other token.
         <i>Note that the full required balance of the token paid out must be present at this same address.</i><br/><br/>
        <b class="errorRed">Please NOTE that this action is irreversable!</b></p>
         <form class="smart-form" data-bind="submit: doAction"><fieldset>
@@ -795,14 +800,14 @@
           </div></section>
         </fieldset></form>
         <div class="formPaddedBot" data-bind="fadeVisibleInOnly: xcpBalRemainingPostCallIsSet">
-            <p>At the given call price of <b><span data-bind="text: dispCallPrice"></span> XCP</b> per unit
+            <p>At the given call price of <b><span data-bind="text: dispCallPrice"></span> {{= xcp}}</b> per unit
                 of <b><span data-bind="text: asset"></span></b> (which has <b><span data-bind="text: dispTotalIssued"></span></b> units issued
                 and <b class="sellColor"><span data-bind="text: dispTotalOutstanding"></span></b> units outstanding),
                 your total cost for a <b><span data-bind="text: percentageToCall"></span>% callback</b> would be
-                <b class="sellColor"><span data-bind="text: totalXCPPay"></span> XCP</b>.</p>
+                <b class="sellColor"><span data-bind="text: totalXCPPay"></span> {{= xcp}}</b>.</p>
             <p>After this callback, this address would have a remaining balance of
             <b data-bind="css: {errorColor: xcpBalRemainingPostCall() < 0, sellColor: xcpBalRemainingPostCall() >= 0}">
-                <span data-bind="text: dispXCPBalRemainingPostCall"></span> XCP</b>, and gain
+                <span data-bind="text: dispXCPBalRemainingPostCall"></span> {{= xcp}}</b>, and gain
             <b class="buyColor"><span data-bind="text: dispUnitsToCallback"></span>
                 <span data-bind="text: asset"></span></b>, for a final balance of
              <b><span data-bind="text: dispUnitsAfterCallback"></span>
@@ -923,7 +928,7 @@
                 <label class="input">
                     <input name="assetCallPrice" type="text" data-bind="value: callPrice" disabled="disabled"/>
                 </label>
-                <div class="note">The <b>XCP price per unit</b> that the owner of the token may call it back for.</div>
+                <div class="note">The <b>{{= xcp}} price per unit</b> that the owner of the token may call it back for.</div>
             </div>
           </div></section>
         </fieldset></form>

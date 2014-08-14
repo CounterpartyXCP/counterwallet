@@ -1,0 +1,16 @@
+var BTC_NAME = "{{= btc_name}}";
+var BTC = "{{= btc}}";
+var XCP_NAME = "{{= xcp_name}}";
+var XCP = "{{= xcp}}";
+var MAX_BURN_PER_ADDRESS = {{= max_burn_per_address}};
+
+{{ if (livenet.burning) { }}
+var LIVENET_BURN_START = {{= livenet.burning.start}};
+var LIVENET_BURN_END = {{= livenet.burning.end}};
+{{ } }}
+
+{{ if (testnet.burning) { }}
+var TESTNET_BURN_START = {{= testnet.burning.start}};
+var TESTNET_BURN_END = {{= testnet.burning.end}};
+{{ } }}
+
