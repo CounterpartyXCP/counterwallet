@@ -281,17 +281,24 @@ function MessageFeed() {
     }
 
     if (displayTx) {
-      WALLET.searchDivisibility(message['bindings']['asset'] || 'BTC', function(divisibility) {
-        message['bindings']['divisible'] = divisibility;
+      var asset1 = message['bindings']['asset'] || 'BTC';
+      WALLET.getAssetsDivisibility([asset1], function(divisibility) {
+
+        message['bindings']['divisible'] = divisibility[asset1];
         message['bindings']['tx_index'] = message['_message_index'];
+        
         if (category == 'dividends') {
-          WALLET.searchDivisibility(message['bindings']['dividend_asset'], function(asset_divisibility) {
-            message['bindings']['dividend_asset_divisible'] = asset_divisibility;
+
+          var asset2 = message['bindings']['dividend_asset'];
+          WALLET.getAssetsDivisibility([asset2], function(asset_divisibility) {
+            message['bindings']['dividend_asset_divisible'] = asset_divisibility[asset2];
             PENDING_ACTION_FEED.add(txHash, category, message['bindings']);
           });
+
         } else {
           PENDING_ACTION_FEED.add(txHash, category, message['bindings']);
         }
+
       });
     }
     

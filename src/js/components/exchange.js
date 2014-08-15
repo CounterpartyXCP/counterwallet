@@ -1112,23 +1112,38 @@ function OpenOrdersViewModel() {
   self.displayOpenOrders = function(data) {
     $.jqlog.debug(data);
     self.openOrders([]);
+    var assets = {};
     var orders = [];
-    for (var i=0; i<data.length; i++) {
+    for (var i = 0; i < data.length; i++) {
       var order = {};
       order.tx_index = data[i].tx_index;
       order.tx_hash = data[i].tx_hash;
       order.source = data[i].source;
       order.address_label = self.addressesLabels[order.source];
-      order.give_quantity_str = normalizeQuantity(data[i].give_quantity) + ' ' + data[i].give_asset;
-      order.get_quantity_str = normalizeQuantity(data[i].get_quantity) + ' ' + data[i].get_asset;
-      order.give_remaining_str = normalizeQuantity(data[i].give_remaining) + ' ' + data[i].give_asset;
-      order.get_remaining_str = normalizeQuantity(data[i].get_remaining) + ' ' + data[i].get_asset;
+      order.give_asset = data[i].give_asset;
+      order.get_asset = data[i].get_asset;
+      order.give_quantity = data[i].give_quantity;
+      order.get_quantity = data[i].get_quantity;
+      order.give_remaining = data[i].give_remaining;
+      order.get_remaining = data[i].get_remaining;
       order.expire_index = data[i].expire_index;
       order.expire_date = expireDate(data[i].expire_index);
       orders.push(order);
+      assets[data[i].give_asset] = true;
+      assets[data[i].give_asset] = true;
     }
-    self.openOrders(orders);
-    var openOrdersTable = $('#openOrdersTable').dataTable();
+    assets = _.keys(assets);
+
+    WALLET.getAssetsDivisibility(assets, function(assetsDivisibility) {
+      for (var i = 0; i < orders.length; i++) {
+        orders[i].give_quantity_str = smartFormat(normalizeQuantity(orders[i].give_quantity, assetsDivisibility[orders[i].give_asset])) + ' ' + orders[i].give_asset;
+        orders[i].get_quantity_str = smartFormat(normalizeQuantity(orders[i].get_quantity, assetsDivisibility[orders[i].get_asset])) + ' ' + orders[i].get_asset;
+        orders[i].give_remaining_str = smartFormat(normalizeQuantity(orders[i].give_remaining, assetsDivisibility[orders[i].give_asset])) + ' ' + orders[i].give_asset;
+        orders[i].get_remaining_str = smartFormat(normalizeQuantity(orders[i].get_remaining, assetsDivisibility[orders[i].get_asset])) + ' ' + orders[i].get_asset;
+      }
+      self.openOrders(orders);
+      var openOrdersTable = $('#openOrdersTable').dataTable();
+    });
   }
 
   self.cancelOpenOrder = function(order) {
@@ -1214,20 +1229,29 @@ function OrderMatchesViewModel() {
   self.displayOrderMatches = function(data) {
     self.orderMatches([]);
     var order_matches = [];
+    var assets = {};
+
     for (var i=0; i<data.length; i++) {
       var order_match = {};
 
       if (self.addressesLabels[data[i].tx0_address]) {
         order_match.address_label = self.addressesLabels[data[i].tx0_address];
-        order_match.give_quantity_str = smartFormat(normalizeQuantity(data[i].forward_quantity)) + ' ' + data[i].forward_asset;
-        order_match.get_quantity_str = smartFormat(normalizeQuantity(data[i].backward_quantity))+ ' ' + data[i].backward_asset;
+        order_match.give_quantity = data[i].forward_quantity;
+        order_match.get_quantity = data[i].backward_quantity;
+        order_match.give_asset = data[i].forward_asset;
+        order_match.get_asset = data[i].backward_asset;
       } else {
         order_match.address_label = self.addressesLabels[data[i].tx1_address];
-        order_match.give_quantity_str = smartFormat(normalizeQuantity(data[i].backward_quantity)) + ' ' + data[i].backward_asset;
-        order_match.get_quantity_str = smartFormat(normalizeQuantity(data[i].forward_quantity)) + ' ' + data[i].forward_asset;
+        order_match.give_quantity = data[i].backward_quantity;
+        order_match.get_quantity = data[i].forward_quantity;
+        order_match.give_asset = data[i].backward_asset;
+        order_match.get_asset = data[i].forward_asset;
       }
       order_match.status = data[i].status;
       order_match.block_index = data[i].block_index;
+
+      assets[order_match.give_asset] = true;
+      assets[order_match.get_asset] = true;
 
       var classes = {
         'completed': 'success',
@@ -1239,11 +1263,18 @@ function OrderMatchesViewModel() {
       order_matches.push(order_match);
     }
     
+    assets = _.keys(assets);
 
-    $('#orderMatchesTable').dataTable().fnClearTable();
-    self.orderMatches(order_matches);
-    runDataTables('#orderMatchesTable', true, {
-      "aaSorting": [[1, 'desc']]
+    WALLET.getAssetsDivisibility(assets, function(assetsDivisibility) {
+      for (var i = 0; i < order_matches.length; i++) {
+        order_matches[i].give_quantity_str = smartFormat(normalizeQuantity(order_matches[i].give_quantity, assetsDivisibility[order_matches[i].give_asset])) + ' ' + order_matches[i].give_asset;
+        order_matches[i].get_quantity_str = smartFormat(normalizeQuantity(order_matches[i].get_quantity, assetsDivisibility[order_matches[i].get_asset])) + ' ' + order_matches[i].get_asset;
+      }
+      $('#orderMatchesTable').dataTable().fnClearTable();
+      self.orderMatches(order_matches);
+      runDataTables('#orderMatchesTable', true, {
+        "aaSorting": [[1, 'desc']]
+      });
     });
 
   }
