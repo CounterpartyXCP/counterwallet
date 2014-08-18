@@ -373,7 +373,7 @@ function getAssetInfo (assets) {
         });
       });
     });
-  return Promise.all(promises);
+  return Promise.all(promises).then(_.flatten);
 }
 
 function multiAPIConsensus(method, params, onSuccess, onConsensusError, onSysError) {

@@ -268,7 +268,7 @@ function WalletViewModel() {
           if(assets.indexOf(balancesData[i]['asset'])==-1)
           assets.push(balancesData[i]['asset']);
         }
-        getAssetInfo(assets).then(_.flatten).then(function (assetsInfo) {
+        getAssetInfo(assets).then(function (assetsInfo) {
           for(i=0; i < assetsInfo.length; i++) {
             for(j=0; j < balancesData.length; j++) {
               if(balancesData[j]['asset'] != assetsInfo[i]['asset']) continue;
