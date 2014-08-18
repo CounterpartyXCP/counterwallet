@@ -363,6 +363,19 @@ function multiAPI(method, params, onSuccess, onError) {
   });
 }
 
+function getAssetInfo (assets) {
+  var slices = [], assets = [].concat(assets);
+  while (assets.length) slices.push(assets.splice(0, 100)); // 100 at once
+  var promises = slices.map(function (assets) {
+      return new Promise(function (resolve) {
+        failoverAPI("get_asset_info", { "assets": assets }, function(assetsInfo) {
+          return resolve(assetsInfo);
+        });
+      });
+    });
+  return Promise.all(promises);
+}
+
 function multiAPIConsensus(method, params, onSuccess, onConsensusError, onSysError) {
   /*Make an API call and require all servers not returning an error to give back the same result, which is
     passed to the onSuccess callback.
