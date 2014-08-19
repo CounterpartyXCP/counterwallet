@@ -78,7 +78,7 @@ for (var network in fixtures) {
 
     it('Should reject transaction with incorrect destination', function() {
       var cwk = new CWPrivateKey(data.privkey);
-      var check = cwk.checkTransactionDest(data.transaction.unsigned, data.addresses[2]);
+      var check = cwk.checkTransactionDest(data.transaction.unsigned, [data.addresses[2]]);
       check.should.be.equal.false;
     });
 

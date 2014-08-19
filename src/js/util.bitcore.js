@@ -172,7 +172,7 @@ CWPrivateKey.prototype.getBitcoreECKey = function() {
 }
 
 CWPrivateKey.prototype.signMessage = function(message, format) {
-  return bitcore.Message.sign(message, this.getBitcoreECKey()).toString(format);
+  return bitcore.Message.signMessage(message, this.getBitcoreECKey()).toString(format);
 }
 
 CWPrivateKey.prototype.signRawTransaction = function(unsignedHex) {
