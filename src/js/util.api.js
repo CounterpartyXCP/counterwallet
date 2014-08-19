@@ -1,5 +1,6 @@
 
 var TIMEOUT_FAILOVER_API = 4000; // 4 seconds (in ms)
+var TIMEOUT_FAILOVER_API_SINGLE = 10000; // 10 seconds (in ms) - timeout when just one server in the list
 var TIMEOUT_MULTI_API = 8000; // 8 seconds (in ms)
 
 //Inlude a .url param in every jqXHR object -- http://stackoverflow.com/a/11980396
@@ -332,7 +333,8 @@ function failoverAPI(method, params, onSuccess, onError) {
   }
 
   var destType = _getDestTypeFromMethod(method);
-  _makeJSONAPICall(destType, cwAPIUrls(), method, params, TIMEOUT_FAILOVER_API, onSuccess, onErrorOverride);
+  _makeJSONAPICall(destType, cwAPIUrls(), method, params,
+    cwAPIUrls().length == 1 ? TIMEOUT_FAILOVER_API_SINGLE : TIMEOUT_FAILOVER_API, onSuccess, onErrorOverride);
 }
   
 function multiAPI(method, params, onSuccess, onError) {

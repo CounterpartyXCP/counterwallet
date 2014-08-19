@@ -10,6 +10,7 @@ function WalletViewModel() {
   self.addresses = ko.observableArray(); //AddressViewModel objects -- populated at login
   
   self.isNew = ko.observable(false); //set to true if we can't find the user's prefs when logging on. if set, we'll show some intro text on their login, etc.
+  self.isExplicitlyNew = ko.observable(false); //set to true if the user explicitly clicks on Create New Wallet and makes it (e.g. this may be false and isNew true if the user typed in the wrong passphrase, or manually put the words together)
   self.isSellingBTC = ko.observable(false); //updated by the btcpay feed
   self.isOldWallet = ko.observable(false);
 

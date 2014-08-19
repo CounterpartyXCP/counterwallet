@@ -51,6 +51,7 @@ function WalletCreationViewModel() {
 
   self.createWallet = function() {
     self.hide();
+    WALLET.isExplicitlyNew(true);
     LOGON_VIEW_MODEL.enteredPassphrase(self.generatedPassphrase());
     LOGON_VIEW_MODEL.openWallet();
   }

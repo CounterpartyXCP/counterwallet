@@ -379,6 +379,9 @@
             <h4 class="modal-title">License Agreement</h4>
           </div>
           <div class="modal-body no-padding">
+            <p data-bind="visible: !WALLET.isExplicitlyNew()" class="formPadded bg-warning padding-10">
+                If you are being asked to accept the Terms and Conditions, this is the first time you are opening this
+                wallet. <b>If you are trying to access an old wallet, you have typed the passphrase incorrectly.</b></p>
             <p class="formPadded">You must read and accept the following agreement in order to use this site:</p>
             <form class="smart-form"><fieldset>
               <section><div class="row">
