@@ -26,7 +26,7 @@
 
     <!-- Counterwallet custom styles -->
     <!-- build:css css/counterwallet-min.css -->
-    <link rel="stylesheet" type="text/css" media="screen" href="css/default.css">
+    <link rel="stylesheet" type="text/css" media="screen" href="vendors/counterwebdeps/css/default.css">
     <link rel="stylesheet" type="text/css" media="screen" href="css/overrides.css">
     <link rel="stylesheet" type="text/css" media="screen" href="css/misc.css">
     <link rel="stylesheet" type="text/css" media="screen" href="css/components/logon.css">
@@ -885,7 +885,6 @@
     <script src="vendors/technical-indicators/index.js"></script>
 
     <!-- Other external libraries. -->
-    <script src="js/qrcode.js"></script>  <!-- from http://d-project.googlecode.com/svn/trunk/misc/qrcode/js/ -->
     <script src="vendors/jsdecimal/lib/decimal.js"></script> <!-- for accurate arithmetic price operations -->
     <script src="vendors/select2/select2.min.js"></script> <!-- JQUERY SELECT2 INPUT -->
 
@@ -915,17 +914,22 @@
 
     <!-- COUNTERWALLET JS INCLUDES -->
     <!-- build:js js/counterwallet-min.js --> 
-    <script src="js/consts.js"></script>
-    <script src="js/mnemonic.js"></script>
-    <script src="js/util.bitcore.js"></script>  
+  
+    <!-- counterwebdeps -->
+    <script src="vendors/counterwebdeps/js/external/mnemonic.js"></script>
+    <script src="vendors/counterwebdeps/js/external/qrcode.js"></script>  <!-- from http://d-project.googlecode.com/svn/trunk/misc/qrcode/js/ -->
+    <script src="vendors/counterwebdeps/js/consts.js"></script>
+    <script src="vendors/counterwebdeps/js/util.generic.js"></script>  
+    <script src="vendors/counterwebdeps/js/util.bitcore.js"></script>  
+    <script src="vendors/counterwebdeps/js/util.api.js"></script>
+    <script src="vendors/counterwebdeps/js/util.bitcoin.js"></script>
+    <script src="vendors/counterwebdeps/js/util.knockout.js"></script>
     
+    <!-- counterwallet-specific -->
+    <script src="js/consts.js"></script>
     <script src="js/util.js"></script> 
-    <script src="js/util.api.js"></script>
-    <script src="js/util.bitcoin.js"></script>
-    <script src="js/util.knockout.js"></script>
     <script src="js/counterwallet.js"></script>
     <script src="js/counterblock.js"></script>
-
     <script src="js/messagefeed.js"></script>
     <script src="js/components/wallet.js"></script>
     <script src="js/components/wallet_options.js"></script>
@@ -937,7 +941,6 @@
     <script src="js/components/feed_pending_actions.js"></script>
     <script src="js/components/feed_btcpays.js"></script>
     <script src="js/components/chatfeed.js"></script>
-    
     <script src="js/components/balances.js"></script>
     <script src="js/components/balances_assets.js"></script>
     <script src="js/components/exchange.js"></script>
@@ -954,8 +957,6 @@
 
     <script src="js/pages.init.js"></script>
     <!-- endbuild -->
-
-
 
   </body>
 </html>
