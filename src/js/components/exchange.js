@@ -134,9 +134,15 @@ function ExchangeViewModel() {
   ********************************************/
 
   self.highestBidPrice = ko.observable();
-  self.sellPrice = ko.observable();
+  self.sellPrice = ko.observable(0).extend({
+    required: true,
+    isValidPositiveQuantity: self
+  });
   self.sellAmount = ko.observable(0);
-  self.sellTotal = ko.observable(0);
+  self.sellTotal = ko.observable(0).extend({
+    required: true,
+    isValidPositiveQuantity: self
+  });
   self.sellPriceHasFocus = ko.observable();
   self.sellAmountHasFocus = ko.observable();
   self.sellTotalHasFocus = ko.observable();
@@ -215,7 +221,9 @@ function ExchangeViewModel() {
   });
 
   self.sellValidation = ko.validatedObservable({
-    sellAmount: self.sellAmount
+    sellAmount: self.sellAmount,
+    sellPrice: self.sellPrice,
+    sellTotal: self.sellTotal
   });
 
   self.sellFee = ko.computed(function() {
@@ -366,8 +374,14 @@ function ExchangeViewModel() {
   ********************************************/
 
   self.lowestAskPrice = ko.observable();
-  self.buyPrice = ko.observable();
-  self.buyAmount = ko.observable(0);
+  self.buyPrice = ko.observable(0).extend({
+    required: true,
+    isValidPositiveQuantity: self
+  });
+  self.buyAmount = ko.observable(0).extend({
+    required: true,
+    isValidPositiveQuantity: self
+  });
   self.buyTotal = ko.observable(0);
   self.buyPriceHasFocus = ko.observable();
   self.buyAmountHasFocus = ko.observable();
@@ -446,7 +460,9 @@ function ExchangeViewModel() {
   });
 
   self.buyValidation = ko.validatedObservable({
-    buyTotal: self.buyTotal
+    buyTotal: self.buyTotal,
+    buyPrice: self.buyPrice,
+    buyAmount: self.buyAmount
   });
 
   self.buyFee = ko.computed(function() {

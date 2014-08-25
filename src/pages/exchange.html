@@ -307,6 +307,7 @@
                         <td>Price</td>
                         <td>
                           <input type="text" class="form-control input-sm number" type="text" data-bind="value: buyPrice, hasFocus: buyPriceHasFocus, valueUpdate: 'input', enable: availableBalanceForBuy() > 0"/>
+                          <span class="invalid text-danger" data-bind="validationMessage: buyPrice"></span>
                         </td> 
                         <td data-bind="text: quoteAsset + '/' + baseAsset"></td>
                       </tr>
@@ -314,6 +315,7 @@
                         <td>Amount</td>
                         <td>
                           <input type="text" class="form-control input-sm number" type="text" data-bind="value: buyAmount, hasFocus: buyAmountHasFocus, valueUpdate: 'input', enable: availableBalanceForBuy() > 0"/>
+                          <span class="invalid text-danger" data-bind="validationMessage: buyAmount"></span>
                         </td> 
                         <td data-bind="text: baseAsset"></td>
                       </tr>
@@ -381,6 +383,7 @@
                         <td>Price</td>
                         <td>
                           <input type="text" class="form-control input-sm number" type="text" data-bind="value: sellPrice, hasFocus: sellPriceHasFocus, valueUpdate: 'input', enable: availableBalanceForSell() > 0"/>
+                          <span class="invalid text-danger" data-bind="validationMessage: sellPrice"></span>
                         </td> 
                         <td data-bind="text: quoteAsset + '/' + baseAsset"></td>
                       </tr>
@@ -396,6 +399,7 @@
                         <td>Total</td>
                         <td>
                           <input type="text" class="form-control input-sm number" type="text" data-bind="value: sellTotal, hasFocus: sellTotalHasFocus, valueUpdate: 'input', enable: availableBalanceForSell() > 0"/>
+                          <span class="invalid text-danger" data-bind="validationMessage: sellTotal"></span>
                         </td> 
                         <td data-bind="text: quoteAsset"></td>
                       </tr>
