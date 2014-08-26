@@ -205,7 +205,11 @@ function ExchangeViewModel() {
 
   self.sellTotal.subscribe(function(total) {
     if (!self.sellTotalHasFocus() || !self.sellPrice()) return;
-    self.sellAmount(noExponents(divFloat(total, self.sellPrice())));
+    if (total == 0) {
+      self.sellAmount(0);
+    } else {
+      self.sellAmount(noExponents(divFloat(total, self.sellPrice())));
+    }
   })
 
   self.sellAmount.extend({
@@ -428,7 +432,11 @@ function ExchangeViewModel() {
     var bal = self.balances[value + '_' + self.quoteAsset()];
     self.availableBalanceForBuy(bal);
     if (self.lowestAskPrice()) {
-      self.obtainableForBuy(divFloat(bal, self.lowestAskPrice()));  
+      if (bal == 0) {
+        self.obtainableForBuy(0);
+      } else {
+        self.obtainableForBuy(divFloat(bal, self.lowestAskPrice()));
+      }
     }
   })
 
@@ -444,7 +452,11 @@ function ExchangeViewModel() {
 
   self.buyTotal.subscribe(function(total) {
     if (!self.buyTotalHasFocus() || !self.buyPrice()) return;
-    self.buyAmount(noExponents(divFloat(total, self.buyPrice())));
+    if (total == 0) {
+      self.buyAmount(0);
+    } else {
+      self.buyAmount(noExponents(divFloat(total, self.buyPrice())));
+    }
   })
 
   self.buyTotal.extend({
@@ -498,7 +510,12 @@ function ExchangeViewModel() {
     var total = self.availableBalanceForBuy();
     self.buyTotal(total);
     if (self.buyPrice()) {
-      self.buyAmount(divFloat(total, self.buyPrice()));
+      if (total==0) {
+        self.buyAmount(0);
+      } else {
+        self.buyAmount(divFloat(total, self.buyPrice()));
+      }
+      
     } 
   }
 
