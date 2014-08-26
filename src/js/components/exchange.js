@@ -271,7 +271,7 @@ function ExchangeViewModel() {
     var get_quantity = denormalizeQuantity(self.sellTotal(), self.quoteAssetIsDivisible());
     var fee_required = 0;
     var fee_provided = MIN_FEE;
-    var expiration = ORDER_DEFAULT_EXPIRATION;
+    var expiration = parseInt(WALLET_OPTIONS_MODAL.orderDefaultExpiration());
 
     if (self.quoteAsset() == 'BTC') {
       fee_required = mulFloat(get_quantity, WALLET_OPTIONS_MODAL.defaultBTCFeeRequiredPct()/100);
@@ -281,7 +281,7 @@ function ExchangeViewModel() {
     if (self.baseAsset() == 'BTC') {
       fee_provided = mulFloat(give_quantity, WALLET_OPTIONS_MODAL.defaultBTCFeeProvidedPct()/100);
       fee_provided = Math.ceil(fee_provided);
-      expiration = ORDER_BTCSELL_DEFAULT_EXPIRATION;
+      expiration = parseInt(WALLET_OPTIONS_MODAL.orderBTCSellDefaultExpiration());
     }
 
     var params = {
@@ -524,7 +524,7 @@ function ExchangeViewModel() {
     var get_quantity = denormalizeQuantity(self.buyAmount(), self.baseAssetIsDivisible());
     var fee_required = 0;
     var fee_provided = MIN_FEE;
-    var expiration = ORDER_DEFAULT_EXPIRATION;
+    var expiration = parseInt(WALLET_OPTIONS_MODAL.orderDefaultExpiration());
 
     if (self.baseAsset() == 'BTC') {
       fee_required = mulFloat(get_quantity, WALLET_OPTIONS_MODAL.defaultBTCFeeRequiredPct()/100);
@@ -534,7 +534,7 @@ function ExchangeViewModel() {
     if (self.quoteAsset() == 'BTC') {
       fee_provided = mulFloat(give_quantity, WALLET_OPTIONS_MODAL.defaultBTCFeeProvidedPct()/100);
       fee_provided = Math.ceil(fee_provided);
-      expiration = ORDER_BTCSELL_DEFAULT_EXPIRATION;
+      expiration = parseInt(WALLET_OPTIONS_MODAL.orderBTCSellDefaultExpiration());
     }
 
     var params = {

@@ -497,7 +497,7 @@
     </div><!-- /.modal -->
     
     <!-- modal for options window (in logged in interface) -->
-    <div data-bind="showModal: shown" id="walletOptionsModal" class="modal fade" data-backdrop="static" data-keyboard="false" tabindex="-1" role="dialog" aria-labelledby="walletOptionsModal" aria-hidden="true">
+    <div data-bind="showModal: shown" id="walletOptionsModal" class="modal fade" data-backdrop="static" data-keyboard="false" tabindex="-1" role="dialog" aria-labelledby="walletOptionsModal" aria-hidden="true" data-bind="validationOptions: { insertMessages: false }">
       <div class="modal-dialog">
         <div class="modal-content">
           <div class="modal-header">
@@ -578,6 +578,21 @@
                 <div class="col col-sm-3">
                   <label class="input">
                     <input class="prefFieldPercent" name="maxBTCFeeRequiredPct" type="text" data-bind="value: maxBTCFeeRequiredPct">%
+                  </label>
+              </div></section>
+
+              <section data-bind="visible: showAdvancedOptions"><div class="row">
+                <div class="col col-sm-3">Orders default expiration</div>
+                <div class="col col-sm-3">
+                  <label class="input">
+                    <input class="prefFieldPercent" name="orderDefaultExpiration" type="text" data-bind="value: orderDefaultExpiration">
+                  </label>
+                  <span class="invalid text-danger" data-bind="validationMessage: orderDefaultExpiration"></span>
+                </div>
+                <div class="col col-sm-3">Sell BTC Orders default expiration</div>
+                <div class="col col-sm-3">
+                  <label class="input">
+                    <input class="prefFieldPercent" name="orderBTCSellDefaultExpiration" type="text" data-bind="value: orderBTCSellDefaultExpiration">
                   </label>
                 </div>
               </div></section>

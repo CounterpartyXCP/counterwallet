@@ -36,12 +36,30 @@ function WalletOptionsModalViewModel() {
   self.defaultBTCFeeProvidedPct = ko.observable(FEE_FRACTION_PROVIDED_DEFAULT_PCT).extend(pctValidator);
   self.defaultBTCFeeRequiredPct = ko.observable(FEE_FRACTION_REQUIRED_DEFAULT_PCT).extend(pctValidator);
 
+  self.orderDefaultExpiration = ko.observable(ORDER_DEFAULT_EXPIRATION).extend({
+    required: true,
+    isValidPositiveInteger: self
+  });
+  self.orderBTCSellDefaultExpiration = ko.observable(ORDER_BTCSELL_DEFAULT_EXPIRATION).extend({
+    required: true,
+    isValidPositiveInteger: self
+  });
+
   self.showAdvancedOptions = ko.observable(false);
   self.urlPassword = ko.observable('');
   self.walletUrl = ko.computed(function() {
     if (self.urlPassword().length > 0 && WALLET.BITCOIN_WALLET) {
       return WALLET.BITCOIN_WALLET.getQuickUrl(self.urlPassword());
     }
+  });
+
+  self.advancedOptionValidation = ko.validatedObservable({
+    minBTCFeeProvidedPct: self.minBTCFeeProvidedPct,
+    maxBTCFeeRequiredPct: self.maxBTCFeeRequiredPct,
+    defaultBTCFeeProvidedPct: self.defaultBTCFeeProvidedPct,
+    defaultBTCFeeRequiredPct: self.defaultBTCFeeRequiredPct,
+    orderDefaultExpiration: self.orderDefaultExpiration,
+    orderBTCSellDefaultExpiration: self.orderBTCSellDefaultExpiration
   });
   
   self.dispMyCookiePresent = ko.computed(function() {
