@@ -1,8 +1,8 @@
 <div class="row">
   <div class="col-xs-12 col-sm-7 col-md-7 col-lg-4">
     <h1 class="page-title txt-color-blueDark">
-      <i class="fa fa-user fa-fw "></i> 
-        My Account Balances 
+      <i class="fa fa-user fa-fw "></i>
+        My Account Balances
     </h1>
   </div>
   <div class="pull-right sectionHeaderButtonBar">
@@ -37,7 +37,7 @@
             </li>
         </ul>
     </div>
-    
+
     <button id="balanceHelp" type="button" class="btn btn-success"><i class="fa fa-question-circle"></i>&nbsp;Page Help</button>
   </div>
 </div>
@@ -64,7 +64,7 @@
     send funds to). <span data-bind="visible: USE_TESTNET">Note that, on testnet, you can use a
     <b><a href="https://en.bitcoin.it/wiki/Bitcoin_faucet" target="_blank">Testnet faucet</a> to get BTC to start with</b>.</span>
     <br/><br/>
-    
+
     One important thing to know before getting started is that when you perform an action in Counterwallet (i.e. place
     an order, create a token, etc), <b>it doesn't take effect immediately as it must first be confirmed on the Bitcoin blockchain</b>.
     Counterwallet lets you know this by displaying your actions under the <b>Pending Actions</b> panel (the Clock icon on the top bar), and then moving
@@ -93,22 +93,22 @@
             </h3>
             <div class="widget-toolbar">
               <div class="btn-group btn-group-dropup">
-                <button class="btn dropdown-toggle btn-xs btn-primary" data-toggle="dropdown"><i class="fa fa-bars"></i> Address Actions <i class="fa fa-caret-down"></i></button>                
+                <button class="btn dropdown-toggle btn-xs btn-primary" data-toggle="dropdown"><i class="fa fa-bars"></i> Address Actions <i class="fa fa-caret-down"></i></button>
                 <ul class="dropdown-menu pull-right">
                   <li><a data-bind="click: showQRCode" href="#">Show QR Code</a></li>
                   <li data-bind="visible: IS_NORMAL"><a data-bind="click: showPrivateKey" href="#">Show Private Key</a></li>
-                  <li data-bind="visible: IS_NORMAL"><a data-bind="click: signMessage" href="#">Sign Message</a></li>  
-                  <li data-bind="visible: IS_NORMAL"><a data-bind="click: signTransaction" href="#">Sign Transaction</a></li>               
-                  <li data-bind="visible: IS_ARMORY_OFFLINE"><a data-bind="click: armoryBroadcastTransaction" href="#">Broadcast Transaction</a></li>               
+                  <li data-bind="visible: IS_NORMAL"><a data-bind="click: signMessage" href="#">Sign Message</a></li>
+                  <li data-bind="visible: IS_NORMAL"><a data-bind="click: signTransaction" href="#">Sign Transaction</a></li>
+                  <li data-bind="visible: IS_ARMORY_OFFLINE"><a data-bind="click: armoryBroadcastTransaction" href="#">Broadcast Transaction</a></li>
                   <li data-bind="visible: !IS_NORMAL"><a data-bind="click: remove" href="#">Remove Address</a></li>
-                  
+
                   <li class="menu-item dropdown dropdown-submenu">
                     <a href="#" class="dropdown-toggle" data-toggle="dropdown">Sort By</a>
                         <ul class="dropdown-menu">
                           <li><a data-bind="click: sortAssetsByName" href="#">Name</a></li>
                           <li><a data-bind="click: sortAssetsByBalance" href="#">Balance</a></li>
                         </ul>
-                  </li>                  
+                  </li>
                   <li class="menu-item dropdown dropdown-submenu">
                     <a href="#" class="dropdown-toggle" data-toggle="dropdown">Filter By</a>
                         <ul class="dropdown-menu">
@@ -117,19 +117,19 @@
                           <li><a data-bind="click: showMyAssetsOnly" href="#">Show My Tokens Only</a></li>
                           <li><a data-bind="click: showOthersAssetsOnly" href="#">Show Other Tokens Only</a></li>
                         </ul>
-                  </li>                  
+                  </li>
 
-                  <li class="divider"></li><li class="dropdown-header">Issuance...</li>                 
-                  <li data-bind="visible: !IS_WATCH_ONLY"><a data-bind="click: createAsset" href="#">Create a Token (Asset)</a></li>                
+                  <li class="divider"></li><li class="dropdown-header">Issuance...</li>
+                  <li data-bind="visible: !IS_WATCH_ONLY"><a data-bind="click: createAsset" href="#">Create a Token (Asset)</a></li>
                   <li data-bind="visible: !IS_WATCH_ONLY && FEATURE_DIVIDEND"><a data-bind="click: payDividend" href="#">Pay Distribution</a></li>
 
-                  <li class="divider"></li><li class="dropdown-header">Betting...</li>  
+                  <li class="divider"></li><li class="dropdown-header">Betting...</li>
                   <li data-bind="visible: !IS_WATCH_ONLY"><a data-bind="click: broadcast" href="#">Feed Broadcast</a></li>
                 </ul>
               </div>
             </div>
-            <div class="widget-toolbar"><span id="" data-bind="attr: {'id': 'address-text-' + ADDRESS}, click: selectAddressText, text: ADDRESS"></span></div>
-            <div class="clearfix"></div>  
+            <div class="widget-toolbar display-address"><span id="" data-bind="attr: {'id': 'address-text-' + ADDRESS}, click: selectAddressText, text: ADDRESS"></span></div>
+            <div class="clearfix"></div>
           </header>
           <div> <!-- widget div-->
             <div class="widget-body" data-bind="attr: {'id': 'address-balances-' + ADDRESS}, foreach: filteredAssets"> <!-- widget content -->
@@ -143,7 +143,7 @@
                     <li data-bind="visible: !$parent.IS_WATCH_ONLY && isMine() && !locked()"><a data-bind="click: issueAdditional" href="#">Issue Additional</a></li>
                     <li data-bind="visible: !$parent.IS_WATCH_ONLY && isMine()"><a data-bind="click: transfer" href="#">Transfer Ownership</a></li>
                     <li data-bind="visible: !$parent.IS_WATCH_ONLY && isMine() && !locked()"><a data-bind="click: lock" href="#">Lock Token Issuance</a></li>
-                    <li data-bind="visible: !$parent.IS_WATCH_ONLY && isMine()"><a data-bind="click: changeDescription" href="#">Change Token Description</a></li>    
+                    <li data-bind="visible: !$parent.IS_WATCH_ONLY && isMine()"><a data-bind="click: changeDescription" href="#">Change Token Description</a></li>
                     <li data-bind="visible: !$parent.IS_WATCH_ONLY && isMine() && CALLABLE"><a data-bind="click: call" href="#">Call</a></li>
                   </ul>
                 </div>
@@ -154,7 +154,7 @@
                         <span data-bind="visible: issuanceQtyChangePending" title="Quantity issued change pending">
                             <i class="icon-append fa fa-spinner fa-spin"></i></span>
                     </span><br/>
-                    Bal: <span data-bind="html: dispBalance"></span> 
+                    Bal: <span data-bind="html: dispBalance"></span>
                     <span data-bind="html: dispEscrowedBalance"></span>
                     <span data-bind="visible: balanceChangePending"
                         title="Balance change pending"><i class="icon-append fa fa-spinner fa-spin"></i></span></p>
@@ -185,7 +185,7 @@
         <div class="formPadded">
             <p>Enter the new label (or, nickname) for your address <b class="notoAddressColor"><span data-bind="text: address()"></span></b>.</p>
         </div>
-        
+
         <form class="smart-form" data-bind="submit: doAction"><fieldset>
           <section><div class="row">
             <label class="control-label col col-sm-2">Label</label>
@@ -225,7 +225,7 @@
         <div data-bind="visible: addressType() == 'armory'">
             <p class="formPadded">Please enter the info for the address you would like to add into your wallet as an Offline Armory address.</p>
         </div>
-        
+
         <form class="smart-form" data-bind="submit: doAction"><fieldset>
           <section data-bind="visible: addressType() != 'normal'"><div class="row">
             <label class="control-label col col-sm-2">Address</label>
@@ -268,7 +268,7 @@
         You have <b><span class="buyColor" data-bind="text: dispNormalizedBalance"></span> <span class="buyColor" data-bind="text: asset"></span></b>
         available to send from this address.
         </p>
-        
+
         <form class="smart-form" data-bind="submit: doAction"><fieldset>
           <section><div class="row">
             <label class="control-label col col-sm-2">Send To</label>
@@ -321,9 +321,9 @@
             <span data-bind="visible: !fromOldWallet">Import token funds by "sweeping" them from an external address into an address in this wallet.</span>
             <span data-bind="visible: fromOldWallet">Transition to your new wallet by sweeping over the token funds from your old wallet.</span>
         </p>
-        
+
         <form class="smart-form" data-bind="submit: doAction, visible: sweepingProgressionMessage()==''"><fieldset>
-          
+
           <section data-bind="visible: !fromOldWallet"><div class="row">
             <label class="control-label col col-sm-12">Private Key To Import</label>
             <div class="col col-sm-12">
@@ -381,7 +381,7 @@
               <div id="sweepingProgressBar" class="progress-bar"  role="progressbar" data-bind="style: { width: sweepingProgressWidth() }">
               </div>
             </div>
-          </div></section>  
+          </div></section>
         <fieldset>
       </div>
       <div class="modal-footer" data-bind="visible: sweepingProgressionMessage()==''">
@@ -403,7 +403,7 @@
       </div>
       <div class="modal-body no-padding">
         <p class="formPadded">Sign a message from address <b data-bind="text: address"></b>.</p>
-        
+
         <form class="smart-form" data-bind="submit: doAction"><fieldset>
           <section><div class="row">
             <label class="control-label col col-sm-2">Message to Sign</label>
@@ -414,7 +414,7 @@
                 <div class="note">Enter the message text to be signed.</div>
             </div>
           </div></section>
-          
+
           <section><div class="row">
             <label class="control-label col col-sm-2">Message Format</label>
             <div class="col col-sm-10">
@@ -428,7 +428,7 @@
               </label>
             </div>
           </div></section>
-          
+
           <section><div class="row">
             <label class="control-label col col-sm-2">Signed Message</label>
             <div class="col col-sm-10">
@@ -498,7 +498,7 @@
       <div class="modal-body no-padding">
         <div class="formPadded">
             <div class="alert alert-warning"><i class="fa-fw fa fa-info"></i>Please make sure nobody can look over your shoulder or see your screen.</div>
-        
+
             <center>
                 <a href="#" class="font-lg" data-bind="visible: !privateKeyText(), click: displayPrivateKey">Show Private Key</a>
                 <span class="font-medlg" data-bind="visible: privateKeyText, text: privateKeyText"></span>
@@ -524,7 +524,7 @@
       <div class="modal-body no-padding">
         <p class="formPadded">Please note that a <b class="notoQuantityColor"><span data-bind="text: ASSET_CREATION_FEE_XCP"></span></b>
         <b class="notoAssetColor">XCP</b> fee will be deducted from your balance upon successful creation.</p>
-        
+
         <form class="smart-form" data-bind="submit: doAction"><fieldset>
           <section><div class="row">
             <label class="control-label col col-sm-2">For Address</label>
@@ -557,7 +557,7 @@
             <label class="control-label col col-sm-2">Quantity</label>
             <div class="col col-sm-10">
                 <label class="input"><i class="icon-append fa fa-plus"></i>
-                    <input name="assetQuantity"  data-bind="value: quantity, valueUpdate: 'input'" type="text"/>                        
+                    <input name="assetQuantity"  data-bind="value: quantity, valueUpdate: 'input'" type="text"/>
                 </label>
                 <div class="note">How many of the units of the token to issue (can be increased later).</div>
             </div>
@@ -580,7 +580,7 @@
               </label>
               <div class="note">Callable token may be called back at a specific date for a specific strike price.</div>
           </div></section>
-          <section data-bind="fadeVisibleInOnly: callable"><div class="row">                
+          <section data-bind="fadeVisibleInOnly: callable"><div class="row">
             <label class="control-label col col-sm-2">Call Date</label>
             <div class="col col-sm-10">
                 <label class="input">
@@ -589,7 +589,7 @@
                 <div class="note">The date and time after which the owner of the token may choose to call it back.</div>
             </div>
           </div></section>
-          <section data-bind="fadeVisibleInOnly: callable"><div class="row">                
+          <section data-bind="fadeVisibleInOnly: callable"><div class="row">
             <label class="control-label col col-sm-2">Call Price</label>
             <div class="col col-sm-10">
                 <label class="input">
@@ -598,7 +598,7 @@
                 <div class="note">The <b>XCP price per unit</b> that the owner of the token may call it back for.</div>
             </div>
           </div></section>
-        </fieldset></form>                    
+        </fieldset></form>
       </div>
       <div class="modal-footer">
         <button type="button" class="btn btn-default" data-bind="click: hide">Cancel</button>
@@ -622,7 +622,7 @@
        the quantity as a whole or floating point number, not in satoshis -- e.g. '732.45')</i><br/><br/>
        There are currently <b class="buyColor" data-bind="text: dispTotalIssued"></b> units of this token issued.<br/><br/>
        <b class="errorRed">Please NOTE that this action is irreversable!</b></p>
-        
+
         <form class="smart-form" data-bind="submit: doAction"><fieldset>
           <section><div class="row">
             <label class="control-label col col-sm-2">Additional Qty</label>
@@ -654,7 +654,7 @@
         <p class="formPadded">Enter the <b>Bitcoin address</b> you would like to perminently transfer ownership of this token to.
             (Be aware that this will not transfer the actual units of this token that you own to this address -- you can do that with a separate Send transaction.)
             <br/><br/><b class="errorRed">Please NOTE that this action is irreversable!</b></p>
-        
+
         <form class="smart-form" data-bind="submit: doAction"><fieldset>
           <section><div class="row">
             <label class="control-label col col-sm-2">Transfer To</label>
@@ -688,7 +688,7 @@
             <p>The token's current description is: <b><span data-bind="text: dispAssetDescription"></span></b></p>
             <p>Enter the new description for this token<span data-bind="html: dispCharactersRemaining"></span>:</p>
         </div>
-        
+
         <form class="smart-form" data-bind="submit: doAction"><fieldset>
           <section><div class="row">
             <label class="control-label col col-sm-2">Description</label>
@@ -741,7 +741,7 @@
             <div class="col col-sm-10">
                 <label class="input">
                     <select id="selectedDividendAsset" class="width-max" data-bind="options: availableDividendAssets, optionsValue: 'ASSET', optionsText: 'SELECT_LABEL', select2: { minimumResultsForSearch: 10, escapeMarkup: 'direct' }, value: selectedDividendAsset"></select>
-                </label>                    
+                </label>
                 <div class="note">The token in which the distribution is paid.</div>
             </div>
           </div></section>
@@ -756,7 +756,7 @@
           </div></section>
         </fieldset></form>
         <div class="formPaddedBot" data-bind="fadeVisibleInOnly: quantityPerUnit() && selectedDividendAsset() && totalPay()">
-            <p>This distribution payment would cost you a total of 
+            <p>This distribution payment would cost you a total of
             <b class="sellColor"><span data-bind="text: dispTotalPay"></span> <span data-bind="text: selectedDividendAsset"></span></b>.</p>
             <p>After distribution payment this address would have a remaining balance of
             <b data-bind="css: {errorColor: dividendAssetBalRemainingPostPay() < 0, sellColor: dividendAssetBalRemainingPostPay() >= 0}">
@@ -858,7 +858,7 @@
             <label class="control-label col col-sm-2">Total Issued</label>
             <div class="col col-sm-10">
                 <label class="input"><i class="icon-append fa fa-plus"></i>
-                    <input name="assetQuantity"  data-bind="value: dispTotalIssued" type="text" disabled="disabled"/>                        
+                    <input name="assetQuantity"  data-bind="value: dispTotalIssued" type="text" disabled="disabled"/>
                 </label>
             </div>
           </div></section>
@@ -909,7 +909,7 @@
               </label>
               <div class="note">Callable tokens may be called back at a specific date for a specific strike price.</div>
           </div></section>
-          <section data-bind="visible: callable"><div class="row">                
+          <section data-bind="visible: callable"><div class="row">
             <label class="control-label col col-sm-2">Call Date</label>
             <div class="col col-sm-10">
                 <label class="input">
@@ -918,7 +918,7 @@
                 <div class="note">The date and time after which the owner of the token may choose to call it back.</div>
             </div>
           </div></section>
-          <section data-bind="fadeVisibleInOnly: callable"><div class="row">                
+          <section data-bind="fadeVisibleInOnly: callable"><div class="row">
             <label class="control-label col col-sm-2">Call Price</label>
             <div class="col col-sm-10">
                 <label class="input">
@@ -975,7 +975,7 @@
             </div>
           </div></section>
 
-           <section><div class="row">                
+           <section><div class="row">
             <label class="control-label col col-sm-2">Value</label>
             <div class="col col-sm-10">
                 <label class="input"><i class="icon-append fa fa-plus"></i>
@@ -995,7 +995,7 @@
             </div>
           </div></section>
 
-          <section><div class="row">                
+          <section><div class="row">
             <label class="control-label col col-sm-2">Broadcast Date</label>
             <div class="col col-sm-10">
                 <label class="input">
@@ -1026,7 +1026,7 @@
       </div>
       <div class="modal-body no-padding">
         <p class="formPadded">Sign a transaction with address <b data-bind="text: address"></b>.</p>
-        
+
         <form class="smart-form"><fieldset>
           <section><div class="row">
             <label class="control-label col col-sm-2">Unsigned hex transaction to Sign</label>
@@ -1037,7 +1037,7 @@
                 <div class="note">Enter the raw transaction to be signed.</div>
             </div>
           </div></section>
-          
+
           <section><div class="row">
             <label class="control-label col col-sm-2">Signed Transaction</label>
             <div class="col col-sm-10">
