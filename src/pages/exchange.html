@@ -278,69 +278,94 @@
             <div class="clearfix"></div>
         </header>
         <div> <!-- widget div-->
-            <div class="widget-body no-padding buyForm"> <!-- widget content -->
-
+          <div class="widget-body no-padding buyForm"> <!-- widget content -->
+            <form class="form-horizontal">
+              <div class="table-responsive">
                 <table class="table buySellForm">
                   <tbody>
-                      <tr>
-                        <td>Address</td>
-                        <td colspan="2">
-                          <select id="buyFromAddress" data-bind="options: availableAddressesForBuy, optionsValue: 'ADDRESS', optionsText: 'SELECT_LABEL', select2: {  minimumResultsForSearch: 10, escapeMarkup: 'direct' }, value: selectedAddressForBuy" style="width:250px"></select>
-                        </td>
-                      </tr>
-                      <tr class="bold">
-                        <td>Your balance</td>
-                        <td data-bind="text: availableBalanceForBuy, click: setMaxBuyAmount" style="cursor:pointer" class="number"></td>
-                        <td data-bind="text: quoteAsset"></td>
-                      </tr>
-                      <tr>
-                        <td>Lowest ask price</td>
-                        <td data-bind="text:lowestAskPrice" style="width:270px" class="number"></td>
-                        <td data-bind="text: quoteAsset + '/' + baseAsset"></td>
-                      </tr>
-                      <tr>
-                        <td>Obtainable</td>
-                        <td data-bind="text: obtainableForBuy" class="number"></td>
-                        <td data-bind="text: baseAsset"></td>
-                      </tr>
-                      <tr>
-                        <td>Price</td>
-                        <td>
+                    <tr>
+                      <td colspan="2">
+                      <div class="form-group">
+                        <label class="control-label col-xs-2">Address</label>
+                        <div class="col-xs-10">
+                          <select id="buyFromAddress" data-bind="options: availableAddressesForBuy, optionsValue: 'ADDRESS', optionsText: 'SELECT_LABEL', select2: {  minimumResultsForSearch: 10, escapeMarkup: 'direct' }, value: selectedAddressForBuy" style="width:100%;"></select>
+                        </div>
+                      </div></td>
+                      <td></td>
+                    </tr>
+                    <tr class="bold">
+                      <td colspan="2">
+                      <div class="form-group">
+                        <label class="control-label nopad col-xs-6">Your balance</label>
+                        <div class="col-xs-6 number" data-bind="text: availableBalanceForBuy, click: setMaxBuyAmount" style="cursor:pointer"></div>
+                      </div></td>
+                      <td data-bind="text: quoteAsset"></td>
+                    </tr>
+                    <tr>
+                      <td colspan="2">
+                      <div class="form-group">
+                        <label class="control-label nopad col-xs-6">Lowest ask price</label>
+                        <div class="col-xs-6 number" data-bind="text:lowestAskPrice"></div>
+                      </div></td>
+                      <td data-bind="text: quoteAsset + '/' + baseAsset"></td>
+                    </tr>
+                    <tr>
+                      <td colspan="2">
+                      <div class="form-group">
+                        <label class="control-label nopad col-xs-6">Obtainable</label>
+                        <div class="col-xs-6 number" data-bind="text: obtainableForBuy"></div>
+                      </div></td>
+                      <td data-bind="text: baseAsset"></td>
+                    </tr>
+                    <tr>
+                      <td colspan="2">
+                      <div class="form-group">
+                        <label class="control-label col-xs-2">Price</label>
+                        <div class="col-xs-10">
                           <input type="text" class="form-control input-sm number" type="text" data-bind="value: buyPrice, hasFocus: buyPriceHasFocus, valueUpdate: 'input', enable: availableBalanceForBuy() > 0"/>
                           <span class="invalid text-danger" data-bind="validationMessage: buyPrice"></span>
-                        </td>
-                        <td data-bind="text: quoteAsset + '/' + baseAsset"></td>
-                      </tr>
-                      <tr>
-                        <td>Amount</td>
-                        <td>
+                        </div>
+                      </div></td>
+                      <td data-bind="text: quoteAsset + '/' + baseAsset"></td>
+                    </tr>
+                    <tr>
+                      <td colspan="2">
+                      <div class="form-group">
+                        <label class="control-label col-xs-2">Amount</label>
+                        <div class="col-xs-10">
                           <input type="text" class="form-control input-sm number" type="text" data-bind="value: buyAmount, hasFocus: buyAmountHasFocus, valueUpdate: 'input', enable: availableBalanceForBuy() > 0"/>
                           <span class="invalid text-danger" data-bind="validationMessage: buyAmount"></span>
-                        </td>
-                        <td data-bind="text: baseAsset"></td>
-                      </tr>
-                      <tr>
-                        <td>Total</td>
-                        <td>
+                        </div>
+                      </div></td>
+                      <td data-bind="text: baseAsset"></td>
+                    </tr>
+                    <tr>
+                      <td colspan="2">
+                      <div class="form-group">
+                        <label class="control-label col-xs-2">Total</label>
+                        <div class="col-xs-10">
                           <input type="text" class="form-control input-sm number" type="text" data-bind="value: buyTotal, hasFocus: buyTotalHasFocus, valueUpdate: 'input', enable: availableBalanceForBuy() > 0"/>
                           <span class="invalid text-danger" data-bind="validationMessage: buyTotal"></span>
-                        </td>
-                        <td data-bind="text: quoteAsset"></td>
-                      </tr>
-                      <tr>
-                        <td>Fee</td>
-                        <td class="number" data-bind="text: buyFee"></td>
-                        <td>BTC</td>
-                      </tr>
-                      <tr>
-                        <td colspan="3" style="text-align:center">
-                          <a id="buyButton" class="btn btn-default btn-lg" data-bind="click: buy">Buy (<span data-bind="text: quoteAsset + '→' + baseAsset"></span>)</a>
-                        </td>
-                      </tr>
+                        </div>
+                      </div></td>
+                      <td data-bind="text: quoteAsset"></td>
+                    </tr>
+                    <tr>
+                      <td colspan="2">
+                      <div class="form-group">
+                        <label class="control-label nopad col-xs-6">Fee</label>
+                        <div class="col-xs-6 number" data-bind="text: buyFee"></div>
+                      </div></td>
+                      <td>BTC</td>
+                    </tr>
+                    <tr>
+                      <td colspan="3" style="text-align:center"><a id="buyButton" class="btn btn-default btn-lg" data-bind="click: buy">Buy (<span data-bind="text: quoteAsset + '→' + baseAsset"></span>)</a></td>
+                    </tr>
                   </tbody>
                 </table>
-
-            </div> <!-- end widget content -->
+              </div>
+            </form>
+          </div> <!-- end widget content -->
         </div> <!-- end widget div -->
       </div> <!-- end widget -->
     </article> <!-- WIDGET END -->
@@ -354,69 +379,94 @@
             <div class="clearfix"></div>
         </header>
         <div> <!-- widget div-->
-            <div class="widget-body no-padding sellForm"> <!-- widget content -->
-
+          <div class="widget-body no-padding sellForm"> <!-- widget content -->
+            <form class="form-horizontal">
+              <div class="table-responsive">
                 <table class="table buySellForm">
                   <tbody>
-                      <tr>
-                        <td>Address</td>
-                        <td colspan="2">
-                          <select id="sellFromAddress" data-bind="options: availableAddressesForSell, optionsValue: 'ADDRESS', optionsText: 'SELECT_LABEL', select2: {  minimumResultsForSearch: 10, escapeMarkup: 'direct' }, value: selectedAddressForSell, enable: availableBalanceForSell() > 0" style="width:250px"></select>
-                        </td>
-                      </tr>
-                      <tr class="bold">
-                        <td>Your balance</td>
-                        <td data-bind="text: availableBalanceForSell, click: setMaxSellAmount" style="cursor:pointer" class="number"></td>
-                        <td data-bind="text: baseAsset"></td>
-                      </tr>
-                      <tr>
-                        <td>Highest bid price</td>
-                        <td data-bind="text:highestBidPrice" style="width:270px" class="number"></td>
-                        <td data-bind="text: quoteAsset + '/' + baseAsset"></td>
-                      </tr>
-                      <tr>
-                        <td>Obtainable</td>
-                        <td data-bind="text: obtainableForSell" class="number"></td>
-                        <td data-bind="text: quoteAsset"></td>
-                      </tr>
-                      <tr>
-                        <td>Price</td>
-                        <td>
+                    <tr>
+                      <td colspan="2">
+                      <div class="form-group">
+                        <label class="control-label col-xs-2">Address</label>
+                        <div class="col-xs-10">
+                          <select style="width: 100%;" id="sellFromAddress" data-bind="options: availableAddressesForSell, optionsValue: 'ADDRESS', optionsText: 'SELECT_LABEL', select2: {  minimumResultsForSearch: 10, escapeMarkup: 'direct' }, value: selectedAddressForSell, enable: availableBalanceForSell() > 0"></select>
+                        </div>
+                      </div></td>
+                      <td></td>
+                    </tr>
+                    <tr class="bold">
+                      <td colspan="2">
+                      <div class="form-group">
+                        <label class="control-label nopad col-xs-6">Your balance</label>
+                        <div class="col-xs-6 number" data-bind="text: availableBalanceForSell, click: setMaxSellAmount" style="cursor:pointer" class="number"></div>
+                      </div></td>
+                      <td data-bind="text: baseAsset"></td>
+                    </tr>
+                    <tr>
+                      <td colspan="2">
+                      <div class="form-group">
+                        <label class="control-label nopad col-xs-6">Highest bid price</label>
+                        <div class="col-xs-6 number" data-bind="text:highestBidPrice"></div>
+                      </div></td>
+                      <td data-bind="text: quoteAsset + '/' + baseAsset"></td>
+                    </tr>
+                    <tr>
+                      <td colspan="2">
+                      <div class="form-group">
+                        <label class="control-label nopad col-xs-6">Obtainable</label>
+                        <div class="col-xs-6 number" data-bind="text: obtainableForSell"></div>
+                      </div></td>
+                      <td data-bind="text: quoteAsset"></td>
+                    </tr>
+                    <tr>
+                      <td colspan="2">
+                      <div class="form-group">
+                        <label class="control-label col-xs-2">Price</label>
+                        <div class="col-xs-10">
                           <input type="text" class="form-control input-sm number" type="text" data-bind="value: sellPrice, hasFocus: sellPriceHasFocus, valueUpdate: 'input', enable: availableBalanceForSell() > 0"/>
                           <span class="invalid text-danger" data-bind="validationMessage: sellPrice"></span>
-                        </td>
-                        <td data-bind="text: quoteAsset + '/' + baseAsset"></td>
-                      </tr>
-                      <tr>
-                        <td>Amount</td>
-                        <td>
+                        </div>
+                      </div></td>
+                      <td data-bind="text: quoteAsset + '/' + baseAsset"></td>
+                    </tr>
+                    <tr>
+                      <td colspan="2">
+                      <div class="form-group">
+                        <label class="control-label col-xs-2">Amount</label>
+                        <div class="col-xs-10">
                           <input type="text" class="form-control input-sm number" type="text" data-bind="value: sellAmount, hasFocus: sellAmountHasFocus, valueUpdate: 'input', enable: availableBalanceForSell() > 0"/>
                           <span class="invalid text-danger" data-bind="validationMessage: sellAmount"></span>
-                        </td>
-                        <td data-bind="text: baseAsset"></td>
-                      </tr>
-                      <tr>
-                        <td>Total</td>
-                        <td>
+                        </div>
+                      </div></td>
+                      <td data-bind="text: baseAsset"></td>
+                    </tr>
+                    <tr>
+                      <td colspan="2">
+                      <div class="form-group">
+                        <label class="control-label col-xs-2">Total</label>
+                        <div class="col-xs-10">
                           <input type="text" class="form-control input-sm number" type="text" data-bind="value: sellTotal, hasFocus: sellTotalHasFocus, valueUpdate: 'input', enable: availableBalanceForSell() > 0"/>
                           <span class="invalid text-danger" data-bind="validationMessage: sellTotal"></span>
-                        </td>
-                        <td data-bind="text: quoteAsset"></td>
-                      </tr>
-                      <tr>
-                        <td>Fee</td>
-                        <td class="number" data-bind="text: sellFee"></td>
-                        <td>BTC</td>
-                      </tr>
-                      <tr>
-                        <td colspan="3" style="text-align:center">
-                          <a id="sellButton" class="btn btn-default btn-lg" data-bind="click: sell">Sell (<span data-bind="text:baseAsset + '→' + quoteAsset"></span>)</a>
-                        </td>
-                      </tr>
+                        </div>
+                      </div></td>
+                      <td data-bind="text: quoteAsset"></td>
+                    </tr>
+                    <tr>
+                      <td colspan="2">
+                      <div class="form-group">
+                        <label class="control-label nopad col-xs-6">Fee</label>
+                        <div class="col-xs-6 number" data-bind="text: sellFee"></div>
+                      </div></td>
+                      <td>BTC</td>
+                    </tr>
+                    <tr>
+                      <td colspan="3" style="text-align:center"><a id="sellButton" class="btn btn-default btn-lg" data-bind="click: sell">Sell (<span data-bind="text:baseAsset + '→' + quoteAsset"></span>)</a></td>
+                    </tr>
                   </tbody>
                 </table>
-
-            </div> <!-- end widget content -->
+              </div>
+            </form>
+          </div> <!-- end widget content -->
         </div> <!-- end widget div -->
       </div> <!-- end widget -->
     </article> <!-- WIDGET END -->
