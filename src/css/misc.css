@@ -1,4 +1,4 @@
-/* 
+/*
  * Logged in site specific
  */
 #qr {
@@ -26,7 +26,7 @@ span.modeIndicator {
 }
 
 
-/* 
+/*
  * Leaderboard page
  */
 .leaderboardAssetText {
@@ -39,7 +39,7 @@ span.modeIndicator {
 }
 
 
-/* 
+/*
  * History page
  */
 .historyBalsFieldset {
@@ -113,4 +113,8 @@ textarea.quickAccessUrl {
   text-align: center;
   padding:5px;
   font-weight: bold;
+}
+
+.widget-toolbar.display-address {
+	width: 350px;
 }
