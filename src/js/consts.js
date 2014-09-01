@@ -223,7 +223,7 @@ location.hash = '';
 var ORIG_REFERER = document.referrer;
 
 //CONSTANTS THAT DEPEND ON IS_DEV / USE_TESTNET
-var BLOCKEXPLORER_URL = USE_TESTNET ? "http://test.bitcore.io" : "http://live.bitcore.io";
+var BLOCKEXPLORER_URL = USE_TESTNET ? "http://test.dogepartychain.info" : "http://dogepartychain.info";
 var GOOGLE_ANALYTICS_UAID = null; //will be set in counterwallet.js
 var ROLLBAR_ACCESS_TOKEN = null; //will be set in counterwallet.js
 
