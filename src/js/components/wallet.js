@@ -282,7 +282,8 @@ function WalletViewModel() {
         $.jqlog.debug("Got initial balances: " + JSON.stringify(balancesData));
         
         if(!balancesData.length)
-          return onSuccess(); //user has no balance (i.e. first time logging in)
+          if (onSuccess) return onSuccess(); //user has no balance (i.e. first time logging in)
+          else return;
         
         var i = null, j = null;
         var numBalProcessed = 0;
@@ -322,12 +323,17 @@ function WalletViewModel() {
   
   }
 
-  self.refreshBTCBalances = function(isRecurring) {
+  self.refreshBTCBalances = function(isRecurring, addresses, onSuccess) {
     if(typeof(isRecurring)==='undefined') isRecurring = false;
     //^ if isRecurring is set to true, we will update BTC balances every 5 min as long as self.autoRefreshBTCBalances == true
     
     //update all BTC balances (independently, so that one addr with a bunch of txns doesn't hold us up)
-    var addresses = self.getAddressesList();
+    if (addresses == undefined || addresses == null) {
+      addresses = self.getAddressesList();
+    }
+
+    $.jqlog.debug(addresses);
+
     var completedAddresses = []; //addresses whose balance has been retrieved
     var addressObj = null;
     
@@ -380,6 +386,9 @@ function WalletViewModel() {
           if(self.autoRefreshBTCBalances) { self.refreshBTCBalances(true); }
         }, 60000 * 5);
       }
+
+      if (onSuccess) onSuccess();
+
     }, function(jqXHR, textStatus, errorThrown) {
       //insight down or spazzing, set all BTC balances out to null
       var addressObj = null;
@@ -624,6 +633,9 @@ function WalletViewModel() {
   }
 
   self.storePreferences = function(callback, for_login) {
+    
+    PREFERENCES['num_addresses_used'] = WALLET.addresses().length;
+
     var params = {
       'wallet_id': WALLET.identifier(),
       'preferences': PREFERENCES,

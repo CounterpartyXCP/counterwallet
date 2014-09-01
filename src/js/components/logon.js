@@ -305,10 +305,9 @@ function LogonViewModel() {
   
   self.updateBalances = function(onSuccess) {
     //updates all balances for all addesses, creating the asset objects on the address if need be
-    WALLET.refreshBTCBalances(true);
+    WALLET.refreshBTCBalances(true, null, onSuccess);
     //^ specify true here to start a recurring get BTC balances timer chain 
-
-    WALLET.refreshCounterpartyBalances(WALLET.getAddressesList(), onSuccess);
+    WALLET.refreshCounterpartyBalances(WALLET.getAddressesList());
   }
   
   self.openWalletPt3 = function(mustSavePreferencesToServer) {
@@ -336,13 +335,30 @@ function LogonViewModel() {
     }
     
     //Update the wallet balances (isAtLogon = true)
-    self.updateBalances(self.openWalletPt4);
+    self.updateBalances(self.genMoreAddresses);
     
     trackEvent("Login", "Wallet", "Size", PREFERENCES['num_addresses_used']);
     trackEvent("Login", "Network", USE_TESTNET ? "Testnet" : "Mainnet");
     trackEvent("Login", "Country", USER_COUNTRY || 'UNKNOWN');
     trackEvent("Login", "Language", PREFERENCES['selected_lang']);
     trackEvent("Login", "Theme", PREFERENCES['selected_theme']);
+  }
+
+  self.genMoreAddresses = function() {
+    var lastAddress = WALLET.addresses()[WALLET.addresses().length - 1];
+    if (lastAddress.numPrimedTxoutsIncl0Confirms() > 0) {
+      var moreAddresses = [];
+      for (var a = 1; a <= MORE_ADDRESSES; a++) {
+        moreAddresses.push(WALLET.addAddress('normal'));
+      }
+      WALLET.refreshBTCBalances(true, moreAddresses, self.genMoreAddresses);
+      WALLET.refreshCounterpartyBalances(moreAddresses);
+    } else {
+      if (PREFERENCES['num_addresses_used'] < WALLET.addresses().length) {
+        WALLET.storePreferences();
+      }
+      self.openWalletPt4();
+    }
   }
     
   self.openWalletPt4 = function() {

@@ -5,7 +5,8 @@ var VERSION = "1.5.0 PRE4 BETA";
 var PREFERENCES = {}; //set when logging in
 
 //Addresses
-var DEFAULT_NUM_ADDRESSES = 1; //default number of addresses to generate. Go with 1 for now to be more newbie friendly
+var DEFAULT_NUM_ADDRESSES = 3; //default number of addresses to generate. Go with 1 for now to be more newbie friendly
+var MORE_ADDRESSES = 2;
 var MAX_ADDRESSES = 20; //totally arbitrary :)
 
 //Order expiration
