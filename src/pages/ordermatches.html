@@ -3,7 +3,7 @@
   <div class="row">
     <div class="col-xs-12 col-sm-7 col-md-7 col-lg-4">
       <h1 class="page-title txt-color-blueDark">
-        <i class="glyphicon glyphicon-share-alt"></i> 
+        <i class="glyphicon glyphicon-share-alt"></i>
           My Order History
       </h1>
     </div>
@@ -17,7 +17,7 @@
         <div class="jarviswidget defaultWidgetColor" data-widget-editbutton="false" data-widget-deletebutton="false">
             <header>
               <span class="widget-icon"> <i class="fa fa-rocket"></i> </span>
-              <h3>Orders mathes</h3>
+              <h3>Orders matches</h3>
               <div class="clearfix"></div>
             </header>
             <div> <!-- widget div-->
@@ -30,14 +30,14 @@
                       <th>Block</th>
                       <th>Address</th>
                       <th>Sell quantity</th>
-                      <th>Buy quantity</th>     
+                      <th>Buy quantity</th>
                     </tr>
                   </thead>
                   <tbody data-bind="foreach: { data: orderMatches, as: 'orderMatch' }">
                     <tr>
-                      <td style="text-align:center" data-bind="html: orderMatch.status_html"></td> 
+                      <td style="text-align:center" data-bind="html: orderMatch.status_html"></td>
                       <td style="text-align:center" data-bind="text: orderMatch.block_index"></td>
-                      <td style="white-space:nowrap" data-bind="text: orderMatch.address_label"></td> 
+                      <td style="white-space:nowrap" data-bind="text: orderMatch.address_label"></td>
                       <td class="number" data-bind="text: orderMatch.give_quantity_str"></td>
                       <td class="number" data-bind="text: orderMatch.get_quantity_str"></td>
                     </tr>
