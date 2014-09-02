@@ -508,3 +508,11 @@ div.tooltip-inner {
 body {
 	overflow: auto;
 }
+
+.tab-content>.tab-pane, {
+	display: none !important;
+}
+
+.tab-content>.active {
+	display: block !important;
+}
