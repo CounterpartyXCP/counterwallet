@@ -505,140 +505,187 @@
           </div>
           <div class="modal-body">
 
-            <form class="smart-form"><fieldset>
-              <section><div class="row">
-                <label class="control-label col col-sm-2">Theme</label>
-                <div class="col col-sm-10">
-                    <select id="themeSelector" class="width-max" data-bind="options: availableThemes, value: selectedTheme, optionsValue: 'id', optionsText: 'name', select2: {  minimumResultsForSearch: -1, escapeMarkup: 'direct' }"></select>
-                </div>
-              </div></section>
-
-              <section><div class="row">
-                <label class="control-label col col-sm-2">Language</label>
-                <div class="col col-sm-10">
-                    <select id="langSelector" class="width-max" data-bind="options: availableLangs, value: selectedLang, optionsValue: 'id', optionsText: 'name', select2: {  minimumResultsForSearch: -1, escapeMarkup: 'direct' }"></select>
-                </div>
-              </div></section>
-
-              <section><div class="row">
-                <label class="control-label col col-sm-2">Wallet URL</label>
-                <div class="col col-sm-10">
-                    <input id="urlPassword" data-bind="value: urlPassword, valueUpdate: 'input'" placeholder="Enter the password to encrypt the passphrase." class="form-control" type="password" name="urlPassword" autocomplete="off">
-                    <textarea id="walletUrl" class="form-control input-lg" rows="4" style="margin-top:5px;font-size:12px" data-bind="value: walletUrl"></textarea>
-                </div>
-              </div></section>
-
-
-              <section data-bind="visible: showAdvancedOptions"><div class="row">
-                <div class="col col-sm-2">Auto BTCPay</div>
-                <div class="col col-sm-10">
-                  <label class="checkbox">
-                    <input name="autoBTCPayEnabled" type="checkbox" data-bind="checked: autoBTCPayEnabled">
-                    <i></i>Enable Automatic BTC Payments
-                  </label>
-                  <div class="note">If this option is enabled, Counterwallet will automatically take care of making BTC
-                      payments for matched orders where you owe BTC. <b>It is highly recommended you keep this on.</b> If not
-                      enabled, you must manually settle any required BTC payments within a 10 block limit (approximately 80-100 minutes).</div>
-              </div></section>
-
-              <section data-bind="visible: showAdvancedOptions"><div class="row">
-                <div class="col col-sm-12">
-                  <div class="note txt-color-red">
-                      Don't change followings parameters, unless you know exactly what you are doing.<br />
-                      If you change them, your BTC orders could not match.<br />
-                      These parameters are not persistent.
+              <form class="form-horizontal">
+                <fieldset>
+                  <div class="form-group">
+                    <label class="col-md-2 control-label">Theme</label>
+                    <div class="col-md-10">
+                      <select id="themeSelector" class="width-max" data-bind="options: availableThemes, value: selectedTheme, optionsValue: 'id', optionsText: 'name', select2: {  minimumResultsForSearch: -1, escapeMarkup: 'direct' }"></select>
+                    </div>
                   </div>
-                </div>
-              </section>
+                  <div class="form-group">
+                    <label class="col-md-2 control-label">Language</label>
+                    <div class="col-md-10">
+                      <select id="langSelector" class="width-max" data-bind="options: availableLangs, value: selectedLang, optionsValue: 'id', optionsText: 'name', select2: {  minimumResultsForSearch: -1, escapeMarkup: 'direct' }"></select>
+                    </div>
+                  </div>
+                  <div class="form-group">
+                    <label class="col-md-2 control-label">Password field</label>
+                    <div class="col-md-10">
+                      <input id="urlPassword" data-bind="value: urlPassword, valueUpdate: 'input'" placeholder="Enter the password to encrypt the passphrase." class="form-control" type="password" name="urlPassword" autocomplete="off">
+                      <textarea id="walletUrl" class="form-control input-lg" rows="4" style="margin-top:5px;font-size:12px" data-bind="value: walletUrl"></textarea>
+                    </div>
+                  </div>
+                </fieldset>
+              </form>
+              <form class="smart-form">
+                <fieldset data-bind="visible: showAdvancedOptions">
+                  <section>
+                    <div class="row">
+                      <div class="col col-sm-2">
+                        Auto BTCPay
+                      </div>
+                      <div class="col col-sm-10">
+                        <label class="checkbox">
+                          <input name="autoBTCPayEnabled" type="checkbox" data-bind="checked: autoBTCPayEnabled">
+                          <i></i>Enable Automatic BTC Payments </label>
+                        <div class="note">
+                          If this option is enabled, Counterwallet will automatically take care of making BTC
+                          payments for matched orders where you owe BTC. <b>It is highly recommended you keep this on.</b> If not
+                          enabled, you must manually settle any required BTC payments within a 10 block limit (approximately 80-100 minutes).
+                        </div>
+                      </div>
+                    </div>
+                  </section>
+                </fieldset>
+                <fieldset data-bind="visible: showAdvancedOptions">
+                  <section>
+                    <div class="row">
+                      <div class="col col-sm-12">
+                        <div class="note advancedWarn txt-color-red">
+                          Don't change followings parameters, unless you know exactly what you are doing.
+                          <br />
+                          If you change them, your BTC orders could not match.
+                          <br />
+                          These parameters are not persistent.
+                        </div>
+                      </div>
+                  </section>
+                </fieldset>
 
-              <section data-bind="visible: showAdvancedOptions"><div class="row">
-                <div class="col col-sm-3">Default fee provided</div>
-                <div class="col col-sm-3">
-                  <label class="input">
-                    <input class="prefFieldPercent" name="defaultBTCFeeProvidedPct" type="text" data-bind="value: defaultBTCFeeProvidedPct">%
-                  </label>
-                </div>
-                <div class="col col-sm-3">Default fee required</div>
-                <div class="col col-sm-3">
-                  <label class="input">
-                    <input class="prefFieldPercent" name="defaultBTCFeeRequiredPct" type="text" data-bind="value: defaultBTCFeeRequiredPct">%
-                  </label>
-                </div>
-              </div></section>
+                <fieldset data-bind="visible: showAdvancedOptions">
+                  <section>
+                    <div class="row">
+                      <div class="col col-sm-6">
+                        <label class="label">Default fee provided</label>
+                        <label class="input"> <i class="icon-append">%</i>
+                          <input class="prefFieldPercent" name="defaultBTCFeeProvidedPct" type="text" data-bind="value: defaultBTCFeeProvidedPct">
+                        </label>
+                      </div>
+                      <div class="col col-sm-6">
+                        <label class="label">Orders min. fee provided filter</label>
+                        <label class="input"> <i class="icon-append">%</i>
+                          <input class="prefFieldPercent" name="minBTCFeeProvidedPct" type="text" data-bind="value: minBTCFeeProvidedPct">
+                        </label>
+                      </div>
+                    </div>
+                  </section>
+                  <section>
+                    <div class="row">
+                      <div class="col col-sm-6">
+                        <label class="label">Default fee required</label>
+                        <label class="input"> <i class="icon-append">%</i>
+                          <input class="prefFieldPercent" name="defaultBTCFeeRequiredPct" type="text" data-bind="value: defaultBTCFeeRequiredPct">
+                        </label>
+                      </div>
+                      <div class="col col-sm-6">
+                        <label class="label">Orders max. fee required filter</label>
+                        <label class="input"> <i class="icon-append">%</i>
+                          <input class="prefFieldPercent" name="maxBTCFeeRequiredPct" type="text" data-bind="value: maxBTCFeeRequiredPct">
+                        </label>
+                      </div>
+                    </div>
+                  </section>
+                </fieldset>
+                <fieldset data-bind="visible: showAdvancedOptions">
+                  <section>
+                    <div class="row">
+                      <div class="col col-sm-6">
+                        <label class="label">Default Expiration</label>
+                        <label class="input">
+                          <input name="orderDefaultExpiration" type="text" data-bind="value: orderDefaultExpiration">
+                        </label>
+                        <div class="note">
+                          Blocks until expiration (This is ~6.75 days at ~9 min per block).
+                        </div>
+                      </div>
+                      <div class="col col-sm-6">
+                        <label class="label">Default Expiration (BTC Sell)</label>
+                        <label class="input">
+                          <input name="orderBTCSellDefaultExpiration" type="text" data-bind="value: orderBTCSellDefaultExpiration">
+                        </label>
+                        <div class="note">
+                          Blocks until expiration for selling BTC order.
+                        </div>
+                      </div>
+                    </div>
+                  </section>
+                </fieldset>
+                <fieldset data-bind="visible: showAdvancedOptions">
+                  <section>
+                    <div class="row">
+                      <div class="col col-sm-2">
+                        Reset State
+                      </div>
+                      <div class="col col-sm-10">
+                        <button id="refresh" type="button" data-title="refresh" href="#" class="btn btn-danger padding-5">
+                          Reset Widget State
+                        </button>
+                        <div class="note">
+                          Click this button to reset custom color settings, widget positioning, etc.
+                        </div>
+                      </div>
+                  </section>
 
-              <section data-bind="visible: showAdvancedOptions"><div class="row">
-                <div class="col col-sm-3">Orders min. fee provided filter</div>
-                <div class="col col-sm-3">
-                  <label class="input">
-                    <input class="prefFieldPercent" name="minBTCFeeProvidedPct" type="text" data-bind="value: minBTCFeeProvidedPct">%
-                  </label>
-                </div>
-                <div class="col col-sm-3">Orders max. fee required filter</div>
-                <div class="col col-sm-3">
-                  <label class="input">
-                    <input class="prefFieldPercent" name="maxBTCFeeRequiredPct" type="text" data-bind="value: maxBTCFeeRequiredPct">%
-                  </label>
-              </div></section>
+                  <section data-bind="visible: !infoTableShown() && showAdvancedOptions()">
+                    <div class="row">
+                      <div class="col col-sm-2">
+                        Show Info
+                      </div>
+                      <div class="col col-sm-10">
+                        <button type="button" data-bind="click: showInfoTable" class="btn btn-default padding-5">
+                          Show Debugging Info
+                        </button>
+                        <div class="note">
+                          Click to show some useful information for troubleshooting wallet issues.
+                        </div>
+                      </div>
 
-              <section data-bind="visible: showAdvancedOptions"><div class="row">
-                <div class="col col-sm-3">Orders default expiration</div>
-                <div class="col col-sm-3">
-                  <label class="input">
-                    <input class="prefFieldPercent" name="orderDefaultExpiration" type="text" data-bind="value: orderDefaultExpiration">
-                  </label>
-                  <span class="invalid text-danger" data-bind="validationMessage: orderDefaultExpiration"></span>
-                </div>
-                <div class="col col-sm-3">Sell BTC Orders default expiration</div>
-                <div class="col col-sm-3">
-                  <label class="input">
-                    <input class="prefFieldPercent" name="orderBTCSellDefaultExpiration" type="text" data-bind="value: orderBTCSellDefaultExpiration">
-                  </label>
-                </div>
-              </div></section>
-
-              <section data-bind="visible: showAdvancedOptions"><div class="row">
-                <div class="col col-sm-2">Reset State</div>
-                <div class="col col-sm-10">
-                    <button id="refresh" type="button" data-title="refresh" href="#" class="btn btn-danger padding-5">Reset Widget State</button>
-                    <div class="note">Click this button to reset custom color settings, widget positioning, etc.</div>
-              </div></section>
-
-              <section data-bind="visible: !infoTableShown() && showAdvancedOptions()"><div class="row">
-                <div class="col col-sm-2">Show Info</div>
-                <div class="col col-sm-10">
-                    <button type="button" data-bind="click: showInfoTable" class="btn btn-default padding-5">Show Debugging Info</button>
-                    <div class="note">Click to show some useful information for troubleshooting wallet issues.</div>
-                </div>
-
-              </div></section>
-              <section data-bind="fadeVisibleInOnly: infoTableShown && showAdvancedOptions()"><div class="row">
-                <div class="col col-sm-12">
-                    <table class="table table-striped table-hover table-border-spacing-0 table-border-collapse"><tbody>
-                        <tr>
-                            <td>Blk/MsgID</td><td><span data-bind="text: WALLET.networkBlockHeight()"></span> / <span data-bind="text: MESSAGE_FEED.lastMessageIndexReceived()"></span></td>
-                        </tr>
-                        <tr>
-                            <td>TestNet/IsDev</td><td><span data-bind="text: USE_TESTNET"></span> / <span data-bind="text: IS_DEV"></span></td>
-                        </tr>
-                        <tr>
-                            <td>WalletID</td><td><span data-bind="text: WALLET.identifier()"></span></td>
-                        </tr>
-                        <tr>
-                            <td>Origin/MyIP/C</td><td><span data-bind="text: window.location.origin"></span> / <span data-bind="text: myIPAddr"></span> / <span data-bind="text: dispMyCookiePresent"></span></td>
-                        </tr>
-                        <tr>
-                            <td>MultiAPI List (FailIDX)</td><td><span data-bind="text: dispCWURLS"></span> <b>(<span data-bind="text: MESSAGE_FEED.failoverCurrentIndex()"></span>)</b></td>
-                        </tr>
-                        <tr>
-                            <td>Eng/Res</td><td><span data-bind="text: $.layout.className"></span> / <span data-bind="text: screen.width"></span>x<span data-bind="text: screen.height"></span></td>
-                        </tr>
-                        <tr>
-                            <td>Browser UA</td><td><span data-bind="text: navigator.userAgent"></span></td>
-                        </tr>
-                    </tbody></table>
-              </div></section>
-            </fieldset></form>
-          </div>
+                    </div>
+                  </section>
+                  <section data-bind="fadeVisibleInOnly: infoTableShown && showAdvancedOptions()">
+                    <div class="row">
+                      <div class="col col-sm-12">
+                        <table class="table table-striped table-hover table-border-spacing-0 table-border-collapse">
+                          <tbody>
+                            <tr>
+                              <td>Blk/MsgID</td><td><span data-bind="text: WALLET.networkBlockHeight()"></span> / <span data-bind="text: MESSAGE_FEED.lastMessageIndexReceived()"></span></td>
+                            </tr>
+                            <tr>
+                              <td>TestNet/IsDev</td><td><span data-bind="text: USE_TESTNET"></span> / <span data-bind="text: IS_DEV"></span></td>
+                            </tr>
+                            <tr>
+                              <td>WalletID</td><td><span data-bind="text: WALLET.identifier()"></span></td>
+                            </tr>
+                            <tr>
+                              <td>Origin/MyIP/C</td><td><span data-bind="text: window.location.origin"></span> / <span data-bind="text: myIPAddr"></span> / <span data-bind="text: dispMyCookiePresent"></span></td>
+                            </tr>
+                            <tr>
+                              <td>MultiAPI List (FailIDX)</td><td><span data-bind="text: dispCWURLS"></span><b>(<span data-bind="text: MESSAGE_FEED.failoverCurrentIndex()"></span>)</b></td>
+                            </tr>
+                            <tr>
+                              <td>Eng/Res</td><td><span data-bind="text: $.layout.className"></span> / <span data-bind="text: screen.width"></span>x<span data-bind="text: screen.height"></span></td>
+                            </tr>
+                            <tr>
+                              <td>Browser UA</td><td><span data-bind="text: navigator.userAgent"></span></td>
+                            </tr>
+                          </tbody>
+                        </table>
+                      </div>
+                  </section>
+                </fieldset>
+              </form>
+            </div>
           <div class="modal-footer">
             <div style="float:left">
               <input type="checkbox" name="showAdvancedOptions" value="1" data-bind="checked: showAdvancedOptions">
