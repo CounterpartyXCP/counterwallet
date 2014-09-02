@@ -509,11 +509,11 @@ body {
 	overflow: auto;
 }
 
-.tab-content>.tab-pane, {
+div#historyTabContent.tab-content > div#wid-id-txnHistory.tab-pane, div#historyTabContent.tab-content > div#wid-id-balHistory.tab-pane {
 	display: none !important;
 }
 
-.tab-content>.active {
+div#historyTabContent.tab-content > div#wid-id-txnHistory.tab-pane.active, div#historyTabContent.tab-content > div#wid-id-balHistory.tab-pane.active {
 	display: block !important;
 }
 
