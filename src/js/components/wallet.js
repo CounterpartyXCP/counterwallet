@@ -110,7 +110,7 @@ function WalletViewModel() {
     var assetObj = addressObj.getAssetObj(asset);
     if(!assetObj) return 0; //asset not in wallet
     if (asset != 'BTC') {
-      return normalized ? assetObj.normalizedBalance() : assetObj.rawBalance();
+      return normalized ? assetObj.availableBalance() : assetObj.rawAvailableBalance();
     } else {
       var bal = assetObj.normalizedBalance() + assetObj.unconfirmedBalance();
       return normalized ? bal : denormalizeQuantity(bal);
