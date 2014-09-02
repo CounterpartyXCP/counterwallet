@@ -351,9 +351,6 @@ function LogonViewModel() {
       for (var a = 1; a <= MORE_ADDRESSES; a++) {
         moreAddresses.push(WALLET.addAddress('normal'));
       }
-      $.jqlog.debug('moreAddresses: ');
-      $.jqlog.debug(moreAddresses);
-
       WALLET.refreshBTCBalances(true, moreAddresses, self.genMoreAddresses);
       WALLET.refreshCounterpartyBalances(moreAddresses);
     } else {
