@@ -20,7 +20,6 @@
     <link rel="stylesheet" type="text/css" href="vendors/jReject/css/jquery.reject.css">
     <link rel="stylesheet" type="text/css" href="vendors/keyboard/css/keyboard.css">
     <link rel="stylesheet" type="text/css" href="vendors/bootstrap-datetimepicker/build/css/bootstrap-datetimepicker.min.css">
-    <link rel="stylesheet" type="text/css" href="vendors/select2/select2.css">
     <link rel="stylesheet" type="text/css" href="vendors/select2/select2-bootstrap.css">
     <!-- endbuild -->
 
@@ -43,8 +42,8 @@
 
     <!-- GOOGLE FONT -->
     <link rel="stylesheet" href="//fonts.googleapis.com/css?family=Open+Sans:400italic,700italic,300,400,700">
-    
-    <!-- Specifying a Webpage Icon for Web Clip 
+
+    <!-- Specifying a Webpage Icon for Web Clip
          Ref: https://developer.apple.com/library/ios/documentation/AppleApplications/Reference/SafariWebContent/ConfiguringWebApplications/ConfiguringWebApplications.html -->
     <link rel="apple-touch-icon" href="images/apple-touch-icon.png" />
     <link rel="apple-touch-icon" sizes="57x57" href="images/apple-touch-icon-57x57.png" />
@@ -54,7 +53,7 @@
     <link rel="apple-touch-icon" sizes="120x120" href="images/apple-touch-icon-120x120.png" />
     <link rel="apple-touch-icon" sizes="144x144" href="images/apple-touch-icon-144x144.png" />
     <link rel="apple-touch-icon" sizes="152x152" href="images/apple-touch-icon-152x152.png" />
-    
+
     <!-- iOS web-app metas : hides Safari UI Components and Changes Status Bar Appearance -->
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black">
@@ -69,7 +68,7 @@
     <header id="header" style="display: none">
       <div id="logo-group">
         <span id="logo"><span class="logoText">Counterwallet</span></span>
-        
+
         <span id="notificationFeed" class="activity-parent" data-contenturl="pages/feed_notifications.html", data-bind="click: ack">
             <span class="activity-dropdown">
                 <i class="fa fa-check"></i><b data-bind="fadeVisible: unackedCount() > 0, text: unackedCount" class="badge"></b>
@@ -80,7 +79,7 @@
               <span><b>Last updated:</b> <span id="notoLastUpdated" data-bind="timeago: lastUpdated()"></span></span> <!-- footer -->
             </div> <!-- .ajax-dropdown -->
         </span>
-        
+
         <span id="pendingActionFeed" class="activity-parent" data-contenturl="pages/feed_pending_actions.html">
             <span class="activity-dropdown">
                 <i class="fa fa-clock-o"></i><b data-bind="visible: dispCount() > 0, text: dispCount" class="badge"></b>
@@ -102,7 +101,7 @@
               <span><b>Last updated:</b> <span id="pendingLastUpdated" data-bind="timeago: dispLastUpdated()"></span></span> <!-- footer -->
             </div> <!-- .ajax-dropdown -->
         </span>
-        
+
       </div> <!-- logo-group -->
 
       <span id="noticeTestnet" data-bind="visible: USE_TESTNET" >Testnet in use</span>
@@ -127,9 +126,9 @@
         <div id="hide-menu" class="btn-header pull-right">
           <span> <a href="#" title="Collapse Menu"><i class="fa fa-minus-square"></i></a> </span>
         </div>
-        
+
         <span id="noticeDevMode" data-bind="visible: IS_DEV" class="label label-warning pull-right modeIndicator"><i class="fa-fw fa fa-warning"></i>&nbsp;Dev Mode Enabled</span>
-       
+
         <span id="donate" class="pull-right">
           <a href="#" class="btn btn-primary">DONATE</a>
         </span>
@@ -148,7 +147,7 @@
         <ul>
           <li class="">
             <a href="pages/balances.html"><i class="fa fa-lg fa-fw fa-user"></i> <span class="menu-item-parent">My Balances</span></a>
-          </li>          
+          </li>
           <li class="">
             <a href="#"><i class="fa fa-lg fa-fw fa-exchange"></i> <span class="menu-item-parent">Exchange</span></a>
             <ul>
@@ -222,8 +221,8 @@
           </span>
           <input id="chatTextBox" data-bind="event: { keyup: onKeyUp }" type="text" class="form-control">
         </div><!-- /input-group -->
-      </div><!-- /.row -->        
-    </div>    
+      </div><!-- /.row -->
+    </div>
 
     <!-- modal for wallet creation -->
     <div data-bind="showModal: shown" id="walletCreation" class="modal fade" data-backdrop="static" data-keyboard="false" tabindex="-1" role="dialog" aria-labelledby="walletCreation" aria-hidden="true">
@@ -239,7 +238,7 @@
           <div class="modal-body">
             <div data-bind="visible: step() == 1">
               <p class="createWalletHeaderText">We have created a passphrase for you in the box below.<br/>
-                This passphrase lets you access your wallet and the funds it contains.</p> 
+                This passphrase lets you access your wallet and the funds it contains.</p>
               <div class="width-max margin-bottom-10">
                 <span id="generated" data-bind="text: generatedPassphrase"></span>
                 <button id="generated-regenerate" data-bind="click: generatePassphrase, tooltip: {title: 'Click to generate another random passphrase.'}" class="pull-right btn btn-default" type="button"><i class="fa fa-repeat"></i></button>
@@ -258,7 +257,7 @@
               </div>
               <div class="width-max">
                 <input type="checkbox" name="passphraseSaved" value="1" data-bind="checked: passphraseSaved" />
-                <label>I have <u>written down</u> or otherwise <u>securely stored</u> my passphrase.</label> 
+                <label>I have <u>written down</u> or otherwise <u>securely stored</u> my passphrase.</label>
               </div>
             </div>
             <div class="width-max" data-bind="visible: step() == 2">
@@ -273,7 +272,7 @@
                   <div class="width-max" data-bind="visible: quickAccessPassword()">
                       <label class="margin-top-10">Copy down the following secret URL and use with your password for quick access:</label>
                       <textarea id="quickAccessUrl" readonly="true" class="form-control input-lg quickAccessUrl" rows="4" data-bind="value: quickAccessUrl"></textarea>
-                  </div>                 
+                  </div>
               </div>
             </div>
           </div>
@@ -297,10 +296,10 @@
         <div id="createNewAcctBtnPane">
           <button id="newWalletButton" data-bind="click: generatePassphrase" type="button" class="btn btn-success btn-lg">Create New Wallet</button>
         </div>
-        
+
         <div data-bind="visible: !USE_TESTNET" class="alert alert-info" class="margin-bottom-0">
            <p><i class="fa-fw fa fa-rocket"></i>&nbsp;New to Counterwallet, and want to just play around?
-               <b><a href="https://testnet.counterwallet.co" target="_blank">Try Counterwallet Testnet!</a></b> 
+               <b><a href="https://testnet.counterwallet.co" target="_blank">Try Counterwallet Testnet!</a></b>
            </p>
          </div>
 
@@ -319,7 +318,7 @@
                 <div class="col-sm-8" data-bind="visible: !cryptedPassphraseUsed()">
                   <input id="password" data-bind="value: enteredPassphrase, valueUpdate: 'input'" placeholder="Enter your 12 word passphrase." class="form-control" type="password" name="password">
                 </div>
- 
+
                 <div class="col-sm-8" data-bind="visible: cryptedPassphraseUsed">
                   <input id="passwordDecrypt" data-bind="value: passwordDecrypt, valueUpdate: 'input'" placeholder="Enter your quick access password." class="form-control" type="password" name="passwordDecrypt">
                 </div>
@@ -330,7 +329,7 @@
                 </div>
 
               </div>
-                            
+
             </form>
             <div class="clearfix"></div>
             <div data-bind="fadeVisible: walletGenProgressVal() > 0" class="progress progress-striped active margin-top-15 margin-bottom-0" class="margin-top-15 margin-bottom-0 display-none">
@@ -340,7 +339,7 @@
           </div>
         </div>
       </div> <!-- form-well -->
-      
+
        <div id="extra-info" class="container">
         <h3 class="sales-title margin-bottom-10">
           Counterwallet is a web-wallet for <a href="http://www.counterparty.co" target="_blank">Counterparty</a>,
@@ -359,7 +358,7 @@
           <div class="col-sm-4 col-md-4">
             <h4 class="margin-bottom-10"><i class="fa fa-cloud"></i> Simple</h4>
             <p>With Counterwallet, your passphrase is your wallet, and all of your addresses and keys are generated on-the-fly when you log in.</p>
-            <p>There are no wallet files to backup or keep private, and with your passphrase you can access your wallet from any trusted machine with a web browser.</p> 
+            <p>There are no wallet files to backup or keep private, and with your passphrase you can access your wallet from any trusted machine with a web browser.</p>
           </div>
           <div class="col-sm-4 col-md-4">
             <h4 class="margin-bottom-10"><i class="fa fa-globe"></i> Open-Source</h4>
@@ -369,7 +368,7 @@
         </div>
       </div>
     </div> <!-- END logged out cover div -->
-    
+
     <!-- modal for keyboardless passphrase entry (on login page) -->
     <div data-bind="showModal: shown" id="licenseModal" class="modal fade" data-backdrop="static" data-keyboard="false" tabindex="-1" role="dialog" aria-labelledby="licenseModal" aria-hidden="true">
       <div class="modal-dialog">
@@ -461,7 +460,7 @@
         </div><!-- /.modal-content -->
       </div><!-- /.modal-dialog -->
     </div><!-- /.modal -->
-    
+
     <!-- modal for setting chat handle window (in logged in interface) -->
     <div data-bind="showModal: shown" id="chatSetHandleModal" class="modal fade" data-backdrop="static" data-keyboard="false" tabindex="-1" role="dialog" aria-labelledby="chatSetHandleModal" aria-hidden="true">
       <div class="modal-dialog">
@@ -474,7 +473,7 @@
             <div class="formPadded">
                 To use chat, you must have a handle (or nickname) you wish to use (alphanumeric/underscore/hyphen, between 4 and 12 characters).<br/><br/>
                 <b class="txt-color-red">Please remember that people in chat may not always be who they seem. Until a verified
-                identity system is implemented for chat, do not simply trust someone is who their handle says they are!</b>                
+                identity system is implemented for chat, do not simply trust someone is who their handle says they are!</b>
             </div>
 
             <form class="smart-form" data-bind="submit: doAction"><fieldset>
@@ -495,7 +494,7 @@
         </div><!-- /.modal-content -->
       </div><!-- /.modal-dialog -->
     </div><!-- /.modal -->
-    
+
     <!-- modal for options window (in logged in interface) -->
     <div data-bind="showModal: shown" id="walletOptionsModal" class="modal fade" data-backdrop="static" data-keyboard="false" tabindex="-1" role="dialog" aria-labelledby="walletOptionsModal" aria-hidden="true" data-bind="validationOptions: { insertMessages: false }">
       <div class="modal-dialog">
@@ -505,7 +504,7 @@
             <h4 class="modal-title">Wallet Options <b class="pull-right padding-right-10">v<span data-bind="text: VERSION"></span></b></h4>
           </div>
           <div class="modal-body">
-            
+
             <form class="smart-form"><fieldset>
               <section><div class="row">
                 <label class="control-label col col-sm-2">Theme</label>
@@ -525,7 +524,7 @@
                 <label class="control-label col col-sm-2">Wallet URL</label>
                 <div class="col col-sm-10">
                     <input id="urlPassword" data-bind="value: urlPassword, valueUpdate: 'input'" placeholder="Enter the password to encrypt the passphrase." class="form-control" type="password" name="urlPassword" autocomplete="off">
-                    <textarea id="walletUrl" class="form-control input-lg" rows="4" style="margin-top:5px;font-size:12px" data-bind="value: walletUrl"></textarea>                  
+                    <textarea id="walletUrl" class="form-control input-lg" rows="4" style="margin-top:5px;font-size:12px" data-bind="value: walletUrl"></textarea>
                 </div>
               </div></section>
 
@@ -610,7 +609,7 @@
                     <button type="button" data-bind="click: showInfoTable" class="btn btn-default padding-5">Show Debugging Info</button>
                     <div class="note">Click to show some useful information for troubleshooting wallet issues.</div>
                 </div>
-                
+
               </div></section>
               <section data-bind="fadeVisibleInOnly: infoTableShown && showAdvancedOptions()"><div class="row">
                 <div class="col col-sm-12">
@@ -643,14 +642,14 @@
           <div class="modal-footer">
             <div style="float:left">
               <input type="checkbox" name="showAdvancedOptions" value="1" data-bind="checked: showAdvancedOptions">
-              <label>Advanced Options</label>             
+              <label>Advanced Options</label>
             </div>
             <button type="button" class="btn btn-primary" data-bind="click: hide">Close</button>
           </div>
         </div><!-- /.modal-content -->
       </div><!-- /.modal-dialog -->
     </div><!-- /.modal -->
-    
+
     <!-- modal for support window (in logged in interface) -->
     <div data-bind="showModal: shown" id="supportModal" class="modal" data-backdrop="static" data-keyboard="false" tabindex="-1" role="dialog" aria-labelledby="supportModal" aria-hidden="true">
       <div class="modal-dialog">
@@ -682,7 +681,7 @@
                     <li><a href="https://www.counterparty.co/xcp/" target="_blank">Where can I buy XCP?</a></li>
                     <li><a href="https://www.counterparty.co/?p=2251" target="_blank">I have another issue...</a></li>
                 </ul>
-                <h5 class="margin-bottom-0">For other questions, please ask in <a href="https://forums.counterparty.co/index.php/board,13.0.html" target="_blank">the Counterparty support forums</a>.</h5> 
+                <h5 class="margin-bottom-0">For other questions, please ask in <a href="https://forums.counterparty.co/index.php/board,13.0.html" target="_blank">the Counterparty support forums</a>.</h5>
                 <h5>For bugs, you may <a href="#" class="showCreateSupportCase">open a support ticket</a>.</h5>
             </div>
             <div data-bind="visible: type == 'exchangePage'">
@@ -694,7 +693,7 @@
                     <li><a href="https://www.counterparty.co/?p=2265" target="_blank">Why does it cost me a little Bitcoin to cancel an order!?</a></li>
                     <li><a href="https://www.counterparty.co/?p=2251" target="_blank">I have another issue...</a></li>
                 </ul>
-                <h5 class="margin-bottom-0">For other questions, please ask in <a href="https://forums.counterparty.co/index.php/board,13.0.html" target="_blank">the Counterparty support forums</a>.</h5> 
+                <h5 class="margin-bottom-0">For other questions, please ask in <a href="https://forums.counterparty.co/index.php/board,13.0.html" target="_blank">the Counterparty support forums</a>.</h5>
                 <h5>For bugs, you may <a href="#" class="showCreateSupportCase">open a support ticket</a>.</h5>
             </div>
 
@@ -720,7 +719,7 @@
               Counterparty is non-profit, self-funded, open source and community supported.
               We appreciate any donations, and all donations go directly towards supporting future development.
             </p>
-            
+
             <form class="smart-form"><fieldset>
 
               <section><div class="row">
@@ -753,16 +752,16 @@
                 </div>
               </div></section>
               <p class="formPaddedBot" data-bind="fadeVisibleInOnly: quantity">
-                You are choosing to send 
+                You are choosing to send
                 <b>
                   <span class="sellColor" data-bind="text: quantity"></span>
-                  <span class="sellColor" data-bind="text: donationCurrency"></span> 
+                  <span class="sellColor" data-bind="text: donationCurrency"></span>
                 </b>
                 to support Counterparty development.
               </p>
             </fieldset></form>
             <p class="formPaddedBot">
-                
+
             </p>
           </div>
           <div class="modal-footer">
@@ -772,7 +771,7 @@
         </div><!-- /.modal-content -->
       </div><!-- /.modal-dialog -->
     </div><!-- /.modal -->
-    
+
     <!-- modal for opening a support case -->
     <div data-bind="showModal: shown" id="createSupportCaseModal" class="modal" data-backdrop="static" data-keyboard="false" tabindex="-1" role="dialog" aria-labelledby="createSupportCaseModal" aria-hidden="true">
       <div class="modal-dialog">
@@ -788,7 +787,7 @@
                     <a href="http://support.counterparty.co/" target="_blank">our knowledge base</a> or ask in
                     <a href="https://forums.counterparty.co/index.php/board,13.0.html" target="_blank">our forums</a>.</b></p>
             </div>
-            
+
             <form class="smart-form" data-bind="submit: doAction"><fieldset>
               <section><div class="row">
                 <label class="control-label col col-sm-2">Your Name</label>
@@ -808,7 +807,7 @@
                     <div class="note">Required so that we can provide a response to you.</div>
                 </div>
               </div></section>
-                
+
               <section><div class="row">
                 <label class="control-label col col-sm-2">Problem Description</label>
                 <div class="col col-sm-10">
@@ -818,7 +817,7 @@
                     <div class="note">Enter an in-depth description of your problem<span data-bind="html: dispCharactersRemaining"></span>.</div>
                 </div>
               </div></section>
-              
+
               <section><div class="row">
                 <div class="col col-sm-2"></div>
                 <div class="col col-sm-10">
@@ -828,7 +827,7 @@
                   </label>
                   <div class="note">Check this box to include a screenshot, which helps us better diagnose the issue.</div>
               </div></section>
-              
+
             </fieldset></form>
             <div class="formPaddedBot">We will try to get back to you within <b>24 hours</b>, via email, to the address you have provided.
             </div>
@@ -858,7 +857,7 @@
     <script src="vendors/jquery-ui/ui/minified/jquery.ui.menu.min.js"></script>
     <script src="vendors/jquery-ui/ui/minified/jquery.ui.autocomplete.min.js"></script>
     <script src="vendors/bootstrap/dist/js/bootstrap.min.js"></script> <!-- BOOTSTRAP JS -->
-    
+
     <!-- SmartAdmin JS includes -->
     <script src="vendors/smartadmin/js/smartwidgets/jarvis.widget.min.js"></script> <!-- JARVIS WIDGETS -->
     <script src="vendors/smartadmin/js/plugin/bootstrap-wizard/jquery.bootstrap.wizard.min.js"></script> <!-- bootstrap wizard -->
@@ -871,7 +870,7 @@
     <script src="vendors/smartadmin/js/plugin/datatables/ColVis.min.js"></script>
     <script src="vendors/smartadmin/js/plugin/datatables/ZeroClipboard.js"></script>
     <script src="vendors/smartadmin/js/plugin/datatables/media/js/TableTools.min.js"></script>
-    <script src="vendors/smartadmin/js/plugin/datatables/DT_bootstrap.js"></script>   
+    <script src="vendors/smartadmin/js/plugin/datatables/DT_bootstrap.js"></script>
 
     <!-- JQuery extras -->
     <!--<script src="vendors/jReject/js/jquery.reject.js"></script>-->
@@ -887,7 +886,7 @@
     <script src="vendors/moment/min/moment-with-langs.min.js"></script> <!-- time processing for datetimepicker -->
     <script src="vendors/bootstrap-datetimepicker/build/js/bootstrap-datetimepicker.min.js"></script>
     <script src="vendors/typeahead.js/dist/typeahead.bundle.min.js"></script>
-    
+
     <!-- knockout.js -->
     <script src="vendors/knockoutjs/index.js"></script>
     <script src='vendors/knockout-secure-binding/dist/knockout-secure-binding.js'></script>
@@ -911,7 +910,7 @@
     <script src="vendors/cryptojs/components/core-min.js"></script>
     <script src="vendors/cryptojs/components/sha256-min.js"></script>
     <script src="vendors/cryptojs/components/enc-base64-min.js"></script>
-    <script src="vendors/cryptojs/components/enc-utf16-min.js"></script> 
+    <script src="vendors/cryptojs/components/enc-utf16-min.js"></script>
     <script src="vendors/cryptojs/rollups/hmac-sha512.js"></script>
     <script src="vendors/cryptojs/rollups/aes.js"></script>
 
@@ -928,22 +927,22 @@
 
 
     <!-- COUNTERWALLET JS INCLUDES -->
-    <!-- build:js js/counterwallet-min.js --> 
-  
+    <!-- build:js js/counterwallet-min.js -->
+
     <!-- counterwebdeps -->
     <script src="vendors/counterwebdeps/js/external/mnemonic.js"></script>
     <script src="vendors/counterwebdeps/js/external/qrcode.js"></script>  <!-- from http://d-project.googlecode.com/svn/trunk/misc/qrcode/js/ -->
     <script src="vendors/counterwebdeps/js/consts.js"></script>
-    <script src="vendors/counterwebdeps/js/util.generic.js"></script>  
-    <script src="vendors/counterwebdeps/js/util.analytics.js"></script>  
-    <script src="vendors/counterwebdeps/js/util.bitcore.js"></script>  
+    <script src="vendors/counterwebdeps/js/util.generic.js"></script>
+    <script src="vendors/counterwebdeps/js/util.analytics.js"></script>
+    <script src="vendors/counterwebdeps/js/util.bitcore.js"></script>
     <script src="vendors/counterwebdeps/js/util.api.js"></script>
     <script src="vendors/counterwebdeps/js/util.bitcoin.js"></script>
     <script src="vendors/counterwebdeps/js/util.knockout.js"></script>
-    
+
     <!-- counterwallet-specific -->
     <script src="js/consts.js"></script>
-    <script src="js/util.js"></script> 
+    <script src="js/util.js"></script>
     <script src="js/counterwallet.js"></script>
     <script src="js/counterblock.js"></script>
     <script src="js/messagefeed.js"></script>
