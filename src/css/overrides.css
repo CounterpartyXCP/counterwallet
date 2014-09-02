@@ -516,3 +516,7 @@ body {
 .tab-content>.active {
 	display: block !important;
 }
+
+.jarviswidget header .nav-tabs>li.active>a {
+	background-color: #FAFAFA;
+}
