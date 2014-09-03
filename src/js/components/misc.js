@@ -70,6 +70,7 @@ function CreateSupportCaseViewModel() {
       'problem': self.problem(),
       'screenshot': screenshotData,
       'addtl_info': JSON.stringify({
+        'version': VERSION,
         'currentBlockID': WALLET.networkBlockHeight(),
         'currentMsgID': MESSAGE_FEED.lastMessageIndexReceived(),
         'useTestnet': USE_TESTNET,
