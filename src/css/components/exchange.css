@@ -161,7 +161,9 @@ table.buySellForm .number {
 }
 
 div.buyForm.disabled, div.sellForm.disabled {
-  background-color: #CCC !important;
+  background-color: #F0F0F0 !important;
+  color: #888;
+  border-color: #E9E9E9;
 }
 
 table.confirmOrderBox td {
@@ -235,3 +237,24 @@ div.buySellBtnGroup .radioBtn  {
 #wid-id-select-other-pair input[type=text] {
   text-transform: uppercase !important;
 }
+
+h3.tradeForm {
+	font-weight: 600 !important;
+	font-size: 20px !important;
+}
+
+.sellForm .form-horizontal .control-label, .buyForm .form-horizontal .control-label {
+	text-align: left;
+}
+
+.sellForm .form-horizontal .form-group, .buyForm .form-horizontal .form-group {
+	margin-bottom: 0;
+}
+
+.sellForm .form-horizontal .control-label.nopad, .buyForm .form-horizontal .control-label.nopad {
+	padding-top: 0;
+}
+
+.table-responsive{
+    overflow-x: auto;
+ }

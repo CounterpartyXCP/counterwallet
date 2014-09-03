@@ -1,6 +1,6 @@
 /* OVERRIDES/ENHANCEMENTS TO smartadmin STYLING */
 
-/* 
+/*
  * FORM STYLING OVERRIDES (we have to redo these because we do forms a bit
  * differently than SmartAdmin does, due to our use of knockout)
  */
@@ -38,20 +38,20 @@ p.formPaddedBot, div.formPaddedBot {
     padding-top: 15px; /* reduce a bit */
 }
 
-/* 
+/*
  * LOGO AND ACTIVITY LOG INTERFACE MODIFICATIONS
  */
 span.logoText {
     font-size: 1.6em;
     color: white;
-    
+
 }
 
 #logo img { /* need to use !important here because the google skin has its own logo img style that borks things up */
     width: auto !important;
     height: auto !important;
     position: relative !important;
-    /*bottom: 8px !important;  */  
+    /*bottom: 8px !important;  */
     vertical-align: middle !important;
 }
 
@@ -65,7 +65,7 @@ span.logoText {
     padding-left: 50px;
 }
 #logo span.logoText {
-  
+
     height: 49px !important;
     line-height: 49px !important;
     display: inline-block !important;
@@ -89,20 +89,20 @@ span.logoText {
 }
 
 /* Fix notification windows "nipples" */
-.ajax-dropdown:after, 
+.ajax-dropdown:after,
 .ajax-dropdown:before {
   left: 165px !important;
 }
 
 @media only screen and (max-width : 479px) {
-  .ajax-dropdown:after, 
+  .ajax-dropdown:after,
   .ajax-dropdown:before {
     left: 34px !important;
   }
 }
 
 @media only screen and (min-width : 480px) and (max-width : 665px) {
-  .ajax-dropdown:after, 
+  .ajax-dropdown:after,
   .ajax-dropdown:before {
     left: 28px !important;
   }
@@ -213,12 +213,12 @@ span.logoText {
 }
 
 
-/* 
+/*
  * STYLE SPECIFIC OVERRIDES
  */
 
 /* change dark elegance menu item padding so things fit on one line */
-.smart-style-1 nav ul li a { 
+.smart-style-1 nav ul li a {
     padding: 12px 12px 12px 12px;
 }
 
@@ -342,7 +342,7 @@ section.ordersGrid .jarviswidget>header {
   display: block !important;
 }
 
-.minified #hide-menu>:first-child>a, 
+.minified #hide-menu>:first-child>a,
 .hidden-menu #hide-menu>:first-child>a {
   background-color: #e8e8e8;
   background-image: -moz-linear-gradient(top,#5a5a5a 0,#686868 100%);
@@ -358,7 +358,7 @@ section.ordersGrid .jarviswidget>header {
   border-color: #494949;
 }
 
-.minified #hide-menu i, 
+.minified #hide-menu i,
 .hidden-menu #hide-menu i {
   color: #fff !important;
 }
@@ -379,7 +379,7 @@ section.ordersGrid .jarviswidget>header {
 b.notoAddrColor > a {
   display: inline !important;
 }
-/* 
+/*
  * CSS SMARTADMIN BUG FIXES
  */
 /* this fixes the success box (Confirm & Place Order) on the last page of the Buy/Sell pane so that it displays correctly */
@@ -496,7 +496,27 @@ div.tooltip-inner {
 
 
 .prefFieldPercent {
-  width: 80% !important;
   text-align: right;
-  display: inline-block !important;
+}
+
+.note.advancedWarn {
+	text-align: center;
+	font-size: 14px;
+	line-height: 19px;
+}
+
+body {
+	overflow: auto;
+}
+
+div#historyTabContent.tab-content > div#wid-id-txnHistory.tab-pane, div#historyTabContent.tab-content > div#wid-id-balHistory.tab-pane {
+	display: none !important;
+}
+
+div#historyTabContent.tab-content > div#wid-id-txnHistory.tab-pane.active, div#historyTabContent.tab-content > div#wid-id-balHistory.tab-pane.active {
+	display: block !important;
+}
+
+.jarviswidget header .nav-tabs>li.active>a {
+	background-color: #FAFAFA;
 }
