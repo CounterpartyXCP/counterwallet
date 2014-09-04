@@ -129,3 +129,13 @@ textarea.quickAccessUrl {
 	position: absolute;
 	width: 1px;
 }
+
+#langSelector {
+  text-align: right;
+  padding: 5px 15px;
+}
+
+#langSelector a img { 
+  filter : alpha(opacity=50);
+  opacity : 0.5;
+}

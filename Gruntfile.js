@@ -29,7 +29,8 @@ module.exports = function (grunt) {
             copy: {
                 files: [
                     {src: 'src/robots.txt', dest: buildDir+'robots.txt'},
-                    {cwd: 'src/assets/', src: '*', dest: buildDir+'assets/', expand: true}
+                    {cwd: 'src/assets/', src: '*', dest: buildDir+'assets/', expand: true},
+                    {cwd: 'src/locales/', src: '**/*.json', dest: buildDir+'locales/', expand: true}
                 ]
             }
         }
