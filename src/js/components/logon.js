@@ -258,7 +258,6 @@ function LogonViewModel() {
     }
     
     WALLET_OPTIONS_MODAL.selectedTheme(PREFERENCES['selected_theme']);
-    WALLET_OPTIONS_MODAL.selectedLang(PREFERENCES['selected_lang']);
     
     self.displayLicenseIfNecessary(mustSavePreferencesToServer);
   }
