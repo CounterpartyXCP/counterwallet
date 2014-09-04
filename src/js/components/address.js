@@ -26,6 +26,7 @@ function AddressViewModel(type, key, address, initialLabel, armoryPubKey) {
   self.numPrimedTxouts = ko.observable(null);
   //^ # of unspent txouts for this address fitting our criteria, or null if unknown (e.g. insight is down/not responding)
   self.numPrimedTxoutsIncl0Confirms = ko.observable(null);
+  self.withMovement = ko.observable(false);
 
   self.assets = ko.observableArray([
     new AssetViewModel({address: address, asset: "BTC"}), //will be updated with data loaded from insight
