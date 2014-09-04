@@ -357,6 +357,13 @@ function WalletViewModel() {
         
         addressObj = self.getAddressObj(data[i]['addr']);
         assert(addressObj, "Cannot find address in wallet for refreshing BTC balances!");
+
+        if (data[i]['confirmedRawBal'] > 0 || data[i]['unconfirmedRawBal'] > 0 || 
+            data[i]['numPrimedTxoutsIncl0Confirms'] > 0 || data[i]['numPrimedTxouts'] > 0 ||
+            data[i]['lastTxns'] > 0) {
+          addressObj.withMovement(true);
+        }
+
         if(data[i]['confirmedRawBal'] && !addressObj.IS_WATCH_ONLY) {
           //Also refresh BTC unspent txouts (to know when to "reprime" the account)
           addressObj.numPrimedTxouts(data[i]['numPrimedTxouts']);

@@ -346,7 +346,7 @@ function LogonViewModel() {
 
   self.genMoreAddresses = function() {
     var lastAddress = WALLET.addresses()[WALLET.addresses().length - 1];
-    if (lastAddress.numPrimedTxoutsIncl0Confirms() > 0) {
+    if (lastAddress.withMovement()) {
       var moreAddresses = [];
       for (var a = 1; a <= MORE_ADDRESSES; a++) {
         moreAddresses.push(WALLET.addAddress('normal'));
