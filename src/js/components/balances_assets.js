@@ -427,8 +427,8 @@ function PayDividendModalViewModel() {
   self.assetName = ko.observable('').extend({
     required: true,
     pattern: {
-      message: "Must contain uppercase letters only (A-Z), be at least 4 characters in length, and cannot start with 'A'. (Or, must be 'XCP'.)",
-      params: '^(XCP)|([B-Z][A-Z]{3,})$'
+      message: "Must contain uppercase letters only (A-Z), be at least 4 characters in length, and cannot start with 'A'.",
+      params: '^[B-Z][A-Z]{3,}$'
     },
     isValidAssetNameLength: self,
     assetNameExists: self,

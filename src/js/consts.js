@@ -1,7 +1,7 @@
 /***********
  * GLOBAL CONSTANTS
  ***********/
-var VERSION = "1.5.0 PRE4 BETA";
+var VERSION = "1.5.0 PRE5 BETA";
 var PREFERENCES = {}; //set when logging in
 
 //Addresses
