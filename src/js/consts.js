@@ -6,7 +6,7 @@ var PREFERENCES = {}; //set when logging in
 
 //Addresses
 var DEFAULT_NUM_ADDRESSES = 1; //default number of addresses to generate. Go with 1 for now to be more newbie friendly
-var MORE_ADDRESSES = 1;
+var LOGIN_ADDRESS_GEN_BATCH_SIZE = 4;
 var MAX_ADDRESSES = 20; //totally arbitrary :)
 
 //Order expiration
