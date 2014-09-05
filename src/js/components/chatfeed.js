@@ -90,7 +90,7 @@ function ChatFeedViewModel() {
     //As all users are connected to every chat feed (at least currently), this should return an accurate number
     //If total numbers of servers in the backends list > # servers the client connects to, this will no longer be the case
     //Also, go with the highest number reported back...
-    multiAPIPrimative("get_num_users_online", {}, function(results) {
+    _multiAPIPrimative("get_num_users_online", {}, function(results) {
       var numUsersOnline = 0;
       for(var i=0; i < results.length; i++) {
         if(results[i]['success']) {
