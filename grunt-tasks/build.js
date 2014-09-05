@@ -94,7 +94,7 @@ module.exports = function(grunt) {
         grunt.log.writeln("Original url: "+url);
         var newUrl = url;
         // procession only relatve urls
-        if (/^\/|https:|http:|data:|\?/i.test(url) === false && url != '') {
+        if (/^\/|https:|http:|data:/i.test(url) === false && url != '') {
             var urlPath = Path.resolve(srcfiledir + '/' + url);
 
             // extract query string
