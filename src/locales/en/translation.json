@@ -484,25 +484,8 @@
   "forbiden_country": "It appears that you are located in a country in which we are legally unable to provide this service.",
   "country_warning": "Country warning",
   "testnet_proceed_anyway": "Since you are on testnet, you can choose to proceeed anyway.",
-  "proceed_anyway": "Proceed Anyway"
+  "proceed_anyway": "Proceed Anyway",
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+  "quick_buy": "Quick Buy"
 
 }

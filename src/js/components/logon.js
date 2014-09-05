@@ -160,6 +160,8 @@ function LogonViewModel() {
       
       // set quote assets
       QUOTE_ASSETS = data['quote_assets']
+
+      QUICK_BUY_ENABLE = data['quick_buy_enable'];
       
       //See if any servers show the wallet as online (this will return the a true result, if any server shows the wallet as online)
       multiAPI("is_wallet_online", {'wallet_id': WALLET.identifier()}, self.onIsWalletOnline);
