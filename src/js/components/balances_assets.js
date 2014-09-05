@@ -3,7 +3,7 @@ ko.validation.rules['assetNameIsTaken'] = {
   message: 'Token name is already taken',
   validator: function (val, self, callback) {
     failoverAPI("get_issuances",
-      {'filters': {'field': 'asset', 'op': '==', 'value': val}},
+      {'filters': {'field': 'asset', 'op': '==', 'value': val}, 'status': 'valid'},
       function(data, endpoint) {
         return data.length ? callback(false) : callback(true) //empty list -> true (valid = true)
       }
@@ -15,7 +15,7 @@ ko.validation.rules['assetNameExists'] = {
   async: true,
   message: 'Token name does not exist',
   validator: function (val, self, callback) {
-    failoverAPI("get_issuances", {'filters': {'field': 'asset', 'op': '==', 'value': val}},
+    failoverAPI("get_issuances", {'filters': {'field': 'asset', 'op': '==', 'value': val}, 'status': 'valid'},
       function(data, endpoint) {
         $.jqlog.debug("Asset exists: " + data.length);
         return data.length ? callback(true) : callback(false) //empty list -> false (valid = false)
