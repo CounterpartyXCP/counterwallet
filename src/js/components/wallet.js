@@ -639,17 +639,14 @@ function WalletViewModel() {
     }
   }
 
-  self.storePreferences = function(callback, for_login) {
-    
-    PREFERENCES['num_addresses_used'] = WALLET.addresses().length;
-
+  self.storePreferences = function(callback, forLogin) {
     var params = {
       'wallet_id': WALLET.identifier(),
       'preferences': PREFERENCES,
       'network': USE_TESTNET ? 'testnet' : 'mainnet',
       'referer': ORIG_REFERER
     };
-    if (for_login) {
+    if (forLogin) {
       params['for_login'] = true;
     }
     multiAPI("store_preferences", params, callback);

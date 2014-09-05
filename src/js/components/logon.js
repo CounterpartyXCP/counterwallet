@@ -281,51 +281,72 @@ function LogonViewModel() {
   }
   
   self.genAddress = function(mustSavePreferencesToServer) {
-    var i = WALLET.addresses().length;
-    var address = WALLET.addAddress('normal');
-    var addressHash = hashToB64(address);
+    var moreAddresses = [], i = null;
+    for (i = 0; i < LOGIN_ADDRESS_GEN_BATCH_SIZE; i++) {
+      var address = WALLET.addAddress('normal');
+      var addressHash = hashToB64(address);
+      var len = WALLET.addresses().length;
+      moreAddresses.push(address);
+  
+      if(PREFERENCES.address_aliases[addressHash] === undefined) { //no existing label. we need to set one
+        mustSavePreferencesToServer = true; //if not already true
+        PREFERENCES.address_aliases[addressHash] = "My Address #" + (i + 1);
+      }
 
-    if(PREFERENCES.address_aliases[addressHash] === undefined) { //no existing label. we need to set one
-      mustSavePreferencesToServer = true; //if not already true
-      PREFERENCES.address_aliases[addressHash] = "My Address #" + (i + 1);
+      $.jqlog.info("Address discovery: Generating address " + len + " of " + PREFERENCES['num_addresses_used']
+        + " (num_addresses_used) (" + self.walletGenProgressVal() + "%) -- " + address);
+      if(len <= PREFERENCES['num_addresses_used']) { //for visual effect
+        var progress = len * (100 / PREFERENCES['num_addresses_used']);
+        self.walletGenProgressVal(progress);
+      }
     }
-    
-    var progress = (i + 1) * (100 / PREFERENCES['num_addresses_used']);
-    self.walletGenProgressVal(progress);
-    $.jqlog.debug("Progress: Address " + (i + 1) + " of " + PREFERENCES['num_addresses_used']
-      + " (" + self.walletGenProgressVal() + "%) -- " + address);
 
-    if(i + 1 < PREFERENCES['num_addresses_used']) {
-      setTimeout(function() { self.genAddress(mustSavePreferencesToServer) }, 1);
-    } else {
-      return self.openWalletPt3(mustSavePreferencesToServer);
-    }
+    //if all addresses in the batch are utilized, then generate another batch
+    WALLET.refreshBTCBalances(false, moreAddresses, function() {
+      var generateAnotherBatch = true;
+      for (i = moreAddresses.length - 1; i >= 0; i--) {
+        if(!WALLET.getAddressObj(moreAddresses[i]).withMovement()) { //no movement on this address...remove it
+          assert(WALLET.addresses()[WALLET.addresses().length - 1].ADDRESS == moreAddresses[i]);
+          $.jqlog.info("Address discovery: Address " + moreAddresses[i] + " unused. Trimming...");
+          WALLET.addresses.pop(); //remove this address
+          generateAnotherBatch = false;
+        }
+      }
+       
+      if(generateAnotherBatch) {
+        $.jqlog.info("Address discovery: Generating another batch of " + LOGIN_ADDRESS_GEN_BATCH_SIZE + " addresses...");
+        setTimeout(function() { self.genAddress(mustSavePreferencesToServer) }, 1);
+      } else { //last used address processed as part of this batch
+        if (PREFERENCES['num_addresses_used'] != WALLET.addresses().length) {
+          PREFERENCES['num_addresses_used'] = WALLET.addresses().length;
+          mustSavePreferencesToServer = true;
+        }
+        return self.openWalletPt3(mustSavePreferencesToServer);
+      }
+    });
   }
   
-  self.updateBalances = function(onSuccess) {
+  self.updateBalances = function(additionalBTCAddresses, onSuccess) {
     //updates all balances for all addesses, creating the asset objects on the address if need be
-    WALLET.refreshBTCBalances(true, null, onSuccess);
-    //^ specify true here to start a recurring get BTC balances timer chain 
-    WALLET.refreshCounterpartyBalances(WALLET.getAddressesList());
+    WALLET.refreshBTCBalances(true, additionalBTCAddresses, function() {
+      //^ specify true here to start a recurring get BTC balances timer chain
+      WALLET.refreshCounterpartyBalances(WALLET.getAddressesList(), onSuccess);
+    });
   }
   
   self.openWalletPt3 = function(mustSavePreferencesToServer) {
-    var i = null;
-    
     //add in the armory and watch only addresses
+    var additionalBTCAddresses = [], i = null;
     for(i=0; i < PREFERENCES['armory_offline_addresses'].length; i++) {
       WALLET.addAddress('armory',
         PREFERENCES['armory_offline_addresses'][i]['address'],
         PREFERENCES['armory_offline_addresses'][i]['pubkey_hex']);
+      additionalBTCAddresses.push(PREFERENCES['armory_offline_addresses'][i]['address']);
     }
     for(i=0; i < PREFERENCES['watch_only_addresses'].length; i++) {
       WALLET.addAddress('watch', PREFERENCES['watch_only_addresses'][i]);
+      additionalBTCAddresses.push(PREFERENCES['watch_only_addresses'][i]);
     }
-    /* hide the login div and show the other divs */
-    $('#logon').hide();
-    $('#header').show();
-    $('#left-panel').show();
-    $('#main').show();
     
     //store the preferences on the server(s) for future use
     if(mustSavePreferencesToServer) {
@@ -334,37 +355,16 @@ function LogonViewModel() {
     }
     
     //Update the wallet balances (isAtLogon = true)
-    self.updateBalances(self.genMoreAddresses);
-    
-    trackEvent("Login", "Wallet", "Size", PREFERENCES['num_addresses_used']);
-    trackEvent("Login", "Network", USE_TESTNET ? "Testnet" : "Mainnet");
-    trackEvent("Login", "Country", USER_COUNTRY || 'UNKNOWN');
-    trackEvent("Login", "Language", PREFERENCES['selected_lang']);
-    trackEvent("Login", "Theme", PREFERENCES['selected_theme']);
-  }
-
-  self.genMoreAddresses = function() {
-    var lastAddress = WALLET.addresses()[WALLET.addresses().length - 1];
-    if (lastAddress.withMovement()) {
-      var moreAddresses = [];
-      for (var a = 1; a <= MORE_ADDRESSES; a++) {
-        moreAddresses.push(WALLET.addAddress('normal'));
-      }
-      WALLET.refreshBTCBalances(true, moreAddresses, self.genMoreAddresses);
-      WALLET.refreshCounterpartyBalances(moreAddresses);
-    } else {
-      if (WALLET.addresses().length > 1) { //remove the blank address at the end
-        WALLET.addresses.pop();
-      }
-      if (PREFERENCES['num_addresses_used'] != WALLET.addresses().length) {
-        PREFERENCES['num_addresses_used'] = WALLET.addresses().length;
-        WALLET.storePreferences();
-      }
-      self.openWalletPt4();
-    }
+    self.updateBalances(additionalBTCAddresses, self.openWalletPt4);
   }
     
   self.openWalletPt4 = function() {
+    /* hide the login div and show the other divs */
+    $('#logon').hide();
+    $('#header').show();
+    $('#left-panel').show();
+    $('#main').show();
+
     PENDING_ACTION_FEED.restoreFromLocalStorage(function() {
       //load the waiting btc feed after the pending action feed is all done loading, as we look at the pending action
       // feed to determine whether a btcpay process is in progress (pending) or not
@@ -372,8 +372,14 @@ function LogonViewModel() {
     });
     MESSAGE_FEED.restoreOrder();
     MESSAGE_FEED.resolvePendingRpsMatches();
-    
 
+    //record some metrics...
+    trackEvent("Login", "Wallet", "Size", PREFERENCES['num_addresses_used']);
+    trackEvent("Login", "Network", USE_TESTNET ? "Testnet" : "Mainnet");
+    trackEvent("Login", "Country", USER_COUNTRY || 'UNKNOWN');
+    trackEvent("Login", "Language", PREFERENCES['selected_lang']);
+    trackEvent("Login", "Theme", PREFERENCES['selected_theme']);
+    
     //all done. load the balances screen
     $.jqlog.debug("Login complete. Directing to balances page...");
     window.location.hash = 'pages/balances.html';
