@@ -354,10 +354,11 @@ function LogonViewModel() {
       WALLET.refreshBTCBalances(true, moreAddresses, self.genMoreAddresses);
       WALLET.refreshCounterpartyBalances(moreAddresses);
     } else {
-      if (WALLET.addresses().length > 1) {
+      if (WALLET.addresses().length > 1) { //remove the blank address at the end
         WALLET.addresses.pop();
       }
-      if (PREFERENCES['num_addresses_used'] < WALLET.addresses().length) {
+      if (PREFERENCES['num_addresses_used'] != WALLET.addresses().length) {
+        PREFERENCES['num_addresses_used'] = WALLET.addresses().length;
         WALLET.storePreferences();
       }
       self.openWalletPt4();
