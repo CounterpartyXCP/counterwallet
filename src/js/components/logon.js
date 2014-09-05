@@ -307,8 +307,12 @@ function LogonViewModel() {
       for (i = moreAddresses.length - 1; i >= 0; i--) {
         if(!WALLET.getAddressObj(moreAddresses[i]).withMovement()) { //no movement on this address...remove it
           assert(WALLET.addresses()[WALLET.addresses().length - 1].ADDRESS == moreAddresses[i]);
-          $.jqlog.info("Address discovery: Address " + moreAddresses[i] + " unused. Trimming...");
-          WALLET.addresses.pop(); //remove this address
+          if(WALLET.addresses().length > DEFAULT_NUM_ADDRESSES) {
+            $.jqlog.info("Address discovery: Address " + moreAddresses[i] + " unused. Trimming...");
+            WALLET.addresses.pop(); //remove this address
+          } else {
+            $.jqlog.info("Address discovery: Address " + moreAddresses[i] + " unused, but kept as an initial address.");
+          }
           generateAnotherBatch = false;
         }
       }
