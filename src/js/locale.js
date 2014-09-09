@@ -14,12 +14,27 @@ In locale/en/translation.json:
 }
 
 In html:
+
 <span data-bind="locale: 'key1'"></span> => <span>Hello world</span>
 <span data-bind="locale: 'key2', localeArgs: ['world']"></span> => <span>Hello world</span>
+OR if only one arg
+<span data-bind="locale: 'key2', localeArgs: 'world'"></span> => <span>Hello world</span>
 <input data-bind="localeAttr: {'placeholder': 'key1'}" /> => <input placeholder="Hello world" />
-<input data-bind="localeAttr: {'placeholder': 'key2'}, localeAttrArgs: {'placeholder': ['world']}" /> => <input placeholder="Hello world" />
+<input data-bind="localeAttr: {'placeholder': 'key2'}, localeAttrArgs: {'placeholder': ['world']}" /> => <input placeholder="Hello world" /> 
+OR if only one arg
+<input data-bind="localeAttr: {'placeholder': 'key2'}, localeAttrArgs: {'placeholder': 'world'}" /> => <input placeholder="Hello world" />
+
+Knockout bug workaround for variables args:
+
+in the view model :
+self.world = 'World'
+in the html: 
+<span data-bind="locale: 'key2', localeArgs: world"></span> => <span>Hello world</span>
+OR if more than one args
+<span data-bind="locale: 'key2', localeArgs: {0: world}"></span> => <span>Hello world</span>
 
 In Javascript:
+
 i18n.t('key1') => "Hello world"
 i18n.t('key2', 'world') => "Hello world"
 
@@ -65,9 +80,20 @@ function getLanguage() {
 ko.bindingHandlers['locale'] = {
   update: function(element, valueAccessor, allBindings){
     var key = ko.unwrap(valueAccessor());
-    var args = ko.toJS(allBindings.get('localeArgs') || []);
+
+    var localeArgs = ko.toJS(allBindings.get('localeArgs'));
+    var args = [];
+    if (Object.prototype.toString.call(localeArgs) == "[object Object]") {
+      for (var k in localeArgs) {
+        args.push(localeArgs[k]);
+      }
+    } else if (Object.prototype.toString.call(localeArgs) == "[object Array]") {
+      args = localeArgs;
+    } else if (Object.prototype.toString.call(localeArgs) == "[object String]") {
+      args = [localeArgs];
+    }
+    
     var translation = i18n.t(key, {postProcess: 'sprintf', sprintf: args});
-    //$.jqlog.debug(key + " : " + translation);
     element.innerHTML = translation;
   }
 };
@@ -79,9 +105,18 @@ ko.bindingHandlers['localeAttr'] = {
     for (var attrName in attributes) {
       var args = [];
       if (attributesArgs[attrName]) {
-        args = ko.toJS(attributesArgs[attrName]);
+        attrArgs = ko.toJS(attributesArgs[attrName]);
+        if (Object.prototype.toString.call(attrArgs) == "[object Object]") {
+          for (var k in attrArgs) {
+            args.push(attrArgs[k]);
+          }
+        } else if (Object.prototype.toString.call(attrArgs) == "[object Array]") {
+          args = attrArgs;
+        } else if (Object.prototype.toString.call(attrArgs) == "[object String]") {
+          args = [attrArgs];
+        }
       }
-      var translation = i18n.t(attributes[attrName], {postProcess: 'sprintf', sprintf: args});
+      var translation = i18n.t(attributes[attrName], {postProcess: 'sprintf', sprintf: args}); 
       $(element).attr(attrName, translation);
     }
   }

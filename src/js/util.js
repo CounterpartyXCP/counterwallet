@@ -116,28 +116,3 @@ function checkCountry(action, callback) {
     callback();
   }
 }
-
-ko.bindingHandlers['locale'] = {
-  update: function(element, valueAccessor, allBindings){
-    var key = ko.unwrap(valueAccessor());
-    var args = ko.toJS(allBindings.get('localeArgs') || []);
-    var translation = i18n.t(key, {postProcess: 'sprintf', sprintf: args});
-    //$.jqlog.debug(key + " : " + translation);
-    element.innerHTML = translation;
-  }
-};
-
-ko.bindingHandlers['localeAttr'] = {
-  update: function(element, valueAccessor, allBindings){
-    var attributes = ko.toJS(valueAccessor());
-    var attributesArgs = ko.toJS(allBindings.get('localeAttrArgs') || {});
-    for (var attrName in attributes) {
-      var args = [];
-      if (attributesArgs[attrName]) {
-        args = ko.toJS(attributesArgs[attrName]);
-      }
-      var translation = i18n.t(attributes[attrName], {postProcess: 'sprintf', sprintf: args});
-      $(element).attr(attrName, translation);
-    }
-  }
-};
