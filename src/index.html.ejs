@@ -3,8 +3,8 @@
   <head>
     <meta charset="utf-8">
     <title>{{= name}}</title>
-    <meta content="Counterparty Wallet" name="description">
-    <meta content="Counterparty Developers" name="author">
+    <meta content="{{= name}}" name="description">
+    <meta content="{{= xcp_name}} Developers" name="author">
 
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 
@@ -709,7 +709,7 @@
                   <span class="sellColor" data-bind="text: quantity"></span>
                   <span class="sellColor" data-bind="text: donationCurrency"></span> 
                 </b>
-                to support Counterparty development.
+                to support {{= xcp_name}} development.
               </p>
             </fieldset></form>
             <p class="formPaddedBot">
