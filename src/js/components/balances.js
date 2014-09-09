@@ -489,7 +489,7 @@ function SweepModalViewModel() {
       getAssetInfo(assets).then(function (assetsInfo) {
         //Create an SweepAssetInDropdownItemModel item
         for(var i=0; i < balancesData.length; i++) {
-          assetInfo = $.grep(assetsData, function(e) { return e['asset'] == balancesData[i]['asset']; })[0]; //O(n^2)
+          assetInfo = $.grep(assetsInfo, function(e) { return e['asset'] == balancesData[i]['asset']; })[0]; //O(n^2)
           self.availableAssetsToSweep.push(new SweepAssetInDropdownItemModel(
             balancesData[i]['asset'], balancesData[i]['quantity'], balancesData[i]['normalized_quantity'], assetInfo));
 
