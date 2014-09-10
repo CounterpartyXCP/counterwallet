@@ -344,14 +344,22 @@ function LogonViewModel() {
     //add in the armory and watch only addresses
     var additionalBTCAddresses = [], i = null;
     for(i=0; i < PREFERENCES['armory_offline_addresses'].length; i++) {
-      WALLET.addAddress('armory',
-        PREFERENCES['armory_offline_addresses'][i]['address'],
-        PREFERENCES['armory_offline_addresses'][i]['pubkey_hex']);
-      additionalBTCAddresses.push(PREFERENCES['armory_offline_addresses'][i]['address']);
+      try {
+        WALLET.addAddress('armory',
+          PREFERENCES['armory_offline_addresses'][i]['address'],
+          PREFERENCES['armory_offline_addresses'][i]['pubkey_hex']);
+        additionalBTCAddresses.push(PREFERENCES['armory_offline_addresses'][i]['address']);
+      } catch(e) {
+        $.jqlog.error("Could not generate armory address: " + e);
+      }
     }
     for(i=0; i < PREFERENCES['watch_only_addresses'].length; i++) {
-      WALLET.addAddress('watch', PREFERENCES['watch_only_addresses'][i]);
-      additionalBTCAddresses.push(PREFERENCES['watch_only_addresses'][i]);
+      try {
+        WALLET.addAddress('watch', PREFERENCES['watch_only_addresses'][i]);
+        additionalBTCAddresses.push(PREFERENCES['watch_only_addresses'][i]);
+      } catch(e) {
+        $.jqlog.error("Could not generate watch only address: " + e);
+      }
     }
     
     //store the preferences on the server(s) for future use
