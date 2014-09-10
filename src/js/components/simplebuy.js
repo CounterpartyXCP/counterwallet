@@ -35,34 +35,34 @@ function SimpleBuyViewModel() {
             var quoteAsset = t == 'sell' ? data[m]['base-asset'] : data[m]['quote-asset'];
 
             attributes[t].push({
-              'label': 'Min. amount',
+              'label': i18n.t('min_amount'),
               'value': data[m][t]['min-amount'] + ' ' + quoteAsset,
               'attrclass': 'min-amount'
             });
             attributes[t].push({
-              'label': 'Max. amount',
+              'label': i18n.t('max_amount'),
               'value': data[m][t]['max-amount'] + ' ' + quoteAsset,
               'attrclass': 'max-amount'
             });
             if (data[m][t]['reserve']) {
               attributes[t].push({
-                'label': 'Reserve balance',
+                'label': i18n.t('reserve_balance'),
                 'value': data[m][t]['reserve'] + ' ' + baseAsset,
                 'attrclass': 'reserve'
               });
             }
             attributes[t].push({
-              'label': 'Confirmations required',
-              'value':  data[m][t]['confirmations-required'],
+              'label': i18n.t('confirmations_required'),
+              'value': data[m][t]['confirmations-required'],
               'attrclass': 'confirmations-required'
             });
             attributes[t].push({
-              'label': 'Current price',
+              'label': i18n.t('current_price'),
               'value':  data[m][t]['price'] + ' ' + data[m]['quote-asset'],
               'attrclass': 'price'
             });
             attributes[t].push({
-              'label': 'Fees',
+              'label': i18n.t('fees'),
               'value': (data[m][t]['fees'] * 100) + '%',
               'attrclass': 'fees'
             });
@@ -79,23 +79,23 @@ function SimpleBuyViewModel() {
         }
 
         attributes['buy'].push({
-          'label': 'Start',
+          'label': i18n.t('start'),
           'value':  moment(data[m]['start'] * 1000).format("MMM Do YYYY, h:mm:ss a"),
           'attrclass': 'date'
         });
         attributes['buy'].push({
-          'label': 'End',
+          'label': i18n.t('end'),
           'value':  moment(data[m]['end'] * 1000).format("MMM Do YYYY, h:mm:ss a"),
           'attrclass': 'date'
         });
         attributes['buy'].push({
-          'label': 'Confirmations required',
-          'value':  data[m]['buy']['confirmations-required'],
+          'label': i18n.t('confirmations_required'),
+          'value': data[m]['buy']['confirmations-required'],
           'attrclass': 'confirmations-required'
         });
         attributes['buy'].push({
-          'label': 'Amount reached',
-          'value':  data[m]['amount-reached'] + ' ' + data[m]['quote-asset'],
+          'label': i18n.t('amount_reached'),
+          'value': data[m]['amount-reached'] + ' ' + data[m]['quote-asset'],
           'attrclass': 'amount-reached'
         });
 
@@ -114,17 +114,14 @@ function SimpleBuyViewModel() {
         data[m]['selldescription'] = data[m]['sell']['description'];
       }
     }
-    $.jqlog.debug(data);
     self.machines(data);
   }
   
   self.buy = function(machine) {
-    $.jqlog.debug(machine);
     VEND_MODAL.show(machine, 'buy');
   }
 
   self.sell = function(machine) {
-    $.jqlog.debug(machine);
     VEND_MODAL.show(machine, 'sell');
   }
 }
@@ -143,7 +140,7 @@ function VendingMachineViewModel() {
         var quantity = self.quantity();
         return parseFloat(quantity) <= self.balances[address];
       },
-      message: 'Quantity entered exceeds the address balance.',
+      message: i18n.t('quantity_exceeds_balance'),
       params: self
     }    
   }
@@ -220,12 +217,19 @@ function VendingMachineViewModel() {
       destination: self.desinationAddress(),
       _divisible: true
     };
-    $.jqlog.debug(params);
+    
     var onSuccess = function(txHash, data, endpoint, addressType, armoryUTx) {
-      var message = "<b>You " + (armoryUTx ? "are choosing to send" : "chose to send") + self.quantity()
-        + " " + self.currency() + " to " + self.desinationAddress() + "</b> ";
-      WALLET.showTransactionCompleteDialog(message + ACTION_PENDING_NOTICE, message, armoryUTx);
+      var message = "<b>";
+      if (armoryUTx) {
+        message += i18n.t("you_are_choosing_to_send_from_to", self.quantity(), self.currency(), self.desinationAddress());
+      } else {
+        message += i18n.t("you_are_chose_to_send_from_to", self.quantity(), self.currency(), self.desinationAddress());
+      }
+      message += "</b> ";
+
+      WALLET.showTransactionCompleteDialog(message + " " + i18n.t(ACTION_PENDING_NOTICE), message, armoryUTx);
     }
+
     WALLET.doTransaction(self.sourceAddress(), "create_send", params, onSuccess);
     self.hide();
   }
