@@ -167,21 +167,21 @@ function LogonViewModel() {
     },
     function(jqXHR, textStatus, errorThrown, endpoint) {
       var message = describeError(jqXHR, textStatus, errorThrown);
-      bootbox.alert("No counterparty servers are currently available. Please try again later. ERROR: " + message);
+      bootbox.alert(i18n.t("no_counterparty_error", message));
     });
   }
 
   self.onIsWalletOnline = function(isOnline, endpoint) {
     if(isOnline) {
       trackEvent("Login", "Wallet", "IsAlreadyOnline");
-      var message = "<b class='errorColor'>You appear to be logged into Counterwallet elsewhere.</b> It's not safe to be logged into the same wallet account from multiple devices at the same time. If you are sure that this is not the case, press Continue. Otherwise, please press Cancel, logout from your other device, and try again.";
+      var message = i18n.t("multi_connection");
       
       bootbox.dialog({
-        title: "Confirm connection",
+        title: i18n.t("confirm_connection"),
         message: message,
         buttons: {
           "cancel": {
-            label: "Cancel",
+            label: i18n.t("cancel"),
             className: "btn-danger",
             callback: function() {
               bootbox.hideAll();
@@ -190,7 +190,7 @@ function LogonViewModel() {
             }
           },
           "continue": {
-            label: "Continue",
+            label: i18n.t("continue"),
             className: "btn-primary",
             callback: function() {
               multiAPINewest("get_preferences", {
@@ -290,7 +290,7 @@ function LogonViewModel() {
   
       if(PREFERENCES.address_aliases[addressHash] === undefined) { //no existing label. we need to set one
         mustSavePreferencesToServer = true; //if not already true
-        PREFERENCES.address_aliases[addressHash] = "My Address #" + (i + 1);
+        PREFERENCES.address_aliases[addressHash] = i18n.t("default_address_label", (i + 1));
       }
 
       $.jqlog.info("Address discovery: Generating address " + len + " of " + PREFERENCES['num_addresses_used']
@@ -507,7 +507,7 @@ function LogonPasswordModalViewModel() {
     $('#logonPassphaseModal input').keyboard({
       display: {
         'bksp'   :  "\u2190",
-        'accept' : 'Accept',
+        'accept' : i18n.t('accept'),
       },
       layout: 'custom',
       customLayout: {

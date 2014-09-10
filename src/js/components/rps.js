@@ -12,7 +12,7 @@ function RpsViewModel() {
         var wager = self.wager();
         return parseFloat(wager) <= self.balances[address];
       },
-      message: 'Wager entered exceeds the address balance.',
+      message: i18n.t("wager_exceeds_balance"),
       params: self
     }    
   }
@@ -35,7 +35,7 @@ function RpsViewModel() {
     {name: 'lizard', value: 5, win:[2, 4], lose:[1, 3]}
   ]);
 
-  self.move_names = ['NA', 'Rock', 'Paper', 'Scissors', 'Spock', 'Lizard'];
+  self.move_names = [i18n.t('na'), i18n.t('rock'), i18n.t('paper'), i18n.t('scissors'), i18n.t('spock'), i18n.t('lizard')];
 
   self.wagers = ko.observableArray(0);
   self.move = ko.observable(null);
@@ -174,18 +174,18 @@ function RpsViewModel() {
       } 
       var game = {};
 
-      game['status_html'] = '<span class="label label-'+classes[data[i]['status']]+'">'+data[i]['status']+'</span>';
+      game['status_html'] = '<span class="label label-'+classes[data[i]['status']]+'">'+i18n.t(data[i]['status'])+'</span>';
       game['block_index'] = data[i]['block_index'];
       game['address_label'] = self.addressesLabels[data[i]['address']] || data[i]['address'];
       game['wager'] = normalizeQuantity(data[i]['wager']) + ' XCP';
       game['move_str'] = self.move_names[data[i]['move']];
       game['countermove_str'] = self.move_names[data[i]['counter_move']];
       if (data[i]['possible_moves'] == 3) {
-        game['game_type'] = 'RPS'
+        game['game_type'] = i18n.t('rps');
       } else if (data[i]['possible_moves'] == 5) {
-        game['game_type'] = 'RPSSL'
+        game['game_type'] = i18n.t('rpssl');
       } else {
-        game['game_type'] = data[i]['possible_moves']+ 'moves'
+        game['game_type'] = i18n.t("x_moves", data[i]['possible_moves']);
       }
       if (data[i]['status'] == 'pending' || data[i]['status'] == 'open') {
         game['expiration'] = '~ ' + expireDate(data[i]['expiration']) + ' (' + data[i]['expiration'] + ')';
@@ -206,7 +206,7 @@ function RpsViewModel() {
 
   self.updatePlayLabel = function(value) {
     if (self.wager() && self.move()) {
-      self.playLabel('Play <b>' + self.wager() + ' XCP</b> on <b>'+self.move().name.toUpperCase() + '</b>');
+      self.playLabel(i18n.t("play_x_on_move", self.wager(), self.move().name.toUpperCase()));
     } else {
       self.playLabel('');
     }
@@ -244,7 +244,7 @@ function RpsViewModel() {
     }
 
     if (self.balances[self.sourceAddress()] < self.wager()) {
-      bootbox.alert("None of your addresses contain enough XCP");
+      bootbox.alert(i18n.t("no_enough_xcp"));
       return false;
     }
     var moveParams = self.generateMoveRandomHash(self.move().value);
@@ -260,16 +260,18 @@ function RpsViewModel() {
     var onSuccess = function(txHash, data, endpoint, addressType, armoryUTx) {
       MESSAGE_FEED.setOpenRPS(self.sourceAddress(), txHash, moveParams);
 
-      var warn = '<b class="errorColor">Please stay logged in so that the game(s) can be properly resolved.' 
-      warn += ' Once your game has been matched, it will take one more block for the game to complete.'
-      warn += ' Be careful, if you close the Wallet before the end of the game you can lose money!!</b><br />';
+      var warn = '<b class="errorColor">' + i18n.t('rps_please_stay_logged') + '</b><br />';
       
-      var message = "<b>You " + (armoryUTx ? "will be placing" : "have placed") + self.wager() + " XCP on "
-        + self.move().name.toUpperCase() + ".</b> " + warn;
+      var message = "";
+      if (armoryUTx) {
+        message = "<b>" + i18n.t("you_will_placing_rps", self.wager(), self.move().name.toUpperCase()) + "</b>" + warn;
+      } else {
+        message = "<b>" + i18n.t("have_placed_rps", self.wager(), self.move().name.toUpperCase()) + "</b> " + warn;
+      }
       
       self.init();
       self.pendingRPS(true);
-      WALLET.showTransactionCompleteDialog(message + ACTION_PENDING_NOTICE, message, armoryUTx);
+      WALLET.showTransactionCompleteDialog(message + " " + i18n.t(ACTION_PENDING_NOTICE), message, armoryUTx);
     }
     WALLET.doTransaction(self.sourceAddress(), "create_rps", param, onSuccess);
     return false; 

@@ -196,7 +196,7 @@ function AddressViewModel(type, key, address, initialLabel, armoryPubKey) {
     //Show the QR code for this address
     var qrcode = makeQRCode(self.ADDRESS);
     //Pop up a modal with this code
-    bootbox.alert('<center><h4>QR Code for <b>' + self.ADDRESS + '</b></h4><br/>' + qrcode + '</center>');
+    bootbox.alert('<center><h4>' + i18n.t('qr_code_for', self.ADDRESS) + '</h4><br/>' + qrcode + '</center>');
   }
 
   self.showPrivateKey = function() {
@@ -240,10 +240,7 @@ function AddressViewModel(type, key, address, initialLabel, armoryPubKey) {
 
     var xcpBalance = WALLET.getBalance(self.ADDRESS, 'XCP');
     if(xcpBalance < ASSET_CREATION_FEE_XCP) {
-      bootbox.alert("You need at least <b class='notoAmountColor'>" + ASSET_CREATION_FEE_XCP + "</b> <b class='notoAssetColor'>XCP</b>"
-        + " to create a token, however, your current balance is only"
-        + " <b class='notoAmountColor'>" + xcpBalance + "</b> <b class='notoAssetColor'>XCP</b>."
-        + "<br/><br/>Please deposit more <b class='notoAssetColor'>XCP</b> into this address and try again.");
+      bootbox.alert(i18n.t("no_enough_for_issuance_fee"), ASSET_CREATION_FEE_XCP, xcpBalance);
       return false;
     }
 

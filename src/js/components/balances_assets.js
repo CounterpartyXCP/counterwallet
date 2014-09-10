@@ -1,6 +1,6 @@
 ko.validation.rules['assetNameIsTaken'] = {
   async: true,
-  message: 'Token name is already taken',
+  message: i18n.t('token_already_exists'),
   validator: function (val, self, callback) {
     failoverAPI("get_issuances",
       {'filters': {'field': 'asset', 'op': '==', 'value': val}, 'status': 'valid'},
@@ -13,7 +13,7 @@ ko.validation.rules['assetNameIsTaken'] = {
 // TODO: DRY!!
 ko.validation.rules['assetNameExists'] = {
   async: true,
-  message: 'Token name does not exist',
+  message: i18n.t('token_dont_exists'),
   validator: function (val, self, callback) {
     failoverAPI("get_issuances", {'filters': {'field': 'asset', 'op': '==', 'value': val}, 'status': 'valid'},
       function(data, endpoint) {
@@ -35,13 +35,13 @@ ko.validation.rules['isValidAssetNameLength'] = {
       assert(n >= Math.pow(26, 3)); //should have been checked already
       return n <= MAX_INT;
     },
-    message: 'Asset name is too long, or too short'
+    message: i18n.t('asset_length_invalid')
 };
 ko.validation.rules['isValidAssetDescription'] = {
     validator: function (val, self) {
       return byteCount(val) <= MAX_ASSET_DESC_LENGTH;
     },
-    message: 'Token description is more than ' + MAX_ASSET_DESC_LENGTH + ' bytes long.'
+    message: i18n.t('token_desc_too_long', MAX_ASSET_DESC_LENGTH)
 };
 ko.validation.registerExtenders();
 
@@ -52,7 +52,7 @@ function CreateAssetModalViewModel() {
   self.name = ko.observable('').extend({
     required: true,
     pattern: {
-      message: "Must contain uppercase letters only (A-Z), be at least 4 characters in length, and cannot start with 'A'.",
+      message: i18n.t("token_name_rules"),
       params: '^[B-Z][A-Z]{3,}$'
     },
     isValidAssetNameLength: self,
@@ -74,13 +74,13 @@ function CreateAssetModalViewModel() {
     // field validation not working if this field is empty). This is temporary...
     date: true,
     required: {
-      message: "Call date is required if the token is callable",
+      message: i18n.t("call_date_required"),
       onlyIf: function () { return (self.callable() === true); }
     }
   });
   self.callPrice = ko.observable(0).extend({
     required: {
-      message: "Call price is required if the token is callable",
+      message: i18n.t("call_price_required"),
       onlyIf: function () { return (self.callable() === true); }
     },
     isValidPositiveQuantityOrZero: self
@@ -124,12 +124,12 @@ function CreateAssetModalViewModel() {
     var rawQuantity = denormalizeQuantity(quantity, self.divisible());
     
     if(rawQuantity > MAX_INT) {
-      bootbox.alert("The quantity desired to be issued for this token is too high.");
+      bootbox.alert(i18n.t("issuance_quantity_too_high"));
       return false;
     }
     
     if(self.callable() && self.callDate() <= new Date()) {
-      bootbox.alert("Call date cannot be in the past.");
+      bootbox.alert(i18n.t("call_date_in_past"));
       return false;
     }
     
@@ -145,12 +145,16 @@ function CreateAssetModalViewModel() {
         transfer_destination: null
       },
       function(txHash, data, endpoint, addressType, armoryUTx) {
-        var message = "Your token <b class='notoAssetColor'>" + self.name() + "</b> "
-          + (armoryUTx ? "will be created" : "has been created") + ".<br/><br/>"
-          + "It will automatically appear under the appropriate address once the network"
-          + " has confirmed it, and your address <b class='notoAddrColor'>" + getAddressLabel(self.address())
-          +  "</b> will be deducted by <b class='notoQuantityColor'>" + ASSET_CREATION_FEE_XCP + "</b> <b class='notoAssetColor'>XCP</b>. ";
-        WALLET.showTransactionCompleteDialog(message + ACTION_PENDING_NOTICE, message, armoryUTx);
+        var message = "";
+        if (armoryUTx) {
+          message = i18n.t("token_will_be_created", self.name());
+        } else {
+          message = i18n.t("token_has_been_created", self.name());
+        }
+        message +=  "<br/><br/>";
+        message += i18n.t("issuance_end_message", getAddressLabel(self.address()), ASSET_CREATION_FEE_XCP);
+
+        WALLET.showTransactionCompleteDialog(message + " " + i18n.t(ACTION_PENDING_NOTICE), message, armoryUTx);
       }
     );
     self.shown(false);
@@ -186,7 +190,7 @@ function IssueAdditionalAssetModalViewModel() {
       validator: function (val, self) {
         return self.rawAdditionalIssue() + self.asset().rawSupply() <= MAX_INT;
       },
-      message: 'This issuance would exceed the hard limit for maximum quantity.',
+      message: i18n.t('issuance_exceed_max_quantity'),
       params: self
     }    
   });
@@ -234,10 +238,14 @@ function IssueAdditionalAssetModalViewModel() {
       function(txHash, data, endpoint, addressType, armoryUTx) {
         self.shown(false);
         
-        var message = "You " + (armoryUTx ? "will be issuing" : "have issued") + " <b class='notoQuantityColor'>"
-          + self.additionalIssue() + "</b> additional" + " quantity on your token <b class='notoAssetColor'>"
-          + self.asset().ASSET + "</b>. ";
-        WALLET.showTransactionCompleteDialog(message + ACTION_PENDING_NOTICE, message, armoryUTx);
+        var message = ""; 
+        if (armoryUTx) {
+          message = i18n.t("you_will_be_issuing", self.additionalIssue(), self.asset().ASSET);
+        } else {
+          message = i18n.t("you_have_issued", self.additionalIssue(), self.asset().ASSET);
+        }
+        
+        WALLET.showTransactionCompleteDialog(message + " " + i18n.t(ACTION_PENDING_NOTICE), message, armoryUTx);
       }
     );
     trackEvent('Assets', 'IssueAdditionalAsset');
@@ -304,9 +312,13 @@ function TransferAssetModalViewModel() {
       function(txHash, data, endpoint, addressType, armoryUTx) {
         self.shown(false);
         
-        var message = "<b class='notoAssetColor'>" + self.asset().ASSET + "</b> " + (armoryUTx ? "will be" : "has been")
-          + " transferred to <b class='notoAddressColor'>" + self.destAddress() + "</b>. ";
-        WALLET.showTransactionCompleteDialog(message + ACTION_PENDING_NOTICE, message, armoryUTx);
+        var message = "";
+        if (armoryUTx) {
+          message = i18n.t("asset_will_be_transfered", self.asset().ASSET, self.destAddress());
+        } else {
+          message = i18n.t("asset_has_been_transfered", self.asset().ASSET, self.destAddress());
+        }
+        WALLET.showTransactionCompleteDialog(message + " " + i18n.t(ACTION_PENDING_NOTICE), message, armoryUTx);
       }
     );
     trackEvent('Assets', 'TransferAsset');
@@ -340,7 +352,7 @@ function ChangeAssetDescriptionModalViewModel() {
       validator: function (val, self) {
         return self.newDescription() != self.asset().description();
       },
-      message: 'This description is the same as the current description.',
+      message: i18n.t('same_description_token'),
       params: self
     },    
     newDescIsNotSameAsCurrentDesc: self
@@ -352,7 +364,7 @@ function ChangeAssetDescriptionModalViewModel() {
 
   self.dispCharactersRemaining = ko.computed(function() {
     if(!self.newDescription() || self.newDescription().length > MAX_ASSET_DESC_LENGTH) return '';
-    return ' (<b>' + (MAX_ASSET_DESC_LENGTH - byteCount(self.newDescription())) + '</b> bytes remaining)';
+    return ' (' + i18n.t('x_bytes_remaining', MAX_ASSET_DESC_LENGTH - byteCount(self.newDescription())) + ')';
   }, self);
     
   self.validationModel = ko.validatedObservable({
@@ -387,10 +399,13 @@ function ChangeAssetDescriptionModalViewModel() {
       },
       function(txHash, data, endpoint, addressType, armoryUTx) {
         self.shown(false);
-
-        var message = "The description for token <b class='notoAssetColor'>" + self.asset().ASSET + "</b> "
-          + (armoryUTx ? "will be" : "has been") + " changed to <b>" + self.newDescription() + "</b>. ";
-        WALLET.showTransactionCompleteDialog(message + ACTION_PENDING_NOTICE, message, armoryUTx);
+        var message = "";
+        if (armoryUTx) {
+          message = i18n.t("desc_will_be_changed", self.asset().ASSET, self.newDescription());
+        } else {
+          message = i18n.t("desc_has_been_changed", self.asset().ASSET, self.newDescription());
+        } 
+        WALLET.showTransactionCompleteDialog(message + " " + i18n.t(ACTION_PENDING_NOTICE), message, armoryUTx);
       }
     );
     trackEvent('Assets', 'ChangeAssetDescription');
@@ -415,7 +430,7 @@ var DividendAssetInDropdownItemModel = function(asset, rawBalance, normalizedBal
   this.ASSET = asset;
   this.RAW_BALANCE = rawBalance; //raw
   this.NORMALIZED_BALANCE = normalizedBalance; //normalized
-  this.SELECT_LABEL = asset + " (bal: " + normalizedBalance + ")";
+  this.SELECT_LABEL = asset + " (" + i18n.t('bal') + ": " + normalizedBalance + ")";
 };
 function PayDividendModalViewModel() {
   var self = this;
@@ -427,7 +442,7 @@ function PayDividendModalViewModel() {
   self.assetName = ko.observable('').extend({
     required: true,
     pattern: {
-      message: "Must contain uppercase letters only (A-Z), be at least 4 characters in length, and cannot start with 'A'.",
+      message: i18n.t("token_name_rules"),
       params: '^[B-Z][A-Z]{3,}$'
     },
     isValidAssetNameLength: self,
@@ -445,7 +460,7 @@ function PayDividendModalViewModel() {
         }
         return supply > 0
       },
-      message: 'No dividend to distribute.',
+      message: i18n.t('no_dividend_to_distribute'),
       params: self
     }
   });
@@ -470,7 +485,7 @@ function PayDividendModalViewModel() {
         if(self.dividendAssetBalRemainingPostPay() === null) return true; //wait until dividend asset chosen to validate
         return self.dividendAssetBalRemainingPostPay() >= 0;
       },
-      message: 'The total distribution would exceed the address\' balance for the selected Distribution Token.',
+      message: i18n.t('total_diviend_exceed_balance'),
       params: self
     }]
   });
@@ -566,11 +581,13 @@ function PayDividendModalViewModel() {
     WALLET.doTransaction(self.addressVM().ADDRESS, "create_dividend", params,
       function(txHash, data, endpoint, addressType, armoryUTx) {
         self.shown(false);
-        
-        var message = "You " + (armoryUTx ? "will be paying" : "have paid") + " a distribution of <b class='notoQuantityColor'>"
-          + self.quantityPerUnit() + "</b>" + " <b class='notoAssetColor'>" + self.selectedDividendAsset()
-          + "</b> per outstanding unit to holders of token" + " <b class='notoAssetColor'>" + self.assetData().asset + "</b>. ";
-        WALLET.showTransactionCompleteDialog(message + ACTION_PENDING_NOTICE, message, armoryUTx);
+        var message = "";
+        if (armoryUTx) {
+          message = i18n.t("you_will_paying_dividend", self.quantityPerUnit(), self.selectedDividendAsset(), self.assetData().asset);
+        } else {
+          message = i18n.t("you_have_paid_dividend", self.quantityPerUnit(), self.selectedDividendAsset(), self.assetData().asset);
+        }
+        WALLET.showTransactionCompleteDialog(message + " " + i18n.t(ACTION_PENDING_NOTICE), message, armoryUTx);
       }
     );
     trackEvent('Assets', 'PayDividend');
@@ -631,7 +648,7 @@ function CallAssetModalViewModel() {
         if(self.xcpBalRemainingPostCall() === null) return true; //wait until dividend asset chosen to validate
         return self.xcpBalRemainingPostCall() >= 0;
       },
-      message: 'The total dividend would exceed the address\' balance for the selected Dividend Token.',
+      message: i18n.t('total_diviend_exceed_balance'),
       params: self
     }    
   });
@@ -720,11 +737,14 @@ function CallAssetModalViewModel() {
       function(txHash, data, endpoint, addressType, armoryUTx) {
         self.shown(false);
 
-        var message = "You " + (armoryUTx ? "will be calling back" : "have called back")
-          + " <b class='notoQuantityColor'>" + self.percentageToCall() + "%</b>"
-          + " of token <b class='notoAssetColor'>" + self.asset() + "</b>"
-          + " for the price of <b class='notoQuantityColor'>" + self.totalXCPPay() + "</b> <b class='notoAssetColor'>XCP</b>. ";
-        WALLET.showTransactionCompleteDialog(message + ACTION_PENDING_NOTICE, message, armoryUTx);
+        var message = "";
+        if (armoryUTx) {
+          message = i18n.t("you_will_calling_back", self.percentageToCall(), self.asset(), self.totalXCPPay());
+        } else {
+          message = i18n.t("you_have_called_back", self.percentageToCall(), self.asset(), self.totalXCPPay());
+        }
+        
+        WALLET.showTransactionCompleteDialog(message + " " + i18n.t(ACTION_PENDING_NOTICE), message, armoryUTx);
       }
     );
     trackEvent('Assets', 'CallAsset');
@@ -746,8 +766,7 @@ function CallAssetModalViewModel() {
     var callDate = new Date(0);
     callDate.setUTCSeconds(self.assetObj().CALLDATE);
     if(callDate > nowUTC) {
-      bootbox.alert("Token <b class='notoAssetColor'>" + self.asset()
-      + "</b> cannot be called until " + self.assetObj().dispCallDate());
+      bootbox.alert(i18n.t("token_not_callable_until", self.asset(), self.assetObj().dispCallDate()));
       return;
     }
     self.shown(true);
@@ -771,23 +790,19 @@ var AssetHistoryItemModel = function(historyObj) {
   self.dispDescription = function() {
     var desc = '';
     if(self.HISTORYOBJ['type'] == 'created') {
-      desc = "Token created with description '<b>" + self.HISTORYOBJ['description']
-        + "</b>' and total issuance of <Am>" + numberWithCommas(self.HISTORYOBJ['total_issued_normalized']) + "</Am> units."
-        + " Owned by address <Ad>" + getAddressLabel(self.HISTORYOBJ['owner']) + "</Ad>";
+      desc = i18n.t("token_created", self.HISTORYOBJ['description'], numberWithCommas(self.HISTORYOBJ['total_issued_normalized']), getAddressLabel(self.HISTORYOBJ['owner']));
     } else if(self.HISTORYOBJ['type'] == 'issued_more') {
-      desc = "An additional <Am>" + numberWithCommas(self.HISTORYOBJ['additional_normalized']) + "</Am> units issued."
-        + " Total issuance increased to <Am>" + numberWithCommas(self.HISTORYOBJ['total_issued_normalized']) + "</Am> units";
+      desc = i18n.t("additional_issuance_done", numberWithCommas(self.HISTORYOBJ['additional_normalized']), numberWithCommas(self.HISTORYOBJ['total_issued_normalized']));
     } else if(self.HISTORYOBJ['type'] == 'changed_description') {
-      desc = "Description changed to '<b>" + self.HISTORYOBJ['new_description'] + "</b>'";
+      desc = i18n.t("descripition_changed_to", self.HISTORYOBJ['new_description']);
     } else if(self.HISTORYOBJ['type'] == 'locked') {
-      desc = "Token locked";
+      desc = i18n.t("token_locked");
     } else if(self.HISTORYOBJ['type'] == 'transferred') {
-      desc = "Token transferred from address <Ad>" + getAddressLabel(self.HISTORYOBJ['prev_owner'])
-        + "</Ad> to address <Ad>" + getAddressLabel(self.HISTORYOBJ['new_owner']) + "</Ad>";
+      desc = i18n.t("token_transferred_from_to", getAddressLabel(self.HISTORYOBJ['prev_owner']), getAddressLabel(self.HISTORYOBJ['new_owner']));
     } else if(self.HISTORYOBJ['type'] == 'called_back') {
-      desc = "<Am>" + self.HISTORYOBJ['percentage'] + "%</Am> of token called back";
+      desc = i18n.t("x_tokens_called_back", self.HISTORYOBJ['percentage']);
     } else {
-      desc = "UNKNOWN OP: <b>" + self.HISTORYOBJ['type'] + "</b>";
+      desc = i18n.t("unknown_op") + " <b>" + self.HISTORYOBJ['type'] + "</b>";
     }
     
     desc = desc.replace(/<Am>/g, '<b class="notoQuantityColor">').replace(/<\/Am>/g, '</b>');

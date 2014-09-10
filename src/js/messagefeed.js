@@ -395,8 +395,8 @@ function MessageFeed() {
     // (do this even in cases where the entry does not exist in pendingActions, as the user could have logged out and back in)
     if(message['_status'] && _.startsWith(message['_status'], 'invalid') && WALLET.getAddressObj(message['source'])) {
       var actionText = PendingActionViewModel.calcText(category, message); //nice "good enough" shortcut method here
-      bootbox.alert("<b class='errorColor'>Network processing of the following action failed:</b><br/><br/>"
-        + actionText + "<br/><br/><b>Reason:</b> " + message['_status']);
+      bootbox.alert("<b class='errorColor'>" + i18n.t('network_processing_failed') + ":</b><br/><br/>"
+        + actionText + "<br/><br/><b>" + i18n.t("reason") + ":</b> " + message['_status']);
     }
 
     //Insert the message into the stats page (if it has been initialized)

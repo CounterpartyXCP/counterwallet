@@ -37,7 +37,7 @@ function CreateSupportCaseViewModel() {
   
   self.dispCharactersRemaining = ko.computed(function() {
     if(!self.problem() || self.problem().length > MAX_SUPPORT_CASE_PROBLEM_LEN) return '';
-    return ' (<b>' + (MAX_SUPPORT_CASE_PROBLEM_LEN - self.problem().length) + '</b> characters remaining)';
+    return ' (' + i18n.t("x_characters_remaining", MAX_SUPPORT_CASE_PROBLEM_LEN - self.problem().length) + ')';
   }, self);
     
   self.validationModel = ko.validatedObservable({
@@ -85,7 +85,7 @@ function CreateSupportCaseViewModel() {
       })
     };
     failoverAPI("create_support_case", caseInfo, function(data, endpoint) {
-      bootbox.alert("Thank you, your information has been sent to our support team. You will receive further ticket information in your email.");
+      bootbox.alert(i18n.t("infos_sent_to_support"));
       trackEvent('Support', 'CaseCreated');
     });   
   }

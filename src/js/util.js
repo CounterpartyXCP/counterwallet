@@ -72,22 +72,22 @@ function expireDate(expire_index) {
 function checkCountry(action, callback) {
   if (RESTRICTED_AREA[action] && RESTRICTED_AREA[action].indexOf(USER_COUNTRY) != -1) {
     
-    var message = 'It appears that you are located in a country in which we are legally unable to provide this service.';
+    var message = i18n.t('forbiden_country');
 
     if(USE_TESTNET) { //allow the user to bust on through this alert on testnet
       bootbox.dialog({
-        title: "Country warning",
-        message: message + "<br/><br/>Since you are on testnet, you can choose to proceeed anyway.",
+        title: i18n.t("country_warning"),
+        message: message + "<br/><br/>" + i18n.t("testnet_proceed_anyway"),
         buttons: {
           "success": {
-            label: "Proceed Anyway",
+            label: i18n.t("proceed_anyway"),
             className: "btn-success",
             callback: function() {
               callback();
             }
           },
           "cancel": {
-            label: "Close",
+            label: i18n.t("close"),
             className: "btn-danger",
             callback: function() {
               bootbox.hideAll();
@@ -98,11 +98,11 @@ function checkCountry(action, callback) {
       });      
     } else { 
       bootbox.dialog({
-        title: "Country warning",
+        title: i18n.t("country_warning"),
         message: message,
         buttons: {
           "cancel": {
-            label: "Close",
+            label: i18n.t("close"),
             className: "btn-danger",
             callback: function() {
               bootbox.hideAll();

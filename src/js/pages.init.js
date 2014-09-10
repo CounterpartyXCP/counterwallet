@@ -169,8 +169,7 @@ function initBalances() {
       //Some misc jquery event handlers
       $('#createAddress, #createWatchOnlyAddress, #createArmoryOfflineAddress').click(function(e) {
         if(WALLET.addresses().length >= MAX_ADDRESSES) {
-          bootbox.alert("You already have the max number of addresses for a single wallet (<b>"
-            + MAX_ADDRESSES + "</b>). Please create a new wallet (i.e. different passphrase) for more.");
+          bootbox.alert(i18n.t("max_number_addresses", MAX_ADDRESSES));
           return false;
         }
 
@@ -218,7 +217,7 @@ function initBalances() {
               break;
             }
             if (needSweep) {
-              bootbox.confirm("<b style='color:red'>We detected that you have an 'old' wallet with funds present. Press 'OK' to sweep these funds into your new wallet, or Cancel to skip for now.</b>", function(value) {
+              bootbox.confirm("<b style='color:red'>" + i18n.t("old_wallet_warning") + "</b>", function(value) {
                 if (value) {
                   SWEEP_MODAL.show(true, true);
                 }

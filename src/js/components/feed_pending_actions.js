@@ -22,25 +22,22 @@ PendingActionViewModel.calcText = function(category, data) {
   }
 
   if(category == 'burns') {
-    desc = pending + " burn of <Am>" + normalizeQuantity(data['quantity']) + "</Am> <As>BTC</As>";
+    desc = i18n.t("pend_or_unconf_burn", pending, normalizeQuantity(data['quantity']));
   } else if(category == 'sends') {
-    desc = pending + " send of <Am>" + numberWithCommas(normalizeQuantity(data['quantity'], divisible)) + "</Am> <As>" + data['asset']
-      + "</As> from <Ad>" + getLinkForCPData('address', data['source'],  getAddressLabel(data['source'])) + "</Ad>"
-      + " to <Ad>" + getLinkForCPData('address', data['destination'],  getAddressLabel(data['destination'])) + "</Ad>"; 
+    desc = i18n.t("pend_or_unconf_send", pending, numberWithCommas(normalizeQuantity(data['quantity'], divisible)), data['asset'],
+      getLinkForCPData('address', data['source'],  getAddressLabel(data['source'])),
+      getLinkForCPData('address', data['destination'],  getAddressLabel(data['destination']))); 
   } else if(category == 'orders') {
-    desc = pending + " order to sell <Am>" + numberWithCommas(normalizeQuantity(data['give_quantity'], data['_give_divisible']))
-      + "</Am> <As>" + data['give_asset'] + "</As> for <Am>"
-      + numberWithCommas(normalizeQuantity(data['get_quantity'], data['_get_divisible'])) + "</Am> <As>"
-      + data['get_asset'] + "</As>";
+    desc = i18n.t("pend_or_unconf_order", pending, numberWithCommas(normalizeQuantity(data['give_quantity'], data['_give_divisible'])),
+      data['give_asset'], numberWithCommas(normalizeQuantity(data['get_quantity'], data['_get_divisible'])), data['get_asset']);
   } else if(category == 'issuances') {
     if(data['transfer_destination']) {
-      desc = pending + " transfer of token <As>" + data['asset'] + "</As> from <Ad>"
-        + getLinkForCPData('address', data['source'], getAddressLabel(data['source'])) + "</Ad> to <Ad>"
-        + getLinkForCPData('address', data['transfer_destination'], getAddressLabel(data['transfer_destination'])) + "</Ad>"; 
+      desc = i18n.t("pend_or_unconf_transfer", pending , data['asset'], getLinkForCPData('address', data['source'], getAddressLabel(data['source'])),
+        getLinkForCPData('address', data['transfer_destination'], getAddressLabel(data['transfer_destination']))); 
     } else if(data['locked']) {
-      desc = pending + " lock of token <As>" + data['asset'] + "</As> against additional issuance";
+      desc = i18n.t("pend_or_unconf_lock", pending, data['asset']);
     } else if(data['quantity'] == 0) {
-      desc = pending + " change of description for token <As>" + data['asset'] + "</As> to <b>" + data['description'] + "</b>";
+      desc = i18n.t("pend_or_unconf_change_desc", pending, data['asset'], data['description']);
     } else {
       //See if this is a new issuance or not
       var assetObj = null;
@@ -49,55 +46,52 @@ PendingActionViewModel.calcText = function(category, data) {
         assetObj = WALLET.getAddressObj(addressesWithAsset[0]).getAssetObj(data['asset']);
       
       if(assetObj) { //the asset exists in our wallet already somewhere, so it's an additional issuance of more units for it
-        desc = pending + " issuance of <Am>" + numberWithCommas(normalizeQuantity(data['quantity'], data['divisible']))
-          + "</Am> additional units for token <As>" + data['asset'] + "</As>";
+        desc = i18n.t("pend_or_unconf_issuance_add", pending, numberWithCommas(normalizeQuantity(data['quantity'], data['divisible'])),
+          data['asset']);
       } else { //new issuance
-        desc = pending + " creation of token <As>" + data['asset'] + "</As> with initial quantity of <Am>"
-          + numberWithCommas(normalizeQuantity(data['quantity'], data['divisible'])) + "</Am> units";
+        desc = i18n.t("pend_or_unconf_issuance", pending, data['asset'], numberWithCommas(normalizeQuantity(data['quantity'], data['divisible'])));
       }
     }
   } else if(category == 'broadcasts') {
-    desc = pending + " broadcast:<br/>Text: " + data['text'] + "<br/>Value:" + data['value'];
+    desc = i18n.t("pend_or_unconf_broadcast", pending, data['text'], data['value']);
   } else if(category == 'bets') {
-    desc = pending + " <b>" + data['bet_type'] + "</b> bet on feed @ <Ad>"
-      + getLinkForCPData('address', data['feed_address'], getAddressLabel(data['feed_address'])) + "</Ad><br/>"
-      + "Wager: <Am>"
-      + numberWithCommas(normalizeQuantity(data['wager_quantity'])) + "</Am> <As>XCP</As>, Counterwager: <Am>"
-      + numberWithCommas(normalizeQuantity(data['counterwager_quantity'])) + "</Am> <As>XCP</As>";  
+    desc = i18n.t("pend_or_unconf_bet", pending, data['bet_type'], getLinkForCPData('address', data['feed_address'], getAddressLabel(data['feed_address'])),
+      numberWithCommas(normalizeQuantity(data['wager_quantity'])),
+      numberWithCommas(normalizeQuantity(data['counterwager_quantity'])));  
   } else if(category == 'dividends') {
     
     var divUnitDivisible;
     if (WALLET.getAddressObj(data['source'])) {
       divUnitDivisible = WALLET.getAddressObj(data['source']).getAssetObj(data['dividend_asset']).DIVISIBLE;
-      desc = pending + " dividend payment ";
+      desc = i18n.t("pend_or_unconf_dividend_payment", pending, numberWithCommas(normalizeQuantity(data['quantity_per_unit'], divUnitDivisible)),
+        data['dividend_asset'], data['asset']);
     } else {
       divUnitDivisible = data['dividend_asset_divisible'];
-      desc = pending + " dividend reception ";
+      desc = i18n.t("pend_or_unconf_dividend_reception", pending, numberWithCommas(normalizeQuantity(data['quantity_per_unit'], divUnitDivisible)),
+        data['dividend_asset'], data['asset']);
     }
-    desc += "of <Am>" + numberWithCommas(normalizeQuantity(data['quantity_per_unit'], divUnitDivisible)) + "</Am> <As>"
-        + data['dividend_asset'] + "</As> on token <As>" + data['asset'] + "</As>";
+    
   
   } else if(category == 'cancels') {
-    desc = pending + " cancellation of " + data['_type'] + " ID <b>" + data['_tx_index'] + "</b>";
+    desc = i18n.t("pend_or_unconf_cancellation", pending, data['_type'], data['_tx_index']);
   } else if(category == 'callbacks') {
-    desc = pending + " callback for <Am>" + (data['fraction'] * 100).toFixed(4) + "%</Am> outstanding on token <As>" + data['asset'] + "</As>";
+    desc = i18n.t("pend_or_unconf_callback", pending, (data['fraction'] * 100).toFixed(4), data['asset']);
   } else if(category == 'btcpays') {
-    desc = pending + " BTC Payment from <Ad>" + getAddressLabel(data['source']) + "</Ad>";
+    desc = i18n.t("pend_or_unconf_btcpay", pending, getAddressLabel(data['source']));
   } else if(category == 'rps') {
-    desc  = pending + "  RPS game with <Ad>" + getAddressLabel(data['source']) + "</Ad>: ";
-    desc += " <Am>"+numberWithCommas(normalizeQuantity(data['wager'])) + '</Am> <As>XCP</As>';
+    desc  = i18n.t("pend_or_unconf_rps", pending, getAddressLabel(data['source']), numberWithCommas(normalizeQuantity(data['wager'])));
   } else if(category == 'rpsresolves') {
-    desc  = pending + " RPS resolution with <Ad>" + getAddressLabel(data['source']) + "</Ad>";
+    desc  = i18n.t("pend_or_unconf_rpsresolve", pending, getAddressLabel(data['source']));
   } else if(category == 'order_matches') {
 
     if (WALLET.getAddressObj(data['tx1_address']) && data['forward_asset'] == 'BTC' && data['_status'] == 'pending') {      
-      desc = "Waiting <Am>" + numberWithCommas(normalizeQuantity(data['forward_quantity'])) + "</Am> <As>BTC</As> payment from <Ad>" + getAddressLabel(data['tx0_address']) + "</Ad>";
+      desc = i18n.t("pend_or_unconf_wait_btcpay", numberWithCommas(normalizeQuantity(data['forward_quantity'])), getAddressLabel(data['tx0_address']));
     } else if (WALLET.getAddressObj(data['tx0_address']) && data['backward_asset'] == 'BTC' && data['_status'] == 'pending') {
-      desc = "Waiting <Am>" + numberWithCommas(normalizeQuantity(data['backward_quantity'])) + "</Am> <As>BTC</As> payment from <Ad>" + getAddressLabel(data['tx1_address']) + "</Ad>";
+      desc = i18n.t("pend_or_unconf_wait_btcpay", numberWithCommas(normalizeQuantity(data['backward_quantity'])), getAddressLabel(data['tx1_address']));
     }
 
   } else {
-    desc = "UNHANDLED TRANSACTION CATEGORY";
+    desc = i18n.t("pend_or_unconf_unhandled");
   }
 
   desc = desc.replace(/<Am>/g, '<b class="notoQuantityColor">').replace(/<\/Am>/g, '</b>');

@@ -54,7 +54,7 @@ function StatsHistoryViewModel() {
         yAxis: {
           min: 0,
           title: {
-            text: '# Transactions'
+            text: i18n.t('transactions_count')
           },
           stackLabels: {
             enabled: true,
@@ -79,8 +79,8 @@ function StatsHistoryViewModel() {
           formatter: function() {
             var text = '<b>' + moment(this.x).format('MMM Do YYYY') + '</b><br/>';
             if(this.x == this.series.data[this.series.data.length-1].x) //last day...add a label that it's partial
-              text += '<b>**PARTIAL DAY**</b><br/>';
-            text += this.series.name + ': ' + this.y + '<br/>' + 'Total: ' + this.point.stackTotal;
+              text += '<b>' + i18n.t('partial_day') + '</b><br/>';
+            text += this.series.name + ': ' + this.y + '<br/>' + i18n.t('Total') + ': ' + this.point.stackTotal;
             return text;
           }
         },
@@ -144,7 +144,7 @@ function StatsHistoryViewModel() {
           formatter: function() {
             var text = '<b>'+ moment(this.x).format('MMM Do YYYY') +'</b><br/>';
             if(this.x == this.series.data[this.series.data.length-1].x) //last day...add a label that it's partial
-              text += '<b>**PARTIAL DAY**</b><br/>';
+              text += '<b>' + i18n.t('partial_day') + '</b><br/>';
             text += this.series.name +': '+ this.y;
             return text;
           }
