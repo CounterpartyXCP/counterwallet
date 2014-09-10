@@ -240,7 +240,7 @@ function AddressViewModel(type, key, address, initialLabel, armoryPubKey) {
 
     var xcpBalance = WALLET.getBalance(self.ADDRESS, 'XCP');
     if(xcpBalance < ASSET_CREATION_FEE_XCP) {
-      bootbox.alert(i18n.t("no_enough_for_issuance_fee"), ASSET_CREATION_FEE_XCP, xcpBalance);
+      bootbox.alert(i18n.t("no_enough_for_issuance_fee", ASSET_CREATION_FEE_XCP, xcpBalance));
       return false;
     }
 
