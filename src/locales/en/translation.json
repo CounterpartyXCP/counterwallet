@@ -505,7 +505,20 @@
   "finished": "finished",
   "buy": "buy",
   "sell": "sell",
-  "you_have_no_in_wallet": "You have no %s in your Wallet"
+  "you_have_no_in_wallet": "You have no %s in your Wallet",
+
+  "statistics": "Statistics",
+  "wallets_count": "# Wallets",
+  "mainnet": "Mainnet",
+  "transaction_history": "Transaction History",
+  "server_wallet_history": "Server Wallet History",
+  "most_recent_transactions": "Most Recent Transactions",
+  "tx": "Tx",
+  "block": "Block",
+  "block_time": "Block Time",
+  "source": "Source",
+  "type": "Type",
+  "description": "Description"
 
 
 }

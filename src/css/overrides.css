@@ -390,6 +390,17 @@ b.notoAddrColor > a {
     margin: 0 !important;
 }
 
+#walletCountStats #sparks li h5 span {
+    display:inline;
+    font-size:11px;
+    text-transform: uppercase;
+}
+
+#walletCountStats #sparks li h5 span.wallets_count {
+  font-size: 18px;
+  display: block;
+}
+
 /*
  * JARVIS WIDGET OVERRIDES
  */
@@ -519,4 +530,9 @@ div#historyTabContent.tab-content > div#wid-id-txnHistory.tab-pane.active, div#h
 
 .jarviswidget header .nav-tabs>li.active>a {
 	background-color: #FAFAFA;
+}
+
+
+h1 span.localeTitle {
+  font-size: 24px !important;
 }
