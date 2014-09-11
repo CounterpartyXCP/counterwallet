@@ -82,17 +82,19 @@ ko.bindingHandlers['locale'] = {
     var key = ko.unwrap(valueAccessor());
 
     var localeArgs = ko.toJS(allBindings.get('localeArgs'));
+    $.jqlog.debug("localeArgs : " + localeArgs);
     var args = [];
-    if (Object.prototype.toString.call(localeArgs) == "[object Object]") {
+    var argsType = Object.prototype.toString.call(localeArgs)
+    if (argsType == "[object Object]") {
       for (var k in localeArgs) {
         args.push(localeArgs[k]);
       }
-    } else if (Object.prototype.toString.call(localeArgs) == "[object Array]") {
+    } else if (argsType == "[object Array]") {
       args = localeArgs;
-    } else if (Object.prototype.toString.call(localeArgs) == "[object String]") {
+    } else if (argsType == "[object String]" || argsType == "[object Number]") {
       args = [localeArgs];
     }
-    
+    $.jqlog.debug("KEY "+ key + " : " + args);
     var translation = i18n.t(key, {postProcess: 'sprintf', sprintf: args});
     element.innerHTML = translation;
   }
@@ -106,13 +108,14 @@ ko.bindingHandlers['localeAttr'] = {
       var args = [];
       if (attributesArgs[attrName]) {
         attrArgs = ko.toJS(attributesArgs[attrName]);
-        if (Object.prototype.toString.call(attrArgs) == "[object Object]") {
+        var argsType = Object.prototype.toString.call(attrArgs)
+        if (argsType == "[object Object]") {
           for (var k in attrArgs) {
             args.push(attrArgs[k]);
           }
-        } else if (Object.prototype.toString.call(attrArgs) == "[object Array]") {
+        } else if (argsType == "[object Array]") {
           args = attrArgs;
-        } else if (Object.prototype.toString.call(attrArgs) == "[object String]") {
+        } else if (argsType == "[object String]" || argsType == "[object Number]") {
           args = [attrArgs];
         }
       }
