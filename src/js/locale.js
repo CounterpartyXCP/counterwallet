@@ -80,9 +80,7 @@ function getLanguage() {
 ko.bindingHandlers['locale'] = {
   update: function(element, valueAccessor, allBindings){
     var key = ko.unwrap(valueAccessor());
-
     var localeArgs = ko.toJS(allBindings.get('localeArgs'));
-    $.jqlog.debug("localeArgs : " + localeArgs);
     var args = [];
     var argsType = Object.prototype.toString.call(localeArgs)
     if (argsType == "[object Object]") {
@@ -94,7 +92,6 @@ ko.bindingHandlers['locale'] = {
     } else if (argsType == "[object String]" || argsType == "[object Number]") {
       args = [localeArgs];
     }
-    $.jqlog.debug("KEY "+ key + " : " + args);
     var translation = i18n.t(key, {postProcess: 'sprintf', sprintf: args});
     element.innerHTML = translation;
   }

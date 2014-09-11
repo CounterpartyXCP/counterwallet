@@ -50,9 +50,6 @@ function CreateAssetModalViewModel() {
   self.shown = ko.observable(false);
   self.address = ko.observable('');
 
-  $.jqlog.debug("ASSET_CREATION_FEE_XCP: " + ASSET_CREATION_FEE_XCP);
-  self.ASSET_CREATION_FEE_XCP = ko.observable(ASSET_CREATION_FEE_XCP);
-
   self.name = ko.observable('').extend({
     required: true,
     pattern: {
