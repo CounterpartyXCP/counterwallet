@@ -9,6 +9,7 @@
         "smartadmin": "https://github.com/CounterpartyXCP/countersmartadmin.git#c7049658057b26747833f18085255a795f10b581",
         "counterwebdeps": "https://github.com/CounterpartyXCP/counterwebdeps.git#28fa454875765ce62c730d2421c89dfc4da96535",
         "cryptojs": "https://crypto-js.googlecode.com/files/CryptoJS%20v3.1.2.zip",
+        "rollbar": "1.1.7",
         "bootbox": "4.2.0",
         "bootstrap-datetimepicker": "https://github.com/Eonasdan/bootstrap-datetimepicker.git#3.0.0",
         "jsdecimal": "https://github.com/hiroshi-manabe/JSDecimal.git#2950032445113a4456581837b25de5622fbd9438",
