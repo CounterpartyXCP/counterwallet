@@ -147,7 +147,7 @@
   "make_a_donation": "Make a donation",
   "donation_desc": "<b>Send a donation to support Counterparty and Counterwallet development.</b><br />Counterparty is non-profit, self-funded, open source and community supported. We appreciate any donations, and all donations go directly towards supporting future development.",
   "send_with": "Send with:",
-  "send_amount": "Send Amount",
+  "send_amount": "Send Amount:",
   "you_are_choosing_to_send": "You are choosing to send",
   "to_support_counterparty": "to support Counterparty development.",
 
@@ -486,6 +486,26 @@
   "testnet_proceed_anyway": "Since you are on testnet, you can choose to proceeed anyway.",
   "proceed_anyway": "Proceed Anyway",
 
-  "quick_buy": "Quick Buy"
+  "quick_buy": "Quick Buy",
+  "min_amount": "Min. amount",
+  "max_amount": "Max. amount",
+  "reserve_balance": "Reserve balance",
+  "confirmations_required": "Confirmations required",
+  "current_price": "Current price",
+  "fees": "Fees",
+  "start": "Start",
+  "end": "End",
+  "amount_reached": "Amount reached",
+  "you_are_choosing_to_send_from_to": "You are choosing to send %s %s to %s",
+  "you_are_chose_to_send_from_to": "You are chose to send %s %s to %s",
+  "gateway": "Gateway",
+  "crowdsale": "Crowdsale",
+  "quick_buy_with_vennd_machine": "Quick Buy with Vennd machine",
+  "all": "All",
+  "finished": "finished",
+  "buy": "buy",
+  "sell": "sell",
+  "you_have_no_in_wallet": "You have no %s in your Wallet"
+
 
 }
