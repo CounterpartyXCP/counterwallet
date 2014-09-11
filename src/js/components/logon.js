@@ -307,7 +307,7 @@ function LogonViewModel() {
     WALLET.refreshBTCBalances(false, moreAddresses, function() {
       var generateAnotherBatch = true;
       for (i = moreAddresses.length - 1; i >= 0; i--) {
-        if(!WALLET.getAddressObj(moreAddresses[i]).withMovement()) { //no movement on this address...remove it
+        if(!WALLET.getAddressObj(moreAddresses[i]).withMovement() && (i + 1) > PREFERENCES['num_addresses_used']) { //no movement on this address...remove it
           if(WALLET.addresses().length > DEFAULT_NUM_ADDRESSES) {
             $.jqlog.info("Address discovery: Address " + moreAddresses[i] + " unused. Trimming...");
             WALLET.addresses.pop(); //remove this address
