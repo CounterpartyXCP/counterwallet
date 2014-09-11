@@ -308,7 +308,6 @@ function LogonViewModel() {
       var generateAnotherBatch = true;
       for (i = moreAddresses.length - 1; i >= 0; i--) {
         if(!WALLET.getAddressObj(moreAddresses[i]).withMovement()) { //no movement on this address...remove it
-          assert(WALLET.addresses()[WALLET.addresses().length - 1].ADDRESS == moreAddresses[i]);
           if(WALLET.addresses().length > DEFAULT_NUM_ADDRESSES) {
             $.jqlog.info("Address discovery: Address " + moreAddresses[i] + " unused. Trimming...");
             WALLET.addresses.pop(); //remove this address
