@@ -68,9 +68,13 @@
     <div id="allContentLoading"><img src="assets/pageloader.gif" /></div>
     <div id="allContent" style="display:none">
 
-    <div id="langSelector">
-      <a href="?lang=en" data-bind="visible: LANG != 'en'"><img src="assets/us.png" /></a><span data-bind="visible: LANG == 'en'"><img src="assets/us.png" /></span>
-      <a href="?lang=fr" data-bind="visible: LANG != 'fr'"><img src="assets/fr.png" /></a><span data-bind="visible: LANG == 'fr'"><img src="assets/fr.png" /></span>
+    <div id="langSelector" data-bind="visible: AVAILABLE_LANGUAGES.length > 1, foreach: AVAILABLE_LANGUAGES">
+      <a data-bind="visible: LANG != $data, attr: {href: '?lang=' + $data}">
+        <img data-bind="attr: {src: 'assets/' + $data + '.png'}" />
+      </a>
+      <span data-bind="visible: LANG == $data">
+        <img data-bind="attr: {src: 'assets/' + $data + '.png'}" />
+      </span>
     </div>
 
     <!-- HEADER -->

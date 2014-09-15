@@ -412,7 +412,7 @@ module.exports = function(grunt) {
 
         var downloadLang = function(lang) {
             transifex.translationInstanceMethod('counterwallet', 'translationjson', lang, function(err, data) {
-                grunt.file.write(buildDir + 'locales/' + lang + '/translation.json', data);
+                grunt.file.write(buildDir + 'locales/' + lang.toLowerCase() + '/translation.json', data);
                 languageDone(lang);
             });
         }

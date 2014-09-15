@@ -40,7 +40,8 @@ i18n.t('key2', 'world') => "Hello world"
 
 
 */
-var AVAILABLE_LANGUAGES = ['en', 'fr'];
+//var AVAILABLE_LANGUAGES = ['fr', 'en', 'de', 'da', 'zh_cn', 'zh_tw', 'fi', 'tr', 'it', 'ja', 'es', 'ru'];
+var AVAILABLE_LANGUAGES = ['en']
 var DEFAULT_LANG = 'en';
 var LANG = getLanguage();
 
@@ -63,11 +64,11 @@ function getLanguage() {
     return qs('lang').toLowerCase();  
   } else {
     var subdomain = window.location.hostname.split(".").shift().toLowerCase();
-    if (subdomain.length == 2) {
+    if (AVAILABLE_LANGUAGES.indexOf(subdomain) != -1) {
       return subdomain;
     } else {
       subdomain = subdomain.split("-").pop();
-      if (subdomain.length == 2) {
+      if (AVAILABLE_LANGUAGES.indexOf(subdomain) != -1) {
         return subdomain;
       } else if (localStorage.getItem("LANG")) {
         return localStorage.getItem("LANG").toLowerCase();

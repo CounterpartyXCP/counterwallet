@@ -34,7 +34,7 @@ module.exports = function (grunt) {
             }
         },
         transifex: {
-            languages: ['fr', 'en', 'de']
+            languages: ['fr', 'en', 'de', 'da', 'zh_CN', 'zh_TW', 'fi', 'tr', 'it', 'ja', 'es', 'ru']
         }
     }
     /*config['chrome-extension'] = {
