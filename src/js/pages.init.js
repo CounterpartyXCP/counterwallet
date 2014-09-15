@@ -283,7 +283,7 @@ function initHistory() {
   
   ko.applyBindings(TXN_HISTORY, document.getElementById("wid-id-txnHistory"));
   ko.applyBindings(BALANCE_HISTORY, document.getElementById("wid-id-balHistory"));
-  ko.applyBindings(BALANCE_HISTORY, document.getElementById("historyHeader"));
+  ko.applyBindings({}, document.getElementById("historyHeader"));
   
   BALANCE_HISTORY.init();
   TXN_HISTORY.init();
