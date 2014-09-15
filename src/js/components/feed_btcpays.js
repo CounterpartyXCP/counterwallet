@@ -50,6 +50,10 @@ function WaitingBTCPayViewModel(btcPayData) {
   self.approxExpiresInTime = ko.computed(function() {
     return self.now().getTime() + (self.expiresInNumBlocks() * APPROX_SECONDS_PER_BLOCK * 1000);
   }, self);
+
+  self.approxExpiresInTimeDisp = ko.computed(function() {
+    return moment(self.approxExpiresInTime()).fromNow();
+  }, self);
   
   self.displayColor = ko.computed(function() {
     if(self.approxExpiresInTime() - self.now() > 7200 * 1000) return 'bg-color-greenLight'; //> 2 hours
@@ -254,6 +258,10 @@ function UpcomingBTCPayViewModel(btcPayData) {
   
   self.approxTimeUntilEligible = ko.computed(function() {
     return self.now().getTime() + (self.numBlocksUntilEligible() * APPROX_SECONDS_PER_BLOCK * 1000);
+  }, self);
+
+  self.approxTimeUntilEligibleDisp = ko.computed(function() {
+    return moment().fromNow(self.approxTimeUntilEligible());
   }, self);
 }
 
