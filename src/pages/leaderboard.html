@@ -1,11 +1,8 @@
 <div class="row">
   <div class="col-xs-12 col-sm-7 col-md-7 col-lg-4">
-    <h1 class="page-title txt-color-blueDark">
-      <i class="fa fa-trophy fa-fw "></i> 
-        Top Tokens 
-    </h1>
+    <h1 class="page-title txt-color-blueDark" data-bind="locale: 'top_tokens'"></h1>
     <div id="leaderboardMarketBar">
-      <h2>Market:&nbsp;</h2>
+      <h2 data-bind="locale: 'market'"></h2>
       <div class="btn-group" data-toggle="buttons">
           <label class="btn btn-primary active" data-bind="click: showPortfolioInXCP">
             <input type="radio" name="options" id="xcpMarket"> <i class="fa fa-times"></i>&nbsp;XCP
@@ -26,7 +23,7 @@
       <div class="jarviswidget defaultWidgetColor" id="wid-id-marketCapHistory" data-widget-editbutton="false" data-widget-deletebutton="false">
           <header>
             <span class="widget-icon"> <i class="fa fa-bar-chart-o"></i> </span>
-            <h3>Market Cap History (in <span data-bind="text: showPortfolioIn()"></span>)</h3>
+            <h3><span data-bind="locale: 'market_cap_history'"></span><span data-bind="text: showPortfolioIn()"></span>)</h3>
           </header>
           <div> <!-- widget div-->
             <div class="widget-body no-padding"> <!-- widget content -->
@@ -46,7 +43,7 @@
       <div class="jarviswidget defaultWidgetColor" data-bind="attr: {id: 'wid-id-assetMarketInfo-' + $index}" data-widget-editbutton="false" data-widget-deletebutton="false">
         <header>
             <span class="widget-icon"> <i class="fa fa-table"></i> </span>
-            <h3>Leaderboard (in <span data-bind="text: base"></span>)</h3>
+            <h3><span data-bind="locale: 'leader_board_in'"></span><span data-bind="text: base"></span>)</h3>
             <div class="widget-toolbar">
             </div>
         </header>
@@ -58,13 +55,13 @@
                     <thead>
                         <tr>
                             <th>#</th>
-                            <th>Token</th>
-                            <th>Market Cap</th>
-                            <th>Price</th>
-                            <th>Total Supply</th>
-                            <th>Volume (24h)</th>
-                            <th>% Change (24h)</th>
-                            <th>Market Cap Graph (7d)</th>
+                            <th data-bind="locale: 'token'"></th>
+                            <th data-bind="locale: 'market_cap'"></th>
+                            <th data-bind="locale: 'price'"></th>
+                            <th data-bind="locale: 'total_supply'"></th>
+                            <th data-bind="locale: 'volume_24h'"></th>
+                            <th data-bind="locale: 'change_24h'"></th>
+                            <th data-bind="locale: 'market_cap_graph'"></th>
                         </tr>
                     </thead>
                     <tbody data-bind="foreach: data">
