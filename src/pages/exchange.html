@@ -1,7 +1,9 @@
 <section id="widget-grid" class="ordersGrid assetSelector" data-bind="validationOptions: { insertMessages: false }"> <!-- widget grid -->
   <div class="row">
     <div class="col-xs-12 col-sm-7 col-md-7 col-lg-4" data-bind="visible: dexHome()">
-      <h1 class="page-title txt-color-blueDark" data-bind="locale: 'decentralized_exchange'"></h1>
+      <h1 class="page-title txt-color-blueDark">
+        <i class="fa fa-bar-chart-o fa-fw"></i><span class="localeTitle" data-bind="locale: 'decentralized_exchange'"></span>
+      </h1>
     </div>
     <div class="pull-right sectionHeaderButtonBar" data-bind="visible: dexHome()">
         <button id="exchangeHelp" type="button" class="btn btn-success" data-bind="locale: 'page_help'"></button>
