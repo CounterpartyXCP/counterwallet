@@ -5,14 +5,14 @@
           <i class="fa fa-fw fa-exclamation fa-2x"></i>
         </em>
         <span>
-           A payment of
+           <span data-bind="locale: 'a_payment_of'"></span>
            <b class="notoQuantityColor"><span data-bind="text: dispBTCQuantity"></span></b>
-           <b class="notoAssetColor">BTC</b> is required from 
-           <b class="notoAddrColor"><span data-bind="text: dispMyAddr"></span></b> to settle payment for
-           matched order <b><span data-bind="html: dispMyOrderTxHash"></span></b>.
+           <b class="notoAssetColor">BTC</b> <span data-bind="locale: 'is_required_from'"></span> 
+           <b class="notoAddrColor"><span data-bind="text: dispMyAddr"></span></b> <span data-bind="locale: 'to_settle_payment_for'"></span>
+           <span data-bind="locale: 'matched_order'"></span> <b><span data-bind="html: dispMyOrderTxHash"></span></b>.
            <div class="clearfix"></div>
-           <span class="pull-right"><button class="btn btn-xs btn-success margin-top-5" data-bind="click: completeBTCPay">Pay Now</button></span>
-           <span class="pull-left font-xs text-muted"><i>Expires ~<span data-bind="timeago: approxExpiresInTime"></span> (@ block <span data-bind="text: MATCH_EXPIRE_INDEX"></span>)</i>
+           <span class="pull-right"><button class="btn btn-xs btn-success margin-top-5" data-bind="click: completeBTCPay, locale: 'pay_now'"></button></span>
+           <span class="pull-left font-xs text-muted"><i><span data-bind="locale: 'expires'"></span> ~<span data-bind="timeago: approxExpiresInTime"></span> (@ <span data-bind="locale: 'block'"></span> <span data-bind="text: MATCH_EXPIRE_INDEX"></span>)</i>
         </span>
       </span>
     </li>
@@ -24,10 +24,10 @@
           <i class="fa fa-fw fa-clock-o fa-2x"></i>
         </em>
         <span>
-           <span data-bind="text: numBlocksUntilEligible"></span> block(s) (~<span data-bind="timeago: approxTimeUntilEligible"></span>)
-           left until order <b><span data-bind="html: dispMyOrderTxHash"></span></b>
-           is eligible for <b class="notoQuantityColor"><span data-bind="text: dispBTCQuantity"></span></b>
-           <b class="notoAssetColor">BTC</b> payment.
+           <span data-bind="text: numBlocksUntilEligible"></span> <span data-bind="locale; 'block(s)'"></span> (~<span data-bind="timeago: approxTimeUntilEligible"></span>)
+           <span data-bind="locale: 'left_until_order'"></span> <b><span data-bind="html: dispMyOrderTxHash"></span></b>
+           <span data-bind="locale: 'is_eligible_for'"></span> <b class="notoQuantityColor"><span data-bind="text: dispBTCQuantity"></span></b>
+           <b class="notoAssetColor">BTC</b> <span data-bind="locale: 'payment'"></span>.
         </span>
       </span>
     </li>
