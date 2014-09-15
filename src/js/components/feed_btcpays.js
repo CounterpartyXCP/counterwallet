@@ -6,11 +6,11 @@
 * user's order listed as an *upcoming* BTCPay for 6 blocks. Shows up in the Waiting BTCpay feed with a clock icon.
 * After 6 blocks, it's "safe" for the user to make a BTCpay against the item:
    -if automatic, a create_btcpay transaction is then immediately made. item does not show up in waiting BTCpays pane
-   -if manual, the user is promtped to make payment. If they say "yes, do it now", things proceed simiarly to the automatic route
+   -if manual, the user is prompted to make payment. If they say "yes, do it now", things proceed simiarly to the automatic route
    above. if they say "no, hold off" the create_btcpay transaction is made once the user chooses to make it.
    the item then shows up in the waiting BTCpay feed with an exclamation point icon, and the user must make payment
 * Once the user DOES make payment (automatic or manually), the btcpay is added to the pending actions list to show that
-  the BTCPay is inprogress (i.e. txn has been broadcast). (Note that if the user were to log out and back in during this time,
+  the BTCPay is in progress (i.e. txn has been broadcast). (Note that if the user were to log out and back in during this time,
   we would see that the BTCpay is on the pending list and wouldn't show it as eligable to be paid.)
 * Once confirmed on the network, the btcpay data is received across the message feed:
    -WaitingBTCPay is no longer marked as "inprogress". localstorage data is removed for it
