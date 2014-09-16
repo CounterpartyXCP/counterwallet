@@ -5,7 +5,7 @@ function formatHtmlPrice(price) {
 }
 
 function cleanHtmlPrice(price) {
-  var clean = price.split("<span>");
+  var clean = price.split("<span");
   return parseFloat(clean[0]);
 }
 
