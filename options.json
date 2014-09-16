@@ -16,6 +16,7 @@
     }
   },
   "testnet": {
+    "url": "http://testnet.wallet.dogeparty.io/",
     "faucet_url": "",
     "burning": {
       "start": 124678,
