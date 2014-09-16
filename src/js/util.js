@@ -1,5 +1,14 @@
 //Counterwallet-specific utility functions
 
+function formatHtmlPrice(price) {
+  return parseFloat(price).toFixed(8).replace(/(0{0,8}$)/,'<span class="text-muted">$1</span>');
+}
+
+function cleanHtmlPrice(price) {
+  var clean = price.split("<span>");
+  return parseFloat(clean[0]);
+}
+
 function feedImageUrl(image_name) {
   var url = cwBaseURLs()[0];
   url += USE_TESTNET ? '/_t_feed_img/' : '/_feed_img/';
