@@ -4,7 +4,9 @@
   </div>
   <div class="pull-right sectionHeaderButtonBar">
     <div class="btn-group">
-        <button type="button" class="btn btn-primary dropdown-toggle" data-toggle="dropdown"  data-bind="locale: 'create_new_address'"></button>
+        <button type="button" class="btn btn-primary dropdown-toggle" data-toggle="dropdown">
+          <span data-bind="locale: 'create_new_address'"></span> <i class="fa fa-caret-down"></i>
+        </button>
         <ul class="dropdown-menu">
             <li>
                 <a id="createAddress" href="#" data-bind="locale: 'create_regular_address'"></a>
@@ -227,7 +229,7 @@
       </div>
       <div class="modal-footer">
         <button type="button" class="btn btn-default" data-bind="click: hide, locale: 'cancel'"></button>
-        <button type="button" data-bind="click: submitForm, locale: 'create_new_address_button'" class="btn btn-primary"></button>
+        <button type="button" data-bind="click: submitForm, locale: 'create_new_address'" class="btn btn-primary"></button>
       </div>
     </div><!-- /.modal-content -->
   </div><!-- /.modal-dialog -->

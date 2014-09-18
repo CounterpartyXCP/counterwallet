@@ -93,6 +93,8 @@ ko.bindingHandlers['locale'] = {
     } else if (argsType == "[object String]" || argsType == "[object Number]") {
       args = [localeArgs];
     }
+    $.jqlog.debug("KEY: "+key);
+    $.jqlog.debug(args);
     var translation = i18n.t(key, {postProcess: 'sprintf', sprintf: args});
     element.innerHTML = translation;
   }

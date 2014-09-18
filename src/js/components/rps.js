@@ -266,7 +266,7 @@ function RpsViewModel() {
       if (armoryUTx) {
         message = "<b>" + i18n.t("you_will_placing_rps", self.wager(), self.move().name.toUpperCase()) + "</b>" + warn;
       } else {
-        message = "<b>" + i18n.t("have_placed_rps", self.wager(), self.move().name.toUpperCase()) + "</b> " + warn;
+        message = "<b>" + i18n.t("you_have_placed_rps", self.wager(), self.move().name.toUpperCase()) + "</b> " + warn;
       }
       
       self.init();

@@ -439,7 +439,7 @@
   "no_enough_xcp": "None of your addresses contain enough XCP",
   "rps_please_stay_logged": "Please stay logged in so that the game(s) can be properly resolved. Once your game has been matched, it will take one more block for the game to complete. Be careful, if you close the Wallet before the end of the game you can lose money!!",
   "you_will_placing_rps": "You will be placing %s XCP on %s.",
-  "you have_placed_rps": "You have placed %s XCP on %s.",
+  "you_have_placed_rps": "You have placed %s XCP on %s.",
   "tie": "tie",
 
   "transactions_count": "# Transactions",
@@ -520,7 +520,7 @@
   "description": "Description",
 
 	"my_account_balances": "<i class=\"fa fa-user fa-fw \"></i> My Account Balances",
-	"create_new_address": "Create New Address <i class=\"fa fa-caret-down\"></i>",
+	"create_new_address": "Create New Address",
 	"create_regular_address": "Create Regular Address",
 	"create_armory_address": "Create Armory Offline Address",
 	"create_watch_address": "Create Watch Only Address",
@@ -572,7 +572,6 @@
 	"enter_address_description_armory": "Please enter the info for the address you would like to add into your wallet as an Offline Armory address.",
 	"address": "Address",
 	"description": "Description",
-	"create_new_address_button": "Create New Address",
 	"broadcast": "Broadcast",
 	"close": "Close",
 	"signed_transaction_from_armory": "Enter the signed transaction from the Offline Armory system.",
@@ -787,7 +786,7 @@
   "payment_required_for_matched_order": "A payment of <b class=\"notoQuantityColor\">%s</b> <b class=\"notoAssetColor\">BTC</b> is required from <b class=\"notoAddrColor\">%s</b> to settle payment for matched order <b>%s</b>.",
   "pay_now": "Pay Now",
   "expire_in": "Expires ~%s (@ block %)",
-  "blocks_left_until_btcpay": "%s block(s) (~%s) left until order <b>%s/b> is eligible for <b class=\"notoQuantityColor\">%</b> <b class=\"notoAssetColor\">BTC</b> payment.",
+  "blocks_left_until_btcpay": "%s block(s) (~%s) left until order <b>%s</b> is eligible for <b class=\"notoQuantityColor\">%s</b> <b class=\"notoAssetColor\">BTC</b> payment.",
 
   "no_entries": "No entries",
 
