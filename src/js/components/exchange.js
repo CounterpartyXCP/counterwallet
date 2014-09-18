@@ -243,7 +243,7 @@ function ExchangeViewModel() {
   });
 
   self.selectBuyOrder = function(order, notFromClick) {
-    var price = new Decimal(order.price);
+    var price = new Decimal(cleanHtmlPrice(order.price));
     var amount1 = new Decimal(self.availableBalanceForSell());
     var amount2 = new Decimal(order.base_depth);
     var amount = amount1.compare(amount2) > 0 ? amount2 : amount1;
@@ -495,7 +495,7 @@ function ExchangeViewModel() {
   });
 
   self.selectSellOrder = function(order, notFromClick) {
-    var price = new Decimal(order.price);
+    var price = new Decimal(cleanHtmlPrice(order.price));
     var amount = new Decimal(order.base_depth);
     var total1 = price.mul(amount);
     var total2 = new Decimal(self.availableBalanceForBuy());
@@ -800,7 +800,7 @@ function ExchangeViewModel() {
         var a = new Decimal(data['buy_orders'][i]['amount']);
         var t = new Decimal(data['buy_orders'][i]['total']);
         var p = roundAmount(t.div(a));
-        data['buy_orders'][i]['price'] = p;
+        data['buy_orders'][i]['price'] = formatHtmlPrice(p);
         data['buy_orders'][i]['base_depth'] = amount + base_depth;
         base_depth = data['buy_orders'][i]['base_depth'];
       }
@@ -826,7 +826,7 @@ function ExchangeViewModel() {
         var a = new Decimal(data['sell_orders'][i]['amount']);
         var t = new Decimal(data['sell_orders'][i]['total']);
         var p = roundAmount(t.div(a));
-        data['sell_orders'][i]['price'] = p;
+        data['sell_orders'][i]['price'] = formatHtmlPrice(p);
         data['sell_orders'][i]['base_depth'] = amount + base_depth;
         base_depth = data['sell_orders'][i]['base_depth'];
       }
