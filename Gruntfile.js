@@ -57,5 +57,5 @@ module.exports = function (grunt) {
 
     grunt.loadTasks('grunt-tasks');
 
-    grunt.registerTask('default', ['build', 'transifex']);
+    grunt.registerTask('default', ['build']);
 };

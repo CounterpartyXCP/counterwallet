@@ -355,6 +355,7 @@ module.exports = function(grunt) {
                 }
             });  
             grunt.task.run('minify');
+
         }
 
         if (this.target=='copy') { 
@@ -366,6 +367,8 @@ module.exports = function(grunt) {
             });
             grunt.task.run('copy');
 
+            grunt.task.run('transifex');
+            
         }
         
     }); 
@@ -393,6 +396,10 @@ module.exports = function(grunt) {
 
         var languages = grunt.config.get('transifex').languages;
         var languages_done = [];
+
+        if (!grunt.file.exists(homePath + '.transifex')) {
+            throw new Error('You must put a transifex user and password in '+ homePath + ".transifex in this format: user:password\n")
+        }
 
         var credential = grunt.file.read(homePath + '.transifex');
         var Transifex = require('transifex');
