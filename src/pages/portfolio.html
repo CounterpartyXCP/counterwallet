@@ -57,7 +57,9 @@
         </header>
         <div> <!-- widget div-->
             <div class="widget-body no-padding"> <!-- widget content -->
-                <p class="clearfix alert alert-success" data-bind="locale: 'only_the_assets_you_own'"></p>
+                <p class="clearfix alert alert-success">
+                  <i class="fa fa-eye"></i>&nbsp;<span data-bind="locale: 'only_the_assets_you_own'"></span>
+                </p>
                 <div class="widget-body-toolbar">
                 </div>
                 <table data-bind="attr: {id: 'assetMarketTable-' + base }" width="100%" class="assetMarketTable table table-striped table-hover datatable_basic">

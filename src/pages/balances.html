@@ -1,6 +1,8 @@
 <div class="row" id="balanceHeader">
   <div class="col-xs-12 col-sm-7 col-md-7 col-lg-4">
-    <h1 class="page-title txt-color-blueDark" data-bind="locale: 'my_account_balances'"></h1>
+    <h1 class="page-title txt-color-blueDark">
+      <i class="fa fa-user fa-fw"></i> <span class="localeTitle" data-bind="locale: 'my_account_balances'"></span>
+    </h1>
   </div>
   <div class="pull-right sectionHeaderButtonBar">
     <div class="btn-group">
@@ -22,7 +24,9 @@
 
     <button id="sweepFunds" type="button" class="btn btn-primary" data-bind="locale: 'import_funds'"></button>
     <div class="btn-group" id="newWalletSweep">
-        <button type="button" class="btn btn-primary dropdown-toggle" data-toggle="dropdown"  data-bind="locale: 'import_funds_dropdown'"></button>
+        <button type="button" class="btn btn-primary dropdown-toggle" data-toggle="dropdown">
+          <span data-bind="locale: 'import_funds_dropdown'"></span> <i class="fa fa-caret-down"></i>
+        </button>
         <ul class="dropdown-menu" style="right:0;left:auto">
             <li>
                 <a id="sweepFunds2" href="#" data-bind="locale: 'from_another_address'"></a>
@@ -33,7 +37,9 @@
         </ul>
     </div>
 
-    <button id="balanceHelp" type="button" class="btn btn-success" data-bind="locale: 'page_help'"></button>
+    <button id="balanceHelp" type="button" class="btn btn-success">
+      <i class="fa fa-question-circle"></i>  <span data-bind="locale: 'page_help'"></span>
+    </button>
   </div>
 </div>
 
@@ -59,7 +65,9 @@
     <span data-bind="locale: 'welcome_p2'"></span>
 </div>
 
-<div id="pendingBTCPayNotice" data-bind="fadeVisibleInOnly: needWarningOnExit(), locale: 'sell_btc_pending'" class="alert alert-danger alert-block"></div>
+<div id="pendingBTCPayNotice" data-bind="fadeVisibleInOnly: needWarningOnExit()" class="alert alert-danger alert-block">
+  <i class="fa-fw fa fa-btc"></i>  <span data-bind="locale: 'sell_btc_pending'"></span>
+</div>
 
 <section id="widget-grid" class="balancesContainer" data-bind="foreach: addresses"> <!-- widget grid -->
     <div class="row"> <!-- one row per widget in this case -->
@@ -69,14 +77,16 @@
             <span class="widget-icon"> <i class="fa" data-bind="css: { 'fa-arrow-circle-o-right': !IS_WATCH_ONLY, 'fa-eye': IS_WATCH_ONLY }"></i> </span>
             <h3 class="jarviswidget-ctrls">
                 <span class="addressLabelText" href="#" data-bind="text: label, click: changeLabel"></span>
-                <div data-bind="visible: assetFilter(), locale: 'filtered'" class="label label-warning margin-left-5"></div>
-                <div data-bind="visible: lastSort(), locale: 'sorted'" class="label label-info margin-left-5"></div>
-                <div data-bind="visible: IS_WATCH_ONLY, locale: 'watch_only'" class="label label-success margin-left-5"></div>
-                <div data-bind="visible: IS_ARMORY_OFFLINE, locale: 'armory_offline'" class="label label-success margin-left-5"></div>
+                <div data-bind="visible: assetFilter()" class="label label-warning margin-left-5"><i class="fa fa-filter"></i> <span data-bind="locale: 'filtered'"></span></div>
+                <div data-bind="visible: lastSort()" class="label label-info margin-left-5"><i class="fa fa-sort-amount-asc"></i> <span data-bind="locale: 'sorted'"></span></div>
+                <div data-bind="visible: IS_WATCH_ONLY" class="label label-success margin-left-5"><i class="fa fa-eye"></i> <span data-bind="locale: 'watch_only'"></span></div>
+                <div data-bind="visible: IS_ARMORY_OFFLINE" class="label label-success margin-left-5"><i class="fa fa-lock"></i>  <span data-bind="locale: 'armory_offline'"></span></div>
             </h3>
             <div class="widget-toolbar">
               <div class="btn-group btn-group-dropup">
-                <button class="btn dropdown-toggle btn-xs btn-primary" data-toggle="dropdown" data-bind="locale: 'address_actions'"></button>
+                <button class="btn dropdown-toggle btn-xs btn-primary" data-toggle="dropdown">
+                  <i class="fa fa-bars"></i> <span data-bind="locale: 'address_actions'"></span> <i class="fa fa-caret-down"></i>
+                </button>
                 <ul class="dropdown-menu pull-right">
                   <li><a data-bind="click: showQRCode, locale: 'show_qr_code'" href="#"></a></li>
                   <li data-bind="visible: IS_NORMAL"><a data-bind="click: showPrivateKey, locale: 'show_private_key'" href="#"></a></li>

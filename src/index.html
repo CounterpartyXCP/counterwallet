@@ -141,7 +141,9 @@
           <span> <a href="#" title="Collapse Menu"><i class="fa fa-minus-square"></i></a> </span>
         </div>
         
-        <span id="noticeDevMode" data-bind="visible: IS_DEV, locale: 'dev_mode_enabled'" class="label label-warning pull-right modeIndicator"></span>
+        <span id="noticeDevMode" data-bind="visible: IS_DEV" class="label label-warning pull-right modeIndicator">
+          <i class\"fa-fw fa fa-warning\"></i> <span data-bind="locale: 'dev_mode_enabled'"></span>
+        </span>
        
         <span id="donate" class="pull-right">
           <a href="#" class="btn btn-primary" data-bind="locale: 'donate'"></a>
@@ -374,9 +376,11 @@
             <h3 class="panel-title">
               <b data-bind="visible: USE_TESTNET, locale: 'log_into_your_testnet_wallet'"></b>
               <b data-bind="visible: !USE_TESTNET, locale: 'log_into_your_wallet'"></b>
-              <span data-bind="fadeVisibleInOnly: IS_DEV, locale: 'dev_mode_enabled'" class="label label-warning pull-right margin-left-5 padding-5 display-none"></span>
+              <span data-bind="fadeVisibleInOnly: IS_DEV" class="label label-warning pull-right margin-left-5 padding-5 display-none">
+                <i class"fa-fw fa fa-warning"></i> <span data-bind="locale: 'dev_mode_enabled'"></span>
+              </span>
               <span data-bind="fadeVisibleInOnly: USE_TESTNET" class="label label-info pull-right margin-left-5 padding-5 display-none">
-                <i class=\"fa-fw fa fa-info\"></i> <b data-bind="locale: 'testnet_in_use'"></b>
+                <i class="fa-fw fa fa-info"></i> <b data-bind="locale: 'testnet_in_use'"></b>
               </span>
             </h3>
           </div>
@@ -414,17 +418,23 @@
         <h4 class="sales-title" data-bind="locale: 'counterwallet_desc_2'"></h4>
         <div class="row">
           <div class="col-sm-4 col-md-4">
-            <h4 class="margin-bottom-10" data-bind="locale: 'counterwallet_desc_3'"></h4>
+            <h4 class="margin-bottom-10">
+              <i class="fa fa-lock"></i> <span data-bind="locale: 'counterwallet_desc_3'"></span>
+            </h4>
             <p data-bind="locale: 'counterwallet_desc_4'"></p>
             <p data-bind="locale: 'counterwallet_desc_5'"></p>
           </div>
           <div class="col-sm-4 col-md-4">
-            <h4 class="margin-bottom-10" data-bind="locale: 'counterwallet_desc_6'"></h4>
+            <h4 class="margin-bottom-10">
+              <i class="fa fa-cloud"></i> <span data-bind="locale: 'counterwallet_desc_6'"></span>
+            </h4>
             <p data-bind="locale: 'counterwallet_desc_7'"></p>
             <p data-bind="locale: 'counterwallet_desc_8'"></p>
           </div>
           <div class="col-sm-4 col-md-4">
-            <h4 class="margin-bottom-10" data-bind="locale: 'counterwallet_desc_9'"></h4>
+            <h4 class="margin-bottom-10">
+              <i class="fa fa-globe"></i>  <span data-bind="locale: 'counterwallet_desc_9'"></span>
+            </h4>
             <p data-bind="locale: 'counterwallet_desc_10'"></p>
             <p data-bind="locale: 'counterwallet_desc_11'"></p>
           </div>
