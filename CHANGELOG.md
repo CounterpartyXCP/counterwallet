@@ -1,4 +1,17 @@
-### v1.4.0 (Unreleased) ###
+### v1.5.0 ###
+**Enhancements:**
+* Added Quick Buy interface with Vennd Machine
+* Added internationalization support
+* New address generation system
+* DEX design improvement
+* Added order expiration and fees in advanced option
+* Added quick url access with choosen password
+
+**Fixes:**
+* Numerous minor fixes
+* Minor UI tweaks
+
+### v1.4.0 ###
 **Enhancements:**
 * Added new DEx interface
 * Added Armory Offline signing support
