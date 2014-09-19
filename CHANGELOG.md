@@ -8,7 +8,7 @@
 * Added quick url access with choosen password
 
 **Fixes:**
-* Numerous minor fixes
+* Numerous fixes: http://goo.gl/opzkoh
 * Minor UI tweaks
 
 ### v1.4.0 ###
