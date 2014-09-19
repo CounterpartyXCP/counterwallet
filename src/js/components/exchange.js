@@ -1167,13 +1167,13 @@ function OpenOrdersViewModel() {
       order.get_asset = data[i].get_asset;
       order.give_quantity = data[i].give_quantity;
       order.get_quantity = data[i].get_quantity;
-      order.give_remaining = data[i].give_remaining;
-      order.get_remaining = data[i].get_remaining;
+      order.give_remaining = Math.max(data[i].give_remaining, 0);
+      order.get_remaining = Math.max(data[i].get_remaining, 0);
       order.expire_index = data[i].expire_index;
       order.expire_date = expireDate(data[i].expire_index);
       orders.push(order);
       assets[data[i].give_asset] = true;
-      assets[data[i].give_asset] = true;
+      assets[data[i].get_asset] = true;
     }
     assets = _.keys(assets);
 
