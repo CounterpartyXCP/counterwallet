@@ -3,8 +3,7 @@
   <div class="row">
     <div class="col-xs-12 col-sm-7 col-md-7 col-lg-4">
       <h1 class="page-title txt-color-blueDark">
-        <i class="glyphicon glyphicon-share-alt"></i> 
-          My Open Bets 
+        <i class="glyphicon glyphicon-share-alt"></i> <span class="localeTitle" data-bind="locale: 'my_open_bets'"></span>
       </h1>
     </div>
   </div>
@@ -17,7 +16,7 @@
         <div class="jarviswidget defaultWidgetColor" data-widget-editbutton="false" data-widget-deletebutton="false">
             <header>
               <span class="widget-icon"> <i class="fa fa-rocket"></i> </span>
-              <h3>Open bets</h3>
+              <h3 data-bind="locale: 'open_bets'"></h3>
               <div class="clearfix"></div>
             </header>
             <div id="counterbets"> <!-- widget div-->
@@ -27,24 +26,24 @@
                   <thead>
                     <tr>
                       <td>&nbsp;</td>
-                      <th>Feed</th>
-                      <th>Your choice</th>
-                      <th>Topic</th>     
-                      <th>Address</th>   
-                      <th>Fee</th>
-                      <th>Deadline</th>
-                      <th>Odds</th>
-                      <th>Wager quantity</th>
-                      <th>Wager remaining</th>
-                      <th>Counterwager quantity</th>
-                      <th>Counterwager remaining</th>
-                      <th>tx_hash</th>
+                      <th data-bind="locale: 'feed'"></th>
+                      <th data-bind="locale: 'your_choice'"></th>
+                      <th data-bind="locale: 'topic'"></th>     
+                      <th data-bind="locale: 'address'"></th>   
+                      <th data-bind="locale: 'fee'"></th>
+                      <th data-bind="locale: 'deadline'"></th>
+                      <th data-bind="locale: 'odds'"></th>
+                      <th data-bind="locale: 'wager_quantity'"></th>
+                      <th data-bind="locale: 'wager_remaining'"></th>
+                      <th data-bind="locale: 'counterwager_quantity'"></th>
+                      <th data-bind="locale: 'counterwager_remaining'"></th>
+                      <th data-bind="locale: 'tx_hash'"></th>
                     </tr>
                   </thead>
                   <tbody data-bind="foreach: { data: openBets, as: 'bet' }">
                     <tr>
                       <td>
-                        <button class="btn btn-xs btn-default" data-bind="click: $parent.cancelOpenBet">Cancel</button>
+                        <button class="btn btn-xs btn-default" data-bind="click: $parent.cancelOpenBet, locale: 'cancel'"></button>
                       </td>
                       <td data-bind="text: bet.feed"></td>
                       <td class="bold" data-bind="text: bet.bet_type"></td>

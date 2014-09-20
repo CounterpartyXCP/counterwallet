@@ -5,14 +5,10 @@
           <i class="fa fa-fw fa-exclamation fa-2x"></i>
         </em>
         <span>
-           A payment of
-           <b class="notoQuantityColor"><span data-bind="text: dispBTCQuantity"></span></b>
-           <b class="notoAssetColor">BTC</b> is required from 
-           <b class="notoAddrColor"><span data-bind="text: dispMyAddr"></span></b> to settle payment for
-           matched order <b><span data-bind="html: dispMyOrderTxHash"></span></b>.
+           <span data-bind="locale: 'payment_required_for_matched_order', localeArgs:{0:dispBTCQuantity, 1:dispMyAddr, 2:dispMyOrderTxHash}"></span>
            <div class="clearfix"></div>
-           <span class="pull-right"><button class="btn btn-xs btn-success margin-top-5" data-bind="click: completeBTCPay">Pay Now</button></span>
-           <span class="pull-left font-xs text-muted"><i>Expires ~<span data-bind="timeago: approxExpiresInTime"></span> (@ block <span data-bind="text: MATCH_EXPIRE_INDEX"></span>)</i>
+           <span class="pull-right"><button class="btn btn-xs btn-success margin-top-5" data-bind="click: completeBTCPay, locale: 'pay_now'"></button></span>
+           <span class="pull-left font-xs text-muted"><i data-bind="locale:'expire_in', localeArgs: {0: approxExpiresInTimeDisp, 1: MATCH_EXPIRE_INDEX}"></i></span>
         </span>
       </span>
     </li>
@@ -23,12 +19,7 @@
         <em class="bg-color-lighten padding-5 no-border-radius pull-left margin-right-5">
           <i class="fa fa-fw fa-clock-o fa-2x"></i>
         </em>
-        <span>
-           <span data-bind="text: numBlocksUntilEligible"></span> block(s) (~<span data-bind="timeago: approxTimeUntilEligible"></span>)
-           left until order <b><span data-bind="html: dispMyOrderTxHash"></span></b>
-           is eligible for <b class="notoQuantityColor"><span data-bind="text: dispBTCQuantity"></span></b>
-           <b class="notoAssetColor">BTC</b> payment.
-        </span>
+        <span data-bind="locale: 'blocks_left_until_btcpay', localeArgs: {0: numBlocksUntilEligible, 1: approxTimeUntilEligibleDisp, 2: dispMyOrderTxHash, 3:dispBTCQuantity}"></span>
       </span>
     </li>
 </ul>

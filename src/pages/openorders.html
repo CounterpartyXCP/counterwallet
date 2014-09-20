@@ -4,7 +4,7 @@
     <div class="col-xs-12 col-sm-7 col-md-7 col-lg-4">
       <h1 class="page-title txt-color-blueDark">
         <i class="glyphicon glyphicon-share-alt"></i> 
-          My Open Orders 
+          <span class="localeTitle" data-bind="locale: 'my_open_orders'"></span> 
       </h1>
     </div>
   </div>
@@ -17,7 +17,7 @@
         <div class="jarviswidget defaultWidgetColor" data-widget-editbutton="false" data-widget-deletebutton="false">
             <header>
               <span class="widget-icon"> <i class="fa fa-rocket"></i> </span>
-              <h3>Open orders</h3>
+              <h3 data-bind="locale: 'open_orders'"></h3>
               <div class="clearfix"></div>
             </header>
             <div> <!-- widget div-->
@@ -27,18 +27,18 @@
                   <thead>
                     <tr>
                       <td>&nbsp;</td>
-                      <th>Address</th>
-                      <th>Sell quantity</th>
-                      <th>Buy quantity</th>     
-                      <th>Sell remaining</th>
-                      <th>Buy remaining</th> 
-                      <th>Expire</th> 
+                      <th data-bind="locale: 'address'"></th>
+                      <th data-bind="locale: 'sell_quantity'"></th>
+                      <th data-bind="locale: 'buy_quantity'"></th>     
+                      <th data-bind="locale: 'sell_remaining'"></th>
+                      <th data-bind="locale: 'buy_remaining'"></th> 
+                      <th data-bind="locale: 'expire'"></th> 
                     </tr>
                   </thead>
                   <tbody data-bind="foreach: { data: openOrders, as: 'order' }">
                     <tr>
                       <td>
-                        <button class="btn btn-xs btn-default" data-bind="click: $parent.cancelOpenOrder">Cancel</button>
+                        <button class="btn btn-xs btn-default" data-bind="click: $parent.cancelOpenOrder, locale: 'cancel'"></button>
                       </td>
                       <td style="white-space:nowrap" data-bind="text: order.address_label"></td> 
                       <td class="number" data-bind="text: order.give_quantity_str"></td>
@@ -46,7 +46,7 @@
                       <td class="number" data-bind="text: order.give_remaining_str"></td>
                       <td class="number" data-bind="text: order.get_remaining_str"></td>
                       <td>
-                        ~<span data-bind="timeago: order.expire_date"></span> (@ block #<span data-bind="html: order.expire_index"></span>)
+                        ~<span data-bind="timeago: order.expire_date"></span> (@ <span data-bind="locale: 'block'"></span> #<span data-bind="html: order.expire_index"></span>)
                       </td>
                     </tr>
                   </tbody>

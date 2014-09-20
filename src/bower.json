@@ -7,7 +7,7 @@
         "underscore.string": "2.3.3",
         "bootstrap": "3.1.1",
         "smartadmin": "https://github.com/CounterpartyXCP/countersmartadmin.git#c7049658057b26747833f18085255a795f10b581",
-        "counterwebdeps": "https://github.com/CounterpartyXCP/counterwebdeps.git#9113c16f062368adad470cd8b1059036eed1c746",
+        "counterwebdeps": "https://github.com/CounterpartyXCP/counterwebdeps.git#49fde4e0a56c5bab97356fb7db863a813054a4aa",
         "cryptojs": "https://crypto-js.googlecode.com/files/CryptoJS%20v3.1.2.zip",
         "rollbar": "1.1.7",
         "bootbox": "4.2.0",
@@ -39,6 +39,8 @@
         "chai": "1.9.1",
         "iso8601-js-period": "https://github.com/nezasa/iso8601-js-period.git#v0.2.0.0",
         "queue": "https://github.com/mbostock/queue.git#v1.0.7",
-        "htmlcanvas": "git://github.com/xnova/html2canvas.git#33e96032800a71e2ea8d0cff556ec940412a8527"
+        "htmlcanvas": "git://github.com/xnova/html2canvas.git#33e96032800a71e2ea8d0cff556ec940412a8527",
+        "sprintf": "git://github.com/alexei/sprintf.js.git#d5cfad02b3db7a472544b1d9e467fcc126e453a9",
+        "i18next": "git://github.com/i18next/i18next.git#c877a7f7fb3afaf034f26a17d6948accaee598e1"
     }
 }

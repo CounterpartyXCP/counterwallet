@@ -28,8 +28,8 @@ var NUM_BLOCKS_TO_WAIT_FOR_BTCPAY = 6; //number of blocks to wait until the user
 
 var ALLOW_UNCONFIRMED_INPUTS = true;  // allow use unconfirmed unspents
 
-var ACTION_PENDING_NOTICE = "<b><u>This action will take some time to complete</u></b>, and will appear as a Pending Action until"
-  + " confirmed on the network. <b class='errorColor'>Until that time, the wallet will not reflect the change. Please be patient.</b>";
+// should be a i18n key
+var ACTION_PENDING_NOTICE = "pending_notice";
 
 var ARMORY_OFFLINE_TX_PREFIX = "=====TXSIGCOLLECT-";
 
@@ -75,3 +75,5 @@ var RESTRICTED_AREA = {
 
 var MAX_SUPPORT_CASE_PROBLEM_LEN = 4096;
 var QUOTE_ASSETS = []; // initalized with counterblock is_ready()
+
+var QUICK_BUY_ENABLE = false;

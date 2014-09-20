@@ -6,11 +6,11 @@
 * user's order listed as an *upcoming* BTCPay for 6 blocks. Shows up in the Waiting BTCpay feed with a clock icon.
 * After 6 blocks, it's "safe" for the user to make a BTCpay against the item:
    -if automatic, a create_btcpay transaction is then immediately made. item does not show up in waiting BTCpays pane
-   -if manual, the user is promtped to make payment. If they say "yes, do it now", things proceed simiarly to the automatic route
+   -if manual, the user is prompted to make payment. If they say "yes, do it now", things proceed simiarly to the automatic route
    above. if they say "no, hold off" the create_btcpay transaction is made once the user chooses to make it.
    the item then shows up in the waiting BTCpay feed with an exclamation point icon, and the user must make payment
 * Once the user DOES make payment (automatic or manually), the btcpay is added to the pending actions list to show that
-  the BTCPay is inprogress (i.e. txn has been broadcast). (Note that if the user were to log out and back in during this time,
+  the BTCPay is in progress (i.e. txn has been broadcast). (Note that if the user were to log out and back in during this time,
   we would see that the BTCpay is on the pending list and wouldn't show it as eligable to be paid.)
 * Once confirmed on the network, the btcpay data is received across the message feed:
    -WaitingBTCPay is no longer marked as "inprogress". localstorage data is removed for it
@@ -50,6 +50,10 @@ function WaitingBTCPayViewModel(btcPayData) {
   self.approxExpiresInTime = ko.computed(function() {
     return self.now().getTime() + (self.expiresInNumBlocks() * APPROX_SECONDS_PER_BLOCK * 1000);
   }, self);
+
+  self.approxExpiresInTimeDisp = ko.computed(function() {
+    return moment(self.approxExpiresInTime()).fromNow();
+  }, self);
   
   self.displayColor = ko.computed(function() {
     if(self.approxExpiresInTime() - self.now() > 7200 * 1000) return 'bg-color-greenLight'; //> 2 hours
@@ -71,26 +75,21 @@ function WaitingBTCPayViewModel(btcPayData) {
     //Pop up confirm dialog, and make BTC payment
     WALLET.retrieveBTCBalance(self.BTCPAY_DATA['myAddr'], function(balance) {
       if(balance < self.BTCPAY_DATA['btcQuantityRaw'] + MIN_PRIME_BALANCE) {
-        bootbox.alert("You do not have the required <b class='notoAssetColor'>BTC</b> balance to settle this order."
-          + " Please deposit more <b class='notoAssetColor'>BTC</b> into address"
-          + " <b class='notoAddrColor'>" + getAddressLabel(self.BTCPAY_DATA['myAddr']) + "</b> and try again.");
+        bootbox.alert(i18n.t("no_balance_for_btc_pay", getAddressLabel(self.BTCPAY_DATA['myAddr'])));
         return;
       }
       
       bootbox.dialog({
-        message: "Confirm a payment of <b class='notoQuantityColor'>" + self.BTCPAY_DATA['btcQuantity'] + "</b>"
-          + " <b class='notoAssetColor'>BTC</b>" + " to address"
-          + " <b class='notoAddrColor'>" + getAddressLabel(self.BTCPAY_DATA['btcDestAddr']) + "</b> to settle order ID"
-          + " <b>" + self.BTCPAY_DATA['myOrderTxIndex'] + "</b>?",
-        title: "Confirm Order Settlement (BTC Payment)",
+        message: i18n.t("confirm_btc_payment", self.BTCPAY_DATA['btcQuantity'], getAddressLabel(self.BTCPAY_DATA['btcDestAddr']), self.BTCPAY_DATA['myOrderTxIndex']),
+        title: i18n.t("confirm_order_settlement"),
         buttons: {
           cancel: {
-            label: "Cancel",
+            label: i18n.t("cancel"),
             className: "btn-default",
             callback: function() { } //just close the dialog
           },
           confirm: {
-            label: "Confirm and Pay",
+            label: i18n.t("confirm_and_pay"),
             className: "btn-success",
             callback: function() {
               //complete the BTCpay. Start by getting the current BTC balance for the address
@@ -260,6 +259,10 @@ function UpcomingBTCPayViewModel(btcPayData) {
   self.approxTimeUntilEligible = ko.computed(function() {
     return self.now().getTime() + (self.numBlocksUntilEligible() * APPROX_SECONDS_PER_BLOCK * 1000);
   }, self);
+
+  self.approxTimeUntilEligibleDisp = ko.computed(function() {
+    return moment().fromNow(self.approxTimeUntilEligible());
+  }, self);
 }
 
 function UpcomingBTCPayFeedViewModel() {
@@ -355,17 +358,11 @@ function UpcomingBTCPayFeedViewModel() {
           { order_match_id: btcPayData['orderMatchID'], source: btcPayData['myAddr'], destBtcPay: btcPayData['btcDestAddr'] },
           function(txHash, data, endpoint, addressType, armoryUTx) {
             //notify the user of the automatic BTC payment
-            var message = "Automatic <b class='notoAssetColor'>BTC</b> payment of "
-              + "<b class='notoQuantityColor'>" + btcPayData['btcQuantity'] + "</b>"
-              + " <b class='notoAssetColor'>BTC</b> made from address"
-              + " <b class='notoAddrColor'>" + btcPayData['myAddr'] + "</b> for"
-              + " <b class='notoQuantityColor'>" + btcPayData['otherOrderQuantity'] + "</b> "
-              + " <b class='notoAssetColor'>" + btcPayData['otherOrderAsset'] + "</b>. ";
-            WALLET.showTransactionCompleteDialog(message + ACTION_PENDING_NOTICE, message, armoryUTx);
+            var message = i18n.t("auto_btcpay_done", btcPayData['btcQuantity'], btcPayData['myAddr'], btcPayData['otherOrderQuantity'], btcPayData['otherOrderAsset']);
+            WALLET.showTransactionCompleteDialog(message + " " + i18n.t(ACTION_PENDING_NOTICE), message, armoryUTx);
           }, function() {
             WAITING_BTCPAY_FEED.add(btcPayData);
-            bootbox.alert("There was an error processing an automatic <b class='notoAssetColor'>BTC</b> payment."
-              + " This payment has been placed in a pending state. Please try again manually.");
+            bootbox.alert(i18n.t("auto_btcpay_error"));
           }
         );
 
@@ -373,29 +370,18 @@ function UpcomingBTCPayFeedViewModel() {
 
         //The user doesn't have the necessary balance on the address... let them know and add the BTC as pending
         WAITING_BTCPAY_FEED.add(btcPayData);
-        WALLET.showTransactionCompleteDialog("A payment on a matched order for "
-          + "<b class='notoQuantityColor'>" + btcPayData['btcQuantity'] + "</b>"
-          + "<b class='notoAssetColor'>BTC</b> is required, however, the address that made the order ("
-          + "<b class='notoAddrColor'>" + getAddressLabel(btcPayData['myAddr']) + "</b>"
-          + ") lacks the balance necessary to do this automatically. This order has been placed in a pending state."
-          + "<br/><br/>Please deposit the necessary <b class='notoAssetColor'>BTC</b> into this address and"
-          + "manually make the payment from the Bitcoin icon in the top bar of the site.");  
+        WALLET.showTransactionCompleteDialog(i18n.t("btcpay_required", btcPayData['btcQuantity'], getAddressLabel(btcPayData['myAddr'])));  
       }
 
     } else {
       //Otherwise, prompt the user to make the BTC pay
-      var prompt = "An order match for <b class='notoQuantityColor'>" + btcPayData['otherOrderQuantity'] + "</b>"
-        + " <b class='notoAssetColor'>" + btcPayData['otherOrderAsset'] + "</b> was successfully made. "
-        + " To finalize, this requires payment of <b class='notoQuantityColor'>"+ btcPayData['btcQuantity'] + "</b>"
-        + " <b class='notoAssetColor'>BTC</b>" + " from address"
-        + " <b class='notoAddressColor'>" + getAddressLabel(btcPayData['myAddr']) + "</b>."
-        + "<br/><br/><b>You must pay within 10 blocks time, or lose the purchase. Pay now?</b>";          
+      var prompt = i18n.t("order_match_succesfull", btcPayData['otherOrderQuantity'], btcPayData['otherOrderAsset'], btcPayData['btcQuantity'], getAddressLabel(btcPayData['myAddr']));          
       bootbox.dialog({
         message: prompt,
-        title: "Order Settlement (BTC Pay)",
+        title: i18n.t("order_settlement"),
         buttons: {
           success: {
-            label: "No, hold off",
+            label: i18n.t("no_hold_off"),
             className: "btn-danger",
             callback: function() {
               //If the user says no, then throw the BTC pay in pending BTC pays
@@ -403,23 +389,23 @@ function UpcomingBTCPayFeedViewModel() {
             }
           },
           danger: {
-            label: "Yes",
+            label: i18n.t("yes"),
             className: "btn-success",
             callback: function() {
               WALLET.doTransaction(btcPayData['myAddr'], "create_btcpay",
                 { order_match_id: btcPayData['orderMatchID'], source: btcPayData['myAddr'], destBtcPay: btcPayData['btcDestAddr'] },
                 function(txHash, data, endpoint, addressType, armoryUTx) {
                   //notify the user of the automatic BTC payment
-                  var message = "Automatic <b class='notoAssetColor'>BTC</b> payment of"
-                    + " <b class='notoQuantityColor'>" + btcPayData['btcQuantity'] + "</b> <b class='notoAssetColor'>BTC</b> "
-                    + (armoryUTx ? 'to be made' : 'made') + " from address <b class='notoAddressColor'>" + getAddressLabel(btcPayData['myAddr']) + "</b>"
-                    + " for <b class='notoQuantityColor'>" + btcPayData['otherOrderQuantity'] + "</b>"
-                    + " <b class='notoAssetColor'>" + btcPayData['otherOrderAsset'] + "</b>. ";
-                  WALLET.showTransactionCompleteDialog(message + ACTION_PENDING_NOTICE, message, armoryUTx);
+                  var message = "";
+                  if (armoryUTx) {
+                    message = i18n.t("auto_btcpay_to_be_made", btcPayData['btcQuantity'], getAddressLabel(btcPayData['myAddr']), btcPayData['otherOrderQuantity'], btcPayData['otherOrderAsset']);
+                  } else {
+                    message = i18n.t("auto_btcpay_made", btcPayData['btcQuantity'], getAddressLabel(btcPayData['myAddr']), btcPayData['otherOrderQuantity'], btcPayData['otherOrderAsset']);
+                  } 
+                  WALLET.showTransactionCompleteDialog(message + " " + i18n.t(ACTION_PENDING_NOTICE), message, armoryUTx);
                 }, function() {
                   WAITING_BTCPAY_FEED.add(btcPayData);
-                  bootbox.alert("There was an error processing an automatic <b class='notoAssetColor'>BTC</b> payment."
-                    + "<br/><br/><b>Please manually make the payment from the Bitcoin icon in the top bar of the site.</b>");
+                  bootbox.alert(i18n.t("auto_btcpay_error"));
                 }
               );
             }
@@ -428,7 +414,6 @@ function UpcomingBTCPayFeedViewModel() {
       });    
     }
   }
-
 
 
 }

@@ -32,6 +32,9 @@ module.exports = function (grunt) {
                     {cwd: 'src/assets/', src: '*', dest: buildDir+'assets/', expand: true}
                 ]
             }
+        },
+        transifex: {
+            languages: ['fr', 'en', 'de', 'da', 'zh_CN', 'zh_TW', 'fi', 'tr', 'it', 'ja', 'es', 'ru']
         }
     }
     /*config['chrome-extension'] = {

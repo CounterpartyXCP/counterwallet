@@ -4,20 +4,15 @@ function WalletOptionsModalViewModel() {
   
   self.shown = ko.observable(false);
   self.availableThemes = ko.observableArray([
-    {'id': 'ultraLight',   'name': 'Ultra Light',   'styleName': 'smart-style-2'},
-    {'id': 'simpleGrey',   'name': 'Simple Grey',   'styleName': 'smart-style-0'},
-    {'id': 'darkElegance', 'name': 'Dark Elegance', 'styleName': 'smart-style-1'},
-    {'id': 'googleSkin',   'name': 'Google Skin',   'styleName': 'smart-style-3'}
-  ]);
-  self.availableLangs = ko.observableArray([
-    {'id': 'en-us', 'name': 'English'}
-    //additional languages in the future
+    {'id': 'ultraLight',   'name': i18n.t('theme_ultra_light'),   'styleName': 'smart-style-2'},
+    {'id': 'simpleGrey',   'name': i18n.t('theme_simple_grey'),   'styleName': 'smart-style-0'},
+    {'id': 'darkElegance', 'name': i18n.t('theme_dark_elegance'), 'styleName': 'smart-style-1'},
+    {'id': 'googleSkin',   'name': i18n.t('theme_google_skin'),   'styleName': 'smart-style-3'}
   ]);
   
   //set these properties to null as PREFERENCES is not available until login happens (they will be formally set on login)
   self.autoBTCPayEnabled = ko.observable(null);
   self.selectedTheme = ko.observable(null);
-  self.selectedLang = ko.observable(null);
   self.ORIG_PREFERENCES_JSON = null;
   
   //Info table related props
@@ -63,11 +58,11 @@ function WalletOptionsModalViewModel() {
   });
   
   self.dispMyCookiePresent = ko.computed(function() {
-    return self.myCookie() ? 'Present' : 'None';
+    return self.myCookie() ? i18n.t('present') : i18n.t('none');
   }, self);
   
   self.dispCWURLS = ko.computed(function() {
-    return cwURLs() ? cwURLs().join(', ') : 'UNKNOWN';
+    return cwURLs() ? cwURLs().join(', ') : i18n.t('unknown');
   }, self);
 
   self.autoBTCPayEnabled.subscribeChanged(function(newVal, prevVal) {
@@ -87,17 +82,6 @@ function WalletOptionsModalViewModel() {
       PREFERENCES['selected_theme'] = newSelection['id'];
     }
   });
-
-  self.selectedLang.subscribe(function(newSelection) {
-    newSelection = (newSelection
-      ? ko.utils.arrayFirst(self.availableLangs(), function(item) { return newSelection === item.id; }) : self.availableLangs()[0]);
-
-    $.jqlog.debug("Changing lang to " + newSelection['name']);
-    //TODO: Code to change the selected language
-    if(PREFERENCES['selected_lang'] != newSelection['id']) {
-      PREFERENCES['selected_lang'] = newSelection['id'];
-    }
-  });
   
   self.show = function(resetForm) {
     document.getElementById('urlPassword').autocomplete = 'off';
@@ -109,12 +93,10 @@ function WalletOptionsModalViewModel() {
     //display current settings into the options UI
     self.autoBTCPayEnabled(PREFERENCES['auto_btcpay']);
     self.selectedTheme(PREFERENCES['selected_theme']);
-    self.selectedLang(PREFERENCES['selected_lang']);
     
     //ghetto ass hack -- select2 will not set itself properly when using the 'optionsValue' option, but it will
     // not fire off events when NOT using this option. wtf... o_O
     $('#themeSelector').select2("val", self.selectedTheme());
-    $('#langSelector').select2("val", self.selectedLang());
 
     self.getReflectedHostInfo();
     

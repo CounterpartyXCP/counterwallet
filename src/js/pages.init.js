@@ -1,6 +1,8 @@
 INIT_FUNC = {};
 PROCESSED_BTCPAY = {};
 
+localeInit(initIndex);
+
 function initIndex() { //main page
   window.LOGON_VIEW_MODEL = new LogonViewModel();
   window.LICENSE_MODAL = new LicenseModalViewModel();
@@ -43,6 +45,10 @@ function initIndex() { //main page
     //so that knockout is run on the DOM sections and global context is accessible...
     ko.applyBindings({}, document.getElementById("noticeTestnet"));
     ko.applyBindings({}, document.getElementById("noticeDevMode"));
+    ko.applyBindings({}, document.getElementById("donate"));
+    ko.applyBindings({}, document.getElementById("openChatPane"));
+    ko.applyBindings({}, document.getElementById("logo"));
+    ko.applyBindings({}, document.getElementById("langSelector"));
     
     $('#fullscreen').click(function(e) {
       launchFullscreen(document.documentElement);
@@ -92,9 +98,10 @@ function initIndex() { //main page
     });
     $('#allContentLoading').hide();
     $('#allContent').show();
+
+    $('*[data-toggle=tooltip]').tooltip();
   });
 }
-initIndex(); //call it now, as this script is loaded on index page load
 
 
 function initBalances() {
@@ -114,7 +121,9 @@ function initBalances() {
   window.BROADCAST_MODAL = new BroadcastModalViewModel();
   window.SIGN_TRANSACTION_MODAL = new SignTransactionModalViewModel();
   window.ARMORY_BROADCAST_TRANSACTION = new ArmoryBroadcastTransactionModalViewModel();
-  
+
+  ko.applyBindings({}, document.getElementById("balanceHeader"));
+  ko.applyBindings({}, document.getElementById("alertBuyXcp"));
   ko.applyBindings({}, document.getElementById("gettingStartedNotice"));
   ko.applyBindings({}, document.getElementById("pendingBTCPayNotice"));
   ko.applyBindings({}, document.getElementById("oldWalletDetectedNotice"));
@@ -162,8 +171,7 @@ function initBalances() {
       //Some misc jquery event handlers
       $('#createAddress, #createWatchOnlyAddress, #createArmoryOfflineAddress').click(function(e) {
         if(WALLET.addresses().length >= MAX_ADDRESSES) {
-          bootbox.alert("You already have the max number of addresses for a single wallet (<b>"
-            + MAX_ADDRESSES + "</b>). Please create a new wallet (i.e. different passphrase) for more.");
+          bootbox.alert(i18n.t("max_number_addresses", MAX_ADDRESSES));
           return false;
         }
 
@@ -211,7 +219,7 @@ function initBalances() {
               break;
             }
             if (needSweep) {
-              bootbox.confirm("<b style='color:red'>We detected that you have an 'old' wallet with funds present. Press 'OK' to sweep these funds into your new wallet, or Cancel to skip for now.</b>", function(value) {
+              bootbox.confirm("<b style='color:red'>" + i18n.t("old_wallet_warning") + "</b>", function(value) {
                 if (value) {
                   SWEEP_MODAL.show(true, true);
                 }
@@ -275,6 +283,7 @@ function initHistory() {
   
   ko.applyBindings(TXN_HISTORY, document.getElementById("wid-id-txnHistory"));
   ko.applyBindings(BALANCE_HISTORY, document.getElementById("wid-id-balHistory"));
+  ko.applyBindings({}, document.getElementById("historyHeader"));
   
   BALANCE_HISTORY.init();
   TXN_HISTORY.init();
@@ -297,6 +306,7 @@ function initStats() {
   ko.applyBindings(STATS_TXN_HISTORY, document.getElementById("wid-id-statsTxnHistory"));
   ko.applyBindings(STATS_HISTORY, document.getElementById("wid-id-statsHistory"));
   ko.applyBindings(STATS_HISTORY, document.getElementById("wid-id-walletHistory"));
+  ko.applyBindings({}, document.getElementById("walletCountStats"));
   
   STATS_HISTORY.init();
   STATS_TXN_HISTORY.init();
@@ -312,6 +322,7 @@ function initLeaderboard() {
   
   ko.applyBindings(ASSET_LEADERBOARD, document.getElementById("leaderboardMarketBar"));
   ko.applyBindings(ASSET_LEADERBOARD, document.getElementsByClassName("leaderboardGrid")[0]);
+  ko.applyBindings({}, document.getElementById("leaderboardTitle"));
   
   ASSET_LEADERBOARD.init();
   
@@ -354,6 +365,7 @@ function initPortfolio() {
   
   ko.applyBindings(ASSET_PORTFOLIO, document.getElementById("portfolioMarketBar"));
   ko.applyBindings(ASSET_PORTFOLIO, document.getElementsByClassName("portfolioGrid")[0]);
+  ko.applyBindings({}, document.getElementById("portofolioHeader"));
   
   $(window).bind("resize", ASSET_PORTFOLIO.dataTableResponsive);
   $(window).on('hashchange', function() {
@@ -426,3 +438,15 @@ function initRPS() {
   RPS.init();
 }
 INIT_FUNC['pages/rps.html'] = initRPS;
+
+function initSimpleBuy() {
+  pageSetUp();
+  window.SIMPLE_BUY = new SimpleBuyViewModel();
+  window.VEND_MODAL = new VendingMachineViewModel();
+
+  ko.applyBindings(SIMPLE_BUY, document.getElementById("simplebuy"));
+  ko.applyBindings(VEND_MODAL, document.getElementById("vendModal"));
+
+  SIMPLE_BUY.init();
+}
+INIT_FUNC['pages/simplebuy.html'] = initSimpleBuy;

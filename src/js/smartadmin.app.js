@@ -223,19 +223,19 @@ $(document).ready(function() {
     $.loginURL = $this.attr('href');
     
     if (needWarningOnExit()) {
-      $.logoutMSG = "<span class='bold txt-color-red'>If you log out, any Bitcoin sell orders you have open will probably not be filled.</span>";
+      $.logoutMSG = "<span class='bold txt-color-red'>" + i18n.t("exit_warning") + "</span>";
     } else {
       $.logoutMSG = $this.data('logout-msg');
     }
 
     // ask verification
     $.SmartMessageBox({
-      title : "<i class='fa fa-sign-out txt-color-orangeDark'></i> Logout <span class='txt-color-orangeDark'><strong>" + $('#show-shortcut').text() + "</strong></span> ?",
+      title : "<i class='fa fa-sign-out txt-color-orangeDark'></i> " + i18n.t('logout') + " <span class='txt-color-orangeDark'><strong>" + $('#show-shortcut').text() + "</strong></span> ?",
       content : $.logoutMSG || "You can improve your security further after logging out by closing this opened browser",
-      buttons : '[No][Yes]'
+      buttons : '[' + i18n.t('no') + '][' + i18n.t('yes') + ']'
 
     }, function(ButtonPressed) {
-      if (ButtonPressed == "Yes") {
+      if (ButtonPressed == i18n.t('yes')) {
         $.root_.addClass('animated fadeOutUp');
         setTimeout(logout, 1000)
       }
@@ -1063,9 +1063,9 @@ function setup_widgets_desktop() {
       widgets : '.jarviswidget',
       localStorage : true,
       deleteSettingsKey : '#deletesettingskey-options',
-      settingsKeyLabel : 'Reset settings?',
+      settingsKeyLabel : i18n.t('reset_settings'),
       deletePositionKey : '#deletepositionkey-options',
-      positionKeyLabel : 'Reset position?',
+      positionKeyLabel : i18n.t('reset_position'),
       sortable : true,
       buttonsHidden : false,
       // toggle button
@@ -1323,7 +1323,7 @@ function loadPage(url, container) {
     cache : !IS_DEV, // yes, in development mode, memory will bloat
     beforeSend : function() {
       // cog placed
-      container.html('<h1><i class="fa fa-cog fa-spin"></i> Loading...</h1>');
+      container.html('<h1><i class="fa fa-cog fa-spin"></i> ' + i18n.t('loading') + '</h1>');
     
       if (container[0] == $("#content")[0]) {
         drawBreadCrumb();
@@ -1344,7 +1344,7 @@ function loadPage(url, container) {
       e.delay(50).animate({ opacity : '1.0' }, 300);
     },
     error : function(xhr, ajaxOptions, thrownError) {
-      container.html('<h4 style="margin-top:10px; display:block; text-align:left"><i class="fa fa-warning txt-color-orangeDark"></i> Error 404! Page not found.</h4>');
+      container.html('<h4 style="margin-top:10px; display:block; text-align:left"><i class="fa fa-warning txt-color-orangeDark"></i> ' + i18n.t('error404') + '</h4>');
     },
     async : false
   });
@@ -1476,7 +1476,7 @@ function runDataTables(specificTableID, destroyOption, extraProps) {
     "sPaginationType" : "bootstrap",
     "sDom" : "R<'dt-top-row'Clf>r<'dt-wrapper't><'dt-row dt-bottom-row'<'row'<'col-sm-6'i><'col-sm-6 text-right'p>>",
     "fnInitComplete" : function(oSettings, json) {
-      $('.ColVis_Button').addClass('btn btn-default btn-sm').html('Columns <i class="icon-arrow-down"></i>');
+      $('.ColVis_Button').addClass('btn btn-default btn-sm').html(i18n.t("columns") + ' <i class="icon-arrow-down"></i>');
     }
   };
   $.extend(props, extraProps);
@@ -1492,7 +1492,7 @@ function runDataTables(specificTableID, destroyOption, extraProps) {
     "oTableTools" : {
       "aButtons" : ["copy", {
         "sExtends" : "collection",
-        "sButtonText" : 'Save <span class="caret" />',
+        "sButtonText" : i18n.t('save') + ' <span class="caret" />',
         "aButtons" : ["csv", "xls", "pdf"]
       }],
       "sSwfPath" : "assets/copy_csv_xls_pdf.swf"

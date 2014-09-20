@@ -141,7 +141,7 @@ function needWarningOnExit() {
 
 function warningOnExit() {
   if (needWarningOnExit()) {
-    return "If you log out, any Bitcoin sell orders you have open will probably not be filled.";
+    return i18n.t("exit_warning");
   }
 }
 
@@ -287,9 +287,8 @@ $(document).ready(function() {
         url: 'http://www.opera.com/download/'
       }      
     },
-    header: 'Your browser is not supported with Counterwallet',
-    paragraph1: "Counterwallet's security features require a newer browser than what you are using. We recommend Chrome for the best user experience."
-      + " Also, note that Microsoft Internet Explorer is not supported due to it's lack of full support for Content-Security-Policy restrictions.",
+    header: i18n.t('brower_not_supported_header'),
+    paragraph1: i18n.t("brower_not_supported_text"),
     close: false,
     closeESC: false
   });

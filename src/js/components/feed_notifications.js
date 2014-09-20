@@ -42,39 +42,32 @@ NotificationViewModel.calcText = function(category, message) {
   
   if(category == "sends") {
     if(WALLET.getAddressObj(message['source']) && WALLET.getAddressObj(message['destination'])) {
-      desc = "You transferred <Am>" + smartFormat(normalizeQuantity(message['quantity'], message['_divisible']))
-        + "</Am> <As>" + message['asset'] + "</As> from <Ad>" + getAddressLabel(message['source'])
-        + "</Ad> to <Ad>" + getAddressLabel(message['destination']) + "</Ad>";
+      desc = i18n.t("notif_you_transferred", smartFormat(normalizeQuantity(message['quantity'], message['_divisible'])),
+        message['asset'], getAddressLabel(message['source']), getAddressLabel(message['destination']));
     } else if(WALLET.getAddressObj(message['source'])) { //we sent funds
-      desc = "You sent <Am>" + smartFormat(normalizeQuantity(message['quantity'], message['_divisible']))
-        + "</Am> <As>" + message['asset'] + "</As> from <Ad>" + getAddressLabel(message['source'])
-        + "</Ad> to address <Ad>" +  getAddressLabel(message['destination']) + "</Ad>";
+      desc = i18n.t("notif_you_sent", smartFormat(normalizeQuantity(message['quantity'], message['_divisible'])),
+        message['asset'], getAddressLabel(message['source']), getAddressLabel(message['destination']));
     } else if(WALLET.getAddressObj(message['destination'])) { //we received funds
-      desc = "You received <Am>"
-        + smartFormat(normalizeQuantity(message['quantity'], message['_divisible'])) + "</Am> <As>" + message['asset']
-        + "</As> from <Ad>" +  getAddressLabel(message['source'])
-        + "</Ad> to your address <Ad>" +  getAddressLabel(message['destination']) + "</Ad>";
+      desc = i18n.t("notif_you_received", smartFormat(normalizeQuantity(message['quantity'], message['_divisible'])),
+        message['asset'], getAddressLabel(message['source']), getAddressLabel(message['destination']));
     }
   } else if(category == "btcpays" && (WALLET.getAddressObj(message['source']) || WALLET.getAddressObj(message['destination']))) {
-    desc = "BTCPay from <Ad>" + getAddressLabel(message['source']) + "</Ad> to <Ad>" + getAddressLabel(message['destination'])
-      + "</Ad> for <Am>" + smartFormat(normalizeQuantity(message['btc_amount'])) + "</Am> <As>BTC</As>";
+    desc = i18n.t("notif_btcpay_from", getAddressLabel(message['source']),  getAddressLabel(message['destination']),
+      smartFormat(normalizeQuantity(message['btc_amount'])));
   } else if(category == "burns" && WALLET.getAddressObj(message['source'])) {
-    desc = "Your address <Ad>" + getAddressLabel(message['source']) + "</Ad> has burned <Am>" + smartFormat(normalizeQuantity(message['burned']))
-      + "</Am> <As>BTC</As> for <Am>" + smartFormat(normalizeQuantity(message['earned'])) + "</Am> <As>XCP</As>";
+    desc = i18n.t("notif_burn", getAddressLabel(message['source']), smartFormat(normalizeQuantity(message['burned'])),
+      smartFormat(normalizeQuantity(message['earned'])));
   } else if(category == "cancels" && WALLET.getAddressObj(message['source'])) {
-    desc = "Order/Bid ID <b>" + message['tx_index'] + "</b> for your address <Ad>" + getAddressLabel(message['source']) + "</Ad> was cancelled";
+    desc = i18n.t("notif_order_cancelled", message['tx_index'], getAddressLabel(message['source']));
   } else if(category == "callbacks" || category == "dividend") {
     //See if any of our addresses own any of the specified asset, and if so, notify them of the callback or dividend
     // NOTE that counterpartyd has automatically already adusted the balances of all asset holders...we just need to notify
     var addressesWithAsset = WALLET.getAddressesWithAsset(message['asset']);
     if(!addressesWithAsset.length) return;
     if(category == "callbacks") {
-      desc = "<As>XCP</As> balance adjusted on your address(es) <Ad>" + addressesWithAsset.join(', ')
-        + "</Ad> due to <Am>" + (parseFloat(message['fraction']) * 100).toString()
-        + "%</Am> callback option being exercised for token <As>" + message['asset'] + "</As>";
+      desc = i18n.t("notif_callback_done", addressesWithAsset.join(', '), (parseFloat(message['fraction']) * 100).toString(), message['asset']);
     } else {
-      desc = "<As>" + message['dividend_asset'] + "</As> balance adjusted on your address(es) <Ad>" + addressesWithAsset.join(', ')
-        + "</Ad> due to <Am>" + message['quantity_per_unit'] + "</Am> distribution being issued for token <As>" + message['asset'] + "</As>";
+      desc = i18n.t("notif_dividend_done", message['dividend_asset'], addressesWithAsset.join(', '), message['quantity_per_unit'], message['asset']);
     }
   } else if(category == 'issuances') {
     var addresses = WALLET.getAddressesList();
@@ -87,114 +80,94 @@ NotificationViewModel.calcText = function(category, message) {
       //Detect transfers, whether we currently have the object in our wallet or not (as it could be
       // a transfer FROM an address outside of our wallet)
       if(addresses.indexOf(message['source'])!=-1 || addresses.indexOf(message['issuer'])!=-1) {
-        desc = "Token <As>" + message['asset'] + "</As> was transferred from <Ad>"
-          + getLinkForCPData('address', message['source'], getAddressLabel(message['source'])) + "</Ad> to <Ad>"
-          + getLinkForCPData('address', message['issuer'], getAddressLabel(message['issuer'])) + "</Ad>"; 
+        desc = i18n.t("notif_token_transferred", message['asset'], getLinkForCPData('address', message['source'], getAddressLabel(message['source'])),
+          getLinkForCPData('address', message['issuer'], getAddressLabel(message['issuer']))); 
       }
     } else if(assetObj) { //the address is in the wallet
       //Detect everything else besides transfers, which we only care to see if the asset is listed in one of the wallet addresses
       if(message['locked']) {
         assert(!assetObj.locked());
-        desc = "Token <As>" + message['asset'] + "</As> was locked against additional issuance";
+        desc = i18n.t("notif_token_locked", message['asset']);
       } else if(message['description'] != assetObj.description()) {
-        desc = "Token <As>" + message['asset'] + "</As> had its description changed from <b>" + assetObj.description()
-          + "</b> to <b>" + message['description'] + "</b>";
+        desc = i18n.t("notif_token_desc_changed", message['asset'], assetObj.description(), message['description']);
       } else {
         var additionalQuantity = message['quantity'];
         if(additionalQuantity) {
-          desc = "Additional <Am>" + smartFormat(normalizeQuantity(additionalQuantity, assetObj.DIVISIBLE))
-            + "</Am> units issued for token <As>" + message['asset'] + "</As>";
+          desc = i18n.t("notif_additional_issued", smartFormat(normalizeQuantity(additionalQuantity, assetObj.DIVISIBLE)), message['asset']);
         } else {
           //this is not a transfer, but it is not in our wallet as well we can assume it's an issuance of a totally new asset
-          desc = "Token <As>" + message['asset'] + "</As> was issued with an initial quantity of <Am>"
-            + smartFormat(normalizeQuantity(message['quantity'], message['divisible'])) + "</Am> units";
+          desc = i18n.t("notif_token_issued", message['asset'], smartFormat(normalizeQuantity(message['quantity'], message['divisible'])));
         }
       }
     }
   } else if(category == "orders" && WALLET.getAddressObj(message['source'])) {
-    desc = "Your order to buy <Am>" + smartFormat(normalizeQuantity(message['get_quantity'], message['_get_asset_divisible']))
-      + "</Am> <As>" + message['get_asset'] + "</As> from <Ad>" + getAddressLabel(message['source'])
-      + "</Ad> in exchange for <Am>" + smartFormat(normalizeQuantity(message['give_quantity'], message['_give_asset_divisible']))
-      + "</Am> <As>" + message['give_asset'] + "</As> is active";
+    desc = i18n.t("notif_order_buy_active", smartFormat(normalizeQuantity(message['get_quantity'], message['_get_asset_divisible'])),
+      message['get_asset'], getAddressLabel(message['source']), smartFormat(normalizeQuantity(message['give_quantity'], message['_give_asset_divisible'])),
+      message['give_asset']);
   } else if(category == "order_matches" && (WALLET.getAddressObj(message['tx0_address']) || WALLET.getAddressObj(message['tx1_address']))) {
-    desc = "Order matched between <Ad>" 
-      + getAddressLabel(message['tx0_address']) + "</Ad> (gave <Am>"
-      + smartFormat(normalizeQuantity(message['forward_quantity'], message['_forward_asset_divisible'])) + "</Ad> <As>" + message['forward_asset'] + "</As>) and <Ad>"
-      + getAddressLabel(message['tx1_address']) + "</Ad> (gave <Am>"
-      + smartFormat(normalizeQuantity(message['backward_quantity'], message['_backward_asset_divisible'])) + "</Ad> <As>" + message['backward_asset'] + "</As>)";
+    desc = i18n.t("notif_order_matched", getAddressLabel(message['tx0_address']), smartFormat(normalizeQuantity(message['forward_quantity'], message['_forward_asset_divisible'])),
+      message['forward_asset'], getAddressLabel(message['tx1_address']), smartFormat(normalizeQuantity(message['backward_quantity'], message['_backward_asset_divisible'])),
+      message['backward_asset']);
   } else if(category == "order_expirations" && WALLET.getAddressObj(message['source'])) {
-    desc = "Your order ID <b>" + message['order_index'] + "</b> from address <Ad>" + getAddressLabel(message['source']) + "</Ad> has expired";
+    desc = i18n.t("notif_order_expired", message['order_index'], getAddressLabel(message['source']));
   } else if(category == "order_match_expirations") {
     if(WALLET.getAddressObj(message['tx0_address']) && WALLET.getAddressObj(message['tx1_address'])) {
-      desc = "An order match between your addresses <Ad>" + getAddressLabel(message['tx0_address'])
-        + "</Ad> and <Ad>" + getAddressLabel(message['tx1_address']) + "</Ad> has expired";
+      desc = i18n.t("notif_self_order_match_expired", getAddressLabel(message['tx0_address']), getAddressLabel(message['tx1_address']));
     } else if(WALLET.getAddressObj(message['tx0_address'])) {
-      desc = "An order match between your address <Ad>" + getAddressLabel(message['tx0_address'])
-        + "</Ad> and address <Ad>" + getAddressLabel(message['tx1_address']) + "</Ad> has expired";
+      desc = i18n.t("notif_order_match_expired", getAddressLabel(message['tx0_address']), getAddressLabel(message['tx1_address']));
     } else if(WALLET.getAddressObj(message['tx1_address'])) {
-      desc = "An order match between your address <Ad>" + getAddressLabel(message['tx1_address'])
-        + "</Ad> and address <Ad>" + getAddressLabel(message['tx0_address']) + "</Ad> has expired";
+      desc = i18n.t("notif_order_match_expired", getAddressLabel(message['tx1_address']), getAddressLabel(message['tx0_address']));
     }
   } else if(category == "broadcasts" && WALLET.getAddressObj(message['source'])) {
     if(message['locked']) {
-      desc = "You have locked the feed at address <Ad>" + getAddressLabel(message['source']) + "</Ad>";
+      desc = i18n.t("notif_feed_locked", getAddressLabel(message['source']));
     } else {
-      desc = "You have broadcast value <Am>" + message['value'] + "</Am> from address <Ad>" + getAddressLabel(message['source']) + "</Ad>";
+      desc = i18n.t("notif_value_broadcasted", message['value'], getAddressLabel(message['source']));
     }
   } else if(category == "bets" && WALLET.getAddressObj(message['source'])) {
 
-    desc = "You bet <Am>" + smartFormat(normalizeQuantity(message['wager_quantity'])) + "</Am> <As>XCP</As> on the feed @"
-      + " <Ad>" + getAddressLabel(message['source']) + "</Ad>";
+    desc = i18n.t("notif_bet", smartFormat(normalizeQuantity(message['wager_quantity'])), getAddressLabel(message['source']));
 
   } else if(category == "bet_matches" && (WALLET.getAddressObj(message['tx0_address']) || WALLET.getAddressObj(message['tx1_address']))) {
 
-    desc = "Bet @ feed <Ad>" + message['feed_address'] + "</Ad> matched between <Ad>" 
-      + getAddressLabel(message['tx0_address']) + "</Ad> (gave <Am>"
-      + smartFormat(normalizeQuantity(message['forward_quantity'])) + "</Ad> <As>XCP</As>) and <Ad>"
-      + getAddressLabel(message['tx1_address']) + "</Ad> (gave <Am>"
-      + smartFormat(normalizeQuantity(message['backward_quantity'])) + "</Ad> <As>XCP</As>)";
+    desc = i18n.t("notif_bet_matched", message['feed_address'], getAddressLabel(message['tx0_address']),
+      smartFormat(normalizeQuantity(message['forward_quantity'])), getAddressLabel(message['tx1_address']), 
+      smartFormat(normalizeQuantity(message['backward_quantity'])));
 
   } else if(category == "bet_expirations" && WALLET.getAddressObj(message['source'])) {
-    desc = "Your bet ID <b>" + message['bet_index'] + "</b> from address <Ad>" + getAddressLabel(message['source']) + "</Ad> has expired";
+    desc = i18n.t("notif_bet_expired", message['bet_index'], getAddressLabel(message['source']));
   } else if(category == "bet_match_expirations") {
     if(WALLET.getAddressObj(message['tx0_address']) && WALLET.getAddressObj(message['tx1_address'])) {
-      desc = "A bet match between your addresses <Ad>" + getAddressLabel(message['tx0_address'])
-        + "</Ad> and <Ad>" + getAddressLabel(message['tx1_address']) + "</Ad> has expired";
+      desc = i18n.t("notif_self_bet_match_expired", getAddressLabel(message['tx0_address']), getAddressLabel(message['tx1_address']));
     } else if(WALLET.getAddressObj(message['tx0_address'])) {
-      desc = "A bet match between your address <Ad>" + getAddressLabel(message['tx0_address'])
-        + "</Ad> and address <Ad>" + getAddressLabel(message['tx1_address']) + "</Ad> has expired";
+      desc = i18n.t("notif_bet_match_expired", getAddressLabel(message['tx0_address']), getAddressLabel(message['tx1_address']));
     } else if(WALLET.getAddressObj(message['tx1_address'])) {
-      desc = "A bet match between your address <Ad>" + getAddressLabel(message['tx1_address'])
-        + "</Ad> and address <Ad>" + getAddressLabel(message['tx0_address']) + "</Ad> has expired";
+      desc = i18n.t("notif_bet_match_expired", getAddressLabel(message['tx1_address']), getAddressLabel(message['tx0_address']));
     }
 
 
   } else if(category == 'rps'  && WALLET.getAddressObj(message['source'])) {
 
-    desc  = "You play Rock-Paper-Scissors with <Am>" + smartFormat(normalizeQuantity(message['wager']))+ "</Am> <As>XCP</As>";
-    desc += " with <Ad>"+ getAddressLabel(message['source']) + "</Ad>";
+    desc  = i18n.t("notif_rps", smartFormat(normalizeQuantity(message['wager'])), getAddressLabel(message['source']));
 
   } else if(category == 'rpsresolves' && WALLET.getAddressObj(message['source'])) {
 
-    var move_names = ['NA', 'ROCK', 'PAPER', 'SCISSORS', 'SPOCK', 'LIZARD'];
+    var move_names = [i18n.t('na'), i18n.t('rock'), i18n.t('paper'), i18n.t('scissors'), i18n.t('spock'), i18n.t('lizard')];
     var move_name = move_names[message['move']] || message['move']
-    desc  = "Your move <Am>"+ move_name +"</Am> with <Ad>" + getAddressLabel(message['source']) + "</Ad> is confirmed";
+    desc  = i18n.t("notif_rps_move_confirmed", move_name, getAddressLabel(message['source']));
 
   } else if(category == 'rps_expirations' && WALLET.getAddressObj(message['source'])) {
 
-    desc = "Your RPS game ID <b>" + message['rps_index'] + "</b> from address <Ad>" + getAddressLabel(message['source']) + "</Ad> has expired";
+    desc = i18n.t("notif_rps_expired", message['rps_index'], getAddressLabel(message['source']));
 
   } else if(category == "rps_match_expirations") {
 
     if(WALLET.getAddressObj(message['tx0_address']) && WALLET.getAddressObj(message['tx1_address'])) {
-      desc = "A RPS match between your addresses <Ad>" + getAddressLabel(message['tx0_address'])
-        + "</Ad> and <Ad>" + getAddressLabel(message['tx1_address']) + "</Ad> has expired";
+      desc = i18n.t("notif_self_rps_match_expired", getAddressLabel(message['tx0_address']), getAddressLabel(message['tx1_address']));
     } else if(WALLET.getAddressObj(message['tx0_address'])) {
-      desc = "A RPS match between your address <Ad>" + getAddressLabel(message['tx0_address'])
-        + "</Ad> and address <Ad>" + getAddressLabel(message['tx1_address']) + "</Ad> has expired";
+      desc = i18n.t("notif_rps_match_expired", getAddressLabel(message['tx0_address']), getAddressLabel(message['tx1_address']));
     } else if(WALLET.getAddressObj(message['tx1_address'])) {
-      desc = "A RPS match between your address <Ad>" + getAddressLabel(message['tx1_address'])
-        + "</Ad> and address <Ad>" + getAddressLabel(message['tx0_address']) + "</Ad> has expired";
+      desc = i18n.t("notif_rps_match_expired", getAddressLabel(message['tx1_address']), getAddressLabel(message['tx0_address']));
     }
 
   } else if(category == "rps_matches") {
@@ -220,13 +193,11 @@ NotificationViewModel.calcText = function(category, message) {
         
         if (WALLET.getAddressObj(message['tx0_address'])) {
           if  (message['status'] == "concluded: first player wins") {
-            desc = "RPS: You win " + smartFormat(normalizeQuantity(message['wager']))+ "</Am> <As>XCP</As>" + 
-                   " with <Ad>" + getAddressLabel(message['tx0_address']) + "</Ad>";
+            desc = i18n.t("notif_rps_win", smartFormat(normalizeQuantity(message['wager'])), getAddressLabel(message['tx0_address']));
           } else if  (message['status'] == "concluded: second player wins") {
-            desc = "RPS: You lose " + smartFormat(normalizeQuantity(message['wager']))+ "</Am> <As>XCP</As>" + 
-                   " with <Ad>" + getAddressLabel(message['tx0_address']) + "</Ad>";
+            desc = i18n.t("notif_rps_lose", smartFormat(normalizeQuantity(message['wager'])), getAddressLabel(message['tx0_address']));
           } else if  (message['status'] == "concluded: tie") {
-            desc = "RPS: Tie with <Ad>" + getAddressLabel(message['tx0_address']) + "</Ad>";
+            desc = i18n.t("notif_rps_tie", getAddressLabel(message['tx0_address']));
           }
           if (desc) {
             desc += " (" + message['tx0_index'] + ")";
@@ -236,13 +207,11 @@ NotificationViewModel.calcText = function(category, message) {
         var desc2 = "";
         if (WALLET.getAddressObj(message['tx1_address'])) {
           if  (message['status'] == "concluded: first player wins") {
-            desc2 = "RPS: You lose " + smartFormat(normalizeQuantity(message['wager']))+ "</Am> <As>XCP</As>" + 
-                   " with <Ad>" + getAddressLabel(message['tx1_address']) + "</Ad>";
+            desc2 = i18n.t("notif_rps_lose", smartFormat(normalizeQuantity(message['wager'])), getAddressLabel(message['tx1_address']));
           } else if  (message['status'] == "concluded: second player wins") {
-            desc2 = "RPS: You win " + smartFormat(normalizeQuantity(message['wager']))+ "</Am> <As>XCP</As>" + 
-                   " with <Ad>" + getAddressLabel(message['tx1_address']) + "</Ad>";
+            desc2 = i18n.t("notif_rps_win", smartFormat(normalizeQuantity(message['wager'])), getAddressLabel(message['tx1_address']));
           } else if  (message['status'] == "concluded: tie") {
-            desc2 = "RPS: Tie with <Ad>" + getAddressLabel(message['tx1_address']) + "</Ad>";
+            desc2 = i18n.t("notif_rps_tie", getAddressLabel(message['tx1_address']));
           }
           if (desc) {
             desc2 += " (" + message['tx1_index'] + ")";

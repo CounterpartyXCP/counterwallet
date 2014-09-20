@@ -16,7 +16,7 @@ function DonationViewModel() {
           return parseFloat(quantity) <= self.balancesBTC[address];
         }
       },
-      message: 'Quantity entered exceeds the address balance.',
+      message: i18n.t('quantity_exceeds_balance'),
       params: self
     }    
   }
@@ -76,12 +76,21 @@ function DonationViewModel() {
       destination: DONATION_ADDRESS,
       _divisible: true
     };
+
     $.jqlog.debug(params);
+
     var onSuccess = function(txHash, data, endpoint, addressType, armoryUTx) {
-      var message = "<b>You " + (armoryUTx ? "are choosing to send" : "chose to send") + self.quantity()
-        + " " + self.donationCurrency() + " to support development. Thank you!</b> ";
-      WALLET.showTransactionCompleteDialog(message + ACTION_PENDING_NOTICE, message, armoryUTx);
+      var message = "<b>"; 
+      if (armoryUTx) {
+        message += i18n.t("you_are_choosing_to_donate", self.quantity(), self.donationCurrency());
+      } else {
+        message += i18n.t("you_chose_to_donate", self.quantity(), self.donationCurrency());
+      }
+      message += " " +  i18n.t("thank_you");
+      message += "</b> ";
+      WALLET.showTransactionCompleteDialog(message + " " + i18n.t(ACTION_PENDING_NOTICE), message, armoryUTx);
     }
+
     WALLET.doTransaction(self.sourceAddress(), "create_send", params, onSuccess);
     self.hide();
   }

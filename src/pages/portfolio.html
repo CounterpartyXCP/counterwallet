@@ -1,11 +1,11 @@
 <div class="row">
   <div class="col-xs-12 col-sm-7 col-md-7 col-lg-4">
-    <h1 class="page-title txt-color-blueDark">
+    <h1 class="page-title txt-color-blueDark" id="portofolioHeader">
       <i class="fa fa-tasks fa-fw "></i> 
-        My Portfolio 
+        <span class="localeTitle" data-bind="locale: 'my_portofolio'"></span>
     </h1>
     <div id="portfolioMarketBar">
-      <h2>Market:&nbsp;</h2>
+      <h2><span data-bind="locale: 'market'"></span>:&nbsp;</h2>
       <div class="btn-group" data-toggle="buttons">
           <label class="btn btn-primary active" data-bind="click: showPortfolioInXCP">
             <input type="radio" name="options" id="xcpMarket"> <i class="fa fa-times"></i>&nbsp;XCP
@@ -25,7 +25,7 @@
       <div class="jarviswidget defaultWidgetColor" id="wid-id-portfolioAllocation" data-widget-editbutton="false" data-widget-deletebutton="false">
           <header>
             <span class="widget-icon"> <i class="fa fa-bar-chart-o"></i> </span>
-            <h3>Portfolio Overview</h3>
+            <h3 data-bind="locale: 'portfolio_overview'"></h3>
           </header>
           <div> <!-- widget div-->
             <div class="widget-body no-padding"> <!-- widget content -->
@@ -51,15 +51,14 @@
       <div class="jarviswidget defaultWidgetColor" id="wid-id-assetMarketInfo" data-widget-editbutton="false" data-widget-deletebutton="false">
         <header>
             <span class="widget-icon"> <i class="fa fa-table"></i> </span>
-            <h3>Portfolio Composition (in <span data-bind="text: base"></span>)</h3>
+            <h3 data-bind="locale: 'portfolio_composition', localeArgs: base"></h3>
             <div class="widget-toolbar">
             </div>
         </header>
         <div> <!-- widget div-->
             <div class="widget-body no-padding"> <!-- widget content -->
                 <p class="clearfix alert alert-success">
-                    <i class="fa fa-eye"></i>&nbsp;Only the assets you own with established market value (via completed
-                    trades on the Distributed Exchange) are listed here. 
+                  <i class="fa fa-eye"></i>&nbsp;<span data-bind="locale: 'only_the_assets_you_own'"></span>
                 </p>
                 <div class="widget-body-toolbar">
                 </div>
@@ -67,13 +66,13 @@
                     <thead>
                         <tr>
                             <th>#</th>
-                            <th>Token</th>
-                            <th>Market Cap</th>
-                            <th>Price</th>
-                            <th>Total Supply</th>
-                            <th>Volume (24h)</th>
-                            <th>% Change (24h)</th>
-                            <th>Market Cap Graph (7d)</th>
+                            <th data-bind="locale: 'token'"></th>
+                            <th data-bind="locale: 'market_cap'"></th>
+                            <th data-bind="locale: 'price'"></th>
+                            <th data-bind="locale: 'total_supply'"></th>
+                            <th data-bind="locale: 'volume_24h'"></th>
+                            <th data-bind="locale: 'change_24h'"></th>
+                            <th data-bind="locale: 'market_cap_graph'"></th>
                         </tr>
                     </thead>
                     <tbody data-bind="foreach: data">

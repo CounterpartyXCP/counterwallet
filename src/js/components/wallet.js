@@ -44,7 +44,7 @@ function WalletViewModel() {
       //see if there's a label already for this address that's stored in PREFERENCES, and use that if so
       var addressHash = hashToB64(address);
       //^ we store in prefs by a hash of the address so that the server data (if compromised) cannot reveal address associations
-      var label = PREFERENCES.address_aliases[addressHash] || "My Address #" + (i + 1);
+      var label = PREFERENCES.address_aliases[addressHash] || i18n.t("default_address_label", (i + 1));
       //^ an alias is made when a watch address is made, so this should always be found
   
       self.addresses.push(new AddressViewModel(type, key, address, label)); //add new
@@ -55,7 +55,7 @@ function WalletViewModel() {
       //a label should already exist for the address in PREFERENCES.address_aliases by the time this is called
       assert(!self.getAddressObj(address), "Cannot addAddress: watch/armory address already exists in wallet!");
       var addressHash = hashToB64(address);
-      var label = PREFERENCES.address_aliases[addressHash] || "UNKNOWN LABEL";
+      var label = PREFERENCES.address_aliases[addressHash] || i18n.t("unknown_label");
   
       self.addresses.push(new AddressViewModel(type, null, address, label, armoryPubKey)); //add new
       $.jqlog.debug("Watch-only or armory wallet address added: " + address + " -- hash: "
@@ -405,7 +405,7 @@ function WalletViewModel() {
         addressObj.numPrimedTxouts(null); //null = UNKNOWN
         addressObj.numPrimedTxoutsIncl0Confirms(null); //null = UNKNOWN
       }
-      bootbox.alert("Got an error when trying to sync BTC balances: " + textStatus);
+      bootbox.alert(i18n.t("btc_sync_error", textStatus));
       
       if(isRecurring && self.autoRefreshBTCBalances) {
         setTimeout(function() {
@@ -429,8 +429,7 @@ function WalletViewModel() {
   //BTC-related
   self.broadcastSignedTx = function(signedTxHex, onSuccess, onError) {
     if (signedTxHex==false) {
-      bootbox.alert("Client-side transaction validation FAILED. Transaction will be aborted and NOT broadcast."
-                    + " Please contact the Counterparty development team");
+      bootbox.alert(i18n.t("tx_validation_failed"));
       return false;
     }
     $.jqlog.debug("RAW SIGNED HEX: " + signedTxHex);
@@ -529,10 +528,7 @@ function WalletViewModel() {
     assert(!addressObj.IS_WATCH_ONLY, "Cannot perform this action on a watch only address!");
     
     if(self.getBalance(address, "BTC", false) < MIN_PRIME_BALANCE) {
-      bootbox.alert("Cannot do this action as you have insufficient <b class='notoAssetColor'>BTC</b> at this address."
-        + "Due to Bitcoin fees, each Counterparty action requires"
-        + " approximately <b class='notoQuantityColor'>" + normalizeQuantity(MIN_PRIME_BALANCE) + "</b> <b class='notoAssetColor'>BTC</b> to perform.<br/><br/>"
-        + "Please deposit the necessary <b class='notoAssetColor'>BTC</b> into <b class='notoAddrColor'>" + getAddressLabel(address) + "</b> and try again.");
+      bootbox.alert(i18n.t("insufficient_btc", normalizeQuantity(MIN_PRIME_BALANCE), getAddressLabel(address)));
       return false;
     }
 
@@ -631,9 +627,8 @@ function WalletViewModel() {
   
   self.showTransactionCompleteDialog = function(text, armoryText, armoryUTx) {
     if(armoryUTx) {
-      bootbox.alert((armoryText || text) + "<br/><br/>To complete the transaction, please copy over and sign the text below on your"
-        + " offline Armory system, then bring back to Counterwallet to broadcast:</br>"
-        + "<textarea class=\"form-control armoryUTxTextarea\" rows=\"20\">" + armoryUTx + "</textarea>");
+      bootbox.alert((armoryText || text) + "<br/><br/>" + i18n.t("to_complete_armory_tx")
+        + "</br><textarea class=\"form-control armoryUTxTextarea\" rows=\"20\">" + armoryUTx + "</textarea>");
     } else {
       bootbox.alert(text);
     }
