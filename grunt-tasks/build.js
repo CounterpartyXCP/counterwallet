@@ -401,7 +401,7 @@ module.exports = function(grunt) {
             throw new Error('You must put a transifex user and password in '+ homePath + ".transifex in this format: user:password\n")
         }
 
-        var credential = grunt.file.read(homePath + '.transifex');
+        var credential = grunt.file.read(homePath + '.transifex').trim();
         var Transifex = require('transifex');
         var transifex = new Transifex({
             project_slug: 'counterwallet',
@@ -419,8 +419,12 @@ module.exports = function(grunt) {
 
         var downloadLang = function(lang) {
             transifex.translationInstanceMethod('counterwallet', 'translationjson', lang, function(err, data) {
-                grunt.file.write(buildDir + 'locales/' + lang.toLowerCase() + '/translation.json', data);
-                languageDone(lang);
+                if (err) {
+                    throw new Error("Error during translation.json download: " + err.message);
+                } else {
+                    grunt.file.write(buildDir + 'locales/' + lang.toLowerCase() + '/translation.json', data);
+                    languageDone(lang);
+                }
             });
         }
 
