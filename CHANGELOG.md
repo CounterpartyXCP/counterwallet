@@ -11,6 +11,8 @@
 * Numerous fixes: http://goo.gl/opzkoh
 * Minor UI tweaks
 
+Full list of changes are at: http://goo.gl/AICdol
+
 ### v1.4.0 ###
 **Enhancements:**
 * Added new DEx interface
