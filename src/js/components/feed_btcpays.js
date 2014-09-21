@@ -409,7 +409,7 @@ function UpcomingBTCPayFeedViewModel() {
                 }
               );
             }
-          },
+          }
         }
       });    
     }
