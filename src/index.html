@@ -83,7 +83,7 @@
 
         <span id="logo"><span class="logoText" data-bind="locale: 'counterwallet'"></span></span>
 
-        <span id="notificationFeed" class="activity-parent" data-contenturl="pages/feed_notifications.html", data-bind="click: ack">
+        <span id="notificationFeed" class="activity-parent" data-contenturl="pages/feed_notifications.html" data-bind="click: ack">
             <span class="activity-dropdown">
                 <i class="fa fa-check"></i><b data-bind="fadeVisible: unackedCount() > 0, text: unackedCount" class="badge"></b>
             </span>
@@ -142,7 +142,7 @@
         </div>
         
         <span id="noticeDevMode" data-bind="visible: IS_DEV" class="label label-warning pull-right modeIndicator">
-          <i class\"fa-fw fa fa-warning\"></i> <span data-bind="locale: 'dev_mode_enabled'"></span>
+          <i class="fa-fw fa fa-warning"></i> <span data-bind="locale: 'dev_mode_enabled'"></span>
         </span>
        
         <span id="donate" class="pull-right">
@@ -377,7 +377,7 @@
               <b data-bind="visible: USE_TESTNET, locale: 'log_into_your_testnet_wallet'"></b>
               <b data-bind="visible: !USE_TESTNET, locale: 'log_into_your_wallet'"></b>
               <span data-bind="fadeVisibleInOnly: IS_DEV" class="label label-warning pull-right margin-left-5 padding-5 display-none">
-                <i class"fa-fw fa fa-warning"></i> <span data-bind="locale: 'dev_mode_enabled'"></span>
+                <i class="fa-fw fa fa-warning"></i> <span data-bind="locale: 'dev_mode_enabled'"></span>
               </span>
               <span data-bind="fadeVisibleInOnly: USE_TESTNET" class="label label-info pull-right margin-left-5 padding-5 display-none">
                 <i class="fa-fw fa fa-info"></i> <b data-bind="locale: 'testnet_in_use'"></b>
