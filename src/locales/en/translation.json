@@ -856,6 +856,6 @@
 	
 	"portfolio_overview": "Portfolio Overview",
 	"portfolio_composition": "Portfolio Composition (in %s)",
-	"only_the_assets_you_own": "Only the assets you own with established market value (via completed trades on the Distributed Exchange) are listed here."
-
+	"only_the_assets_you_own": "Only the assets you own with established market value (via completed trades on the Distributed Exchange) are listed here.",
+	"highest_bid_price": "Highest bid price"
 }
