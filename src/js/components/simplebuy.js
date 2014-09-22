@@ -113,6 +113,7 @@ function SimpleBuyViewModel() {
         data[m]['selltitle'] = data[m]['sell']['title'];
         data[m]['selldescription'] = data[m]['sell']['description'];
       }
+      data[m]['supportlink'] = data[m]['support-link'];
     }
     self.machines(data);
   }

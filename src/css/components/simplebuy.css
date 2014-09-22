@@ -1,5 +1,9 @@
-div.vennd-machine {
-
+div.vennd-machine a.support {
+  display:block;
+  width: 100px;
+  text-align: center;
+  margin-top: 105px;
+  position: absolute;
 }
 
 div.vennd-machine img {
