@@ -116,6 +116,16 @@ function SimpleBuyViewModel() {
       data[m]['supportlink'] = data[m]['support-link'];
     }
     self.machines(data);
+
+    $('div.vennd-machine').each(function() {
+      var maxHeight = 0;
+      $(this).find('p.description').each(function() {
+        if ($(this).height() > maxHeight) {
+          maxHeight = $(this).height();
+        }
+      });
+      $(this).find('p.description').css('height', maxHeight + 'px');
+    })
   }
   
   self.buy = function(machine) {
