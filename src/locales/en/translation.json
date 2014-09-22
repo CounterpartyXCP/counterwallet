@@ -507,7 +507,7 @@
   "you_have_no_in_wallet": "You have no %s in your Wallet",
   "quick_by_notice": "Please note that Counterparty does not operate the vending machine services provided on this page, and is not responsible for the quality of services provided through their use. If you have any issues with these 3rd party services, please contact them directly for support.",
   "support": "Support",
-  
+
   "statistics": "Statistics",
   "wallets_count": "# Wallets",
   "mainnet": "Mainnet",
@@ -676,8 +676,8 @@
 	"create_issue_token": "Create (Issue) a Token",
 	"old_wallet_detected": "<strong>Old Wallet detected:</strong> We see you are using an old wallet. Please transfer your funds to a newly created wallet as soon as possible. Support for 'old' wallets will be discontinued <b>July 15, 2014</b>.",
 	"old_wallet_more_info": "More info",
-	"want_to_buy_xcp": "<b>Want to buy XCP?</b> Beyond using the decentralized exchange in Counterwallet, other options for purchasing XCP are",
-	"want_to_buy_listed_here": "listed here",
+	"want_to_buy_xcp": "<b>Want to buy XCP?</b> Beyond using the decentralized exchange in Counterwallet, other options for purchasing XCP are <a href=\"https://www.counterparty.co/xcp/\" target=\"_blank\">listed here</a>.",
+  "want_to_buy_xcp_with_quick_buy": "The easiest way to buy XCP is to use <a href=\"#pages/simplebuy.html\">Quick Buy</a> in Counterwallet. For traditional exchanges, <a href=\"https://www.counterparty.co/xcp/\" target=\"_blank\">click here</a>.",
 	"enter_new_label": "Enter the new label (or, nickname) for your address <b class=\"notoAddressColor\">%s</b>.",
 	"after_sending": "After sending, you will have <b><span class=\"sellColor\">%s</span> <span class=\"sellColor\">%s</span> remaining</b> at this address (minus fees).",
 	"sign_a_message": "Sign a Message",
