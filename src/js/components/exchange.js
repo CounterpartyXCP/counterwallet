@@ -789,7 +789,7 @@ function ExchangeViewModel() {
           self.sellPrice(data['buy_orders'][i]['price']);
           var a = new Decimal(self.availableBalanceForSell());
           var h = new Decimal(self.highestBidPrice());
-          var o = roundAmount(a.mul(a));
+          var o = roundAmount(a.mul(h));
           self.obtainableForSell(o);
         }
         var amount = normalizeQuantity(data['buy_orders'][i]['amount'], data['base_asset_divisible']);
