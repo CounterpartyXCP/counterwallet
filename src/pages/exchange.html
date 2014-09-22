@@ -211,9 +211,9 @@
                         <tr>
                             <td data-bind="text: type, attr: {class: type}"></td>
                             <td data-bind="text: block_time" style="white-space:nowrap"></td>
-                            <td data-bind="text: price"></td>
-                            <td data-bind="text: amount"></td> <!-- quantity (count) -->
-                            <td data-bind="text: total"></td>
+                            <td data-bind="html: price"></td>
+                            <td data-bind="html: amount"></td> <!-- quantity (count) -->
+                            <td data-bind="html: total"></td>
                             <td data-bind="text: status"></td>
                         </tr>
                     </tbody>
@@ -249,9 +249,9 @@
                       <tbody data-bind="foreach: userOpenOrders"> <!-- descending order -->
                           <tr>
                               <td data-bind="text: type, attr: {class: type}"></td>
-                              <td data-bind="text: price"></td>
-                              <td data-bind="text: amount"></td> <!-- quantity (count) -->
-                              <td data-bind="text: total"></td>
+                              <td data-bind="html: price"></td>
+                              <td data-bind="html: amount"></td> <!-- quantity (count) -->
+                              <td data-bind="html: total"></td>
                               <td data-bind="text: completion"></td>
                               <td>
                                 <a class="btn btn-default btn-xs" data-bind="click: $parent.cancelOrder, locale: 'cancel'"></a>
