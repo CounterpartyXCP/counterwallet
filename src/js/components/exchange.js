@@ -793,12 +793,14 @@ function ExchangeViewModel() {
           self.obtainableForSell(o);
         }
         var amount = normalizeQuantity(data['buy_orders'][i]['amount'], data['base_asset_divisible']);
+        var noHtmlAmount = roundAmount(amount);
+        var noHtmlTotal = roundAmount(normalizeQuantity(data['buy_orders'][i]['total'], data['quote_asset_divisible']));
         data['buy_orders'][i]['exclude'] = false;
         
-        data['buy_orders'][i]['amount'] = roundAmount(amount);
-        data['buy_orders'][i]['total'] = roundAmount(normalizeQuantity(data['buy_orders'][i]['total'], data['quote_asset_divisible']));
-        var a = new Decimal(data['buy_orders'][i]['amount']);
-        var t = new Decimal(data['buy_orders'][i]['total']);
+        data['buy_orders'][i]['amount'] = formatHtmlPrice(noHtmlAmount);
+        data['buy_orders'][i]['total'] = formatHtmlPrice(noHtmlTotal);
+        var a = new Decimal(noHtmlAmount);
+        var t = new Decimal(noHtmlTotal);
         var p = roundAmount(t.div(a));
         data['buy_orders'][i]['price'] = formatHtmlPrice(p);
         data['buy_orders'][i]['base_depth'] = amount + base_depth;
@@ -820,11 +822,13 @@ function ExchangeViewModel() {
           self.obtainableForBuy(o);
         }
         var amount = normalizeQuantity(data['sell_orders'][i]['amount'], data['base_asset_divisible']);
+        var noHtmlAmount = roundAmount(amount);
+        var noHtmlTotal = roundAmount(normalizeQuantity(data['sell_orders'][i]['total'], data['quote_asset_divisible']));
         data['sell_orders'][i]['exclude'] = false;
-        data['sell_orders'][i]['amount'] = roundAmount(amount);
-        data['sell_orders'][i]['total'] = roundAmount(normalizeQuantity(data['sell_orders'][i]['total'], data['quote_asset_divisible']));
-        var a = new Decimal(data['sell_orders'][i]['amount']);
-        var t = new Decimal(data['sell_orders'][i]['total']);
+        data['sell_orders'][i]['amount'] = formatHtmlPrice(noHtmlAmount);
+        data['sell_orders'][i]['total'] = formatHtmlPrice(noHtmlTotal);
+        var a = new Decimal(noHtmlAmount);
+        var t = new Decimal(noHtmlTotal);
         var p = roundAmount(t.div(a));
         data['sell_orders'][i]['price'] = formatHtmlPrice(p);
         data['sell_orders'][i]['base_depth'] = amount + base_depth;
@@ -839,9 +843,9 @@ function ExchangeViewModel() {
     try { $('#tradeHistory').dataTable().fnClearTable(); } catch(err) { }
 
     for (var i in data['last_trades']) {
-      data['last_trades'][i]['price'] = roundAmount(data['last_trades'][i]['price']);
-      data['last_trades'][i].amount = roundAmount(normalizeQuantity(data['last_trades'][i].amount, self.baseAssetIsDivisible()));
-      data['last_trades'][i].total = roundAmount(normalizeQuantity(data['last_trades'][i].total, self.quoteAssetIsDivisible()));
+      data['last_trades'][i]['price'] = formatHtmlPrice(roundAmount(data['last_trades'][i]['price']));
+      data['last_trades'][i].amount = formatHtmlPrice(roundAmount(normalizeQuantity(data['last_trades'][i].amount, self.baseAssetIsDivisible())));
+      data['last_trades'][i].total = formatHtmlPrice(roundAmount(normalizeQuantity(data['last_trades'][i].total, self.quoteAssetIsDivisible())));
       data['last_trades'][i].block_time = moment(data['last_trades'][i].block_time * 1000).format('YYYY/MM/DD hh:mm:ss A Z');
     }
     self.tradeHistory(data['last_trades']);

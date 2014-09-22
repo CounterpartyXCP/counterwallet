@@ -500,8 +500,8 @@
                       <tbody data-bind="foreach: askBook"> <!-- ascending order -->
                           <tr data-bind="click: $parent.selectSellOrder, visible: !exclude">
                               <td data-bind="html: price"></td>
-                              <td data-bind="text: amount"></td> <!-- quantity (count) -->
-                              <td data-bind="text: total"></td>
+                              <td data-bind="html: amount"></td> <!-- quantity (count) -->
+                              <td data-bind="html: total"></td>
                           </tr>
                       </tbody>
                   </table>
@@ -533,8 +533,8 @@
                       <tbody data-bind="foreach: bidBook"> <!-- descending order -->
                           <tr data-bind="click: $parent.selectBuyOrder, visible: !exclude">
                               <td data-bind="html: price"></td>
-                              <td data-bind="text: amount"></td> <!-- quantity (count) -->
-                              <td data-bind="text: total"></td>
+                              <td data-bind="html: amount"></td> <!-- quantity (count) -->
+                              <td data-bind="html: total"></td>
                           </tr>
                       </tbody>
                   </table>
@@ -573,9 +573,9 @@
                         <tr>
                             <td data-bind="text: type, attr: {class: type}"></td>
                             <td data-bind="text: block_time" style="white-space:nowrap"></td>
-                            <td class="number" data-bind="text: price"></td>
-                            <td class="number" data-bind="text: amount"></td> <!-- quantity (count) -->
-                            <td class="number" data-bind="text: total"></td>
+                            <td class="number" data-bind="html: price"></td>
+                            <td class="number" data-bind="html: amount"></td> <!-- quantity (count) -->
+                            <td class="number" data-bind="html: total"></td>
                             <td class="number" data-bind="text: status"></td>
                         </tr>
                     </tbody>
