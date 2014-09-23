@@ -532,7 +532,11 @@ div#historyTabContent.tab-content > div#wid-id-txnHistory.tab-pane.active, div#h
 	background-color: #FAFAFA;
 }
 
-
 h1 span.localeTitle {
   font-size: 24px !important;
+}
+
+.smart-form .checkbox input[name=autoBTCPayEnabled] {
+  position: static !important;
+  margin-top: 7px;
 }

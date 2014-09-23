@@ -9,6 +9,11 @@
     </div>
   </div>
 
+  <div class="alert alert-info">
+    <i class="fa-fw fa fa-info"></i>
+    <span data-bind="locale: 'quick_by_notice'"></span>
+  </div>
+
   <div class="row">
     <div class="col-xs-12 col-sm-12 col-md-12 col-lg-12 machineFilter">
 
@@ -54,6 +59,7 @@
               <a data-bind="attr: {href: url}" target="_blank">
                 <img data-bind="attr: {src: image}" style="width:100px" />
               </a>
+              <a class="support" target="_blank" data-bind="attr: {href: supportlink}, locale: 'support'">Support</a>
 
               <div style="padding-left:120px">
                 <div class="row">
