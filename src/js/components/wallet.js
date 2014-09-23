@@ -281,6 +281,29 @@ function WalletViewModel() {
     }
     return _.uniq(assets);
   }
+
+  self.updateBTCEscrowedBalance = function(onSuccess) {
+
+    var onBTCEscrowedBalances = function(escrowedBalances) {
+      for (var address in escrowedBalances) {
+        addressObj = WALLET.getAddressObj(address);
+        if (addressObj) {
+          addressObj.getAssetObj('BTC').escrowedBalance(escrowedBalances[address]);
+        }
+      }
+      //all done
+      if (onSuccess) return onSuccess(); 
+    }
+
+    var params = {
+      'method': 'autobtcescrow_get_btc_escrowed_balances',
+      'params': {
+        'wallet_id': WALLET.identifier()
+      }
+    }
+    failoverAPI('proxy_to_autobtcescrow', params, onBTCEscrowedBalances);
+
+  }
   
   self.refreshCounterpartyBalances = function(addresses, onSuccess) {
     //update all counterparty asset balances for the specified address (including XCP)
@@ -323,7 +346,16 @@ function WalletViewModel() {
                 }
                 WALLET.getAddressObj(address).addOrUpdateAsset(asset, assetsInfo[i], balancesData[j]['quantity'], escrowedBalance);
                 numBalProcessed += 1;
-                if (numBalProcessed == balancesData.length && onSuccess) return onSuccess();
+                
+                if (numBalProcessed == balancesData.length) {
+                  //Also get auto BTC escrowed balances, if applicable
+                  if(AUTO_BTC_ESCROW_ENABLE) {
+                    self.updateBTCEscrowedBalance(onSuccess);
+                  } else {
+                    if (onSuccess) return onSuccess();
+                  }
+                }
+
               }
             }
 

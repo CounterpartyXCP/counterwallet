@@ -131,11 +131,21 @@ function MessageFeed() {
     failoverAPI('get_rps_matches', params, onReceivePendingRpsMatches);
   }
 
+  self.registerUpcomingBTCPay = function(message) {
+    //Register this as an "upcoming" BTCpay (has been checked that it's not being paid via automatic BTC escrow)
+    var btcPayData = WaitingBTCPayFeedViewModel.makeBTCPayData(message); 
+    //Don't include in UPCOMING_BTCPAY_FEED BTCpays which are for less than the current (multisig) dust amount
+    if (btcPayData['btcQuantityRaw'] >= MULTISIG_DUST_SIZE) {
+      UPCOMING_BTCPAY_FEED.add(btcPayData);
+    } else {
+      $.jqlog.debug("dust order_matches " + btcPayData['orderMatchID'] + " : " + btcPayData['btcQuantityRaw']);
+    }  
+  }
 
   self.removeOrder = function(hash) {
     var address = false
     for (var i in self.OPEN_ORDERS) {
-      if (self.OPEN_ORDERS[i]['tx_hash'] == hash) {
+      if (self.OPEN_ORDERS[i] && self.OPEN_ORDERS[i]['tx_hash'] == hash) {
         address = self.OPEN_ORDERS[i]['source'];
         self.OPEN_ORDERS = self.OPEN_ORDERS.splice(i, 1);
       }
@@ -447,6 +457,7 @@ function MessageFeed() {
     } else if(category == "broadcasts") {
       //TODO
     } else if(category == "btcpays") {
+      UPCOMING_BTCPAY_FEED.remove(message['order_match_id']);
       var btcpay = WAITING_BTCPAY_FEED.remove(message['order_match_id']);
       //^ covers the case where make a BTC payment and log out before it is confirmed, then log back in and see it confirmed
       if (btcpay) {
@@ -502,6 +513,7 @@ function MessageFeed() {
         self.OPEN_ORDERS.push(message);
       }
       refreshEscrowedBalance.push(message['source']);
+      WALLET.updateBTCEscrowedBalance();
 
     } else if(category == "order_matches") {
 
@@ -512,14 +524,42 @@ function MessageFeed() {
       //If the order_matches message doesn't have a tx0_address/tx1_address field, then we don't need to do anything with it
       if ((WALLET.getAddressObj(message['tx0_address']) && message['forward_asset'] == 'BTC' && message['_status'] == 'pending')
          || (WALLET.getAddressObj(message['tx1_address']) && message['backward_asset'] == 'BTC' && message['_status'] == 'pending')) {
-        //Register this as an "upcoming" BTCpay
-        var btcPayData = WaitingBTCPayFeedViewModel.makeBTCPayData(message); 
-        //Don't include in UPCOMING_BTCPAY_FEED BTCpays which are for less than the current (multisig) dust amount
-        if (btcPayData['btcQuantityRaw']>=MULTISIG_DUST_SIZE) {
-          UPCOMING_BTCPAY_FEED.add(btcPayData);
+        
+        //If the BTCpay is marked as being processed by an automated escrow agent, ignore it 
+        if (AUTO_BTC_ESCROW_ENABLE) {
+
+          orderSignedTxHashes = [];
+
+          if (WALLET.getAddressObj(message['tx0_address'])) {
+            var key = WALLET.getAddressObj(message['tx0_address']).KEY;
+            orderSignedTxHashes.push(key.signMessage(message['tx0_hash'], 'base64'));
+          }
+          if (WALLET.getAddressObj(message['tx1_address'])) {
+            var key = WALLET.getAddressObj(message['tx1_address']).KEY;
+            orderSignedTxHashes.push(key.signMessage(message['tx1_hash'], 'base64'));
+          }
+
+          var params = {
+            'method': 'autobtcescrow_get_by_order_signed_tx_hashes',
+            'params': {
+              'order_signed_tx_hashes': orderSignedTxHashes
+            }
+          }
+
+          failoverAPI('proxy_to_autobtcescrow', params, 
+            function(data, endpoint) {
+              if(data.length == 0) {
+                $.jqlog.debug("AutoBTCEscrow: Adding to auto BTCPay in CW, since escrow system had no record for order match ID " + orderMatchID);
+                self.registerUpcomingBTCPay(message);
+              }
+            }
+          );
+
         } else {
-          $.jqlog.debug("dust order_matches "+btcPayData['orderMatchID']+" : "+btcPayData['btcQuantityRaw']);
-        }  
+
+          self.registerUpcomingBTCPay(message);
+
+        }
         
       } else if ((WALLET.getAddressObj(message['tx1_address']) && message['forward_asset'] == 'BTC' && message['_status'] == 'pending')
          || (WALLET.getAddressObj(message['tx0_address']) && message['backward_asset'] == 'BTC' && message['_status'] == 'pending')) {

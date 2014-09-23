@@ -134,6 +134,8 @@ function loadCounterwalletConfigFromServer() {
 }
 
 function needWarningOnExit() {
+  if(PREFERENCES['btcpay_method'] === 'autoescrow') return false; //NB: we're assuming that all of the users orders are autobtcescrow orders...
+  
   return (window.WALLET && WALLET.isSellingBTC()) ||
          window.MESSAGE_FEED.sellBTCOrdersCount() ||
          window.PENDING_ACTION_FEED.pendingSellBTCOrdersCount();

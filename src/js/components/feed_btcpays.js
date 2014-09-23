@@ -152,7 +152,7 @@ function WaitingBTCPayFeedViewModel() {
       return orderHashOrMatchHash == orderHash1 || orderHashOrMatchHash == orderHash2;
     });
     if(match) {
-      self.entries.remove(match);
+      self.entries.splice(self.entries.indexOf(match), 1);
       self.lastUpdated(new Date());
       return match;
     }
@@ -164,6 +164,46 @@ function WaitingBTCPayFeedViewModel() {
     self.entries.sort(function(left, right) {
       return left.expiresInNumBlocks() == right.expiresInNumBlocks() ? 0 : (left.expiresInNumBlocks() < right.expiresInNumBlocks() ? -1 : 1);
     });      
+  }
+
+  self._restoreFromOrderMatches = function(data, escrowInfos) {
+    for(var i=0; i < data.length; i++) {
+      var orderMatchID = data[i]['tx0_hash'] + data[i]['tx1_hash'];
+
+      //if the returned data has a record for this order match, skip it
+      for (var i in escrowInfos) {
+        if (escrowInfos[i]['order_tx_hash'] == data[i]['tx0_hash'] || escrowInfos[i]['order_tx_hash'] == data[i]['tx1_hash'])
+          continue;
+      }
+
+      //if the other party is the one that should be paying BTC for this specific order match, then skip it          
+      if(   WALLET.getAddressObj(data['tx0_address']) && data['forward_asset'] == 'BTC'
+         || WALLET.getAddressObj(data['tx1_address']) && data['backward_asset'] == 'BTC')
+        continue;
+         
+      //if here, we have a pending order match that we owe BTC for. 
+      //next step is that we need to check if it's one we have paid, but just hasn't been confirmed yet. check
+      // the pendingactions feed to see if the BTCpay is pending
+      var pendingBTCPay = $.grep(PENDING_ACTION_FEED.entries(), function(e) {
+        return e['CATEGORY'] == 'btcpays' && e['DATA']['order_match_id'] == orderMatchID;
+      })[0];
+      if(pendingBTCPay) {
+        $.jqlog.debug("pendingBTCPay:restore:not showing btcpay request for order match ID: " + orderMatchID);
+      } else {
+        //not paid yet (confirmed), nor is it a pending action
+        var btcPayData = WaitingBTCPayFeedViewModel.makeBTCPayData(data[i]);            
+        if (btcPayData) {
+          if(WALLET.networkBlockHeight() - btcPayData['blockIndex'] < NUM_BLOCKS_TO_WAIT_FOR_BTCPAY) {
+            //If the order match is younger than NUM_BLOCKS_TO_WAIT_FOR_BTCPAY blocks, then it's actually still an
+            // order that should be in the upcomingBTCPay feed
+            UPCOMING_BTCPAY_FEED.add(btcPayData);
+          } else {
+            //otherwise, if not already paid and awaiting confirmation, show it as a waiting BTCpay
+            WAITING_BTCPAY_FEED.add(btcPayData);
+          }
+        }
+      }
+    }
   }
 
   self.restore = function() {
@@ -180,36 +220,44 @@ function WaitingBTCPayFeedViewModel() {
     failoverAPI("get_order_matches", {'filters': filters, 'filterop': 'or', status: 'pending'},
       function(data, endpoint) {
         $.jqlog.debug("Order matches: " + JSON.stringify(data));
-        for(var i=0; i < data.length; i++) {
-          //if the other party is the one that should be paying BTC for this specific order match, then skip it          
-          if(   WALLET.getAddressObj(data['tx0_address']) && data['forward_asset'] == 'BTC'
-             || WALLET.getAddressObj(data['tx1_address']) && data['backward_asset'] == 'BTC')
-             continue;
+        
+        if(AUTO_BTC_ESCROW_ENABLE) {
+
+          //Check if any of these order matches are being covered by the autobtcescrow server. if so, skip them
+          var orderSignedTxHashes = [];
+          for(var i=0; i < data.length; i++) {
+
+            if (WALLET.getAddressObj(data[i]['tx0_address'])) {
+              var key = WALLET.getAddressObj(data[i]['tx0_address']).KEY;
+              orderSignedTxHashes.push(key.signMessage(data[i]['tx0_hash'], 'base64'));
+            }
+            if (WALLET.getAddressObj(data[i]['tx1_address'])) {
+              var key = WALLET.getAddressObj(data[i]['tx1_address']).KEY;
+              orderSignedTxHashes.push(key.signMessage(data[i]['tx1_hash'], 'base64'));
+            }
+            
+          }
           
-          //if here, we have a pending order match that we owe BTC for. 
-          var orderMatchID = data[i]['tx0_hash'] + data[i]['tx1_hash'];
-          
-          //next step is that we need to check if it's one we have paid, but just hasn't been confirmed yet. check
-          // the pendingactions feed to see if the BTCpay is pending
-          var pendingBTCPay = $.grep(PENDING_ACTION_FEED.entries(), function(e) {
-            return e['CATEGORY'] == 'btcpays' && e['DATA']['order_match_id'] == orderMatchID;
-          })[0];
-          if(pendingBTCPay) {
-            $.jqlog.debug("pendingBTCPay:restore:not showing btcpay request for order match ID: " + orderMatchID);
-          } else {
-            //not paid yet (confirmed), nor is it a pending action
-            var btcPayData = WaitingBTCPayFeedViewModel.makeBTCPayData(data[i]);            
-            if (btcPayData) {
-              if(WALLET.networkBlockHeight() - btcPayData['blockIndex'] < NUM_BLOCKS_TO_WAIT_FOR_BTCPAY) {
-                //If the order match is younger than NUM_BLOCKS_TO_WAIT_FOR_BTCPAY blocks, then it's actually still an
-                // order that should be in the upcomingBTCPay feed
-                UPCOMING_BTCPAY_FEED.add(btcPayData);
-              } else {
-                //otherwise, if not already paid and awaiting confirmation, show it as a waiting BTCpay
-                WAITING_BTCPAY_FEED.add(btcPayData);
+          if (orderSignedTxHashes.length > 0) {
+
+            var params = {
+              'method': 'autobtcescrow_get_by_order_signed_tx_hashes',
+              'params': {
+                'order_signed_tx_hashes': orderSignedTxHashes
               }
             }
+
+            failoverAPI('proxy_to_autobtcescrow', params,
+              function(escrowInfos, endpoint) {
+                self._restoreFromOrderMatches(data, escrowInfos);
+              }
+            );
+
+          } else {
+            self._restoreFromOrderMatches(data, {});
           }
+        } else {
+          self._restoreFromOrderMatches(data, {});
         }
           
         //Sort upcoming btcpay and waiting btcpay lists
@@ -317,7 +365,7 @@ function UpcomingBTCPayFeedViewModel() {
       return orderHashOrMatchHash == orderHash1 || orderHashOrMatchHash == orderHash2;
     });
     if(match) {
-      self.entries.remove(match);
+      self.entries.splice(self.entries.indexOf(match), 1);
       self.lastUpdated(new Date());
       return match;
     }
@@ -349,7 +397,7 @@ function UpcomingBTCPayFeedViewModel() {
     self.remove(btcPayData['orderMatchID']);
         
     //If automatic BTC pays are enabled, just take care of the BTC pay right now
-    if(PREFERENCES['auto_btcpay']) {
+    if(PREFERENCES['btcpay_method'] == 'auto') {
 
       if(WALLET.getBalance(btcPayData['myAddr'], 'BTC', false) >= (btcPayData['btcQuantityRaw']) + MIN_PRIME_BALANCE) {
         
@@ -373,7 +421,7 @@ function UpcomingBTCPayFeedViewModel() {
         WALLET.showTransactionCompleteDialog(i18n.t("btcpay_required", btcPayData['btcQuantity'], getAddressLabel(btcPayData['myAddr'])));  
       }
 
-    } else {
+    } else if (PREFERENCES['btcpay_method'] == 'manual') {
       //Otherwise, prompt the user to make the BTC pay
       var prompt = i18n.t("order_match_succesfull", btcPayData['otherOrderQuantity'], btcPayData['otherOrderAsset'], btcPayData['btcQuantity'], getAddressLabel(btcPayData['myAddr']));          
       bootbox.dialog({

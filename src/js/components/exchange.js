@@ -127,6 +127,88 @@ function ExchangeViewModel() {
     return $('<div>').append(span).html();
   });
 
+
+  /********************************************
+
+  BTCPAY AUTOESCROW 
+  
+  ********************************************/
+
+
+   //step 1: fetch an escrow address to send the BTC to
+  self.getBTCEscrowAddress = function(orderTxHash, orderParams, orderAction) {
+
+    var key = WALLET.getAddressObj(orderParams['source']).KEY;
+
+    var params = {
+      'method': 'autobtcescrow_get_escrow_address',
+      'params': {
+        'order_source': orderParams['source'], 
+        'order_tx_hash': orderTxHash, 
+        'order_signed_tx_hash': key.signMessage(orderTxHash, 'base64'), 
+        'wallet_id': WALLET.identifier()
+      }
+    }
+
+    var onSuccess = function(escrowInfo, endpoint) {
+      assert(escrowInfo['escrow_address'], "Returned escrow address undefined/blank!");
+      self.sendBTCEscrow(orderTxHash, orderParams, orderAction, escrowInfo, 1);
+    }
+
+    failoverAPI('proxy_to_autobtcescrow', params, onSuccess);
+  }
+
+
+  //step 2: sends the BTC over to the escrow address
+  self.sendBTCEscrow = function(orderTxHash, orderParams, orderAction, escrowInfo, retry) {
+
+    var sendParams = { 
+      source: orderParams['source'],
+      destination: escrowInfo['escrow_address'],
+      quantity: orderParams['give_quantity'] + BTCPAY_FEE_RETAINER + Math.ceil(orderParams['give_quantity'] * ESCROW_COMMISSION),
+      asset: orderParams['give_asset'],
+      _divisible: orderParams['_give_divisible']
+    };
+
+    var onSuccess = function(depositTxHash, data, endpoint, addressType, armoryUTx) {
+      $.jqlog.info("BTCEscrow record " + escrowInfo['_id'] + "created for order tx hash " + orderTxHash);
+      
+      var message = i18n.t("btc_escrow_success", i18n.t(orderAction), (orderAction === 'buy' ? self.buyAmount() : self.sellAmount()), 
+                            self.baseAsset(), normalizeQuantity(orderParams['give_quantity'])); 
+
+      WALLET.showTransactionCompleteDialog(message + ' ' + i18n.t(ACTION_PENDING_NOTICE), message, armoryUTx);
+      WALLET.updateBTCEscrowedBalance();
+    }
+
+    var onError = function(jqXHR, textStatus, errorThrown) {
+      if (retry < TRANSACTION_MAX_RETRY) {
+
+        $.jqlog.debug("TRANSACTION FAILED => RETRY " + retry + "/" + TRANSACTION_MAX_RETRY);
+
+        setTimeout(function() {      
+          self.sendBTCEscrow(orderTxHash, orderParams, orderAction, escrowInfo, retry + 1);
+        }, TRANSACTION_DELAY);
+
+      } else {
+        bootbox.alert(i18n.t("transaction_failed") + " " + textStatus);
+      }
+    }
+
+    WALLET.doTransaction(orderParams['source'], "create_send", sendParams, onSuccess, onError);
+  }
+
+  // Launch 2 steps for auto BTC escrow
+  self.doOrderAutoBTCEscrow = function(orderTxHash, orderParams, orderAction) {
+    assert(orderParams['give_asset'] === 'BTC');
+    assert(orderAction === 'buy' || orderAction === 'sell');
+    if(PREFERENCES['btcpay_method'] !== 'autoescrow') return;
+    
+    setTimeout(function() {      
+      self.getBTCEscrowAddress(orderTxHash, orderParams, orderAction);
+    }, TRANSACTION_DELAY);
+  }
+
+
   /********************************************
 
   SELL FORM BEGIN
@@ -561,15 +643,23 @@ function ExchangeViewModel() {
 
     var onSuccess = function(txHash, data, endpoint, addressType, armoryUTx) {
       trackEvent('Exchange', 'Buy', self.dispAssetPair());
-      
-      var message = "";
-      if (armoryUTx) {
-        message = i18n.t("you_buy_order_will_be_placed", self.buyAmount(), self.baseAsset()); 
-      } else {
-        message = i18n.t("you_buy_order_has_been_placed", self.buyAmount(), self.baseAsset());
-      }
 
-      WALLET.showTransactionCompleteDialog(message + " " + i18n.t(ACTION_PENDING_NOTICE), message, armoryUTx);
+      if(PREFERENCES['btcpay_method'] === 'autoescrow' && params['give_asset'] === 'BTC') {
+
+        self.doOrderAutoBTCEscrow(txHash, params, 'buy');  
+
+      } else {  
+
+        var message = "";
+        if (armoryUTx) {
+          message = i18n.t("you_buy_order_will_be_placed", self.buyAmount(), self.baseAsset()); 
+        } else {
+          message = i18n.t("you_buy_order_has_been_placed", self.buyAmount(), self.baseAsset());
+        }
+
+        WALLET.showTransactionCompleteDialog(message + " " + i18n.t(ACTION_PENDING_NOTICE), message, armoryUTx);
+
+      }
       
       //if the order involes selling BTC, then we want to notify the servers of our wallet_id so folks can see if our
       // wallet is "online", in order to determine if we'd be able to best make the necessary BTCpay
@@ -608,10 +698,20 @@ function ExchangeViewModel() {
     message += '<tr><td><b>' + i18n.t('amount') + ': </b></td><td style="text-align:right">' + self.buyAmount() + '</td><td>' + self.baseAsset() + '</td></tr>';
     message += '<tr><td><b>' + i18n.t('total') + ': </b></td><td style="text-align:right">' + self.buyTotal() + '</td><td>' + self.quoteAsset() + '</td></tr>';
     message += '<tr><td><b>' + i18n.t('real_estimated_total') + ': </b></td><td style="text-align:right">' + estimatedTotalPrice + '</td><td>' + self.quoteAsset() + '</td></tr>';
+    
     if (self.quoteAsset() == 'BTC') {
       message += '<tr><td><b>' + i18n.t('provided_fee') + ': </b></td><td style="text-align:right">' + self.buyFee() + '</td><td>' + self.quoteAsset() + '</td></tr>';
       message += '<tr><td colspan="3"><i>' + i18n.t('these_fees_are_optional') + '</i></td></tr>';
     }
+
+    if(PREFERENCES['btcpay_method'] === 'autoescrow' && self.quoteAsset() === 'BTC') {    
+      message += '<tr><td colspan="3"><p class="bg-info padding-10">';
+      message += i18n.t('btc_escrow_confirm');
+      message += '</p></td></tr>';
+      message += '<tr><td><b>' + i18n.t('escrow_commission') + ': </b></td><td style="text-align:right">' + self.buyTotal() * ESCROW_COMMISSION + '</td><td>' + self.quoteAsset() + '</td></tr>';
+      message += '<tr><td><b>' + i18n.t('btcpay_retaining_fee') + ': </b></td><td style="text-align:right">' + normalizeQuantity(BTCPAY_FEE_RETAINER) + '</td><td>' + self.quoteAsset() + '</td></tr>';
+    }
+
     message += '</table>';
 
     bootbox.dialog({

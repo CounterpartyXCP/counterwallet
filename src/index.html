@@ -592,22 +592,25 @@
                 </fieldset>
               </form>
               <form class="smart-form">
+
                 <fieldset data-bind="visible: showAdvancedOptions">
-                  <section>
-                    <div class="row">
-                      <div class="col col-sm-2" data-bind="locale: 'auto_btcpay'"></div>
-                      <div class="col col-sm-10">
-                        <label class="checkbox">
-                          <input name="autoBTCPayEnabled" type="checkbox" data-bind="checked: autoBTCPayEnabled">
-                          <span data-bind="locale: 'enable_auto_btcpay'"></span>
-                        </label>
-                        <div class="note" data-bind="locale: 'enable_auto_btcpay_desc'">
-                          
+                  <section data-bind="visible: showAdvancedOptions"><div class="row">
+                    <label class="control-label col col-sm-2" data-bind="locale: 'btc_pay_method'"></label>
+                    <div class="col col-sm-10">
+                          <select id="btcPayMethodSelector" class="width-max" data-bind="options: availableBTCPayMethods, value: selectedBTCPayMethod, optionsValue: 'id', optionsText: 'name', select2: {  minimumResultsForSearch: -1, escapeMarkup: 'direct' }"></select>
+                        <div class="note">
+                            <span data-bind="locale: 'btc_pay_method_desc'"></span>
+                            <ul>
+                                <li><b data-bind="locale: 'automatic_escrow'"></b>: <span data-bind="locale: 'automatic_escrow_desc'"></span></li>
+                                <li><b data-bind="locale: 'automatic'"></b>: <span data-bind="locale: 'automatic_desc'"></span></li>
+                                <li><b data-bind="locale: 'manual'"></b>: <span data-bind="locale: 'manual_desc'"></span></li>
+                            </ul>
                         </div>
                       </div>
                     </div>
                   </section>
                 </fieldset>
+
                 <fieldset data-bind="visible: showAdvancedOptions">
                   <section>
                     <div class="row">

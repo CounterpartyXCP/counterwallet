@@ -40,7 +40,7 @@ var DEFAULT_PREFERENCES = {
   'selected_lang': 'en-us',
   'watch_only_addresses': [],
   'armory_offline_addresses': [],
-  'auto_btcpay': true, //default to auto BTC payments being enabled
+  'btcpay_method': 'autoescrow', //valid values are 'autoescrow', 'auto', and 'manual'
   'has_accepted_license': false
 };
 
@@ -77,3 +77,8 @@ var MAX_SUPPORT_CASE_PROBLEM_LEN = 4096;
 var QUOTE_ASSETS = []; // initalized with counterblock is_ready()
 
 var QUICK_BUY_ENABLE = false;
+
+var AUTO_BTC_ESCROW_ENABLE = false;
+var ESCROW_COMMISSION;
+var BTCPAY_FEE_RETAINER;
+

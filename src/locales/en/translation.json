@@ -858,5 +858,19 @@
   "portfolio_overview": "Portfolio Overview",
   "portfolio_composition": "Portfolio Composition (in %s)",
   "only_the_assets_you_own": "Only the assets you own with established market value (via completed trades on the Distributed Exchange) are listed here.",
-  "highest_bid_price": "Highest bid price"
+  "highest_bid_price": "Highest bid price",
+
+  "btc_escrow_success": "Your order to %s <b class='notoQuantityColor'>%s</b> <b class='notoAssetColor'>%s</b> has been placed.<br/><br/><b class='notoQuantityColor'>%s</b> <b class='notoAssetColor'>BTC</b> has been withdrawn and escrowed by the system to complete this order. If the order is cancelled or expires, this BTC will be returned.",
+  "transaction_failed": "Transaction failed:",
+  "btc_escrow_confirm": "We will automatically escrow your BTC upon confirmation of this order. It will be refunded to you if the order is cancelled or expires.",
+  "escrow_commission": "Escrow commission",
+  "btcpay_retaining_fee": "BTCPay retaining fee",
+  "automatic": "Automatic",
+  "manual": "Manual",
+  "automatic_escrow": "Automatic Escrow",
+  "btc_pay_method": "BTCPay Method",
+  "btc_pay_method_desc": "Determines the method to use for making BTC payments on matched orders where you owe BTC:",
+  "automatic_escrow_desc": "The system will take your BTC into escrow at the time of the order and automatically complete your BTCpay. <b>If available, this method is highly recommended</b>.",
+  "automatic_desc": "Counterwallet will automatically take care of making BTC payments. You must remain logged in.",
+  "manual_desc": "You will be prompted to manually settle any required BTC payments within a 10 block limit (approximately 80-100 minutes)."
 }
