@@ -23,7 +23,8 @@ module.exports = function (grunt) {
             process: {
                 files: [
                     {cwd: 'src/', src: 'index.html', dest: buildDir, expand: true},
-                    {cwd: 'src/pages/', src: '*.html', dest: buildDir+'pages/', expand: true}
+                    {cwd: 'src/pages/', src: '*.html', dest: buildDir+'pages/', expand: true},
+                    {cwd: 'src/locales/en', src: '*.json', dest: buildDir+'locales/en', expand: true}
                 ]
             },
             copy: {
@@ -34,7 +35,7 @@ module.exports = function (grunt) {
             }
         },
         transifex: {
-            languages: ['fr', 'en', 'de', 'da', 'zh_CN', 'zh_TW', 'fi', 'tr', 'it', 'ja', 'es', 'ru']
+            languages: ['fr', 'de', 'da', 'zh_CN', 'zh_TW', 'fi', 'tr', 'it', 'ja', 'es', 'ru']
         }
     }
     /*config['chrome-extension'] = {
