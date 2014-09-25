@@ -196,7 +196,7 @@
   "you_have_burned": "You have burned <b class='notoQuantityColor'>%s</b> <b class='notoAssetColor'>BTC</b> for approximately <b class='notoQuantityColor'>%s</b> <b class='notoAssetColor'>XCP</b>.",
   "broadcast_transmitted": "Broadcast transmitted.",
   "broadcast_to_be_transmitted": "Broadcast to be transmitted",
-  "your_tx_broadcast_success": "Your transaction were broacasted successfully:",
+  "your_tx_broadcast_success": "Your transaction were broadcasted successfully:",
   "step_x_of_y_message": "Step %s/%s : %s",
 
   "not_available_asset_to_send": "You have no available <b class='notoAssetColor'>%s</b> at address <b class='notoAddrColor'>%s</b> to send.",
@@ -651,7 +651,7 @@
   "tokens_to_sweep": "Tokens to Sweep",
   "tokens_to_sweep_note": "Select all of the tokens whose total balances you want to move into the destination address.",
   "private_key_pay_fees": "Private Key used to pay fees",
-  "private_key_pay_fees_note": "Enter the unencrypted private key that cooresponds to the address used to pay fees.",
+  "private_key_pay_fees_note": "Enter the unencrypted private key that corresponds to the address used to pay fees.",
   "sweep": "Sweep",
   "sign": "Sign",
   "burn": "Burn",
