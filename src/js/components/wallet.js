@@ -14,6 +14,12 @@ function WalletViewModel() {
   self.isSellingBTC = ko.observable(false); //updated by the btcpay feed
   self.isOldWallet = ko.observable(false);
 
+  self.cancelOrders = [];
+  var storedCancelOrders = localStorage.getObject("cancelOrders")
+  if (storedCancelOrders) {
+    self.cancelOrders = storedCancelOrders;
+  }
+
   self.networkBlockHeight.subscribe(function(newBlockIndex) {
     try {
       if (CURRENT_PAGE_URL == 'pages/exchange.html') {
@@ -546,6 +552,17 @@ function WalletViewModel() {
   self.doTransaction = function(address, action, data, onSuccess, onError) {
     assert(['sign_tx', 'broadcast_tx', 'convert_armory_signedtx_to_raw_hex'].indexOf(action) === -1,
       'Specified action not supported through this function. please use appropriate primatives');
+
+    if(action == 'create_cancel') {
+      if (self.cancelOrders.indexOf(data['offer_hash']) != -1) {
+        $.jqlog.debug(data['offer_hash'] + ' already cancelled.')
+        return;
+      } else {
+        $('#btcancel_' + data['offer_hash']).addClass('disabled');
+        self.cancelOrders.push(data['offer_hash']);
+        localStorage.setObject("cancelOrders", self.cancelOrders);
+      }
+    }
     
     var addressObj = WALLET.getAddressObj(address);
     
@@ -656,6 +673,7 @@ function WalletViewModel() {
     var now = Math.round((new Date()).getTime() / 1000);
     localStorage.setObject(WALLET.identifier() + '_preferences', {'last_updated': now, 'preferences':PREFERENCES});
   }
+
 }
 
 /*NOTE: Any code here is only triggered the first time the page is visited. Put JS that needs to run on the

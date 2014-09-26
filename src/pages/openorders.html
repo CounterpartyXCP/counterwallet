@@ -38,7 +38,7 @@
                   <tbody data-bind="foreach: { data: openOrders, as: 'order' }">
                     <tr>
                       <td>
-                        <button class="btn btn-xs btn-default" data-bind="click: $parent.cancelOpenOrder, locale: 'cancel'"></button>
+                        <a class="btn btn-xs btn-default" data-bind="click: $parent.cancelOpenOrder, locale: 'cancel', attr: {'id': 'btcancel_' + tx_hash}, css: {disabled: order.cancelled }"></a>
                       </td>
                       <td style="white-space:nowrap" data-bind="text: order.address_label"></td> 
                       <td class="number" data-bind="text: order.give_quantity_str"></td>

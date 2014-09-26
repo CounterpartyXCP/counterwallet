@@ -821,6 +821,7 @@
   "sell_orders": "Sell orders",
   "buy_orders": "Buy orders",
   "completed_trades_for": "Completed Trades for %s",
+  "order_already_cancelled": "Order already cancelled",
 
   "top_tokens": "Top Tokens",
   "market_cap_history": "Market Cap History (in %s)",
