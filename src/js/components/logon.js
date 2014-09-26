@@ -297,7 +297,7 @@ function LogonViewModel() {
   
       if(PREFERENCES.address_aliases[addressHash] === undefined) { //no existing label. we need to set one
         mustSavePreferencesToServer = true; //if not already true
-        PREFERENCES.address_aliases[addressHash] = i18n.t("default_address_label", (i + 1));
+        PREFERENCES.address_aliases[addressHash] = i18n.t("default_address_label", len);
       }
 
       $.jqlog.info("Address discovery: Generating address " + len + " of " + PREFERENCES['num_addresses_used']
