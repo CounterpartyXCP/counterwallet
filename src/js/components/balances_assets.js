@@ -715,6 +715,10 @@ function CallAssetModalViewModel() {
     percentageToCall: self.percentageToCall
   });
 
+  self.dispXCPBalRemainingPostCallCss = ko.computed(function() {
+    return self.xcpBalRemainingPostCall() < 0 ? 'errorColor' : 'sellColor';
+  }, self);
+
   self.resetForm = function() {
     self.percentageToCall(null);
     self.validationModel.errors.showAllMessages(false);

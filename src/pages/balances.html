@@ -59,8 +59,7 @@
     <a class="close" data-dismiss="alert" href="#">×</a>
     <h4 class="alert-heading padding-bottom-10"><span data-bind="locale: 'welcome'"></span>!</h4>
     <span data-bind="locale: 'welcome_p1'"></span>
-    <span data-bind="visible: USE_TESTNET"><span data-bind="locale: 'note_testnet'"></span>
-    <b><a href="https://en.bitcoin.it/wiki/Bitcoin_faucet" target="_blank" data-bind="locale: 'testnet_faucet'"></a> <span data-bind="locale: 'btc_to_start'"></span></b>.</span>
+    <span data-bind="visible: USE_TESTNET, locale: 'testnet_faucet'"></span>
     <br/><br/>
     <span data-bind="locale: 'welcome_p2'"></span>
 </div>
@@ -443,9 +442,13 @@
       </div>
       <div class="modal-body no-padding">
         <p class="formPadded">
-         <span data-bind="locale: 'create_xcp_testnet'"></span><br/><br/>
-         <span data-bind="visible: 1 - btcAlreadyBurned() > 0"><b><span data-bind="locale: 'burn_up_to'"></span> <span class="sellColor"><span data-bind="text: maxPossibleBurn()"></span> BTC</span> <span data-bind="locale: 'from_this_address'"></span></b></span>
-         <span data-bind="visible: 1 - btcAlreadyBurned() <= 0"><b class="errorColor"><span data-bind="locale: 'already_burned'"></span></b></span>
+          <span data-bind="locale: 'create_xcp_testnet'"></span><br/><br/>
+          <span data-bind="visible: 1 - btcAlreadyBurned() > 0">
+            <b data-bind="locale: 'burn_up_to', localeArgs: maxPossibleBurn()"></b>
+          </span>
+          <span data-bind="visible: 1 - btcAlreadyBurned() <= 0">
+            <b class="errorColor"><span data-bind="locale: 'already_burned'"></span></b>
+          </span>
        </p>
        <form class="smart-form" data-bind="submit: doAction"><fieldset>
           <section><div class="row">
@@ -457,10 +460,7 @@
             </div>
           </div></section>
         </fieldset></form>
-        <p class="formPaddedBot bold" data-bind="fadeVisibleInOnly: validationModel.isValid()">
-            <span data-bind="locale: 'after_burning'"></span>
-            <b class="buyColor"><span data-bind="text: dispQuantityXCPToBeCreated"></span> XCP</b> <span data-bind="locale: 'created_at_this_address'"></span>
-        </p>
+        <p class="formPaddedBot bold" data-bind="fadeVisibleInOnly: validationModel.isValid(), locale: 'after_burning', localeArgs: dispQuantityXCPToBeCreated"></p>
       </div>
       <div class="modal-footer">
         <button type="button" class="btn btn-default" data-bind="click: hide, locale: 'cancel'"></button>
@@ -677,9 +677,7 @@
             </div>
           </div></section>
         </fieldset></form>
-        <div class="formPaddedBot"><span data-bind="locale: 'token_an_image'"></span>
-            <a href="https://wiki.counterparty.co/w/Enhanced_Token_Info_in_Counterwallet" target="_blank" data-bind="locale: 'this_link'"></a>.
-        </div>
+        <div class="formPaddedBot" data-bind="locale: 'token_an_image'"></div>
       </div>
       <div class="modal-footer">
         <button type="button" class="btn btn-default" data-bind="click: hide, locale: 'cancel'"></button>
@@ -769,14 +767,7 @@
             </div>
           </div></section>
         </fieldset></form>
-        <div class="formPaddedBot" data-bind="fadeVisibleInOnly: xcpBalRemainingPostCallIsSet">
-            <p data-bind="locale: 'xcp_bal_remaining_post_call_one', localeArgs: {0: dispCallPrice, 1: asset, 2: dispTotalIssued, 3: dispTotalOutstanding, 4: percentageToCall, 5: totalXCPPay}"></p>
-            <p>
-              <span data-bind="locale: 'xcp_bal_remaining_post_call_two'"></span>
-              <b data-bind="css: {errorColor: xcpBalRemainingPostCall() < 0, sellColor: xcpBalRemainingPostCall() >= 0}">
-              <span data-bind="locale: 'xcp_bal_remaining_post_call_three', localeArgs: {0: dispXCPBalRemainingPostCall, 1: dispUnitsToCallback, 2: asset, 3: dispUnitsAfterCallback, 4: asset}"></span>
-            </p>
-        </div>
+        <div class="formPaddedBot" data-bind="fadeVisibleInOnly: xcpBalRemainingPostCallIsSet, locale: 'xcp_bal_remaining_post_call', localeArgs: {0: dispCallPrice, 1: asset, 2: dispTotalIssued, 3: dispTotalOutstanding, 4: percentageToCall, 5: totalXCPPay, 6: dispXCPBalRemainingPostCallCss, 7: dispXCPBalRemainingPostCall, 8: dispUnitsToCallback, 9: asset, 10: dispUnitsAfterCallback, 11: asset}"></div>
       </div>
       <div class="modal-footer">
         <button type="button" class="btn btn-default" data-bind="click: hide, locale: 'cancel'"></button>
