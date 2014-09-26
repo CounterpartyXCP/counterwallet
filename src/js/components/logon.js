@@ -259,6 +259,8 @@ function LogonViewModel() {
       mustSavePreferencesToServer = true;
     }
     
+    PREFERENCES['num_addresses_used'] = Math.min(MAX_ADDRESSES, PREFERENCES['num_addresses_used']);
+
     WALLET_OPTIONS_MODAL.selectedTheme(PREFERENCES['selected_theme']);
     
     self.displayLicenseIfNecessary(mustSavePreferencesToServer);
