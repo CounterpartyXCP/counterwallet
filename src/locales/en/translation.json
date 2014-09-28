@@ -690,7 +690,7 @@
   "signed_message": "Signed Message",
   "signed_message_note": "The signed message appears above.",
   "xcp_bal_remaining_post_call": "<p>At the given call price of <b>%s XCP</b> per unit of <b>%s</b> (which has <b>%s</b> units issued and <b class=\"sellColor\">%s</b> units outstanding), your total cost for a <b>%s callback</b> would be <b class=\"sellColor\">%s XCP</b>.</p><p>After this callback, this address would have a remaining balance of <b class=\"%s\">%s XCP</b>, and gain <b class=\"buyColor\">%s %s</b>, for a final balance of <b>%s %s</b>.</p>",
-  "percent_to_call": "to Call",
+  "percent_to_call": "%% to Call",
   "use_this_form": "Use this form to exercise a call option for the selected token (<b>%s</b>), any time after its call date of <b>%s</b>.<br/><br/><b class=\"errorRed\">Please NOTE that this action is irreversable!</b>",
   "this_distribution_payment": "This distribution payment would cost you a total of",
   "after_distribution_payment": "After distribution payment this address would have a remaining balance of",
