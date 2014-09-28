@@ -328,8 +328,7 @@
             </div>
             <div class="width-max" data-bind="visible: step() == 2">
               <p class="createWalletHeaderText" data-bind="locale: 'quick_access_intro_1'"></p>
-              <p class="createWalletHeaderText" data-bind="visible: !showQuickAccessFrame(), locale: 'quick_access_intro_2'"></p>
-              <div class="width-max margin-bottom-10" data-bind="visible: showQuickAccessFrame()">
+              <div class="width-max margin-bottom-10">
                   <label data-bind="locale: 'enter_quick_access_password'"></label>
                   <input id="quickAccessPassword" data-bind="value: quickAccessPassword, valueUpdate: 'input', localeAttr: {'placeholder': 'enter_url_password'}" class="form-control" type="password" name="quickAccessPassword" autocomplete="off">
                   <div class="width-max" data-bind="visible: quickAccessPassword()">
@@ -342,9 +341,7 @@
           <div class="modal-footer">
             <button type="button" class="btn btn-default" data-bind="visible: step()==1, click: hide, locale: 'cancel'"></button>
             <button id="continueWalletCreation" type="button" class="btn btn-primary" data-bind="visible: step() == 1, enable: passphraseSaved, click: goToStep2, locale: 'continue'"></button>
-            <button id="finishWalletCreation" type="button" class="btn btn-primary" data-bind="visible: step() == 2 && !showQuickAccessFrame(), click: showQuickAccessURLGUI, locale: 'create_quick_access'"></button>
-            <button id="finishWalletCreation" type="button" class="btn btn-primary" data-bind="visible: step() == 2 && !showQuickAccessFrame(), click: createWallet, locale: 'skip_this_step'"></button>
-            <button id="finishWalletCreation" type="button" class="btn btn-primary" data-bind="visible: step() == 2 && showQuickAccessFrame(), click: createWallet, locale: 'create_wallet'"></button>
+            <button id="finishWalletCreation" type="button" class="btn btn-primary" data-bind="visible: step() == 2, click: createWallet, locale: 'create_wallet', css: {disabled: !quickAccessPassword()}"></button>
           </div>
         </div><!-- /.modal-content -->
       </div><!-- /.modal-dialog -->
