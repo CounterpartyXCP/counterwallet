@@ -254,7 +254,7 @@
                               <td data-bind="html: total"></td>
                               <td data-bind="text: completion"></td>
                               <td>
-                                <a class="btn btn-default btn-xs" data-bind="click: $parent.cancelOrder, locale: 'cancel'"></a>
+                                <a class="btn btn-default btn-xs" data-bind="click: $parent.cancelOrder, locale: 'cancel', attr: {'id': 'btcancel_' + tx_hash}, css: {disabled: cancelled }"></a>
                               </td>
                           </tr>
                       </tbody>

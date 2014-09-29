@@ -51,9 +51,10 @@ function WalletCreationViewModel() {
 
   self.createWallet = function() {
     self.hide();
-    WALLET.isExplicitlyNew(true);
-    LOGON_VIEW_MODEL.enteredPassphrase(self.generatedPassphrase());
-    LOGON_VIEW_MODEL.openWallet();
+    bootbox.alert(i18n.t("your_wallet_is_ready"));
+    //WALLET.isExplicitlyNew(true);
+    //LOGON_VIEW_MODEL.enteredPassphrase(self.generatedPassphrase());
+    //LOGON_VIEW_MODEL.openWallet();
   }
 
 }
@@ -259,6 +260,8 @@ function LogonViewModel() {
       mustSavePreferencesToServer = true;
     }
     
+    PREFERENCES['num_addresses_used'] = Math.min(MAX_ADDRESSES, PREFERENCES['num_addresses_used']);
+
     WALLET_OPTIONS_MODAL.selectedTheme(PREFERENCES['selected_theme']);
     
     self.displayLicenseIfNecessary(mustSavePreferencesToServer);
@@ -295,7 +298,7 @@ function LogonViewModel() {
   
       if(PREFERENCES.address_aliases[addressHash] === undefined) { //no existing label. we need to set one
         mustSavePreferencesToServer = true; //if not already true
-        PREFERENCES.address_aliases[addressHash] = i18n.t("default_address_label", (i + 1));
+        PREFERENCES.address_aliases[addressHash] = i18n.t("default_address_label", len);
       }
 
       $.jqlog.info("Address discovery: Generating address " + len + " of " + PREFERENCES['num_addresses_used']

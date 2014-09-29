@@ -671,6 +671,7 @@ function ExchangeViewModel() {
       data[i].amount = formatHtmlPrice(smartFormat(normalizeQuantity(data[i].amount, self.baseAssetIsDivisible())));
       data[i].total = formatHtmlPrice(smartFormat(normalizeQuantity(data[i].total, self.quoteAssetIsDivisible())));
       data[i].price = formatHtmlPrice(smartFormat(parseFloat(data[i].price)));
+      data[i].cancelled = WALLET.cancelOrders.indexOf(data[i].tx_hash) != -1;
     }
     self.userOpenOrders(data);
   }
@@ -943,35 +944,43 @@ function ExchangeViewModel() {
   self.cancelOrder = function(order) {
     $.jqlog.debug(order);
 
-    var message = i18n.t('cancel_consume_btc');
-    if (self.quoteAsset() == 'BTC' && order.type == 'BUY') {
-      message += '<br />' + i18n.t('we_recommend_to_use_xcp');
-    }
+    if (WALLET.cancelOrders.indexOf(order.tx_hash) != -1) {
 
-    bootbox.dialog({
-      title: i18n.t("confirm_cancellation_order"),
-      message: message,
-      buttons: {
-        "cancel": {
-          label: i18n.t("close"),
-          className: "btn-danger",
-          callback: function() {
-            bootbox.hideAll();
-            return false;
-          }
-        },
-        "confirm": {
-          label: i18n.t("confirm_cancellation"),
-          className: "btn-primary",
-          callback: function() {
-            bootbox.hideAll();
-            self.cancelOpenOrder(order);
-            return true;
-          }
-        }
+      bootbox.alert(i18n.t('order_already_cancelled'));
 
+    } else {
+
+      var message = i18n.t('cancel_consume_btc');
+      if (self.quoteAsset() == 'BTC' && order.type == 'BUY') {
+        message += '<br />' + i18n.t('we_recommend_to_use_xcp');
       }
-    });
+
+      bootbox.dialog({
+        title: i18n.t("confirm_cancellation_order"),
+        message: message,
+        buttons: {
+          "cancel": {
+            label: i18n.t("close"),
+            className: "btn-danger",
+            callback: function() {
+              bootbox.hideAll();
+              return false;
+            }
+          },
+          "confirm": {
+            label: i18n.t("confirm_cancellation"),
+            className: "btn-primary",
+            callback: function() {
+              bootbox.hideAll();
+              self.cancelOpenOrder(order);
+              return true;
+            }
+          }
+
+        }
+      }); 
+
+    }
 
   }
 
@@ -1175,6 +1184,7 @@ function OpenOrdersViewModel() {
       order.get_remaining = Math.max(data[i].get_remaining, 0);
       order.expire_index = data[i].expire_index;
       order.expire_date = expireDate(data[i].expire_index);
+      order.cancelled = WALLET.cancelOrders.indexOf(order.tx_hash) != -1;
       orders.push(order);
       assets[data[i].give_asset] = true;
       assets[data[i].get_asset] = true;
@@ -1196,35 +1206,42 @@ function OpenOrdersViewModel() {
   self.cancelOpenOrder = function(order) {
     $.jqlog.debug(order);
 
-    var message = i18n.t('cancel_consume_btc');
-    if (order.give_quantity_str.indexOf('BTC') != -1) {
-      message += '<br />' + i18n.t('we_recommend_to_use_xcp');
-    }
+    if (WALLET.cancelOrders.indexOf(order.tx_hash) != -1) {
 
-    bootbox.dialog({
-      title: i18n.t("confirm_cancellation_order"),
-      message: message,
-      buttons: {
-        "cancel": {
-          label: i18n.t("close"),
-          className: "btn-danger",
-          callback: function() {
-            bootbox.hideAll();
-            return false;
-          }
-        },
-        "confirm": {
-          label: i18n.t("confirm_cancellation"),
-          className: "btn-primary",
-          callback: function() {
-            bootbox.hideAll();
-            self.cancelOrder(order);
-            return true;
+      bootbox.alert(i18n.t('order_already_cancelled'));
+
+    } else {
+
+      var message = i18n.t('cancel_consume_btc');
+      if (order.give_quantity_str.indexOf('BTC') != -1) {
+        message += '<br />' + i18n.t('we_recommend_to_use_xcp');
+      }
+
+      bootbox.dialog({
+        title: i18n.t("confirm_cancellation_order"),
+        message: message,
+        buttons: {
+          "cancel": {
+            label: i18n.t("close"),
+            className: "btn-danger",
+            callback: function() {
+              bootbox.hideAll();
+              return false;
+            }
+          },
+          "confirm": {
+            label: i18n.t("confirm_cancellation"),
+            className: "btn-primary",
+            callback: function() {
+              bootbox.hideAll();
+              self.cancelOrder(order);
+              return true;
+            }
           }
         }
-      }
-    });
+      });
 
+    }
   }
 
   self.cancelOrder = function(order) {

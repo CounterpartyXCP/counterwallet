@@ -80,6 +80,28 @@ function AddressViewModel(type, key, address, initialLabel, armoryPubKey) {
     });
   }
   
+  self.initDropDown = function(asset) {
+    setTimeout(function() {
+
+      $('#asset-' + self.ADDRESS + '-' + asset + ' .dropdown-toggle').last().dropdown();
+
+      $('#asset-' + self.ADDRESS + '-' + asset + ' .assetBtn').unbind('click');
+      $('#asset-' + self.ADDRESS + '-' + asset + ' .assetBtn').click(function (event) {
+        var menu = $(this).parent().find('ul');
+        if (menu.css('display')=='block') {
+          menu.hide();
+        } else {
+          menu.show();
+        }
+        menu.mouseleave(function() {
+          menu.hide();
+          menu.unbind('mouseleave');
+        })
+      });
+
+    }, 500);
+  }
+
   self.addOrUpdateAsset = function(asset, assetInfo, initialRawBalance, escrowedBalance) {
     //Update asset property changes (ONLY establishes initial balance when logging in! -- past that, balance changes
     // come from debit and credit messages)
@@ -90,9 +112,10 @@ function AddressViewModel(type, key, address, initialLabel, armoryPubKey) {
     });
     
     if(asset == 'BTC' || asset == 'XCP') { //special case update
-      assert(match); //was created when the address viewmodel was initialized...
+      assert(match, 'was created when the address viewmodel was initialized...');
       match.rawBalance(initialRawBalance);
       match.escrowedBalance(escrowedBalance);
+      self.initDropDown(asset);
       return;
     }
 
@@ -117,25 +140,7 @@ function AddressViewModel(type, key, address, initialLabel, armoryPubKey) {
         escrowedBalance: normalizeQuantity(escrowedBalance, assetInfo['divisible'])
       };
       self.assets.push(new AssetViewModel(assetProps)); //add new
-      setTimeout(function() {
-
-        $('#asset-' + self.ADDRESS + '-' + asset + ' .dropdown-toggle').last().dropdown();
-
-        $('#asset-' + self.ADDRESS + '-' + asset + ' .assetBtn').unbind('click');
-        $('#asset-' + self.ADDRESS + '-' + asset + ' .assetBtn').click(function (event) {
-          var menu = $(this).parent().find('ul');
-          if (menu.css('display')=='block') {
-            menu.hide();
-          } else {
-            menu.show();
-          }
-          menu.mouseleave(function() {
-            menu.hide();
-            menu.unbind('mouseleave');
-          })
-        });
-
-      }, 1000);
+      self.initDropDown(asset);
 
     } else {
       //update existing. NORMALLY this logic is really only reached from the messages feed, however, we can have the
