@@ -26,6 +26,7 @@
   "create_quick_access": "Create a Quick Access URL",
   "skip_this_step": "Skip This Step",
   "create_wallet": "Create Wallet",
+  "your_wallet_is_ready": "Your wallet is ready. Use your passphrase or your quick access url to login.",
   "testnet": "Testnet",
   "powered_by_counterparty": "Powered by Counterparty",
   "create_new_wallet": "Create New Wallet",

@@ -51,9 +51,10 @@ function WalletCreationViewModel() {
 
   self.createWallet = function() {
     self.hide();
-    WALLET.isExplicitlyNew(true);
-    LOGON_VIEW_MODEL.enteredPassphrase(self.generatedPassphrase());
-    LOGON_VIEW_MODEL.openWallet();
+    bootbox.alert(i18n.t("your_wallet_is_ready"));
+    //WALLET.isExplicitlyNew(true);
+    //LOGON_VIEW_MODEL.enteredPassphrase(self.generatedPassphrase());
+    //LOGON_VIEW_MODEL.openWallet();
   }
 
 }
