@@ -739,6 +739,8 @@
   "broadcast_interval": "Broadcast interval",
   "url": "URL",
   "fee": "Fee",
+  "miners_fee": "Miners fee",
+  "redeemable_fee": "Reedemable fee",
   "owner": "Owner",
   "select_feed": "Select feed",
   "enter_bet": "Enter bet",

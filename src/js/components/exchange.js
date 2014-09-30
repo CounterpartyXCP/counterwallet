@@ -242,6 +242,8 @@ function ExchangeViewModel() {
     return normalizeQuantity(fee_provided);
   });
 
+  self.sellRedeemableFee = ko.observable(normalizeQuantity(2 * MULTISIG_DUST_SIZE));
+
   self.selectBuyOrder = function(order, notFromClick) {
     var price = new Decimal(cleanHtmlPrice(order.price));
     var amount1 = new Decimal(self.availableBalanceForSell());
@@ -332,6 +334,9 @@ function ExchangeViewModel() {
       if (buyOrders[i]['price'] >= self.sellPrice() && amountCumul < self.sellAmount()) {
         var vol = Math.min(self.sellAmount() - amountCumul, buyOrders[i]['amount']);
         estimatedTotalPrice += mulFloat(vol, buyOrders[i]['price']);
+        $.jqlog.debug("vol: " + vol);
+        $.jqlog.debug("price: " + buyOrders[i]['price']);
+        $.jqlog.debug("estimatedTotalPrice: " + estimatedTotalPrice);
         amountCumul += vol;
       }
     }
@@ -493,6 +498,8 @@ function ExchangeViewModel() {
 
     return normalizeQuantity(fee_provided);
   });
+
+  self.buyRedeemableFee = ko.observable(normalizeQuantity(2 * MULTISIG_DUST_SIZE));
 
   self.selectSellOrder = function(order, notFromClick) {
     var price = new Decimal(cleanHtmlPrice(order.price));
