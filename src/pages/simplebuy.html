@@ -131,15 +131,21 @@
             </div>
           </div>
 
+          <div class="row" data-bind="visible: noReserve">
+            <div class="col col-sm-10" >
+              <div class="txt-color-red" data-bind="locale: 'there_is_no_reserve'"></div>
+            </div>
+          </div>
 
-          <section data-bind="visible: !noBalance"><div class="row">
+
+          <section data-bind="visible: !noBalance && !noReserve"><div class="row">
             <label class="control-label col col-sm-2" data-bind="locale: 'send_with'"></label>
             <div class="col col-sm-10">
               <select class="form-control" style="width: 350px;vertical-align: top;margin-right: 12px;" name="source" data-bind="options: availableAddresses, optionsValue: 'address', optionsText: 'label', value: sourceAddress, select2: { minimumResultsForSearch: 10, escapeMarkup: 'direct' }"></select>
             </div>
           </div></section>
 
-          <section data-bind="visible: !noBalance"><div class="row">
+          <section data-bind="visible: !noBalance && !noReserve"><div class="row">
             <label class="control-label col col-sm-2" data-bind="locale: 'send_amount'"></label>
             <div class="col col-sm-10">
                 <label class="input inline-block">
@@ -157,7 +163,7 @@
       </div>
       <div class="modal-footer">
         <button type="button" class="btn btn-default" data-bind="click: hide, locale: 'cancel'"></button>
-        <button type="button" class="btn btn-primary" data-bind="click: send, visible: !noBalance, locale: 'send'"></button>
+        <button type="button" class="btn btn-primary" data-bind="click: send, visible: !noBalance && !noReserve, locale: 'send'"></button>
       </div>
     </div><!-- /.modal-content -->
   </div><!-- /.modal-dialog -->

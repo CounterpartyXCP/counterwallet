@@ -172,6 +172,7 @@ function VendingMachineViewModel() {
   self.type = ko.observable();
   self.description = ko.observable();
   self.noBalance = ko.observable();
+  self.noReserve = ko.observable();
   self.price = ko.observable();
   self.getCurrency = ko.observable();
   self.fees = ko.observable();
@@ -231,6 +232,12 @@ function VendingMachineViewModel() {
         self.noBalance(false);
       }
       
+    }
+    if (self.noBalance() == false) {
+      self.noReserve(false);
+      if ('reserve' in machine[action] && machine[action]['reserve'] <= 0) {
+        self.noReserve(true);
+      }
     }
     self.availableAddresses(options);
   }
