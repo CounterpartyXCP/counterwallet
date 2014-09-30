@@ -508,6 +508,7 @@
   "you_have_no_in_wallet": "You have no %s in your Wallet",
   "quick_by_notice": "Please note that Counterparty does not operate the vending machine services provided on this page, and is not responsible for the quality of services provided through their use. If you have any issues with these 3rd party services, please contact them directly for support.",
   "support": "Support",
+  "quick_by_confirm_message": "You are choosing to send <span class=\"sellColor\">%s %s</span> to <b>%s</b>. You will receive <span class=\"sellColor\">%s %s</span>.",
 
   "statistics": "Statistics",
   "wallets_count": "# Wallets",

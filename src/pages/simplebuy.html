@@ -152,14 +152,7 @@
                 <span class="invalid" data-bind="validationMessage: quantity"></span>
             </div>
           </section>
-          <p class="formPaddedBot" data-bind="fadeVisibleInOnly: quantity">
-            <span data-bind="locale: 'you_are_choosing_to_send'"></span> 
-            <b>
-              <span class="sellColor" data-bind="text: quantity"></span>
-              <span class="sellColor" data-bind="text: currency"></span> 
-            </b>
-           
-          </p>
+          <p class="formPaddedBot" data-bind="fadeVisibleInOnly: quantity, html: confirmationPhrase"></p>
         </fieldset></form>
       </div>
       <div class="modal-footer">

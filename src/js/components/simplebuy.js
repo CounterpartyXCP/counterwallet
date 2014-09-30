@@ -172,6 +172,17 @@ function VendingMachineViewModel() {
   self.type = ko.observable();
   self.description = ko.observable();
   self.noBalance = ko.observable();
+  self.price = ko.observable();
+  self.getCurrency = ko.observable();
+  self.fees = ko.observable();
+
+  self.confirmationPhrase = ko.computed(function() {
+    if (!self.quantity()) return null;
+    var getQuantity = divFloat(self.quantity(), self.price());
+    getQuantity = mulFloat(getQuantity, 1 - self.fees());
+    return i18n.t("quick_by_confirm_message", self.quantity(), self.currency(), self.name(), getQuantity, self.getCurrency());
+
+  });
 
   self.validationModel = ko.validatedObservable({
     quantity: self.quantity
@@ -187,6 +198,7 @@ function VendingMachineViewModel() {
   }
 
   self.init = function(machine, action) {
+    $.jqlog.debug(machine);
 
     self.name(machine['name']);
     self.type(machine['type']);
@@ -196,11 +208,15 @@ function VendingMachineViewModel() {
     self.balances = {};
     if (action == 'buy') {
       self.currency(machine['quote-asset']);
-      self.desinationAddress(machine['buy']['address']);
+      self.getCurrency(machine['base-asset']);
     } else {
       self.currency(machine['base-asset']);
-      self.desinationAddress(machine['sell']['address']);
+      self.getCurrency(machine['quote-asset']);
     }
+    self.desinationAddress(machine[action]['address']);
+    self.price(machine[action]['price']);
+    self.fees(machine[action]['fees']);
+
     var addresses = WALLET.getAddressesList(true);
     var options = []
     self.noBalance(true);
