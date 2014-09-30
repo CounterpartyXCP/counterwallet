@@ -334,9 +334,6 @@ function ExchangeViewModel() {
       if (buyOrders[i]['price'] >= self.sellPrice() && amountCumul < self.sellAmount()) {
         var vol = Math.min(self.sellAmount() - amountCumul, buyOrders[i]['amount']);
         estimatedTotalPrice += mulFloat(vol, buyOrders[i]['price']);
-        $.jqlog.debug("vol: " + vol);
-        $.jqlog.debug("price: " + buyOrders[i]['price']);
-        $.jqlog.debug("estimatedTotalPrice: " + estimatedTotalPrice);
         amountCumul += vol;
       }
     }

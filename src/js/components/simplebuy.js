@@ -25,82 +25,87 @@ function SimpleBuyViewModel() {
       };
       var sellAttributes = [];
 
-      if (data[m]['type'] == 'gateway') {
+      var types = data[m]['type'] == 'gateway' ? {'buy':1, 'sell':1} : {'buy':1}
 
-        for (var t in {'buy':1, 'sell':1}) {
+      for (var t in types) {
 
-          if (data[m][t]) {
+        if (data[m][t]) {
 
-            var baseAsset = t == 'buy' ? data[m]['base-asset'] : data[m]['quote-asset'];
-            var quoteAsset = t == 'sell' ? data[m]['base-asset'] : data[m]['quote-asset'];
+          var baseAsset = t == 'buy' ? data[m]['base-asset'] : data[m]['quote-asset'];
+          var quoteAsset = t == 'sell' ? data[m]['base-asset'] : data[m]['quote-asset'];
 
+          if (data[m]['type'] == 'crowdsale') {
+
+            if (now >= data[m]['end']) {
+              data[m]['finished'] = true;
+            }
+            if (now < data[m]['start']) {
+              data[m]['pending'] = true;
+            }
+
+            attributes['buy'].push({
+              'label': i18n.t('start'),
+              'value':  moment(data[m]['start'] * 1000).format("MMM Do YYYY, h:mm:ss a"),
+              'attrclass': 'date'
+            });
+            attributes['buy'].push({
+              'label': i18n.t('end'),
+              'value':  moment(data[m]['end'] * 1000).format("MMM Do YYYY, h:mm:ss a"),
+              'attrclass': 'date'
+            });
+
+          }
+
+          if (data[m][t]['min-amount']) {
             attributes[t].push({
               'label': i18n.t('min_amount'),
               'value': data[m][t]['min-amount'] + ' ' + quoteAsset,
               'attrclass': 'min-amount'
             });
+          }
+          if (data[m][t]['max-amount']) {
             attributes[t].push({
               'label': i18n.t('max_amount'),
               'value': data[m][t]['max-amount'] + ' ' + quoteAsset,
               'attrclass': 'max-amount'
             });
-            if (data[m][t]['reserve']) {
-              attributes[t].push({
-                'label': i18n.t('reserve_balance'),
-                'value': data[m][t]['reserve'] + ' ' + baseAsset,
-                'attrclass': 'reserve'
-              });
-            }
+          }
+          if (data[m][t]['reserve']) {
             attributes[t].push({
-              'label': i18n.t('confirmations_required'),
-              'value': data[m][t]['confirmations-required'],
-              'attrclass': 'confirmations-required'
+              'label': i18n.t('reserve_balance'),
+              'value': data[m][t]['reserve'] + ' ' + baseAsset,
+              'attrclass': 'reserve'
             });
+          }
+          attributes[t].push({
+            'label': i18n.t('confirmations_required'),
+            'value': data[m][t]['confirmations-required'],
+            'attrclass': 'confirmations-required'
+          });
+          if (data[m][t]['price']) {
             attributes[t].push({
               'label': i18n.t('current_price'),
               'value':  data[m][t]['price'] + ' ' + data[m]['quote-asset'],
               'attrclass': 'price'
             });
+          }
+          if (data[m][t]['fees']) {
             attributes[t].push({
               'label': i18n.t('fees'),
               'value': (data[m][t]['fees'] * 100) + '%',
               'attrclass': 'fees'
             });
           }
+
+          if (data[m]['type'] == 'crowdsale') {
+            attributes['buy'].push({
+              'label': i18n.t('amount_reached'),
+              'value': data[m]['amount-reached'] + ' ' + data[m]['quote-asset'],
+              'attrclass': 'amount-reached'
+            });
+          }
         }
-
-      } else if (data[m]['type'] == 'crowdsale') {
-
-        if (now >= data[m]['end']) {
-          data[m]['finished'] = true;
-        }
-        if (now < data[m]['start']) {
-          data[m]['pending'] = true;
-        }
-
-        attributes['buy'].push({
-          'label': i18n.t('start'),
-          'value':  moment(data[m]['start'] * 1000).format("MMM Do YYYY, h:mm:ss a"),
-          'attrclass': 'date'
-        });
-        attributes['buy'].push({
-          'label': i18n.t('end'),
-          'value':  moment(data[m]['end'] * 1000).format("MMM Do YYYY, h:mm:ss a"),
-          'attrclass': 'date'
-        });
-        attributes['buy'].push({
-          'label': i18n.t('confirmations_required'),
-          'value': data[m]['buy']['confirmations-required'],
-          'attrclass': 'confirmations-required'
-        });
-        attributes['buy'].push({
-          'label': i18n.t('amount_reached'),
-          'value': data[m]['amount-reached'] + ' ' + data[m]['quote-asset'],
-          'attrclass': 'amount-reached'
-        });
-
       }
-      
 
       data[m]['attributes'] = attributes;
       data[m]['machineclass'] = (data[m]['finished'] || data[m]['pending']) ? 'pendingMachine' : '';
