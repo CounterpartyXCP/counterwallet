@@ -276,7 +276,7 @@ $(document).ready(function() {
       },
       firefox: {
         text: 'Firefox',
-        url: 'http://http://www.mozilla.org/'
+        url: 'http://www.mozilla.org/'
       },
       safari: {
         text: 'Safari (Mac Users)',
