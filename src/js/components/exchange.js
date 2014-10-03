@@ -708,7 +708,7 @@ function ExchangeViewModel() {
       message += '<tr><td colspan="3"><p class="bg-info padding-10">';
       message += i18n.t('btc_escrow_confirm');
       message += '</p></td></tr>';
-      message += '<tr><td><b>' + i18n.t('escrow_commission') + ': </b></td><td style="text-align:right">' + self.buyTotal() * ESCROW_COMMISSION + '</td><td>' + self.quoteAsset() + '</td></tr>';
+      message += '<tr><td><b>' + i18n.t('escrow_commission') + ': </b></td><td style="text-align:right">' + smartFormat(mulFloat(self.buyTotal(), ESCROW_COMMISSION)) + '</td><td>' + self.quoteAsset() + '</td></tr>';
       message += '<tr><td><b>' + i18n.t('btcpay_retaining_fee') + ': </b></td><td style="text-align:right">' + normalizeQuantity(BTCPAY_FEE_RETAINER) + '</td><td>' + self.quoteAsset() + '</td></tr>';
     }
 

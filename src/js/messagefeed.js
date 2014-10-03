@@ -463,7 +463,9 @@ function MessageFeed() {
       if (btcpay) {
         refreshEscrowedBalance.push(btcpay.BTCPAY_DATA['myAddr']);
         refreshEscrowedBalance.push(btcpay.BTCPAY_DATA['btcDestAddr']);
+        WALLET.updateBTCEscrowedBalance();
       }
+
     } else if(category == "burns") {
     } else if(category == "cancels") {
       
