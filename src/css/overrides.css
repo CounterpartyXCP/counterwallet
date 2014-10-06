@@ -540,3 +540,8 @@ h1 span.localeTitle {
   position: static !important;
   margin-top: 7px;
 }
+
+div.showSupport {
+  text-align: right;
+  font-size: 12px;
+}
