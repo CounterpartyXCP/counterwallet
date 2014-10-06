@@ -158,6 +158,7 @@ function initBalances() {
   window.PAY_DIVIDEND_MODAL = new PayDividendModalViewModel();
   window.CALL_ASSET_MODAL = new CallAssetModalViewModel();
   window.SHOW_ASSET_INFO_MODAL = new ShowAssetInfoModalViewModel();
+  window.EXTENDED_INFO_MODAL = new ExtendedInfoModalViewModel();
   
   ko.applyBindings(CREATE_ASSET_MODAL, document.getElementById("createAssetModal"));
   ko.applyBindings(ISSUE_ADDITIONAL_ASSET_MODAL, document.getElementById("issueAdditionalAssetModal"));
@@ -166,6 +167,7 @@ function initBalances() {
   ko.applyBindings(PAY_DIVIDEND_MODAL, document.getElementById("payDividendModal"));
   ko.applyBindings(CALL_ASSET_MODAL, document.getElementById("callAssetModal"));
   ko.applyBindings(SHOW_ASSET_INFO_MODAL, document.getElementById("showAssetInfoModal"));
+  ko.applyBindings(EXTENDED_INFO_MODAL, document.getElementById("extendedInfoModal"));
   
   $(document).ready(function() {
       //Some misc jquery event handlers

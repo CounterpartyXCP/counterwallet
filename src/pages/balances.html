@@ -138,6 +138,7 @@
                     <li data-bind="visible: !$parent.IS_WATCH_ONLY && isMine() && !locked()"><a data-bind="click: lock, locale: 'lock_token_issuance'" href="#"></a></li>
                     <li data-bind="visible: !$parent.IS_WATCH_ONLY && isMine()"><a data-bind="click: changeDescription, locale: 'change_token_description'" href="#"></a></li>
                     <li data-bind="visible: !$parent.IS_WATCH_ONLY && isMine() && CALLABLE"><a data-bind="click: call, locale: 'call'" href="#"></a></li>
+                    <li data-bind="visible: !$parent.IS_WATCH_ONLY && isMine()"><a data-bind="click: extendedInfo, locale: 'extended_info'" href="#"></a></li>
                   </ul>
                 </div>
                 <h3 class="name pull-left" data-bind="text: ASSET"></h3>
@@ -589,6 +590,80 @@
       </div>
     </div><!-- /.modal-content -->
   </div><!-- /.modal-dialog -->
+</div><!-- /.modal -->
+
+<!-- modal for extended info -->
+<div data-bind="showModal: shown" id="extendedInfoModal" class="modal fade" data-backdrop="static" data-keyboard="false" tabindex="-1" role="dialog" aria-labelledby="extendedInfoModal" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" data-bind="click: hide" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                <h4 class="modal-title" data-bind="locale: 'extended_info'"></h4>
+            </div>
+            <div class="modal-body no-padding">
+                <p class="formPadded" data-bind="locale: 'extended_info_guide'"></p>
+
+                <form class="smart-form" data-bind="submit: doAction">
+                    <fieldset>
+                        <section>
+                            <div class="row">
+                                <label class="control-label col col-sm-2" data-bind="locale: 'description'"></label>
+
+                                <div class="col col-sm-10">
+                                    <label class="textarea textarea-resizable">
+                                        <textarea name="description" rows="3" class="custom-scroll"
+                                                  data-bind="value: description"></textarea>
+                                    </label>
+                                </div>
+                            </div>
+                        </section>
+                        <section>
+                            <div class="row">
+                                <label class="control-label col col-sm-2" data-bind="locale: 'logo'"></label>
+
+                                <div class="col col-sm-10">
+                                    <label class="input"><i class="icon-append fa fa-info"></i>
+                                        <input name="image" data-bind="value: image, valueUpdate: 'input'" type="text"/>
+                                    </label>
+                                    <img data-bind="attr: {'src': image}"/> <!-- should be 48x48 -->
+                                </div>
+                            </div>
+                        </section>
+                        <section>
+                            <div class="row">
+                                <label class="control-label col col-sm-2" data-bind="locale: 'website_url'"></label>
+
+                                <div class="col col-sm-10">
+                                    <label class="input"><i class="icon-append fa fa-info"></i>
+                                        <input name="website" data-bind="value: website, valueUpdate: 'website'" type="text"/>
+                                    </label>
+                                    <a data-bind="attr: {'href': website}, text: website" target="_blank"></a>
+                                </div>
+                            </div>
+                        </section>
+                        <section >
+                            <div class="row">
+                                <label class="control-label col col-sm-2" data-bind="locale: 'pgp_signature'"></label>
+
+                                <div class="col col-sm-10">
+                                    <label class="input"><i class="icon-append fa fa-info"></i>
+                                        <input name="pgpsig" data-bind="value: pgpsig, valueUpdate: 'pgpsig'" type="text"/>
+                                    </label>
+                                    <a data-bind="attr: {'href': pgpsig}, text: pgpsig" target="_blank"></a>
+                                </div>
+                            </div>
+                        </section>
+
+
+                    </fieldset>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-bind="click: hide, locale: 'cancel'"></button>
+                <button type="button" data-bind="click: submitForm, locale: 'extended_info'" class="btn btn-primary btn-warning"></button>
+            </div>
+        </div><!-- /.modal-content -->
+    </div><!-- /.modal-dialog -->
 </div><!-- /.modal -->
 
 

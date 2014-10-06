@@ -175,6 +175,114 @@ function CreateAssetModalViewModel() {
   }  
 }
 
+function ExtendedInfoModalViewModel() {
+    var self = this;
+    self.shown = ko.observable(false);
+    self.address = ko.observable('');
+    self.asset = ko.observable();
+    self.description = ko.observable('').extend({
+        minLength: 0,
+        maxLength: 2048
+    });
+    self.image = ko.observable().extend({
+
+        pattern: {
+            message: i18n.t('url_png'),
+            params: "^https?://.*?.png$"
+        }
+    });
+    self.website = ko.observable().extend({
+
+        pattern: {
+            message: i18n.t('url_invalid'),
+            params: "^https?://.*?$"
+        }
+    });
+    self.pgpsig = ko.observable().extend({
+
+        pattern: {
+            message: i18n.t('url_invalid'),
+            params: "^https?://.*?$"
+        }
+    });
+
+    self.validationModel = ko.validatedObservable({
+        description: self.description,
+        image: self.image,
+        website: self.website,
+        pgpsig: self.pgpsig
+    });
+
+    self.resetForm = function() {
+        self.description('');
+        self.image('');
+        self.website('');
+        self.pgpsig('');
+        self.validationModel.errors.showAllMessages(false);
+    }
+
+    self.submitForm = function() {
+        if (!self.validationModel.isValid()) {
+            self.validationModel.errors.showAllMessages();
+            return false;
+        }
+
+        //data entry is valid...submit to the server
+        $('#extendedInfoModal form').submit();
+    }
+
+    self.doAction = function() {
+        var rec = {
+            'asset':self.asset().ASSET,
+            'description':self.description(),
+            'image':self.image(),
+            'website':self.website(),
+            'pgpsig':self.pgpsig()};
+
+
+
+        failoverAPI("create_asset_file",rec, function(data, endpoint){
+           console.log(data);
+           console.log(endpoint);
+           if (data.url != "") {
+               var d = new Date();
+               failoverAPI("create_broadcast", {"source":self.address().address, "fee_fraction":0,"timestamp": d.getTime(),"value": 0, "text": data.url}, function (data, endpoint){
+                   console.log(data);
+                   WALLET.signAndBroadcastTx(self.address(), data, function (txHash, data, endpoint, addressType, armoryUTx) {
+                       self.shown(false);
+
+                       var message = "";
+                       if (armoryUTx) {
+                           message = i18n.t("will_be_extended", self.additionalIssue(), self.asset().ASSET);
+                       } else {
+                           message = i18n.t("you_have_extended", self.additionalIssue(), self.asset().ASSET);
+                       }
+
+                       WALLET.showTransactionCompleteDialog(message + " " + i18n.t(ACTION_PENDING_NOTICE), message, armoryUTx);
+                   });
+               });
+           }
+           self.shown(false);
+
+        });
+
+    }
+
+
+    self.show = function(address, asset, resetForm) {
+            if(typeof(resetForm)==='undefined') resetForm = true;
+            if(resetForm) self.resetForm();
+            self.address(address);
+            self.asset(asset);
+            self.shown(true);
+            trackDialogShow('ExtendedInfo');
+
+    }
+
+    self.hide = function() {
+        self.shown(false);
+    }
+}
 
 function IssueAdditionalAssetModalViewModel() {
   var self = this;
@@ -182,7 +290,7 @@ function IssueAdditionalAssetModalViewModel() {
   self.address = ko.observable(''); // SOURCE address (supplied)
   self.divisible = ko.observable();
   self.asset = ko.observable();
-  
+
   self.additionalIssue = ko.observable('').extend({
     required: true,
     isValidPositiveQuantity: self,
@@ -193,17 +301,17 @@ function IssueAdditionalAssetModalViewModel() {
       },
       message: i18n.t('issuance_exceed_max_quantity'),
       params: self
-    }    
+    }
   });
-  
+
   self.dispTotalIssued = ko.computed(function() {
     if(!self.asset()) return null;
     return self.asset().dispTotalIssued();
   }, self);
-  
+
   self.rawAdditionalIssue = ko.computed(function() {
     if(!self.asset() || !isNumber(self.additionalIssue())) return null;
-    return denormalizeQuantity(self.additionalIssue(), self.asset().DIVISIBLE); 
+    return denormalizeQuantity(self.additionalIssue(), self.asset().DIVISIBLE);
   }, self);
 
   self.validationModel = ko.validatedObservable({
@@ -214,12 +322,12 @@ function IssueAdditionalAssetModalViewModel() {
     self.additionalIssue(null);
     self.validationModel.errors.showAllMessages(false);
   }
-  
+
   self.submitForm = function() {
     if (!self.validationModel.isValid()) {
       self.validationModel.errors.showAllMessages();
       return false;
-    }    
+    }
     $('#issueAdditionalAssetModal form').submit();
   }
 
@@ -238,8 +346,8 @@ function IssueAdditionalAssetModalViewModel() {
       },
       function(txHash, data, endpoint, addressType, armoryUTx) {
         self.shown(false);
-        
-        var message = ""; 
+
+        var message = "";
         if (armoryUTx) {
           message = i18n.t("you_will_be_issuing", self.additionalIssue(), self.asset().ASSET);
         } else {
