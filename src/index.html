@@ -382,7 +382,6 @@
 
                 <div class="col-sm-8" data-bind="visible: !cryptedPassphraseUsed()">
                   <input id="password" data-bind="value: enteredPassphrase, valueUpdate: 'input', localeAttr: {'placeholder': 'enter_passphrase'}" class="form-control" type="password" name="password">
-                  <div class="showSupport"><a href="#" data-bind="locale: 'login_problems'"></a></div>
                 </div>
 
                 <div class="col-sm-8" data-bind="visible: cryptedPassphraseUsed">
@@ -392,6 +391,7 @@
                 <div class="col-sm-4">
                   <button id="walletLoginButton" data-bind="click: openWallet, enable: isPassphraseValid(), css: { 'btn-primary': isPassphraseValid() }, locale: 'open_wallet'" type="button" class="btn btn-default" disabled></button>
                   &nbsp;<button id="secureKeyboardButton" data-bind="click: showSecureKeyboard, enable: !isPassphraseValid(), css: { 'btn-primary': !isPassphraseValid() }" type="button" class="btn btn-default" disabled><i class="fa fa-keyboard-o"></i></button>
+                  <div class="showSupport"><a href="#" data-bind="locale: 'login_problems'"></a></div>
                 </div>
 
               </div>
