@@ -62,7 +62,7 @@ span.logoText {
     line-height: 49px !important;
     margin: 0 !important;
     background: url(../images/logo-small.png) no-repeat 10px 8px;
-    padding-left: 50px;
+    padding-left: 65px;
 }
 #logo span.logoText {
 
@@ -166,16 +166,16 @@ span.logoText {
 }
 
 #notificationFeed .ajax-dropdown {
-    left: 46px;
+    left: 61px;
 }
 #pendingActionFeed .ajax-dropdown {
-    left: 86px;
+    left: 101px;
 }
 #openOrderFeed .ajax-dropdown {
-    left: 126px;
+    left: 141px;
 }
 #btcPayFeed .ajax-dropdown {
-    left: 166px;
+    left: 181px;
 }
 
 
