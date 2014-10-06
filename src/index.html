@@ -363,14 +363,6 @@
           <button id="newWalletButton" data-bind="click: generatePassphrase, locale: 'create_new_wallet'" type="button" class="btn btn-success btn-lg"></button>
         </div>
 
-        <div data-bind="visible: !USE_TESTNET" class="alert alert-info" class="margin-bottom-0">
-           <p>
-              <i class="fa-fw fa fa-rocket"></i>
-              <span data-bind="locale: 'new_to_counterwallet'"></span>
-               <b><a href="https://testnet.counterwallet.co" target="_blank" data-bind="locale: 'try_testnet'"></a></b> 
-           </p>
-         </div>
-
         <div class="panel panel-info">
           <div class="panel-heading">
             <h3 class="panel-title">
@@ -390,6 +382,7 @@
 
                 <div class="col-sm-8" data-bind="visible: !cryptedPassphraseUsed()">
                   <input id="password" data-bind="value: enteredPassphrase, valueUpdate: 'input', localeAttr: {'placeholder': 'enter_passphrase'}" class="form-control" type="password" name="password">
+                  <div class="showSupport"><a href="#" data-bind="locale: 'login_problems'"></a></div>
                 </div>
 
                 <div class="col-sm-8" data-bind="visible: cryptedPassphraseUsed">
@@ -415,7 +408,6 @@
 
        <div id="extra-info" class="container">
         <h3 class="sales-title margin-bottom-10" data-bind="locale: 'counterwallet_desc_1'"></h3>
-        <h4 class="sales-title" data-bind="locale: 'counterwallet_desc_2'"></h4>
         <div class="row">
           <div class="col-sm-4 col-md-4">
             <h4 class="margin-bottom-10">
@@ -780,7 +772,9 @@
                     <li><a href="https://support.counterparty.io/support/solutions/articles/5000003522-what-does-something-like-xcp-btc-mean-in" target="_blank" data-bind="locale: 'answer_9'"></a></li>
                     <li><a href="https://support.counterparty.io/support/solutions/articles/5000003513-i-placed-an-order-to-buy-btc-for-something-else-what-i-offered-was-removed-from-my-account-but-i" target="_blank" data-bind="locale: 'answer_11'"></a></li>
                     <li><a href="https://support.counterparty.io/support/solutions/articles/5000003514-why-do-i-need-small-amounts-of-bitcoin-to-do" target="_blank" data-bind="locale: 'answer_12'"></a></li>
-                    <li><a href="https://support.counterparty.io/support/solutions/articles/5000003516-how-do-i-get-support-for-counterwallet" target="_blank" data-bind="locale: 'answer_8'"></a></li>
+                    <li><a href="http://support.counterparty.io/support/solutions/articles/5000049906-what-is-the-difference-between-miner-s-fee-and-redeemable" target="_blank" data-bind="locale: 'answer_13'"></a></li>
+                    <li><a href="http://support.counterparty.io/support/solutions/articles/5000051505-what-btc-sellers-on-the-counterparty-distributed-exchange-need-to" target="_blank" data-bind="locale: 'answer_14'"></a></li>
+                    <li><a href="http://support.counterparty.io/support/solutions/articles/5000003516-how-do-i-get-support-for-counterwallet" target="_blank" data-bind="locale: 'answer_8'"></a></li>
                 </ul>
                 <h5 class="margin-bottom-0">
                   <span data-bind="locale: 'for_other_questions'"></span>
