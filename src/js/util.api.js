@@ -1,5 +1,5 @@
 
-var TIMEOUT_FAILOVER_API = 4000; // 4 seconds (in ms)
+var TIMEOUT_FAILOVER_API = 16000; // 16 seconds (in ms)
 var TIMEOUT_MULTI_API = 8000; // 8 seconds (in ms)
 
 //Inlude a .url param in every jqXHR object -- http://stackoverflow.com/a/11980396
