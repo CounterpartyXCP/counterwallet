@@ -861,5 +861,7 @@
   "portfolio_overview": "Portfolio Overview",
   "portfolio_composition": "Portfolio Composition (in %s)",
   "only_the_assets_you_own": "Only the assets you own with established market value (via completed trades on the Distributed Exchange) are listed here.",
-  "highest_bid_price": "Highest bid price"
+  "highest_bid_price": "Highest bid price",
+
+  "diligence_is_advised": "Because of the fully peer-to-peer nature of the exchange, due diligence is advised. Please ensure that the assets you are trading are legitimate and official"
 }
