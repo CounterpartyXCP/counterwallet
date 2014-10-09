@@ -43,7 +43,7 @@
   "counterwallet_desc_2": "All transactions made with Counterwallet use an automatic escrow system to keep them secure, with no middleman required.",
   "counterwallet_desc_3": "Secure",
   "counterwallet_desc_4": "All encryption is handled client-side. Neither your passphrase nor any of your private information ever leaves your browser.",
-  "counterwallet_desc_5": "Counterwallet passhrases are highly secure, so you know that your wallet is safe from all brute force attacks. They are also easy to learn and hard to mistype.",
+  "counterwallet_desc_5": "Counterwallet passphrases are highly secure, so you know that your wallet is safe from all brute force attacks. They are also easy to learn and hard to mistype.",
   "counterwallet_desc_6": "Simple",
   "counterwallet_desc_7": "With Counterwallet, your passphrase is your wallet, and all of your addresses and keys are generated on-the-fly when you log in.",
   "counterwallet_desc_8": "There are no wallet files to backup or keep private, and with your passphrase you can access your wallet from any trusted machine with a web browser.",
