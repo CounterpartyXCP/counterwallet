@@ -672,9 +672,10 @@ function ExchangeViewModel() {
 
   self.displayOpenUserOrders = function(data) {
     for (var i in data) {
-      data[i].amount = formatHtmlPrice(smartFormat(normalizeQuantity(data[i].amount, self.baseAssetIsDivisible())));
-      data[i].total = formatHtmlPrice(smartFormat(normalizeQuantity(data[i].total, self.quoteAssetIsDivisible())));
-      data[i].price = formatHtmlPrice(smartFormat(parseFloat(data[i].price)));
+      
+      data[i].amount = formatHtmlPrice(normalizeQuantity(data[i].amount, self.baseAssetIsDivisible()));
+      data[i].total = formatHtmlPrice(normalizeQuantity(data[i].total, self.quoteAssetIsDivisible()));
+      data[i].price = formatHtmlPrice(parseFloat(data[i].price));
       data[i].cancelled = WALLET.cancelOrders.indexOf(data[i].tx_hash) != -1;
     }
     self.userOpenOrders(data);
@@ -697,10 +698,10 @@ function ExchangeViewModel() {
 
   self.displayUserLastTrades = function(data) {
     for (var i in data) {
-      data[i].amount = formatHtmlPrice(smartFormat(normalizeQuantity(data[i].amount, self.baseAssetIsDivisible())));
-      data[i].total = formatHtmlPrice(smartFormat(normalizeQuantity(data[i].total, self.quoteAssetIsDivisible())));
+      data[i].amount = formatHtmlPrice(normalizeQuantity(data[i].amount, self.baseAssetIsDivisible()));
+      data[i].total = formatHtmlPrice(normalizeQuantity(data[i].total, self.quoteAssetIsDivisible()));
       data[i].block_time = moment(data[i].block_time * 1000).format('YYYY/MM/DD hh:mm:ss A Z');
-      data[i].price = formatHtmlPrice(smartFormat(parseFloat(data[i].price)));
+      data[i].price = formatHtmlPrice(parseFloat(data[i].price));
     }
     self.userLastTrades(data);
   }
