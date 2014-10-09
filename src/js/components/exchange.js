@@ -66,6 +66,9 @@ function ExchangeViewModel() {
     var pair = self.assetPair();
     return pair[0] + "/" + pair[1];
   }, self);
+  self.dispAssetPair.subscribeChanged(function(newValue, prevValue) {
+    self.currentMarketPrice(0);
+  });
   self.baseAsset = ko.computed(function() {
     if(!self.assetPair()) return null;
     return self.assetPair()[0];
@@ -911,7 +914,6 @@ function ExchangeViewModel() {
       $('#asset1, #asset2').typeahead(null, {
         source: assets.ttAdapter(),
         displayKey: function(obj) { 
-          $.jqlog.debug(obj);
           return obj; 
         }
       }).on('typeahead:selected', function($e, datum) {
@@ -947,7 +949,6 @@ function ExchangeViewModel() {
   }
   
   self.cancelOrder = function(order) {
-    $.jqlog.debug(order);
 
     if (WALLET.cancelOrders.indexOf(order.tx_hash) != -1) {
 
@@ -1171,7 +1172,6 @@ function OpenOrdersViewModel() {
   }
 
   self.displayOpenOrders = function(data) {
-    $.jqlog.debug(data);
     self.openOrders([]);
     var assets = {};
     var orders = [];
@@ -1209,7 +1209,6 @@ function OpenOrdersViewModel() {
   }
 
   self.cancelOpenOrder = function(order) {
-    $.jqlog.debug(order);
 
     if (WALLET.cancelOrders.indexOf(order.tx_hash) != -1) {
 
