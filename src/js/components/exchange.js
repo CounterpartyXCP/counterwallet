@@ -24,7 +24,7 @@ ko.validation.rules['baseDivisibilityIsOk'] = {
       return true;
     }
   },
-  message: "Divisible amount for non-divisible asset."
+  message: i18n.t("nodivisible_amount_incorrect")
 };
 
 ko.validation.rules['quoteDivisibilityIsOk'] = {
@@ -35,7 +35,7 @@ ko.validation.rules['quoteDivisibilityIsOk'] = {
       return true;
     }
   },
-  message: "Divisible total for non-divisible asset."
+  message: i18n.t("nodivisible_total_incorrect")
 };
 
 ko.validation.registerExtenders();
