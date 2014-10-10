@@ -15,6 +15,29 @@ ko.validation.rules['ordersIsExistingAssetName'] = {
   },
   message: i18n.t("asset_doesnt_exist")
 };
+
+ko.validation.rules['baseDivisibilityIsOk'] = {
+  validator: function (value, self) {
+    if (!self.baseAssetIsDivisible() && (value % 1) > 0) {
+      return false;
+    } else {
+      return true;
+    }
+  },
+  message: "Divisible amount for non-divisible asset."
+};
+
+ko.validation.rules['quoteDivisibilityIsOk'] = {
+  validator: function (value, self) {
+    if (!self.quoteAssetIsDivisible() && (value % 1) > 0) {
+      return false;
+    } else {
+      return true;
+    }
+  },
+  message: "Divisible total for non-divisible asset."
+};
+
 ko.validation.registerExtenders();
 
 function ExchangeViewModel() {
@@ -141,10 +164,14 @@ function ExchangeViewModel() {
     required: true,
     isValidPositiveQuantity: self
   });
-  self.sellAmount = ko.observable(0);
+  self.sellAmount = ko.observable(0).extend({
+    required: true,
+    baseDivisibilityIsOk: self
+  });
   self.sellTotal = ko.observable(0).extend({
     required: true,
-    isValidPositiveQuantity: self
+    isValidPositiveQuantity: self,
+    quoteDivisibilityIsOk: self
   });
   self.sellPriceHasFocus = ko.observable();
   self.sellAmountHasFocus = ko.observable();
@@ -252,7 +279,17 @@ function ExchangeViewModel() {
     var amount1 = new Decimal(self.availableBalanceForSell());
     var amount2 = new Decimal(order.base_depth);
     var amount = amount1.compare(amount2) > 0 ? amount2 : amount1;
-    var total = price.mul(amount);
+    var total;
+
+    if (self.quoteAssetIsDivisible() == self.baseAssetIsDivisible()) {
+      total = price.mul(amount);
+    } else if (self.quoteAssetIsDivisible() && !self.baseAssetIsDivisible()) {
+      amount = Math.floor(amount);
+      total = mulFloat(amount, price);
+    } else if (!self.quoteAssetIsDivisible() && self.baseAssetIsDivisible()) {
+      total = Math.floor(price.mul(amount));
+      amount = divFloat(total, price);
+    }
 
     self.sellPrice(roundAmount(price));
     self.sellAmount(roundAmount(amount));
@@ -265,10 +302,16 @@ function ExchangeViewModel() {
 
   self.setMaxSellAmount = function() {
     var amount = self.availableBalanceForSell();
-    self.sellAmount(amount);
     if (self.sellPrice()) {
-      self.sellTotal(mulFloat(self.sellPrice(), amount));
+      if (self.quoteAssetIsDivisible()) {
+        self.sellTotal(mulFloat(self.sellPrice(), amount)); 
+      } else {
+        var total = Math.floor(mulFloat(self.sellPrice(), amount));
+        self.sellTotal(total);
+        amount = divFloat(total, self.sellPrice());
+      }
     } 
+    self.sellAmount(amount);
   }
 
   self.doSell = function() {
@@ -394,9 +437,14 @@ function ExchangeViewModel() {
   });
   self.buyAmount = ko.observable(0).extend({
     required: true,
-    isValidPositiveQuantity: self
+    isValidPositiveQuantity: self,
+    baseDivisibilityIsOk: self
   });
-  self.buyTotal = ko.observable(0);
+  self.buyTotal = ko.observable(0).extend({
+    required: true,
+    isValidPositiveQuantity: self,
+    quoteDivisibilityIsOk: self
+  });
   self.buyPriceHasFocus = ko.observable();
   self.buyAmountHasFocus = ko.observable();
   self.buyTotalHasFocus = ko.observable();
@@ -507,7 +555,16 @@ function ExchangeViewModel() {
     var total1 = price.mul(amount);
     var total2 = new Decimal(self.availableBalanceForBuy());
     var total = total1.compare(total2) > 0 ? total2 : total1;
-    amount = total.div(price);
+
+    if (self.quoteAssetIsDivisible() == self.baseAssetIsDivisible()) {
+      amount = total.div(price);
+    } else if (self.quoteAssetIsDivisible() && !self.baseAssetIsDivisible()) {
+      amount = Math.floor(total.div(price));
+      total = mulFloat(amount, price);
+    } else if (!self.quoteAssetIsDivisible() && self.baseAssetIsDivisible()) {
+      total = Math.floor(total);
+      amount = total.div(price);
+    }
 
     self.buyPrice(roundAmount(price));
     self.buyTotal(roundAmount(total));
@@ -520,15 +577,20 @@ function ExchangeViewModel() {
 
   self.setMaxBuyAmount = function() {
     var total = self.availableBalanceForBuy();
-    self.buyTotal(total);
     if (self.buyPrice()) {
       if (total==0) {
         self.buyAmount(0);
       } else {
-        self.buyAmount(divFloat(total, self.buyPrice()));
+        if (self.baseAssetIsDivisible()) {
+          self.buyAmount(divFloat(total, self.buyPrice()));
+        } else {
+          var amount = Math.floor(divFloat(total, self.buyPrice()));
+          self.buyAmount(amount);
+          total = mulFloat(amount, self.buyPrice());
+        }
       }
-      
     } 
+    self.buyTotal(total);
   }
 
   self.doBuy = function() {
