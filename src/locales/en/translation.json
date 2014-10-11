@@ -830,6 +830,8 @@
   "buy_orders": "Buy orders",
   "completed_trades_for": "Completed Trades for %s",
   "order_already_cancelled": "Order already cancelled",
+  "nodivisible_amount_incorrect": "Divisible amount for non-divisible asset.",
+  "nodivisible_total_incorrect": "Divisible total for non-divisible asset.",
 
   "top_tokens": "Top Tokens",
   "market_cap_history": "Market Cap History (in %s)",
