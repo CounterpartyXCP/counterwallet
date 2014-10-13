@@ -91,92 +91,95 @@ ko.bindingHandlers.datetimepicker = {
 /* 
  * Shared knockout Validation custom rules
  */
-ko.validation.rules['isValidBitcoinAddress'] = {
-    validator: function (val, self) {
-        return CWBitcore.isValidAddress(val);
-    },
-    message: USE_TESTNET ? i18n.t('must_be_valid_testnet_address') : i18n.t('must_be_valid_bitcoin_address')
-};
+function createSharedKnockoutValidators() {
 
-ko.validation.rules['isValidBitcoinAddressIfSpecified'] = {
-    validator: function (val, self) {
-        try {
-          if(!val) return true; //the "if specified" part of the name :)
+  ko.validation.rules['isValidBitcoinAddress'] = {
+      validator: function (val, self) {
           return CWBitcore.isValidAddress(val);
-        } catch (err) {
+      },
+      message: USE_TESTNET ? i18n.t('must_be_valid_testnet_address') : i18n.t('must_be_valid_bitcoin_address')
+  };
+
+  ko.validation.rules['isValidBitcoinAddressIfSpecified'] = {
+      validator: function (val, self) {
+          try {
+            if(!val) return true; //the "if specified" part of the name :)
+            return CWBitcore.isValidAddress(val);
+          } catch (err) {
+            return false;
+          }
+      },
+      message: USE_TESTNET ? i18n.t('must_be_valid_testnet_address') : i18n.t('must_be_valid_bitcoin_address')
+  };
+
+  ko.validation.rules['isValidQtyForDivisibility'] = {
+      validator: function (val, self) {
+        if(!self.divisible() && numberHasDecimalPlace(parseFloat(val))) {
           return false;
         }
-    },
-    message: USE_TESTNET ? i18n.t('must_be_valid_testnet_address') : i18n.t('must_be_valid_bitcoin_address')
-};
+        return true;
+      },
+      message: i18n.t('must_be_whole_number')
+  };
 
-ko.validation.rules['isValidQtyForDivisibility'] = {
-    validator: function (val, self) {
-      if(!self.divisible() && numberHasDecimalPlace(parseFloat(val))) {
-        return false;
-      }
-      return true;
-    },
-    message: i18n.t('must_be_whole_number')
-};
+  ko.validation.rules['isNotSameBitcoinAddress'] = {
+      validator: function (val, self) {
+        return val != self.address();
+      },
+      message: i18n.t('destination_equal_to_source')
+  };
 
-ko.validation.rules['isNotSameBitcoinAddress'] = {
-    validator: function (val, self) {
-      return val != self.address();
-    },
-    message: i18n.t('destination_equal_to_source')
-};
+  ko.validation.rules['isValidPositiveQuantity'] = {
+      validator: function (val, self) {
+        //$.jqlog.debug("isValidPositiveQuantity:" + val)
+        //$.jqlog.debug(val.toString().match(/^[0-9]*\.?[0-9]{0,8}$/) && parseFloat(val) > 0)
 
-ko.validation.rules['isValidPositiveQuantity'] = {
-    validator: function (val, self) {
-      //$.jqlog.debug("isValidPositiveQuantity:" + val)
-      //$.jqlog.debug(val.toString().match(/^[0-9]*\.?[0-9]{0,8}$/) && parseFloat(val) > 0)
+        return val.toString().match(/^[0-9]*\.?[0-9]{0,8}$/) && parseFloat(val) > 0;
+      },
+      message: i18n.t('must_be_quantity')
+  };
 
-      return val.toString().match(/^[0-9]*\.?[0-9]{0,8}$/) && parseFloat(val) > 0;
-    },
-    message: i18n.t('must_be_quantity')
-};
+  ko.validation.rules['isValidPositiveQuantityOrZero'] = {
+      validator: function (val, self) {
+        return val.toString().match(/^[0-9]*\.?[0-9]{0,8}$/) && parseFloat(val) >= 0;
+      },
+      message: i18n.t('must_be_quantity_or_zero')
+  };
 
-ko.validation.rules['isValidPositiveQuantityOrZero'] = {
-    validator: function (val, self) {
-      return val.toString().match(/^[0-9]*\.?[0-9]{0,8}$/) && parseFloat(val) >= 0;
-    },
-    message: i18n.t('must_be_quantity_or_zero')
-};
+  ko.validation.rules['isValidPositiveInteger'] = {
+      validator: function (val, self) {
+        return val.toString().match(/^[0-9]+$/) && parseFloat(val) >= 0;
+      },
+      message: i18n.t('must_be_positive_integer')
+  };
 
-ko.validation.rules['isValidPositiveInteger'] = {
-    validator: function (val, self) {
-      return val.toString().match(/^[0-9]+$/) && parseFloat(val) >= 0;
-    },
-    message: i18n.t('must_be_positive_integer')
-};
+  ko.validation.rules['isValidUrl'] = {
+      validator: function (val, self) {
+          return isValidURL(val);
+      },
+      message: i18n.t('must_be_url')
+  };
 
-ko.validation.rules['isValidUrl'] = {
-    validator: function (val, self) {
-        return isValidURL(val);
-    },
-    message: i18n.t('must_be_url')
-};
+  ko.validation.rules['isValidUrlOrValidBitcoinAdressOrJsonBet'] = {
+      validator: function (val, self) {
+        if (!val) return false;
+        // regex to check url, make freeze Chrome when checking btc address
+        // TODO: change the way to check an url
+        // return CWBitcore.isValidAddress(val) || isValidURL(val);
+        if (val.length>50 || val.lastIndexOf('=') == val.length-1) {
+          return typeof(decodeJsonBet(val)) == 'object';
+        } else if (val.indexOf('http://') == 0 || val.indexOf('https://') == 0) {
+          return isValidURL(val);
+        } else {
+          return CWBitcore.isValidAddress(val);
+        }   
+      },
+      message: i18n.t('must_be_url_or_address')
+  };
 
-ko.validation.rules['isValidUrlOrValidBitcoinAdressOrJsonBet'] = {
-    validator: function (val, self) {
-      if (!val) return false;
-      // regex to check url, make freeze Chrome when checking btc address
-      // TODO: change the way to check an url
-      // return CWBitcore.isValidAddress(val) || isValidURL(val);
-      if (val.length>50 || val.lastIndexOf('=') == val.length-1) {
-        return typeof(decodeJsonBet(val)) == 'object';
-      } else if (val.indexOf('http://') == 0 || val.indexOf('https://') == 0) {
-        return isValidURL(val);
-      } else {
-        return CWBitcore.isValidAddress(val);
-      }   
-    },
-    message: i18n.t('must_be_url_or_address')
-};
+  ko.validation.registerExtenders();
 
-ko.validation.registerExtenders();
-
+}
 
 //Bootstrap 3 button toggle group handler: http://stackoverflow.com/a/20080917 (with FIX)
 ko.bindingHandlers.btnGroupChecked = {
