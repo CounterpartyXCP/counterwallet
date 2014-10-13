@@ -55,6 +55,7 @@ function localeInit(callback) {
   }
   i18n.init(options, function() {
     callback();
+    createSharedKnockoutValidators();
   });
   localStorage.setItem("LANG", LANG);
 }

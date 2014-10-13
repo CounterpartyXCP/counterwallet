@@ -15,6 +15,29 @@ ko.validation.rules['ordersIsExistingAssetName'] = {
   },
   message: i18n.t("asset_doesnt_exist")
 };
+
+ko.validation.rules['baseDivisibilityIsOk'] = {
+  validator: function (value, self) {
+    if (!self.baseAssetIsDivisible() && (value % 1) > 0) {
+      return false;
+    } else {
+      return true;
+    }
+  },
+  message: i18n.t("nodivisible_amount_incorrect")
+};
+
+ko.validation.rules['quoteDivisibilityIsOk'] = {
+  validator: function (value, self) {
+    if (!self.quoteAssetIsDivisible() && (value % 1) > 0) {
+      return false;
+    } else {
+      return true;
+    }
+  },
+  message: i18n.t("nodivisible_total_incorrect")
+};
+
 ko.validation.registerExtenders();
 
 function ExchangeViewModel() {
@@ -66,6 +89,9 @@ function ExchangeViewModel() {
     var pair = self.assetPair();
     return pair[0] + "/" + pair[1];
   }, self);
+  self.dispAssetPair.subscribeChanged(function(newValue, prevValue) {
+    self.currentMarketPrice(0);
+  });
   self.baseAsset = ko.computed(function() {
     if(!self.assetPair()) return null;
     return self.assetPair()[0];
@@ -220,10 +246,14 @@ function ExchangeViewModel() {
     required: true,
     isValidPositiveQuantity: self
   });
-  self.sellAmount = ko.observable(0);
+  self.sellAmount = ko.observable(0).extend({
+    required: true,
+    baseDivisibilityIsOk: self
+  });
   self.sellTotal = ko.observable(0).extend({
     required: true,
-    isValidPositiveQuantity: self
+    isValidPositiveQuantity: self,
+    quoteDivisibilityIsOk: self
   });
   self.sellPriceHasFocus = ko.observable();
   self.sellAmountHasFocus = ko.observable();
@@ -331,7 +361,17 @@ function ExchangeViewModel() {
     var amount1 = new Decimal(self.availableBalanceForSell());
     var amount2 = new Decimal(order.base_depth);
     var amount = amount1.compare(amount2) > 0 ? amount2 : amount1;
-    var total = price.mul(amount);
+    var total;
+
+    if (self.quoteAssetIsDivisible() == self.baseAssetIsDivisible()) {
+      total = price.mul(amount);
+    } else if (self.quoteAssetIsDivisible() && !self.baseAssetIsDivisible()) {
+      amount = Math.floor(amount);
+      total = mulFloat(amount, price);
+    } else if (!self.quoteAssetIsDivisible() && self.baseAssetIsDivisible()) {
+      total = Math.floor(price.mul(amount));
+      amount = divFloat(total, price);
+    }
 
     self.sellPrice(roundAmount(price));
     self.sellAmount(roundAmount(amount));
@@ -344,10 +384,16 @@ function ExchangeViewModel() {
 
   self.setMaxSellAmount = function() {
     var amount = self.availableBalanceForSell();
-    self.sellAmount(amount);
     if (self.sellPrice()) {
-      self.sellTotal(mulFloat(self.sellPrice(), amount));
+      if (self.quoteAssetIsDivisible()) {
+        self.sellTotal(mulFloat(self.sellPrice(), amount)); 
+      } else {
+        var total = Math.floor(mulFloat(self.sellPrice(), amount));
+        self.sellTotal(total);
+        amount = divFloat(total, self.sellPrice());
+      }
     } 
+    self.sellAmount(amount);
   }
 
   self.doSell = function() {
@@ -473,9 +519,14 @@ function ExchangeViewModel() {
   });
   self.buyAmount = ko.observable(0).extend({
     required: true,
-    isValidPositiveQuantity: self
+    isValidPositiveQuantity: self,
+    baseDivisibilityIsOk: self
   });
-  self.buyTotal = ko.observable(0);
+  self.buyTotal = ko.observable(0).extend({
+    required: true,
+    isValidPositiveQuantity: self,
+    quoteDivisibilityIsOk: self
+  });
   self.buyPriceHasFocus = ko.observable();
   self.buyAmountHasFocus = ko.observable();
   self.buyTotalHasFocus = ko.observable();
@@ -586,7 +637,16 @@ function ExchangeViewModel() {
     var total1 = price.mul(amount);
     var total2 = new Decimal(self.availableBalanceForBuy());
     var total = total1.compare(total2) > 0 ? total2 : total1;
-    amount = total.div(price);
+
+    if (self.quoteAssetIsDivisible() == self.baseAssetIsDivisible()) {
+      amount = total.div(price);
+    } else if (self.quoteAssetIsDivisible() && !self.baseAssetIsDivisible()) {
+      amount = Math.floor(total.div(price));
+      total = mulFloat(amount, price);
+    } else if (!self.quoteAssetIsDivisible() && self.baseAssetIsDivisible()) {
+      total = Math.floor(total);
+      amount = total.div(price);
+    }
 
     self.buyPrice(roundAmount(price));
     self.buyTotal(roundAmount(total));
@@ -599,15 +659,20 @@ function ExchangeViewModel() {
 
   self.setMaxBuyAmount = function() {
     var total = self.availableBalanceForBuy();
-    self.buyTotal(total);
     if (self.buyPrice()) {
       if (total==0) {
         self.buyAmount(0);
       } else {
-        self.buyAmount(divFloat(total, self.buyPrice()));
+        if (self.baseAssetIsDivisible()) {
+          self.buyAmount(divFloat(total, self.buyPrice()));
+        } else {
+          var amount = Math.floor(divFloat(total, self.buyPrice()));
+          self.buyAmount(amount);
+          total = mulFloat(amount, self.buyPrice());
+        }
       }
-      
     } 
+    self.buyTotal(total);
   }
 
   self.doBuy = function() {
@@ -772,9 +837,10 @@ function ExchangeViewModel() {
 
   self.displayOpenUserOrders = function(data) {
     for (var i in data) {
-      data[i].amount = formatHtmlPrice(smartFormat(normalizeQuantity(data[i].amount, self.baseAssetIsDivisible())));
-      data[i].total = formatHtmlPrice(smartFormat(normalizeQuantity(data[i].total, self.quoteAssetIsDivisible())));
-      data[i].price = formatHtmlPrice(smartFormat(parseFloat(data[i].price)));
+      
+      data[i].amount = formatHtmlPrice(normalizeQuantity(data[i].amount, self.baseAssetIsDivisible()));
+      data[i].total = formatHtmlPrice(normalizeQuantity(data[i].total, self.quoteAssetIsDivisible()));
+      data[i].price = formatHtmlPrice(parseFloat(data[i].price));
       data[i].cancelled = WALLET.cancelOrders.indexOf(data[i].tx_hash) != -1;
     }
     self.userOpenOrders(data);
@@ -797,10 +863,10 @@ function ExchangeViewModel() {
 
   self.displayUserLastTrades = function(data) {
     for (var i in data) {
-      data[i].amount = formatHtmlPrice(smartFormat(normalizeQuantity(data[i].amount, self.baseAssetIsDivisible())));
-      data[i].total = formatHtmlPrice(smartFormat(normalizeQuantity(data[i].total, self.quoteAssetIsDivisible())));
+      data[i].amount = formatHtmlPrice(normalizeQuantity(data[i].amount, self.baseAssetIsDivisible()));
+      data[i].total = formatHtmlPrice(normalizeQuantity(data[i].total, self.quoteAssetIsDivisible()));
       data[i].block_time = moment(data[i].block_time * 1000).format('YYYY/MM/DD hh:mm:ss A Z');
-      data[i].price = formatHtmlPrice(smartFormat(parseFloat(data[i].price)));
+      data[i].price = formatHtmlPrice(parseFloat(data[i].price));
     }
     self.userLastTrades(data);
   }
@@ -1010,7 +1076,6 @@ function ExchangeViewModel() {
       $('#asset1, #asset2').typeahead(null, {
         source: assets.ttAdapter(),
         displayKey: function(obj) { 
-          $.jqlog.debug(obj);
           return obj; 
         }
       }).on('typeahead:selected', function($e, datum) {
@@ -1046,7 +1111,6 @@ function ExchangeViewModel() {
   }
   
   self.cancelOrder = function(order) {
-    $.jqlog.debug(order);
 
     if (WALLET.cancelOrders.indexOf(order.tx_hash) != -1) {
 
@@ -1270,7 +1334,6 @@ function OpenOrdersViewModel() {
   }
 
   self.displayOpenOrders = function(data) {
-    $.jqlog.debug(data);
     self.openOrders([]);
     var assets = {};
     var orders = [];
@@ -1308,7 +1371,6 @@ function OpenOrdersViewModel() {
   }
 
   self.cancelOpenOrder = function(order) {
-    $.jqlog.debug(order);
 
     if (WALLET.cancelOrders.indexOf(order.tx_hash) != -1) {
 

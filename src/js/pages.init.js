@@ -58,7 +58,7 @@ function initIndex() { //main page
       WALLET_OPTIONS_MODAL.show();
       return false;
     });
-    $('#support').click(function(e) {
+    $('#support, div.showSupport a').click(function(e) {
       SUPPORT_MODAL.show('general');
       return false;
     });

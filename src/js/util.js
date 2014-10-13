@@ -1,7 +1,11 @@
 //Counterwallet-specific utility functions
 
 function formatHtmlPrice(price) {
-  return parseFloat(price).toFixed(8).replace(/(0{0,8}$)/,'<span class="text-muted">$1</span>');
+  num = noExponents(parseFloat(price).toFixed(8));
+  var parts = num.toString().split(".");
+  parts[0] = parts[0].replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+  parts[1] = parts[1].replace(/(0{0,8}$)/,'<span class="text-muted">$1</span>')
+  return parts.join('.');
 }
 
 function cleanHtmlPrice(price) {
