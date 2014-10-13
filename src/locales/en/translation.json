@@ -865,5 +865,15 @@
   "only_the_assets_you_own": "Only the assets you own with established market value (via completed trades on the Distributed Exchange) are listed here.",
   "highest_bid_price": "Highest bid price",
 
-  "diligence_is_advised": "Because of the fully peer-to-peer nature of the exchange, due diligence is advised. Please ensure that the assets you are trading are legitimate and official. Terms of Use for Counterparty.io and Counterwallet.io can be found at <a href=\"http://counterparty.io\" target=\"_blank\">http://counterparty.io</a>."
+  "diligence_is_advised": "Because of the fully peer-to-peer nature of the exchange, due diligence is advised. Please ensure that the assets you are trading are legitimate and official. Terms of Use for Counterparty.io and Counterwallet.io can be found at <a href=\"http://counterparty.io\" target=\"_blank\">http://counterparty.io</a>.",
+
+  "must_be_valid_testnet_address": "This field must be a valid TESTNET Bitcoin address.",
+  "must_be_valid_bitcoin_address": "This field must be a valid Bitcoin address.",
+  "must_be_whole_number": "The quantity entered must be a whole number, since this is a non-divisible asset.",
+  "destination_equal_to_source": "Destination address cannot be equal to the source address.",
+  "must_be_quantity": "Must be a valid quantity (positive num with max 8 decimal places)",
+  "must_be_quantity_or_zero": "Must be a valid quantity (num with max 8 decimal places), or zero",
+  "must_be_positive_integer": "Must be a positive integer",
+  "must_be_url": "This field must be a valid url",
+  "must_be_url_or_address": "This field must be a valid url or a valid Bitcoin address"
 }
