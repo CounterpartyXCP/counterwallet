@@ -182,7 +182,7 @@
   "bal": "bal:",
   "not_valid_testnet_pk": "Not a valid TESTNET private key",
   "not_valid_pk": "Not a valid private key",
-  "not_able_to_sweep": "We're not able to sweep all of the tokens you selected. Please send %s BTC transactions to address %s and try again. OR use the following fields to pay fees with another address",
+  "not_able_to_sweep": "We're not able to sweep all of the tokens you selected. Please send %s BTC to address %s and try again. OR use the following fields to pay fees with another address",
   "asset_sent_to": "Sent <b class='notoQuantityColor'>%s</b> <b class='notoAssetColor'>%s</b> to <b class='notoAddrColor'>%s</b>",
   "transferred_ownership": "Transferred ownership to <b class='notoAddrColor'>%s</b>",
   "funds_sent_failure": "Funds not sent due to failure.",
