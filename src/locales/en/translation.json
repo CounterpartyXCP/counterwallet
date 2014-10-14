@@ -48,7 +48,7 @@
   "counterwallet_desc_7": "With Counterwallet, your passphrase is your wallet, and all of your addresses and keys are generated on-the-fly when you log in.",
   "counterwallet_desc_8": "There are no wallet files to backup or keep private, and with your passphrase you can access your wallet from any trusted machine with a web browser.",
   "counterwallet_desc_9": "Open-Source",
-  "counterwallet_desc_10": "Counterwallet and Counterwalletd are entirely open-source, so you know that they work exactly the way that they are supposed to.",
+  "counterwallet_desc_10": "Counterwallet and Counterwallet are entirely open-source, so you know that they work exactly the way that they are supposed to.",
   "counterwallet_desc_11": "If you like, you may also even run your own Counterwallet server.",
   "license_agreement": "License Agreement",
   "is_the_first_time": "If you are being asked to accept the Terms and Conditions, this is the first time you are opening this wallet. <b>If you are trying to access an old wallet, you have typed the passphrase incorrectly.</b>",
