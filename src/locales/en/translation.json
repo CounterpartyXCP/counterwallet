@@ -250,7 +250,7 @@
   "token_locked": "Token locked",
   "token_transferred_from_to": "Token transferred from address <Ad>%s</Ad> to address <Ad>%s</Ad>",
   "x_tokens_called_back": "<Am>%s%%</Am> of token called back",
-  "unknown_op": "UNKNOWN OP:",
+  "unknown_op": "Unknown operation:",
 
   "bullish_up": "Bullish (up)",
   "bearish_down": "Bearish (down)",
