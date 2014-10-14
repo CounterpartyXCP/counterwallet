@@ -109,7 +109,7 @@
   "show_info": "Show Info",
   "show_debugging_info": "Show Debugging Info",
   "show_info_desc": "Click to show some useful information for troubleshooting wallet issues.",
-  "blk_msgid": "Blk/MsgID",
+  "blk_msgid": "Block/MessageID",
   "testnet_isdev": "TestNet/IsDev",
   "walletid": "WalletID",
   "origin_myip_c": "Origin/MyIP/C",
