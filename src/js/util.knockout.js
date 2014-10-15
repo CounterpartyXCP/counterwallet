@@ -177,6 +177,20 @@ function createSharedKnockoutValidators() {
       message: i18n.t('must_be_url_or_address')
   };
 
+  ko.validation.rules['canGetAddressPubKey'] = {
+    async: true,
+    message: i18n.t('cant_find_public_key'),
+    validator: function (val, self, callback) {
+      if(self.addressType() != 'armory') return true; //only necessary for armory offline addresses
+      failoverAPI("get_pubkey_for_address", {'address': val},
+        function(data, endpoint) {
+          self.armoryPubKey(data);
+          return data ? callback(true) : callback(false)
+        }
+      );   
+    }
+  };
+
   ko.validation.registerExtenders();
 
 }
