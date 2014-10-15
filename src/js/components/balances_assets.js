@@ -439,6 +439,7 @@ function PayDividendModalViewModel() {
   self.shown = ko.observable(false);
   self.addressVM = ko.observable(null); // SOURCE address view model(supplied)
   self.assetData = ko.observable(null);
+  self.holderCount = ko.observable(null);
   
   self.assetName = ko.observable('').extend({
     required: true,
@@ -469,7 +470,10 @@ function PayDividendModalViewModel() {
   self.assetName.subscribe(function(name) {
     if (!name) return;
     failoverAPI("get_asset_info", {'assets': [name]}, function(assetsData, endpoint) {
-      self.assetData(assetsData[0]);
+      failoverAPI('get_holder_count', {'asset':name}, function(holderData) {
+        self.assetData(assetsData[0]);
+        self.holderCount(holderData[name]);
+      });
     });
   });
   
@@ -505,9 +509,18 @@ function PayDividendModalViewModel() {
     return Decimal.round(totalPay, 8, Decimal.MidpointRounding.ToEven).toFloat();
 
   }, self);
+
+  self.totalFee = ko.computed(function() {
+    if(!self.holderCount() || !isNumber(self.quantityPerUnit()) || !parseFloat(self.quantityPerUnit())) return null;
+    return mulFloat(self.holderCount(), DIVIDEND_FEE_PER_HOLDER);
+  });
   
   self.dispTotalPay = ko.computed(function() {
     return smartFormat(self.totalPay());
+  }, self);
+
+  self.dispTotalFee= ko.computed(function() {
+    return smartFormat(self.totalFee());
   }, self);
 
   self.dividendAssetBalance = ko.computed(function() {

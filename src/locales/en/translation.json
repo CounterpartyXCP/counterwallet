@@ -700,6 +700,7 @@
   "use_this_form": "Use this form to exercise a call option for the selected token (<b>%s</b>), any time after its call date of <b>%s</b>.<br/><br/><b class=\"errorRed\">Please NOTE that this action is irreversible!</b>",
   "this_distribution_payment": "This distribution payment would cost you a total of",
   "after_distribution_payment": "After distribution payment this address would have a remaining balance of",
+  "distribution_fee": "Fee for this distribution: <b class=\"sellColor\">%s XCP</b>",
   "pay_holders": "Use this form to pay holders of any token a distribution using XCP or any other token. <i>Note that the full required balance of the token paid out must be present at this same address.</i><br/><br/><b class=\"errorRed\">Please NOTE that this action is irreversable!</b>",
   "address_transfer_ownership": "Enter the <b>Bitcoin address</b> you would like to permanently transfer ownership of this token to. (Be aware that this will not transfer the actual units of this token that you own to this address -- you can do that with a separate Send transaction.)<br/><br/><b class=\"errorRed\">Please NOTE that this action is irreversible!</b>",
   "more_token_issue": "How much more of this token would you like to issue? <i>(For divisible tokens, state the quantity as a whole or floating point number, not in satoshis -- e.g. '732.45')</i><br/><br/>There are currently <b>%s</b> units of this token issued.<br/><br/><b class=\"errorRed\">Please NOTE that this action is irreversable!</b>",
