@@ -481,6 +481,10 @@ function PayDividendModalViewModel() {
   self.selectedDividendAsset = ko.observable(null).extend({ //dividends are paid IN (i.e. with) this asset
     required: true
   });
+  self.selectedDividendAssetDivisibility =  ko.observableArray(null);
+  self.selectedDividendAsset.subscribe(function(asset) {
+    self.selectedDividendAssetDivisibility(WALLET.isAssetDivisibilityAvailable(asset) == 0 ? false : true); // asset divisibility should be available..
+  });
   
   self.quantityPerUnit = ko.observable('').extend({
     required: true,
@@ -491,6 +495,17 @@ function PayDividendModalViewModel() {
         return self.dividendAssetBalRemainingPostPay() >= 0;
       },
       message: i18n.t('total_diviend_exceed_balance'),
+      params: self
+    }, {
+      validator: function (val, self) {
+        if (!self.selectedDividendAsset()) return true;
+        if (!self.selectedDividendAssetDivisibility()) {
+          return parseFloat(val) % 1 == 0;
+        } else {
+          return true;
+        }
+      },
+      message: i18n.t('nodivisible_amount_incorrect'),
       params: self
     }]
   });
