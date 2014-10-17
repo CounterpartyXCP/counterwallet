@@ -59,7 +59,7 @@
     "src/vendors/i18next/i18next.min.js": "436aed3d5ea5479c3069d26a2136599bd1e4b7e60ce4dd790c0146b911652422",
     "src/vendors/counterwebdeps/js/external/mnemonic.js": "463b7bb1c2bc0cc3824106a4be68ea2ff166c667fbb39379a417ac2dda63a18a",
     "src/vendors/counterwebdeps/js/external/qrcode.js": "3f7944d28ba419256acf5cdfc5300cf4d519f1f65065305e62e6080d4b8e53e1",
-    "src/vendors/counterwebdeps/js/consts.js": "c60369d282f9e2a071b06edb3ac474ada3ba9fd51613e706b67a7170dd2e76ca",
+    "src/vendors/counterwebdeps/js/consts.js": "9382a61f54d4e4cae1c319c01fa000444d496f5a094b7571dfde32df9d032c5f",
     "src/vendors/counterwebdeps/js/util.generic.js": "0d9687865326d350835b80b921fcfb54d539fe93cd60f03da6029fe609b8f9ef",
     "src/vendors/counterwebdeps/js/util.analytics.js": "e2ae8dd7b29ab24b2b5265b139bd558a90b470eb639a6bd7ad1ffd29c4826a53",
     "src/vendors/counterwebdeps/js/util.bitcore.js": "2fc2684c1761b8d57c22a48aaf110f5686ca20e85022012414b85bc24f267b2c",

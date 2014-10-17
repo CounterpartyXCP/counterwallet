@@ -439,6 +439,7 @@ function PayDividendModalViewModel() {
   self.shown = ko.observable(false);
   self.addressVM = ko.observable(null); // SOURCE address view model(supplied)
   self.assetData = ko.observable(null);
+  self.holderCount = ko.observable(null);
   
   self.assetName = ko.observable('').extend({
     required: true,
@@ -469,13 +470,20 @@ function PayDividendModalViewModel() {
   self.assetName.subscribe(function(name) {
     if (!name) return;
     failoverAPI("get_asset_info", {'assets': [name]}, function(assetsData, endpoint) {
-      self.assetData(assetsData[0]);
+      failoverAPI('get_holder_count', {'asset':name}, function(holderData) {
+        self.assetData(assetsData[0]);
+        self.holderCount(holderData[name]);
+      });
     });
   });
   
   self.availableDividendAssets = ko.observableArray([]);
   self.selectedDividendAsset = ko.observable(null).extend({ //dividends are paid IN (i.e. with) this asset
     required: true
+  });
+  self.selectedDividendAssetDivisibility =  ko.observableArray(null);
+  self.selectedDividendAsset.subscribe(function(asset) {
+    self.selectedDividendAssetDivisibility(WALLET.isAssetDivisibilityAvailable(asset) == 0 ? false : true); // asset divisibility should be available..
   });
   
   self.quantityPerUnit = ko.observable('').extend({
@@ -487,6 +495,17 @@ function PayDividendModalViewModel() {
         return self.dividendAssetBalRemainingPostPay() >= 0;
       },
       message: i18n.t('total_diviend_exceed_balance'),
+      params: self
+    }, {
+      validator: function (val, self) {
+        if (!self.selectedDividendAsset()) return true;
+        if (!self.selectedDividendAssetDivisibility()) {
+          return parseFloat(val) % 1 == 0;
+        } else {
+          return true;
+        }
+      },
+      message: i18n.t('nodivisible_amount_incorrect'),
       params: self
     }]
   });
@@ -505,9 +524,22 @@ function PayDividendModalViewModel() {
     return Decimal.round(totalPay, 8, Decimal.MidpointRounding.ToEven).toFloat();
 
   }, self);
+
+  self.totalFee = ko.computed(function() {
+    if(!self.holderCount() || !isNumber(self.quantityPerUnit()) || !parseFloat(self.quantityPerUnit())) return null;
+    if (USE_TESTNET || WALLET.networkBlockHeight() > 328000) {
+      return mulFloat(self.holderCount(), DIVIDEND_FEE_PER_HOLDER);
+    } else {
+      return 0;
+    }
+  });
   
   self.dispTotalPay = ko.computed(function() {
     return smartFormat(self.totalPay());
+  }, self);
+
+  self.dispTotalFee= ko.computed(function() {
+    return smartFormat(self.totalFee());
   }, self);
 
   self.dividendAssetBalance = ko.computed(function() {

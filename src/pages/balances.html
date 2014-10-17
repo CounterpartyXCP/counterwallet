@@ -730,11 +730,19 @@
           </div></section>
         </fieldset></form>
         <div class="formPaddedBot" data-bind="fadeVisibleInOnly: quantityPerUnit() && selectedDividendAsset() && totalPay()">
-            <p><span data-bind="locale: 'thisDistributionPayment'"></span>
-            <b class="sellColor"><span data-bind="text: dispTotalPay"></span> <span data-bind="text: selectedDividendAsset"></span></b>.</p>
-            <p><span data-bind="locale: 'after_distribution_payment'"></span>
-            <b data-bind="css: {errorColor: dividendAssetBalRemainingPostPay() < 0, sellColor: dividendAssetBalRemainingPostPay() >= 0}">
-                <span data-bind="text: dispDividendAssetBalRemainingPostPay"></span> <span data-bind="text: selectedDividendAsset"></span></b>.</p>
+            <p>
+              <span data-bind="locale: 'this_distribution_payment'"></span>
+              <b class="sellColor"><span data-bind="text: dispTotalPay"></span> <span data-bind="text: selectedDividendAsset"></span></b>.
+            </p>
+            <p>
+              <span data-bind="locale: 'after_distribution_payment'"></span>
+              <b data-bind="css: {errorColor: dividendAssetBalRemainingPostPay() < 0, sellColor: dividendAssetBalRemainingPostPay() >= 0}">
+                <span data-bind="text: dispDividendAssetBalRemainingPostPay"></span> <span data-bind="text: selectedDividendAsset"></span>
+              </b>.
+            </p>
+            <p>
+              <span data-bind="locale: 'distribution_fee', localeArgs: dispTotalFee"></span>
+            </p>
         </div>
       </div>
       <div class="modal-footer">
