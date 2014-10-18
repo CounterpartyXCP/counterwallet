@@ -194,7 +194,7 @@
               <i class="fa fa-lg fa-fw fa-rocket"></i> <span data-bind="locale: 'quick_buy'"></span>
             </a>
           </li>
-          <li class="" data-bind="visible: FEATURE_BETTING">
+          <li class="" data-bind="visible: FEATURE_BETTING && BETTING_ENABLE">
             <a href="#">
               <i class="fa fa-lg fa-fw fa-bullseye"></i> <span class="menu-item-parent" data-bind="locale: 'betting'"></span>
             </a>
@@ -216,7 +216,7 @@
               </li>
             </ul>
           </li>
-          <li class="" data-bind="visible: FEATURE_RPS">
+          <li class="" data-bind="visible: FEATURE_RPS && GAMING_ENABLE">
             <a href="#">
               <i class="fa fa-lg fa-fw fa-trophy"></i> <span class="menu-item-parent" data-bind="locale: 'gaming'"></span>
             </a>

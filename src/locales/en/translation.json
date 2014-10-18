@@ -488,6 +488,7 @@
   "country_warning": "Country warning",
   "testnet_proceed_anyway": "Since you are on testnet, you can choose to proceed anyway.",
   "proceed_anyway": "Proceed Anyway",
+  "buy_xcp_if_legal": "If legal to do so in your country, you can purchase XCP from one of the centralized exchanges listed <a href=\"http://coinmarketcap.com/currencies/counterparty/#markets\" target=\"_blank\">here</a>.",
 
   "quick_buy": "Quick Buy",
   "min_amount": "Min. amount",
@@ -877,4 +878,5 @@
   "must_be_positive_integer": "Must be a positive integer",
   "must_be_url": "This field must be a valid url",
   "must_be_url_or_address": "This field must be a valid url or a valid Bitcoin address"
+
 }
