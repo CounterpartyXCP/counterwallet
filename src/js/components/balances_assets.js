@@ -470,10 +470,15 @@ function PayDividendModalViewModel() {
   self.assetName.subscribe(function(name) {
     if (!name) return;
     failoverAPI("get_asset_info", {'assets': [name]}, function(assetsData, endpoint) {
-      failoverAPI('get_holder_count', {'asset':name}, function(holderData) {
+      if (USE_TESTNET || WALLET.networkBlockHeight() > 328000) {
+        failoverAPI('get_holder_count', {'asset':name}, function(holderData) {
+          self.assetData(assetsData[0]);
+          self.holderCount(holderData[name]);
+        });
+      } else {
         self.assetData(assetsData[0]);
-        self.holderCount(holderData[name]);
-      });
+        self.holderCount(0);
+      }
     });
   });
   
