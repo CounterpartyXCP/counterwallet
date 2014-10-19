@@ -70,10 +70,17 @@ var RESTRICTED_AREA = {
   'pages/openbets.html': ['US'],
   'pages/matchedbets.html': ['US'],
   'pages/rps.html': ['US'],
-  'dividend': ['US']
+  'dividend': ['US'],
+  'pages/simplebuy.html': ['US']
+}
+
+var RESTRICTED_AREA_MESSAGE = {
+  'pages/simplebuy.html': 'buy_xcp_if_legal'
 }
 
 var MAX_SUPPORT_CASE_PROBLEM_LEN = 4096;
 var QUOTE_ASSETS = []; // initalized with counterblock is_ready()
 
 var QUICK_BUY_ENABLE = false;
+var BETTING_ENABLE = true;
+var GAMING_ENABLE = true;
