@@ -87,6 +87,10 @@ function checkCountry(action, callback) {
     
     var message = i18n.t('forbiden_country');
 
+    if (action in RESTRICTED_AREA_MESSAGE) {
+      message += '<br />' + i18n.t(RESTRICTED_AREA_MESSAGE[action]);
+    }
+
     if(USE_TESTNET) { //allow the user to bust on through this alert on testnet
       bootbox.dialog({
         title: i18n.t("country_warning"),

@@ -73,7 +73,18 @@ function getLanguage() {
         return subdomain;
       } else if (localStorage.getItem("LANG")) {
         return localStorage.getItem("LANG").toLowerCase();
-      } 
+      } else {
+        var browserLang = navigator.language || navigator.userLanguage;
+        browserLang = browserLang.replace("-", "_").toLowerCase();
+        if (AVAILABLE_LANGUAGES.indexOf(browserLang) != -1) {
+          return browserLang;
+        } else {
+          browserLang = browserLang.split("_")[0];
+          if (AVAILABLE_LANGUAGES.indexOf(browserLang) != -1) {
+            return browserLang;
+          }
+        }
+      }
     }
   }
   return 'en';
