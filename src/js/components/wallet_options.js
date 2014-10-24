@@ -74,6 +74,7 @@ function WalletOptionsModalViewModel() {
     //if(!newSelection) newSelection = self.availableBTCPayMethods()[0]; //hack
     //assert(_.contains(['autoescrow', 'auto', 'manual'], newSelection));
     newSelection = ko.utils.arrayFirst(self.availableBTCPayMethods(), function(item) { return newSelection === item.id; });
+    if (!newSelection) return;
     prevSelection = (prevSelection
       ? ko.utils.arrayFirst(self.availableBTCPayMethods(), function(item) { return prevSelection === item.id; }) : self.availableBTCPayMethods()[0]);
     $.jqlog.debug("Changing btcpay_method from " + prevSelection['name'] + " to " + newSelection['name']);
