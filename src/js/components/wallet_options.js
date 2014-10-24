@@ -77,7 +77,9 @@ function WalletOptionsModalViewModel() {
     if (!newSelection) return;
     prevSelection = (prevSelection
       ? ko.utils.arrayFirst(self.availableBTCPayMethods(), function(item) { return prevSelection === item.id; }) : self.availableBTCPayMethods()[0]);
-    $.jqlog.debug("Changing btcpay_method from " + prevSelection['name'] + " to " + newSelection['name']);
+    if (prevSelection) {
+      $.jqlog.debug("Changing btcpay_method from " + prevSelection['name'] + " to " + newSelection['name']);
+    }
     PREFERENCES['btcpay_method'] = newSelection['id'];
   });
   
