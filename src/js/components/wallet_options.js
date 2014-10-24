@@ -88,6 +88,7 @@ function WalletOptionsModalViewModel() {
   
   self.selectedTheme.subscribeChanged(function(newSelection, prevSelection) {
     newSelection = ko.utils.arrayFirst(self.availableThemes(), function(item) { return newSelection === item.id; });
+    if (!newSelection) return;
     prevSelection = (prevSelection
       ? ko.utils.arrayFirst(self.availableThemes(), function(item) { return prevSelection === item.id; }) : self.availableThemes()[0]);
     
