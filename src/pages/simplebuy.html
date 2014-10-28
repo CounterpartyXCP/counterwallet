@@ -64,7 +64,7 @@
               <div style="padding-left:120px">
                 <div class="row">
 
-                  <div class="col-xs-6 col-sm-6 col-md-6 col-lg-6">
+                  <div class="col-xs-6 col-sm-6 col-md-6 col-lg-6" data-bind="visible: buytitle">
                     <h4 data-bind="text: buytitle"></h4>
                     <p class="description" data-bind="text: buydescription"></p>
                     <div style="padding:20px; background-color:#E9FAF3" data-bind="attr: {class: machineclass}">
@@ -80,7 +80,7 @@
                     </div>
                   </div>
 
-                  <div class="col-xs-6 col-sm-6 col-md-6 col-lg-6" data-bind="visible: doubleway">
+                  <div class="col-xs-6 col-sm-6 col-md-6 col-lg-6" data-bind="visible: selltitle">
                     <h4 data-bind="text: selltitle"></h4>
                     <p class="description" data-bind="text: selldescription"></p>
                     <div style="padding:20px; background-color:#ffeddf">

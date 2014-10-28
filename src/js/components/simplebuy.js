@@ -56,21 +56,21 @@ function SimpleBuyViewModel() {
 
           }
 
-          if (data[m][t]['min-amount']) {
+          if ('min-amount' in data[m][t]) {
             attributes[t].push({
               'label': i18n.t('min_amount'),
               'value': data[m][t]['min-amount'] + ' ' + quoteAsset,
               'attrclass': 'min-amount'
             });
           }
-          if (data[m][t]['max-amount']) {
+          if ('max-amount' in data[m][t]) {
             attributes[t].push({
               'label': i18n.t('max_amount'),
               'value': data[m][t]['max-amount'] + ' ' + quoteAsset,
               'attrclass': 'max-amount'
             });
           }
-          if (data[m][t]['reserve']) {
+          if ('reserve' in data[m][t]) {
             attributes[t].push({
               'label': i18n.t('reserve_balance'),
               'value': data[m][t]['reserve'] + ' ' + baseAsset,
@@ -89,7 +89,7 @@ function SimpleBuyViewModel() {
               'attrclass': 'price'
             });
           }
-          if (data[m][t]['fees']) {
+          if ('fees' in data[m][t]) {
             attributes[t].push({
               'label': i18n.t('fees'),
               'value': (data[m][t]['fees'] * 100) + '%',
@@ -111,10 +111,11 @@ function SimpleBuyViewModel() {
       data[m]['machineclass'] = (data[m]['finished'] || data[m]['pending']) ? 'pendingMachine' : '';
       data[m]['baseasset'] = data[m]['base-asset'];
       data[m]['quoteasset'] = data[m]['quote-asset'];
-      data[m]['doubleway'] = attributes['sell'].length > 0;
-      data[m]['buytitle'] = data[m]['buy']['title'];
-      data[m]['buydescription'] = data[m]['buy']['description'];
-      if (data[m]['doubleway']) {
+      if (data[m]['buy']) {
+        data[m]['buytitle'] = data[m]['buy']['title'];
+        data[m]['buydescription'] = data[m]['buy']['description'];
+      }
+      if (data[m]['sell']) {
         data[m]['selltitle'] = data[m]['sell']['title'];
         data[m]['selldescription'] = data[m]['sell']['description'];
       }

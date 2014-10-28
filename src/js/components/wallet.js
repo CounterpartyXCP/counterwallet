@@ -290,6 +290,8 @@ function WalletViewModel() {
       function(balancesData, endpoint) {
         $.jqlog.debug("Got initial balances: " + JSON.stringify(balancesData));
         
+        var addressAsset = {};
+
         if(!balancesData.length) {
           for (var i in addresses) {
             WALLET.getAddressObj(addresses[i]).addOrUpdateAsset('XCP', {}, 0, 0);
@@ -304,13 +306,28 @@ function WalletViewModel() {
         var assets = [];
         //Make a unique list of assets
         for(i=0; i < balancesData.length; i++) {
-          if(assets.indexOf(balancesData[i]['asset'])==-1)
-          assets.push(balancesData[i]['asset']);
+          addressAsset[balancesData[i]['address'] + '_' + balancesData[i]['asset']] = true;
+          if(assets.indexOf(balancesData[i]['asset'])==-1) {
+            assets.push(balancesData[i]['asset']);
+          }
         }
         // TODO: optimize: assets infos already fetched in get_normalized_balances() in counterblockd
-        failoverAPI("get_asset_info", {'assets': assets}, function(assetsInfo, endpoint) {
+        failoverAPI("get_escrowed_balances", {'addresses': addresses}, function(escrowedBalances) {
 
-          failoverAPI("get_escrowed_balances", {'addresses': addresses}, function(escrowedBalances) {
+          // add asset with all fund escrowed
+          for (var addr in escrowedBalances) {
+            for (var ass in escrowedBalances[addr]) {
+              if (!((addr + '_' + ass) in addressAsset)) {
+                balancesData.push({'address': addr, 'asset': ass, 'quantity': 0});
+                addressAsset[addr + '_' + ass] = true;
+              }
+              if(assets.indexOf(ass)==-1) {
+                assets.push(ass);
+              }
+            }
+          }
+
+          failoverAPI("get_asset_info", {'assets': assets}, function(assetsInfo, endpoint) {
 
             for (i=0; i < assetsInfo.length; i++) {
               for (j=0; j < balancesData.length; j++) {
