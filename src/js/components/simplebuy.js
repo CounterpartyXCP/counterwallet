@@ -111,10 +111,11 @@ function SimpleBuyViewModel() {
       data[m]['machineclass'] = (data[m]['finished'] || data[m]['pending']) ? 'pendingMachine' : '';
       data[m]['baseasset'] = data[m]['base-asset'];
       data[m]['quoteasset'] = data[m]['quote-asset'];
-      data[m]['doubleway'] = attributes['sell'].length > 0;
-      data[m]['buytitle'] = data[m]['buy']['title'];
-      data[m]['buydescription'] = data[m]['buy']['description'];
-      if (data[m]['doubleway']) {
+      if (data[m]['buy']) {
+        data[m]['buytitle'] = data[m]['buy']['title'];
+        data[m]['buydescription'] = data[m]['buy']['description'];
+      }
+      if (data[m]['sell']) {
         data[m]['selltitle'] = data[m]['sell']['title'];
         data[m]['selldescription'] = data[m]['sell']['description'];
       }
