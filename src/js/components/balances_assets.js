@@ -470,7 +470,7 @@ function PayDividendModalViewModel() {
   self.assetName.subscribe(function(name) {
     if (!name) return;
     failoverAPI("get_asset_info", {'assets': [name]}, function(assetsData, endpoint) {
-      if (USE_TESTNET || WALLET.networkBlockHeight() > 328000) {
+      if (USE_TESTNET || WALLET.networkBlockHeight() > 330000) {
         failoverAPI('get_holder_count', {'asset':name}, function(holderData) {
           self.assetData(assetsData[0]);
           self.holderCount(holderData[name]);
@@ -532,7 +532,7 @@ function PayDividendModalViewModel() {
 
   self.totalFee = ko.computed(function() {
     if(!self.holderCount() || !isNumber(self.quantityPerUnit()) || !parseFloat(self.quantityPerUnit())) return null;
-    if (USE_TESTNET || WALLET.networkBlockHeight() > 328000) {
+    if (USE_TESTNET || WALLET.networkBlockHeight() > 330000) {
       return mulFloat(self.holderCount(), DIVIDEND_FEE_PER_HOLDER);
     } else {
       return 0;
