@@ -7,7 +7,7 @@ var BuySellAddressInDropdownItemModel = function(address, label, asset, balance)
 
 ko.validation.rules['ordersIsExistingAssetName'] = {
   validator: function (asset, self) {
-    if(asset == 'XCP' || asset == 'BTC') return true;
+    if(asset == 'XCP') return true;
     var match = ko.utils.arrayFirst(self.allAssets(), function(item) {
       return item == asset;
     });
@@ -75,7 +75,7 @@ function ExchangeViewModel() {
 
   self.selectedQuoteAsset = ko.observable();
   self.selectedQuoteAsset.subscribe(function(value) {
-    if (value == 'BTC' || value == 'XCP') self.asset2(value);
+    if (value == 'XCP') self.asset2(value);
     else self.asset2('');
   })
 
@@ -263,12 +263,6 @@ function ExchangeViewModel() {
   self.sellFee = ko.computed(function() {
     var give_quantity = denormalizeQuantity(self.sellAmount(), self.baseAssetIsDivisible());
     var fee_provided = MIN_FEE;
-    
-    if (self.baseAsset() == 'BTC') {
-      fee_provided = mulFloat(give_quantity, WALLET_OPTIONS_MODAL.defaultBTCFeeProvidedPct()/100);
-      fee_provided = Math.ceil(fee_provided);
-    }
-
     return normalizeQuantity(fee_provided);
   });
 
@@ -321,17 +315,6 @@ function ExchangeViewModel() {
     var fee_provided = MIN_FEE;
     var expiration = parseInt(WALLET_OPTIONS_MODAL.orderDefaultExpiration());
 
-    if (self.quoteAsset() == 'BTC') {
-      fee_required = mulFloat(get_quantity, WALLET_OPTIONS_MODAL.defaultBTCFeeRequiredPct()/100);
-      fee_required = Math.ceil(fee_required);
-    }
-
-    if (self.baseAsset() == 'BTC') {
-      fee_provided = mulFloat(give_quantity, WALLET_OPTIONS_MODAL.defaultBTCFeeProvidedPct()/100);
-      fee_provided = Math.ceil(fee_provided);
-      expiration = parseInt(WALLET_OPTIONS_MODAL.orderBTCSellDefaultExpiration());
-    }
-
     var params = {
       source: self.selectedAddressForSell(),
       give_quantity: give_quantity,
@@ -356,12 +339,6 @@ function ExchangeViewModel() {
       }
 
       WALLET.showTransactionCompleteDialog(message + " " + i18n.t(ACTION_PENDING_NOTICE), message, armoryUTx);
-       
-      //if the order involes selling BTC, then we want to notify the servers of our wallet_id so folks can see if our
-      // wallet is "online", in order to determine if we'd be able to best make the necessary BTCpay
-      if(self.baseAsset() == 'BTC' && addressType !== 'armory') {
-        multiAPI("record_btc_open_order", {'wallet_id': WALLET.identifier(), 'order_tx_hash': txHash});
-      }
     }
 
     WALLET.doTransaction(self.selectedAddressForSell(), "create_order", params, onSuccess);
@@ -538,12 +515,6 @@ function ExchangeViewModel() {
   self.buyFee = ko.computed(function() {
     var give_quantity = denormalizeQuantity(self.buyTotal(), self.quoteAssetIsDivisible());
     var fee_provided = MIN_FEE;
-
-    if (self.quoteAsset() == 'BTC') {
-      fee_provided = mulFloat(give_quantity, WALLET_OPTIONS_MODAL.defaultBTCFeeProvidedPct()/100);
-      fee_provided = Math.ceil(fee_provided);
-    }
-
     return normalizeQuantity(fee_provided);
   });
 
@@ -600,17 +571,6 @@ function ExchangeViewModel() {
     var fee_provided = MIN_FEE;
     var expiration = parseInt(WALLET_OPTIONS_MODAL.orderDefaultExpiration());
 
-    if (self.baseAsset() == 'BTC') {
-      fee_required = mulFloat(get_quantity, WALLET_OPTIONS_MODAL.defaultBTCFeeRequiredPct()/100);
-      fee_required = Math.ceil(fee_required);
-    }
-
-    if (self.quoteAsset() == 'BTC') {
-      fee_provided = mulFloat(give_quantity, WALLET_OPTIONS_MODAL.defaultBTCFeeProvidedPct()/100);
-      fee_provided = Math.ceil(fee_provided);
-      expiration = parseInt(WALLET_OPTIONS_MODAL.orderBTCSellDefaultExpiration());
-    }
-
     var params = {
       source: self.selectedAddressForBuy(),
       give_quantity: give_quantity,
@@ -635,12 +595,6 @@ function ExchangeViewModel() {
       }
 
       WALLET.showTransactionCompleteDialog(message + " " + i18n.t(ACTION_PENDING_NOTICE), message, armoryUTx);
-      
-      //if the order involes selling BTC, then we want to notify the servers of our wallet_id so folks can see if our
-      // wallet is "online", in order to determine if we'd be able to best make the necessary BTCpay
-      if(self.quoteAsset() == 'BTC' && addressType !== 'armory') {
-        multiAPI("record_btc_open_order", {'wallet_id': WALLET.identifier(), 'order_tx_hash': txHash});
-      }
     }
 
     WALLET.doTransaction(self.selectedAddressForBuy(), "create_order", params, onSuccess);
@@ -673,10 +627,6 @@ function ExchangeViewModel() {
     message += '<tr><td><b>' + i18n.t('amount') + ': </b></td><td style="text-align:right">' + self.buyAmount() + '</td><td>' + self.baseAsset() + '</td></tr>';
     message += '<tr><td><b>' + i18n.t('total') + ': </b></td><td style="text-align:right">' + self.buyTotal() + '</td><td>' + self.quoteAsset() + '</td></tr>';
     message += '<tr><td><b>' + i18n.t('real_estimated_total') + ': </b></td><td style="text-align:right">' + estimatedTotalPrice + '</td><td>' + self.quoteAsset() + '</td></tr>';
-    if (self.quoteAsset() == 'BTC') {
-      message += '<tr><td><b>' + i18n.t('provided_fee') + ': </b></td><td style="text-align:right">' + self.buyFee() + '</td><td>' + self.quoteAsset() + '</td></tr>';
-      message += '<tr><td colspan="3"><i>' + i18n.t('these_fees_are_optional') + '</i></td></tr>';
-    }
     message += '</table>';
 
     bootbox.dialog({
@@ -751,9 +701,7 @@ function ExchangeViewModel() {
     var params = {
       'asset1': self.asset1(),
       'asset2': self.asset2(),
-      'addresses': WALLET.getAddressesList(),
-      'min_fee_provided': WALLET_OPTIONS_MODAL.minBTCFeeProvidedPct(),
-      'max_fee_required': WALLET_OPTIONS_MODAL.maxBTCFeeRequiredPct()
+      'addresses': WALLET.getAddressesList()
     }
     failoverAPI('get_market_orders', params, self.displayOpenUserOrders);
   }
@@ -850,9 +798,7 @@ function ExchangeViewModel() {
     var buy_orders = [];
 
     for (var i in data['buy_orders']) {
-      if ((data['base_asset'] == 'BTC' && data['buy_orders'][i]['amount'] < BTC_ORDER_MIN_AMOUNT) || 
-          (data['quote_asset'] == 'BTC' && data['buy_orders'][i]['total'] < BTC_ORDER_MIN_AMOUNT) ||
-          (data['sell_orders'].length > 0 && data['buy_orders'][i]['price'] >= data['sell_orders'][0]['price'])) {
+      if (data['sell_orders'].length > 0 && data['buy_orders'][i]['price'] >= data['sell_orders'][0]['price']) {
         data['buy_orders'][i]['exclude'] = true;
       } else {
         if (base_depth == 0) {
@@ -880,31 +826,26 @@ function ExchangeViewModel() {
     }
     base_depth = 0;
     for (var i in data['sell_orders']) {
-      if ((data['base_asset'] == 'BTC' && data['sell_orders'][i]['amount'] < BTC_ORDER_MIN_AMOUNT) || 
-          (data['quote_asset'] == 'BTC' && data['sell_orders'][i]['total'] < BTC_ORDER_MIN_AMOUNT)) {
-        data['sell_orders'][i]['exclude'] = true;
-      } else {
-        if (base_depth == 0) {
-          self.lowestAskPrice(data['sell_orders'][i]['price']);
-          self.buyPrice(data['sell_orders'][i]['price']);
-          var a = new Decimal(self.availableBalanceForBuy());
-          var l = new Decimal(self.lowestAskPrice());
-          var o = roundAmount(a.div(l));
-          self.obtainableForBuy(o);
-        }
-        var amount = normalizeQuantity(data['sell_orders'][i]['amount'], data['base_asset_divisible']);
-        var noHtmlAmount = roundAmount(amount);
-        var noHtmlTotal = roundAmount(normalizeQuantity(data['sell_orders'][i]['total'], data['quote_asset_divisible']));
-        data['sell_orders'][i]['exclude'] = false;
-        data['sell_orders'][i]['amount'] = formatHtmlPrice(noHtmlAmount);
-        data['sell_orders'][i]['total'] = formatHtmlPrice(noHtmlTotal);
-        var a = new Decimal(noHtmlAmount);
-        var t = new Decimal(noHtmlTotal);
-        var p = roundAmount(t.div(a));
-        data['sell_orders'][i]['price'] = formatHtmlPrice(p);
-        data['sell_orders'][i]['base_depth'] = amount + base_depth;
-        base_depth = data['sell_orders'][i]['base_depth'];
+      if (base_depth == 0) {
+        self.lowestAskPrice(data['sell_orders'][i]['price']);
+        self.buyPrice(data['sell_orders'][i]['price']);
+        var a = new Decimal(self.availableBalanceForBuy());
+        var l = new Decimal(self.lowestAskPrice());
+        var o = roundAmount(a.div(l));
+        self.obtainableForBuy(o);
       }
+      var amount = normalizeQuantity(data['sell_orders'][i]['amount'], data['base_asset_divisible']);
+      var noHtmlAmount = roundAmount(amount);
+      var noHtmlTotal = roundAmount(normalizeQuantity(data['sell_orders'][i]['total'], data['quote_asset_divisible']));
+      data['sell_orders'][i]['exclude'] = false;
+      data['sell_orders'][i]['amount'] = formatHtmlPrice(noHtmlAmount);
+      data['sell_orders'][i]['total'] = formatHtmlPrice(noHtmlTotal);
+      var a = new Decimal(noHtmlAmount);
+      var t = new Decimal(noHtmlTotal);
+      var p = roundAmount(t.div(a));
+      data['sell_orders'][i]['price'] = formatHtmlPrice(p);
+      data['sell_orders'][i]['base_depth'] = amount + base_depth;
+      base_depth = data['sell_orders'][i]['base_depth'];
     }
 
     self.bidBook(data['buy_orders'])
@@ -931,7 +872,7 @@ function ExchangeViewModel() {
 
   self.selectMarket = function(item) {
     self.asset1(item.base_asset);
-    if (item.quote_asset == 'BTC' || item.quote_asset == 'XCP') {
+    if (item.quote_asset == 'XCP') {
       self.selectedQuoteAsset(item.quote_asset);
     } else {
       self.selectedQuoteAsset('Other');
@@ -950,9 +891,7 @@ function ExchangeViewModel() {
     self.metricsRefreshPriceChart();
     var params = {
       'asset1': self.asset2(),
-      'asset2': self.asset1(),
-      'min_fee_provided': WALLET_OPTIONS_MODAL.minBTCFeeProvidedPct(),
-      'max_fee_required': WALLET_OPTIONS_MODAL.maxBTCFeeRequiredPct()
+      'asset2': self.asset1()
     }
     failoverAPI('get_market_details', params, self.displayMarketDetails);
   }
@@ -963,7 +902,7 @@ function ExchangeViewModel() {
     
     //Get a list of all assets
     failoverAPI("get_asset_names", {}, function(data, endpoint) {
-      data = ['XCP', 'BTC'].concat(data);
+      data = ['XCP'].concat(data);
       self.allAssets(data);
       
       //Set up typeahead bindings manually for now (can't get knockout and typeahead playing well together...)
@@ -1019,9 +958,6 @@ function ExchangeViewModel() {
     } else {
 
       var message = i18n.t('cancel_consume_btc');
-      if (self.quoteAsset() == 'BTC' && order.type == 'BUY') {
-        message += '<br />' + i18n.t('we_recommend_to_use_xcp');
-      }
 
       bootbox.dialog({
         title: i18n.t("confirm_cancellation_order"),
@@ -1279,9 +1215,6 @@ function OpenOrdersViewModel() {
     } else {
 
       var message = i18n.t('cancel_consume_btc');
-      if (order.give_quantity_str.indexOf('BTC') != -1) {
-        message += '<br />' + i18n.t('we_recommend_to_use_xcp');
-      }
 
       bootbox.dialog({
         title: i18n.t("confirm_cancellation_order"),
