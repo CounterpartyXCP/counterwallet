@@ -465,7 +465,6 @@
 
   "pending_notice": "<b><u>This action will take some time to complete</u></b>, and will appear as a Pending Action until confirmed on the network. <b class='errorColor'>Until that time, the wallet will not reflect the change. Please be patient.</b>",
 
-  "exit_warning": "If you log out, any Bitcoin sell orders you have open will probably not be filled.",
   "brower_not_supported_header": "Your browser is not supported with Counterwallet",
   "brower_not_supported_text": "Counterwallet's security features require a newer browser than what you are using. We recommend Chrome for the best user experience. Also, note that Microsoft Internet Explorer is not supported due to it's lack of full support for Content-Security-Policy restrictions.",
 
@@ -868,7 +867,7 @@
   "highest_bid_price": "Highest bid price",
 
   "diligence_is_advised": "Warning and Disclaimer: <b>Every</b> Counterparty asset can be viewed on the \"Markets\" page. The hosts of Counterwallet.io and Counterwallet.co <b>do not filter</b> very likely scam or fraudulent assets, and explicitly disclaim any responsibility therefor. Caveat emptor: do your own diligence, and do not invest more than you can afford to lose.",
-
+  "btc_trading_off": "Trading to or from BTC is no longer possible in Counterwallet. Click <a href=\"http://support.counterparty.io/support/solutions/articles/5000500845-why-can-i-no-longer-trade-to-and-from-btc-in-counterwallet-\" target=\"_blank\">here</a> to learn why.",
   "must_be_valid_testnet_address": "This field must be a valid TESTNET Bitcoin address.",
   "must_be_valid_bitcoin_address": "This field must be a valid Bitcoin address.",
   "must_be_whole_number": "The quantity entered must be a whole number, since this is a non-divisible asset.",

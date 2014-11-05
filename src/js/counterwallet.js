@@ -133,18 +133,6 @@ function loadCounterwalletConfigFromServer() {
   });
 }
 
-function needWarningOnExit() {
-  return (window.WALLET && WALLET.isSellingBTC()) ||
-         window.MESSAGE_FEED.sellBTCOrdersCount() ||
-         window.PENDING_ACTION_FEED.pendingSellBTCOrdersCount();
-}
-
-function warningOnExit() {
-  if (needWarningOnExit()) {
-    return i18n.t("exit_warning");
-  }
-}
-
 function autoDropUpDropdowns() {
   //FROM: http://stackoverflow.com/a/22263501
   //USAGE: Add 'btn-group-dropup' class to any 'btn-group' div that contains
@@ -297,5 +285,4 @@ $(document).ready(function() {
   
   loadCounterwalletConfigFromServer();
 
-  window.onbeforeunload = warningOnExit;
 });

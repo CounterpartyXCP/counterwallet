@@ -1,5 +1,4 @@
 INIT_FUNC = {};
-PROCESSED_BTCPAY = {};
 
 localeInit(initIndex);
 
@@ -17,10 +16,6 @@ function initIndex() { //main page
   window.CHAT_SET_HANDLE_MODAL = new ChatSetHandleModalViewModel();
   window.PENDING_ACTION_FEED = new PendingActionFeedViewModel();
   
-  window.UPCOMING_BTCPAY_FEED = new UpcomingBTCPayFeedViewModel();
-  window.WAITING_BTCPAY_FEED = new WaitingBTCPayFeedViewModel();
-  window.BTCPAY_FEED = new BTCPayFeedViewModel();
-  
   window.NOTIFICATION_FEED = new NotificationFeedViewModel();
   
   window.SUPPORT_MODAL = new SupportModalViewModel();
@@ -36,7 +31,6 @@ function initIndex() { //main page
     ko.applyBindings(CHAT_FEED, document.getElementById("chatPane"));
     ko.applyBindings(CHAT_SET_HANDLE_MODAL, document.getElementById("chatSetHandleModal"));
     ko.applyBindings(PENDING_ACTION_FEED, document.getElementById("pendingActionFeed"));
-    ko.applyBindings(BTCPAY_FEED, document.getElementById("btcPayFeed"));
     ko.applyBindings(NOTIFICATION_FEED, document.getElementById("notificationFeed"));        
     ko.applyBindings(SUPPORT_MODAL, document.getElementById("supportModal"));
     ko.applyBindings(DONATE_MODAL, document.getElementById("donateModal"));
@@ -125,7 +119,6 @@ function initBalances() {
   ko.applyBindings({}, document.getElementById("balanceHeader"));
   ko.applyBindings({}, document.getElementById("alertBuyXcp"));
   ko.applyBindings({}, document.getElementById("gettingStartedNotice"));
-  ko.applyBindings({}, document.getElementById("pendingBTCPayNotice"));
   ko.applyBindings({}, document.getElementById("oldWalletDetectedNotice"));
   ko.applyBindings(CHANGE_ADDRESS_LABEL_MODAL, document.getElementById("changeAddressLabelModal"));
   ko.applyBindings(CREATE_NEW_ADDRESS_MODAL, document.getElementById("createNewAddressModal"));
@@ -254,13 +247,6 @@ function initBalances() {
   });
 }
 INIT_FUNC['pages/balances.html'] = initBalances;
-
-function initFeedBTCPays() {
-  ko.applyBindings(WAITING_BTCPAY_FEED, document.getElementById("waitingBTCPayFeedContent"));
-  ko.applyBindings(UPCOMING_BTCPAY_FEED, document.getElementById("upcomingBTCPayFeedContent"));
-}
-INIT_FUNC['pages/feed_btcpays.html'] = initFeedBTCPays;
-
 
 function initFeedNotifications() {
   ko.applyBindings(NOTIFICATION_FEED, document.getElementById("notificationFeedContent"));

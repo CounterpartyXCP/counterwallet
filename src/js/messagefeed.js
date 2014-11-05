@@ -6,12 +6,6 @@ function MessageFeed() {
   self.MESSAGE_QUEUE = [];
   self.OPEN_ORDERS = []; // here only for sellBTCOrdersCount
 
-  self.sellBTCOrdersCount = ko.computed(function() {
-    return $.map(self.OPEN_ORDERS, function(item) {       
-        return ('BTC' == item['get_asset']) ? item : null;
-    }).length;
-  }, self);
-
   self.rpsresolveQueue = null;
   self.rpsresolveErrors = {};
 
@@ -264,7 +258,7 @@ function MessageFeed() {
     var displayTx = false;
     
     if (!WALLET.getAddressObj(message['bindings']['source'])) {
-      if (category=='sends' || category=='btcpays') {
+      if (category=='sends') {
         if (WALLET.getAddressObj(message['bindings']['destination'])) {
           displayTx = true;
         }
@@ -434,13 +428,6 @@ function MessageFeed() {
       }
     } else if(category == "broadcasts") {
       //TODO
-    } else if(category == "btcpays") {
-      var btcpay = WAITING_BTCPAY_FEED.remove(message['order_match_id']);
-      //^ covers the case where make a BTC payment and log out before it is confirmed, then log back in and see it confirmed
-      if (btcpay) {
-        refreshEscrowedBalance.push(btcpay.BTCPAY_DATA['myAddr']);
-        refreshEscrowedBalance.push(btcpay.BTCPAY_DATA['btcDestAddr']);
-      }
     } else if(category == "burns") {
     } else if(category == "cancels") {
       
@@ -495,25 +482,6 @@ function MessageFeed() {
 
       if(message['_btc_below_dust_limit'])
         return; //ignore any order match involving BTC below the dust limit
-      
-      //Look to order matches when determining to do a BTCpay
-      //If the order_matches message doesn't have a tx0_address/tx1_address field, then we don't need to do anything with it
-      if ((WALLET.getAddressObj(message['tx0_address']) && message['forward_asset'] == 'BTC' && message['_status'] == 'pending')
-         || (WALLET.getAddressObj(message['tx1_address']) && message['backward_asset'] == 'BTC' && message['_status'] == 'pending')) {
-        //Register this as an "upcoming" BTCpay
-        var btcPayData = WaitingBTCPayFeedViewModel.makeBTCPayData(message); 
-        //Don't include in UPCOMING_BTCPAY_FEED BTCpays which are for less than the current (multisig) dust amount
-        if (btcPayData['btcQuantityRaw']>=MULTISIG_DUST_SIZE) {
-          UPCOMING_BTCPAY_FEED.add(btcPayData);
-        } else {
-          $.jqlog.debug("dust order_matches "+btcPayData['orderMatchID']+" : "+btcPayData['btcQuantityRaw']);
-        }  
-        
-      } else if ((WALLET.getAddressObj(message['tx1_address']) && message['forward_asset'] == 'BTC' && message['_status'] == 'pending')
-         || (WALLET.getAddressObj(message['tx0_address']) && message['backward_asset'] == 'BTC' && message['_status'] == 'pending')) {
-
-        PENDING_ACTION_FEED.add(txHash, category, message);
-      }
 
       refreshEscrowedBalance.push(message['tx0_address']);
       refreshEscrowedBalance.push(message['tx1_address']);
@@ -521,15 +489,11 @@ function MessageFeed() {
     } else if(category == "order_expirations") {
       //Remove the order from the open orders list
       self.removeOrder(message['order_hash']);
-      WAITING_BTCPAY_FEED.remove(message['order_hash']); //just in case we had a BTC payment required for this order when it expired
-
+      
       refreshEscrowedBalance.push(message['source']);
     
     } else if(category == "order_match_expirations") {
-      //Would happen if the user didn't make a BTC payment in time
-      WAITING_BTCPAY_FEED.remove(message['order_match_id']);
-      //^ just in case we had a BTC payment required for this order match when it expired
-
+     
       refreshEscrowedBalance.push(message['tx0_address']);
       refreshEscrowedBalance.push(message['tx1_address']);
 

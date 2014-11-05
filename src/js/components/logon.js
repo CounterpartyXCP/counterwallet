@@ -393,11 +393,7 @@ function LogonViewModel() {
     $('#left-panel').show();
     $('#main').show();
 
-    PENDING_ACTION_FEED.restoreFromLocalStorage(function() {
-      //load the waiting btc feed after the pending action feed is all done loading, as we look at the pending action
-      // feed to determine whether a btcpay process is in progress (pending) or not
-      WAITING_BTCPAY_FEED.restore();   
-    });
+    PENDING_ACTION_FEED.restoreFromLocalStorage(function() {});
     MESSAGE_FEED.restoreOrder();
     MESSAGE_FEED.resolvePendingRpsMatches();
 
