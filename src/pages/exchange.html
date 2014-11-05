@@ -30,6 +30,11 @@
 
   </div>
 
+  <div class="alert alert-warning">
+    <i class="fa-fw fa fa-exchange"></i>
+    <span data-bind="locale: 'btc_trading_off'"></span>
+  </div>
+
   <div class="alert alert-info">
     <i class="fa-fw fa fa-exchange"></i>
     <span data-bind="locale: 'diligence_is_advised'"></span>
@@ -80,15 +85,12 @@
                         <span class="errorColor" data-bind="validationMessage: asset1"></span>
                       </div>
                     </section>
-                    <section class="col-md-4">
-                      <div style="padding:10px">
+                    <section class="col-md-3">
+                      <div style="padding-top:10px">
                         <label for="asset2" class="control-label font-medlg"  data-blind="locale: 'token_2'"></label>
                         <div class="btn-group buySellBtnGroup" data-toggle="buttons" style="margin-bottom:0">
                           <label class="radioBtn btn" data-bind="css: { 'btn-success': selectedQuoteAsset() == 'XCP', 'active': selectedQuoteAsset() == 'XCP'}">
                             <input type="radio" value="XCP" data-bind="btnGroupChecked: selectedQuoteAsset">XCP</label>
-                            <!-- , attr: {disabled: selectedSellAsset() == 'XCP' ? 'disabled' : null }" -->
-                          <label class="radioBtn btn" data-bind="css: { 'btn-success': selectedQuoteAsset() == 'BTC', 'active': selectedQuoteAsset() == 'BTC'}">
-                            <input type="radio" value="BTC" data-bind="btnGroupChecked: selectedQuoteAsset">BTC</label>
                           <label class="radioBtn btn" data-bind="css: { 'btn-success': selectedQuoteAsset() == 'Other', 'active': selectedQuoteAsset() == 'Other'}">
                             <input type="radio" value="Other" data-bind="btnGroupChecked: selectedQuoteAsset">Other</label>
                         </div>
@@ -96,7 +98,7 @@
                       </div>
                     </section>
                     <section class="col col-lg-4 col-sm-4" data-bind="visible: selectedQuoteAsset() == 'Other'">
-                      <div style="padding:10px">
+                      <div style="padding-top:2px">
                         <label for="asset2" class="control-label font-medlg">&nbsp;</label>
                         <label class="input">
                             <input type="text" id="asset2" name="asset2" class="form-control input" type="text" placeholder="Asset name" data-bind="value: asset2" />

@@ -114,13 +114,6 @@ function PendingActionFeedViewModel() {
     return self.entries().length;
   }, self);
 
-  self.pendingSellBTCOrdersCount = ko.computed(function() {
-    return $.map(self.entries(), function(item) { 
-        var sellingBTC = ('orders' == item.CATEGORY && 'BTC' == item.DATA.give_asset) || ('btcpays' == item.CATEGORY);
-        return sellingBTC ? item : null;
-    }).length;
-  }, self);
-
   self.pendingRPS = ko.computed(function() {
     return $.map(self.entries(), function(item) { 
         var game = 'rps' == item.CATEGORY;
@@ -289,11 +282,6 @@ PendingActionFeedViewModel.modifyBalancePendingFlag = function(category, data, f
 
     updateUnconfirmedBalance(data['source'], data['asset'], data['quantity'] * -1);
     updateUnconfirmedBalance(data['destination'], data['asset'], data['quantity']);
-
-  } else if(category == 'btcpays') {
-
-    updateUnconfirmedBalance(data['source'], "BTC", data['quantity'] * -1);
-    updateUnconfirmedBalance(data['destination'], "BTC", data['quantity']);
 
   } else if(category == 'issuances' && !data['locked'] && !data['transfer_destination']) {
     //with this, we don't modify the balanceChangePending flag, but the issuanceQtyChangePending flag instead...

@@ -105,17 +105,6 @@
             </div> <!-- .ajax-dropdown -->
         </span>
 
-        <span id="btcPayFeed" data-bind="fadeVisible: dispCount()" class="activity-parent" data-contenturl="pages/feed_btcpays.html">
-            <span class="activity-dropdown">
-                <i class="fa fa-btc"></i><b data-bind="text: dispCount()" class="badge badge-error"></b>
-            </span>
-            <div class="ajax-dropdown">
-              <h2 data-bind="locale: 'required_btc_pays'"></h2>
-              <div class="ajax-notifications custom-scroll"></div> <!-- notification content -->
-              <span><b data-bind="locale: 'last_updated'"></b> <span id="pendingBtcPayLastUpdated" data-bind="timeago: dispLastUpdated()"></span></span> <!-- footer -->
-            </div> <!-- .ajax-dropdown -->
-        </span>
-
       </div> <!-- logo-group -->
 
       <span id="noticeTestnet" data-bind="visible: USE_TESTNET, locale: 'testnet_in_use'"></span>
@@ -584,65 +573,7 @@
                 </fieldset>
               </form>
               <form class="smart-form">
-                <fieldset data-bind="visible: showAdvancedOptions">
-                  <section>
-                    <div class="row">
-                      <div class="col col-sm-2" data-bind="locale: 'auto_btcpay'"></div>
-                      <div class="col col-sm-10">
-                        <label class="checkbox">
-                          <input name="autoBTCPayEnabled" type="checkbox" data-bind="checked: autoBTCPayEnabled">
-                          <span data-bind="locale: 'enable_auto_btcpay'"></span>
-                        </label>
-                        <div class="note" data-bind="locale: 'enable_auto_btcpay_desc'">
-                          
-                        </div>
-                      </div>
-                    </div>
-                  </section>
-                </fieldset>
-                <fieldset data-bind="visible: showAdvancedOptions">
-                  <section>
-                    <div class="row">
-                      <div class="col col-sm-12">
-                        <div class="note advancedWarn txt-color-red" data-bind="locale: 'advanced_options_warning'"></div>
-                      </div>
-                  </section>
-                </fieldset>
-
-                <fieldset data-bind="visible: showAdvancedOptions">
-                  <section>
-                    <div class="row">
-                      <div class="col col-sm-6">
-                        <label class="label" data-bind="locale: 'default_fee_provided'"></label>
-                        <label class="input"> <i class="icon-append">%</i>
-                          <input class="prefFieldPercent" name="defaultBTCFeeProvidedPct" type="text" data-bind="value: defaultBTCFeeProvidedPct">
-                        </label>
-                      </div>
-                      <div class="col col-sm-6">
-                        <label class="label" data-bind="locale: 'fee_provided_filter'"></label>
-                        <label class="input"> <i class="icon-append">%</i>
-                          <input class="prefFieldPercent" name="minBTCFeeProvidedPct" type="text" data-bind="value: minBTCFeeProvidedPct">
-                        </label>
-                      </div>
-                    </div>
-                  </section>
-                  <section>
-                    <div class="row">
-                      <div class="col col-sm-6">
-                        <label class="label" data-bind="locale: 'default_fee_required'"></label>
-                        <label class="input"> <i class="icon-append">%</i>
-                          <input class="prefFieldPercent" name="defaultBTCFeeRequiredPct" type="text" data-bind="value: defaultBTCFeeRequiredPct">
-                        </label>
-                      </div>
-                      <div class="col col-sm-6">
-                        <label class="label" data-bind="locale: 'fee_required_filter'"></label>
-                        <label class="input"> <i class="icon-append">%</i>
-                          <input class="prefFieldPercent" name="maxBTCFeeRequiredPct" type="text" data-bind="value: maxBTCFeeRequiredPct">
-                        </label>
-                      </div>
-                    </div>
-                  </section>
-                </fieldset>
+                
                 <fieldset data-bind="visible: showAdvancedOptions">
                   <section>
                     <div class="row">
@@ -652,13 +583,6 @@
                           <input class="text-right" name="orderDefaultExpiration" type="text" data-bind="value: orderDefaultExpiration">
                         </label>
                         <div class="note" data-bind="locale: 'default_expiration_desc'"></div>
-                      </div>
-                      <div class="col col-sm-6">
-                        <label class="label" data-bind="locale: 'default_expiration_btc'"></label>
-                        <label class="input">
-                          <input class="text-right" name="orderBTCSellDefaultExpiration" type="text" data-bind="value: orderBTCSellDefaultExpiration">
-                        </label>
-                        <div class="note" data-bind="locale: 'default_expiration_btc_desc'"></div>
                       </div>
                     </div>
                   </section>
@@ -1041,7 +965,6 @@
     <script src="js/components/misc.js"></script>
     <script src="js/components/feed_notifications.js"></script>
     <script src="js/components/feed_pending_actions.js"></script>
-    <script src="js/components/feed_btcpays.js"></script>
     <script src="js/components/chatfeed.js"></script>
     <script src="js/components/balances.js"></script>
     <script src="js/components/balances_assets.js"></script>
