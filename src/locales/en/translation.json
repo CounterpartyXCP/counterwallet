@@ -867,7 +867,7 @@
   "highest_bid_price": "Highest bid price",
 
   "diligence_is_advised": "Warning and Disclaimer: <b>Every</b> Counterparty asset can be viewed on the \"Markets\" page. The hosts of Counterwallet.io and Counterwallet.co <b>do not filter</b> very likely scam or fraudulent assets, and explicitly disclaim any responsibility therefor. Caveat emptor: do your own diligence, and do not invest more than you can afford to lose.",
-  "btc_trading_off": "Counterwallet no longer have the option of making trades with BTC. Trades in Counterwallet are peer-to-peer, and are all <b>automated</b>*, except those involving BTC. The latter require users to stay logged in for two hours <b>after their orders have been matched</b>, in order to be completed. Users have not done this reliably, which has resulted in many incomplete orders and a worse user experience. Hence, to improve user-experience, we have removed BTC trades from Counterwallet. BTC trades can still be made using Counterparty's command-line interface, counterparyd, which you may download <a href=\"https://github.com/CounterpartyXCP/counterpartyd\" target=\"_blank\">here</a>.",
+  "btc_trading_off": "Trading to or from BTC is no longer possible in Counterwallet. Click <a href=\"http://support.counterparty.io/support/solutions/articles/5000500845-why-can-i-no-longer-trade-to-and-from-btc-in-counterwallet-\" target=\"_blank\">here</a> to learn why.",
   "must_be_valid_testnet_address": "This field must be a valid TESTNET Bitcoin address.",
   "must_be_valid_bitcoin_address": "This field must be a valid Bitcoin address.",
   "must_be_whole_number": "The quantity entered must be a whole number, since this is a non-divisible asset.",
