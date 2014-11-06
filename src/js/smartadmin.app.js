@@ -217,16 +217,9 @@ $(document).ready(function() {
 
   // LOGOUT BUTTON
   $('#logout a').click(function(e) {
-
     //get the link
     var $this = $(this);
     $.loginURL = $this.attr('href');
-    
-    if (needWarningOnExit()) {
-      $.logoutMSG = "<span class='bold txt-color-red'>" + i18n.t("exit_warning") + "</span>";
-    } else {
-      $.logoutMSG = $this.data('logout-msg');
-    }
 
     // ask verification
     $.SmartMessageBox({
@@ -243,7 +236,7 @@ $(document).ready(function() {
     });
 
     e.preventDefault();
-
+    return false;
   });
 
   /*
