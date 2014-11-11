@@ -75,7 +75,7 @@ function CreateNewAddressModalViewModel() {
     isValidBitcoinAddressIfSpecified: self,
     validation: [{
       validator: function (val, self) {
-        return (self.addressType() == 'watch' || self.addressType() == 'armory') ? val : true;
+        return (self.addressType() == 'watch' || self.addressType() == 'armory' || self.addressType() == 'multisig') ? val : true;
       },
       message: i18n.t('field_required'),
       params: self
@@ -106,8 +106,13 @@ function CreateNewAddressModalViewModel() {
   });
   
   self.dispWindowTitle = ko.computed(function() {
-    return self.addressType() == 'normal' ? i18n.t('create_new_address') : (
-      self.addressType() == 'watch' ? i18n.t('add_watch_address') : i18n.t('add_armory_adress'));
+    var title = {
+      'normal': i18n.t('create_new_address'),
+      'watch': i18n.t('add_watch_address'),
+      'armory': i18n.t('add_armory_adress'),
+      'multisig': i18n.t('add_multisig_adress')
+    }
+    return title[self.addressType()];
   }, self);
 
   self.resetForm = function() {
@@ -133,6 +138,13 @@ function CreateNewAddressModalViewModel() {
     $('#createNewAddressModal form').submit();
   }
 
+  self.eventName = {
+    'normal': 'CreateNewAddress',
+    'watch': 'CreateNewWatchAddress',
+    'armory': 'CreateNewArmoryOfflineAddress',
+    'multisig': 'CreateMultisigAddress'
+  };
+
   self.doAction = function() {
     var newAddress = null;
     
@@ -140,6 +152,7 @@ function CreateNewAddressModalViewModel() {
       newAddress = WALLET.addAddress(self.addressType());
     } else {
       newAddress = self.watchAddress(); //watch or armory
+      newAddress = orderMultisigAddress(newAddress);
       newAddress = WALLET.addAddress(self.addressType(), newAddress, self.armoryPubKey());
     }
 
@@ -149,6 +162,8 @@ function CreateNewAddressModalViewModel() {
       PREFERENCES['num_addresses_used'] += 1;
     } else if(self.addressType() == 'watch') {
       PREFERENCES['watch_only_addresses'].push(newAddress); //can't use the hash here, unfortunately
+    } else if(self.addressType() == 'multisig') {
+      PREFERENCES['multisig_addresses'].push(newAddress); //can't use the hash here, unfortunately
     } else {
       assert(self.addressType() == 'armory');
       PREFERENCES['armory_offline_addresses'].push({'address': newAddress, 'pubkey_hex': self.armoryPubKey()}); //can't use the hash here, unfortunately
@@ -165,8 +180,8 @@ function CreateNewAddressModalViewModel() {
       WALLET.refreshCounterpartyBalances([newAddress]);
       WALLET.refreshBTCBalances();
     });
-    trackEvent('Balances', self.addressType() == 'normal' ? 'CreateNewAddress' : (
-      self.addressType() == 'watch' ? 'CreateNewWatchAddress' : 'CreateNewArmoryOfflineAddress'));
+
+    trackEvent('Balances', self.eventName[self.addressType()]);
 
   }
   
@@ -175,8 +190,7 @@ function CreateNewAddressModalViewModel() {
     if(resetForm) self.resetForm();
     self.addressType(addressType);
     self.shown(true);
-    trackDialogShow(self.addressType() == 'normal' ? 'CreateNewAddress' : (
-      self.addressType() == 'watch' ? 'CreateNewWatchAddress' : 'CreateNewArmoryOfflineAddress'));
+    trackDialogShow(self.eventName[self.addressType()]);
   }  
 
   self.hide = function() {

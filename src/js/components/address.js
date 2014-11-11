@@ -2,8 +2,8 @@
 function AddressViewModel(type, key, address, initialLabel, armoryPubKey) {
   //An address on a wallet
   //type is one of: normal, watch, armory
-  assert(['normal', 'watch', 'armory'].indexOf(type) != -1);
-  assert((type == 'normal' && key) || (type == 'watch' && !key) || (type == 'armory' && !key));
+  assert(['normal', 'watch', 'armory', 'multisig'].indexOf(type) != -1);
+  assert((type == 'normal' && key) || (type == 'watch' && !key) || (type == 'armory' && !key) || type == 'multisig');
   assert((type == 'armory' && armoryPubKey) || !armoryPubKey); //only used with armory addresses
 
   var self = this;
@@ -18,6 +18,7 @@ function AddressViewModel(type, key, address, initialLabel, armoryPubKey) {
   self.IS_NORMAL = (type == 'normal');
   self.IS_WATCH_ONLY = (type == 'watch');
   self.IS_ARMORY_OFFLINE = (type == 'armory');
+  self.IS_MULTISIG_ADDRESS = (type == 'multisig');
 
   self.lastSort = ko.observable('');
   self.lastSortDirection = ko.observable('');
