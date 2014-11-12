@@ -57,6 +57,7 @@ function localeInit(callback) {
     callback();
     createSharedKnockoutValidators();
   });
+  switchTimeagoLocale(LANG);
   localStorage.setItem("LANG", LANG);
 }
 
