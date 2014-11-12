@@ -104,7 +104,11 @@ function createSharedKnockoutValidators() {
       validator: function (val, self) {
           try {
             if(!val) return true; //the "if specified" part of the name :)
-            return CWBitcore.isValidAddress(val) || CWBitcore.isValidMultisigAddress(val);
+            if(self.addressType() == 'multisig') {
+              return CWBitcore.isValidMultisigAddress(val)
+            } else {
+              return CWBitcore.isValidAddress(val);
+            }
           } catch (err) {
             return false;
           }
@@ -181,18 +185,31 @@ function createSharedKnockoutValidators() {
     async: true,
     message: i18n.t('cant_find_public_key'),
     validator: function (val, self, callback) {
-      if(self.addressType() != 'armory') return true; //only necessary for armory offline addresses
-      failoverAPI("get_pubkey_for_address", {'address': val},
-        function(data, endpoint) {
-          self.armoryPubKey(data);
-          return data ? callback(true) : callback(false)
-        }
-      );   
+      if (self.addressType() == 'armory' || self.addressType() == 'multisig') {
+        failoverAPI("get_pubkey_for_address", {'address': val},
+          function(data, endpoint) {
+            if (data) {
+              if (self.addressType() == 'armory') {
+                self.armoryPubKey(data[0]);
+                return callback(true)
+              } else if (self.addressType() == 'multisig') {
+                if (data.length == val.split("_").length - 2) {
+                  return callback(true);
+                } else {
+                  return callback(false);
+                }
+              }
+            } else {
+              return callback(false);
+            }
+          }
+        );
+      } else {
+        return true; 
+      }
     }
   };
-
   ko.validation.registerExtenders();
-
 }
 
 //Bootstrap 3 button toggle group handler: http://stackoverflow.com/a/20080917 (with FIX)

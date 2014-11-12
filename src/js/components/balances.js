@@ -89,6 +89,7 @@ function CreateNewAddressModalViewModel() {
     }],
     canGetAddressPubKey: self
   });
+  
   self.description = ko.observable('').extend({
     required: true,
     validation: {
