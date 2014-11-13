@@ -52,7 +52,25 @@ function AddressViewModel(type, key, address, initialLabel, armoryPubKey) {
       });      
     }
   }, self);
+
+  self.multisigType = ko.computed(function(){
+    if (!self.IS_MULTISIG_ADDRESS) return null;
+    var array = self.ADDRESS.split("_");
+    return array.shift() + "/" + array.pop();
+  });
   
+  self.dispAddress = ko.computed(function(){
+    if (!self.IS_MULTISIG_ADDRESS) return self.ADDRESS;
+    var addresses = self.ADDRESS.split("_");
+    addresses.shift();
+    addresses.pop();
+    var shortAddresses = [];
+    ko.utils.arrayForEach(addresses, function(address) {
+      shortAddresses.push(address.substring(0, 5) + '...' + address.substring(address.length - 5, address.length));
+    });
+    return shortAddresses.join(", ");
+  });
+
   self.getAssetObj = function(asset) {
     //given an asset string, return a reference to the cooresponding AssetViewModel object
     return ko.utils.arrayFirst(self.assets(), function(a) {

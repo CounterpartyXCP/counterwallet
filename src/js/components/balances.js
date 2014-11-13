@@ -19,6 +19,18 @@ function ChangeAddressLabelModalViewModel() {
   self.validationModel = ko.validatedObservable({
     newLabel: self.newLabel
   });  
+
+  self.dispAddress = ko.computed(function() {
+    if (!self.address()) return "";
+    if (self.address().indexOf("_") == -1) {
+      return self.address();
+    } else {
+      var addresses = self.address().split("_");
+      var sigRequired = addresses.shift();
+      addresses.pop();
+      return addresses.join(", ") + ' (' + sigRequired + '/' + addresses.length + ')';
+    }
+  });
   
   self.resetForm = function() {
     self.newLabel('');
@@ -89,7 +101,7 @@ function CreateNewAddressModalViewModel() {
     }],
     canGetAddressPubKey: self
   });
-  
+
   self.description = ko.observable('').extend({
     required: true,
     validation: {
