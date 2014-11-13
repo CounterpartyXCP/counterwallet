@@ -80,7 +80,9 @@ span.modeIndicator {
   color: red;
   background-color: white;
   display: block;
-  width: 230px;
+  min-width: 216px;
+  padding-left: 7px;
+  padding-right: 7px;
   position: absolute;
   left: 50%;
   margin-left: -115px;
@@ -91,7 +93,7 @@ span.modeIndicator {
 @media only screen and (max-width : 860px) {
   #noticeTestnet {
     font-size:13px;
-    width: 116px;
+    min-width: 116px;
     margin-left: -58px;
   }
 }
