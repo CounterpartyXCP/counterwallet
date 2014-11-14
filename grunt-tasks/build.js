@@ -393,6 +393,7 @@ module.exports = function(grunt) {
 
         var homePath = (process.env['HOME'] + '/') || (process.env['USERPROFILE'] + '/') || './';
         var buildDir = this.options(defaultOptions).buildDir;
+        var depsDir = this.options(defaultOptions).srcDir + this.options(defaultOptions).depsDir;
 
         var languages = grunt.config.get('transifex').languages;
         var languages_done = [];
@@ -423,6 +424,29 @@ module.exports = function(grunt) {
                     throw new Error("Error during translation.json download: " + err.message);
                 } else {
                     grunt.file.write(buildDir + 'locales/' + lang.toLowerCase() + '/translation.json', data);
+                    
+                    // correct language code mismatch here
+                    switch(lang)
+                    {
+                        case "cs":
+                          timeago_lang="cz";
+                          break;
+                        case "zh_CN":
+                          timeago_lang="zh-CN";
+                          break;
+                        case "zh_TW":
+                          timeago_lang="zh-TW";
+                          break;
+                        default:
+                          timeago_lang=lang;
+                    }                    
+                    timeagoTranslation = depsDir + 'jquery-timeago/locales/jquery.timeago.' + timeago_lang + '.js';
+                    
+                    if(grunt.file.exists(timeagoTranslation))
+                        grunt.file.copy(timeagoTranslation, buildDir + 'locales/' + lang.toLowerCase() + '/timeago.js');
+                    else
+                        grunt.file.write(buildDir + 'locales/' + lang.toLowerCase() + '/timeago.js', '');
+
                     languageDone(lang);
                 }
             });
