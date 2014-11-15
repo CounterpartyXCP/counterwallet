@@ -1428,16 +1428,22 @@ function SignTransactionModalViewModel() {
     var cwk = WALLET.getAddressObj(self.address()).KEY;
     var signed = '';
     try {
-      signed = cwk.signRawTransaction(self.unsignedTx());
-      self.validTx(true);
+      
+      CWBitcore.signRawTransaction2(self.unsignedTx(), cwk, function(signedHex) {
+        self.signedTx(signedHex);
+        $("#signedMessage").effect("highlight", {}, 1500);
+        trackEvent('Balances', 'SignTransaction');
+        //Keep the form up after signing, the user will manually press Close to close it...
+      })
+      
+      //signed = cwk.signRawTransaction(self.unsignedTx());
+      //self.validTx(true);
+
     } catch (e) {
-      signed = e.message;
+      self.signedTx(e.message);
       self.validTx(false);
     }   
-    self.signedTx(signed);
-    $("#signedMessage").effect("highlight", {}, 1500);
-    trackEvent('Balances', 'SignTransaction');
-    //Keep the form up after signing, the user will manually press Close to close it...
+    
   }
 
   self.signAndBroadcastTransaction = function() {
