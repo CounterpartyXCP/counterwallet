@@ -570,7 +570,7 @@
             <label class="control-label col col-sm-2" data-bind="locale: 'call_date'"></label>
             <div class="col col-sm-10">
                 <label class="input">
-                    <input name="assetCallDate" type="text" data-bind="datetimepicker: callDate"/>
+                    <input name="assetCallDate" type="text" data-bind="datetimepicker: callDate, value: callDate, valueUpdate: 'input'"/>
                 </label>
                 <div class="note" data-bind="locale: 'call_date_note'"></div>
             </div>
