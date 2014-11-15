@@ -70,7 +70,7 @@ function CreateAssetModalViewModel() {
     isValidQtyForDivisibility: self
   });
   self.callable = ko.observable(false);
-  self.callDate = ko.observable(new Date(new Date().getTime() + 30*24*60*60*1000)).extend({
+  self.callDate = ko.observable().extend({
     //^ default to current date + 30 days for now (also serves to hide a bug with the required
     // field validation not working if this field is empty). This is temporary...
     date: true,
@@ -141,7 +141,7 @@ function CreateAssetModalViewModel() {
         divisible: self.divisible(),
         description: self.description(),
         callable_: self.callable(),
-        call_date: self.callable() ? parseInt(self.callDate().getTime() / 1000) : null, //epoch ts
+        call_date: self.callable() ? parseInt(new Date(self.callDate()).getTime() / 1000) : null, //epoch ts
         call_price: self.callable() ? parseFloat(self.callPrice()) : null, //float
         transfer_destination: null
       },
