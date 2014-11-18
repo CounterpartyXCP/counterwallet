@@ -61,27 +61,29 @@ ko.bindingHandlers.timeago = {
     }
 }
 
-ko.bindingHandlers.datetimepicker = {
-  init: function(element, valueAccessor, allBindingsAccessor) {
-    //initialize datepicker with some optional options
-    var options = allBindingsAccessor().datepickerOptions || {};
-    $(element).datetimepicker(options);
-
-    //when a user changes the date, update the view model
-    ko.utils.registerEventHandler(element, "change.dp", function(event) {
-       var value = valueAccessor();
-       if (ko.isObservable(value) && event.date) {
-         value(event.date.toDate());
-       }                
-    });
-  },
-  update: function(element, valueAccessor)   {
-    var widget = $(element).data("DateTimePicker");
-     //when the view model is updated, update the widget
-    if (widget) {
-      var date = ko.utils.unwrapObservable(valueAccessor());
-      if (date) {
-          widget.setDate(date);
+var initDateTimePicker = function(locale) {
+  ko.bindingHandlers.datetimepicker = {
+    init: function(element, valueAccessor, allBindingsAccessor) {
+      //initialize datepicker with some optional options
+      var options = allBindingsAccessor().datepickerOptions || {language: locale};
+      $(element).datetimepicker(options);
+      
+      //when a user changes the date, update the view model
+      ko.utils.registerEventHandler(element, "change.dp", function(event) {
+        var value = valueAccessor();
+        if (ko.isObservable(value) && event.date) {
+          value(event.date.toDate());
+        }                
+      });
+    },
+    update: function(element, valueAccessor)   {
+      var widget = $(element).data("DateTimePicker");
+      //when the view model is updated, update the widget
+      if (widget) {
+        var date = ko.utils.unwrapObservable(valueAccessor());
+        if (date) {
+            widget.setDate(date);
+        }
       }
     }
   }
