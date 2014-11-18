@@ -646,7 +646,7 @@ function WalletViewModel() {
           return;
         } else if (addressObj.IS_MULTISIG_ADDRESS) {
 
-          self.showTransactionCompleteDialog("", null, null, unsignedTxHex);
+          self.showTransactionCompleteDialog("<b>"+ i18n.t('mutisig_tx_read') +"</b>", null, null, unsignedTxHex);
 
         } else {
           WALLET.signAndBroadcastTx(address, unsignedTxHex, function(txHash, endpoint) {

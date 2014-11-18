@@ -265,12 +265,8 @@ function LogonViewModel() {
       }
       mustSavePreferencesToServer = true;
     }
-    $.jqlog.info("num_addresses_used: " + PREFERENCES['num_addresses_used']);
-    $.jqlog.info("MAX_ADDRESSES: " + MAX_ADDRESSES);
     PREFERENCES['num_addresses_used'] = Math.min(MAX_ADDRESSES, PREFERENCES['num_addresses_used']);
     
-    
-
     WALLET_OPTIONS_MODAL.selectedTheme(PREFERENCES['selected_theme']);
     
     self.displayLicenseIfNecessary(mustSavePreferencesToServer);

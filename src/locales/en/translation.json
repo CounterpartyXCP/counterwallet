@@ -463,7 +463,8 @@
   "tx_validation_failed": "Client-side transaction validation FAILED. Transaction will be aborted and NOT broadcast. Please contact the Counterparty development team",
   "insufficient_btc": "Cannot do this action as you have insufficient <b class='notoAssetColor'>BTC</b> at this address. Due to Bitcoin fees, each Counterparty action requires approximately <b class='notoQuantityColor'>%s</b> <b class='notoAssetColor'>BTC</b> to perform.<br/><br/>Please deposit the necessary <b class='notoAssetColor'>BTC</b> into <b class='notoAddrColor'>%s</b> and try again.",
   "to_complete_armory_tx": "To complete the transaction, please copy over and sign the text below on your offline Armory system, then bring back to Counterwallet to broadcast:",
-  "to_complete_unsigned_tx": "To complete the transaction, please copy over and sign the text below on your Bitcoin wallet, then bring back to Counterwallet to broadcast:",
+  "mutisig_tx_read": "Your multisig transaction is ready to sign.",
+  "to_complete_unsigned_tx": "To complete the transaction, please copy over and sign the text below with the necessary addresses, then you will be able to broadcast it:",
   "pending_notice": "<b><u>This action will take some time to complete</u></b>, and will appear as a Pending Action until confirmed on the network. <b class='errorColor'>Until that time, the wallet will not reflect the change. Please be patient.</b>",
 
   "brower_not_supported_header": "Your browser is not supported with Counterwallet",
