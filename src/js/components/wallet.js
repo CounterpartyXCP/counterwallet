@@ -29,7 +29,7 @@ function WalletViewModel() {
   });
   
   self.addAddress = function(type, address, armoryPubKey) {
-    assert(['normal', 'watch', 'armory'].indexOf(type) != -1);
+    assert(['normal', 'watch', 'armory', 'multisig'].indexOf(type) != -1);
     assert((type == 'normal' && !address) || (address));
     assert((type == 'armory' && armoryPubKey) || !armoryPubKey); //only used with armory addresses
     
@@ -644,6 +644,10 @@ function WalletViewModel() {
             }
           );
           return;
+        } else if (addressObj.IS_MULTISIG_ADDRESS) {
+
+          self.showTransactionCompleteDialog("<b>"+ i18n.t('mutisig_tx_read') +"</b>", null, null, unsignedTxHex);
+
         } else {
           WALLET.signAndBroadcastTx(address, unsignedTxHex, function(txHash, endpoint) {
             //register this as a pending transaction
@@ -667,10 +671,13 @@ function WalletViewModel() {
     });
   }
   
-  self.showTransactionCompleteDialog = function(text, armoryText, armoryUTx) {
+  self.showTransactionCompleteDialog = function(text, armoryText, armoryUTx, unsignedHex) {
     if(armoryUTx) {
       bootbox.alert((armoryText || text) + "<br/><br/>" + i18n.t("to_complete_armory_tx")
         + "</br><textarea class=\"form-control armoryUTxTextarea\" rows=\"20\">" + armoryUTx + "</textarea>");
+    } else if (unsignedHex) { 
+      bootbox.alert(text + "<br/><br/>" + i18n.t("to_complete_unsigned_tx")
+        + "</br><textarea class=\"form-control armoryUTxTextarea\" rows=\"20\">" + unsignedHex + "</textarea>");
     } else {
       bootbox.alert(text);
     }

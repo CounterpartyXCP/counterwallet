@@ -162,17 +162,13 @@ function initBalances() {
   
   $(document).ready(function() {
       //Some misc jquery event handlers
-      $('#createAddress, #createWatchOnlyAddress, #createArmoryOfflineAddress').click(function(e) {
+      $('#createAddress, #createWatchOnlyAddress, #createArmoryOfflineAddress, #createMultisigAddress').click(function(e) {
         if(WALLET.addresses().length >= MAX_ADDRESSES) {
           bootbox.alert(i18n.t("max_number_addresses", MAX_ADDRESSES));
           return false;
         }
 
-        var addressType = 'normal';        
-        if($(this).attr('id') == 'createWatchOnlyAddress')
-          addressType = 'watch'; 
-        else if($(this).attr('id') == 'createArmoryOfflineAddress')
-          addressType = 'armory'; 
+        addressType = $(this).attr('data-type');
         CREATE_NEW_ADDRESS_MODAL.show(addressType);
         e.preventDefault(); //prevent the location hash from changing
       });
