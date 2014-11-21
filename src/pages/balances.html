@@ -509,8 +509,6 @@
         <h4 class="modal-title" data-bind="locale: 'create_issue_token'"></h4>
       </div>
       <div class="modal-body no-padding">
-        <p class="formPadded" data-bind="locale: 'asset_creation_fee_xcp', localeArgs: ASSET_CREATION_FEE_XCP"></p>
-
         <form class="smart-form" data-bind="submit: doAction"><fieldset>
           <section><div class="row">
             <label class="control-label col col-sm-2" data-bind="locale: 'for_address'"></label>
@@ -519,6 +517,21 @@
                     <input name="assetAddress" data-bind="value: address" type="text" disabled="disabled"/>
                 </label>
                 <div class="note" data-bind="locale: 'for_address_note'"></div>
+            </div>
+          </div></section>
+          <section><div class="row">
+            <label class="control-label col col-sm-2" data-bind="locale: 'token_name_type'"></label>
+            <div class="col col-sm-10">
+              <label class="radio">
+                <input type="radio" data-bind="checked: tokenNameType" name="tokenNameType" value="alphabetic">
+                <i></i><span data-bind="locale: 'alphabetic_name'"></span>
+                <div class="note" style="margin-top:0" data-bind="locale: 'token_name_rules'"></div>
+              </label>
+              <label class="radio">
+                <input type="radio" data-bind="checked: tokenNameType" name="tokenNameType" value="numeric">
+                <i></i><span data-bind="locale: 'numeric_name'"></span>
+                <div class="note" style="margin-top:0" data-bind="locale: 'free_token_name_rules'"></div>
+              </label>
             </div>
           </div></section>
           <section><div class="row">
@@ -585,6 +598,7 @@
             </div>
           </div></section>
         </fieldset></form>
+        <p class="formPadded" style="text-align:center" data-bind="visible: tokenNameType== 'alphabetic', locale: 'asset_creation_fee_xcp', localeArgs: ASSET_CREATION_FEE_XCP"></p>
       </div>
       <div class="modal-footer">
         <button type="button" class="btn btn-default" data-bind="click: hide, locale: 'cancel'"></button>

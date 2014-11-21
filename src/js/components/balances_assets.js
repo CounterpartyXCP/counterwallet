@@ -1,62 +1,14 @@
-ko.validation.rules['assetNameIsTaken'] = {
-  async: true,
-  message: i18n.t('token_already_exists'),
-  validator: function (val, self, callback) {
-    failoverAPI("get_issuances",
-      {'filters': {'field': 'asset', 'op': '==', 'value': val}, 'status': 'valid'},
-      function(data, endpoint) {
-        return data.length ? callback(false) : callback(true) //empty list -> true (valid = true)
-      }
-    );   
-  }
-};
-// TODO: DRY!!
-ko.validation.rules['assetNameExists'] = {
-  async: true,
-  message: i18n.t('token_dont_exists'),
-  validator: function (val, self, callback) {
-    failoverAPI("get_issuances", {'filters': {'field': 'asset', 'op': '==', 'value': val}, 'status': 'valid'},
-      function(data, endpoint) {
-        $.jqlog.debug("Asset exists: " + data.length);
-        return data.length ? callback(true) : callback(false) //empty list -> false (valid = false)
-      }
-    );   
-  }
-};
-ko.validation.rules['isValidAssetNameLength'] = {
-    validator: function (val, self) {
-      //Check length
-      var n = 0;
-      for(var i=0; i < val.length; i++) {
-        n *= 26;
-        assert(B26_DIGITS.indexOf(val[i]) != -1); //should have been checked already
-        n += B26_DIGITS.indexOf(val[i]); 
-      }
-      assert(n >= Math.pow(26, 3)); //should have been checked already
-      return n <= MAX_INT;
-    },
-    message: i18n.t('asset_length_invalid')
-};
-ko.validation.rules['isValidAssetDescription'] = {
-    validator: function (val, self) {
-      return byteCount(val) <= MAX_ASSET_DESC_LENGTH;
-    },
-    message: i18n.t('token_desc_too_long', MAX_ASSET_DESC_LENGTH)
-};
-ko.validation.registerExtenders();
 
 function CreateAssetModalViewModel() {
   var self = this;
   self.shown = ko.observable(false);
   self.address = ko.observable('');
 
+  self.tokenNameType = ko.observable('alphabetic');
+
   self.name = ko.observable('').extend({
     required: true,
-    pattern: {
-      message: i18n.t("token_name_rules"),
-      params: '^[B-Z][A-Z]{3,}$'
-    },
-    isValidAssetNameLength: self,
+    isValidAssetName: self,
     assetNameIsTaken: self
   });
   self.description = ko.observable('').extend({
@@ -153,8 +105,11 @@ function CreateAssetModalViewModel() {
           message = i18n.t("token_has_been_created", self.name());
         }
         message +=  "<br/><br/>";
-        message += i18n.t("issuance_end_message", getAddressLabel(self.address()), ASSET_CREATION_FEE_XCP);
-
+        if (self.tokenNameType() == 'alphabetic') {
+          message += i18n.t("issuance_end_message", getAddressLabel(self.address()), ASSET_CREATION_FEE_XCP);
+        } else {
+          message += i18n.t("free_issuance_end_message");
+        }
         WALLET.showTransactionCompleteDialog(message + " " + i18n.t(ACTION_PENDING_NOTICE), message, armoryUTx);
       }
     );

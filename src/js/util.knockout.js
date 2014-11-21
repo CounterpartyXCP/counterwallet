@@ -211,6 +211,61 @@ function createSharedKnockoutValidators() {
       }
     }
   };
+
+  ko.validation.rules['assetNameIsTaken'] = {
+    async: true,
+    message: i18n.t('token_already_exists'),
+    validator: function (val, self, callback) {
+      failoverAPI("get_issuances",
+        {'filters': {'field': 'asset', 'op': '==', 'value': val}, 'status': 'valid'},
+        function(data, endpoint) {
+          return data.length ? callback(false) : callback(true) //empty list -> true (valid = true)
+        }
+      );   
+    }
+  };
+
+  // TODO: DRY!!
+  ko.validation.rules['assetNameExists'] = {
+    async: true,
+    message: i18n.t('token_dont_exists'),
+    validator: function (val, self, callback) {
+      failoverAPI("get_issuances", {'filters': {'field': 'asset', 'op': '==', 'value': val}, 'status': 'valid'},
+        function(data, endpoint) {
+          $.jqlog.debug("Asset exists: " + data.length);
+          return data.length ? callback(true) : callback(false) //empty list -> false (valid = false)
+        }
+      );   
+    }
+  };
+
+  ko.validation.rules['isValidAssetName'] = {
+      validator: function (val, self) {
+        if (self.tokenNameType() == 'alphabetic') {
+          var patt = new RegExp("^[B-Z][A-Z]{3,11}$");
+          return patt.test(val);
+        } else if (self.tokenNameType() == 'numeric') {
+          var patt = new RegExp("^A[0-9]{17,}$");
+          if (patt.test(val)) {
+            var MIN = bigInt(26).pow(12).add(1);
+            var MAX = bigInt(256).pow(8);
+            var id = bigInt(val.substr(1));
+            return id.geq(MIN) && id.leq(MAX);
+          } else {
+            return false
+          }
+        } 
+      },
+      message: i18n.t('asset_name_invalid')
+  };
+  
+  ko.validation.rules['isValidAssetDescription'] = {
+      validator: function (val, self) {
+        return byteCount(val) <= MAX_ASSET_DESC_LENGTH;
+      },
+      message: i18n.t('token_desc_too_long', MAX_ASSET_DESC_LENGTH)
+  };
+
   ko.validation.registerExtenders();
 }
 
