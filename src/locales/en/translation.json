@@ -629,7 +629,7 @@
   "info_for_asset": "Info for <b>%s</b> (Read Only)",
   "call": "Call",
   "call_token": "Call Token <b>%s</b>",
-  "call_token_note": "Enter the percentage of the token to call back (e.g. 40.5 for 40.5",
+  "call_token_note": "Enter the percentage of the token to call back (e.g. 40.5 for 40.5)",
   "pay_distribution": "Pay Distribution",
   "distribution_per_unit": "Distribution per Unit",
   "distribution_unit_note": "Enter the quantity of the Distribution Token that should be distributed per share of %s.",
