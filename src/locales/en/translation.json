@@ -735,7 +735,7 @@
   "play_rock_paper_scissors_lizard_spock": "Play Rock-Paper-Scissors-Lizard-Spock",
   "select_your_move": "1. Select your move",
   "select_your_wager": "2. Select your wager",
-  "select_your_options": "2. Select your options",
+  "select_your_options": "3. Select your options",
   "do_not_wager_on_different_addresses": "Do not make multiple wagers of the same size on different addresses in your wallet, <a href=\"https://www.youtube.com/watch?v=92kpC3WWeMg\" target=\"_blank\">as they can match each other.</a>",
   "wager": "Wager",
   "expiration": "Expiration",
