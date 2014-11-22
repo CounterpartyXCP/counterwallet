@@ -41,6 +41,9 @@ var DEFAULT_PREFERENCES = {
   'has_accepted_license': false
 };
 
+var NUMERIC_ASSET_ID_MIN = bigInt(26).pow(12).add(1);
+var NUMERIC_ASSET_ID_MAX = bigInt(256).pow(8);
+
 /***********
  * DYNAMICALLY SET
  ***********/

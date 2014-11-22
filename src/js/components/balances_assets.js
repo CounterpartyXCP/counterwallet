@@ -1,11 +1,14 @@
-
 function CreateAssetModalViewModel() {
   var self = this;
   self.shown = ko.observable(false);
   self.address = ko.observable('');
 
   self.tokenNameType = ko.observable('alphabetic');
-
+  self.tokenNameType.subscribe(function(val) {
+    if (val == 'numeric') self.generateRandomId();
+    else if (val == 'alphabetic') self.name('');
+  });
+  
   self.name = ko.observable('').extend({
     required: true,
     isValidAssetName: self,
@@ -46,6 +49,11 @@ function CreateAssetModalViewModel() {
     callDate: self.callDate,
     callPrice: self.callPrice
   });  
+
+  self.generateRandomId = function() {
+    var r = bigInt.randBetween(NUMERIC_ASSET_ID_MIN, NUMERIC_ASSET_ID_MAX);
+    self.name('A' + r);
+  }
 
   self.resetForm = function() {
     self.name('');

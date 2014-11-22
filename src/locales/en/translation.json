@@ -223,7 +223,7 @@
   "asset_name_invalid": "Asset name invalid",
   "token_desc_too_long": "Token description is more than %s bytes long.",
   "token_name_rules": "Must contain between 4 and 12 uppercase letters only (A-Z), and cannot start with 'A'.",
-  "free_token_name_rules": "Must start with 'A', followed by a number between 26^12 + 1 and 256^8.",
+  "free_token_name_rules": "Must start with 'A', followed by a large random number.",
   "call_date_required": "Call date is required if the token is callable",
   "call_price_required": "Call price is required if the token is callable",
   "issuance_quantity_too_high": "The quantity desired to be issued for this token is too high.",

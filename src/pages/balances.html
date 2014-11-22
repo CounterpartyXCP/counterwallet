@@ -537,7 +537,9 @@
           <section><div class="row">
             <label class="control-label col col-sm-2" data-bind="locale: 'token_name'"></label>
             <div class="col col-sm-10">
-                <label class="input"><i class="icon-append fa fa-tag"></i>
+                <label class="input">
+                    <a href="#" data-bind="visible: tokenNameType=='numeric', click: generateRandomId"><i class="icon-append fa fa-rotate-right"></i></a>
+                    <i data-bind="visible: tokenNameType=='alphabetic'" class="icon-append fa fa-tag"></i>
                     <input name="assetName" data-bind="value: name, valueUpdate : 'input'" type="text"/>
                 </label>
                 <div class="note" data-bind="locale: 'token_name_note'"></div>

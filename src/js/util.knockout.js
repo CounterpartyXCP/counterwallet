@@ -247,10 +247,8 @@ function createSharedKnockoutValidators() {
         } else if (self.tokenNameType() == 'numeric') {
           var patt = new RegExp("^A[0-9]{17,}$");
           if (patt.test(val)) {
-            var MIN = bigInt(26).pow(12).add(1);
-            var MAX = bigInt(256).pow(8);
             var id = bigInt(val.substr(1));
-            return id.geq(MIN) && id.leq(MAX);
+            return id.geq(NUMERIC_ASSET_ID_MIN) && id.leq(NUMERIC_ASSET_ID_MAX);
           } else {
             return false
           }
@@ -258,7 +256,7 @@ function createSharedKnockoutValidators() {
       },
       message: i18n.t('asset_name_invalid')
   };
-  
+
   ko.validation.rules['isValidAssetDescription'] = {
       validator: function (val, self) {
         return byteCount(val) <= MAX_ASSET_DESC_LENGTH;
