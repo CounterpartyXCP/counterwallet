@@ -11,13 +11,16 @@
         </button>
         <ul class="dropdown-menu">
             <li>
-                <a id="createAddress" href="#" data-bind="locale: 'create_regular_address'"></a>
+                <a id="createAddress" href="#" data-type="normal" data-bind="locale: 'create_regular_address'"></a>
             </li>
             <li>
-                <a id="createArmoryOfflineAddress" href="#" data-bind="locale: 'create_armory_address'"></a>
+                <a id="createArmoryOfflineAddress" data-type="armory" href="#" data-bind="locale: 'create_armory_address'"></a>
             </li>
             <li>
-                <a id="createWatchOnlyAddress" href="#" data-bind="locale: 'create_watch_address'"></a>
+                <a id="createWatchOnlyAddress" data-type="watch" href="#" data-bind="locale: 'create_watch_address'"></a>
+            </li>
+            <li>
+                <a id="createMultisigAddress" data-type="multisig" href="#" data-bind="visible: USE_TESTNET, locale: 'create_multisig_address'"></a>
             </li>
         </ul>
     </div>
@@ -76,6 +79,7 @@
                 <div data-bind="visible: lastSort()" class="label label-info margin-left-5"><i class="fa fa-sort-amount-asc"></i> <span data-bind="locale: 'sorted'"></span></div>
                 <div data-bind="visible: IS_WATCH_ONLY" class="label label-success margin-left-5"><i class="fa fa-eye"></i> <span data-bind="locale: 'watch_only'"></span></div>
                 <div data-bind="visible: IS_ARMORY_OFFLINE" class="label label-success margin-left-5"><i class="fa fa-lock"></i>  <span data-bind="locale: 'armory_offline'"></span></div>
+                <div data-bind="visible: IS_MULTISIG_ADDRESS" class="label label-success margin-left-5"><i class="fa fa-lock"></i>  <span data-bind="locale: 'multisig_address'"></span> <span data-bind="text: multisigType"></span></div>
             </h3>
             <div class="widget-toolbar">
               <div class="btn-group btn-group-dropup">
@@ -116,7 +120,7 @@
                 </ul>
               </div>
             </div>
-            <div class="widget-toolbar display-address"><span id="" data-bind="attr: {'id': 'address-text-' + ADDRESS}, click: selectAddressText, text: ADDRESS"></span></div>
+            <div class="widget-toolbar display-address"><span id="" data-bind="attr: {'id': 'address-text-' + ADDRESS}, click: selectAddressText, text: dispAddress"></span></div>
             <div class="clearfix"></div>
           </header>
           <div> <!-- widget div-->
@@ -171,7 +175,7 @@
       </div>
       <div class="modal-body no-padding">
         <div class="formPadded">
-          <p data-bind="locale: 'enter_new_label', localeArgs: address"></p>
+          <p data-bind="locale: 'enter_new_label', localeArgs: dispAddress "></p>
         </div>
 
         <form class="smart-form" data-bind="submit: doAction"><fieldset>
@@ -211,6 +215,9 @@
         </div>
         <div data-bind="visible: addressType() == 'armory'">
             <p class="formPadded" data-bind="locale: 'enter_address_description_armory'"></p>
+        </div>
+        <div data-bind="visible: addressType() == 'multisig'">
+            <p class="formPadded" data-bind="locale: 'enter_address_description_multisig'"></p>
         </div>
 
         <form class="smart-form" data-bind="submit: doAction"><fieldset>
@@ -502,8 +509,6 @@
         <h4 class="modal-title" data-bind="locale: 'create_issue_token'"></h4>
       </div>
       <div class="modal-body no-padding">
-        <p class="formPadded" data-bind="locale: 'asset_creation_fee_xcp', localeArgs: ASSET_CREATION_FEE_XCP"></p>
-
         <form class="smart-form" data-bind="submit: doAction"><fieldset>
           <section><div class="row">
             <label class="control-label col col-sm-2" data-bind="locale: 'for_address'"></label>
@@ -514,10 +519,27 @@
                 <div class="note" data-bind="locale: 'for_address_note'"></div>
             </div>
           </div></section>
+          <section data-bind="visible: USE_TESTNET"><div class="row">
+            <label class="control-label col col-sm-2" data-bind="locale: 'token_name_type'"></label>
+            <div class="col col-sm-10">
+              <label class="radio">
+                <input type="radio" data-bind="checked: tokenNameType" name="tokenNameType" value="alphabetic">
+                <i></i><span data-bind="locale: 'alphabetic_name'"></span>
+                <div class="note" style="margin-top:0" data-bind="locale: 'token_name_rules'"></div>
+              </label>
+              <label class="radio">
+                <input type="radio" data-bind="checked: tokenNameType" name="tokenNameType" value="numeric">
+                <i></i><span data-bind="locale: 'numeric_name'"></span>
+                <div class="note" style="margin-top:0" data-bind="locale: 'free_token_name_rules'"></div>
+              </label>
+            </div>
+          </div></section>
           <section><div class="row">
             <label class="control-label col col-sm-2" data-bind="locale: 'token_name'"></label>
             <div class="col col-sm-10">
-                <label class="input"><i class="icon-append fa fa-tag"></i>
+                <label class="input">
+                    <a href="#" data-bind="visible: tokenNameType=='numeric', click: generateRandomId"><i class="icon-append fa fa-rotate-right"></i></a>
+                    <i data-bind="visible: tokenNameType=='alphabetic'" class="icon-append fa fa-tag"></i>
                     <input name="assetName" data-bind="value: name, valueUpdate : 'input'" type="text"/>
                 </label>
                 <div class="note" data-bind="locale: 'token_name_note'"></div>
@@ -563,7 +585,7 @@
             <label class="control-label col col-sm-2" data-bind="locale: 'call_date'"></label>
             <div class="col col-sm-10">
                 <label class="input">
-                    <input name="assetCallDate" type="text" data-bind="datetimepicker: callDate"/>
+                    <input name="assetCallDate" type="text" data-bind="datetimepicker: callDate, value: callDate, valueUpdate: 'input'"/>
                 </label>
                 <div class="note" data-bind="locale: 'call_date_note'"></div>
             </div>
@@ -578,6 +600,7 @@
             </div>
           </div></section>
         </fieldset></form>
+        <p class="formPadded" style="text-align:center" data-bind="visible: tokenNameType== 'alphabetic', locale: 'asset_creation_fee_xcp', localeArgs: ASSET_CREATION_FEE_XCP"></p>
       </div>
       <div class="modal-footer">
         <button type="button" class="btn btn-default" data-bind="click: hide, locale: 'cancel'"></button>

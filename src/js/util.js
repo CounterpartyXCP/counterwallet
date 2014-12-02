@@ -133,3 +133,15 @@ function checkCountry(action, callback) {
     callback();
   }
 }
+
+function orderMultisigAddress(address) {
+  var addresse_array = address.split('_');
+  if (addresse_array.length > 1) {
+    var required_sig = addresse_array.shift();
+    var provided_sig = addresse_array.pop();
+    return required_sig + '_' + addresse_array.sort().join("_") + '_' + provided_sig;
+  } else {
+    return addresse_array.pop();
+  }
+  
+}

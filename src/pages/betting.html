@@ -245,25 +245,25 @@
                           <thead></thead>
                           <tbody>
                             <tr data-bind="visible: $parent.jsonBetProvided">
-                              <td><b><span data-blind="locale: 'operator'"></span>:</b></td>
+                              <td><b><span data-bind="locale: 'operator'"></span>:</b></td>
                               <td>
                                 <a data-bind="attr: {href: info_data.operator.url}" target="_blank"><span data-bind="text: info_data.operator.name"></span></a>
                               </td>
                             </tr>
                             <tr>
-                              <td><b><span data-blind="locale: 'wager'"></span>:</b></td>
+                              <td><b><span data-bind="locale: 'wager'"></span>:</b></td>
                               <td><b><span data-bind="text: $parent.wager + ' XCP'"></span></b></td>
                             </tr>
                             <tr data-bind="visible: info_data.type=='binary'">          
-                              <td><b><span data-blind="locale: 'topic'"></span>:</b></td>
+                              <td><b><span data-bind="locale: 'topic'"></span>:</b></td>
                               <td><b><span data-bind="text: $parent.targetValueText"></span></b></td>  
                             </tr>
                             <tr>          
-                              <td><b><span data-blind="locale: 'your_choice'"></span>:</b></td>
+                              <td><b><span data-bind="locale: 'your_choice'"></span>:</b></td>
                               <td><b><span data-bind="text: $parent.betTypeText"></span></b></td> 
                             </tr>
                             <tr>
-                              <td><b><span data-blind="locale: 'odds'"></span>:</b></td>
+                              <td><b><span data-bind="locale: 'odds'"></span>:</b></td>
                               <td>
                                 <div class="progress progress-sm odd-bar">
                                   <div class="progress-bar bg-color-greenLight" data-bind="attr: {style: 'width: '+$parent.greenPercent()+'%'}"></div>

@@ -37,8 +37,12 @@ var DEFAULT_PREFERENCES = {
   'selected_lang': 'en-us',
   'watch_only_addresses': [],
   'armory_offline_addresses': [],
+  'multisig_addresses': [],
   'has_accepted_license': false
 };
+
+var NUMERIC_ASSET_ID_MIN = bigInt(26).pow(12).add(1);
+var NUMERIC_ASSET_ID_MAX = bigInt(256).pow(8);
 
 /***********
  * DYNAMICALLY SET

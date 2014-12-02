@@ -2,8 +2,8 @@
 function AddressViewModel(type, key, address, initialLabel, armoryPubKey) {
   //An address on a wallet
   //type is one of: normal, watch, armory
-  assert(['normal', 'watch', 'armory'].indexOf(type) != -1);
-  assert((type == 'normal' && key) || (type == 'watch' && !key) || (type == 'armory' && !key));
+  assert(['normal', 'watch', 'armory', 'multisig'].indexOf(type) != -1);
+  assert((type == 'normal' && key) || (type == 'watch' && !key) || (type == 'armory' && !key) || type == 'multisig');
   assert((type == 'armory' && armoryPubKey) || !armoryPubKey); //only used with armory addresses
 
   var self = this;
@@ -18,6 +18,7 @@ function AddressViewModel(type, key, address, initialLabel, armoryPubKey) {
   self.IS_NORMAL = (type == 'normal');
   self.IS_WATCH_ONLY = (type == 'watch');
   self.IS_ARMORY_OFFLINE = (type == 'armory');
+  self.IS_MULTISIG_ADDRESS = (type == 'multisig');
 
   self.lastSort = ko.observable('');
   self.lastSortDirection = ko.observable('');
@@ -51,7 +52,25 @@ function AddressViewModel(type, key, address, initialLabel, armoryPubKey) {
       });      
     }
   }, self);
+
+  self.multisigType = ko.computed(function(){
+    if (!self.IS_MULTISIG_ADDRESS) return null;
+    var array = self.ADDRESS.split("_");
+    return array.shift() + "/" + array.pop();
+  });
   
+  self.dispAddress = ko.computed(function(){
+    if (!self.IS_MULTISIG_ADDRESS) return self.ADDRESS;
+    var addresses = self.ADDRESS.split("_");
+    addresses.shift();
+    addresses.pop();
+    var shortAddresses = [];
+    ko.utils.arrayForEach(addresses, function(address) {
+      shortAddresses.push(address.substring(0, 5) + '...' + address.substring(address.length - 5, address.length));
+    });
+    return shortAddresses.join(", ");
+  });
+
   self.getAssetObj = function(asset) {
     //given an asset string, return a reference to the cooresponding AssetViewModel object
     return ko.utils.arrayFirst(self.assets(), function(a) {

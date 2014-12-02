@@ -56,7 +56,9 @@ function localeInit(callback) {
   i18n.init(options, function() {
     callback();
     createSharedKnockoutValidators();
+    initDateTimePicker(options.lng);
   });
+  switchTimeagoLocale(LANG);  
   localStorage.setItem("LANG", LANG);
 }
 

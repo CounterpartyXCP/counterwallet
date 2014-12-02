@@ -377,7 +377,7 @@
                   <input id="passwordDecrypt" data-bind="value: passwordDecrypt, valueUpdate: 'input', localeAttr: {'placeholder': 'enter_quick_password'}" class="form-control" type="password" name="passwordDecrypt">
                 </div>
 
-                <div class="col-sm-4">
+                <div class="col-sm-4" style="white-space:nowrap">
                   <button id="walletLoginButton" data-bind="click: openWallet, enable: isPassphraseValid(), css: { 'btn-primary': isPassphraseValid() }, locale: 'open_wallet'" type="button" class="btn btn-default" disabled></button>
                   &nbsp;<button id="secureKeyboardButton" data-bind="click: showSecureKeyboard, enable: !isPassphraseValid(), css: { 'btn-primary': !isPassphraseValid() }" type="button" class="btn btn-default" disabled><i class="fa fa-keyboard-o"></i></button>
                   <div class="showSupport"><a href="#" data-bind="locale: 'login_problems'"></a></div>
@@ -932,6 +932,7 @@
     <script src="vendors/sprintf/dist/sprintf.min.js"></script>
     <script src="vendors/i18next/i18next.min.js"></script>
 
+    <script src="vendors/big-integer/BigInteger.min.js"></script>
     <!-- endbuild -->
 
 
@@ -951,6 +952,7 @@
 
     <!-- counterwallet-specific -->
     <script src="js/util.knockout.js"></script>
+    <script src="js/jquery-timeago.i18n.js"></script>
     <script src="js/locale.js"></script>
     <script src="js/consts.js"></script>
     <script src="js/util.js"></script>
