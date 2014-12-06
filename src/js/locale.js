@@ -41,7 +41,9 @@ i18n.t('key2', 'world') => "Hello world"
 
 */
 //var AVAILABLE_LANGUAGES = ['fr', 'en', 'de', 'da', 'zh_cn', 'zh_tw', 'fi', 'tr', 'it', 'ja', 'es', 'ru'];
-var AVAILABLE_LANGUAGES = ['en', 'zh_cn', 'cs']
+
+// To enable more languages in Counterwallet, add them to this array. See README.md for details.
+var AVAILABLE_LANGUAGES = ['en']
 var DEFAULT_LANG = 'en';
 var LANG = getLanguage();
 
