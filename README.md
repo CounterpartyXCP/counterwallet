@@ -71,8 +71,8 @@ grunt freeze
 ### To enable localizations (optional):
 1. Create an account on [Transifex](https://www.transifex.com/)
 2. In your home directory, create a file named `.transifex` and put your Transifex username and password into it in this format: `user:password`
-3. Edit **src/js/locale.js** and add the languages you want to support to AVAILABLE_LANGUAGES
-4. Run `grunt build` to download translations and rebuild the site with your changes
+3. Run `grunt build` to download translations
+4. Add the languages you want to support to `AVAILABLE_LANGUAGES` in **counterwallet.conf.json** - you can use **counterwallet.conf.json.example** as a template
 
 Setting up your own Counterwallet Server
 -----------------------------------------
