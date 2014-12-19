@@ -51,7 +51,7 @@
   "counterwallet_desc_10": "Counterwallet is entirely open-source, so you know that it works exactly the way that it is supposed to.",
   "counterwallet_desc_11": "If you like, you may also even run your own Counterwallet server.",
   "license_agreement": "License Agreement",
-  "is_the_first_time": "If you are being asked to accept the Terms and Conditions, this may be the first time you are opening this wallet on this server. <b>If you are trying to access an old wallet, you have typed the passphrase incorrectly.</b>",
+  "is_the_first_time": "If you are being asked to accept the Terms and Conditions, this may be the first time you are opening this wallet on this server. <b>If you are trying to access a wallet created before May 8, 2014, you have typed the passphrase incorrectly.</b>",
   "you_must_read": "You must read and accept the following agreement in order to use this site:",
   "reject_terms": "Reject Terms",
   "accept_terms": "Accept Terms",
