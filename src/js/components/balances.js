@@ -1435,9 +1435,6 @@ function SignTransactionModalViewModel() {
         trackEvent('Balances', 'SignTransaction');
         //Keep the form up after signing, the user will manually press Close to close it...
       })
-      
-      //signed = cwk.signRawTransaction(self.unsignedTx());
-      //self.validTx(true);
 
     } catch (e) {
       self.signedTx(e.message);
@@ -1447,17 +1444,31 @@ function SignTransactionModalViewModel() {
   }
 
   self.signAndBroadcastTransaction = function() {
-    self.signTransaction();
-    trackEvent('Balances', 'BroadcastTransaction');
-    if (self.validTx()) {
-      var onSuccess = function(txHash, endpoint) {
-        self.shown(false);
-        bootbox.alert(i18n.t("your_tx_broadcast_success") + "<br /><br /><b>"+txHash+"</b>");
-      }
+    var cwk = WALLET.getAddressObj(self.address()).KEY;
+    var signed = '';
+    try {
+      
+      CWBitcore.signRawTransaction2(self.unsignedTx(), cwk, function(signedHex) {
+        self.signedTx(signedHex);
+        $("#signedMessage").effect("highlight", {}, 1500);
+        trackEvent('Balances', 'SignTransaction');
+        
+        var onSuccess = function(txHash, endpoint) {
+          trackEvent('Balances', 'BroadcastTransaction');
+          self.shown(false);
+          bootbox.alert(i18n.t("your_tx_broadcast_success") + "<br /><br /><b>"+txHash+"</b>");
+        }
+        WALLET.broadcastSignedTx(self.signedTx(), onSuccess, defaultErrorHandler);
+        
+      });
 
-      WALLET.broadcastSignedTx(self.signedTx(), onSuccess, defaultErrorHandler);
+    } catch (e) {
+      self.signedTx(e.message);
+      self.validTx(false);
     }
+    
   }
+  
 }
 
 function ArmoryBroadcastTransactionModalViewModel() {
