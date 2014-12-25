@@ -151,10 +151,7 @@ function AddressViewModel(type, key, address, initialLabel, armoryPubKey) {
         locked: assetInfo['locked'],
         rawBalance: initialRawBalance,
         rawSupply: assetInfo['supply'] || assetInfo['quantity'],
-        description: assetInfo['description'], 
-        callable: assetInfo['callable'],
-        callDate: assetInfo['call_date'],
-        callPrice: assetInfo['call_price'],
+        description: assetInfo['description'],
         rawEscrowedBalance: escrowedBalance,
         escrowedBalance: normalizeQuantity(escrowedBalance, assetInfo['divisible'])
       };

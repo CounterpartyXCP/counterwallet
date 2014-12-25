@@ -147,7 +147,7 @@ function MessageFeed() {
           message['bindings']['transfer_destination'] = message['bindings']['issuer'];
           displayTx = true;
         }
-      } else if (category == 'dividends' || category == 'callbacks') {
+      } else if (category == 'dividends') {
         if (WALLET.isAssetHolder(message['bindings']['asset'])) {
           displayTx = true;
         }
@@ -320,9 +320,6 @@ function MessageFeed() {
         refreshEscrowedBalance.push(message['source']);
       }
 
-    } else if(category == "callbacks") {
-      //assets that are totally called back will be removed automatically when their
-      // balance goes to zero, via the credit and debit handler
     } else if(category == "dividends") {
     } else if(category == "issuances") {
 

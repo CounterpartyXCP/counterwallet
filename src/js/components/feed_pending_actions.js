@@ -74,8 +74,6 @@ PendingActionViewModel.calcText = function(category, data) {
   
   } else if(category == 'cancels') {
     desc = i18n.t("pend_or_unconf_cancellation", pending, data['_type'], data['_tx_index']);
-  } else if(category == 'callbacks') {
-    desc = i18n.t("pend_or_unconf_callback", pending, (data['fraction'] * 100).toFixed(4), data['asset']);
   } else if(category == 'btcpays') {
     desc = i18n.t("pend_or_unconf_btcpay", pending, getAddressLabel(data['source']));
   } else if(category == 'order_matches') {
@@ -102,7 +100,7 @@ function PendingActionFeedViewModel() {
   self.entries = ko.observableArray([]); //pending actions beyond pending BTCpays
   self.lastUpdated = ko.observable(new Date());
   self.ALLOWED_CATEGORIES = [
-    'sends', 'orders', 'issuances', 'broadcasts', 'bets', 'dividends', 'burns', 'cancels', 'callbacks', 'btcpays', 'order_matches'
+    'sends', 'orders', 'issuances', 'broadcasts', 'bets', 'dividends', 'burns', 'cancels', 'btcpays', 'order_matches'
     //^ pending actions are only allowed for these categories
   ];
   

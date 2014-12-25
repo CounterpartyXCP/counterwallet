@@ -148,7 +148,6 @@ function initBalances() {
   window.TRANSFER_ASSET_MODAL = new TransferAssetModalViewModel();
   window.CHANGE_ASSET_DESCRIPTION_MODAL = new ChangeAssetDescriptionModalViewModel();
   window.PAY_DIVIDEND_MODAL = new PayDividendModalViewModel();
-  window.CALL_ASSET_MODAL = new CallAssetModalViewModel();
   window.SHOW_ASSET_INFO_MODAL = new ShowAssetInfoModalViewModel();
   
   ko.applyBindings(CREATE_ASSET_MODAL, document.getElementById("createAssetModal"));
@@ -156,7 +155,6 @@ function initBalances() {
   ko.applyBindings(TRANSFER_ASSET_MODAL, document.getElementById("transferAssetModal"));
   ko.applyBindings(CHANGE_ASSET_DESCRIPTION_MODAL, document.getElementById("changeAssetDescriptionModal"));
   ko.applyBindings(PAY_DIVIDEND_MODAL, document.getElementById("payDividendModal"));
-  ko.applyBindings(CALL_ASSET_MODAL, document.getElementById("callAssetModal"));
   ko.applyBindings(SHOW_ASSET_INFO_MODAL, document.getElementById("showAssetInfoModal"));
   
   $(document).ready(function() {

@@ -24,30 +24,11 @@ function CreateAssetModalViewModel() {
     isValidPositiveQuantityOrZero: self,
     isValidQtyForDivisibility: self
   });
-  self.callable = ko.observable(false);
-  self.callDate = ko.observable().extend({
-    //^ default to current date + 30 days for now (also serves to hide a bug with the required
-    // field validation not working if this field is empty). This is temporary...
-    date: true,
-    required: {
-      message: i18n.t("call_date_required"),
-      onlyIf: function () { return (self.callable() === true); }
-    }
-  });
-  self.callPrice = ko.observable(0).extend({
-    required: {
-      message: i18n.t("call_price_required"),
-      onlyIf: function () { return (self.callable() === true); }
-    },
-    isValidPositiveQuantityOrZero: self
-  });
   
   self.validationModel = ko.validatedObservable({
     name: self.name,
     description: self.description,
-    quantity: self.quantity,
-    callDate: self.callDate,
-    callPrice: self.callPrice
+    quantity: self.quantity
   });  
 
   self.generateRandomId = function() {
@@ -89,10 +70,6 @@ function CreateAssetModalViewModel() {
       return false;
     }
     
-    if(self.callable() && self.callDate() <= new Date()) {
-      bootbox.alert(i18n.t("call_date_in_past"));
-      return false;
-    }
     
     WALLET.doTransaction(self.address(), "create_issuance",
       { source: self.address(),
@@ -100,9 +77,6 @@ function CreateAssetModalViewModel() {
         quantity: rawQuantity,
         divisible: self.divisible(),
         description: self.description(),
-        callable_: self.callable(),
-        call_date: self.callable() ? parseInt(new Date(self.callDate()).getTime() / 1000) : null, //epoch ts
-        call_price: self.callable() ? parseFloat(self.callPrice()) : null, //float
         transfer_destination: null
       },
       function(txHash, data, endpoint, addressType, armoryUTx) {
@@ -194,9 +168,6 @@ function IssueAdditionalAssetModalViewModel() {
         asset: self.asset().ASSET,
         divisible: self.asset().DIVISIBLE,
         description: self.asset().description(),
-        callable_: self.asset().CALLABLE,
-        call_date: self.asset().CALLABLE ? self.asset().CALLDATE : 0,
-        call_price: self.asset().CALLABLE ? self.asset().CALLPRICE : 0,
         transfer_destination: null
       },
       function(txHash, data, endpoint, addressType, armoryUTx) {
@@ -268,9 +239,6 @@ function TransferAssetModalViewModel() {
         asset: self.asset().ASSET,
         divisible: self.asset().DIVISIBLE,
         description: self.asset().description(),
-        callable_: self.asset().CALLABLE,
-        call_date: self.asset().CALLABLE ? self.asset().CALLDATE : 0,
-        call_price: self.asset().CALLABLE ? self.asset().CALLPRICE : 0,
         transfer_destination: self.destAddress()
       },
       function(txHash, data, endpoint, addressType, armoryUTx) {
@@ -356,9 +324,6 @@ function ChangeAssetDescriptionModalViewModel() {
         asset: self.asset().ASSET,
         divisible: self.asset().DIVISIBLE,
         description: self.newDescription(),
-        callable_: self.asset().CALLABLE,
-        call_date: self.asset().CALLABLE ? self.asset().CALLDATE : 0,
-        call_price: self.asset().CALLABLE ? self.asset().CALLPRICE : 0,
         transfer_destination: null
       },
       function(txHash, data, endpoint, addressType, armoryUTx) {
@@ -632,158 +597,6 @@ function PayDividendModalViewModel() {
 }
 
 
-function CallAssetModalViewModel() {
-  var self = this;
-  self.shown = ko.observable(false);
-  self.address = ko.observable(null); // SOURCE address (supplied)
-  self.asset = ko.observable(null); // Asset to call (supplied)
-  self.assetObj = ko.observable(null);
-  
-  self.percentageToCall = ko.observable(null).extend({
-    required: true,
-    isValidPositiveQuantity: self,
-    max: 100,
-    min: 0.00001,
-    validation: {
-      validator: function (val, self) {
-        if(self.xcpBalRemainingPostCall() === null) return true; //wait until dividend asset chosen to validate
-        return self.xcpBalRemainingPostCall() >= 0;
-      },
-      message: i18n.t('total_diviend_exceed_balance'),
-      params: self
-    }    
-  });
-
-  self.dispCallDate = ko.computed(function() {
-    if(!self.assetObj()) return null;
-    return self.assetObj().dispCallDate();
-  }, self);
-    
-  self.dispCallPrice = ko.computed(function() {
-    if(!self.assetObj()) return null;
-    return self.assetObj().CALLPRICE;
-  }, self);
-  
-  self.dispTotalIssued = ko.computed(function() {
-    if(!self.assetObj()) return null;
-    return self.assetObj().normalizedTotalIssued();
-  }, self); 
-  
-  self.dispTotalOutstanding = ko.computed(function() {
-    //total qty of this asset in hands other than the asset's owner
-    if(!self.assetObj()) return null;
-    return self.assetObj().normalizedTotalIssued() - self.assetObj().normalizedBalance();
-  }, self); 
-
-  self.unitsToCallback = ko.computed(function() {
-    if(!self.dispTotalOutstanding() || !self.percentageToCall()) return null;
-    return self.dispTotalOutstanding() * Decimal.round(new Decimal(self.percentageToCall()).div(100), 8, Decimal.MidpointRounding.ToEven).toFloat(); 
-  }, self); 
-
-  self.dispUnitsToCallback = ko.computed(function() {
-    return smartFormat(self.unitsToCallback(), null, 4); 
-  }, self); 
-
-  self.unitsAfterCallback = ko.computed(function() {
-    if(!self.assetObj() || !self.unitsToCallback()) return null;
-    return self.assetObj().normalizedBalance() + self.unitsToCallback();
-  }, self); 
-
-  self.dispUnitsAfterCallback = ko.computed(function() {
-    return smartFormat(self.unitsAfterCallback(), null, 4); 
-  }, self); 
-
-  self.totalXCPPay = ko.computed(function() {
-    if(!self.percentageToCall() || !self.assetObj()) return null;
-    return +(self.percentageToCall() * (self.assetObj().normalizedTotalIssued() - self.assetObj().normalizedBalance()) * self.assetObj().CALLPRICE).toFixed(4);
-  }, self);
-
-  self.xcpBalRemainingPostCall = ko.computed(function() {
-    if(self.totalXCPPay() === null) return null;
-    return Decimal.round(new Decimal(WALLET.getBalance(self.address(), 'XCP')).sub(self.totalXCPPay()), 8, Decimal.MidpointRounding.ToEven).toFloat();
-  }, self);
-  
-  self.xcpBalRemainingPostCallIsSet = ko.computed(function() {
-    return self.xcpBalRemainingPostCall() !== null;
-  }, self);
-
-  self.dispXCPBalRemainingPostCall = ko.computed(function() {
-    return smartFormat(self.xcpBalRemainingPostCall(), null, 4);
-  }, self);
-  
-  self.validationModel = ko.validatedObservable({
-    percentageToCall: self.percentageToCall
-  });
-
-  self.dispXCPBalRemainingPostCallCss = ko.computed(function() {
-    return self.xcpBalRemainingPostCall() < 0 ? 'errorColor' : 'sellColor';
-  }, self);
-
-  self.resetForm = function() {
-    self.percentageToCall(null);
-    self.validationModel.errors.showAllMessages(false);
-  }
-  
-  self.submitForm = function() {
-    if (!self.validationModel.isValid()) {
-      self.validationModel.errors.showAllMessages();
-      return false;
-    }    
-    $('#callAssetModal form').submit();
-  }
-
-  self.doAction = function() {
-    //do the additional issuance (specify non-zero quantity, no transfer destination)
-    WALLET.doTransaction(self.address(), "create_callback",
-      { source: self.address(),
-        fraction: Decimal.round(new Decimal(self.percentageToCall()).div(100), 8, Decimal.MidpointRounding.ToEven).toFloat(),
-        asset: self.asset()
-      },
-      function(txHash, data, endpoint, addressType, armoryUTx) {
-        self.shown(false);
-
-        var message = "";
-        if (armoryUTx) {
-          message = i18n.t("you_will_calling_back", self.percentageToCall(), self.asset(), self.totalXCPPay());
-        } else {
-          message = i18n.t("you_have_called_back", self.percentageToCall(), self.asset(), self.totalXCPPay());
-        }
-        
-        WALLET.showTransactionCompleteDialog(message + " " + i18n.t(ACTION_PENDING_NOTICE), message, armoryUTx);
-      }
-    );
-    trackEvent('Assets', 'CallAsset');
-  }
-  
-  self.show = function(address, asset, resetForm) {
-    if(typeof(resetForm)==='undefined') resetForm = true;
-    if(resetForm) self.resetForm();
-    self.address(address);
-    self.asset(asset);
-    self.assetObj(WALLET.getAddressObj(address).getAssetObj(asset));
-    var now = new Date(); 
-    var nowUTC = new Date(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate(), now.getUTCHours(), now.getUTCMinutes(), now.getUTCSeconds());
-
-    //Check if the passed asset is callable
-    assert(self.assetObj().isMine(), "Token is not yours!");
-    assert(self.assetObj().CALLABLE, "Token is not callable!");
-
-    var callDate = new Date(0);
-    callDate.setUTCSeconds(self.assetObj().CALLDATE);
-    if(callDate > nowUTC) {
-      bootbox.alert(i18n.t("token_not_callable_until", self.asset(), self.assetObj().dispCallDate()));
-      return;
-    }
-    self.shown(true);
-    trackDialogShow('CallAsset');
-  }  
-
-  self.hide = function() {
-    self.shown(false);
-  }  
-}
-
-
 var AssetHistoryItemModel = function(historyObj) {
   var self = this;
   self.HISTORYOBJ = historyObj;
@@ -804,8 +617,6 @@ var AssetHistoryItemModel = function(historyObj) {
       desc = i18n.t("token_locked");
     } else if(self.HISTORYOBJ['type'] == 'transferred') {
       desc = i18n.t("token_transferred_from_to", getAddressLabel(self.HISTORYOBJ['prev_owner']), getAddressLabel(self.HISTORYOBJ['new_owner']));
-    } else if(self.HISTORYOBJ['type'] == 'called_back') {
-      desc = i18n.t("x_tokens_called_back", self.HISTORYOBJ['percentage']);
     } else {
       desc = i18n.t("unknown_op") + " <b>" + self.HISTORYOBJ['type'] + "</b>";
     }
@@ -826,9 +637,6 @@ function ShowAssetInfoModalViewModel() {
   self.totalIssued = ko.observable(null);
   self.locked = ko.observable(null);
   self.divisible = ko.observable(null);
-  self.callable = ko.observable(null);
-  self.callDate = ko.observable(null);
-  self.callPrice = ko.observable(null);
   self.history = ko.observableArray([]);
   
   self.extImageURL = ko.observable(null);
@@ -852,9 +660,6 @@ function ShowAssetInfoModalViewModel() {
     self.totalIssued(assetObj.normalizedTotalIssued());
     self.locked(assetObj.locked());
     self.divisible(assetObj.DIVISIBLE);
-    self.callable(assetObj.CALLABLE);
-    self.callDate(assetObj.dispCallDate());
-    self.callPrice(assetObj.CALLPRICE);
     self.history([]); //clear until we have the data from the API call below...
     
     //Fetch the asset history and populate the table with it

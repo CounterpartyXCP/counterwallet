@@ -136,7 +136,6 @@
                     <li data-bind="visible: !$parent.IS_WATCH_ONLY && isMine()"><a data-bind="click: transfer, locale: 'transfer_ownership'" href="#"></a></li>
                     <li data-bind="visible: !$parent.IS_WATCH_ONLY && isMine() && !locked()"><a data-bind="click: lock, locale: 'lock_token_issuance'" href="#"></a></li>
                     <li data-bind="visible: !$parent.IS_WATCH_ONLY && isMine()"><a data-bind="click: changeDescription, locale: 'change_token_description'" href="#"></a></li>
-                    <li data-bind="visible: !$parent.IS_WATCH_ONLY && isMine() && CALLABLE"><a data-bind="click: call, locale: 'call'" href="#"></a></li>
                   </ul>
                 </div>
                 <h3 class="name pull-left" data-bind="text: ASSET"></h3>
@@ -153,8 +152,6 @@
                 <div class="balancesAssetIcons">
                     <span data-bind="visible: locked()" class="balancesAssetIcon"
                         title="Token is locked"><i class="icon-append fa fa-lock"></i></span>
-                    <span data-bind="visible: CALLABLE" class="balancesAssetIcon"
-                        title="Token is callable"><i class="icon-append fa fa-mail-reply-all"></i></span>
                 </div>
               </div>
             </div> <!-- end widget content body -->
@@ -572,33 +569,6 @@
               </label>
               <div class="note" data-bind="locale: 'make_divisible_note'"></div>
           </div></section>
-          <section><div class="row">
-            <div class="col col-sm-2"></div>
-            <div class="col col-sm-10">
-              <label class="checkbox">
-                <input name="assetCallable" type="checkbox" data-bind="checked: callable">
-                <i></i><span data-bind="locale: 'make_callable'"></span>
-              </label>
-              <div class="note" data-bind="locale: 'make_callable_note'"></div>
-          </div></section>
-          <section data-bind="fadeVisibleInOnly: callable"><div class="row">
-            <label class="control-label col col-sm-2" data-bind="locale: 'call_date'"></label>
-            <div class="col col-sm-10">
-                <label class="input">
-                    <input name="assetCallDate" type="text" data-bind="datetimepicker: callDate, value: callDate, valueUpdate: 'input'"/>
-                </label>
-                <div class="note" data-bind="locale: 'call_date_note'"></div>
-            </div>
-          </div></section>
-          <section data-bind="fadeVisibleInOnly: callable"><div class="row">
-            <label class="control-label col col-sm-2" data-bind="locale: 'call_price'"></label>
-            <div class="col col-sm-10">
-                <label class="input">
-                    <input name="assetCallPrice" type="text" data-bind="value: callPrice, valueUpdate: 'input'"/>
-                </label>
-                <div class="note" data-bind="locale: 'call_price_note'"></div>
-            </div>
-          </div></section>
         </fieldset></form>
         <p class="formPadded" style="text-align:center" data-bind="visible: tokenNameType== 'alphabetic', locale: 'asset_creation_fee_xcp', localeArgs: ASSET_CREATION_FEE_XCP"></p>
       </div>
@@ -772,39 +742,6 @@
   </div><!-- /.modal-dialog -->
 </div><!-- /.modal -->
 
-
-<!-- modal for call asset -->
-<div data-bind="showModal: shown" id="callAssetModal" class="modal fade" data-backdrop="static" data-keyboard="false" tabindex="-1" role="dialog" aria-labelledby="callAssetModal" aria-hidden="true">
-  <div class="modal-dialog">
-    <div class="modal-content">
-      <div class="modal-header">
-        <button type="button" data-bind="click: hide" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
-        <h4 class="modal-title" data-bind="locale: 'call_token', localeArgs: asset"></h4>
-      </div>
-      <div class="modal-body no-padding" data-bind="visible: assetObj">
-        <p class="formPadded" data-bind="locale: 'use_this_form', localeArgs: {0: asset, 1: dispCallDate}"></p>
-        <form class="smart-form" data-bind="submit: doAction"><fieldset>
-          <section><div class="row">
-            <label class="control-label col col-sm-2"><span data-bind="locale: 'percent_to_call'"></span></label>
-            <div class="col col-sm-10">
-                <label class="input"><i class="icon-append fa fa-plus"></i>
-                    <input name="percentageToCall" data-bind="value: percentageToCall, valueUpdate : 'input'" type="text"/>
-                </label>
-                <div class="note"><span  data-bind="locale: 'call_token_note'"></span>%).</div>
-            </div>
-          </div></section>
-        </fieldset></form>
-        <div class="formPaddedBot" data-bind="fadeVisibleInOnly: xcpBalRemainingPostCallIsSet, locale: 'xcp_bal_remaining_post_call', localeArgs: {0: dispCallPrice, 1: asset, 2: dispTotalIssued, 3: dispTotalOutstanding, 4: percentageToCall, 5: totalXCPPay, 6: dispXCPBalRemainingPostCallCss, 7: dispXCPBalRemainingPostCall, 8: dispUnitsToCallback, 9: asset, 10: dispUnitsAfterCallback, 11: asset}"></div>
-      </div>
-      <div class="modal-footer">
-        <button type="button" class="btn btn-default" data-bind="click: hide, locale: 'cancel'"></button>
-        <button type="button" data-bind="click: submitForm, locale: 'call'" class="btn btn-warning"></button>
-      </div>
-    </div><!-- /.modal-content -->
-  </div><!-- /.modal-dialog -->
-</div><!-- /.modal -->
-
-
 <!-- modal for show asset info -->
 <div data-bind="showModal: shown" id="showAssetInfoModal" class="modal fade" data-backdrop="static" data-keyboard="false" tabindex="-1" role="dialog" aria-labelledby="showAssetInfoModal" aria-hidden="true">
   <div class="modal-dialog modal-lg">
@@ -885,33 +822,6 @@
                 <i></i><span data-bind="locale: 'divisible_token'"></span>
               </label>
               <div class="note" data-bind="locale: 'divisible_token_note'"></div>
-          </div></section>
-          <section><div class="row">
-            <div class="col col-sm-2"></div>
-            <div class="col col-sm-10">
-              <label class="checkbox">
-                <input name="assetCallable" type="checkbox" data-bind="checked: callable" disabled="disabled">
-                <i></i><span data-bind="locale: 'callable_token'"></span>
-              </label>
-              <div class="note" data-bind="locale: 'callable_token_note'"></div>
-          </div></section>
-          <section data-bind="visible: callable"><div class="row">
-            <label class="control-label col col-sm-2" data-bind="locale: 'call_date'"></label>
-            <div class="col col-sm-10">
-                <label class="input">
-                    <input name="assetCallDate" type="text" data-bind="value: callDate" disabled="disabled"/>
-                </label>
-                <div class="note" data-bind="locale: 'call_date_note'"></div>
-            </div>
-          </div></section>
-          <section data-bind="fadeVisibleInOnly: callable"><div class="row">
-            <label class="control-label col col-sm-2" data-bind="locale: 'call_price'"></label>
-            <div class="col col-sm-10">
-                <label class="input">
-                    <input name="assetCallPrice" type="text" data-bind="value: callPrice" disabled="disabled"/>
-                </label>
-                <div class="note" data-bind="locale: 'call_price_note'"></div>
-            </div>
           </div></section>
         </fieldset></form>
         <table class="table table-striped table-bordered table-hover" data-bind="fadeVisibleInOnly: showHistory">

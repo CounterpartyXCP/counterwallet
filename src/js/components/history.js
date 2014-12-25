@@ -209,8 +209,6 @@ function TransactionHistoryItemViewModel(data) {
       desc = i18n.t("hist_dividend", smartFormat(normalizeQuantity(self.DATA['quantity_per_unit'])), self.DATA['dividend_asset'], self.DATA['asset']);
     } else if(self.RAW_TX_TYPE == 'cancels') {
       desc = i18n.t("hist_cancellation", data['offer_hash']);
-    } else if(self.RAW_TX_TYPE == 'callbacks') {
-      desc = i18n.t("hist_callback", (self.DATA['fraction'] * 100).toFixed(4), self.DATA['asset']);
     } else if(self.RAW_TX_TYPE == 'bet_expirations') {
       desc = i18n.t("hist_bet_expired", self.DATA['bet_index']);
     } else if(self.RAW_TX_TYPE == 'order_expirations') {

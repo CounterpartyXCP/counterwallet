@@ -58,16 +58,12 @@ NotificationViewModel.calcText = function(category, message) {
       smartFormat(normalizeQuantity(message['earned'])));
   } else if(category == "cancels" && WALLET.getAddressObj(message['source'])) {
     desc = i18n.t("notif_order_cancelled", message['tx_index'], getAddressLabel(message['source']));
-  } else if(category == "callbacks" || category == "dividend") {
+  } else if(category == "dividend") {
     //See if any of our addresses own any of the specified asset, and if so, notify them of the callback or dividend
     // NOTE that counterpartyd has automatically already adusted the balances of all asset holders...we just need to notify
     var addressesWithAsset = WALLET.getAddressesWithAsset(message['asset']);
     if(!addressesWithAsset.length) return;
-    if(category == "callbacks") {
-      desc = i18n.t("notif_callback_done", addressesWithAsset.join(', '), (parseFloat(message['fraction']) * 100).toString(), message['asset']);
-    } else {
-      desc = i18n.t("notif_dividend_done", message['dividend_asset'], addressesWithAsset.join(', '), message['quantity_per_unit'], message['asset']);
-    }
+    desc = i18n.t("notif_dividend_done", message['dividend_asset'], addressesWithAsset.join(', '), message['quantity_per_unit'], message['asset']);
   } else if(category == 'issuances') {
     var addresses = WALLET.getAddressesList();
     var assetObj = null;
