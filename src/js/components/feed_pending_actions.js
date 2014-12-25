@@ -78,10 +78,6 @@ PendingActionViewModel.calcText = function(category, data) {
     desc = i18n.t("pend_or_unconf_callback", pending, (data['fraction'] * 100).toFixed(4), data['asset']);
   } else if(category == 'btcpays') {
     desc = i18n.t("pend_or_unconf_btcpay", pending, getAddressLabel(data['source']));
-  } else if(category == 'rps') {
-    desc  = i18n.t("pend_or_unconf_rps", pending, getAddressLabel(data['source']), numberWithCommas(normalizeQuantity(data['wager'])));
-  } else if(category == 'rpsresolves') {
-    desc  = i18n.t("pend_or_unconf_rpsresolve", pending, getAddressLabel(data['source']));
   } else if(category == 'order_matches') {
 
     if (WALLET.getAddressObj(data['tx1_address']) && data['forward_asset'] == 'BTC' && data['_status'] == 'pending') {      
@@ -106,7 +102,7 @@ function PendingActionFeedViewModel() {
   self.entries = ko.observableArray([]); //pending actions beyond pending BTCpays
   self.lastUpdated = ko.observable(new Date());
   self.ALLOWED_CATEGORIES = [
-    'sends', 'orders', 'issuances', 'broadcasts', 'bets', 'dividends', 'burns', 'cancels', 'callbacks', 'btcpays', 'rps', 'rpsresolves', 'order_matches'
+    'sends', 'orders', 'issuances', 'broadcasts', 'bets', 'dividends', 'burns', 'cancels', 'callbacks', 'btcpays', 'order_matches'
     //^ pending actions are only allowed for these categories
   ];
   
@@ -114,12 +110,6 @@ function PendingActionFeedViewModel() {
     return self.entries().length;
   }, self);
 
-  self.pendingRPS = ko.computed(function() {
-    return $.map(self.entries(), function(item) { 
-        var game = 'rps' == item.CATEGORY;
-        return game ? item : null;
-    }).length;
-  }, self);
   
   self.getLocalStorageKey = function() {
     return 'pendingActions_' + WALLET.identifier();
@@ -312,10 +302,6 @@ PendingActionFeedViewModel.modifyBalancePendingFlag = function(category, data, f
   } else if (category == 'bets') {
 
     updateUnconfirmedBalance(data['source'], 'XCP', data['wager_quantity'] * -1);
-    
-  } else if (category == 'rps') {
-
-    updateUnconfirmedBalance(data['source'], 'XCP', data['wager'] * -1);
     
   }
 }

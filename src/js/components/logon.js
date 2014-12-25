@@ -161,9 +161,6 @@ function LogonViewModel() {
       if (RESTRICTED_AREA['pages/betting.html'].indexOf(USER_COUNTRY) != -1) {
         BETTING_ENABLE = false;
       }
-      if (RESTRICTED_AREA['pages/rps.html'].indexOf(USER_COUNTRY) != -1) {
-        GAMING_ENABLE = false;
-      }
       
       // set quote assets
       QUOTE_ASSETS = data['quote_assets']
@@ -402,7 +399,6 @@ function LogonViewModel() {
 
     PENDING_ACTION_FEED.restoreFromLocalStorage(function() {});
     MESSAGE_FEED.restoreOrder();
-    MESSAGE_FEED.resolvePendingRpsMatches();
 
     //record some metrics...
     trackEvent("Login", "Wallet", "Size", PREFERENCES['num_addresses_used']);

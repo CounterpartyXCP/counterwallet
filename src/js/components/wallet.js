@@ -652,7 +652,6 @@ function WalletViewModel() {
           WALLET.signAndBroadcastTx(address, unsignedTxHex, function(txHash, endpoint) {
             //register this as a pending transaction
             var category = action.replace('create_', '') + 's'; //hack
-            if (category == 'rpss') category = 'rps';
             if(data['source'] === undefined) data['source'] = address;
             if(action == 'create_order') {
               data['_give_divisible'] = extra1;

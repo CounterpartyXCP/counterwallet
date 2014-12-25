@@ -1,4 +1,3 @@
-NOTIFIED_RPS_RESULT = {};
 
 function NotificationViewModel(category, message) {
   var self = this;
@@ -145,89 +144,6 @@ NotificationViewModel.calcText = function(category, message) {
       desc = i18n.t("notif_bet_match_expired", getAddressLabel(message['tx1_address']), getAddressLabel(message['tx0_address']));
     }
 
-
-  } else if(category == 'rps'  && WALLET.getAddressObj(message['source'])) {
-
-    desc  = i18n.t("notif_rps", smartFormat(normalizeQuantity(message['wager'])), getAddressLabel(message['source']));
-
-  } else if(category == 'rpsresolves' && WALLET.getAddressObj(message['source'])) {
-
-    var move_names = [i18n.t('na'), i18n.t('rock'), i18n.t('paper'), i18n.t('scissors'), i18n.t('spock'), i18n.t('lizard')];
-    var move_name = move_names[message['move']] || message['move']
-    desc  = i18n.t("notif_rps_move_confirmed", move_name, getAddressLabel(message['source']));
-
-  } else if(category == 'rps_expirations' && WALLET.getAddressObj(message['source'])) {
-
-    desc = i18n.t("notif_rps_expired", message['rps_index'], getAddressLabel(message['source']));
-
-  } else if(category == "rps_match_expirations") {
-
-    if(WALLET.getAddressObj(message['tx0_address']) && WALLET.getAddressObj(message['tx1_address'])) {
-      desc = i18n.t("notif_self_rps_match_expired", getAddressLabel(message['tx0_address']), getAddressLabel(message['tx1_address']));
-    } else if(WALLET.getAddressObj(message['tx0_address'])) {
-      desc = i18n.t("notif_rps_match_expired", getAddressLabel(message['tx0_address']), getAddressLabel(message['tx1_address']));
-    } else if(WALLET.getAddressObj(message['tx1_address'])) {
-      desc = i18n.t("notif_rps_match_expired", getAddressLabel(message['tx1_address']), getAddressLabel(message['tx0_address']));
-    }
-
-  } else if(category == "rps_matches") {
-
-    if (!message['tx0_address']) {
-
-      var params = {
-        filters: [
-          {field: 'id', op: '=', value: message['rps_match_id']}
-        ]
-      }
-
-      var onReceiveRpsMatch = function(data) {
-        for (var i in data) {
-          var rps_match = data[i];
-          NOTIFICATION_FEED.add(category, rps_match);
-        }        
-      }
-
-      failoverAPI('get_rps_matches', params, onReceiveRpsMatch);
-
-    } else {
-        
-        if (WALLET.getAddressObj(message['tx0_address'])) {
-          if  (message['status'] == "concluded: first player wins") {
-            desc = i18n.t("notif_rps_win", smartFormat(normalizeQuantity(message['wager'])), getAddressLabel(message['tx0_address']));
-          } else if  (message['status'] == "concluded: second player wins") {
-            desc = i18n.t("notif_rps_lose", smartFormat(normalizeQuantity(message['wager'])), getAddressLabel(message['tx0_address']));
-          } else if  (message['status'] == "concluded: tie") {
-            desc = i18n.t("notif_rps_tie", getAddressLabel(message['tx0_address']));
-          }
-          if (desc) {
-            desc += " (" + message['tx0_index'] + ")";
-          }
-        }
-
-        var desc2 = "";
-        if (WALLET.getAddressObj(message['tx1_address'])) {
-          if  (message['status'] == "concluded: first player wins") {
-            desc2 = i18n.t("notif_rps_lose", smartFormat(normalizeQuantity(message['wager'])), getAddressLabel(message['tx1_address']));
-          } else if  (message['status'] == "concluded: second player wins") {
-            desc2 = i18n.t("notif_rps_win", smartFormat(normalizeQuantity(message['wager'])), getAddressLabel(message['tx1_address']));
-          } else if  (message['status'] == "concluded: tie") {
-            desc2 = i18n.t("notif_rps_tie", getAddressLabel(message['tx1_address']));
-          }
-          if (desc) {
-            desc2 += " (" + message['tx1_index'] + ")";
-          }
-          if (desc2 != "") {
-            desc = desc + '<br />' + desc2;
-          }
-        }
-
-        if (desc && NOTIFIED_RPS_RESULT[desc]) {
-          desc = null;
-        } else if (desc) {
-          NOTIFIED_RPS_RESULT[desc] = true;
-        }
-      
-    }
 
   }
 
