@@ -512,7 +512,7 @@ function WalletViewModel() {
       onError = function(jqXHR, textStatus, errorThrown) { return defaultErrorHandler(jqXHR, textStatus, errorThrown); };
     assert(onSuccess, "onSuccess callback must be defined");
     
-    failoverAPI("get_chain_address_info", {"addresses": addresses, "with_uxtos": true, "with_last_txn_hashes": 5, "with_block_height": true},
+    failoverAPI("get_chain_address_info", {"addresses": addresses, "with_uxtos": true, "with_last_txn_hashes": 5},
       function(data, endpoint) {
         var numSuitableUnspentTxouts = null;
         var numPrimedTxoutsIncl0Confirms = null;
