@@ -85,6 +85,17 @@ function WalletViewModel() {
     return addresses;
   }
 
+  self.numAddressesUsed = function() {
+    var count = 0;
+    
+    ko.utils.arrayForEach(self.addresses(), function(address) {
+      if (address.TYPE == 'normal') {
+        count++;
+      }
+    });
+    return count;
+  }
+
   self.getBiggestXCPBalanceAddress = function() {
     var maxAmount = 0;
     var maxAddress = null;

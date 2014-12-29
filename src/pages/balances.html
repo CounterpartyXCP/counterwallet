@@ -92,7 +92,7 @@
                   <li data-bind="visible: IS_NORMAL"><a data-bind="click: signMessage, locale: 'sign_message'" href="#"></a></li>
                   <li data-bind="visible: IS_NORMAL"><a data-bind="click: signTransaction, locale: 'sign_transaction'" href="#"></a></li>
                   <li data-bind="visible: IS_ARMORY_OFFLINE"><a data-bind="click: armoryBroadcastTransaction, locale: 'broadcast_transaction'" href="#"></a></li>
-                  <li data-bind="visible: !IS_NORMAL"><a data-bind="click: remove, locale: 'remove_address'" href="#"></a></li>
+                  <li data-bind="visible: !IS_NORMAL || (($index == PREFERENCES['num_addresses_used'] - 1) && ($index != 0))"><a data-bind="click: remove, locale: 'remove_address'" href="#"></a></li>
 
                   <li class="menu-item dropdown dropdown-submenu">
                     <a href="#" class="dropdown-toggle" data-toggle="dropdown" data-bind="locale: 'sort_by'"></a>

@@ -226,16 +226,19 @@ function AddressViewModel(type, key, address, initialLabel, pubKeys) {
   }
   
   self.remove = function() { //possible for watch only addresses only
-    assert(self.TYPE != 'normal', 'Only watch-only or armory addresses can be removed.');
     WALLET.addresses.remove(self);
     
     //update the preferences with this address removed
-    if(self.TYPE === 'watch') {
+    if (self.TYPE === 'watch') {
       PREFERENCES['watch_only_addresses']= _.without(PREFERENCES['watch_only_addresses'], self.ADDRESS);  
-    } else {
-      assert(self.TYPE === 'armory');
+    } else if (self.TYPE === 'armory') {
       PREFERENCES['armory_offline_addresses'] = _.filter(PREFERENCES['armory_offline_addresses'], 
         function (el) { return el.address !== self.ADDRESS; });
+    } else if (self.TYPE === 'multisig') {
+      PREFERENCES['multisig_addresses'] = _.filter(PREFERENCES['multisig_addresses'], 
+        function (el) { return el.address !== self.ADDRESS; });
+    } else if (self.TYPE === 'normal') {
+      PREFERENCES['num_addresses_used'] -= 1;
     }
     
     WALLET.storePreferences(function() {

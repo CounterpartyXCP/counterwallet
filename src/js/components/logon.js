@@ -237,6 +237,10 @@ function LogonViewModel() {
       if (localPref && localPref['last_updated'] && localPref['last_updated'] > data['last_updated']) {
         PREFERENCES = localPref['preferences'];
       }
+      // restore lost local storage
+      if (!localPref) {
+        mustSavePreferencesToServer = true;
+      }
       
       //Provide defaults for any missing fields in the stored preferences object
       for(var prop in DEFAULT_PREFERENCES) {
@@ -353,7 +357,7 @@ function LogonViewModel() {
   self.openWalletPt3 = function(mustSavePreferencesToServer) {
     //add in the armory and watch only addresses
     var additionalBTCAddresses = [], i = null;
-    for(i=0; i < PREFERENCES['armory_offline_addresses'].length; i++) {
+    for(i in PREFERENCES['armory_offline_addresses']) {
       try {
         WALLET.addAddress('armory',
           PREFERENCES['armory_offline_addresses'][i]['address'],
@@ -363,7 +367,7 @@ function LogonViewModel() {
         $.jqlog.error("Could not generate armory address: " + e);
       }
     }
-    for(i=0; i < PREFERENCES['watch_only_addresses'].length; i++) {
+    for(i in PREFERENCES['watch_only_addresses']) {
       try {
         WALLET.addAddress('watch', PREFERENCES['watch_only_addresses'][i]);
         additionalBTCAddresses.push(PREFERENCES['watch_only_addresses'][i]);
@@ -371,7 +375,7 @@ function LogonViewModel() {
         $.jqlog.error("Could not generate watch only address: " + e);
       }
     }
-    for(i=0; i < PREFERENCES['multisig_addresses'].length; i++) {
+    for(i in PREFERENCES['multisig_addresses']) {
       try {
         WALLET.addAddress('multisig', 
                           PREFERENCES['multisig_addresses'][i]['address'],

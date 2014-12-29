@@ -360,13 +360,16 @@ function CreateNewAddressModalViewModel() {
     //update PREFs
     var newAddressHash = hashToB64(newAddress);
     if(self.addressType() == 'normal') {
-      PREFERENCES['num_addresses_used'] += 1;
+      PREFERENCES['num_addresses_used'] = parseInt(PREFERENCES['num_addresses_used']) + 1;
     } else if(self.addressType() == 'watch') {
+      if (!(PREFERENCES['watch_only_addresses'] instanceof Array)) PREFERENCES['watch_only_addresses'] = [];
       PREFERENCES['watch_only_addresses'].push(newAddress); //can't use the hash here, unfortunately
     } else if(self.addressType() == 'multisig') {
+      if (!(PREFERENCES['multisig_addresses'] instanceof Array)) PREFERENCES['multisig_addresses'] = [];
       PREFERENCES['multisig_addresses'].push({'address': newAddress, 'pubkeys_hex': self.multisigPubkeys()}); //can't use the hash here, unfortunately
     } else {
       assert(self.addressType() == 'armory');
+      if (!(PREFERENCES['armory_offline_addresses'] instanceof Array)) PREFERENCES['armory_offline_addresses'] = [];
       PREFERENCES['armory_offline_addresses'].push({'address': newAddress, 'pubkey_hex': self.armoryPubKey()}); //can't use the hash here, unfortunately
     }
     var sanitizedDescription = _.stripTags(self.description());
