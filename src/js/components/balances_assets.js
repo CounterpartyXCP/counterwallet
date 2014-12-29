@@ -460,11 +460,7 @@ function PayDividendModalViewModel() {
 
   self.totalFee = ko.computed(function() {
     if(!self.holderCount() || !isNumber(self.quantityPerUnit()) || !parseFloat(self.quantityPerUnit())) return null;
-    if (USE_TESTNET || WALLET.networkBlockHeight() > 330000) {
-      return mulFloat(self.holderCount(), DIVIDEND_FEE_PER_HOLDER);
-    } else {
-      return 0;
-    }
+    return mulFloat(self.holderCount(), DIVIDEND_FEE_PER_HOLDER);
   });
   
   self.dispTotalPay = ko.computed(function() {
