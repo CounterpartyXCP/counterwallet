@@ -373,8 +373,10 @@ function LogonViewModel() {
     }
     for(i=0; i < PREFERENCES['multisig_addresses'].length; i++) {
       try {
-        WALLET.addAddress('multisig', PREFERENCES['multisig_addresses'][i]);
-        additionalBTCAddresses.push(PREFERENCES['multisig_addresses'][i]);
+        WALLET.addAddress('multisig', 
+                          PREFERENCES['multisig_addresses'][i]['address'],
+                          PREFERENCES['multisig_addresses'][i]['pubkeys_hex']);
+        additionalBTCAddresses.push(PREFERENCES['multisig_addresses'][i]['address']);
       } catch(e) {
         $.jqlog.error("Could not generate multisig only address: " + e);
       }

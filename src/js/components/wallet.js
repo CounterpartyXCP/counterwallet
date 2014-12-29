@@ -28,10 +28,10 @@ function WalletViewModel() {
     } catch(e) {}
   });
   
-  self.addAddress = function(type, address, armoryPubKey) {
+  self.addAddress = function(type, address, pubKeys) {
     assert(['normal', 'watch', 'armory', 'multisig'].indexOf(type) != -1);
     assert((type == 'normal' && !address) || (address));
-    assert((type == 'armory' && armoryPubKey) || !armoryPubKey); //only used with armory addresses
+    assert((type == 'multisig' && pubKeys) ||(type == 'armory' && pubKeys) || !pubKeys); //only used with armory addresses
     
     if(type == 'normal') {
       //adds a key to the wallet, making a new address object on the wallet in the process
@@ -63,9 +63,9 @@ function WalletViewModel() {
       var addressHash = hashToB64(address);
       var label = PREFERENCES.address_aliases[addressHash] || i18n.t("unknown_label");
   
-      self.addresses.push(new AddressViewModel(type, null, address, label, armoryPubKey)); //add new
-      $.jqlog.debug("Watch-only or armory wallet address added: " + address + " -- hash: "
-        + addressHash + " -- label: " + label + " -- armoryPubKey: " + armoryPubKey);
+      self.addresses.push(new AddressViewModel(type, null, address, label, pubKeys)); //add new
+      $.jqlog.debug("Watch-only, multisig or armory wallet address added: " + address + " -- hash: "
+        + addressHash + " -- label: " + label + " -- PubKey(s): " + pubKeys);
     }
 
     return address;
@@ -592,6 +592,14 @@ function WalletViewModel() {
     data['encoding'] = 'multisig';
     data['pubkey'] = addressObj.PUBKEY;
     //find and specify the verifyDestAddr
+
+    if (data['_pubkeys']) {
+      if (typeof(data['pubkey']) == "string") {
+        data['pubkey'] = [data['pubkey']];
+      }
+      data['pubkey'] = data['pubkey'].concat(data['_pubkeys']);
+      delete data['_pubkeys']
+    }
 
     if (ALLOW_UNCONFIRMED_INPUTS && supportUnconfirmedChangeParam(action)) {
       data['allow_unconfirmed_inputs'] = true;

@@ -1,17 +1,17 @@
 
-function AddressViewModel(type, key, address, initialLabel, armoryPubKey) {
+function AddressViewModel(type, key, address, initialLabel, pubKeys) {
   //An address on a wallet
   //type is one of: normal, watch, armory
   assert(['normal', 'watch', 'armory', 'multisig'].indexOf(type) != -1);
   assert((type == 'normal' && key) || (type == 'watch' && !key) || (type == 'armory' && !key) || type == 'multisig');
-  assert((type == 'armory' && armoryPubKey) || !armoryPubKey); //only used with armory addresses
+  assert((type == 'multisig' && pubKeys) || (type == 'armory' && pubKeys) || !pubKeys); //only used with armory addresses
 
   var self = this;
   
   self.KEY = key; //  key : the HierarchicalKey bitcore object
   self.TYPE = type;
   self.ADDRESS = address;
-  self.PUBKEY = type == 'armory' ? armoryPubKey : (key ? key.getPub() : ''); //hex string
+  self.PUBKEY = (type == 'armory' || type == 'multisig') ? pubKeys : (key ? key.getPub() : ''); //hex string
 
   //Accessors for ease of use in templates...
   self.FEATURE_DIVIDEND = disabledFeatures.indexOf('dividend') == -1;

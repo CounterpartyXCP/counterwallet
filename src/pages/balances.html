@@ -218,7 +218,72 @@
         </div>
 
         <form class="smart-form" data-bind="submit: doAction"><fieldset>
-          <section data-bind="visible: addressType() != 'normal'"><div class="row">
+
+          <section data-bind="visible: addressType() == 'multisig'"><div class="row">
+            <label class="control-label col col-sm-2" data-bind="locale: 'type'"></label>
+            <div class="col col-sm-10">
+                <label class="input">
+                    <select class="width-max select2" data-bind="value: multisigAddressType, valueUpdate: 'input'">
+                      <option value="1_2">1 of 2</option>
+                      <option value="2_2">2 of 2</option>
+                      <option value="1_3">1 of 3</option>
+                      <option value="2_3">2 of 3</option>
+                      <option value="3_3">3 of 3</option>
+                    </select>
+                </label>
+            </div>
+          </div></section>
+          <section data-bind="visible: addressType() == 'multisig'"><div class="row">
+            <label class="control-label col col-sm-2" data-bind="locale: 'first_address'"></label>
+            <div class="col col-sm-10">
+                <label class="input"><i class="icon-append fa fa-tag"></i>
+                    <input name="multisigAddress1" data-bind="value: multisigAddress1, valueUpdate: 'input'" type="text"/>
+                </label>
+            </div>
+          </div></section>
+          <section data-bind="visible: addressType() == 'multisig' && needPubkey1()"><div class="row">
+            <label class="control-label col col-sm-2" data-bind="locale: 'first_pubkey'"></label>
+            <div class="col col-sm-10">
+                <label class="input"><i class="icon-append fa fa-tag"></i>
+                    <input name="multisigPubkeyAddress1" data-bind="value: multisigPubkeyAddress1, valueUpdate: 'input'" type="text"/>
+                </label>
+            </div>
+          </div></section>
+          <section data-bind="visible: addressType() == 'multisig'"><div class="row">
+            <label class="control-label col col-sm-2" data-bind="locale: 'second_address'"></label>
+            <div class="col col-sm-10">
+                <label class="input"><i class="icon-append fa fa-tag"></i>
+                    <input name="multisigAddress2" data-bind="value: multisigAddress2, valueUpdate: 'input'" type="text"/>
+                </label>
+            </div>
+          </div></section>
+          <section data-bind="visible: addressType() == 'multisig' && needPubkey2()"><div class="row">
+            <label class="control-label col col-sm-2" data-bind="locale: 'second_pubkey'"></label>
+            <div class="col col-sm-10">
+                <label class="input"><i class="icon-append fa fa-tag"></i>
+                    <input name="multisigPubkeyAddress2" data-bind="value: multisigPubkeyAddress2, valueUpdate: 'input'" type="text"/>
+                </label>
+            </div>
+          </div></section>
+          <section data-bind="visible: addressType() == 'multisig' && multisigProvided() == '3'"><div class="row">
+            <label class="control-label col col-sm-2" data-bind="locale: 'third_address'"></label>
+            <div class="col col-sm-10">
+                <label class="input"><i class="icon-append fa fa-tag"></i>
+                    <input name="multisigAddress3" data-bind="value: multisigAddress3, valueUpdate: 'input'" type="text"/>
+                </label>
+            </div>
+          </div></section>
+          <section data-bind="visible: addressType() == 'multisig' && multisigProvided() == '3' && needPubkey3()"><div class="row">
+            <label class="control-label col col-sm-2" data-bind="locale: 'third_pubkey'"></label>
+            <div class="col col-sm-10">
+                <label class="input"><i class="icon-append fa fa-tag"></i>
+                    <input name="multisigPubkeyAddress3" data-bind="value: multisigPubkeyAddress3, valueUpdate: 'input'" type="text"/>
+                </label>
+            </div>
+          </div></section>
+
+
+          <section data-bind="visible: addressType() != 'normal' && addressType() != 'multisig'"><div class="row">
             <label class="control-label col col-sm-2" data-bind="locale: 'address'"></label>
             <div class="col col-sm-10">
                 <label class="input"><i class="icon-append fa fa-tag"></i>
@@ -266,12 +331,49 @@
                 <span class="invalid" data-bind="validationMessage: destAddress"></span>
             </div>
           </div></section>
+          
+
+          <section><div class="row" data-bind="visible: missingPubkey1()">
+            <label class="control-label col col-sm-2" data-bind="locale: 'pubkey'"></label>
+            <div class="col col-sm-10">
+                <label class="input">
+                    <div class="note" data-bind="locale: 'for_the_address', localeArgs: {0: missingPubkey1Address()}"></div>
+                    <input name="pubkey1" data-bind="value: pubkey1, valueUpdate: 'input', localeAttr: {'placeholder': 'enter_pubkey'}" type="text"/>
+
+                </label>
+                <span class="invalid" data-bind="validationMessage: pubkey1"></span>
+            </div>
+          </div></section>
+          <section><div class="row" data-bind="visible: missingPubkey2()">
+            <label class="control-label col col-sm-2" data-bind="locale: 'pubkey'"></label>
+            <div class="col col-sm-10">
+                <label class="input">
+                    <div class="note" data-bind="locale: 'for_the_address', localeArgs: {0: missingPubkey2Address()}"></div>
+                    <input name="pubkey1" data-bind="value: pubkey2, valueUpdate: 'input', localeAttr: {'placeholder': 'enter_pubkey'}" type="text"/>
+
+                </label>
+                <span class="invalid" data-bind="validationMessage: pubkey2"></span>
+            </div>
+          </div></section>
+          <section><div class="row" data-bind="visible: missingPubkey3()">
+            <label class="control-label col col-sm-2" data-bind="locale: 'pubkey'"></label>
+            <div class="col col-sm-10">
+                <label class="input">
+                    <div class="note" data-bind="locale: 'for_the_address', localeArgs: {0: missingPubkey3Address()}"></div>
+                    <input name="pubkey3" data-bind="value: pubkey3, valueUpdate: 'input', localeAttr: {'placeholder': 'enter_pubkey'}" type="text"/>
+
+                </label>
+                <span class="invalid" data-bind="validationMessage: pubkey3"></span>
+            </div>
+          </div></section>
+
+
           <section><div class="row">
             <label class="control-label col col-sm-2" data-bind="locale: 'send_amount'"></label>
             <div class="col col-sm-10">
                 <label id="sendAmountLabel" class="input inline-block">
                     <i class="icon-append fa fa-share"></i>
-                    <input name="quantity" data-bind="value: quantity, valueUpdate: 'input', attr: {placeholder: 'Enter quantity'}" type="text"/>
+                    <input name="quantity" data-bind="value: quantity, valueUpdate: 'input', localeAttr: {'placeholder': 'enter_quantity'}" type="text"/>
                 </label>
                 <span>&nbsp;&nbsp;<button type="button" data-bind="click: maxAmount, locale: 'max'" class="btn btn-default btn-sm"></button></span>
                 <span class="invalid" data-bind="validationMessage: quantity"></span>

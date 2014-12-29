@@ -102,15 +102,30 @@ function createSharedKnockoutValidators() {
       message: USE_TESTNET ? i18n.t('must_be_valid_testnet_address') : i18n.t('must_be_valid_bitcoin_address')
   };
 
+  ko.validation.rules['isValidMonosigAddress'] = {
+      validator: function (val, self) {
+          return CWBitcore.isValidAddress(val);
+      },
+      message: USE_TESTNET ? i18n.t('must_be_valid_testnet_address') : i18n.t('must_be_valid_bitcoin_address')
+  };
+
   ko.validation.rules['isValidBitcoinAddressIfSpecified'] = {
       validator: function (val, self) {
           try {
             if(!val) return true; //the "if specified" part of the name :)
-            if(self.addressType() == 'multisig') {
-              return CWBitcore.isValidMultisigAddress(val)
-            } else {
-              return CWBitcore.isValidAddress(val);
-            }
+            return CWBitcore.isValidAddress(val) || CWBitcore.isValidMultisigAddress(val);
+          } catch (err) {
+            return false;
+          }
+      },
+      message: USE_TESTNET ? i18n.t('must_be_valid_testnet_address') : i18n.t('must_be_valid_bitcoin_address')
+  };
+
+  ko.validation.rules['isValidMonosigAddressIfSpecified'] = {
+      validator: function (val, self) {
+          try {
+            if(!val) return true; //the "if specified" part of the name :)
+            return CWBitcore.isValidAddress(val);
           } catch (err) {
             return false;
           }
@@ -187,7 +202,7 @@ function createSharedKnockoutValidators() {
     async: true,
     message: i18n.t('cant_find_public_key'),
     validator: function (val, self, callback) {
-      if (self.addressType() == 'armory' || self.addressType() == 'multisig') {
+      if (self.addressType() == 'armory') {
         failoverAPI("get_pubkey_for_address", {'address': val},
           function(data, endpoint) {
             if (data) {

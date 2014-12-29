@@ -547,7 +547,7 @@
   "enter_address_description": "Enter the description you'd like to use for this new address.<br/><br/> <b class=\"errorColor\">Please NOTE that once you create a new address, you cannot delete it.</b>",
   "enter_address_description_watch_only": "Please enter the info for the address you would like to add into your wallet as a watch-only address.",
   "enter_address_description_armory": "Please enter the info for the address you would like to add into your wallet as an Offline Armory address.",
-  "enter_address_description_multisig": "<p>Please enter the the multisig address you would like to add into your wallet.</p><p>The multisig addresses are represented as such a string as <b><i>'{m}_{address}_{address}_{address}_{n}'</i></b>, where the addresses are sorted alphabetically/numerically.<br />1-of-2, 2-of-2, 1-of-3, 2-of-3 and 3-of-3 are supported at the moment. </p><p><i><b>NOTE:</b> Each address in a multisig source must have already made <b>at least one non-multisig transaction</b> in the blockchain, for counterpartyd to be able to retrieve its pubkey from the blockchain.</i></p>",
+  "enter_address_description_multisig": "<p>Please enter the the multisig address you would like to add into your wallet</p>",
   "address": "Address",
   "description": "Description",
   "broadcast": "Broadcast",
@@ -817,6 +817,16 @@
   "must_be_quantity_or_zero": "Must be a valid quantity (num with max 8 decimal places), or zero",
   "must_be_positive_integer": "Must be a positive integer",
   "must_be_url": "This field must be a valid url",
-  "must_be_url_or_address": "This field must be a valid url or a valid Bitcoin address"
+  "must_be_url_or_address": "This field must be a valid url or a valid Bitcoin address",
 
+  "first_address": "First Address",
+  "second_address": "Second Address",
+  "third_address": "Third Address",
+  "first_pubkey": "First PubKey",
+  "second_pubkey": "Second PubKey",
+  "third_pubkey": "Third PubKey",
+  "pubkey": "PubKey",
+  "for_the_address": "For the address <b>%s</b>",
+  "enter_pubkey": "Enter PubKey",
+  "pubkey_not_match": "PubKey do not match with the address"
 }
