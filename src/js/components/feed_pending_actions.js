@@ -245,7 +245,7 @@ PendingActionFeedViewModel.modifyBalancePendingFlag = function(category, data, f
           assetObj = addrObj.getAssetObj(asset);
           updateAssetObj(assetObj, quantity, dividend);
         } else {
-          failoverAPI("get_asset_info", {'assets': [asset]}, function(assetsInfo, endpoint) {
+          failoverAPI("get_assets_info", {'assetsList': [asset]}, function(assetsInfo, endpoint) {
             addrObj.addOrUpdateAsset(asset, assetsInfo[0], 0);
             assetObj = addrObj.getAssetObj(asset);
             updateAssetObj(assetObj, quantity, dividend);

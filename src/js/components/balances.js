@@ -821,7 +821,7 @@ function SweepModalViewModel() {
         assets.push(balancesData[i]['asset']);
       }
       //get info on the assets, since we need this for the create_issuance call during the sweep (to take ownership of the asset)
-      failoverAPI("get_asset_info", {'assets': assets}, function(assetsData, endpoint) {
+      failoverAPI("get_assets_info", {'assetsList': assets}, function(assetsData, endpoint) {
         //Create an SweepAssetInDropdownItemModel item
         for(var i=0; i < balancesData.length; i++) {
           assetInfo = $.grep(assetsData, function(e) { return e['asset'] == balancesData[i]['asset']; })[0]; //O(n^2)

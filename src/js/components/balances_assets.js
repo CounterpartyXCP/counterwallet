@@ -397,7 +397,7 @@ function PayDividendModalViewModel() {
   // TODO: DRY! we already make a query to check if assetName exists
   self.assetName.subscribe(function(name) {
     if (!name) return;
-    failoverAPI("get_asset_info", {'assets': [name]}, function(assetsData, endpoint) {
+    failoverAPI("get_assets_info", {'assetsList': [name]}, function(assetsData, endpoint) {
       if (USE_TESTNET || WALLET.networkBlockHeight() > 330000) {
         failoverAPI('get_holder_count', {'asset':name}, function(holderData) {
           self.assetData(assetsData[0]);

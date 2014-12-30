@@ -150,7 +150,7 @@ function WalletViewModel() {
       assert(asset != "XCP" && asset != "BTC", "BTC or XCP not present in the address?"); //these should be already in each address
       //we're trying to update the balance of an asset that doesn't yet exist at this address
       //fetch the asset info from the server, and then use that in a call to addressObj.addOrUpdateAsset
-      failoverAPI("get_asset_info", {'assets': [asset]}, function(assetsInfo, endpoint) {
+      failoverAPI("get_assets_info", {'assetsList': [asset]}, function(assetsInfo, endpoint) {
         addressObj.addOrUpdateAsset(asset, assetsInfo[0], rawBalance);
       });    
     } else {
@@ -267,7 +267,7 @@ function WalletViewModel() {
 
     if (notAvailable.length > 0) {
       // else make a query to counterpartyd
-      failoverAPI("get_asset_info", {'assets': notAvailable}, function(assetsInfo, endpoint) {
+      failoverAPI("get_assets_info", {'assetsList': notAvailable}, function(assetsInfo, endpoint) {
         for (var a in assetsInfo) {
           assetsDivisibility[assetsInfo[a]['asset']] = assetsInfo[a]['divisible'];
         }
@@ -338,7 +338,7 @@ function WalletViewModel() {
             }
           }
 
-          failoverAPI("get_asset_info", {'assets': assets}, function(assetsInfo, endpoint) {
+          failoverAPI("get_assets_info", {'assetsList': assets}, function(assetsInfo, endpoint) {
 
             for (i=0; i < assetsInfo.length; i++) {
               for (j=0; j < balancesData.length; j++) {
