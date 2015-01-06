@@ -2,6 +2,7 @@ function CreateAssetModalViewModel() {
   var self = this;
   self.shown = ko.observable(false);
   self.address = ko.observable('');
+  self.noEnoughXCP = ko.observable(false)
 
   self.tokenNameType = ko.observable('alphabetic');
   self.tokenNameType.subscribe(function(val) {
@@ -99,10 +100,13 @@ function CreateAssetModalViewModel() {
     trackEvent('Assets', 'CreateAsset');
   }
   
-  self.show = function(address, resetForm) {
+  self.show = function(address, resetForm, noXCP) {
+    self.noEnoughXCP(noXCP || false);
     if(typeof(resetForm)==='undefined') resetForm = true;
     if(resetForm) self.resetForm();
     self.address(address);
+    self.tokenNameType('numeric');
+    self.generateRandomId();
     self.shown(true);
     trackDialogShow('CreateAsset');
   }  
@@ -371,11 +375,6 @@ function PayDividendModalViewModel() {
   
   self.assetName = ko.observable('').extend({
     required: true,
-    pattern: {
-      message: i18n.t("token_name_rules"),
-      params: '^[B-Z][A-Z]{3,}$'
-    },
-    isValidAssetNameLength: self,
     assetNameExists: self,
     rateLimit: { timeout: 500, method: "notifyWhenChangesStop" },
     validation:  {
@@ -402,6 +401,10 @@ function PayDividendModalViewModel() {
         failoverAPI('get_holder_count', {'asset':name}, function(holderData) {
           self.assetData(assetsData[0]);
           self.holderCount(holderData[name]);
+          var userAsset = self.addressVM().getAssetObj(name);
+          if (userAsset && userAsset.normalizedBalance() > 0) {
+            self.holderCount(self.holderCount() - 1);
+          }
         });
       } else {
         self.assetData(assetsData[0]);

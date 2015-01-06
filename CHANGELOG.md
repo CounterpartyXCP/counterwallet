@@ -1,3 +1,21 @@
+### v1.6.0 ###
+**Enhancements:**
+- Full multisig support
+- Free numeric asset and dividend fee support
+- Better internationalization
+- Make Counterwallet possible to package in Linux
+
+**Removed features:**
+- BTC Trading
+- Callback
+- RPS
+
+**Fixes:**
+* Numerous fixes: http://goo.gl/JUPoBp
+* Minor UI tweaks
+
+Full list of changes are at: http://goo.gl/V3y29V
+
 ### v1.5.0 ###
 **Enhancements:**
 * Added Quick Buy interface with Vennd Machine
