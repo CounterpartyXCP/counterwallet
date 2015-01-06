@@ -1,17 +1,17 @@
 
-function AddressViewModel(type, key, address, initialLabel, armoryPubKey) {
+function AddressViewModel(type, key, address, initialLabel, pubKeys) {
   //An address on a wallet
   //type is one of: normal, watch, armory
   assert(['normal', 'watch', 'armory', 'multisig'].indexOf(type) != -1);
   assert((type == 'normal' && key) || (type == 'watch' && !key) || (type == 'armory' && !key) || type == 'multisig');
-  assert((type == 'armory' && armoryPubKey) || !armoryPubKey); //only used with armory addresses
+  assert((type == 'multisig' && pubKeys) || (type == 'armory' && pubKeys) || !pubKeys); //only used with armory addresses
 
   var self = this;
   
   self.KEY = key; //  key : the HierarchicalKey bitcore object
   self.TYPE = type;
   self.ADDRESS = address;
-  self.PUBKEY = type == 'armory' ? armoryPubKey : (key ? key.getPub() : ''); //hex string
+  self.PUBKEY = (type == 'armory' || type == 'multisig') ? pubKeys : (key ? key.getPub() : ''); //hex string
 
   //Accessors for ease of use in templates...
   self.FEATURE_DIVIDEND = disabledFeatures.indexOf('dividend') == -1;
@@ -151,10 +151,7 @@ function AddressViewModel(type, key, address, initialLabel, armoryPubKey) {
         locked: assetInfo['locked'],
         rawBalance: initialRawBalance,
         rawSupply: assetInfo['supply'] || assetInfo['quantity'],
-        description: assetInfo['description'], 
-        callable: assetInfo['callable'],
-        callDate: assetInfo['call_date'],
-        callPrice: assetInfo['call_price'],
+        description: assetInfo['description'],
         rawEscrowedBalance: escrowedBalance,
         escrowedBalance: normalizeQuantity(escrowedBalance, assetInfo['divisible'])
       };
@@ -229,16 +226,19 @@ function AddressViewModel(type, key, address, initialLabel, armoryPubKey) {
   }
   
   self.remove = function() { //possible for watch only addresses only
-    assert(self.TYPE != 'normal', 'Only watch-only or armory addresses can be removed.');
     WALLET.addresses.remove(self);
     
     //update the preferences with this address removed
-    if(self.TYPE === 'watch') {
+    if (self.TYPE === 'watch') {
       PREFERENCES['watch_only_addresses']= _.without(PREFERENCES['watch_only_addresses'], self.ADDRESS);  
-    } else {
-      assert(self.TYPE === 'armory');
+    } else if (self.TYPE === 'armory') {
       PREFERENCES['armory_offline_addresses'] = _.filter(PREFERENCES['armory_offline_addresses'], 
         function (el) { return el.address !== self.ADDRESS; });
+    } else if (self.TYPE === 'multisig') {
+      PREFERENCES['multisig_addresses'] = _.filter(PREFERENCES['multisig_addresses'], 
+        function (el) { return el.address !== self.ADDRESS; });
+    } else if (self.TYPE === 'normal') {
+      PREFERENCES['num_addresses_used'] -= 1;
     }
     
     WALLET.storePreferences(function() {

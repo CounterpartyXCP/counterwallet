@@ -145,3 +145,38 @@ function orderMultisigAddress(address) {
   }
   
 }
+
+function pubkeyToPubkeyhash(pubkey) {
+  return bitcore.Address.fromPubKey(new bitcore.Buffer(pubkey, 'hex'), USE_TESTNET ? 'testnet' : 'livenet').toString();
+}
+
+function getPubkeyForAddress(address, callback) {
+  if (!CWBitcore.isValidAddress(address) && !CWBitcore.isValidMultisigAddress(address)) {
+    callback([]);
+  }
+  var pubkeys = [];
+  var addresses = address.split('_');
+  for (var a in addresses) {
+    var addr = addresses[a];
+    if (CWBitcore.isValidAddress(addr)) {
+      var addrObj = WALLET.getAddressObj(addr);
+      if (addrObj) {
+        pubkeys.push(addrObj.PUBKEY);
+      }
+    }
+  }
+  if (addresses.length > pubkeys.length) {
+    failoverAPI("get_pubkey_for_address", {'address': address}, function (data) {
+      if (data) {
+        for (var p in data) {
+          if (pubkeys.indexOf(data[p]) == -1) {
+            pubkeys.push(data[p]);
+          }
+        }
+      }
+      callback(pubkeys);
+    });
+  } else {
+    callback(pubkeys);
+  }
+}

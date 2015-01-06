@@ -84,10 +84,10 @@ function CreateNewAddressModalViewModel() {
   self.addressType = ko.observable(null); //addressType is one of: normal, watch, or armory
   self.armoryPubKey = ko.observable(null); //only set with armory offline addresses
   self.watchAddress = ko.observable('').extend({
-    isValidBitcoinAddressIfSpecified: self,
+    isValidMonosigAddressIfSpecified: self,
     validation: [{
       validator: function (val, self) {
-        return (self.addressType() == 'watch' || self.addressType() == 'armory' || self.addressType() == 'multisig') ? val : true;
+        return (self.addressType() == 'watch' || self.addressType() == 'armory') ? val : true;
       },
       message: i18n.t('field_required'),
       params: self
@@ -100,6 +100,163 @@ function CreateNewAddressModalViewModel() {
       params: self
     }],
     canGetAddressPubKey: self
+  });
+
+  self.multisigAddressType =  ko.observable(null);
+  self.multisigRequired =  ko.computed(function() {
+    if (self.multisigAddressType()) {
+      return self.multisigAddressType().split("_").shift();
+    }
+    return;
+  });
+  self.multisigProvided =  ko.computed(function() {
+    if (self.multisigAddressType()) {
+      return self.multisigAddressType().split("_").pop();
+    }
+    return;
+  });
+
+  
+  self.multisigAddress1 = ko.observable('').extend({
+    isValidMonosigAddress: self,
+    required: true
+  });
+  self.multisigAddress1.subscribe(function(val) {
+    if (val && CWBitcore.isValidAddress(val)) {
+      getPubkeyForAddress(val, function (data) {
+        if (data[0]) {
+          self.multisigPubkeyAddress1(data[0]);
+        } else {
+          self.needPubkey1(true);
+        }
+      });
+    }
+  });
+  self.multisigPubkeyAddress1 = ko.observable('').extend({
+    validation: [{
+      validator: function (val, self) {
+        return (self.addressType() == 'multisig') ? val : true;
+      },
+      message: i18n.t('field_required'),
+      params: self 
+    }, {
+      validator: function (val, self) {
+        if (!val) return true;
+        try {
+          return pubkeyToPubkeyhash(val) == self.multisigAddress1();
+        } catch(e) {
+          return false;
+        }
+      },
+      message: i18n.t('pubkey_not_match'),
+      params: self 
+    }],
+  });
+  self.needPubkey1 = ko.observable(false);
+
+  self.multisigAddress2 = ko.observable('').extend({
+    isValidMonosigAddress: self,
+    required: true
+  });
+  self.multisigAddress2.subscribe(function(val) {
+    if (val && CWBitcore.isValidAddress(val)) {
+      getPubkeyForAddress(val, function (data) {
+        if (data[0]) {
+          self.multisigPubkeyAddress2(data[0]);
+        } else {
+          self.needPubkey2(true);
+        }
+      });
+    }
+  });
+  self.multisigPubkeyAddress2 = ko.observable('').extend({
+    validation: [{
+      validator: function (val, self) {
+        return (self.addressType() == 'multisig') ? val : true;
+      },
+      message: i18n.t('field_required'),
+      params: self 
+    }, {
+      validator: function (val, self) {
+        if (!val) return true;
+        try {
+          return pubkeyToPubkeyhash(val) == self.multisigAddress2();
+        } catch(e) {
+          return false;
+        }
+      },
+      message: i18n.t('pubkey_not_match'),
+      params: self 
+    }],
+  });
+  self.needPubkey2 = ko.observable(false);
+
+  self.multisigAddress3 = ko.observable('').extend({
+    validation: [{
+      validator: function (val, self) {
+        return (self.addressType() == 'multisig' && self.multisigProvided() == 3) ? val : true;
+      },
+      message: i18n.t('field_required'),
+      params: self 
+    }],
+    isValidMonosigAddressIfSpecified: self
+  });
+  self.multisigAddress3.subscribe(function(val) {
+    if (val && CWBitcore.isValidAddress(val)) {
+      getPubkeyForAddress(val, function (data) {
+        if (data[0]) {
+          self.multisigPubkeyAddress3(data[0]);
+        } else {
+          self.needPubkey3(true);
+        }
+      });
+    }
+  });
+  self.multisigPubkeyAddress3 = ko.observable('').extend({
+    validation: [{
+      validator: function (val, self) {
+        return (self.addressType() == 'multisig' && self.multisigProvided() == 3) ? val : true;
+      },
+      message: i18n.t('field_required'),
+      params: self 
+    }, {
+      validator: function (val, self) {
+        if (!val) return true;
+        try {
+          return pubkeyToPubkeyhash(val) == self.multisigAddress3();
+        } catch(e) {
+          return false;
+        }
+      },
+      message: i18n.t('pubkey_not_match'),
+      params: self 
+    }],
+  });
+  self.needPubkey3 = ko.observable(false);
+
+  self.multisigAddress = ko.computed(function() {
+    var newAddress = self.multisigRequired() + '_' + self.multisigAddress1() + '_' + self.multisigAddress2() + '_';
+    if (self.multisigProvided() == 3) {
+      newAddress += self.multisigAddress3() + '_';
+    }
+    newAddress += self.multisigProvided();
+    newAddress = orderMultisigAddress(newAddress);
+    return newAddress;
+  });
+
+  self.multisigPubkeys = ko.computed(function() {
+    var pubKeys = [];
+    var orderedAddress = self.multisigAddress().split('_');
+    orderedAddress.pop();
+    orderedAddress.shift();
+    for (var a in orderedAddress) {
+      for (var i=1; i<=3; i++) {
+        if (orderedAddress[a] == self['multisigAddress' + i]()) {
+          pubKeys.push(self['multisigPubkeyAddress' + i]())
+        }
+      }
+    }
+    return pubKeys;
   });
 
   self.description = ko.observable('').extend({
@@ -117,6 +274,16 @@ function CreateNewAddressModalViewModel() {
     description: self.description,
     watchAddress: self.watchAddress
   });
+
+  self.validationModelMultisig = ko.validatedObservable({
+    description: self.description,
+    multisigAddress1: self.multisigAddress1,
+    multisigPubkeyAddress1: self.multisigPubkeyAddress1,
+    multisigAddress2: self.multisigAddress2,
+    multisigPubkeyAddress2: self.multisigPubkeyAddress2,
+    multisigAddress3: self.multisigAddress3,
+    multisigPubkeyAddress3: self.multisigPubkeyAddress3
+  });
   
   self.dispWindowTitle = ko.computed(function() {
     var title = {
@@ -132,21 +299,38 @@ function CreateNewAddressModalViewModel() {
     self.addressType(null);
     self.watchAddress('');
     self.description('');
+    self.needPubkey1(false);
+    self.multisigAddress1('');
+    self.multisigPubkeyAddress1('');
+    self.needPubkey2(false);
+    self.multisigAddress2('');
+    self.multisigPubkeyAddress2('');
+    self.needPubkey3(false);
+    self.multisigAddress3('');
+    self.multisigPubkeyAddress3('');
     self.validationModel.errors.showAllMessages(false);
   }
   
   self.submitForm = function() {
-    if(self.addressType() == 'armory' && self.watchAddress.isValidating()) {
+    if (self.addressType() == 'armory' && self.watchAddress.isValidating()) {
       setTimeout(function() { //wait a bit and call again
         self.submitForm();
       }, 50);
       return;
     }
-    
-    if (!self.validationModel.isValid()) {
-      self.validationModel.errors.showAllMessages();
-      return false;
-    }    
+
+    if (self.addressType() == 'multisig') {
+      if (!self.validationModelMultisig.isValid()) {
+        self.validationModelMultisig.errors.showAllMessages();
+        return false;
+      }
+    } else {
+      if (!self.validationModel.isValid()) {
+        self.validationModel.errors.showAllMessages();
+        return false;
+      }  
+    }
+
     //data entry is valid...submit to trigger doAction()
     $('#createNewAddressModal form').submit();
   }
@@ -159,26 +343,33 @@ function CreateNewAddressModalViewModel() {
   };
 
   self.doAction = function() {
-    var newAddress = null;
-    
-    if(self.addressType() == 'normal') {
-      newAddress = WALLET.addAddress(self.addressType());
-    } else {
-      newAddress = self.watchAddress(); //watch or armory
-      newAddress = orderMultisigAddress(newAddress);
-      newAddress = WALLET.addAddress(self.addressType(), newAddress, self.armoryPubKey());
+    var newAddress;
+    var pubKeys;
+    if (self.addressType() == 'multisig') {
+      newAddress = self.multisigAddress();
+      pubKeys = self.multisigPubkeys();     
+    } else if (self.addressType() == 'armory') {
+      newAddress = self.watchAddress();
+      pubKeys = self.armoryPubKey();
+    } else if (self.addressType() == 'watch') {
+      newAddress = self.watchAddress();
     }
+
+    newAddress = WALLET.addAddress(self.addressType(), newAddress, pubKeys);
 
     //update PREFs
     var newAddressHash = hashToB64(newAddress);
     if(self.addressType() == 'normal') {
-      PREFERENCES['num_addresses_used'] += 1;
+      PREFERENCES['num_addresses_used'] = parseInt(PREFERENCES['num_addresses_used']) + 1;
     } else if(self.addressType() == 'watch') {
+      if (!(PREFERENCES['watch_only_addresses'] instanceof Array)) PREFERENCES['watch_only_addresses'] = [];
       PREFERENCES['watch_only_addresses'].push(newAddress); //can't use the hash here, unfortunately
     } else if(self.addressType() == 'multisig') {
-      PREFERENCES['multisig_addresses'].push(newAddress); //can't use the hash here, unfortunately
+      if (!(PREFERENCES['multisig_addresses'] instanceof Array)) PREFERENCES['multisig_addresses'] = [];
+      PREFERENCES['multisig_addresses'].push({'address': newAddress, 'pubkeys_hex': self.multisigPubkeys()}); //can't use the hash here, unfortunately
     } else {
       assert(self.addressType() == 'armory');
+      if (!(PREFERENCES['armory_offline_addresses'] instanceof Array)) PREFERENCES['armory_offline_addresses'] = [];
       PREFERENCES['armory_offline_addresses'].push({'address': newAddress, 'pubkey_hex': self.armoryPubKey()}); //can't use the hash here, unfortunately
     }
     var sanitizedDescription = _.stripTags(self.description());
@@ -220,12 +411,130 @@ function SendModalViewModel() {
   self.rawBalance = ko.observable(null);
   self.divisible = ko.observable();
   
-  self.destAddress = ko.observable('').trimmed().extend({
+  self.destAddress = ko.observable('').extend({
     required: true,
     isValidBitcoinAddress: self,
     isNotSameBitcoinAddress: self
   });
-  
+
+  self.missingPubkey1 = ko.observable(false);
+  self.missingPubkey1Address = ko.observable('');
+  self.pubkey1 = ko.observable('').extend({
+    validation: [{
+      validator: function (val, self) {
+        return self.missingPubkey1() ? val : true;
+      },
+      message: i18n.t('field_required'),
+      params: self 
+    }, {
+      validator: function (val, self) {
+        if (!val) return true;
+        try {
+          return pubkeyToPubkeyhash(val) == self.missingPubkey1Address();
+        } catch(e) {
+          return false;
+        }
+      },
+      message: i18n.t('pubkey_not_match'),
+      params: self 
+    }],
+  });
+  self.missingPubkey2 = ko.observable(false);
+  self.missingPubkey2Address = ko.observable('');
+  self.pubkey2 = ko.observable('').extend({
+    validation: [{
+      validator: function (val, self) {
+        return self.missingPubkey2() ? val : true;
+      },
+      message: i18n.t('field_required'),
+      params: self 
+    }, {
+      validator: function (val, self) {
+        if (!val) return true;
+        try {
+          return pubkeyToPubkeyhash(val) == self.missingPubkey2Address();
+        } catch(e) {
+          return false;
+        }
+      },
+      message: i18n.t('pubkey_not_match'),
+      params: self 
+    }],
+  });
+  self.missingPubkey3 = ko.observable(false);
+  self.missingPubkey3Address = ko.observable('');
+  self.pubkey3 = ko.observable('').extend({
+    validation: [{
+      validator: function (val, self) {
+        return self.missingPubkey3() ? val : true;
+      },
+      message: i18n.t('field_required'),
+      params: self 
+    }, {
+      validator: function (val, self) {
+        if (!val) return true;
+        try {
+          return pubkeyToPubkeyhash(val) == self.missingPubkey3Address();
+        } catch(e) {
+          return false;
+        }
+      },
+      message: i18n.t('pubkey_not_match'),
+      params: self 
+    }],
+  });
+
+  self._additionalPubkeys = [];
+  self.destAddress.subscribe(function(val) {
+
+    self.missingPubkey1(false);
+    self.missingPubkey1Address('');
+    self.missingPubkey2(false);
+    self.missingPubkey2Address('');
+    self.missingPubkey3(false);
+    self.missingPubkey3Address('');
+
+    if (!self.destAddress()) return;
+    if (!CWBitcore.isValidMultisigAddress(self.destAddress())) return;
+
+    getPubkeyForAddress(val, function (data) {
+      var addresses = []
+      if (CWBitcore.isValidMultisigAddress(self.destAddress())) {
+        addresses = self.destAddress().split('_');
+        addresses.pop();
+        addresses.shift();
+      } else {
+        addresses.push(self.destAddress())
+      }
+      var missingPubkeys = []
+      for (var a in addresses) {
+        var address = addresses[a];
+        var missing = true;
+        for (var k in data) {
+          if (pubkeyToPubkeyhash(data[k]) == address) {
+            missing = false;
+            self._additionalPubkeys.push(data[k]);
+          }
+        }
+        if (missing) {
+          missingPubkeys.push(address);
+        }
+      }
+      if (missingPubkeys.length >= 1) {
+        self.missingPubkey1(true);
+        self.missingPubkey1Address(missingPubkeys[0]);
+      }
+      if (missingPubkeys.length >= 2) {
+        self.missingPubkey2(true);
+        self.missingPubkey2Address(missingPubkeys[1]);
+      }
+      if (missingPubkeys.length == 3) {
+        self.missingPubkey3(true);
+        self.missingPubkey3Address(missingPubkeys[2]);
+      }
+    });
+  });
+
   self.quantity = ko.observable().extend({
     required: true,
     isValidPositiveQuantity: self,
@@ -269,12 +578,23 @@ function SendModalViewModel() {
   
   self.validationModel = ko.validatedObservable({
     destAddress: self.destAddress,
-    quantity: self.quantity()
+    quantity: self.quantity,
+    pubkey1: self.pubkey1,
+    pubkey2: self.pubkey2,
+    pubkey3: self.pubkey3
   });  
   
   self.resetForm = function() {
     self.destAddress('');
     self.quantity(null);
+
+    self.missingPubkey1(false);
+    self.missingPubkey1Address('');
+    self.missingPubkey2(false);
+    self.missingPubkey2Address('');
+    self.missingPubkey3(false);
+    self.missingPubkey3Address('');
+
     self.validationModel.errors.showAllMessages(false);
   }
   
@@ -296,12 +616,25 @@ function SendModalViewModel() {
   }
 
   self.doAction = function() {
+    var additionalPubkeys = [];
+
+    if (self.pubkey1()) {
+      additionalPubkeys.push(self.pubkey1())
+    }
+    if (self.pubkey2()) {
+      additionalPubkeys.push(self.pubkey2())
+    }
+    if (self.pubkey3()) {
+      additionalPubkeys.push(self.pubkey3())
+    }
+
     WALLET.doTransaction(self.address(), "create_send",
       { source: self.address(),
         destination: self.destAddress(),
         quantity: denormalizeQuantity(parseFloat(self.quantity()), self.divisible()),
         asset: self.asset(),
-        _divisible: self.divisible()
+        _divisible: self.divisible(),
+        _pubkeys: additionalPubkeys.concat(self._additionalPubkeys)
       },
       function(txHash, data, endpoint, addressType, armoryUTx) {
         var message = "<b>" + (armoryUTx ? i18n.t("will_be_sent") : i18n.t("were_sent")) + " </b>";
@@ -488,7 +821,7 @@ function SweepModalViewModel() {
         assets.push(balancesData[i]['asset']);
       }
       //get info on the assets, since we need this for the create_issuance call during the sweep (to take ownership of the asset)
-      failoverAPI("get_asset_info", {'assets': assets}, function(assetsData, endpoint) {
+      failoverAPI("get_assets_info", {'assetsList': assets}, function(assetsData, endpoint) {
         //Create an SweepAssetInDropdownItemModel item
         for(var i=0; i < balancesData.length; i++) {
           assetInfo = $.grep(assetsData, function(e) { return e['asset'] == balancesData[i]['asset']; })[0]; //O(n^2)
@@ -540,7 +873,6 @@ function SweepModalViewModel() {
       return;
     }
     WALLET.retriveBTCAddrsInfo([address], function(data) {
-      $.jqlog.debug(data);
       self.addressForFeesBalanceMessage(normalizeQuantity(data[0]['confirmedRawBal'])+' BTC in '+address);
       self.addressForFeesBalance(data[0]['confirmedRawBal']); 
     });
@@ -803,9 +1135,6 @@ function SweepModalViewModel() {
       asset: selectedAsset.ASSET,
       divisible: selectedAsset.ASSET_INFO['divisible'],
       description: selectedAsset.ASSET_INFO['description'],
-      callable_: selectedAsset.ASSET_INFO['callable'],
-      call_date: selectedAsset.ASSET_INFO['call_date'] ? selectedAsset.ASSET_INFO['call_date'] : null,
-      call_price: selectedAsset.ASSET_INFO['call_price'] ? parseFloat(selectedAsset.ASSET_INFO['call_price']) : null,
       transfer_destination: self.destAddress(),
       encoding: 'multisig',
       pubkey: pubkey,
@@ -1435,9 +1764,6 @@ function SignTransactionModalViewModel() {
         trackEvent('Balances', 'SignTransaction');
         //Keep the form up after signing, the user will manually press Close to close it...
       })
-      
-      //signed = cwk.signRawTransaction(self.unsignedTx());
-      //self.validTx(true);
 
     } catch (e) {
       self.signedTx(e.message);
@@ -1447,17 +1773,31 @@ function SignTransactionModalViewModel() {
   }
 
   self.signAndBroadcastTransaction = function() {
-    self.signTransaction();
-    trackEvent('Balances', 'BroadcastTransaction');
-    if (self.validTx()) {
-      var onSuccess = function(txHash, endpoint) {
-        self.shown(false);
-        bootbox.alert(i18n.t("your_tx_broadcast_success") + "<br /><br /><b>"+txHash+"</b>");
-      }
+    var cwk = WALLET.getAddressObj(self.address()).KEY;
+    var signed = '';
+    try {
+      
+      CWBitcore.signRawTransaction2(self.unsignedTx(), cwk, function(signedHex) {
+        self.signedTx(signedHex);
+        $("#signedMessage").effect("highlight", {}, 1500);
+        trackEvent('Balances', 'SignTransaction');
+        
+        var onSuccess = function(txHash, endpoint) {
+          trackEvent('Balances', 'BroadcastTransaction');
+          self.shown(false);
+          bootbox.alert(i18n.t("your_tx_broadcast_success") + "<br /><br /><b>"+txHash+"</b>");
+        }
+        WALLET.broadcastSignedTx(self.signedTx(), onSuccess, defaultErrorHandler);
+        
+      });
 
-      WALLET.broadcastSignedTx(self.signedTx(), onSuccess, defaultErrorHandler);
+    } catch (e) {
+      self.signedTx(e.message);
+      self.validTx(false);
     }
+    
   }
+  
 }
 
 function ArmoryBroadcastTransactionModalViewModel() {

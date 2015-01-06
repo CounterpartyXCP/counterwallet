@@ -1,6 +1,6 @@
 INIT_FUNC = {};
 
-localeInit(initIndex);
+loadLocaleConfig(initIndex);
 
 function initIndex() { //main page
   window.LOGON_VIEW_MODEL = new LogonViewModel();
@@ -135,7 +135,6 @@ function initBalances() {
     ko.applyBindings({
       FEATURE_EXCHANGE: disabledFeatures.indexOf('exchange') == -1,
       FEATURE_BETTING: disabledFeatures.indexOf('betting') == -1,
-      FEATURE_RPS: disabledFeatures.indexOf('rps') == -1,
       FEATURE_HISTORY: disabledFeatures.indexOf('history') == -1,
       FEATURE_PORTFOLIO: disabledFeatures.indexOf('portfolio') == -1,
       FEATURE_LEADERBOARD: disabledFeatures.indexOf('leaderboard') == -1,
@@ -149,7 +148,6 @@ function initBalances() {
   window.TRANSFER_ASSET_MODAL = new TransferAssetModalViewModel();
   window.CHANGE_ASSET_DESCRIPTION_MODAL = new ChangeAssetDescriptionModalViewModel();
   window.PAY_DIVIDEND_MODAL = new PayDividendModalViewModel();
-  window.CALL_ASSET_MODAL = new CallAssetModalViewModel();
   window.SHOW_ASSET_INFO_MODAL = new ShowAssetInfoModalViewModel();
   
   ko.applyBindings(CREATE_ASSET_MODAL, document.getElementById("createAssetModal"));
@@ -157,7 +155,6 @@ function initBalances() {
   ko.applyBindings(TRANSFER_ASSET_MODAL, document.getElementById("transferAssetModal"));
   ko.applyBindings(CHANGE_ASSET_DESCRIPTION_MODAL, document.getElementById("changeAssetDescriptionModal"));
   ko.applyBindings(PAY_DIVIDEND_MODAL, document.getElementById("payDividendModal"));
-  ko.applyBindings(CALL_ASSET_MODAL, document.getElementById("callAssetModal"));
   ko.applyBindings(SHOW_ASSET_INFO_MODAL, document.getElementById("showAssetInfoModal"));
   
   $(document).ready(function() {
@@ -277,7 +274,6 @@ function initHistory() {
 }
 INIT_FUNC['pages/history.html'] = initHistory;
 
-
 function initStats() {
   pageSetUp(); //init smartadmin featureset
   
@@ -294,7 +290,6 @@ function initStats() {
   STATS_TXN_HISTORY.init();
 }
 INIT_FUNC['pages/stats.html'] = initStats;
-
 
 function initLeaderboard() {
   pageSetUp(); //init smartadmin featureset
@@ -411,15 +406,6 @@ function initOrderMatches() {
   ORDER_MATCHES.init();
 }
 INIT_FUNC['pages/ordermatches.html'] = initOrderMatches;
-
-function initRPS() {
-  pageSetUp();
-  window.RPS = new RpsViewModel();
-  ko.applyBindings(RPS, document.getElementById("rps"));
-
-  RPS.init();
-}
-INIT_FUNC['pages/rps.html'] = initRPS;
 
 function initSimpleBuy() {
   pageSetUp();

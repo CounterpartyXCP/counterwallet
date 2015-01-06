@@ -28,10 +28,10 @@ function WalletViewModel() {
     } catch(e) {}
   });
   
-  self.addAddress = function(type, address, armoryPubKey) {
+  self.addAddress = function(type, address, pubKeys) {
     assert(['normal', 'watch', 'armory', 'multisig'].indexOf(type) != -1);
     assert((type == 'normal' && !address) || (address));
-    assert((type == 'armory' && armoryPubKey) || !armoryPubKey); //only used with armory addresses
+    assert((type == 'multisig' && pubKeys) ||(type == 'armory' && pubKeys) || !pubKeys); //only used with armory addresses
     
     if(type == 'normal') {
       //adds a key to the wallet, making a new address object on the wallet in the process
@@ -63,9 +63,9 @@ function WalletViewModel() {
       var addressHash = hashToB64(address);
       var label = PREFERENCES.address_aliases[addressHash] || i18n.t("unknown_label");
   
-      self.addresses.push(new AddressViewModel(type, null, address, label, armoryPubKey)); //add new
-      $.jqlog.debug("Watch-only or armory wallet address added: " + address + " -- hash: "
-        + addressHash + " -- label: " + label + " -- armoryPubKey: " + armoryPubKey);
+      self.addresses.push(new AddressViewModel(type, null, address, label, pubKeys)); //add new
+      $.jqlog.debug("Watch-only, multisig or armory wallet address added: " + address + " -- hash: "
+        + addressHash + " -- label: " + label + " -- PubKey(s): " + pubKeys);
     }
 
     return address;
@@ -83,6 +83,17 @@ function WalletViewModel() {
       }
     });
     return addresses;
+  }
+
+  self.numAddressesUsed = function() {
+    var count = 0;
+    
+    ko.utils.arrayForEach(self.addresses(), function(address) {
+      if (address.TYPE == 'normal') {
+        count++;
+      }
+    });
+    return count;
   }
 
   self.getBiggestXCPBalanceAddress = function() {
@@ -139,7 +150,7 @@ function WalletViewModel() {
       assert(asset != "XCP" && asset != "BTC", "BTC or XCP not present in the address?"); //these should be already in each address
       //we're trying to update the balance of an asset that doesn't yet exist at this address
       //fetch the asset info from the server, and then use that in a call to addressObj.addOrUpdateAsset
-      failoverAPI("get_asset_info", {'assets': [asset]}, function(assetsInfo, endpoint) {
+      failoverAPI("get_assets_info", {'assetsList': [asset]}, function(assetsInfo, endpoint) {
         addressObj.addOrUpdateAsset(asset, assetsInfo[0], rawBalance);
       });    
     } else {
@@ -256,7 +267,7 @@ function WalletViewModel() {
 
     if (notAvailable.length > 0) {
       // else make a query to counterpartyd
-      failoverAPI("get_asset_info", {'assets': notAvailable}, function(assetsInfo, endpoint) {
+      failoverAPI("get_assets_info", {'assetsList': notAvailable}, function(assetsInfo, endpoint) {
         for (var a in assetsInfo) {
           assetsDivisibility[assetsInfo[a]['asset']] = assetsInfo[a]['divisible'];
         }
@@ -327,7 +338,7 @@ function WalletViewModel() {
             }
           }
 
-          failoverAPI("get_asset_info", {'assets': assets}, function(assetsInfo, endpoint) {
+          failoverAPI("get_assets_info", {'assetsList': assets}, function(assetsInfo, endpoint) {
 
             for (i=0; i < assetsInfo.length; i++) {
               for (j=0; j < balancesData.length; j++) {
@@ -512,7 +523,7 @@ function WalletViewModel() {
       onError = function(jqXHR, textStatus, errorThrown) { return defaultErrorHandler(jqXHR, textStatus, errorThrown); };
     assert(onSuccess, "onSuccess callback must be defined");
     
-    failoverAPI("get_chain_address_info", {"addresses": addresses, "with_uxtos": true, "with_last_txn_hashes": 5, "with_block_height": true},
+    failoverAPI("get_chain_address_info", {"addresses": addresses, "with_uxtos": true, "with_last_txn_hashes": 5},
       function(data, endpoint) {
         var numSuitableUnspentTxouts = null;
         var numPrimedTxoutsIncl0Confirms = null;
@@ -593,6 +604,14 @@ function WalletViewModel() {
     data['pubkey'] = addressObj.PUBKEY;
     //find and specify the verifyDestAddr
 
+    if (data['_pubkeys']) {
+      if (typeof(data['pubkey']) == "string") {
+        data['pubkey'] = [data['pubkey']];
+      }
+      data['pubkey'] = data['pubkey'].concat(data['_pubkeys']);
+      delete data['_pubkeys']
+    }
+
     if (ALLOW_UNCONFIRMED_INPUTS && supportUnconfirmedChangeParam(action)) {
       data['allow_unconfirmed_inputs'] = true;
     }
@@ -652,7 +671,6 @@ function WalletViewModel() {
           WALLET.signAndBroadcastTx(address, unsignedTxHex, function(txHash, endpoint) {
             //register this as a pending transaction
             var category = action.replace('create_', '') + 's'; //hack
-            if (category == 'rpss') category = 'rps';
             if(data['source'] === undefined) data['source'] = address;
             if(action == 'create_order') {
               data['_give_divisible'] = extra1;

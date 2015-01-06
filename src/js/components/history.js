@@ -209,8 +209,6 @@ function TransactionHistoryItemViewModel(data) {
       desc = i18n.t("hist_dividend", smartFormat(normalizeQuantity(self.DATA['quantity_per_unit'])), self.DATA['dividend_asset'], self.DATA['asset']);
     } else if(self.RAW_TX_TYPE == 'cancels') {
       desc = i18n.t("hist_cancellation", data['offer_hash']);
-    } else if(self.RAW_TX_TYPE == 'callbacks') {
-      desc = i18n.t("hist_callback", (self.DATA['fraction'] * 100).toFixed(4), self.DATA['asset']);
     } else if(self.RAW_TX_TYPE == 'bet_expirations') {
       desc = i18n.t("hist_bet_expired", self.DATA['bet_index']);
     } else if(self.RAW_TX_TYPE == 'order_expirations') {
@@ -224,17 +222,6 @@ function TransactionHistoryItemViewModel(data) {
       desc = i18n.t("hist_credit_debit", getLinkForCPData('address', self.DATA['address'], getAddressLabel(self.DATA['address'])), tx_type,
         smartFormat(normalizeQuantity(self.DATA['quantity'], self.DATA['_divisible'])), self.DATA['asset']);
 
-    } else if(self.RAW_TX_TYPE == 'rps') {
-      desc = i18n.t("hist_rps", smartFormat(normalizeQuantity(self.DATA['wager'])));  
-    } else if(self.RAW_TX_TYPE == 'rps_matches') {
-      desc = i18n.t("hist_rps_match", getAddressLabel(self.DATA['tx0_address']), getAddressLabel(self.DATA['tx1_address']),
-        smartFormat(normalizeQuantity(self.DATA['wager'])));
-    } else if(self.RAW_TX_TYPE == 'rpsresolves') {
-      desc = i18n.t("hist_rpsresolve", getTxHashLink(self.DATA['rps_match_id']), getAddressLabel(self.DATA['source']), self.DATA['move']);
-    } else if(self.RAW_TX_TYPE == 'rps_expirations') {
-      desc = i18n.t("hist_rps_expired", self.DATA['rps_index']);
-    } else if(self.RAW_TX_TYPE == 'rps_match_expirations') {
-      desc = i18n.t("hist_rps_match_expired", getTxHashLink(self.DATA['rps_match_id']));
     } else {
       desc = i18n.t("hist_unknown");
     }

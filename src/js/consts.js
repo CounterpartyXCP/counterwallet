@@ -61,7 +61,7 @@ var USER_COUNTRY = ''; //set in login.js
 var CURRENT_PAGE_URL = ''; // set in loadUrl()
 
 //selective disablement
-var DISABLED_FEATURES_SUPPORTED = ['betting', 'rps', 'dividend', 'exchange', 'leaderboard', 'portfolio', 'stats', 'history']; //what can be disabled
+var DISABLED_FEATURES_SUPPORTED = ['betting', 'dividend', 'exchange', 'leaderboard', 'portfolio', 'stats', 'history']; //what can be disabled
 var DISABLED_FEATURES = []; //set in counterwallet.js
 
 // restricted action
@@ -69,7 +69,6 @@ var RESTRICTED_AREA = {
   'pages/betting.html': ['US'],
   'pages/openbets.html': ['US'],
   'pages/matchedbets.html': ['US'],
-  'pages/rps.html': ['US'],
   'dividend': ['US'],
   'pages/simplebuy.html': ['US']
 }
