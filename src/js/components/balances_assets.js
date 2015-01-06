@@ -375,11 +375,6 @@ function PayDividendModalViewModel() {
   
   self.assetName = ko.observable('').extend({
     required: true,
-    pattern: {
-      message: i18n.t("token_name_rules"),
-      params: '^[B-Z][A-Z]{3,}$'
-    },
-    isValidAssetNameLength: self,
     assetNameExists: self,
     rateLimit: { timeout: 500, method: "notifyWhenChangesStop" },
     validation:  {
