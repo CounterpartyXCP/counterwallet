@@ -401,6 +401,10 @@ function PayDividendModalViewModel() {
         failoverAPI('get_holder_count', {'asset':name}, function(holderData) {
           self.assetData(assetsData[0]);
           self.holderCount(holderData[name]);
+          var userAsset = self.addressVM().getAssetObj(name);
+          if (userAsset && userAsset.normalizedBalance() > 0) {
+            self.holderCount(self.holderCount() - 1);
+          }
         });
       } else {
         self.assetData(assetsData[0]);
