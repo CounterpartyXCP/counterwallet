@@ -621,7 +621,7 @@
           <section><div class="row">
             <label class="control-label col col-sm-2" data-bind="locale: 'token_name_type'"></label>
             <div class="col col-sm-10">
-              <label class="radio">
+              <label class="radio" data-bind="visible: noEnoughXCP() == false">
                 <input type="radio" data-bind="checked: tokenNameType" name="tokenNameType" value="alphabetic">
                 <i></i><span data-bind="locale: 'alphabetic_name'"></span>
                 <div class="note" style="margin-top:0" data-bind="locale: 'token_name_rules'"></div>

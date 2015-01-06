@@ -263,12 +263,12 @@ function AddressViewModel(type, key, address, initialLabel, pubKeys) {
     if(!WALLET.canDoTransaction(self.ADDRESS)) return false;
 
     var xcpBalance = WALLET.getBalance(self.ADDRESS, 'XCP');
+    var noXCP = false;
     if(xcpBalance < ASSET_CREATION_FEE_XCP) {
-      bootbox.alert(i18n.t("no_enough_for_issuance_fee", ASSET_CREATION_FEE_XCP, xcpBalance));
-      return false;
+      noXCP = true;
     }
 
-    CREATE_ASSET_MODAL.show(self.ADDRESS);
+    CREATE_ASSET_MODAL.show(self.ADDRESS, true, noXCP);
   }
 
   self.payDividend = function () {

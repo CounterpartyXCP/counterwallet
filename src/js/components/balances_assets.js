@@ -2,6 +2,7 @@ function CreateAssetModalViewModel() {
   var self = this;
   self.shown = ko.observable(false);
   self.address = ko.observable('');
+  self.noEnoughXCP = ko.observable(false)
 
   self.tokenNameType = ko.observable('alphabetic');
   self.tokenNameType.subscribe(function(val) {
@@ -99,10 +100,13 @@ function CreateAssetModalViewModel() {
     trackEvent('Assets', 'CreateAsset');
   }
   
-  self.show = function(address, resetForm) {
+  self.show = function(address, resetForm, noXCP) {
+    self.noEnoughXCP(noXCP || false);
     if(typeof(resetForm)==='undefined') resetForm = true;
     if(resetForm) self.resetForm();
     self.address(address);
+    self.tokenNameType('numeric');
+    self.generateRandomId();
     self.shown(true);
     trackDialogShow('CreateAsset');
   }  
