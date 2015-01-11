@@ -93,7 +93,7 @@ function initRollbar() {
 
 function loadServersListAndSettings() {
   //Request for the servers.json file, which should contain an array of API backends for us to use
-  $.getJSON("/servers.json", function(data) {
+  $.getJSON("servers.json", function(data) {
     assert(data && typeof data == "object" && data.hasOwnProperty("servers"), "Returned servers.json file does not contain valid JSON object");
     assert(data['servers'] && data['servers'] instanceof Array, "'servers' field in returned servers.json file is not an array");
     ROLLBAR_ACCESS_TOKEN = data['rollbarAccessToken'] || ''; 
