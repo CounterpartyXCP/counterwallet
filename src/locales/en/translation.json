@@ -90,7 +90,7 @@
   "wallet_options": "Wallet Options",
   "theme": "Theme",
   "language": "Language",
-  "password_field": "Password field",
+  "password_field": "Password for Quick Access URL",
   "auto_btcpay": "Auto BTCPay",
   "enable_auto_btcpay": "Enable Automatic BTC Payments",
   "enable_auto_btcpay_desc": "If this option is enabled, Counterwallet will automatically take care of making BTC payments for matched orders where you owe BTC. <b>It is highly recommended you keep this on.</b> If not enabled, you must manually settle any required BTC payments within a 10 block limit (approximately 80-100 minutes).",
