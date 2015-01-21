@@ -273,7 +273,7 @@
                 </label>
             </div>
           </div></section>
-          <section data-bind="visible: addressType() == 'multisig' && multisigProvided() == '3' && needPubkey3()"><div class="row">
+          <section data-bind="visible: (addressType() == 'multisig') && (multisigProvided() == '3') && needPubkey3()"><div class="row">
             <label class="control-label col col-sm-2" data-bind="locale: 'third_pubkey'"></label>
             <div class="col col-sm-10">
                 <label class="input"><i class="icon-append fa fa-tag"></i>
@@ -281,7 +281,6 @@
                 </label>
             </div>
           </div></section>
-
 
           <section data-bind="visible: addressType() != 'normal' && addressType() != 'multisig'"><div class="row">
             <label class="control-label col col-sm-2" data-bind="locale: 'address'"></label>
