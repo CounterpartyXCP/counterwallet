@@ -87,7 +87,7 @@
                   <i class="fa fa-bars"></i> <span data-bind="locale: 'address_actions'"></span> <i class="fa fa-caret-down"></i>
                 </button>
                 <ul class="dropdown-menu pull-right">
-                  <li><a data-bind="click: showQRCode, locale: 'show_qr_code'" href="#"></a></li>
+                  <li><a data-bind="click: showQRCode, locale: 'show_qr_code', visible: !IS_MULTISIG_ADDRESS" href="#"></a></li>
                   <li data-bind="visible: IS_NORMAL"><a data-bind="click: showPrivateKey, locale: 'show_private_key'" href="#"></a></li>
                   <li data-bind="visible: IS_NORMAL"><a data-bind="click: signMessage, locale: 'sign_message'" href="#"></a></li>
                   <li data-bind="visible: IS_NORMAL"><a data-bind="click: signTransaction, locale: 'sign_transaction'" href="#"></a></li>
