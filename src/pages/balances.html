@@ -120,7 +120,7 @@
                 </ul>
               </div>
             </div>
-            <div class="widget-toolbar display-address"><span id="" data-bind="attr: {'id': 'address-text-' + ADDRESS}, click: selectAddressText, text: dispAddress"></span></div>
+            <div class="widget-toolbar display-address"><span id="" data-bind="attr: {'id': 'address-text-' + ADDRESS}, click: changeLabel, text: dispAddress"></span></div>
             <div class="clearfix"></div>
           </header>
           <div> <!-- widget div-->
@@ -172,7 +172,7 @@
       </div>
       <div class="modal-body no-padding">
         <div class="formPadded">
-          <p data-bind="locale: 'enter_new_label', localeArgs: dispAddress "></p>
+          <p style="word-wrap: break-word;" data-bind="locale: 'enter_new_label', localeArgs: dispAddress "></p>
         </div>
 
         <form class="smart-form" data-bind="submit: doAction"><fieldset>

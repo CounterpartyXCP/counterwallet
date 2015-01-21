@@ -28,7 +28,7 @@ function ChangeAddressLabelModalViewModel() {
       var addresses = self.address().split("_");
       var sigRequired = addresses.shift();
       addresses.pop();
-      return addresses.join(", ") + ' (' + sigRequired + '/' + addresses.length + ')';
+      return sigRequired + '_' + addresses.join("_") + '_' + addresses.length;
     }
   });
   
