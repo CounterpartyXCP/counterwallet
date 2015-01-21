@@ -544,7 +544,7 @@
   "label": "Label",
   "cancel": "Cancel",
   "change_label": "Change Label",
-  "enter_address_description": "Enter the description you'd like to use for this new address.<br/><br/> <b class=\"errorColor\">Please NOTE that once you create a new address, you cannot delete it.</b>",
+  "enter_address_description": "Enter the description you'd like to use for this new address.<br/><br/>",
   "enter_address_description_watch_only": "Please enter the info for the address you would like to add into your wallet as a watch-only address.",
   "enter_address_description_armory": "Please enter the info for the address you would like to add into your wallet as an Offline Armory address.",
   "enter_address_description_multisig": "<p>Please enter the the multisig address you would like to add into your wallet</p>",
