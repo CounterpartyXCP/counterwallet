@@ -379,10 +379,13 @@ function CreateNewAddressModalViewModel() {
     WALLET.getAddressObj(newAddress).label(sanitizedDescription);
 
     //save prefs to server
-    WALLET.storePreferences(function(data, endpoint) {
-      self.shown(false);      
-      WALLET.refreshCounterpartyBalances([newAddress]);
-      WALLET.refreshBTCBalances();
+    WALLET.storePreferences(function(data, endpoint) {  
+      WALLET.refreshCounterpartyBalances([newAddress], function() {
+        WALLET.refreshBTCBalances(false, null, function() {
+          self.shown(false); 
+          setTimeout(checkURL, 300);
+        });
+      });
     });
 
     trackEvent('Balances', self.eventName[self.addressType()]);
