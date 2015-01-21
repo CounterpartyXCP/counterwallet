@@ -343,6 +343,8 @@ function CreateNewAddressModalViewModel() {
   };
 
   self.doAction = function() {
+    $('#createNewAddressButtons button').addClass('disabled');
+
     var newAddress;
     var pubKeys;
     if (self.addressType() == 'multisig') {
@@ -393,6 +395,7 @@ function CreateNewAddressModalViewModel() {
   }
   
   self.show = function(addressType, resetForm) {
+    $('#createNewAddressButtons button').removeClass('disabled');
     if(typeof(resetForm)==='undefined') resetForm = true;
     if(resetForm) self.resetForm();
     self.addressType(addressType);
