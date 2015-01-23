@@ -87,7 +87,7 @@
                   <i class="fa fa-bars"></i> <span data-bind="locale: 'address_actions'"></span> <i class="fa fa-caret-down"></i>
                 </button>
                 <ul class="dropdown-menu pull-right">
-                  <li><a data-bind="click: showQRCode, locale: 'show_qr_code'" href="#"></a></li>
+                  <li><a data-bind="click: showQRCode, locale: 'show_qr_code', visible: !IS_MULTISIG_ADDRESS" href="#"></a></li>
                   <li data-bind="visible: IS_NORMAL"><a data-bind="click: showPrivateKey, locale: 'show_private_key'" href="#"></a></li>
                   <li data-bind="visible: IS_NORMAL"><a data-bind="click: signMessage, locale: 'sign_message'" href="#"></a></li>
                   <li data-bind="visible: IS_NORMAL"><a data-bind="click: signTransaction, locale: 'sign_transaction'" href="#"></a></li>
@@ -120,7 +120,7 @@
                 </ul>
               </div>
             </div>
-            <div class="widget-toolbar display-address"><span id="" data-bind="attr: {'id': 'address-text-' + ADDRESS}, click: selectAddressText, text: dispAddress"></span></div>
+            <div class="widget-toolbar display-address"><span id="" data-bind="attr: {'id': 'address-text-' + ADDRESS}, click: changeLabel, text: dispAddress"></span></div>
             <div class="clearfix"></div>
           </header>
           <div> <!-- widget div-->
@@ -172,7 +172,7 @@
       </div>
       <div class="modal-body no-padding">
         <div class="formPadded">
-          <p data-bind="locale: 'enter_new_label', localeArgs: dispAddress "></p>
+          <p style="word-wrap: break-word;" data-bind="locale: 'enter_new_label', localeArgs: dispAddress "></p>
         </div>
 
         <form class="smart-form" data-bind="submit: doAction"><fieldset>
@@ -273,7 +273,7 @@
                 </label>
             </div>
           </div></section>
-          <section data-bind="visible: addressType() == 'multisig' && multisigProvided() == '3' && needPubkey3()"><div class="row">
+          <section data-bind="visible: (addressType() == 'multisig') && (multisigProvided() == '3') && needPubkey3()"><div class="row">
             <label class="control-label col col-sm-2" data-bind="locale: 'third_pubkey'"></label>
             <div class="col col-sm-10">
                 <label class="input"><i class="icon-append fa fa-tag"></i>
@@ -281,7 +281,6 @@
                 </label>
             </div>
           </div></section>
-
 
           <section data-bind="visible: addressType() != 'normal' && addressType() != 'multisig'"><div class="row">
             <label class="control-label col col-sm-2" data-bind="locale: 'address'"></label>
@@ -301,7 +300,7 @@
           </div></section>
         </fieldset></form>
       </div>
-      <div class="modal-footer">
+      <div class="modal-footer" id="createNewAddressButtons">
         <button type="button" class="btn btn-default" data-bind="click: hide, locale: 'cancel'"></button>
         <button type="button" data-bind="click: submitForm, locale: 'create_new_address'" class="btn btn-primary"></button>
       </div>

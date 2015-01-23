@@ -1,7 +1,7 @@
 Counterwallet
 ================
 
-Online Webwallet for [Counterparty](http://www.counterparty.co).
+Online Webwallet for [Counterparty](http://www.counterparty.io).
 
 Originally based off of [Carbonwallet](http://www.carbonwallet.com) (however virtually all the original code has been removed or rewritten).
 
@@ -9,8 +9,8 @@ Originally based off of [Carbonwallet](http://www.carbonwallet.com) (however vir
 Production Systems
 -------------------
 
-* Mainnet: **[counterwallet.co](https://www.counterwallet.co/)**
-* Testnet: **[testnet.counterwallet.co](https://testnet.counterwallet.co/)**
+* Mainnet: **[counterwallet.io](https://www.counterwallet.io/)**
+* Testnet: **[testnet.counterwallet.io](https://testnet.counterwallet.io/)**
 
 
 Features
@@ -21,14 +21,14 @@ Features
 - Fully-AJAX driven
 - Anonymous
 - Runs in the browser, with keys created in memory
-
+- Multi-sig
 
 Browser Support
 -------------------
 
 **Desktop**
 
-- Chrome 23+ (Preferred)
+- Chrome 23+ (preferred browser)
 - Firefox 25+
 - Safari 7+
 - Opera 15+
@@ -72,7 +72,7 @@ grunt freeze
 1. Create an account on [Transifex](https://www.transifex.com/)
 2. In your home directory, create a file named `.transifex` and put your Transifex username and password into it in this format: `user:password`
 3. Run `grunt build` to download translations
-4. Add the languages you want to support to `AVAILABLE_LANGUAGES` in **counterwallet.conf.json** - you can use **counterwallet.conf.json.example** as a template
+4. Add the languages you want to support to `AVAILABLE_LANGUAGES` in **counterwallet.conf.json** - you can use **counterwallet.conf.json.example** as a template. The template file contains **only** the setting relevant to languages and does not replace the rest of variables required in that file (refer to Federeated Node documentation for additional details about `coutnerwallet.conf`).
 
 Setting up your own Counterwallet Server
 -----------------------------------------

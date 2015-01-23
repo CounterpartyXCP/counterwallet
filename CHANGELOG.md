@@ -1,3 +1,7 @@
+### v1.6.1 ###
+**Fixes:**
+* Bug fixes: http://goo.gl/uj5mcQ
+
 ### v1.6.0 ###
 **Enhancements:**
 - Full multisig support

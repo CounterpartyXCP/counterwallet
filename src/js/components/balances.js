@@ -28,7 +28,7 @@ function ChangeAddressLabelModalViewModel() {
       var addresses = self.address().split("_");
       var sigRequired = addresses.shift();
       addresses.pop();
-      return addresses.join(", ") + ' (' + sigRequired + '/' + addresses.length + ')';
+      return sigRequired + '_' + addresses.join("_") + '_' + addresses.length;
     }
   });
   
@@ -343,6 +343,8 @@ function CreateNewAddressModalViewModel() {
   };
 
   self.doAction = function() {
+    $('#createNewAddressButtons button').addClass('disabled');
+
     var newAddress;
     var pubKeys;
     if (self.addressType() == 'multisig') {
@@ -379,10 +381,13 @@ function CreateNewAddressModalViewModel() {
     WALLET.getAddressObj(newAddress).label(sanitizedDescription);
 
     //save prefs to server
-    WALLET.storePreferences(function(data, endpoint) {
-      self.shown(false);      
-      WALLET.refreshCounterpartyBalances([newAddress]);
-      WALLET.refreshBTCBalances();
+    WALLET.storePreferences(function(data, endpoint) {  
+      WALLET.refreshCounterpartyBalances([newAddress], function() {
+        WALLET.refreshBTCBalances(false, null, function() {
+          self.shown(false); 
+          setTimeout(checkURL, 300);
+        });
+      });
     });
 
     trackEvent('Balances', self.eventName[self.addressType()]);
@@ -390,6 +395,7 @@ function CreateNewAddressModalViewModel() {
   }
   
   self.show = function(addressType, resetForm) {
+    $('#createNewAddressButtons button').removeClass('disabled');
     if(typeof(resetForm)==='undefined') resetForm = true;
     if(resetForm) self.resetForm();
     self.addressType(addressType);

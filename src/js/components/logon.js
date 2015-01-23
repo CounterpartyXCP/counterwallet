@@ -167,8 +167,12 @@ function LogonViewModel() {
 
       QUICK_BUY_ENABLE = data['quick_buy_enable'];
       
-      //See if any servers show the wallet as online (this will return the a true result, if any server shows the wallet as online)
-      multiAPI("is_wallet_online", {'wallet_id': WALLET.identifier()}, self.onIsWalletOnline);
+      //Grab preferences
+      multiAPINewest("get_preferences", {
+        'wallet_id': WALLET.identifier(),
+        'network': USE_TESTNET ? 'testnet' : 'mainnet',
+        'for_login': true
+      }, 'last_updated', self.onReceivedPreferences);
 
     },
     function(jqXHR, textStatus, errorThrown, endpoint) {
@@ -177,46 +181,6 @@ function LogonViewModel() {
     });
   }
 
-  self.onIsWalletOnline = function(isOnline, endpoint) {
-    if(isOnline) {
-      trackEvent("Login", "Wallet", "IsAlreadyOnline");
-      var message = i18n.t("multi_connection");
-      
-      bootbox.dialog({
-        title: i18n.t("confirm_connection"),
-        message: message,
-        buttons: {
-          "cancel": {
-            label: i18n.t("cancel"),
-            className: "btn-danger",
-            callback: function() {
-              bootbox.hideAll();
-              self.setExtraInfoOpacity(100);
-              return false;
-            }
-          },
-          "continue": {
-            label: i18n.t("continue"),
-            className: "btn-primary",
-            callback: function() {
-              multiAPINewest("get_preferences", {
-                'wallet_id': WALLET.identifier(),
-                'network': USE_TESTNET ? 'testnet' : 'mainnet',
-                'for_login': true
-              }, 'last_updated', self.onReceivedPreferences);
-            }
-          }
-        }
-      });
-    } else {
-      //Grab preferences
-      multiAPINewest("get_preferences", {
-        'wallet_id': WALLET.identifier(),
-        'network': USE_TESTNET ? 'testnet' : 'mainnet',
-        'for_login': true
-      }, 'last_updated', self.onReceivedPreferences);
-    }
-  }
   
   self.onReceivedPreferences = function(data) {
     $.jqlog.debug('PREFERENCES:');
