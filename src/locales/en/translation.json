@@ -659,7 +659,7 @@
   "asset_creation_fee_xcp": "Please note that a <b class=\"notoQuantityColor\">%s</b> <b class=\"notoAssetColor\">XCP</b> fee will be deducted from your balance upon successful creation.",
   "change_token_description_p1": "The token's current description is:",
   "change_token_description_p2": "Enter the new description for this token",
-  "token_an_image": "Want to give your token an image, enhanced description text, or more? See <a href=\"https://wiki.counterparty.io/w/Enhanced_Token_Info_in_Counterwallet\" target=\"_blank\">this link</a>.",
+  "token_an_image": "Want to give your token an image, enhanced description text, or more? See <a href=\"http://counterparty.io/docs/enhanced_asset_info/" target=\"_blank\">this link</a>.",
   "token_name_type": "Name type",
   "alphabetic_name": "Alphabetic name with anti-spam fee (0.5 XCP)",
   "numeric_name": "Free numeric name",
