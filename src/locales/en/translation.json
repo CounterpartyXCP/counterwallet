@@ -124,7 +124,7 @@
   "having_issue": "Having Issues?",
   "page_common_questions": "Common Questions for this Page",
   "try_the_following": "If you are having issues using Counterwallet, please try the following:",
-  "support_1": "<b>Ask in Counterwallet chat:</b> Click on the <b>Show Chat</b> link on the left menubar, and ask your question there. Someone may know the answer.",
+  "support_1": "<b>Ask in Counterwallet chat:</b> Click on the <b>Show Chat</b> link on the left menubar, and ask your question there. Or try the <a href=\"https://gitter.im/CounterpartyXCP/\">Counterparty chat</a> on Gitter. Someone may know the answer.",
   "support_2": "<b>Check out our forums:</b> You can post your question or issue in <a href=\"https://forums.counterparty.io/categories/product-support\" target=\"_blank\">the Counterparty support forums</a>.",
   "support_3": "<b>Open a support ticket:</b> If all else fails, you may <a href=\"#\" class=\"showCreateSupportCase\">open a support ticket</a>.",
   "answers_to_common_questions": "Answers to common questions. Just click the one you're interested in:",
