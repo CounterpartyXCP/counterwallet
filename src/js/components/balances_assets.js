@@ -607,7 +607,11 @@ var AssetHistoryItemModel = function(historyObj) {
   self.dispDescription = function() {
     var desc = '';
     if(self.HISTORYOBJ['type'] == 'created') {
-      desc = i18n.t("token_created", self.HISTORYOBJ['description'], numberWithCommas(self.HISTORYOBJ['total_issued_normalized']), getAddressLabel(self.HISTORYOBJ['owner']));
+      var token_desc = self.HISTORYOBJ['description']
+      if (! token_desc) {
+        token_desc = '<abbr title="Description was not initialized">Undefined</abbr>';
+      }
+      desc = i18n.t("token_created", token_desc, numberWithCommas(self.HISTORYOBJ['total_issued_normalized']), getAddressLabel(self.HISTORYOBJ['owner']));
     } else if(self.HISTORYOBJ['type'] == 'issued_more') {
       desc = i18n.t("additional_issuance_done", numberWithCommas(self.HISTORYOBJ['additional_normalized']), numberWithCommas(self.HISTORYOBJ['total_issued_normalized']));
     } else if(self.HISTORYOBJ['type'] == 'changed_description') {

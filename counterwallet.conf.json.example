@@ -1,4 +1,5 @@
 {
+    "servers": [],
     "AVAILABLE_LANGUAGES": ["en", "zh_cn", "zh_tw", "ru", "cs", "da"],
     "DEFAULT_LANGUAGE": "en"
 }
