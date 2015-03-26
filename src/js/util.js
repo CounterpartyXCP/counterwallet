@@ -84,7 +84,6 @@ function expireDate(expire_index) {
 
 function checkCountry(action, callback) {
   if (RESTRICTED_AREA[action] && RESTRICTED_AREA[action].indexOf(USER_COUNTRY) != -1) {
-    
     var message = i18n.t('forbiden_country');
 
     if (action in RESTRICTED_AREA_MESSAGE) {
@@ -179,4 +178,54 @@ function getPubkeyForAddress(address, callback) {
   } else {
     callback(pubkeys);
   }
+}
+
+function getLinkForCPData(type, dataID, dataTitle, htmlize) {
+  if(typeof(dataTitle)==='undefined' || dataTitle === null) dataTitle = dataID;
+  if(typeof(htmlize)==='undefined' || htmlize === null) htmlize = true;
+  if(typeof(type)==='undefined') type = 'tx';
+  var url = null;
+  if(type == 'address') { //dataID is an address
+    url = "http://" + (USE_TESTNET ? 'testnet.' : '') + "blockscan.com/address/" + dataID;
+    //format multisig addresses
+    if(dataTitle.indexOf("_") > -1) {
+    	var parts = dataTitle.split('_');
+    	dataTitle = "multisig " + parts[0] + " of " + parts[parts.length - 1];
+    	//remove first and last elements
+    	parts.shift();
+    	parts.pop();
+    	dataTitle += " (" + parts.join(', ') + ")";
+    }
+  } else if(type == 'order') { //txID is an order ID
+    url = "http://" + (USE_TESTNET ? 'testnet.' : '') + "blockscan.com/orderinfo/" + dataID;
+  } else if(type == 'tx') { //generic TX
+    url = "http://" + (USE_TESTNET ? 'testnet.' : '') + "blockscan.com/txInfo/" + dataID;
+  } else {
+    assert(false, "Unknown type of " + type);
+  }
+
+  return htmlize ? ('<a href="' + url + '" target="_blank">' + dataTitle + '</a>') : url;  
+}
+
+function getTxHashLink(hash) {
+  // TODO: add link to blockscan when possible
+  var shortHash = hash.substr(hash.length-5);
+  if (hash.length == 128) {
+    shortHash += '...' + hash.substr(64, 5);
+  }
+  var link = '<span rel="tooltip" title="'+hash+'" data-placement="top" data-container="body" class="shortHash">'+shortHash+'</span>';
+
+  return link;
+}
+
+function getLinkForBlock(blockIndex, dataTitle, htmlize) {
+  if(typeof(dataTitle)==='undefined' || dataTitle === null) dataTitle = blockIndex;
+  if(typeof(htmlize)==='undefined' || htmlize === null) htmlize = true;
+  var url = BLOCKEXPLORER_URL + '/block-index/' + blockIndex;
+  return htmlize ? '<a href="' + url + '" target="_blank">' + dataTitle + '</a>' : url;
+}
+
+function getAddressLabel(address) {
+  //gets the address label if the address is in this wallet
+  return PREFERENCES['address_aliases'][hashToB64(address)] || address;
 }
