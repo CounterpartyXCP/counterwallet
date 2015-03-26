@@ -72,12 +72,12 @@ grunt freeze
 1. Create an account on [Transifex](https://www.transifex.com/)
 2. In your home directory, create a file named `.transifex` and put your Transifex username and password into it in this format: `user:password`
 3. Run `grunt build` to download translations
-4. Add the languages you want to support to `AVAILABLE_LANGUAGES` in **counterwallet.conf.json** - you can use **counterwallet.conf.json.example** as a template. The template file contains **only** the setting relevant to languages and does not replace the rest of variables required in that file (refer to Federeated Node documentation for additional details about `coutnerwallet.conf`).
+4. Add the languages you want to support to `AVAILABLE_LANGUAGES` in **counterwallet.conf.json** - you can use **counterwallet.conf.json.example** as a template. The template file contains **only** the setting relevant to languages and does not replace the rest of variables required in that file (refer to Federeated Node documentation for additional details about `counterwallet.conf`).
 
 Setting up your own Counterwallet Server
 -----------------------------------------
 
-See [this link](https://github.com/CounterpartyXCP/counterpartyd_build/blob/master/docs/SettingUpAFederatedNode.rst) for more info.
+See [this link](http://counterparty.io/docs/federated_node/) for more info.
 
 
 Licence

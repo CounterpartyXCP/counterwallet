@@ -10,7 +10,7 @@ var AssetPortfolioViewModel = AssetLeaderboardViewModel.extend(function() {
   
   self.showPortfolioIn.subscribeChanged(function(newValue, prevValue) {
     //use this to hook into the parent class being done with loading its market info data
-    assert(self.marketInfo.length);
+    if(!self.marketInfo.length) return; //nothing to show
     assert(newValue == "XCP" || newValue == "BTC", "Invalid value");
     if(newValue == prevValue) return; //no change
     
