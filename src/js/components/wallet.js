@@ -600,7 +600,7 @@ function WalletViewModel() {
     //specify the pubkey for a multisig tx
     assert(data['encoding'] === undefined);
     assert(data['pubkey'] === undefined);
-    data['encoding'] = 'multisig';
+    data['encoding'] = 'auto';
     data['pubkey'] = addressObj.PUBKEY;
     //find and specify the verifyDestAddr
 
