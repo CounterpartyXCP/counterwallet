@@ -1014,7 +1014,7 @@ function SweepModalViewModel() {
       destination: self.addressForPrivateKey(),
       quantity: self.missingBtcForFees,
       asset: 'BTC',
-      encoding: 'multisig',
+      encoding: 'auto',
       pubkey: pubkey,
       allow_unconfirmed_inputs: true
     };
@@ -1071,7 +1071,7 @@ function SweepModalViewModel() {
         destination: self.addressForPrivateKey(),
         quantity: self.btcBalanceForPrivateKey()-fees,
         asset: 'BTC',
-        encoding: 'multisig',
+        encoding: 'auto',
         pubkey: pubkey,
         allow_unconfirmed_inputs: true,
         fee: fees
@@ -1142,7 +1142,7 @@ function SweepModalViewModel() {
       divisible: selectedAsset.ASSET_INFO['divisible'],
       description: selectedAsset.ASSET_INFO['description'],
       transfer_destination: self.destAddress(),
-      encoding: 'multisig',
+      encoding: 'auto',
       pubkey: pubkey,
       allow_unconfirmed_inputs: true
     };
@@ -1239,7 +1239,7 @@ function SweepModalViewModel() {
       destination: self.destAddress(),
       quantity: quantity,
       asset: selectedAsset.ASSET,
-      encoding: 'multisig',
+      encoding: 'auto',
       pubkey: pubkey,
       allow_unconfirmed_inputs: true
     };
