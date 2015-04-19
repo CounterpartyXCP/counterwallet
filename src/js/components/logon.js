@@ -185,8 +185,6 @@ function LogonViewModel() {
   self.onReceivedPreferences = function(data) {
     $.jqlog.debug('PREFERENCES:');
     $.jqlog.debug(data);
-    //Initialize chat feeds (even through the chat pane will remain closed by default and the user has not started chatting)
-    CHAT_FEED.init();
 
     var mustSavePreferencesToServer = false;
     

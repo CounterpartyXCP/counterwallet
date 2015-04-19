@@ -32,7 +32,6 @@
     <link rel="stylesheet" type="text/css" media="screen" href="css/overrides.css">
     <link rel="stylesheet" type="text/css" media="screen" href="css/misc.css">
     <link rel="stylesheet" type="text/css" media="screen" href="css/components/logon.css">
-    <link rel="stylesheet" type="text/css" media="screen" href="css/components/chatfeed.css">
     <link rel="stylesheet" type="text/css" media="screen" href="css/components/balances.css">
     <link rel="stylesheet" type="text/css" media="screen" href="css/components/exchange.css">
     <link rel="stylesheet" type="text/css" media="screen" href="css/components/betting.css">
@@ -114,7 +113,7 @@
         </div> <!-- end logout button -->
 
         <div id="support" class="btn-header transparent pull-right"> <!-- help button -->
-          <span> <a href="#" title="Support"><i class="fa fa-question"></i></a> </span>
+          <span> <a href="#" title="Support"><i class="fa fa-question" style="color:#739e73"></i></a> </span>
         </div> <!-- end help button -->
 
         <div id="fullscreen" class="btn-header transparent pull-right"> <!-- fullscreen button -->
@@ -249,27 +248,6 @@
       <!-- END MAIN CONTENT -->
     </div>
     <!-- END MAIN PANEL -->
-    <div class="openChatPane" id="openChatPane" data-bind="locale: 'chat'"></div>
-    <div id="chatPane" style="display: none">
-      <h2 data-bind="html: headerText"></h2>
-      <div class="chatOnlineCount">
-        <span data-bind="text: numUsersOnline"></span>
-        <span data-bind="locale: 'users_online'"></span>
-      </div>
-      <div id="chatContentDiv">
-        <div id="chatContentInnerDiv" data-bind="foreach: lines">
-          <p class="chatMessage"><span data-bind="html: lineHead"></span><span data-bind="text: text"></span></p>
-        </div>
-      </div>
-      <div id="chatControlDiv" class="row">
-        <div class="input-group">
-          <span class="input-group-btn">
-            <button id="chatSendButton" data-bind="click: sendLine, locale: 'send'" class="btn btn-default" type="button"></button>
-          </span>
-          <input id="chatTextBox" data-bind="event: { keyup: onKeyUp }" type="text" class="form-control">
-        </div><!-- /input-group -->
-      </div><!-- /.row -->
-    </div>
 
     <!-- modal for wallet creation -->
     <div data-bind="showModal: shown" id="walletCreation" class="modal fade" data-backdrop="static" data-keyboard="false" tabindex="-1" role="dialog" aria-labelledby="walletCreation" aria-hidden="true">
@@ -498,37 +476,6 @@
       </div><!-- /.modal-dialog -->
     </div><!-- /.modal -->
 
-    <!-- modal for setting chat handle window (in logged in interface) -->
-    <div data-bind="showModal: shown" id="chatSetHandleModal" class="modal fade" data-backdrop="static" data-keyboard="false" tabindex="-1" role="dialog" aria-labelledby="chatSetHandleModal" aria-hidden="true">
-      <div class="modal-dialog">
-        <div class="modal-content">
-          <div class="modal-header">
-            <button type="button" data-bind="click: hide" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
-            <h4 class="modal-title" data-bind="locale: 'choose_your_handle'"></h4>
-          </div>
-          <div class="modal-body no-padding">
-
-            <div class="formPadded" data-bind="locale: 'choose_your_handle_desc'"></div>
-
-            <form class="smart-form" data-bind="submit: doAction"><fieldset>
-              <section><div class="row">
-                <label class="control-label col col-sm-2" data-bind="locale: 'your_handle'"></label>
-                <div class="col col-sm-10">
-                    <label class="input"><i class="icon-append fa fa-info"></i>
-                        <input name="newHandle" data-bind="value: newHandle, valueUpdate: 'input'" type="text"/>
-                    </label>
-                </div>
-              </div></section>
-            </fieldset></form>
-          </div>
-          <div class="modal-footer">
-            <button type="button" class="btn btn-default" data-bind="click: hide, locale: 'cancel'"></button>
-            <button id="startChatBtn" type="button" data-bind="click: submitForm, enable: startEnable, locale: 'start_chat'" class="btn btn-primary"></button>
-          </div>
-        </div><!-- /.modal-content -->
-      </div><!-- /.modal-dialog -->
-    </div><!-- /.modal -->
-
     <!-- modal for options window (in logged in interface) -->
     <div data-bind="showModal: shown" id="walletOptionsModal" class="modal fade" data-backdrop="static" data-keyboard="false" tabindex="-1" role="dialog" aria-labelledby="walletOptionsModal" aria-hidden="true" data-bind="validationOptions: { insertMessages: false }">
       <div class="modal-dialog">
@@ -651,7 +598,6 @@
             <div data-bind="visible: type == 'general'">
                 <h5 data-bind="locale: 'try_the_following'"></h5>
                 <ul>
-                    <li data-bind="locale: 'support_1'"></li>
                     <li data-bind="locale: 'support_2'"></li>
                     <li data-bind="locale: 'support_3'"></li>
                 </ul>
@@ -954,7 +900,6 @@
     <script src="js/components/misc.js"></script>
     <script src="js/components/feed_notifications.js"></script>
     <script src="js/components/feed_pending_actions.js"></script>
-    <script src="js/components/chatfeed.js"></script>
     <script src="js/components/balances.js"></script>
     <script src="js/components/balances_assets.js"></script>
     <script src="js/components/exchange.js"></script>

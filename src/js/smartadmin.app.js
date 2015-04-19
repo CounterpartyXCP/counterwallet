@@ -421,27 +421,15 @@ function nav_page_height() {
   if (setHeight > windowHeight) {// if content height exceedes actual window height and menuHeight
     $.left_panel.css('min-height', setHeight + 'px');
     $.root_.css('min-height', setHeight + $.navbar_height + 'px');
-
-    //COUNTERWALLETD: START MOD
-    $('#chatPane').css('height', windowHeight + 'px');
-    $('#chatContentDiv').css('height', (windowHeight - 50 - 40 - 20) + 'px');
-    $('#chatContentInnerDiv').slimScroll({ height: 'auto' });
-    //COUNTERWALLETD: END MOD
   } else {
     $.left_panel.css('min-height', windowHeight + 'px');
     $.root_.css('min-height', windowHeight + 'px');
-    //COUNTERWALLETD: START MOD
-    $('#chatPane').css('height', windowHeight + 'px');
-    $('#chatContentDiv').css('height', (windowHeight - 50 - 40 - 20) + 'px');
-    $('#chatContentInnerDiv').slimScroll({ height: 'auto' });
-    //COUNTERWALLETD: END MOD
   }
 }
 
 $('#main').resize(function() {
   nav_page_height();
   check_if_mobile_width();
-  resize_chatbox();
 })
 
 $('nav').resize(function() {
@@ -453,13 +441,6 @@ function check_if_mobile_width() {
     $.root_.addClass('mobile-view-activated')
   } else if ($.root_.hasClass('mobile-view-activated')) {
     $.root_.removeClass('mobile-view-activated');
-  }
-}
-
-function resize_chatbox() {
-  /* resizing chatbox when visible and over #main */
-  if ($('#chatPane').css('display')=='block' && $('#main').css('margin-right')=='0px') {
-    $('#chatPane').css('width', ($('#main').width()-5)+'px');
   }
 }
 
