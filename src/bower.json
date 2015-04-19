@@ -7,7 +7,7 @@
         "underscore.string": "2.3.3",
         "bootstrap": "3.1.1",
         "smartadmin": "https://github.com/CounterpartyXCP/countersmartadmin.git#c7049658057b26747833f18085255a795f10b581",
-        "counterwebdeps": "https://github.com/CounterpartyXCP/counterwebdeps.git#f39b7868ddc99eeba2ec9c51c56ebd80221b91bd",
+        "counterwebdeps": "https://github.com/CounterpartyXCP/counterwebdeps.git#81447ed0adb94b3059373b33e427057f5d6239d5",
         "cryptojs": "https://crypto-js.googlecode.com/files/CryptoJS%20v3.1.2.zip",
         "rollbar": "1.1.7",
         "bootbox": "4.2.0",
