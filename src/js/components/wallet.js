@@ -351,7 +351,7 @@ function WalletViewModel() {
                 }
                 WALLET.getAddressObj(address).addOrUpdateAsset(asset, assetsInfo[i], balancesData[j]['quantity'], escrowedBalance);
                 numBalProcessed += 1;
-                if (numBalProcessed == balancesData.length && onSuccess) return onSuccess();
+                if (numBalProcessed == assets.length && onSuccess) return onSuccess();
               }
             }
 
