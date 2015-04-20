@@ -1,4 +1,4 @@
-### v1.6.2 ###
+### v1.6.3 ###
 **Enhancements:**
 - Allow `OP_RETURN`; use`'auto'` encoding
 
@@ -8,6 +8,14 @@
 **Fixes:**
 - Fix `refreshCounterpartyBalances()`
 - Fix pending message for issuance with quantity=0
+
+### v1.6.2 ###
+**Fixes:**
+- Proper formatting for multisig addresses on history page and stats page
+- Updated terminology in several parts of the UI
+- Updated blockscan links in the history page and stats page
+- Blockscan links now work with testnet
+- A few other minor changes
 
 ### v1.6.1 ###
 **Fixes:**
