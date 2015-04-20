@@ -1,3 +1,14 @@
+### v1.6.2 ###
+**Enhancements:**
+- Allow `OP_RETURN`; use`'auto'` encoding
+
+**Removed features:**
+- Chat
+
+**Fixes:**
+- Fix `refreshCounterpartyBalances()`
+- Fix pending message for issuance with quantity=0
+
 ### v1.6.1 ###
 **Fixes:**
 * Bug fixes: http://goo.gl/uj5mcQ
