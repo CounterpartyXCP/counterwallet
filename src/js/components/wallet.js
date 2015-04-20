@@ -346,15 +346,13 @@ function WalletViewModel() {
                 var address = balancesData[j]['address'];
                 var asset = assetsInfo[i]['asset'];
                 var escrowedBalance = 0;
-                if (escrowedBalances[address] && escrowedBalances[address][asset]) {
+                if (address in escrowedBalances && asset in escrowedBalances[address]) {
                   escrowedBalance = escrowedBalances[address][asset];
                 }
                 WALLET.getAddressObj(address).addOrUpdateAsset(asset, assetsInfo[i], balancesData[j]['quantity'], escrowedBalance);
-                numBalProcessed += 1;
-                if (numBalProcessed == balancesData.length && onSuccess) return onSuccess();
               }
             }
-
+            if (onSuccess) return onSuccess();
           });
           
         });
@@ -600,7 +598,7 @@ function WalletViewModel() {
     //specify the pubkey for a multisig tx
     assert(data['encoding'] === undefined);
     assert(data['pubkey'] === undefined);
-    data['encoding'] = 'multisig';
+    data['encoding'] = 'auto';
     data['pubkey'] = addressObj.PUBKEY;
     //find and specify the verifyDestAddr
 

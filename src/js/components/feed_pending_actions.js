@@ -37,7 +37,11 @@ PendingActionViewModel.calcText = function(category, data) {
     } else if(data['locked']) {
       desc = i18n.t("pend_or_unconf_lock", pending, data['asset']);
     } else if(data['quantity'] == 0) {
-      desc = i18n.t("pend_or_unconf_change_desc", pending, data['asset'], data['description']);
+      if(assetObj) {  
+        desc = i18n.t("pend_or_unconf_change_desc", pending, data['asset'], data['description']);
+      } else {
+        desc = i18n.t("pend_or_unconf_issuance", pending, data['asset'], numberWithCommas(normalizeQuantity(data['quantity'], data['divisible'])));
+      }
     } else {
       //See if this is a new issuance or not
       var assetObj = null;

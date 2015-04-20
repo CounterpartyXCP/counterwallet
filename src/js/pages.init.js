@@ -12,8 +12,6 @@ function initIndex() { //main page
   window.WALLET_OPTIONS_MODAL = new WalletOptionsModalViewModel();
   
   window.MESSAGE_FEED = new MessageFeed();
-  window.CHAT_FEED = new ChatFeedViewModel();
-  window.CHAT_SET_HANDLE_MODAL = new ChatSetHandleModalViewModel();
   window.PENDING_ACTION_FEED = new PendingActionFeedViewModel();
   
   window.NOTIFICATION_FEED = new NotificationFeedViewModel();
@@ -28,8 +26,6 @@ function initIndex() { //main page
     ko.applyBindings(LOGON_PASSWORD_MODAL, document.getElementById("logonPassphaseModal"));
     ko.applyBindings(WALLET_CREATION_MODAL, document.getElementById("walletCreation"));
     ko.applyBindings(WALLET_OPTIONS_MODAL, document.getElementById("walletOptionsModal"));
-    ko.applyBindings(CHAT_FEED, document.getElementById("chatPane"));
-    ko.applyBindings(CHAT_SET_HANDLE_MODAL, document.getElementById("chatSetHandleModal"));
     ko.applyBindings(PENDING_ACTION_FEED, document.getElementById("pendingActionFeed"));
     ko.applyBindings(NOTIFICATION_FEED, document.getElementById("notificationFeed"));        
     ko.applyBindings(SUPPORT_MODAL, document.getElementById("supportModal"));
@@ -40,7 +36,6 @@ function initIndex() { //main page
     ko.applyBindings({}, document.getElementById("noticeTestnet"));
     ko.applyBindings({}, document.getElementById("noticeDevMode"));
     ko.applyBindings({}, document.getElementById("donate"));
-    ko.applyBindings({}, document.getElementById("openChatPane"));
     ko.applyBindings({}, document.getElementById("logo"));
     ko.applyBindings({}, document.getElementById("langSelector"));
     
