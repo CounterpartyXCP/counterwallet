@@ -579,17 +579,6 @@ function WalletViewModel() {
     assert(['sign_tx', 'broadcast_tx', 'convert_armory_signedtx_to_raw_hex'].indexOf(action) === -1,
       'Specified action not supported through this function. please use appropriate primatives');
 
-    if(action == 'create_cancel') {
-      if (self.cancelOrders.indexOf(data['offer_hash']) != -1) {
-        $.jqlog.debug(data['offer_hash'] + ' already cancelled.')
-        return;
-      } else {
-        $('#btcancel_' + data['offer_hash']).addClass('disabled');
-        self.cancelOrders.push(data['offer_hash']);
-        localStorage.setObject("cancelOrders", self.cancelOrders);
-      }
-    }
-    
     var addressObj = WALLET.getAddressObj(address);
     
     //should not ever be a watch only wallet
@@ -680,6 +669,17 @@ function WalletViewModel() {
               data['_divisible'] = extra1;
             }
             PENDING_ACTION_FEED.add(txHash, category, data);
+
+            if(action == 'create_cancel') {
+              if (self.cancelOrders.indexOf(data['offer_hash']) != -1) {
+                $.jqlog.debug(data['offer_hash'] + ' already cancelled.')
+                return;
+              } else {
+                $('#btcancel_' + data['offer_hash']).addClass('disabled');
+                self.cancelOrders.push(data['offer_hash']);
+                localStorage.setObject("cancelOrders", self.cancelOrders);
+              }
+            }
             
             return onSuccess ? onSuccess(txHash, data, endpoint, 'normal', null) : null;
           }, onError, verifyDestAddr);
