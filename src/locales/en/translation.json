@@ -633,7 +633,7 @@
   "old_wallet_more_info": "More info",
   "want_to_buy_xcp": "<b>How to Buy XCP</b> Provided that it is legal in your jurisdiction, the easiest way to buy XCP is from one of the centralized exchanges listed <a href=\"http://coinmarketcap.com/currencies/counterparty/#markets\" target=\"_blank\">here</a>.",
   "want_to_buy_xcp_with_quick_buy": "<b>How to Buy XCP</b> Provided that it is legal in your jurisdiction, the easiest way to buy XCP is from one of the centralized exchanges listed <a href=\"http://coinmarketcap.com/currencies/counterparty/#markets\" target=\"_blank\">here</a>.",
-  "enter_new_label": "Enter the new label (or, nickname) for your address <b class=\"notoAddressColor\">%s</b>.",
+  "enter_new_label": "Enter the new label (or, nickname) for your address <b class=\"notoAddressColor\">%s</b>",
   "after_sending": "After sending, you will have <b><span class=\"sellColor\">%s</span> <span class=\"sellColor\">%s</span> remaining</b> at this address (minus fees).",
   "sign_a_message": "Sign a Message",
   "sign_a_message_address": "Sign a message from address <b>%s</b>.",
