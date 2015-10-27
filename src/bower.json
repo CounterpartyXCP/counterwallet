@@ -34,7 +34,8 @@
         "typeahead.js": "0.10.2",
         "select2": "3.4.6",
         "font-awesome": "4.0.3",
-        "bitcore": "https://github.com/bitpay/bitcore.git#v0.1.35",
+        "bitcore-lib": "0.13.10",
+        "bitcore-message": "1.0.2",
         "mocha": "1.18.2",
         "chai": "1.9.1",
         "iso8601-js-period": "https://github.com/nezasa/iso8601-js-period.git#v0.2.0.0",
@@ -42,6 +43,7 @@
         "htmlcanvas": "git://github.com/xnova/html2canvas.git#33e96032800a71e2ea8d0cff556ec940412a8527",
         "sprintf": "git://github.com/alexei/sprintf.js.git#d5cfad02b3db7a472544b1d9e467fcc126e453a9",
         "i18next": "git://github.com/i18next/i18next.git#c877a7f7fb3afaf034f26a17d6948accaee598e1",
-        "big-integer": "https://github.com/peterolson/BigInteger.js.git#8ef66b232d9a8e91e4b7f4dac960fe10cf4541d6"
+        "big-integer": "https://github.com/peterolson/BigInteger.js.git#8ef66b232d9a8e91e4b7f4dac960fe10cf4541d6",
+        "async": "1.5.0"
     }
 }
