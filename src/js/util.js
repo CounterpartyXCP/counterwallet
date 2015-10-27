@@ -146,7 +146,7 @@ function orderMultisigAddress(address) {
 }
 
 function pubkeyToPubkeyhash(pubkey) {
-  return bitcore.Address.fromPubKey(new bitcore.Buffer(pubkey, 'hex'), USE_TESTNET ? 'testnet' : 'livenet').toString();
+  return CWBitcore.pubKeyToPubKeyHash(pubkey);
 }
 
 function getPubkeyForAddress(address, callback) {
