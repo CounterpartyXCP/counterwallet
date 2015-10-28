@@ -64,10 +64,17 @@ Object.keys(fixtures).forEach(function(network) {
       check.should.be.equal.false;
     });
 
-  });
+    it('Should be able to sign a message', function() {
+      var cwk = new CWPrivateKey(data.privkey);
 
+      var message = "testing123";
 
-  describe(prefix + 'Signing', function() {
+      var signature = cwk.signMessage(message);
+
+      signature.should.be.a('string');
+      bitcore.Message(message).verify(data.addresses[0], signature).should.be.true;
+
+    });
 
     it('Should correctly sign raw transaction [playground]', function() {
       var cwk = new CWPrivateKey(data.privkey);
