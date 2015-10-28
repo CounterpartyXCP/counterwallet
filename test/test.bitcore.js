@@ -105,56 +105,37 @@ Object.keys(fixtures).forEach(function(network) {
 
       // take unsigned serialized and set proper input again
       tx = bitcore.Transaction(data.transaction.unsigned2);
-      tx.inputs.splice(0, 1); // remove input, no other way of doing this in bitcore ...
-      tx.from(utxoInfo);
+
+      // dissect what was set as input script to use it as output script
+      if (bitcore.Script(tx.inputs[0]._scriptBuffer.toString('hex')).isPublicKeyHashOut()) {
+        var inputObj = tx.inputs[0].toObject();
+        inputObj.output = bitcore.Transaction.Output({
+          script: tx.inputs[0]._scriptBuffer.toString('hex'),
+          satoshis: 0 // we don't know this value, setting 0 because otherwise it's going to cry about not being an INT
+        });
+        tx.inputs[0] = new bitcore.Transaction.Input.PublicKeyHash(inputObj);
+      }
 
       // sign with priv
       tx.sign([cwk.priv]);
 
-      // signed serialized
-      tx.serialize().should.be.equal(data.transaction.signed, "signed");
-    });
-
-    it('Should correctly sign raw transaction', function(done) {
-
-      var _failoverAPI = failoverAPI;
-      // mock failoverAPI
-      failoverAPI = function(method, data, cb) {
-        if (method != "get_script_pub_key") {
-          throw new Error("Invalid method called: " + method);
-        }
-        if (data.tx_hash != "93cb35b7e13c7c6de45d4c54375b94c14cb35073f67f974ced464b855a8abd39") {
-          throw new Error("Invalid tx_hash: " + data.tx_hash);
-        }
-        if (data.vout_index != 2) {
-          throw new Error("Invalid vout_index: " + data.vout_index);
-        }
-
-        cb({
-          "value" : 8.95789030,
-          "n" : 2,
-          "scriptPubKey" : {
-            "asm" : "OP_DUP OP_HASH160 99d31556557ce86ab75fcb74683efba1bde2815e OP_EQUALVERIFY OP_CHECKSIG",
-            "hex" : "76a91499d31556557ce86ab75fcb74683efba1bde2815e88ac",
-            "reqSigs" : 1,
-            "type" : "pubkeyhash",
-            "addresses" : [
-              "muYJYjRZDPmTEMfyEGe34BGN8tZ6rmRZCu"
-            ]
-          }
-        });
+      // disable any checks that have anything to do with the values, because we don't know the values of the inputs
+      var opts = {
+        disableSmallFees: true,
+        disableLargeFees: true,
+        disableDustOutputs: true,
+        disableMoreOutputThanInput: true
       };
 
-      after(function() {
-        failoverAPI = _failoverAPI;
-      });
+      // signed serialized
+      tx.serialize(opts).should.be.equal(data.transaction.signed, "signed");
+    });
 
+    it('Should correctly sign raw transaction', function() {
       var cwk = new CWPrivateKey(data.privkey);
 
-      cwk.signRawTransaction(data.transaction.unsigned, function(signed) {
-        signed.should.be.equal(data.transaction.signed, "signed");
-        done();
-      })
+      var signedHex = cwk.signRawTransaction(data.transaction.unsigned2);
+      signedHex.should.be.equal(data.transaction.signed, "signed");
     });
 
   });
