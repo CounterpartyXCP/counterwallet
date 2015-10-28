@@ -579,17 +579,15 @@ function WalletViewModel() {
     assert(['sign_tx', 'broadcast_tx', 'convert_armory_signedtx_to_raw_hex'].indexOf(action) === -1,
       'Specified action not supported through this function. please use appropriate primatives');
 
-    if(action == 'create_cancel') {
+    if (action == 'create_cancel') {
       if (self.cancelOrders.indexOf(data['offer_hash']) != -1) {
         $.jqlog.debug(data['offer_hash'] + ' already cancelled.')
         return;
       } else {
         $('#btcancel_' + data['offer_hash']).addClass('disabled');
-        self.cancelOrders.push(data['offer_hash']);
-        localStorage.setObject("cancelOrders", self.cancelOrders);
       }
     }
-    
+
     var addressObj = WALLET.getAddressObj(address);
     
     //should not ever be a watch only wallet
@@ -653,6 +651,7 @@ function WalletViewModel() {
           
         //if the address is an armory wallet, then generate an offline transaction to get signed
         if(addressObj.IS_ARMORY_OFFLINE) {
+
           multiAPIConsensus("create_armory_utx", {'unsigned_tx_hex': unsignedTxHex, 'public_key_hex': addressObj.PUBKEY},
             function(asciiUTx, numTotalEndpoints, numConsensusEndpoints) {
               //DO not add to pending action feed (it will be added automatically via zeroconf when the p2p network sees the tx)
@@ -660,12 +659,21 @@ function WalletViewModel() {
               return onSuccess ? onSuccess(null, data, null, 'armory', asciiUTx) : null;
             }
           );
+          if (action == 'create_cancel') {
+            $('#btcancel_' + data['offer_hash']).removeClass('disabled');
+          }
           return;
+
         } else if (addressObj.IS_MULTISIG_ADDRESS) {
 
           self.showTransactionCompleteDialog("<b>"+ i18n.t('mutisig_tx_read') +"</b>", null, null, unsignedTxHex);
+          if (action == 'create_cancel') {
+            $('#btcancel_' + data['offer_hash']).removeClass('disabled');
+          }
+          return;
 
         } else {
+
           WALLET.signAndBroadcastTx(address, unsignedTxHex, function(txHash, endpoint) {
             //register this as a pending transaction
             var category = action.replace('create_', '') + 's'; //hack
@@ -680,10 +688,22 @@ function WalletViewModel() {
               data['_divisible'] = extra1;
             }
             PENDING_ACTION_FEED.add(txHash, category, data);
+
+            if (action == 'create_cancel') {
+              $('#btcancel_' + data['offer_hash']).addClass('disabled');
+              self.cancelOrders.push(data['offer_hash']);
+              localStorage.setObject("cancelOrders", self.cancelOrders);
+            }
             
             return onSuccess ? onSuccess(txHash, data, endpoint, 'normal', null) : null;
-          }, onError, verifyDestAddr);
+          }, function(jqXHR, textStatus, errorThrown) { 
+            if (action == 'create_cancel') {
+              $('#btcancel_' + data['offer_hash']).removeClass('disabled');
+            }
+            onError(jqXHR, textStatus, errorThrown);
+          }, verifyDestAddr);
         }
+
     });
   }
   
