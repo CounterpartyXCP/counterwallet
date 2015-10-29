@@ -7,6 +7,8 @@
     <script type="text/javascript" src="../src/vendors/chai/chai.js"></script>
     <script type="text/javascript">
       mocha.setup('bdd');
+
+      window.DONT_INIT_PAGES = true; // disables the initIndex because the err that is thrown there upsets mocha
     </script>
     <script src="../src/vendors/cryptojs/components/core-min.js"></script>
     <script src="../src/vendors/cryptojs/components/sha256-min.js"></script>

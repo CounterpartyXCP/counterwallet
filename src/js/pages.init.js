@@ -1,6 +1,9 @@
 INIT_FUNC = {};
 
-loadLocaleConfig(initIndex);
+// this is neccesary to avoid mocha getting upset over knockout errors
+if (!window.DONT_INIT_PAGES) {
+  loadLocaleConfig(initIndex);
+}
 
 function initIndex() { //main page
   window.LOGON_VIEW_MODEL = new LogonViewModel();
