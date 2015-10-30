@@ -1,3 +1,5 @@
+[![Slack Status](http://slack.counterparty.io/badge.svg)](http://slack.counterparty.io)
+
 Counterwallet
 ================
 
