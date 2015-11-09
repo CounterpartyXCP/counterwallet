@@ -9,8 +9,9 @@ Originally based off of [Carbonwallet](http://www.carbonwallet.com) (however vir
 Production Systems
 -------------------
 
-* Mainnet: **[counterwallet.co](https://www.counterwallet.co/)**
-* Testnet: **[testnet.counterwallet.co](https://testnet.counterwallet.co/)**
+* Main page: **[counterwallet.co](https://counterwallet.io/)**
+* Primary server -- Mainnet: **[wallet.counterwallet.co](https://wallet.counterwallet.io/)**
+* Primary server -- Testnet: **[wallet-testnet.counterwallet.co](https://wallet-testnet.counterwallet.io/)**
 
 
 Features
@@ -77,7 +78,7 @@ grunt freeze
 Setting up your own Counterwallet Server
 -----------------------------------------
 
-See [this link](https://github.com/CounterpartyXCP/counterpartyd_build/blob/master/docs/SettingUpAFederatedNode.rst) for more info.
+See [this link](http://counterparty.io/docs/federated_node/) for more info.
 
 
 Licence
