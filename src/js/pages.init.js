@@ -1,6 +1,9 @@
 INIT_FUNC = {};
 
-loadLocaleConfig(initIndex);
+// this is neccesary to avoid mocha getting upset over knockout errors
+if (!window.DONT_INIT_PAGES) {
+  loadLocaleConfig(initIndex);
+}
 
 function initIndex() { //main page
   window.LOGON_VIEW_MODEL = new LogonViewModel();
@@ -27,18 +30,18 @@ function initIndex() { //main page
     ko.applyBindings(WALLET_CREATION_MODAL, document.getElementById("walletCreation"));
     ko.applyBindings(WALLET_OPTIONS_MODAL, document.getElementById("walletOptionsModal"));
     ko.applyBindings(PENDING_ACTION_FEED, document.getElementById("pendingActionFeed"));
-    ko.applyBindings(NOTIFICATION_FEED, document.getElementById("notificationFeed"));        
+    ko.applyBindings(NOTIFICATION_FEED, document.getElementById("notificationFeed"));
     ko.applyBindings(SUPPORT_MODAL, document.getElementById("supportModal"));
     ko.applyBindings(DONATE_MODAL, document.getElementById("donateModal"));
     ko.applyBindings(CREATE_SUPPORT_CASE_VIEW_MODEL, document.getElementById("createSupportCaseModal"));
-    
+
     //so that knockout is run on the DOM sections and global context is accessible...
     ko.applyBindings({}, document.getElementById("noticeTestnet"));
     ko.applyBindings({}, document.getElementById("noticeDevMode"));
     ko.applyBindings({}, document.getElementById("donate"));
     ko.applyBindings({}, document.getElementById("logo"));
     ko.applyBindings({}, document.getElementById("langSelector"));
-    
+
     $('#fullscreen').click(function(e) {
       launchFullscreen(document.documentElement);
       return false;
