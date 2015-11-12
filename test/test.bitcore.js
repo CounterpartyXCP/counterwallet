@@ -20,6 +20,11 @@ var setNetwork = function(network) {
       break;
   }
 
+  // 'fix' for when running tests through `mocha-phantomjs`
+  if (cwURLs().length === 0 || (cwURLs().length === 1 && cwURLs()[0] === "file://")) {
+    cwURLs(['https://wallet.counterwallet.io']);
+  }
+
   // update URLs
   cwAPIUrls(jQuery.map(cwURLs(), function(element) {
     return element + (USE_TESTNET ? '/_t_api' : '/_api');
