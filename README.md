@@ -1,3 +1,5 @@
+[![Build Status Travis](https://travis-ci.org/CounterpartyXCP/counterwallet.svg?branch=develop)](https://travis-ci.org/CounterpartyXCP/counterwallet)
+[![Build Status Circle](https://circleci.com/gh/CounterpartyXCP/counterwallet.svg?&style=shield)](https://circleci.com/gh/CounterpartyXCP/counterwallet)
 [![Slack Status](http://slack.counterparty.io/badge.svg)](http://slack.counterparty.io)
 
 Counterwallet
