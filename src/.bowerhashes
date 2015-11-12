@@ -59,13 +59,5 @@
     "src/vendors/htmlcanvas/build/html2canvas.js": "d13063b4e7bdf2a4a37c0d4102aba1f010e369b1f421154e0a78b040bead01c3",
     "src/vendors/sprintf/dist/sprintf.min.js": "e12b992b6797e823c724558ffa0e42c3e3f831c6c6094b19c374b2dae3243e6c",
     "src/vendors/i18next/i18next.min.js": "436aed3d5ea5479c3069d26a2136599bd1e4b7e60ce4dd790c0146b911652422",
-    "src/vendors/big-integer/BigInteger.min.js": "95133befe02a33c1a67a9e5f963eafcef5e4f52175b3233e2ff322d179eb053b",
-    "src/vendors/counterwebdeps/js/external/mnemonic.js": "463b7bb1c2bc0cc3824106a4be68ea2ff166c667fbb39379a417ac2dda63a18a",
-    "src/vendors/counterwebdeps/js/external/qrcode.js": "3f7944d28ba419256acf5cdfc5300cf4d519f1f65065305e62e6080d4b8e53e1",
-    "src/vendors/counterwebdeps/js/consts.js": "9382a61f54d4e4cae1c319c01fa000444d496f5a094b7571dfde32df9d032c5f",
-    "src/vendors/counterwebdeps/js/util.generic.js": "0d9687865326d350835b80b921fcfb54d539fe93cd60f03da6029fe609b8f9ef",
-    "src/vendors/counterwebdeps/js/util.analytics.js": "e2ae8dd7b29ab24b2b5265b139bd558a90b470eb639a6bd7ad1ffd29c4826a53",
-    "src/vendors/counterwebdeps/js/util.bitcore.js": "438de70ff97debc853654161176161679498ef56e800aa52624a705283fcde59",
-    "src/vendors/counterwebdeps/js/util.api.js": "ded9fdbec73243e2d2c356ac446eca675d39f583968a21cc59986204a760317a",
-    "src/vendors/counterwebdeps/js/util.bitcoin.js": "1f7fd5616a4a92eda1673b5216cd6c714aaefbf1c1f41c5fcf13847954de7549"
+    "src/vendors/big-integer/BigInteger.min.js": "95133befe02a33c1a67a9e5f963eafcef5e4f52175b3233e2ff322d179eb053b"
 }
