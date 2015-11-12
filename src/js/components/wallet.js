@@ -468,7 +468,7 @@ function WalletViewModel() {
   /////////////////////////
   //BTC-related
   self.broadcastSignedTx = function(signedTxHex, onSuccess, onError) {
-    if (signedTxHex==false) {
+    if (signedTxHex == false) {
       bootbox.alert(i18n.t("tx_validation_failed"));
       return false;
     }
@@ -492,13 +492,18 @@ function WalletViewModel() {
     $.jqlog.debug("RAW UNSIGNED HEX: " + unsignedTxHex);
    
     //Sign the input(s)
-    var signedHex = key.checkAndSignRawTransaction(unsignedTxHex, verifyDestAddr);
-    return self.broadcastSignedTx(signedHex, onSuccess, onError);
+    key.checkAndSignRawTransaction(unsignedTxHex, verifyDestAddr, function(err, signedHex) {
+      if (err) {
+        return onError(err);
+      }
+
+      self.broadcastSignedTx(signedHex, onSuccess, onError);
+    });
   }
   
   self.signAndBroadcastTx = function(address, unsignedTxHex, onSuccess, onError, verifyDestAddr) {
     var key = WALLET.getAddressObj(address).KEY;
-    return self.signAndBroadcastTxRaw(key, unsignedTxHex, onSuccess, onError, address, verifyDestAddr);
+    self.signAndBroadcastTxRaw(key, unsignedTxHex, onSuccess, onError, address, verifyDestAddr);
   }
   
   self.retrieveBTCBalance = function(address, onSuccess, onError) {
