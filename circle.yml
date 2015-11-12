@@ -1,0 +1,9 @@
+dependencies:
+    override:
+        - npm install -g bower grunt mocha-phantomjs
+        - cd src; bower update; cd ..;
+        - npm update # update instead of install to avoid prepublish trigger
+        - grunt build --dontcheckdeps
+test:
+    override:
+        - mocha-phantomjs test/test.html --ignore-ssl-errors=true --ignore-resource-errors --ssl-protocol=any # phantomjs has issues with counterwallet.io SSL cert
