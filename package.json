@@ -21,7 +21,8 @@
     "transifex": "1.4.2"
   },
   "scripts": {
-    "prepublish": "grunt"
+    "prepublish": "grunt",
+    "test": "mocha-phantomjs test/test.html --ignore-ssl-errors=true --ignore-resource-errors --ssl-protocol=any # phantomjs has issues with counterwallet.io SSL cert"
   },
   "engine": "node >= 0.10"
 }
