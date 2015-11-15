@@ -57,7 +57,7 @@ if (location.hash.indexOf('cp=') == 1) {
 location.hash = '';
 
 //CONSTANTS THAT DEPEND ON IS_DEV / USE_TESTNET
-var USER_COUNTRY = ''; //set in login.js
+var USER_COUNTRY = ''; //set in logon.js
 var CURRENT_PAGE_URL = ''; // set in loadUrl()
 
 //selective disablement
