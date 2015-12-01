@@ -1,3 +1,17 @@
+### v1.7.0 ###
+**Release Date:** December 2, 2015 
+
+**Enhancements:**
+- Update to work with newest bitcore and enforced high S signatures (@rubensayshi)
+- Code cleanup/reformatting (@rubensayshi)
+- Added basic Travis and CircleCI test suite
+
+**Removed features:**
+- None
+
+**Fixes:**
+- Fixed improper disabled textarea on Firefox in signing raw transactions dialog
+
 ### v1.6.3 ###
 **Enhancements:**
 - Allow `OP_RETURN`; use`'auto'` encoding
