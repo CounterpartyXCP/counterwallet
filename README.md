@@ -1,3 +1,5 @@
+[![Build Status Travis](https://travis-ci.org/CounterpartyXCP/counterwallet.svg?branch=develop)](https://travis-ci.org/CounterpartyXCP/counterwallet)
+[![Build Status Circle](https://circleci.com/gh/CounterpartyXCP/counterwallet.svg?&style=shield)](https://circleci.com/gh/CounterpartyXCP/counterwallet)
 [![Slack Status](http://slack.counterparty.io/badge.svg)](http://slack.counterparty.io)
 
 Counterwallet
@@ -82,8 +84,39 @@ Setting up your own Counterwallet Server
 
 See [this link](http://counterparty.io/docs/federated_node/) for more info.
 
+Development
+-----------
+
+### Local Dev Env
+The easiest way to develop locally;
+
+ - `sudo npm install -g serve`
+ - open a seperate terminal and `cd build/` and run `serve`
+ - add `"https://wallet.counterwallet.io"` to your `servers` in `counterwallet.conf.json`
+ - use the following to build: `grunt build --dontcheckdeps --dontminify && cp counterwallet.conf.json build/`
+    - the `--dontcheckdeps` speeds up the process and avoids having to do `grunt freeze` everytime you make a change to a dependency during development
+    - the `--dontminify` makes your debugging life a bit easier
+    - the `cp` is neccesary because grunt keeps clearing the `build` folder
+ - visit `http://localhost:3000` (or you can specify a different port for `serve` if you like)
+ 
+ - **extra**; if you want to test your local version on another device (or let another person test something) use https://ngrok.com to setup a tunnel to your local env
+ 
+### Note concerning `npm install`
+`npm install` triggers a `prepublish` which is configured to do `grunt build` 
+and will bork if you haven't done a `grunt freeze` after making changes to dependencies.
+You can use `npm update` to circumvent this during development.
+
+### Running tests in browser
+You can run tests in your browser by doing the above steps and;
+ - open a seperate terminal and [from the root of the project, not from `build/` run `serve -p 3001` (different port)
+ - visit `http://localhost:3001/test/test.html`
+
+### Running tests from CLI (using phantomjs headless browser)
+ - `npm test`
+
 
 Licence
 -------------------
 
 http://opensource.org/licenses/CDDL-1.0
+

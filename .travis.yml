@@ -1,0 +1,12 @@
+language: nodejs
+install:
+- npm install -g bower grunt mocha-phantomjs
+- cd src; bower update; cd ..;
+- npm update
+- grunt build --dontcheckdeps
+script:
+- mocha-phantomjs test/test.html --ignore-ssl-errors=true --ignore-resource-errors
+  --ssl-protocol=any
+notifications:
+  slack:
+    secure: Y1SVxKmUV6srsFy1J3zmSf79zTO/i81DQpzXBVd3Hb4nseyUS7Lml38tvFuMfEdHNP5I1fMgkUDIYWEZn9Wmy5QLGapEKk0JW2f6jih9JUg1OqyjnGqcK3H8jriEIRsw0yngeaWlIhtPJCgXvYEw7M2P8z8L6SpXFx6aaz0rGys=

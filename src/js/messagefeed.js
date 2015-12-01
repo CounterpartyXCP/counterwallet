@@ -1,4 +1,3 @@
-
 function MessageFeed() {
   var self = this;
   self.lastMessageIndexReceived = ko.observable(0); //last message received from the message feed (socket.io) -- used to detect gaps
@@ -28,10 +27,10 @@ function MessageFeed() {
       }
     );
   }
-  
-  
+
+
   self.tryNextSIOMessageFeed = function() {
-    if(self.failoverCurrentIndex() + 1 == cwBaseURLs().length) {
+    if (self.failoverCurrentIndex() + 1 == cwBaseURLs().length) {
       self.failoverCurrentIndex(0);
     } else {
       self.failoverCurrentIndex(self.failoverCurrentIndex() + 1);
@@ -39,7 +38,7 @@ function MessageFeed() {
     $.jqlog.log('socket.io: Trying next server: ' + cwBaseURLs()[self.failoverCurrentIndex()]);
     self.init(self.lastMessageIndexReceived());
   }
-  
+
   self.init = function(last_message_index) {
     self.lastMessageIndexReceived(last_message_index);
     //set up a connection to the server event feed via socket.io and handle messages
@@ -57,70 +56,70 @@ function MessageFeed() {
       //'transports': ['websocket', 'htmlfile', 'xhr-multipart', 'xhr-polling', 'jsonp-polling'],
       'resource': USE_TESTNET ? '_t_feed' : '_feed'
     });
-  
+
     //Create a wildcard event handler: http://stackoverflow.com/a/19121009
     var original_$emit = socket.$emit;
     socket.$emit = function() {
-        var args = Array.prototype.slice.call(arguments);
-        original_$emit.apply(socket, ['*'].concat(args));
-        if(!original_$emit.apply(socket, arguments)) {
-            original_$emit.apply(socket, ['default'].concat(args));
-        }
+      var args = Array.prototype.slice.call(arguments);
+      original_$emit.apply(socket, ['*'].concat(args));
+      if (!original_$emit.apply(socket, arguments)) {
+        original_$emit.apply(socket, ['default'].concat(args));
+      }
     }
     /*socket.on('default',function(event, data) {
         $.jqlog.debug('socket.io event not trapped: ' + event + ' - data:' + JSON.stringify(data));
     });*/
-    socket.on('*',function(event, data) {
-        $.jqlog.log('socket.io message received: ' + event + ' - data:' + JSON.stringify(data));
-        if(event == 'connect') {
-          $.jqlog.log('socket.io(messages): Connected to server: ' + url);
-          socket.emit("subscribe"); //subscribe to the data feed itself
-        } else if(event == 'disconnect') {
-          $.jqlog.warn('socket.io(messages): The client has disconnected from server: ' + url);
-        } else if(event == 'connect_failed') {
-          $.jqlog.warn('socket.io(messages): Connection to server failed: ' + url);
-          socket.disconnect();
-          self.tryNextSIOMessageFeed();
-        } else if(event == 'reconnect_failed') {
-          $.jqlog.warn('socket.io(messages): Reconnect to the server failed: ' + url);
-          socket.disconnect();
-          self.tryNextSIOMessageFeed();
-        } else if(event == 'error') {
-          $.jqlog.warn('socket.io(messages): Received an error: ' + url);
-        } else if(['connecting', 'connect_error', 'connect_timeout', 'reconnect', 'reconnecting', 'reconnect_error'].indexOf(event) >= 0) {
-          //these events currently not handled
-        } else{
-          assert(data['_category'] !== undefined && event == data['_category'], "Message feed message lacks category field!");
-          var txHash = self.getTxHash(data);
-          self.MESSAGE_QUEUE.push([txHash, event, data]);
-        }
+    socket.on('*', function(event, data) {
+      $.jqlog.log('socket.io message received: ' + event + ' - data:' + JSON.stringify(data));
+      if (event == 'connect') {
+        $.jqlog.log('socket.io(messages): Connected to server: ' + url);
+        socket.emit("subscribe"); //subscribe to the data feed itself
+      } else if (event == 'disconnect') {
+        $.jqlog.warn('socket.io(messages): The client has disconnected from server: ' + url);
+      } else if (event == 'connect_failed') {
+        $.jqlog.warn('socket.io(messages): Connection to server failed: ' + url);
+        socket.disconnect();
+        self.tryNextSIOMessageFeed();
+      } else if (event == 'reconnect_failed') {
+        $.jqlog.warn('socket.io(messages): Reconnect to the server failed: ' + url);
+        socket.disconnect();
+        self.tryNextSIOMessageFeed();
+      } else if (event == 'error') {
+        $.jqlog.warn('socket.io(messages): Received an error: ' + url);
+      } else if (['connecting', 'connect_error', 'connect_timeout', 'reconnect', 'reconnecting', 'reconnect_error'].indexOf(event) >= 0) {
+        //these events currently not handled
+      } else {
+        assert(data['_category'] !== undefined && event == data['_category'], "Message feed message lacks category field!");
+        var txHash = self.getTxHash(data);
+        self.MESSAGE_QUEUE.push([txHash, event, data]);
+      }
     });
-    
+
     //Start the message queue reading process (we don't just call the message parsing machinery directly due and use a
     // producer/consumer queue pattern as this method allows us to effectively handle message gaps (i.e. just push them
     // on the head of the queue and just keep running through the queue))
     self.checkMessageQueue();
   }
-  
+
   self.getTxHash = function(message) {
     var txHash = message['event'] || message['tx_hash'] || (message['tx0_hash'] + message['tx1_hash']) || null;
-    if(!txHash)
+    if (!txHash)
       $.jqlog.warn("Cannot derive a txHash for IDX " + message['_message_index'] + " (category: " + message['_category'] + ")");
     return txHash;
   }
-  
+
   self.checkMessageQueue = function() {
     var event = null, result = null;
-    while(self.MESSAGE_QUEUE.length) {
+    while (self.MESSAGE_QUEUE.length) {
       event = self.MESSAGE_QUEUE[0];
       result = self.parseMessageWithFeedGapDetection(event[0], event[1], event[2]);
-      if(result && result.hasOwnProperty('done')) {
+      if (result && result.hasOwnProperty('done')) {
         break; //deferred returned, as there were missing messages. abort processing until we have them
       }
       self.MESSAGE_QUEUE.shift(); //normal case. pop off the head and continue processing...
     }
-    
-    if(result && result.hasOwnProperty('done')) {
+
+    if (result && result.hasOwnProperty('done')) {
       //a gap was found. wait until we get in the missing messages. then call again (as those missing msgs should be at the top of the queue)
       $.when(result).done(function(d) {
         self.checkMessageQueue();
@@ -136,9 +135,9 @@ function MessageFeed() {
     message['bindings']['mempool'] = true;
 
     var displayTx = false;
-    
+
     if (!WALLET.getAddressObj(message['bindings']['source'])) {
-      if (category=='sends') {
+      if (category == 'sends') {
         if (WALLET.getAddressObj(message['bindings']['destination'])) {
           displayTx = true;
         }
@@ -160,7 +159,7 @@ function MessageFeed() {
 
         message['bindings']['divisible'] = divisibility[asset1];
         message['bindings']['tx_index'] = message['_message_index'];
-        
+
         if (category == 'dividends') {
 
           var asset2 = message['bindings']['dividend_asset'];
@@ -175,11 +174,11 @@ function MessageFeed() {
 
       });
     }
-    
+
   }
-  
+
   self.parseMessageWithFeedGapDetection = function(txHash, category, message) {
-    if(!message || (message.substring && message.startswith("<html>"))) return;
+    if (!message || (message.substring && message.startswith("<html>"))) return;
     //^ sometimes nginx can trigger this via its proxy handling it seems, with a blank payload (or a html 502 Bad Gateway
     // payload) -- especially if the backend server reloads. Just ignore it.
     assert(self.lastMessageIndexReceived(), "lastMessageIndexReceived is not defined!");
@@ -193,34 +192,34 @@ function MessageFeed() {
     }
 
     //Ignore old messages if they are ever thrown at us
-    if(message['_message_index'] <= self.lastMessageIndexReceived()) {
+    if (message['_message_index'] <= self.lastMessageIndexReceived()) {
       $.jqlog.warn("Received message_index is <= lastMessageIndexReceived: " + JSON.stringify(message));
       return;
     }
-    
+
     //handle normal case that the message we received is the next in order
-    if(message['_message_index'] == self.lastMessageIndexReceived() + 1) {
+    if (message['_message_index'] == self.lastMessageIndexReceived() + 1) {
       self.handleMessage(txHash, category, message);
       return;
     }
-    
+
     //otherwise, we have a forward gap
     $.jqlog.warn("feed:MESSAGE GAP DETECTED: our last msgidx = " + self.lastMessageIndexReceived() + " --  server sent msgidx = " + message['_message_index']);
-    
+
     //sanity check
     assert(message['_message_index'] - self.lastMessageIndexReceived() <= 30, "Way too many missing messages, IDX="
       + message['_message_index'] + " (last idx: " + self.lastMessageIndexReceived() + ")");
-  
+
     //request the missing messages from the feed and replay them...
     var deferred = $.Deferred();
     var missingMessageIndexes = [];
     var missingMessageQueueEntries = [];
-    for(var i=self.lastMessageIndexReceived()+1; i < message['_message_index']; i++) {
+    for (var i = self.lastMessageIndexReceived() + 1; i < message['_message_index']; i++) {
       missingMessageIndexes.push(i);
     }
     failoverAPI("get_messagefeed_messages_by_index", {'message_indexes': missingMessageIndexes}, function(missingMessageData, endpoint) {
       var missingTxHash = null;
-      for(var i=0; i < missingMessageData.length; i++) {
+      for (var i = 0; i < missingMessageData.length; i++) {
         missingTxHash = self.getTxHash(missingMessageData[i]);
         assert(missingMessageData[i]['_message_index'] == missingMessageIndexes[i], "Message feed resync list oddity...?");
         $.jqlog.info("feed:receiveForGap IDX=" + missingMessageData[i]['_message_index']);
@@ -234,17 +233,17 @@ function MessageFeed() {
     //(the subsequent call to the function will process the missing messages, as well as what was already in the message queue)
     return deferred;
   }
-  
+
   self.handleMessage = function(txHash, category, message) {
     assert(self.lastMessageIndexReceived() + 1 == message['_message_index'], "Message feed resync counter increment oddity...?");
-  
+
     $.jqlog.info("feed:PROCESS MESSAGE=" + category + ", IDX=" + message['_message_index'] + " (last idx: "
       + self.lastMessageIndexReceived() + "), TX_HASH=" + txHash + ", CONTENTS=" + JSON.stringify(message));
-  
+
     self.lastMessageIndexReceived(self.lastMessageIndexReceived() + 1);
-      
+
     //Detect a reorg and refresh the current page if so.
-    if(message['_command'] == 'reorg') {
+    if (message['_command'] == 'reorg') {
       //Don't need to adjust the message index
       self.lastMessageIndexReceived(message['_last_message_index']);
       $.jqlog.warn("feed:Blockchain reorganization at block " + message['block_index']
@@ -258,38 +257,38 @@ function MessageFeed() {
 
     //increment stored networkBlockHeight off of the feed, if possible (allows us to more quickly update this then
     // just relying on 5 minute polling for new BTC balances)
-    if(message['block_index'])
+    if (message['block_index'])
       WALLET.networkBlockHeight(message['block_index']);
-      
+
     //filter out non insert messages for now, EXCEPT for order, and bet (so that we get notified when the remaining qty, etc decrease)
-    if(message['_command'] != 'insert' && (category != "orders" && category != "bets"))
+    if (message['_command'] != 'insert' && (category != "orders" && category != "bets"))
       return;
 
     //If we received an action originating from an address in our wallet that was marked invalid by the network, let the user know
     // (do this even in cases where the entry does not exist in pendingActions, as the user could have logged out and back in)
-    if(message['_status'] && _.startsWith(message['_status'], 'invalid') && WALLET.getAddressObj(message['source'])) {
+    if (message['_status'] && _.startsWith(message['_status'], 'invalid') && WALLET.getAddressObj(message['source'])) {
       var actionText = PendingActionViewModel.calcText(category, message); //nice "good enough" shortcut method here
       bootbox.alert("<b class='errorColor'>" + i18n.t('network_processing_failed') + ":</b><br/><br/>"
         + actionText + "<br/><br/><b>" + i18n.t("reason") + ":</b> " + message['_status']);
     }
 
     //Insert the message into the stats page (if it has been initialized)
-    if(window.hasOwnProperty('STATS_TXN_HISTORY')) {
+    if (window.hasOwnProperty('STATS_TXN_HISTORY')) {
       window.STATS_TXN_HISTORY.addMessage(message);
     }
-      
+
     //remove any pending message from the pending actions pane (we do this before we filter out invalid messages
     // because we need to be able to remove a pending action that was marked invalid as well)
     PENDING_ACTION_FEED.remove(txHash, category);
-  
-    if(_.startsWith(message['_status'], 'invalid'))
+
+    if (_.startsWith(message['_status'], 'invalid'))
       return; //ignore message
-    if(message['_status'] == 'expired') {
+    if (message['_status'] == 'expired') {
       //ignore expired orders and bets, but we have order_expirations and bet_expiration inserts that we DO look at
       assert(category == "orders" || category == "bets", "Got an 'expired' message for a category of: " + category);
       return;
     }
-    
+
     //notify the user in the notification pane
     NOTIFICATION_FEED.add(category, message);
     //^ especially with issuances, it's important that this line come before we modify state below
@@ -297,20 +296,20 @@ function MessageFeed() {
 
     // address with potential change in escrowed balance
     var refreshEscrowedBalance = [];
-    
+
     //Have the action take effect (i.e. everything besides notifying the user in the notifcations pane, which was done above)
-    if(category == "balances") {
+    if (category == "balances") {
       //DO NOTHING
-    } else if(category == "credits" || category == "debits") {
-      if(WALLET.getAddressObj(message['address'])) {
+    } else if (category == "credits" || category == "debits") {
+      if (WALLET.getAddressObj(message['address'])) {
         WALLET.updateBalance(message['address'], message['asset'], message['_balance']);
         refreshEscrowedBalance.push(message['address']);
       }
-    } else if(category == "broadcasts") {
+    } else if (category == "broadcasts") {
       //TODO
-    } else if(category == "burns") {
-    } else if(category == "cancels") {
-      
+    } else if (category == "burns") {
+    } else if (category == "cancels") {
+
       if (WALLET.getAddressObj(message['source'])) {
         //Remove the canceled order from the open orders list
         // NOTE: this does not apply as a pending action because in order for us to issue a cancellation,
@@ -320,74 +319,74 @@ function MessageFeed() {
         refreshEscrowedBalance.push(message['source']);
       }
 
-    } else if(category == "dividends") {
-    } else if(category == "issuances") {
+    } else if (category == "dividends") {
+    } else if (category == "issuances") {
 
       var addressesWithAsset = WALLET.getAddressesWithAsset(message['asset']);
-      for(var i=0; i < addressesWithAsset.length; i++) {
+      for (var i = 0; i < addressesWithAsset.length; i++) {
         WALLET.getAddressObj(addressesWithAsset[i]).addOrUpdateAsset(message['asset'], message, null);
       }
       //Also, if this is a new asset creation, or a transfer to an address that doesn't have the asset yet
-      if(WALLET.getAddressObj(message['issuer']) && addressesWithAsset.length && !(addressesWithAsset.indexOf(message['issuer']) != -1)) {
+      if (WALLET.getAddressObj(message['issuer']) && addressesWithAsset.length && !(addressesWithAsset.indexOf(message['issuer']) != -1)) {
         failoverAPI("get_assets_info", {'assetsList': [message['asset']]}, function(assetsInfo, endpoint) {
           WALLET.getAddressObj(message['issuer']).addOrUpdateAsset(message['asset'], assetsInfo[0], null); //will show with a 0 balance
-        });    
+        });
       }
 
-    } else if(category == "sends") {
+    } else if (category == "sends") {
       //the effects of a send are handled based on the credit and debit messages it creates, so nothing to do here
-    } else if(category == "orders") {
-      if(message['_btc_below_dust_limit'])
+    } else if (category == "orders") {
+      if (message['_btc_below_dust_limit'])
         return; //ignore any order involving BTC below the dust limit
-      
+
       //valid order statuses: open, filled, invalid, cancelled, and expired
       //update the give/get remaining numbers in the open orders listing, if it already exists
       var match = ko.utils.arrayFirst(self.OPEN_ORDERS, function(item) {
-          return item['tx_hash'] == message['tx_hash'];
+        return item['tx_hash'] == message['tx_hash'];
       });
-      if(match) {
-        if(message['_status'] != 'open') { //order is filled, expired, or cancelled, remove it from the listing
+      if (match) {
+        if (message['_status'] != 'open') { //order is filled, expired, or cancelled, remove it from the listing
           self.removeOrder(message['tx_hash']);
         }
-      } else if(WALLET.getAddressObj(message['source'])) {
+      } else if (WALLET.getAddressObj(message['source'])) {
         //order is not in the open orders listing, but should be
         self.OPEN_ORDERS.push(message);
       }
       refreshEscrowedBalance.push(message['source']);
 
-    } else if(category == "order_matches") {
+    } else if (category == "order_matches") {
 
-      if(message['_btc_below_dust_limit'])
+      if (message['_btc_below_dust_limit'])
         return; //ignore any order match involving BTC below the dust limit
 
       refreshEscrowedBalance.push(message['tx0_address']);
       refreshEscrowedBalance.push(message['tx1_address']);
 
-    } else if(category == "order_expirations") {
+    } else if (category == "order_expirations") {
       //Remove the order from the open orders list
       self.removeOrder(message['order_hash']);
-      
-      refreshEscrowedBalance.push(message['source']);
-    
-    } else if(category == "order_match_expirations") {
-     
-      refreshEscrowedBalance.push(message['tx0_address']);
-      refreshEscrowedBalance.push(message['tx1_address']);
 
-    } else if(category == "bets") {
-      
       refreshEscrowedBalance.push(message['source']);
 
-    } else if(category == "bet_matches") {
+    } else if (category == "order_match_expirations") {
 
       refreshEscrowedBalance.push(message['tx0_address']);
       refreshEscrowedBalance.push(message['tx1_address']);
 
-    } else if(category == "bet_expirations") {
-      
+    } else if (category == "bets") {
+
       refreshEscrowedBalance.push(message['source']);
 
-    } else if(category == "bet_match_expirations") {
+    } else if (category == "bet_matches") {
+
+      refreshEscrowedBalance.push(message['tx0_address']);
+      refreshEscrowedBalance.push(message['tx1_address']);
+
+    } else if (category == "bet_expirations") {
+
+      refreshEscrowedBalance.push(message['source']);
+
+    } else if (category == "bet_match_expirations") {
 
       refreshEscrowedBalance.push(message['tx0_address']);
       refreshEscrowedBalance.push(message['tx1_address']);
