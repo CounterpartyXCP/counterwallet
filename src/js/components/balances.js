@@ -1,24 +1,23 @@
-
 function ChangeAddressLabelModalViewModel() {
   var self = this;
   self.shown = ko.observable(false);
   self.address = ko.observable(null); //address string, not an Address object
   self.existingLabel = ko.observable(null);
-  
+
   self.newLabel = ko.observable('').trimmed().extend({
     required: true,
     validation: {
-      validator: function (val, self) {
+      validator: function(val, self) {
         return val.length <= 75;
       },
       message: i18n.t('invalid_address_label'),
       params: self
-    }    
+    }
   });
-  
+
   self.validationModel = ko.validatedObservable({
     newLabel: self.newLabel
-  });  
+  });
 
   self.dispAddress = ko.computed(function() {
     if (!self.address()) return "";
@@ -31,21 +30,21 @@ function ChangeAddressLabelModalViewModel() {
       return sigRequired + '_' + addresses.join("_") + '_' + addresses.length;
     }
   });
-  
+
   self.resetForm = function() {
     self.newLabel('');
     self.validationModel.errors.showAllMessages(false);
   }
-  
+
   self.submitForm = function() {
     if (!self.validationModel.isValid()) {
       self.validationModel.errors.showAllMessages();
       return false;
-    }    
+    }
     //data entry is valid...submit to the server
     $('#changeAddressLabelModal form').submit();
   }
-  
+
   self.doAction = function() {
     var addressHash = hashToB64(self.address());
     var label = _.stripTags($("<div/>").html(self.newLabel()).text());
@@ -58,23 +57,23 @@ function ChangeAddressLabelModalViewModel() {
     });
     trackEvent('Balances', 'ChangeAddressLabel');
   }
-  
+
   self.show = function(address, existingLabel, resetForm) {
-    if(typeof(resetForm)==='undefined') resetForm = true;
-    if(resetForm) self.resetForm();
+    if (typeof(resetForm) === 'undefined') resetForm = true;
+    if (resetForm) self.resetForm();
     self.address(address);
     self.existingLabel(existingLabel);
-    
+
     //set new label to existing label (to provide a default) and highlight the box
     self.newLabel(existingLabel);
     self.shown(true);
     selectText('newAddressLabel');
     trackDialogShow('ChangeAddressLabel');
-  }  
+  }
 
   self.hide = function() {
     self.shown(false);
-  }  
+  }
 }
 
 function CreateNewAddressModalViewModel() {
@@ -86,14 +85,14 @@ function CreateNewAddressModalViewModel() {
   self.watchAddress = ko.observable('').extend({
     isValidMonosigAddressIfSpecified: self,
     validation: [{
-      validator: function (val, self) {
+      validator: function(val, self) {
         return (self.addressType() == 'watch' || self.addressType() == 'armory') ? val : true;
       },
       message: i18n.t('field_required'),
       params: self
-    },{
-      validator: function (val, self) {
-        if(!val) return true; //the check above will cover it
+    }, {
+      validator: function(val, self) {
+        if (!val) return true; //the check above will cover it
         return !WALLET.getAddressObj(val);
       },
       message: i18n.t('address_already_in_wallet'),
@@ -102,28 +101,28 @@ function CreateNewAddressModalViewModel() {
     canGetAddressPubKey: self
   });
 
-  self.multisigAddressType =  ko.observable(null);
-  self.multisigRequired =  ko.computed(function() {
+  self.multisigAddressType = ko.observable(null);
+  self.multisigRequired = ko.computed(function() {
     if (self.multisigAddressType()) {
       return self.multisigAddressType().split("_").shift();
     }
     return;
   });
-  self.multisigProvided =  ko.computed(function() {
+  self.multisigProvided = ko.computed(function() {
     if (self.multisigAddressType()) {
       return self.multisigAddressType().split("_").pop();
     }
     return;
   });
 
-  
+
   self.multisigAddress1 = ko.observable('').extend({
     isValidMonosigAddress: self,
     required: true
   });
   self.multisigAddress1.subscribe(function(val) {
     if (val && CWBitcore.isValidAddress(val)) {
-      getPubkeyForAddress(val, function (data) {
+      getPubkeyForAddress(val, function(data) {
         if (data[0]) {
           self.multisigPubkeyAddress1(data[0]);
         } else {
@@ -134,23 +133,23 @@ function CreateNewAddressModalViewModel() {
   });
   self.multisigPubkeyAddress1 = ko.observable('').extend({
     validation: [{
-      validator: function (val, self) {
+      validator: function(val, self) {
         return (self.addressType() == 'multisig') ? val : true;
       },
       message: i18n.t('field_required'),
-      params: self 
+      params: self
     }, {
-      validator: function (val, self) {
+      validator: function(val, self) {
         if (!val) return true;
         try {
           return pubkeyToPubkeyhash(val) == self.multisigAddress1();
-        } catch(e) {
+        } catch (e) {
           return false;
         }
       },
       message: i18n.t('pubkey_not_match'),
-      params: self 
-    }],
+      params: self
+    }]
   });
   self.needPubkey1 = ko.observable(false);
 
@@ -160,7 +159,7 @@ function CreateNewAddressModalViewModel() {
   });
   self.multisigAddress2.subscribe(function(val) {
     if (val && CWBitcore.isValidAddress(val)) {
-      getPubkeyForAddress(val, function (data) {
+      getPubkeyForAddress(val, function(data) {
         if (data[0]) {
           self.multisigPubkeyAddress2(data[0]);
         } else {
@@ -171,39 +170,39 @@ function CreateNewAddressModalViewModel() {
   });
   self.multisigPubkeyAddress2 = ko.observable('').extend({
     validation: [{
-      validator: function (val, self) {
+      validator: function(val, self) {
         return (self.addressType() == 'multisig') ? val : true;
       },
       message: i18n.t('field_required'),
-      params: self 
+      params: self
     }, {
-      validator: function (val, self) {
+      validator: function(val, self) {
         if (!val) return true;
         try {
           return pubkeyToPubkeyhash(val) == self.multisigAddress2();
-        } catch(e) {
+        } catch (e) {
           return false;
         }
       },
       message: i18n.t('pubkey_not_match'),
-      params: self 
-    }],
+      params: self
+    }]
   });
   self.needPubkey2 = ko.observable(false);
 
   self.multisigAddress3 = ko.observable('').extend({
     validation: [{
-      validator: function (val, self) {
+      validator: function(val, self) {
         return (self.addressType() == 'multisig' && self.multisigProvided() == 3) ? val : true;
       },
       message: i18n.t('field_required'),
-      params: self 
+      params: self
     }],
     isValidMonosigAddressIfSpecified: self
   });
   self.multisigAddress3.subscribe(function(val) {
     if (val && CWBitcore.isValidAddress(val)) {
-      getPubkeyForAddress(val, function (data) {
+      getPubkeyForAddress(val, function(data) {
         if (data[0]) {
           self.multisigPubkeyAddress3(data[0]);
         } else {
@@ -214,23 +213,23 @@ function CreateNewAddressModalViewModel() {
   });
   self.multisigPubkeyAddress3 = ko.observable('').extend({
     validation: [{
-      validator: function (val, self) {
+      validator: function(val, self) {
         return (self.addressType() == 'multisig' && self.multisigProvided() == 3) ? val : true;
       },
       message: i18n.t('field_required'),
-      params: self 
+      params: self
     }, {
-      validator: function (val, self) {
+      validator: function(val, self) {
         if (!val) return true;
         try {
           return pubkeyToPubkeyhash(val) == self.multisigAddress3();
-        } catch(e) {
+        } catch (e) {
           return false;
         }
       },
       message: i18n.t('pubkey_not_match'),
-      params: self 
-    }],
+      params: self
+    }]
   });
   self.needPubkey3 = ko.observable(false);
 
@@ -250,7 +249,7 @@ function CreateNewAddressModalViewModel() {
     orderedAddress.pop();
     orderedAddress.shift();
     for (var a in orderedAddress) {
-      for (var i=1; i<=3; i++) {
+      for (var i = 1; i <= 3; i++) {
         if (orderedAddress[a] == self['multisigAddress' + i]()) {
           pubKeys.push(self['multisigPubkeyAddress' + i]())
         }
@@ -262,14 +261,14 @@ function CreateNewAddressModalViewModel() {
   self.description = ko.observable('').extend({
     required: true,
     validation: {
-      validator: function (val, self) {
+      validator: function(val, self) {
         return val.length <= 70; //arbitrary
       },
       message: i18n.t('address_desc_too_long'),
       params: self
-    }    
+    }
   });
-  
+
   self.validationModel = ko.validatedObservable({
     description: self.description,
     watchAddress: self.watchAddress
@@ -284,7 +283,7 @@ function CreateNewAddressModalViewModel() {
     multisigAddress3: self.multisigAddress3,
     multisigPubkeyAddress3: self.multisigPubkeyAddress3
   });
-  
+
   self.dispWindowTitle = ko.computed(function() {
     var title = {
       'normal': i18n.t('create_new_address'),
@@ -328,7 +327,7 @@ function CreateNewAddressModalViewModel() {
       if (!self.validationModel.isValid()) {
         self.validationModel.errors.showAllMessages();
         return false;
-      }  
+      }
     }
 
     //data entry is valid...submit to trigger doAction()
@@ -349,7 +348,7 @@ function CreateNewAddressModalViewModel() {
     var pubKeys;
     if (self.addressType() == 'multisig') {
       newAddress = self.multisigAddress();
-      pubKeys = self.multisigPubkeys();     
+      pubKeys = self.multisigPubkeys();
     } else if (self.addressType() == 'armory') {
       newAddress = self.watchAddress();
       pubKeys = self.armoryPubKey();
@@ -361,12 +360,12 @@ function CreateNewAddressModalViewModel() {
 
     //update PREFs
     var newAddressHash = hashToB64(newAddress);
-    if(self.addressType() == 'normal') {
+    if (self.addressType() == 'normal') {
       PREFERENCES['num_addresses_used'] = parseInt(PREFERENCES['num_addresses_used']) + 1;
-    } else if(self.addressType() == 'watch') {
+    } else if (self.addressType() == 'watch') {
       if (!(PREFERENCES['watch_only_addresses'] instanceof Array)) PREFERENCES['watch_only_addresses'] = [];
       PREFERENCES['watch_only_addresses'].push(newAddress); //can't use the hash here, unfortunately
-    } else if(self.addressType() == 'multisig') {
+    } else if (self.addressType() == 'multisig') {
       if (!(PREFERENCES['multisig_addresses'] instanceof Array)) PREFERENCES['multisig_addresses'] = [];
       PREFERENCES['multisig_addresses'].push({'address': newAddress, 'pubkeys_hex': self.multisigPubkeys()}); //can't use the hash here, unfortunately
     } else {
@@ -376,15 +375,15 @@ function CreateNewAddressModalViewModel() {
     }
     var sanitizedDescription = _.stripTags(self.description());
     PREFERENCES['address_aliases'][newAddressHash] = sanitizedDescription;
-    
+
     //manually set the address in this case to get around the chicken and egg issue here (and have client side match the server)
     WALLET.getAddressObj(newAddress).label(sanitizedDescription);
 
     //save prefs to server
-    WALLET.storePreferences(function(data, endpoint) {  
+    WALLET.storePreferences(function(data, endpoint) {
       WALLET.refreshCounterpartyBalances([newAddress], function() {
         WALLET.refreshBTCBalances(false, null, function() {
-          self.shown(false); 
+          self.shown(false);
           setTimeout(checkURL, 300);
         });
       });
@@ -393,19 +392,19 @@ function CreateNewAddressModalViewModel() {
     trackEvent('Balances', self.eventName[self.addressType()]);
 
   }
-  
+
   self.show = function(addressType, resetForm) {
     $('#createNewAddressButtons button').removeClass('disabled');
-    if(typeof(resetForm)==='undefined') resetForm = true;
-    if(resetForm) self.resetForm();
+    if (typeof(resetForm) === 'undefined') resetForm = true;
+    if (resetForm) self.resetForm();
     self.addressType(addressType);
     self.shown(true);
     trackDialogShow(self.eventName[self.addressType()]);
-  }  
+  }
 
   self.hide = function() {
     self.shown(false);
-  }  
+  }
 }
 
 
@@ -416,7 +415,7 @@ function SendModalViewModel() {
   self.asset = ko.observable();
   self.rawBalance = ko.observable(null);
   self.divisible = ko.observable();
-  
+
   self.destAddress = ko.observable('').extend({
     required: true,
     isValidBitcoinAddress: self,
@@ -427,67 +426,67 @@ function SendModalViewModel() {
   self.missingPubkey1Address = ko.observable('');
   self.pubkey1 = ko.observable('').extend({
     validation: [{
-      validator: function (val, self) {
+      validator: function(val, self) {
         return self.missingPubkey1() ? val : true;
       },
       message: i18n.t('field_required'),
-      params: self 
+      params: self
     }, {
-      validator: function (val, self) {
+      validator: function(val, self) {
         if (!val) return true;
         try {
           return pubkeyToPubkeyhash(val) == self.missingPubkey1Address();
-        } catch(e) {
+        } catch (e) {
           return false;
         }
       },
       message: i18n.t('pubkey_not_match'),
-      params: self 
-    }],
+      params: self
+    }]
   });
   self.missingPubkey2 = ko.observable(false);
   self.missingPubkey2Address = ko.observable('');
   self.pubkey2 = ko.observable('').extend({
     validation: [{
-      validator: function (val, self) {
+      validator: function(val, self) {
         return self.missingPubkey2() ? val : true;
       },
       message: i18n.t('field_required'),
-      params: self 
+      params: self
     }, {
-      validator: function (val, self) {
+      validator: function(val, self) {
         if (!val) return true;
         try {
           return pubkeyToPubkeyhash(val) == self.missingPubkey2Address();
-        } catch(e) {
+        } catch (e) {
           return false;
         }
       },
       message: i18n.t('pubkey_not_match'),
-      params: self 
-    }],
+      params: self
+    }]
   });
   self.missingPubkey3 = ko.observable(false);
   self.missingPubkey3Address = ko.observable('');
   self.pubkey3 = ko.observable('').extend({
     validation: [{
-      validator: function (val, self) {
+      validator: function(val, self) {
         return self.missingPubkey3() ? val : true;
       },
       message: i18n.t('field_required'),
-      params: self 
+      params: self
     }, {
-      validator: function (val, self) {
+      validator: function(val, self) {
         if (!val) return true;
         try {
           return pubkeyToPubkeyhash(val) == self.missingPubkey3Address();
-        } catch(e) {
+        } catch (e) {
           return false;
         }
       },
       message: i18n.t('pubkey_not_match'),
-      params: self 
-    }],
+      params: self
+    }]
   });
 
   self._additionalPubkeys = [];
@@ -503,7 +502,7 @@ function SendModalViewModel() {
     if (!self.destAddress()) return;
     if (!CWBitcore.isValidMultisigAddress(self.destAddress())) return;
 
-    getPubkeyForAddress(val, function (data) {
+    getPubkeyForAddress(val, function(data) {
       var addresses = []
       if (CWBitcore.isValidMultisigAddress(self.destAddress())) {
         addresses = self.destAddress().split('_');
@@ -546,50 +545,50 @@ function SendModalViewModel() {
     isValidPositiveQuantity: self,
     isValidQtyForDivisibility: self,
     validation: {
-      validator: function (val, self) {
-        if(normalizeQuantity(self.rawBalance(), self.divisible()) - parseFloat(val) < 0) {
+      validator: function(val, self) {
+        if (normalizeQuantity(self.rawBalance(), self.divisible()) - parseFloat(val) < 0) {
           return false;
         }
         return true;
       },
       message: i18n.t('quantity_exceeds_balance'),
       params: self
-    }   
+    }
   });
-    
+
   self.normalizedBalance = ko.computed(function() {
-    if(self.address() === null || self.rawBalance() === null) return null;
+    if (self.address() === null || self.rawBalance() === null) return null;
     return normalizeQuantity(self.rawBalance(), self.divisible());
   }, self);
-  
+
   self.dispNormalizedBalance = ko.computed(function() {
     return smartFormat(self.normalizedBalance());
   }, self);
-  
+
   self.normalizedBalRemaining = ko.computed(function() {
-    if(!isNumber(self.quantity())) return null;
+    if (!isNumber(self.quantity())) return null;
     var curBalance = normalizeQuantity(self.rawBalance(), self.divisible());
     var balRemaining = Decimal.round(new Decimal(curBalance).sub(parseFloat(self.quantity())), 8, Decimal.MidpointRounding.ToEven).toFloat();
-    if(balRemaining < 0) return null;
+    if (balRemaining < 0) return null;
     return balRemaining;
   }, self);
 
   self.dispNormalizedBalRemaining = ko.computed(function() {
     return smartFormat(self.normalizedBalRemaining());
   }, self);
-  
+
   self.normalizedBalRemainingIsSet = ko.computed(function() {
     return self.normalizedBalRemaining() !== null;
   }, self);
-  
+
   self.validationModel = ko.validatedObservable({
     destAddress: self.destAddress,
     quantity: self.quantity,
     pubkey1: self.pubkey1,
     pubkey2: self.pubkey2,
     pubkey3: self.pubkey3
-  });  
-  
+  });
+
   self.resetForm = function() {
     self.destAddress('');
     self.quantity(null);
@@ -603,19 +602,19 @@ function SendModalViewModel() {
 
     self.validationModel.errors.showAllMessages(false);
   }
-  
+
   self.submitForm = function() {
     if (!self.validationModel.isValid()) {
       self.validationModel.errors.showAllMessages();
       return false;
-    }    
+    }
     //data entry is valid...submit to the server
     $('#sendModal form').submit();
   }
-  
+
   self.maxAmount = function() {
     assert(self.normalizedBalance(), "No balance present?");
-    if(self.asset() == 'BTC')
+    if (self.asset() == 'BTC')
       self.quantity(subFloat(self.normalizedBalance(), normalizeQuantity(MIN_FEE)));
     else
       self.quantity(self.normalizedBalance());
@@ -635,7 +634,8 @@ function SendModalViewModel() {
     }
 
     WALLET.doTransaction(self.address(), "create_send",
-      { source: self.address(),
+      {
+        source: self.address(),
         destination: self.destAddress(),
         quantity: denormalizeQuantity(parseFloat(self.quantity()), self.divisible()),
         asset: self.asset(),
@@ -650,26 +650,26 @@ function SendModalViewModel() {
     self.shown(false);
     trackEvent('Balances', 'Send', self.asset());
   }
-  
+
   self.show = function(fromAddress, asset, rawBalance, isDivisible, resetForm) {
-    if(asset == 'BTC' && rawBalance == null) {
+    if (asset == 'BTC' && rawBalance == null) {
       return bootbox.alert(i18n.t("cannot_send_server_unavailable"));
     }
     assert(rawBalance, "Balance is null or undefined?");
-    
-    if(typeof(resetForm)==='undefined') resetForm = true;
-    if(resetForm) self.resetForm();
+
+    if (typeof(resetForm) === 'undefined') resetForm = true;
+    if (resetForm) self.resetForm();
     self.address(fromAddress);
     self.asset(asset);
     self.rawBalance(rawBalance);
     self.divisible(isDivisible);
     self.shown(true);
     trackDialogShow('Send');
-  }  
+  }
 
   self.hide = function() {
     self.shown(false);
-  }  
+  }
 }
 
 
@@ -692,13 +692,13 @@ var privateKeyValidator = function(required) {
   return {
     required: required,
     validation: {
-      validator: function (val, self) {       
+      validator: function(val, self) {
         return (new CWPrivateKey(val)).isValid();
       },
       message: USE_TESTNET ? i18n.t('not_valid_testnet_pk') : i18n.t('not_valid_pk'),
       params: self
-    }, 
-    rateLimit: { timeout: 500, method: "notifyWhenChangesStop" }
+    },
+    rateLimit: {timeout: 500, method: "notifyWhenChangesStop"}
   }
 }
 
@@ -718,11 +718,11 @@ function SweepModalViewModel() {
   self.selectedAssetsToSweep = ko.observableArray([]).extend({
     required: true,
     validation: {
-      validator: function (val, self, callback) {
+      validator: function(val, self, callback) {
 
         var sweepingCost = 0;
 
-        for(var i = 0; i < self.selectedAssetsToSweep().length; i++) {
+        for (var i = 0; i < self.selectedAssetsToSweep().length; i++) {
           var assetName = self.selectedAssetsToSweep()[i];
           var assetCost = self.sweepAssetsCost[assetName];
           sweepingCost += parseInt(assetCost);
@@ -732,19 +732,19 @@ function SweepModalViewModel() {
         if (self.txoutsCountForPrivateKey > 1) {
           // MIN_FEE for 4 outputs.
           self.mergeCost = Math.ceil(self.txoutsCountForPrivateKey / 4) * MIN_FEE;
-          sweepingCost += self.mergeCost; 
+          sweepingCost += self.mergeCost;
         }
 
         //$.jqlog.debug('Total sweeping cost : ' + sweepingCost);
 
         // here we assume that the transaction cost to send BTC from addressForFees is MIN_FEE
-        var totalBtcBalanceForSweeep = self.btcBalanceForPrivateKey() + Math.max(0, (self.addressForFeesBalance()-MIN_FEE));
+        var totalBtcBalanceForSweeep = self.btcBalanceForPrivateKey() + Math.max(0, (self.addressForFeesBalance() - MIN_FEE));
         self.missingBtcForFees = Math.max(MULTISIG_DUST_SIZE, sweepingCost - self.btcBalanceForPrivateKey());
-   
 
-        if  (totalBtcBalanceForSweeep < sweepingCost) {
-          
-          this.message = i18n.t("not_able_to_sweep", normalizeQuantity(self.missingBtcForFees), self.addressForPrivateKey());          
+
+        if (totalBtcBalanceForSweeep < sweepingCost) {
+
+          this.message = i18n.t("not_able_to_sweep", normalizeQuantity(self.missingBtcForFees), self.addressForPrivateKey());
           self.notEnoughBTC(true);
           return false;
 
@@ -752,38 +752,38 @@ function SweepModalViewModel() {
           self.privateKeyForFees('');
           self.addressForFeesBalance(0);
         }
-        
+
         self.notEnoughBTC(false);
         return true;
       },
       params: self
-    }    
+    }
   });
   self.destAddress = ko.observable('').trimmed().extend({
     required: true,
     isValidBitcoinAddress: self
   });
-  
+
   self.availableAddresses = ko.observableArray([]);
   self.availableOldAddresses = ko.observableArray([]);
   self.excludedOldAddresses = ko.observableArray([]);
 
   self.privateKeyValidated = ko.validatedObservable({
-    privateKey: self.privateKey,
+    privateKey: self.privateKey
   });
 
   self.privateKeyForFeesValidated = ko.validatedObservable({
-    privateKeyForFees: self.privateKeyForFees,
+    privateKeyForFees: self.privateKeyForFees
   });
 
   self.addressForPrivateKey = ko.computed(function() {
-    if(!self.privateKeyValidated.isValid()) return null;
+    if (!self.privateKeyValidated.isValid()) return null;
     //Get the address for this privatekey
     return (new CWPrivateKey(self.privateKey())).getAddress();
   }, self);
 
   self.addressForPrivateKeyForFees = ko.computed(function() {
-    if(!self.privateKeyForFeesValidated.isValid() || self.privateKeyForFees()=='') {
+    if (!self.privateKeyForFeesValidated.isValid() || self.privateKeyForFees() == '') {
       self.addressForFeesBalanceMessage('');
       self.addressForFeesBalance(0);
       return null;
@@ -806,43 +806,43 @@ function SweepModalViewModel() {
   self.oldPrivateKey.subscribe(function(value) {
     if (self.fromOldWallet()) {
       self.privateKey(value);
-    } 
+    }
   });
-  
+
   self.validationModel = ko.validatedObservable({
     privateKey: self.privateKey,
     selectedAssetsToSweep: self.selectedAssetsToSweep,
     destAddress: self.destAddress
-  });  
+  });
 
   self.addressForPrivateKey.subscribe(function(address) {
     //set up handler on changes in private key to generate a list of balances
-    self.sweepAssetsCost = {'BTC': MIN_FEE+REGULAR_DUST_SIZE};
-    if(!address || address=='') return;
+    self.sweepAssetsCost = {'BTC': MIN_FEE + REGULAR_DUST_SIZE};
+    if (!address || address == '') return;
 
     //Get the balance of ALL assets at this address
     failoverAPI("get_normalized_balances", {'addresses': [address]}, function(balancesData, endpoint) {
       var assets = [], assetInfo = null;
-      for(var i=0; i < balancesData.length; i++) {
+      for (var i = 0; i < balancesData.length; i++) {
         assets.push(balancesData[i]['asset']);
       }
       //get info on the assets, since we need this for the create_issuance call during the sweep (to take ownership of the asset)
       failoverAPI("get_assets_info", {'assetsList': assets}, function(assetsData, endpoint) {
         //Create an SweepAssetInDropdownItemModel item
-        for(var i=0; i < balancesData.length; i++) {
+        for (var i = 0; i < balancesData.length; i++) {
           assetInfo = $.grep(assetsData, function(e) { return e['asset'] == balancesData[i]['asset']; })[0]; //O(n^2)
           self.availableAssetsToSweep.push(new SweepAssetInDropdownItemModel(
             balancesData[i]['asset'], balancesData[i]['quantity'], balancesData[i]['normalized_quantity'], assetInfo));
 
           var cost = 0;
-          if (balancesData[i]['quantity']>0) {
+          if (balancesData[i]['quantity'] > 0) {
             cost += MIN_FEE + (2 * MULTISIG_DUST_SIZE);
           }
           // need ownership transfer
           if (assetInfo['owner'] == self.addressForPrivateKey()) {
             cost += MIN_FEE + (4 * MULTISIG_DUST_SIZE);
           }
-          self.sweepAssetsCost[balancesData[i]['asset']] = cost;          
+          self.sweepAssetsCost[balancesData[i]['asset']] = cost;
         }
 
         //Also get the BTC balance at this address and put at head of the list
@@ -851,8 +851,8 @@ function SweepModalViewModel() {
           self.btcBalanceForPrivateKey(0);
           self.txoutsCountForPrivateKey = 0;
           //TODO: counterblockd return unconfirmedRawBal==0, after fixing we need use unconfirmedRawBal
-          var unconfirmedRawBal = data[0]['confirmedRawBal']; 
-          if(unconfirmedRawBal > 0) {
+          var unconfirmedRawBal = data[0]['confirmedRawBal'];
+          if (unconfirmedRawBal > 0) {
             //We don't need to supply asset info to the SweepAssetInDropdownItemModel constructor for BTC
             // b/c we won't be transferring any asset ownership with it
             var viewModel = new SweepAssetInDropdownItemModel("BTC", unconfirmedRawBal, normalizeQuantity(unconfirmedRawBal));
@@ -867,23 +867,23 @@ function SweepModalViewModel() {
           $('#availableAssetsToSweep').change();
         });
 
-      });      
-      
+      });
+
     });
-  }); 
+  });
 
   self.addressForPrivateKeyForFees.subscribe(function(address) {
-    if(!address || address=='') {
+    if (!address || address == '') {
       self.addressForFeesBalanceMessage('');
       self.addressForFeesBalance(0);
       return;
     }
     WALLET.retriveBTCAddrsInfo([address], function(data) {
-      self.addressForFeesBalanceMessage(normalizeQuantity(data[0]['confirmedRawBal'])+' BTC in '+address);
-      self.addressForFeesBalance(data[0]['confirmedRawBal']); 
+      self.addressForFeesBalanceMessage(normalizeQuantity(data[0]['confirmedRawBal']) + ' BTC in ' + address);
+      self.addressForFeesBalance(data[0]['confirmedRawBal']);
     });
   });
- 
+
   self.resetForm = function(fromOldWallet) {
     self.fromOldWallet(fromOldWallet);
     self.privateKey('');
@@ -904,9 +904,9 @@ function SweepModalViewModel() {
     //populate the list of addresseses again
     self.availableAddresses([]);
     var addresses = WALLET.getAddressesList(true);
-    for(var i = 0; i < addresses.length; i++) {
-        self.availableAddresses.push(new BalancesAddressInDropdownItemModel(addresses[i][0], addresses[i][1]));
-    }  
+    for (var i = 0; i < addresses.length; i++) {
+      self.availableAddresses.push(new BalancesAddressInDropdownItemModel(addresses[i][0], addresses[i][1]));
+    }
 
     self.availableOldAddresses([]);
     if (self.fromOldWallet()) {
@@ -914,22 +914,22 @@ function SweepModalViewModel() {
         for (var address in data) {
           if (self.excludedOldAddresses.indexOf(address) == -1) {
             self.availableOldAddresses.push(new BalancesAddressInDropdownItemModel(address, address, data[address]['BTC']['privkey']));
-          }       
+          }
         }
-      }); 
-    }    
-    
+      });
+    }
+
     self.validationModel.errors.showAllMessages(false);
   }
 
-  self.showNextMessage = function(message) {      
+  self.showNextMessage = function(message) {
     var width = self.sweepingCurrentStep * (100 / self.availableAssetsToSweep().length);
-    self.sweepingProgressWidth(width+'%');
+    self.sweepingProgressWidth(width + '%');
     var message = i18n.t('step_x_of_y_message', self.sweepingCurrentStep, self.availableAssetsToSweep().length, message);
     self.sweepingProgressionMessage(message);
     $.jqlog.debug(message);
   }
-  
+
   self.submitForm = function() {
     if (!self.validationModel.isValid()) {
       self.validationModel.errors.showAllMessages();
@@ -939,32 +939,32 @@ function SweepModalViewModel() {
     //data entry is valid...submit to trigger doAction()
     $('#sweepModal form').submit();
   }
-  
+
   self._sweepCompleteDialog = function(opsComplete) {
     var assetDisplayList = [];
-    for(var i = 0; i < opsComplete.length; i++) {
-      if(opsComplete[i]['result']) {
-        if(opsComplete[i]['type'] == 'send') {
-          assetDisplayList.push("<li><b class='notoAssetColor'>" + opsComplete[i]['asset'] + ":</b> " + 
-                        i18n.t('asset_sent_to', opsComplete[i]['normalized_quantity'], opsComplete[i]['asset'], getAddressLabel(opsComplete[i]['to']))+ "</b>" 
-            + "</li>");  
+    for (var i = 0; i < opsComplete.length; i++) {
+      if (opsComplete[i]['result']) {
+        if (opsComplete[i]['type'] == 'send') {
+          assetDisplayList.push("<li><b class='notoAssetColor'>" + opsComplete[i]['asset'] + ":</b> " +
+            i18n.t('asset_sent_to', opsComplete[i]['normalized_quantity'], opsComplete[i]['asset'], getAddressLabel(opsComplete[i]['to'])) + "</b>"
+            + "</li>");
         } else {
           assert(opsComplete[i]['type'] == 'transferOwnership');
-          assetDisplayList.push("<li><b class='notoAssetColor'>" + opsComplete[i]['asset'] + ":</b> " + 
-                        i18n.t('transferred_ownership', getAddressLabel(opsComplete[i]['to']))+ "</b>" 
-            + "</li>");  
+          assetDisplayList.push("<li><b class='notoAssetColor'>" + opsComplete[i]['asset'] + ":</b> " +
+            i18n.t('transferred_ownership', getAddressLabel(opsComplete[i]['to'])) + "</b>"
+            + "</li>");
         }
       } else {
-        if(opsComplete[i]['type'] == 'send') {
+        if (opsComplete[i]['type'] == 'send') {
           assetDisplayList.push("<li><b class='notoAssetColor'>" + opsComplete[i]['asset'] + "</b>: " + i18n.t("funds_sent_failure") + "</li>");
         } else {
           assert(opsComplete[i]['type'] == 'transferOwnership');
           assetDisplayList.push("<li><b class='notoAssetColor'>" + opsComplete[i]['asset'] + "</b>: " + i18n.t("ownership_transfer_failure") + "</li>");
-        }  
+        }
       }
     }
     var alertCallback = null;
-    if (self.fromOldWallet() && self.availableOldAddresses().length>1) {
+    if (self.fromOldWallet() && self.availableOldAddresses().length > 1) {
       alertCallback = function() {
         self.show(true, true, self.addressForPrivateKey());
       }
@@ -972,15 +972,15 @@ function SweepModalViewModel() {
     bootbox.alert(i18n.t("sweep_from_completed", self.addressForPrivateKey()) + "<br/><br/><ul>" + assetDisplayList.join('') + "</ul>"
       + " " + i18n.t(ACTION_PENDING_NOTICE), alertCallback);
   }
-  
+
 
   self.waitTxoutCountIncrease = function(callback) {
     setTimeout(function() {
       WALLET.retriveBTCAddrsInfo([self.addressForPrivateKey()], function(data) {
         $.jqlog.debug('initial txo count: ' + self.txoutsCountForPrivateKey);
         $.jqlog.debug('new txo count: ' + data[0]['rawUtxoData'].length);
-        if (self.txoutsCountForPrivateKey<data[0]['rawUtxoData'].length) {
-          self.txoutsCountForPrivateKey = data[0]['rawUtxoData'].length;       
+        if (self.txoutsCountForPrivateKey < data[0]['rawUtxoData'].length) {
+          self.txoutsCountForPrivateKey = data[0]['rawUtxoData'].length;
           callback();
         } else {
           self.waitTxoutCountIncrease(callback);
@@ -992,22 +992,22 @@ function SweepModalViewModel() {
   self.sendBtcForFees = function(callback) {
     var cwk = new CWPrivateKey(self.privateKeyForFees());
     var pubkey = cwk.getPub();
-    
+
     // if address has one ouptut, it will has two after this transaction..
     // ..so need output merging
-    if (self.txoutsCountForPrivateKey==1) {
+    if (self.txoutsCountForPrivateKey == 1) {
       self.missingBtcForFees += 2 * MIN_FEE;
     }
     // To avoid "Destination output is below the dust target value" error
     var sweepBTC = false;
-    for(var i = 0; i < self.selectedAssetsToSweep().length; i++) {
+    for (var i = 0; i < self.selectedAssetsToSweep().length; i++) {
       var assetName = self.selectedAssetsToSweep()[i];
-      if (assetName=='BTC') sweepBTC = true;
+      if (assetName == 'BTC') sweepBTC = true;
     }
     if (sweepBTC) {
       self.missingBtcForFees += REGULAR_DUST_SIZE;
     }
-    $.jqlog.debug('missingBtcForFees: '+self.missingBtcForFees);
+    $.jqlog.debug('missingBtcForFees: ' + self.missingBtcForFees);
 
     var sendData = {
       source: self.addressForPrivateKeyForFees(),
@@ -1025,10 +1025,10 @@ function SweepModalViewModel() {
       var newBalance = self.btcBalanceForPrivateKey() + self.missingBtcForFees;
       self.btcBalanceForPrivateKey(newBalance);
       // waiting for transaction is correctly broadcasted
-      self.waitTxoutCountIncrease(callback);    
+      self.waitTxoutCountIncrease(callback);
     }
 
-    var onTransactionCreated = function(unsignedTxHex, numTotalEndpoints, numConsensusEndpoints) {    
+    var onTransactionCreated = function(unsignedTxHex, numTotalEndpoints, numConsensusEndpoints) {
       cwk.checkAndSignRawTransaction(unsignedTxHex, [self.addressForPrivateKey()], function(err, signedHex) {
         if (err) {
           return onTransactionSignError(err);
@@ -1039,7 +1039,7 @@ function SweepModalViewModel() {
     }
 
     var onTransactionError = function() {
-      if (arguments.length==4) {
+      if (arguments.length == 4) {
         self.shown(false);
         bootbox.alert(arguments[1]);
       } else {
@@ -1064,7 +1064,7 @@ function SweepModalViewModel() {
   // so the final balance for btc transfert is the value of last change that we get with extractChangeTxoutValue()
   // TODO: think for a more economic way to have a reliable amount for the final tx (BTC).
   self.mergeOutputs = function(key, pubkey, callback, fees) {
-    if (self.txoutsCountForPrivateKey>1) {
+    if (self.txoutsCountForPrivateKey > 1) {
 
       var message = i18n.t("peparing_transaction_chaining");
       self.sweepingProgressionMessage(message);
@@ -1077,7 +1077,7 @@ function SweepModalViewModel() {
       var sendData = {
         source: self.addressForPrivateKey(),
         destination: self.addressForPrivateKey(),
-        quantity: self.btcBalanceForPrivateKey()-fees,
+        quantity: self.btcBalanceForPrivateKey() - fees,
         asset: 'BTC',
         encoding: 'auto',
         pubkey: pubkey,
@@ -1098,12 +1098,12 @@ function SweepModalViewModel() {
             if (minEstimateFee > self.btcBalanceForPrivateKey()) {
               self.shown(false);
               bootbox.alert(arguments[1]);
-            } else {             
+            } else {
               $.jqlog.debug('Retry with estimated fees.');
               setTimeout(function() {
                 self.mergeOutputs(key, pubkey, callback, minEstimateFee);
               }, 500); //wait 0.5s by courtesy
-            }           
+            }
           } else {
             self.shown(false);
             bootbox.alert(arguments[1]);
@@ -1139,19 +1139,19 @@ function SweepModalViewModel() {
       }
 
       $.jqlog.debug("Create merge outputs transactions");
-      multiAPIConsensus("create_send", sendData, onTransactionCreated, onConsensusError, onSysError); 
+      multiAPIConsensus("create_send", sendData, onTransactionCreated, onConsensusError, onSysError);
 
     } else {
       // Only one input, nothing to do
       callback();
     }
   }
-  
+
   self._doTransferAsset = function(selectedAsset, key, pubkey, opsComplete, callback) {
     assert(selectedAsset.ASSET && selectedAsset.ASSET_INFO);
 
     self.showNextMessage(i18n.t("transferring_asset_from_to", selectedAsset.ASSET, self.addressForPrivateKey(), self.destAddress()));
-    
+
     var transferData = {
       source: self.addressForPrivateKey(),
       quantity: 0,
@@ -1165,7 +1165,7 @@ function SweepModalViewModel() {
     };
     multiAPIConsensus("create_issuance", transferData,
       function(unsignedTxHex, numTotalEndpoints, numConsensusEndpoints) {
-        
+
         key.checkAndSignRawTransaction(unsignedTxHex, [self.destAddress()], function(err, signedHex) {
           if (err) {
             // @TODO: is this the correct way of handling err?
@@ -1179,7 +1179,7 @@ function SweepModalViewModel() {
             });
           }
 
-          WALLET.broadcastSignedTx(signedHex, function (issuanceTxHash, endpoint) { //broadcast was successful
+          WALLET.broadcastSignedTx(signedHex, function(issuanceTxHash, endpoint) { //broadcast was successful
             opsComplete.push({
               'type': 'transferOwnership',
               'result': true,
@@ -1197,7 +1197,7 @@ function SweepModalViewModel() {
             self.sweepingCurrentStep++;
             return callback();
 
-          }, function (jqXHR, textStatus, errorThrown, endpoint) { //on error broadcasting tx
+          }, function(jqXHR, textStatus, errorThrown, endpoint) { //on error broadcasting tx
 
             $.jqlog.debug('broadcasting error: ' + textStatus);
             // retry..
@@ -1220,7 +1220,7 @@ function SweepModalViewModel() {
         return self.showSweepError(selectedAsset.ASSET, opsComplete);
       }, function(jqXHR, textStatus, errorThrown, endpoint) { //onSysError
 
-        $.jqlog.debug('onSysError: '+textStatus);
+        $.jqlog.debug('onSysError: ' + textStatus);
         // retry..
         return callback(true, {
           'type': 'transferOwnership',
@@ -1232,14 +1232,14 @@ function SweepModalViewModel() {
       }
     );
   }
-  
+
   self._doSendAsset = function(asset, key, pubkey, opsComplete, adjustedBTCQuantity, callback) {
     $.jqlog.debug('_doSendAsset: ' + asset);
-    
+
     //TODO: remove this
-    if(asset == 'BTC') assert(adjustedBTCQuantity !== null);
+    if (asset == 'BTC') assert(adjustedBTCQuantity !== null);
     else assert(adjustedBTCQuantity === null);
-    
+
     var selectedAsset = ko.utils.arrayFirst(self.availableAssetsToSweep(), function(item) {
       return asset == item.ASSET;
     });
@@ -1248,11 +1248,11 @@ function SweepModalViewModel() {
     $.jqlog.debug("btcBalanceForPrivateKey: " + self.btcBalanceForPrivateKey());
     var quantity = (asset == 'BTC') ? (self.btcBalanceForPrivateKey() - MIN_FEE) : selectedAsset.RAW_BALANCE;
     var normalizedQuantity = (asset == 'BTC') ? normalizeQuantity(quantity) : selectedAsset.NORMALIZED_BALANCE;
-    
+
     assert(selectedAsset);
-    
-    if(!quantity) { //if there is no quantity to send for the asset, only do the transfer
-      if(asset == 'XCP' || asset == 'BTC') { //nothing to send, and no transfer to do
+
+    if (!quantity) { //if there is no quantity to send for the asset, only do the transfer
+      if (asset == 'XCP' || asset == 'BTC') { //nothing to send, and no transfer to do
         return callback(); //my valuable work here is done!
       } else {
         self._doTransferAsset(selectedAsset, key, pubkey, opsComplete, callback); //will trigger callback() once done
@@ -1260,9 +1260,9 @@ function SweepModalViewModel() {
       }
     }
 
-    self.showNextMessage(i18n.t('sweeping_x_assets_from_to', 
+    self.showNextMessage(i18n.t('sweeping_x_assets_from_to',
       normalizedQuantity, selectedAsset.ASSET, self.addressForPrivateKey(), self.destAddress()));
-      
+
     //dont use WALLET.doTransaction for this...
     var sendData = {
       source: self.addressForPrivateKey(),
@@ -1275,7 +1275,7 @@ function SweepModalViewModel() {
     };
     multiAPIConsensus("create_send", sendData, //can send both BTC and counterparty assets
       function(unsignedTxHex, numTotalEndpoints, numConsensusEndpoints) {
-        
+
         key.checkAndSignRawTransaction(unsignedTxHex, [self.destAddress()], function(err, signedHex) {
           if (err) {
             // @TODO: is this the correct way of handling err?
@@ -1310,8 +1310,8 @@ function SweepModalViewModel() {
 
             //For non BTC/XCP assets, also take ownership (iif the address we are sweeping from is the asset's owner')
             if (selectedAsset.ASSET != 'XCP'
-               && selectedAsset.ASSET != 'BTC'
-               && selectedAsset.ASSET_INFO['owner'] == self.addressForPrivateKey()) {
+              && selectedAsset.ASSET != 'BTC'
+              && selectedAsset.ASSET_INFO['owner'] == self.addressForPrivateKey()) {
               $.jqlog.debug("waiting " + TRANSACTION_DELAY + "ms");
               setTimeout(function() {
                 self._doTransferAsset(selectedAsset, key, pubkey, opsComplete, callback); //will trigger callback() once done
@@ -1358,32 +1358,32 @@ function SweepModalViewModel() {
   }
 
   self.showSweepError = function(asset, opsComplete) {
-    $.jqlog.debug("Error sweeping "+asset);
+    $.jqlog.debug("Error sweeping " + asset);
     self.shown(false);
     self._sweepCompleteDialog(opsComplete);
   }
-  
+
   self.doAction = function() {
     var cwk = new CWPrivateKey(self.privateKey());
     var pubkey = cwk.getPub();
 
     var sendsToMake = [];
     var opsComplete = [];
-    
+
     var selectedAsset = null, hasBTC = false;
-    for(var i = 0; i < self.selectedAssetsToSweep().length; i++) {
+    for (var i = 0; i < self.selectedAssetsToSweep().length; i++) {
       selectedAsset = self.selectedAssetsToSweep()[i];
-      if(selectedAsset == 'BTC') {
+      if (selectedAsset == 'BTC') {
         hasBTC = i; //send BTC last so the sweep doesn't randomly eat our primed txouts for the other assets
       } else {
         sendsToMake.push([selectedAsset, cwk, pubkey, opsComplete, null]);
       }
     }
-    if(hasBTC !== false) {
+    if (hasBTC !== false) {
       //This balance is adjusted after each asset transfert with the change output.
       sendsToMake.push(["BTC", cwk, pubkey, opsComplete, self.btcBalanceForPrivateKey()]);
     }
-    
+
     var total = sendsToMake.length;
     var sendParams = false;
     var retryCounter = {};
@@ -1398,21 +1398,21 @@ function SweepModalViewModel() {
 
         if (sendParams[0] in retryCounter) {
           if (retryCounter[sendParams[0]] < TRANSACTION_MAX_RETRY) {
-            retryCounter[sendParams[0]]++;    
-            $.jqlog.debug("retry count: " + retryCounter[sendParams[0]]);        
+            retryCounter[sendParams[0]]++;
+            $.jqlog.debug("retry count: " + retryCounter[sendParams[0]]);
           } else {
             sendParams = undefined;
             opsComplete.push(failedTx);
-            $.jqlog.debug("max retry.. stopping"); 
+            $.jqlog.debug("max retry.. stopping");
           }
         } else {
           retryCounter[sendParams[0]] = 1;
-          $.jqlog.debug("retry count: 1"); 
+          $.jqlog.debug("retry count: 1");
         }
 
       }
-       
-      if(sendParams === undefined) {
+
+      if (sendParams === undefined) {
 
         // No more asset or max retry occur
         self.shown(false);
@@ -1420,11 +1420,11 @@ function SweepModalViewModel() {
 
       } else {
 
-        if (retry && failedTx['type']=='transferOwnership') {
+        if (retry && failedTx['type'] == 'transferOwnership') {
 
           //TODO: this is ugly. transfert asset must be include in sendsToMake array
           self._doTransferAsset(failedTx['selectedAsset'], sendParams[1], sendParams[2], opsComplete, function(retry, failedTx) {
-            $.jqlog.debug("waiting "+TRANSACTION_DELAY + "ms");
+            $.jqlog.debug("waiting " + TRANSACTION_DELAY + "ms");
             setTimeout(function() {
               doSweep(retry, failedTx);
             }, TRANSACTION_DELAY);
@@ -1433,36 +1433,36 @@ function SweepModalViewModel() {
         } else {
 
           self._doSendAsset(sendParams[0], sendParams[1], sendParams[2], sendParams[3], sendParams[4], function(retry, failedTx) {
-            $.jqlog.debug("waiting "+TRANSACTION_DELAY + "ms");
+            $.jqlog.debug("waiting " + TRANSACTION_DELAY + "ms");
             setTimeout(function() {
               doSweep(retry, failedTx);
             }, TRANSACTION_DELAY);
           });
 
         }
-        
+
       }
     }
 
     var launchSweep = function() {
-      if (sendsToMake.length==1 && sendsToMake[0][0]=='BTC') {
+      if (sendsToMake.length == 1 && sendsToMake[0][0] == 'BTC') {
         doSweep();
       } else {
         // merge output then start sweeping.
         self.mergeOutputs(cwk, pubkey, doSweep);
       }
     }
-    
+
     trackEvent('Balances', self.fromOldWallet() ? 'SweepFromOldWallet' : 'Sweep');
 
-    if (self.missingBtcForFees>0 && self.privateKeyForFeesValidated.isValid()!='') {
+    if (self.missingBtcForFees > 0 && self.privateKeyForFeesValidated.isValid() != '') {
       // send btc to pay fees then launch sweeping
       self.sendBtcForFees(launchSweep);
     } else {
       launchSweep();
     }
   }
-  
+
   self.show = function(resetForm, fromOldWallet, excludeOldAddress) {
     if (typeof(resetForm) === 'undefined') resetForm = true;
     if (typeof(fromOldWallet) === 'undefined') fromOldWallet = false;
@@ -1471,7 +1471,7 @@ function SweepModalViewModel() {
     if (resetForm) self.resetForm(fromOldWallet);
     self.shown(true);
     trackDialogShow(fromOldWallet ? 'SweepFromOldWallet' : 'Sweep');
-  }  
+  }
 
   self.hide = function() {
     self.shown(false);
@@ -1484,44 +1484,44 @@ function SignMessageModalViewModel() {
   self.shown = ko.observable(false);
   self.address = ko.observable(null); //address string, not an Address object
   self.message = ko.observable('').extend({
-    required: true,
+    required: true
   });
   self.signatureFormat = ko.observable('base64');
 
   self.signedMessage = ko.observable();
-  
+
   self.validationModel = ko.validatedObservable({
     message: self.message
   });
-  
+
   self.resetForm = function() {
     self.address(null);
     self.message('');
     self.signedMessage('');
     self.validationModel.errors.showAllMessages(false);
   }
-  
+
   self.submitForm = function() {
     if (!self.validationModel.isValid()) {
       self.validationModel.errors.showAllMessages();
       return false;
-    }    
+    }
     //data entry is valid...submit to trigger doAction()
     $('#signMessageModal form').submit();
   }
-  
+
   self.show = function(address, resetForm) {
-    if(typeof(resetForm)==='undefined') resetForm = true;
-    if(resetForm) self.resetForm();
+    if (typeof(resetForm) === 'undefined') resetForm = true;
+    if (resetForm) self.resetForm();
     self.address(address);
     self.shown(true);
     trackDialogShow('SignMessage');
-  }  
+  }
 
   self.hide = function() {
     self.shown(false);
   }
-  
+
   self.doAction = function() {
     assert(self.validationModel.isValid(), "Cannot sign");
     var key = WALLET.getAddressObj(self.address()).KEY;
@@ -1529,7 +1529,7 @@ function SignMessageModalViewModel() {
     var signedMessage = key.signMessage(self.message(), format);
     self.signedMessage(signedMessage);
     $("#signedMessage").effect("highlight", {}, 1500);
-    trackEvent('Balances', 'SignMessage');    
+    trackEvent('Balances', 'SignMessage');
     //Keep the form up after signing, the user will manually press Close to close it...
   }
 }
@@ -1544,40 +1544,40 @@ function TestnetBurnModalViewModel() {
     required: true,
     isValidPositiveQuantity: self,
     validation: [{
-      validator: function (val, self) {
+      validator: function(val, self) {
         return parseFloat(val) > 0 && parseFloat(val) <= 1;
       },
       message: i18n.t('quantity_must_be_between_0_and_1'),
       params: self
-    },{
-      validator: function (val, self) {
+    }, {
+      validator: function(val, self) {
         return parseFloat(val) <= WALLET.getBalance(self.address(), 'BTC') - normalizeQuantity(MIN_FEE);
       },
       message: i18n.t('quantity_of_exceeds_balance', 'BTC'),
       params: self
-    },{
-      validator: function (val, self) {
+    }, {
+      validator: function(val, self) {
         return !(parseFloat(val) > 1 - self.btcAlreadyBurned());
       },
       message: i18n.t('you_can_only_burn'),
       params: self
     }]
   });
-  
+
   self.quantityXCPToBeCreated = ko.computed(function() { //normalized
-    if(!self.btcBurnQuantity() || !parseFloat(self.btcBurnQuantity())) return null;
+    if (!self.btcBurnQuantity() || !parseFloat(self.btcBurnQuantity())) return null;
     return testnetBurnDetermineEarned(WALLET.networkBlockHeight(), self.btcBurnQuantity());
   }, self);
-  
-  self.dispQuantityXCPToBeCreated = ko.computed(function() { 
+
+  self.dispQuantityXCPToBeCreated = ko.computed(function() {
     return numberWithCommas(self.quantityXCPToBeCreated());
   }, self);
-  
+
   self.maxPossibleBurn = ko.computed(function() { //normalized
-    if(self.btcAlreadyBurned() === null) return null;
-    return Math.min(1 - self.btcAlreadyBurned(), WALLET.getAddressObj(self.address()).getAssetObj('BTC').normalizedBalance()) 
+    if (self.btcAlreadyBurned() === null) return null;
+    return Math.min(1 - self.btcAlreadyBurned(), WALLET.getAddressObj(self.address()).getAssetObj('BTC').normalizedBalance())
   }, self);
-  
+
   self.validationModel = ko.validatedObservable({
     btcBurnQuantity: self.btcBurnQuantity
   });
@@ -1586,7 +1586,7 @@ function TestnetBurnModalViewModel() {
     self.btcBurnQuantity('');
     self.validationModel.errors.showAllMessages(false);
   }
-  
+
   self.submitForm = function() {
     if (!self.validationModel.isValid()) {
       self.validationModel.errors.showAllMessages();
@@ -1598,8 +1598,9 @@ function TestnetBurnModalViewModel() {
   self.doAction = function() {
     //do the additional issuance (specify non-zero quantity, no transfer destination)
     WALLET.doTransaction(self.address(), "create_burn",
-      { source: self.address(),
-        quantity: denormalizeQuantity(self.btcBurnQuantity()),
+      {
+        source: self.address(),
+        quantity: denormalizeQuantity(self.btcBurnQuantity())
       },
       function(txHash, data, endpoint, addressType, armoryUTx) {
         self.shown(false);
@@ -1615,29 +1616,29 @@ function TestnetBurnModalViewModel() {
     );
     trackEvent('Balances', 'TestnetBurn');
   }
-  
+
   self.show = function(address, resetForm) {
-    if(typeof(resetForm)==='undefined') resetForm = true;
-    if(resetForm) self.resetForm();
+    if (typeof(resetForm) === 'undefined') resetForm = true;
+    if (resetForm) self.resetForm();
     self.address(address);
-    
+
     //get the current block height, to calculate the XCP burn payout
     //determine whether the selected address has burned before, and if so, how much
     failoverAPI("get_burns", {filters: {'field': 'source', 'op': '==', 'value': address}}, function(data, endpoint) {
       var totalBurned = 0;
-      for(var i=0; i < data.length; i++) {
+      for (var i = 0; i < data.length; i++) {
         totalBurned += data[i]['burned'];
       }
-      
+
       self.btcAlreadyBurned(normalizeQuantity(totalBurned));
       self.shown(true);
       trackDialogShow('TestnetBurn');
     });
-  }  
+  }
 
   self.hide = function() {
     self.shown(false);
-  }  
+  }
 }
 
 function DisplayPrivateKeyModalViewModel() {
@@ -1645,24 +1646,24 @@ function DisplayPrivateKeyModalViewModel() {
   self.shown = ko.observable(false);
   self.address = ko.observable(null); //address string, not an Address object
   self.privateKeyText = ko.observable(null);
-  
+
   self.resetForm = function() {
     self.address(null);
     self.privateKeyText(null);
   }
-  
+
   self.show = function(address, resetForm) {
-    if(typeof(resetForm)==='undefined') resetForm = true;
-    if(resetForm) self.resetForm();
+    if (typeof(resetForm) === 'undefined') resetForm = true;
+    if (resetForm) self.resetForm();
     self.address(address);
     self.shown(true);
     trackDialogShow('DisplayPrivateKey');
-  }  
+  }
 
   self.hide = function() {
     self.shown(false);
   }
-  
+
   self.displayPrivateKey = function() {
     var wif = WALLET.getAddressObj(self.address()).KEY.getWIF();
     self.privateKeyText(wif);
@@ -1679,11 +1680,11 @@ function BroadcastModalViewModel() {
   self.shown = ko.observable(false);
 
   self.address = ko.observable(null).extend({
-    required: true   
+    required: true
   });
 
   self.textValue = ko.observable('').extend({
-    required: true   
+    required: true
   });
 
   self.numericalValue = ko.observable(-1).extend({
@@ -1717,15 +1718,15 @@ function BroadcastModalViewModel() {
     self.broadcastDate(new Date());
     self.validationModel.errors.showAllMessages(false);
   }
-  
+
   self.show = function(addressObj, resetForm) {
-    if(typeof(resetForm)==='undefined') resetForm = true;
-    if(resetForm) self.resetForm();
+    if (typeof(resetForm) === 'undefined') resetForm = true;
+    if (resetForm) self.resetForm();
     self.addressObj = addressObj;
     self.address(self.addressObj.ADDRESS);
     self.shown(true);
     trackDialogShow('Broadcast');
-  }  
+  }
 
   self.hide = function() {
     self.shown(false);
@@ -1735,7 +1736,7 @@ function BroadcastModalViewModel() {
     if (!self.validationModel.isValid()) {
       self.validationModel.errors.showAllMessages();
       return false;
-    }    
+    }
     //data entry is valid...submit to the server
     $('#broadcastModal form').submit();
   }
@@ -1749,7 +1750,7 @@ function BroadcastModalViewModel() {
       value: parseFloat(self.numericalValue())
     }
     //$.jqlog.debug(params); 
-    
+
     var onSuccess = function(txHash, data, endpoint, addressType, armoryUTx) {
       self.hide();
       WALLET.showTransactionCompleteDialog(i18n.t("broadcast_transmitted") + " " + i18n.t(ACTION_PENDING_NOTICE),
@@ -1771,15 +1772,15 @@ function SignTransactionModalViewModel() {
   self.shown = ko.observable(false);
   self.address = ko.observable(null); //address string, not an Address object
   self.unsignedTx = ko.observable('').extend({
-    required: true,
+    required: true
   });
   self.signedTx = ko.observable();
   self.validTx = ko.observable(false);
-  
+
   self.validationModel = ko.validatedObservable({
     unsignedTx: self.unsignedTx
   });
-  
+
   self.resetForm = function() {
     self.address(null);
     self.unsignedTx('');
@@ -1787,19 +1788,19 @@ function SignTransactionModalViewModel() {
     self.validTx(false);
     self.validationModel.errors.showAllMessages(false);
   }
-  
+
   self.show = function(address, resetForm) {
-    if(typeof(resetForm)==='undefined') resetForm = true;
-    if(resetForm) self.resetForm();
+    if (typeof(resetForm) === 'undefined') resetForm = true;
+    if (resetForm) self.resetForm();
     self.address(address);
     self.shown(true);
     trackDialogShow('SignTransaction');
-  }  
+  }
 
   self.hide = function() {
     self.shown(false);
   }
-  
+
   self.signTransaction = function() {
     assert(self.validationModel.isValid(), "Cannot sign");
     var cwk = WALLET.getAddressObj(self.address()).KEY;
@@ -1822,8 +1823,8 @@ function SignTransactionModalViewModel() {
     } catch (e) {
       self.signedTx(e.message);
       self.validTx(false);
-    }   
-    
+    }
+
   }
 
   self.signAndBroadcastTransaction = function() {
@@ -1844,7 +1845,7 @@ function SignTransactionModalViewModel() {
         var onSuccess = function(txHash, endpoint) {
           trackEvent('Balances', 'BroadcastTransaction');
           self.shown(false);
-          bootbox.alert(i18n.t("your_tx_broadcast_success") + "<br /><br /><b>"+txHash+"</b>");
+          bootbox.alert(i18n.t("your_tx_broadcast_success") + "<br /><br /><b>" + txHash + "</b>");
         }
         WALLET.broadcastSignedTx(self.signedTx(), onSuccess, defaultErrorHandler);
       });
@@ -1853,9 +1854,9 @@ function SignTransactionModalViewModel() {
       self.signedTx(e.message);
       self.validTx(false);
     }
-    
+
   }
-  
+
 }
 
 function ArmoryBroadcastTransactionModalViewModel() {
@@ -1863,36 +1864,36 @@ function ArmoryBroadcastTransactionModalViewModel() {
   self.shown = ko.observable(false);
   self.address = ko.observable(null); //address string, not an Address object
   self.signedTx = ko.observable('').extend({
-    required: true,
+    required: true
   });
-  
+
   self.validationModel = ko.validatedObservable({
     signedTx: self.signedTx
   });
-  
+
   self.resetForm = function() {
     self.address(null);
     self.signedTx('');
     self.validationModel.errors.showAllMessages(false);
   }
-  
+
   self.show = function(address, resetForm) {
-    if(typeof(resetForm)==='undefined') resetForm = true;
-    if(resetForm) self.resetForm();
+    if (typeof(resetForm) === 'undefined') resetForm = true;
+    if (resetForm) self.resetForm();
     self.address(address);
     self.shown(true);
     trackDialogShow('ArmoryBroadcastTransaction');
-  }  
+  }
 
   self.hide = function() {
     self.shown(false);
   }
-  
+
   self.submitForm = function() {
     if (!self.validationModel.isValid()) {
       self.validationModel.errors.showAllMessages();
       return false;
-    }    
+    }
     //data entry is valid...submit to the server
     $('#armoryBroadcastTransactionModal form').submit();
   }
@@ -1900,16 +1901,16 @@ function ArmoryBroadcastTransactionModalViewModel() {
   self.doAction = function() {
     var onSuccess = function(txHash, data, endpoint, addressType, armoryUTx) {
       self.hide();
-      var message = i18n.t("your_tx_broadcast_success") + "<br /><br /><b>"+txHash+"</b>";
+      var message = i18n.t("your_tx_broadcast_success") + "<br /><br /><b>" + txHash + "</b>";
       WALLET.showTransactionCompleteDialog(message, message, armoryUTx);
     }
-    
+
     failoverAPI("convert_armory_signedtx_to_raw_hex", {'signed_tx_ascii': self.signedTx()},
       function(data, endpoint) {
         WALLET.broadcastSignedTx(data, onSuccess);
       }
     );
-    
+
     trackEvent('Balances', 'ArmoryBroadcastTransaction');
   }
 }

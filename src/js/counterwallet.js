@@ -5,7 +5,7 @@
 //Set up logging (jqlog) and monkey patch jqlog with a debug function
 $.jqlog.enabled(true);
 $.jqlog.debug = function(object, options) {
-  if(IS_DEV || USE_TESTNET) //may change to just IS_DEV in the future
+  if (IS_DEV || USE_TESTNET) //may change to just IS_DEV in the future
     $.jqlog.info(object, options);
 }
 
@@ -14,12 +14,12 @@ _.mixin(_.string.exports());
 
 //IE does not include support for location.origin ...
 if (!window.location.origin) {
-  window.location.origin = window.location.protocol + "//" + window.location.hostname + (window.location.port ? ':' + window.location.port: '');
+  window.location.origin = window.location.protocol + "//" + window.location.hostname + (window.location.port ? ':' + window.location.port : '');
 }
 
 //if in dev or testnet mode (both of which are specified based on a URL querystring being present), IF a query string is
 // provided clear the query string so that our hash-based AJAX navigation works after logging in...
-if((IS_DEV || USE_TESTNET) && location.search) {
+if ((IS_DEV || USE_TESTNET) && location.search) {
   //history.replaceState is NOT supported on IE 9...ehh
   assert($.layout.className !== 'trident9',
     "Use of 'dev' or 'testnet' flags NOT supported on IE 9, due to lack of history.replaceState() support.");
@@ -28,10 +28,10 @@ if((IS_DEV || USE_TESTNET) && location.search) {
 
 //Knockout secure binding drop-in initialization
 var options = {
-   attribute: "data-bind",        // default "data-sbind"
-   globals: window,               // default {}
-   bindings: ko.bindingHandlers,  // default ko.bindingHandlers
-   noVirtualElements: false       // default true
+  attribute: "data-bind",        // default "data-sbind"
+  globals: window,               // default {}
+  bindings: ko.bindingHandlers,  // default ko.bindingHandlers
+  noVirtualElements: false       // default true
 };
 ko.bindingProvider.instance = new ko.secureBindingsProvider(options);
 
@@ -57,7 +57,7 @@ var disabledFeatures = ko.observableArray([]);
 function produceCWServerList() {
   cwURLs(_.shuffle(cwURLs())); //randomly shuffle the list to decide the server try order...
   $.jqlog.debug("MultiAPI Backends: " + JSON.stringify(cwURLs()));
-  
+
   cwBaseURLs(jQuery.map(cwURLs(), function(element) {
     return element;
   }));
@@ -68,32 +68,108 @@ function produceCWServerList() {
 
 function initGoogleAnalytics() {
   $.jqlog.debug("Initializing Google Analytics for UA: " + GOOGLE_ANALYTICS_UAID);
-  if(!GOOGLE_ANALYTICS_UAID) return;
-  
-  window._gaq=[["_setAccount", GOOGLE_ANALYTICS_UAID], ["_trackPageview"]]; 
-  (function(d,t){var g=d.createElement(t),s=d.getElementsByTagName(t)[0];g.async=1;
-  g.src=("https:"==location.protocol?"//ssl":"//www")+".google-analytics.com/ga.js";
-  s.parentNode.insertBefore(g,s)}(document,"script"));  
+  if (!GOOGLE_ANALYTICS_UAID) return;
+
+  window._gaq = [["_setAccount", GOOGLE_ANALYTICS_UAID], ["_trackPageview"]];
+  (function(d, t) {
+    var g = d.createElement(t), s = d.getElementsByTagName(t)[0];
+    g.async = 1;
+    g.src = ("https:" == location.protocol ? "//ssl" : "//www") + ".google-analytics.com/ga.js";
+    s.parentNode.insertBefore(g, s)
+  }(document, "script"));
 }
 
 function initRollbar() {
   /* TODO: Try to load rollbar earlier, possibly... (However, as we get the accessToken from servers.json, we'd have
    * to put all of that logic in <head> for instance to be able to do that. So this should hopefully work fine.) 
    */
-  if(!ROLLBAR_ACCESS_TOKEN) return;
+  if (!ROLLBAR_ACCESS_TOKEN) return;
   $.jqlog.debug("Initializing rollbar: " + ROLLBAR_ACCESS_TOKEN);
   var _rollbarConfig = {
-      verbose: IS_DEV,
-      rollbarJsUrl: "/src/vendors/rollbar/release/rollbar-1.1.7.min.js",
-      accessToken: ROLLBAR_ACCESS_TOKEN,
-      captureUncaught: true,
-      payload: {
-          environment: USE_TESTNET ? "testnet" : "mainnet"
-      }
+    verbose: IS_DEV,
+    rollbarJsUrl: "/src/vendors/rollbar/release/rollbar-1.1.7.min.js",
+    accessToken: ROLLBAR_ACCESS_TOKEN,
+    captureUncaught: true,
+    payload: {
+      environment: USE_TESTNET ? "testnet" : "mainnet"
+    }
   };
   try {
-    !function(a,b){function c(b){this.shimId=++h,this.notifier=null,this.parentShim=b,this.logger=function(){},a.console&&void 0===a.console.shimId&&(this.logger=a.console.log)}function d(b,c,d){a._rollbarWrappedError&&(d[4]||(d[4]=a._rollbarWrappedError),d[5]||(d[5]=a._rollbarWrappedError._rollbarContext),a._rollbarWrappedError=null),b.uncaughtError.apply(b,d),c&&c.apply(a,d)}function e(b){var d=c;return g(function(){if(this.notifier)return this.notifier[b].apply(this.notifier,arguments);var c=this,e="scope"===b;e&&(c=new d(this));var f=Array.prototype.slice.call(arguments,0),g={shim:c,method:b,args:f,ts:new Date};return a._rollbarShimQueue.push(g),e?c:void 0})}function f(a,b){if(b.hasOwnProperty&&b.hasOwnProperty("addEventListener")){var c=b.addEventListener;b.addEventListener=function(b,d,e){c.call(this,b,a.wrap(d),e)};var d=b.removeEventListener;b.removeEventListener=function(a,b,c){d.call(this,a,b&&b._wrapped?b._wrapped:b,c)}}}function g(a,b){return b=b||this.logger,function(){try{return a.apply(this,arguments)}catch(c){b("Rollbar internal error:",c)}}}var h=0;c.init=function(a,b){var e=b.globalAlias||"Rollbar";if("object"==typeof a[e])return a[e];a._rollbarShimQueue=[],a._rollbarWrappedError=null,b=b||{};var h=new c;return g(function(){if(h.configure(b),b.captureUncaught){var c=a.onerror;a.onerror=function(){var a=Array.prototype.slice.call(arguments,0);d(h,c,a)};var g,i,j="EventTarget,Window,Node,ApplicationCache,AudioTrackList,ChannelMergerNode,CryptoOperation,EventSource,FileReader,HTMLUnknownElement,IDBDatabase,IDBRequest,IDBTransaction,KeyOperation,MediaController,MessagePort,ModalWindow,Notification,SVGElementInstance,Screen,TextTrack,TextTrackCue,TextTrackList,WebSocket,WebSocketWorker,Worker,XMLHttpRequest,XMLHttpRequestEventTarget,XMLHttpRequestUpload".split(",");for(g=0;g<j.length;++g)i=j[g],a[i]&&a[i].prototype&&f(h,a[i].prototype)}return a[e]=h,h},h.logger)()},c.prototype.loadFull=function(a,b,c,d){var e=g(function(){var a=b.createElement("script"),e=b.getElementsByTagName("script")[0];a.src=d.rollbarJsUrl,a.async=!c,a.onload=f,e.parentNode.insertBefore(a,e)},this.logger),f=g(function(){if(void 0===a._rollbarPayloadQueue)for(var b,c,d,e,f=new Error("rollbar.js did not load");b=a._rollbarShimQueue.shift();)for(d=b.args,e=0;e<d.length;++e)if(c=d[e],"function"==typeof c){c(f);break}},this.logger);g(function(){c?e():a.addEventListener?a.addEventListener("load",e,!1):a.attachEvent("onload",e)},this.logger)()},c.prototype.wrap=function(b,c){try{var d;if(d="function"==typeof c?c:function(){return c||{}},"function"!=typeof b)return b;if(b._isWrap)return b;if(!b._wrapped){b._wrapped=function(){try{return b.apply(this,arguments)}catch(c){throw c._rollbarContext=d(),c._rollbarContext._wrappedSource=b.toString(),a._rollbarWrappedError=c,c}},b._wrapped._isWrap=!0;for(var e in b)b.hasOwnProperty(e)&&(b._wrapped[e]=b[e])}return b._wrapped}catch(f){return b}};for(var i="log,debug,info,warn,warning,error,critical,global,configure,scope,uncaughtError".split(","),j=0;j<i.length;++j)c.prototype[i[j]]=e(i[j]);var k="//d37gvrvc0wt4s1.cloudfront.net/js/v1.1/rollbar.min.js";_rollbarConfig.rollbarJsUrl=_rollbarConfig.rollbarJsUrl||k;var l=c.init(a,_rollbarConfig);l.loadFull(a,b,!1,_rollbarConfig)}(window,document);
-  } catch(e) {
+    !function(a, b) {
+      function c(b) {this.shimId = ++h, this.notifier = null, this.parentShim = b, this.logger = function() {}, a.console && void 0 === a.console.shimId && (this.logger = a.console.log)}
+
+      function d(b, c, d) {a._rollbarWrappedError && (d[4] || (d[4] = a._rollbarWrappedError), d[5] || (d[5] = a._rollbarWrappedError._rollbarContext), a._rollbarWrappedError = null), b.uncaughtError.apply(b, d), c && c.apply(a, d)}
+
+      function e(b) {
+        var d = c;
+        return g(function() {
+          if (this.notifier)return this.notifier[b].apply(this.notifier, arguments);
+          var c = this, e = "scope" === b;
+          e && (c = new d(this));
+          var f = Array.prototype.slice.call(arguments, 0), g = {shim: c, method: b, args: f, ts: new Date};
+          return a._rollbarShimQueue.push(g), e ? c : void 0
+        })
+      }
+
+      function f(a, b) {
+        if (b.hasOwnProperty && b.hasOwnProperty("addEventListener")) {
+          var c = b.addEventListener;
+          b.addEventListener = function(b, d, e) {c.call(this, b, a.wrap(d), e)};
+          var d = b.removeEventListener;
+          b.removeEventListener = function(a, b, c) {d.call(this, a, b && b._wrapped ? b._wrapped : b, c)}
+        }
+      }
+
+      function g(a, b) {return b = b || this.logger, function() {try {return a.apply(this, arguments)} catch (c) {b("Rollbar internal error:", c)}}}
+
+      var h = 0;
+      c.init = function(a, b) {
+        var e = b.globalAlias || "Rollbar";
+        if ("object" == typeof a[e])return a[e];
+        a._rollbarShimQueue = [], a._rollbarWrappedError = null, b = b || {};
+        var h = new c;
+        return g(function() {
+          if (h.configure(b), b.captureUncaught) {
+            var c = a.onerror;
+            a.onerror = function() {
+              var a = Array.prototype.slice.call(arguments, 0);
+              d(h, c, a)
+            };
+            var g, i, j = "EventTarget,Window,Node,ApplicationCache,AudioTrackList,ChannelMergerNode,CryptoOperation,EventSource,FileReader,HTMLUnknownElement,IDBDatabase,IDBRequest,IDBTransaction,KeyOperation,MediaController,MessagePort,ModalWindow,Notification,SVGElementInstance,Screen,TextTrack,TextTrackCue,TextTrackList,WebSocket,WebSocketWorker,Worker,XMLHttpRequest,XMLHttpRequestEventTarget,XMLHttpRequestUpload".split(",");
+            for (g = 0; g < j.length; ++g)i = j[g], a[i] && a[i].prototype && f(h, a[i].prototype)
+          }
+          return a[e] = h, h
+        }, h.logger)()
+      }, c.prototype.loadFull = function(a, b, c, d) {
+        var e = g(function() {
+          var a = b.createElement("script"), e = b.getElementsByTagName("script")[0];
+          a.src = d.rollbarJsUrl, a.async = !c, a.onload = f, e.parentNode.insertBefore(a, e)
+        }, this.logger), f = g(function() {
+          if (void 0 === a._rollbarPayloadQueue)for (var b, c, d, e, f = new Error("rollbar.js did not load"); b = a._rollbarShimQueue.shift();)for (d = b.args, e = 0; e < d.length; ++e)if (c = d[e], "function" == typeof c) {
+            c(f);
+            break
+          }
+        }, this.logger);
+        g(function() {c ? e() : a.addEventListener ? a.addEventListener("load", e, !1) : a.attachEvent("onload", e)}, this.logger)()
+      }, c.prototype.wrap = function(b, c) {
+        try {
+          var d;
+          if (d = "function" == typeof c ? c : function() {return c || {}}, "function" != typeof b)return b;
+          if (b._isWrap)return b;
+          if (!b._wrapped) {
+            b._wrapped = function() {try {return b.apply(this, arguments)} catch (c) {throw c._rollbarContext = d(), c._rollbarContext._wrappedSource = b.toString(), a._rollbarWrappedError = c, c}}, b._wrapped._isWrap = !0;
+            for (var e in b)b.hasOwnProperty(e) && (b._wrapped[e] = b[e])
+          }
+          return b._wrapped
+        } catch (f) {return b}
+      };
+      for (var i = "log,debug,info,warn,warning,error,critical,global,configure,scope,uncaughtError".split(","), j = 0; j < i.length; ++j)c.prototype[i[j]] = e(i[j]);
+      var k = "//d37gvrvc0wt4s1.cloudfront.net/js/v1.1/rollbar.min.js";
+      _rollbarConfig.rollbarJsUrl = _rollbarConfig.rollbarJsUrl || k;
+      var l = c.init(a, _rollbarConfig);
+      l.loadFull(a, b, !1, _rollbarConfig)
+    }(window, document);
+  } catch (e) {
     $.jqlog.warn("Got exception when trying to configure rollbar: " + e);
   }
 }
@@ -103,22 +179,22 @@ function loadCounterwalletConfigFromServer() {
   $.getJSON("/counterwallet.conf.json", function(data) {
     assert(data && typeof data == "object" && data.hasOwnProperty("servers"), "Returned servers.json file does not contain valid JSON object");
     assert(data['servers'] && data['servers'] instanceof Array, "'servers' field in returned servers.json file is not an array");
-    ROLLBAR_ACCESS_TOKEN = data['rollbarAccessToken'] || ''; 
+    ROLLBAR_ACCESS_TOKEN = data['rollbarAccessToken'] || '';
     GOOGLE_ANALYTICS_UAID = (!USE_TESTNET ? data['googleAnalyticsUA'] : data['googleAnalyticsUA-testnet']) || '';
-    
-    if(!data['servers'].length)
-      cwURLs([ location.origin ]);
+
+    if (!data['servers'].length)
+      cwURLs([location.origin]);
     else
       cwURLs(data['servers']);
     produceCWServerList();
     initGoogleAnalytics();
     initRollbar();
-    
+
     //Init list of disabled features
-    if(data['disabledFeatures']) {
+    if (data['disabledFeatures']) {
       assert(data['disabledFeatures'] instanceof Array, "'disabledFeatures' field in returned servers.json file is not an array");
-      for(var i=0; i < data['disabledFeatures']; i++) {
-        if(DISABLED_FEATURES_SUPPORTED.indexOf(data['disabledFeatures'][i]) == -1) {
+      for (var i = 0; i < data['disabledFeatures']; i++) {
+        if (DISABLED_FEATURES_SUPPORTED.indexOf(data['disabledFeatures'][i]) == -1) {
           assert(data['disabledFeatures'] instanceof Array, "'disabledFeatures' field has invalid entry '" + data['disabledFeatures'][i]
             + "'. Supported entries are: " + DISABLED_FEATURES_SUPPORTED.join(', '));
         }
@@ -128,7 +204,7 @@ function loadCounterwalletConfigFromServer() {
     disabledFeatures(data['disabledFeatures'] || []);
   }).fail(function() {
     //File not found, just use the local box as the API server
-    cwURLs([ location.origin ]);
+    cwURLs([location.origin]);
     produceCWServerList();
   });
 }
@@ -140,12 +216,12 @@ function autoDropUpDropdowns() {
   (function() {
     // require menu height + margin, otherwise convert to drop-up
     var dropUpMarginBottom = 100;
-  
+
     function dropUp() {
       var windowHeight = $(window).height();
       $(".btn-group-dropup").each(function() {
-        var dropDownMenuHeight, 
-            rect = this.getBoundingClientRect();
+        var dropDownMenuHeight,
+          rect = this.getBoundingClientRect();
         // only toggle menu's that are visible on the current page
         if (rect.top > windowHeight) {
           return;
@@ -158,13 +234,13 @@ function autoDropUpDropdowns() {
         $(this).toggleClass("dropup", ((windowHeight - rect.bottom) < (dropDownMenuHeight + dropUpMarginBottom)) && (rect.top > dropDownMenuHeight));
       });
     };
-  
+
     // bind to load & scroll - but debounce scroll with `underscorejs`
     $(window).bind({
       "resize scroll touchstart touchmove mousewheel": _.debounce(dropUp, 100),
       "load": dropUp
     });
-  }).call(this);  
+  }).call(this);
 }
 
 
@@ -174,13 +250,13 @@ function autoDropUpDropdowns() {
 $(document).ready(function() {
   //Reject browsers that don't support the features we need (especially CSP 1.0 and window.crypto)
   // See http://caniuse.com/contentsecuritypolicy and https://developer.mozilla.org/en-US/docs/Web/API/window.crypto.getRandomValues
-  $.reject({  
+  $.reject({
     reject: {
       msie1: true,
       msie2: true,
       msie3: true,
       msie4: true,
-      msie5: true, 
+      msie5: true,
       msie6: true, //kill it with fire
       msie7: true, //kill it with fire
       msie8: true, //kill it with fire
@@ -273,16 +349,16 @@ $(document).ready(function() {
       opera: {
         text: 'Opera',
         url: 'http://www.opera.com/download/'
-      }      
+      }
     },
     header: i18n.t('brower_not_supported_header'),
     paragraph1: i18n.t("brower_not_supported_text"),
     close: false,
     closeESC: false
   });
-  
+
   autoDropUpDropdowns();
-  
+
   loadCounterwalletConfigFromServer();
 
 });
