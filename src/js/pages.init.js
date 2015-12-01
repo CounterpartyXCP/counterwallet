@@ -10,15 +10,15 @@ function initIndex() { //main page
   window.LICENSE_MODAL = new LicenseModalViewModel();
   window.LOGON_PASSWORD_MODAL = new LogonPasswordModalViewModel();
   window.WALLET_CREATION_MODAL = new WalletCreationViewModel();
-  
+
   window.WALLET = new WalletViewModel();
   window.WALLET_OPTIONS_MODAL = new WalletOptionsModalViewModel();
-  
+
   window.MESSAGE_FEED = new MessageFeed();
   window.PENDING_ACTION_FEED = new PendingActionFeedViewModel();
-  
+
   window.NOTIFICATION_FEED = new NotificationFeedViewModel();
-  
+
   window.SUPPORT_MODAL = new SupportModalViewModel();
   window.DONATE_MODAL = new DonationViewModel();
   window.CREATE_SUPPORT_CASE_VIEW_MODEL = new CreateSupportCaseViewModel();
@@ -57,7 +57,7 @@ function initIndex() { //main page
     $('#loginform').submit(function() {
       if (LOGON_VIEW_MODEL.isPassphraseValid()) {
         LOGON_VIEW_MODEL.openWallet();
-      } 
+      }
       return false;
     })
     $('#donate').click(function(e) {
@@ -74,14 +74,14 @@ function initIndex() { //main page
     }
 
     $("#walletUrl, #quickAccessUrl").focus(function() {
-        var $this = $(this);
-        $this.select();
-        // Work around Chrome's little problem
-        $this.mouseup(function() {
-            // Prevent further mouseup intervention
-            $this.unbind("mouseup");
-            return false;
-        });
+      var $this = $(this);
+      $this.select();
+      // Work around Chrome's little problem
+      $this.mouseup(function() {
+        // Prevent further mouseup intervention
+        $this.unbind("mouseup");
+        return false;
+      });
     });
 
     $('.showCreateSupportCase').click(function(e) {
@@ -99,9 +99,9 @@ function initIndex() { //main page
 function initBalances() {
   ko.applyBindings(WALLET, document.getElementsByClassName("balancesContainer")[0]);
   //^ this line MUST go above pageSetup() in this case, or odd things will happen
-  
+
   pageSetUp(); //init smartadmin featureset
-   
+
   //balances.js
   window.CHANGE_ADDRESS_LABEL_MODAL = new ChangeAddressLabelModalViewModel();
   window.CREATE_NEW_ADDRESS_MODAL = new CreateNewAddressModalViewModel();
@@ -128,8 +128,8 @@ function initBalances() {
   ko.applyBindings(BROADCAST_MODAL, document.getElementById("broadcastModal"));
   ko.applyBindings(SIGN_TRANSACTION_MODAL, document.getElementById("signTransactionModal"));
   ko.applyBindings(ARMORY_BROADCAST_TRANSACTION, document.getElementById("armoryBroadcastTransactionModal"));
-  
-  if(!isBound("left-panel")) {
+
+  if (!isBound("left-panel")) {
     ko.applyBindings({
       FEATURE_EXCHANGE: disabledFeatures.indexOf('exchange') == -1,
       FEATURE_BETTING: disabledFeatures.indexOf('betting') == -1,
@@ -139,7 +139,7 @@ function initBalances() {
       FEATURE_STATS: disabledFeatures.indexOf('stats') == -1
     }, document.getElementById("left-panel"));
   }
-    
+
   //balances_assets.js
   window.CREATE_ASSET_MODAL = new CreateAssetModalViewModel();
   window.ISSUE_ADDITIONAL_ASSET_MODAL = new IssueAdditionalAssetModalViewModel();
@@ -147,94 +147,95 @@ function initBalances() {
   window.CHANGE_ASSET_DESCRIPTION_MODAL = new ChangeAssetDescriptionModalViewModel();
   window.PAY_DIVIDEND_MODAL = new PayDividendModalViewModel();
   window.SHOW_ASSET_INFO_MODAL = new ShowAssetInfoModalViewModel();
-  
+
   ko.applyBindings(CREATE_ASSET_MODAL, document.getElementById("createAssetModal"));
   ko.applyBindings(ISSUE_ADDITIONAL_ASSET_MODAL, document.getElementById("issueAdditionalAssetModal"));
   ko.applyBindings(TRANSFER_ASSET_MODAL, document.getElementById("transferAssetModal"));
   ko.applyBindings(CHANGE_ASSET_DESCRIPTION_MODAL, document.getElementById("changeAssetDescriptionModal"));
   ko.applyBindings(PAY_DIVIDEND_MODAL, document.getElementById("payDividendModal"));
   ko.applyBindings(SHOW_ASSET_INFO_MODAL, document.getElementById("showAssetInfoModal"));
-  
+
   $(document).ready(function() {
-      //Some misc jquery event handlers
-      $('#createAddress, #createWatchOnlyAddress, #createArmoryOfflineAddress, #createMultisigAddress').click(function(e) {
-        if(WALLET.addresses().length >= MAX_ADDRESSES) {
-          bootbox.alert(i18n.t("max_number_addresses", MAX_ADDRESSES));
-          return false;
-        }
-
-        addressType = $(this).attr('data-type');
-        CREATE_NEW_ADDRESS_MODAL.show(addressType);
-        e.preventDefault(); //prevent the location hash from changing
-      });
-      
-      $('#sweepFunds, #sweepFunds2').click(function() {
-        SWEEP_MODAL.show(true, false);
-      });
-      $('#sweepOldWallet').click(function() {
-        SWEEP_MODAL.show(true, true);
-      });
-      $('#balanceHelp').click(function() {
-        SUPPORT_MODAL.show('balancesPage');
-      });
-
-      //temporary
-      if (WALLET.BITCOIN_WALLET.useOldHierarchicalKey) {
-        $('#newWalletSweep').hide();
-      } else {
-        $('#sweepFunds').hide();
-      }
-      $('#support_havingIssuesLink').click(function(e) {
-        SUPPORT_MODAL.show('general');
+    //Some misc jquery event handlers
+    $('#createAddress, #createWatchOnlyAddress, #createArmoryOfflineAddress, #createMultisigAddress').click(function(e) {
+      if (WALLET.addresses().length >= MAX_ADDRESSES) {
+        bootbox.alert(i18n.t("max_number_addresses", MAX_ADDRESSES));
         return false;
-      });
-        
-      //Called on first load, and every switch back to the balances page
-      if(window._BALANCES_HAS_LOADED_ALREADY === undefined) {
-        window._BALANCES_HAS_LOADED_ALREADY = true;
-        
-        function _detectOldWallet() {
-          //Prompt an old wallet user to migrate their funds
-          //Do this in another thread so that we don't delay the showing of the balances
-          WALLET.BITCOIN_WALLET.getOldAddressesInfos(function(data) {   
-            var needSweep = false;
-            for (var a in data) {
-              needSweep = true;
-              break;
-            }
-            if (needSweep) {
-              bootbox.confirm("<b style='color:red'>" + i18n.t("old_wallet_warning") + "</b>", function(value) {
-                if (value) {
-                  SWEEP_MODAL.show(true, true);
-                }
-              });
-            }
-          });
-        }    
-        //DISABLE this call for now, as it takes too long to complete and hangs the browser
-        //setTimeout(_detectOldWallet, 300);
-
-      } else {
-        WALLET.refreshBTCBalances(false);
       }
 
-      // FIX: replace buggy smartadmin dropdown menu for assets menu
-      $('.assetBtn').click(function (event) {
-        var menu = $(this).parent().find('ul');
-        if (menu.css('display')=='block') {
-          menu.hide();
-        } else {
-          menu.show();
-        }
-        menu.mouseleave(function() {
-          menu.hide();
-          menu.unbind('mouseleave');
-        })
-      });
-      // don't work: https://github.com/twbs/bootstrap/issues/2975#issuecomment-8670606
-      /*$('body')
-      .on('touchstart.dropdown', '.dropdown-menu', function (e) { e.stopPropagation(); })
-      .on('touchstart.dropdown', '.dropdown-submenu', function (e) { e.preventDefault(); });*/
+      var addressType = $(this).attr('data-type');
+      CREATE_NEW_ADDRESS_MODAL.show(addressType);
+      e.preventDefault(); //prevent the location hash from changing
+    });
+
+    $('#sweepFunds, #sweepFunds2').click(function() {
+      SWEEP_MODAL.show(true, false);
+    });
+    $('#sweepOldWallet').click(function() {
+      SWEEP_MODAL.show(true, true);
+    });
+    $('#balanceHelp').click(function() {
+      SUPPORT_MODAL.show('balancesPage');
+    });
+
+    //temporary
+    if (WALLET.BITCOIN_WALLET.useOldHierarchicalKey) {
+      $('#newWalletSweep').hide();
+    } else {
+      $('#sweepFunds').hide();
+    }
+    $('#support_havingIssuesLink').click(function(e) {
+      SUPPORT_MODAL.show('general');
+      return false;
+    });
+
+    //Called on first load, and every switch back to the balances page
+    if (window._BALANCES_HAS_LOADED_ALREADY === undefined) {
+      window._BALANCES_HAS_LOADED_ALREADY = true;
+
+      function _detectOldWallet() {
+        //Prompt an old wallet user to migrate their funds
+        //Do this in another thread so that we don't delay the showing of the balances
+        WALLET.BITCOIN_WALLET.getOldAddressesInfos(function(data) {
+          var needSweep = false;
+          for (var a in data) {
+            needSweep = true;
+            break;
+          }
+          if (needSweep) {
+            bootbox.confirm("<b style='color:red'>" + i18n.t("old_wallet_warning") + "</b>", function(value) {
+              if (value) {
+                SWEEP_MODAL.show(true, true);
+              }
+            });
+          }
+        });
+      }
+
+      //DISABLE this call for now, as it takes too long to complete and hangs the browser
+      //setTimeout(_detectOldWallet, 300);
+
+    } else {
+      WALLET.refreshBTCBalances(false);
+    }
+
+    // FIX: replace buggy smartadmin dropdown menu for assets menu
+    $('.assetBtn').click(function(event) {
+      var menu = $(this).parent().find('ul');
+      if (menu.css('display') == 'block') {
+        menu.hide();
+      } else {
+        menu.show();
+      }
+      menu.mouseleave(function() {
+        menu.hide();
+        menu.unbind('mouseleave');
+      })
+    });
+    // don't work: https://github.com/twbs/bootstrap/issues/2975#issuecomment-8670606
+    /*$('body')
+    .on('touchstart.dropdown', '.dropdown-menu', function (e) { e.stopPropagation(); })
+    .on('touchstart.dropdown', '.dropdown-submenu', function (e) { e.preventDefault(); });*/
   });
 }
 INIT_FUNC['pages/balances.html'] = initBalances;
@@ -253,18 +254,18 @@ INIT_FUNC['pages/feed_pending_actions.html'] = initFeedPendingActions;
 
 function initHistory() {
   pageSetUp(); //init smartadmin featureset
-  
+
   //This code is run on each visit to the page
   window.BALANCE_HISTORY = new BalanceHistoryViewModel();
   window.TXN_HISTORY = new TransactionHistoryViewModel();
-  
+
   ko.applyBindings(TXN_HISTORY, document.getElementById("wid-id-txnHistory"));
   ko.applyBindings(BALANCE_HISTORY, document.getElementById("wid-id-balHistory"));
   ko.applyBindings({}, document.getElementById("historyHeader"));
-  
+
   BALANCE_HISTORY.init();
   TXN_HISTORY.init();
-    
+
   $(window).bind("resize", TXN_HISTORY.dataTableResponsive);
   $(window).on('hashchange', function() {
     $(window).off("resize", TXN_HISTORY.dataTableResponsive);
@@ -274,16 +275,16 @@ INIT_FUNC['pages/history.html'] = initHistory;
 
 function initStats() {
   pageSetUp(); //init smartadmin featureset
-  
+
   //This code is run on each visit to the page
   window.STATS_HISTORY = new StatsHistoryViewModel();
   window.STATS_TXN_HISTORY = new StatsTransactionHistoryViewModel();
-  
+
   ko.applyBindings(STATS_TXN_HISTORY, document.getElementById("wid-id-statsTxnHistory"));
   ko.applyBindings(STATS_HISTORY, document.getElementById("wid-id-statsHistory"));
   ko.applyBindings(STATS_HISTORY, document.getElementById("wid-id-walletHistory"));
   ko.applyBindings({}, document.getElementById("walletCountStats"));
-  
+
   STATS_HISTORY.init();
   STATS_TXN_HISTORY.init();
 }
@@ -291,16 +292,16 @@ INIT_FUNC['pages/stats.html'] = initStats;
 
 function initLeaderboard() {
   pageSetUp(); //init smartadmin featureset
-  
+
   //This code is run on each visit to the page
   window.ASSET_LEADERBOARD = new AssetLeaderboardViewModel();
-  
+
   ko.applyBindings(ASSET_LEADERBOARD, document.getElementById("leaderboardMarketBar"));
   ko.applyBindings(ASSET_LEADERBOARD, document.getElementsByClassName("leaderboardGrid")[0]);
   ko.applyBindings({}, document.getElementById("leaderboardTitle"));
-  
+
   ASSET_LEADERBOARD.init();
-  
+
   $(window).bind("resize", ASSET_LEADERBOARD.dataTableResponsive);
   $(window).on('hashchange', function() {
     $(window).off("resize", ASSET_LEADERBOARD.dataTableResponsive);
@@ -312,13 +313,13 @@ INIT_FUNC['pages/leaderboard.html'] = initLeaderboard;
 function initExchange() {
   // Hack to resolve books widgets positions
   localStorage.removeItem('Plugin_position_pages/exchange.html_widget-grid');
-  
+
   pageSetUp(); //init smartadmin featureset
-  
+
   //This code is run on each visit to the page
   window.EXCHANGE = new ExchangeViewModel();
   ko.applyBindings(EXCHANGE, document.getElementsByClassName("ordersGrid")[0]);
-  
+
   EXCHANGE.init(true);
 
   $('#exchangeHelp').click(function() {
@@ -334,14 +335,14 @@ INIT_FUNC['pages/exchange.html'] = initExchange;
 
 function initPortfolio() {
   pageSetUp(); //init smartadmin featureset
-  
+
   //This code is run on each visit to the page
   window.ASSET_PORTFOLIO = new AssetPortfolioViewModel();
-  
+
   ko.applyBindings(ASSET_PORTFOLIO, document.getElementById("portfolioMarketBar"));
   ko.applyBindings(ASSET_PORTFOLIO, document.getElementsByClassName("portfolioGrid")[0]);
   ko.applyBindings({}, document.getElementById("portofolioHeader"));
-  
+
   $(window).bind("resize", ASSET_PORTFOLIO.dataTableResponsive);
   $(window).on('hashchange', function() {
     $(window).off("resize", ASSET_PORTFOLIO.dataTableResponsive);
@@ -365,7 +366,7 @@ function initOpenBets() {
   ko.applyBindings(OPEN_BETS, document.getElementById("openbets"));
 
   OPEN_BETS.init();
-  
+
   $(window).bind("resize", OPEN_BETS.dataTableResponsive);
   $(window).on('hashchange', function() {
     $(window).off("resize", OPEN_BETS.dataTableResponsive);

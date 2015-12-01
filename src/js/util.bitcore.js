@@ -23,7 +23,7 @@ CWHierarchicalKey.prototype.init = function(passphrase) {
   this.passphrase = passphrase;
 
   var words = $.trim(passphrase.toLowerCase()).split(' ');
-  
+
   // if first word == 'old' then use the  oldHierarchicalKey
   if (words.length == 13) {
     var first = words.shift();
@@ -53,9 +53,9 @@ CWHierarchicalKey.prototype.getOldAddressesInfos = function(callback) {
   var addresses = [];
   var cwkeys = {};
 
-  for (var i=0; i<=9; i++) {
+  for (var i = 0; i <= 9; i++) {
 
-    var derivedKey = this.oldHierarchicalKey.derive(this.basePath+i);
+    var derivedKey = this.oldHierarchicalKey.derive(this.basePath + i);
 
     var cwk = new CWPrivateKey(derivedKey.privateKey);
     var address = cwk.getAddress();
@@ -68,7 +68,7 @@ CWHierarchicalKey.prototype.getOldAddressesInfos = function(callback) {
 
 CWHierarchicalKey.prototype.getAddressKey = function(index) {
   checkArgType(index, "number");
-  var derivedKey = this.HierarchicalKey.derive(this.basePath+index);
+  var derivedKey = this.HierarchicalKey.derive(this.basePath + index);
   return new CWPrivateKey(derivedKey.privateKey);
 }
 
@@ -167,7 +167,7 @@ CWPrivateKey.prototype.checkTransactionDest = function(txHex, destAdress) {
     return CWBitcore.checkTransactionDest(txHex, this.getAddresses(), destAdress);
   } catch (err) {
     return false;
-  }  
+  }
 }
 
 CWPrivateKey.prototype.checkAndSignRawTransaction = function(unsignedHex, destAdress, disableIsFullySigned, cb) {
@@ -216,10 +216,10 @@ var CWBitcore = {}
  */
 CWBitcore.isOutScript = function(script) {
   return script.isPublicKeyOut() ||
-          script.isPublicKeyHashOut() ||
-          script.isMultisigOut() ||
-          script.isScriptHashOut() ||
-          script.isDataOut();
+    script.isPublicKeyHashOut() ||
+    script.isMultisigOut() ||
+    script.isScriptHashOut() ||
+    script.isDataOut();
 }
 
 CWBitcore.isValidAddress = function(val) {
@@ -246,7 +246,7 @@ CWBitcore.isValidMultisigAddress = function(val) {
         return false;
       }
     }
-    return true;   
+    return true;
   } catch (err) {
     return false;
   }
@@ -264,7 +264,7 @@ CWBitcore.MultisigAddressToAddresses = function(val) {
     return addresses;
   } else {
     return [];
-  }  
+  }
 }
 
 CWBitcore.genKeyMap = function(cwPrivateKeys) {
@@ -363,8 +363,8 @@ CWBitcore.signRawTransaction = function(unsignedHex, cwPrivateKey, disableIsFull
                   addresses = CWBitcore.extractMultiSigAddressesFromScript(inputObj.output.script);
 
                   return cb(null, addresses);
-              }
-            );
+                }
+              );
 
             case bitcore.Script.types.MULTISIG_OUT:
               inputObj = input.toObject();
@@ -406,13 +406,13 @@ CWBitcore.signRawTransaction = function(unsignedHex, cwPrivateKey, disableIsFull
           }
 
           // unique filter
-          addresses = addresses.filter(function (address, idx, self) {
+          addresses = addresses.filter(function(address, idx, self) {
             return address && self.indexOf(address) === idx;
           });
 
-          var _keyChain = addresses.map(function (address) {
+          var _keyChain = addresses.map(function(address) {
             return typeof keyMap[address] !== "undefined" ? keyMap[address] : null;
-          }).filter(function (key) {
+          }).filter(function(key) {
             return !!key
           });
 
@@ -428,18 +428,18 @@ CWBitcore.signRawTransaction = function(unsignedHex, cwPrivateKey, disableIsFull
       function(err) {
         if (err) {
           // async.nextTick to avoid parent trycatch
-          return async.nextTick(function () {
+          return async.nextTick(function() {
             cb(err);
           });
         }
 
         // unique filter
-        keyChain = keyChain.filter(function (key, idx, self) {
+        keyChain = keyChain.filter(function(key, idx, self) {
           return key && self.indexOf(key) === idx;
         });
 
         // sign with each key
-        keyChain.forEach(function (priv) {
+        keyChain.forEach(function(priv) {
           tx.sign(priv);
         });
 
@@ -493,7 +493,7 @@ CWBitcore.extractMultiSigInfoFromScript = function(script) {
   var nKeysCount = bitcore.Opcode(script.chunks[script.chunks.length - 2].opcodenum).toNumber() - bitcore.Opcode.map.OP_1 + 1;
   var threshold = bitcore.Opcode(script.chunks[script.chunks.length - nKeysCount - 2 - 1].opcodenum).toNumber() - bitcore.Opcode.map.OP_1 + 1;
   return {
-    publicKeys: script.chunks.slice(script.chunks.length - 2 - nKeysCount, script.chunks.length - 2).map(function (pubKey) {
+    publicKeys: script.chunks.slice(script.chunks.length - 2 - nKeysCount, script.chunks.length - 2).map(function(pubKey) {
       return bitcore.PublicKey(pubKey.buf);
     }),
     threshold: threshold

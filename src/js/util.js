@@ -4,7 +4,7 @@ function formatHtmlPrice(price) {
   num = noExponents(parseFloat(price).toFixed(8));
   var parts = num.toString().split(".");
   parts[0] = parts[0].replace(/\B(?=(\d{3})+(?!\d))/g, ",");
-  parts[1] = parts[1].replace(/(0{0,8}$)/,'<span class="text-muted">$1</span>')
+  parts[1] = parts[1].replace(/(0{0,8}$)/, '<span class="text-muted">$1</span>')
   return parts.join('.');
 }
 
@@ -28,7 +28,7 @@ function assetImageUrl(image_name) {
 }
 
 function getCurrentPage() {
-  return(window.location.hash.replace('#', '/'));
+  return (window.location.hash.replace('#', '/'));
 }
 
 function decodeJsonBet(jsonBetBase64) {
@@ -37,7 +37,7 @@ function decodeJsonBet(jsonBetBase64) {
     $.jqlog.debug(atob(jsonBetBase64));
     jsonBet = JSON.parse(atob(jsonBetBase64));
 
-  } catch(e) {
+  } catch (e) {
     return false;
   }
   if (typeof(jsonBet) != 'object') {
@@ -46,7 +46,7 @@ function decodeJsonBet(jsonBetBase64) {
   if (jsonBet.command == undefined || jsonBet.command != 'bet') {
     return false;
   }
-  var numbers = {'wager':1, 'counterwager':1, 'target_value':1, 'expiration':1, 'leverage':1, 'bet_type':1};
+  var numbers = {'wager': 1, 'counterwager': 1, 'target_value': 1, 'expiration': 1, 'leverage': 1, 'bet_type': 1};
   for (var e in numbers) {
     if (jsonBet[e] == undefined || isNaN(jsonBet[e])) {
       return false;
@@ -66,10 +66,10 @@ function decodeJsonBet(jsonBetBase64) {
   }
   var addresses = WALLET.getAddressesList(true);
   var isMine = false;
-  for(var i = 0; i < addresses.length; i++) {
+  for (var i = 0; i < addresses.length; i++) {
     if (addresses[i][0] == jsonBet.source) {
       isMine = true;
-    }    
+    }
   }
   if (!isMine) {
     return false;
@@ -90,7 +90,7 @@ function checkCountry(action, callback) {
       message += '<br />' + i18n.t(RESTRICTED_AREA_MESSAGE[action]);
     }
 
-    if(USE_TESTNET) { //allow the user to bust on through this alert on testnet
+    if (USE_TESTNET) { //allow the user to bust on through this alert on testnet
       bootbox.dialog({
         title: i18n.t("country_warning"),
         message: message + "<br/><br/>" + i18n.t("testnet_proceed_anyway"),
@@ -111,8 +111,8 @@ function checkCountry(action, callback) {
             }
           }
         }
-      });      
-    } else { 
+      });
+    } else {
       bootbox.dialog({
         title: i18n.t("country_warning"),
         message: message,
@@ -142,7 +142,7 @@ function orderMultisigAddress(address) {
   } else {
     return addresse_array.pop();
   }
-  
+
 }
 
 function pubkeyToPubkeyhash(pubkey) {
@@ -165,7 +165,7 @@ function getPubkeyForAddress(address, callback) {
     }
   }
   if (addresses.length > pubkeys.length) {
-    failoverAPI("get_pubkey_for_address", {'address': address}, function (data) {
+    failoverAPI("get_pubkey_for_address", {'address': address}, function(data) {
       if (data) {
         for (var p in data) {
           if (pubkeys.indexOf(data[p]) == -1) {
@@ -181,46 +181,46 @@ function getPubkeyForAddress(address, callback) {
 }
 
 function getLinkForCPData(type, dataID, dataTitle, htmlize) {
-  if(typeof(dataTitle)==='undefined' || dataTitle === null) dataTitle = dataID;
-  if(typeof(htmlize)==='undefined' || htmlize === null) htmlize = true;
-  if(typeof(type)==='undefined') type = 'tx';
+  if (typeof(dataTitle) === 'undefined' || dataTitle === null) dataTitle = dataID;
+  if (typeof(htmlize) === 'undefined' || htmlize === null) htmlize = true;
+  if (typeof(type) === 'undefined') type = 'tx';
   var url = null;
-  if(type == 'address') { //dataID is an address
+  if (type == 'address') { //dataID is an address
     url = "http://" + (USE_TESTNET ? 'testnet.' : '') + "blockscan.com/address/" + dataID;
     //format multisig addresses
-    if(dataTitle.indexOf("_") > -1) {
-    	var parts = dataTitle.split('_');
-    	dataTitle = "multisig " + parts[0] + " of " + parts[parts.length - 1];
-    	//remove first and last elements
-    	parts.shift();
-    	parts.pop();
-    	dataTitle += " (" + parts.join(', ') + ")";
+    if (dataTitle.indexOf("_") > -1) {
+      var parts = dataTitle.split('_');
+      dataTitle = "multisig " + parts[0] + " of " + parts[parts.length - 1];
+      //remove first and last elements
+      parts.shift();
+      parts.pop();
+      dataTitle += " (" + parts.join(', ') + ")";
     }
-  } else if(type == 'order') { //txID is an order ID
+  } else if (type == 'order') { //txID is an order ID
     url = "http://" + (USE_TESTNET ? 'testnet.' : '') + "blockscan.com/orderinfo/" + dataID;
-  } else if(type == 'tx') { //generic TX
+  } else if (type == 'tx') { //generic TX
     url = "http://" + (USE_TESTNET ? 'testnet.' : '') + "blockscan.com/txInfo/" + dataID;
   } else {
     assert(false, "Unknown type of " + type);
   }
 
-  return htmlize ? ('<a href="' + url + '" target="_blank">' + dataTitle + '</a>') : url;  
+  return htmlize ? ('<a href="' + url + '" target="_blank">' + dataTitle + '</a>') : url;
 }
 
 function getTxHashLink(hash) {
   // TODO: add link to blockscan when possible
-  var shortHash = hash.substr(hash.length-5);
+  var shortHash = hash.substr(hash.length - 5);
   if (hash.length == 128) {
     shortHash += '...' + hash.substr(64, 5);
   }
-  var link = '<span rel="tooltip" title="'+hash+'" data-placement="top" data-container="body" class="shortHash">'+shortHash+'</span>';
+  var link = '<span rel="tooltip" title="' + hash + '" data-placement="top" data-container="body" class="shortHash">' + shortHash + '</span>';
 
   return link;
 }
 
 function getLinkForBlock(blockIndex, dataTitle, htmlize) {
-  if(typeof(dataTitle)==='undefined' || dataTitle === null) dataTitle = blockIndex;
-  if(typeof(htmlize)==='undefined' || htmlize === null) htmlize = true;
+  if (typeof(dataTitle) === 'undefined' || dataTitle === null) dataTitle = blockIndex;
+  if (typeof(htmlize) === 'undefined' || htmlize === null) htmlize = true;
   var url = BLOCKEXPLORER_URL + '/block-index/' + blockIndex;
   return htmlize ? '<a href="' + url + '" target="_blank">' + dataTitle + '</a>' : url;
 }

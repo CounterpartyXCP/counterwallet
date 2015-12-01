@@ -1,14 +1,13 @@
-
 function normalizeQuantity(quantity, divisible) {
   //Converts from satoshi (int) to float (decimal form)
-  if(typeof(divisible)==='undefined') divisible = true;
+  if (typeof(divisible) === 'undefined') divisible = true;
   return divisible && quantity !== 0 ? Decimal.round(new Decimal(quantity).div(UNIT), 8, Decimal.MidpointRounding.ToEven).toFloat() : parseInt(quantity);
   //^ we have the quantity !== 0 check due to a bug in Decimal (https://github.com/hiroshi-manabe/JSDecimal/issues/2)
 }
 
 function denormalizeQuantity(quantity, divisible) {
   //Converts from float (decimal form) to satoshi (int) 
-  if(typeof(divisible)==='undefined') divisible = true;
+  if (typeof(divisible) === 'undefined') divisible = true;
   return divisible && quantity !== 0 ? Decimal.round(new Decimal(quantity).mul(UNIT), 8, Decimal.MidpointRounding.ToEven).toFloat() : parseInt(quantity);
   //^ we have the quantity !== 0 check due to a bug in Decimal (https://github.com/hiroshi-manabe/JSDecimal/issues/2)
 }
@@ -41,15 +40,15 @@ function divFloat(floatA, floatB) {
 
 function hashToB64(content) {
   //used for storing address alias data, for instance
-  return CryptoJS.SHA256(content).toString(CryptoJS.enc.Base64); 
+  return CryptoJS.SHA256(content).toString(CryptoJS.enc.Base64);
 }
 
 function smartFormat(num, truncateDecimalPlacesAtMin, truncateDecimalPlacesTo) { //arbitrary rules to make quantities formatted a bit more friendly
-  if(num === null || isNaN(num)) return '??';
-  if(num === 0) return num; //avoid Decimal class issue dealing with 0
-  if(typeof(truncateDecimalPlacesMin)==='undefined' || truncateDecimalPlacesMin === null) truncateDecimalPlacesMin = null;
-  if(typeof(truncateDecimalPlacesTo)==='undefined') truncateDecimalPlacesTo = 4;
-  if(truncateDecimalPlacesAtMin === null || num > truncateDecimalPlacesAtMin) {
+  if (num === null || isNaN(num)) return '??';
+  if (num === 0) return num; //avoid Decimal class issue dealing with 0
+  if (typeof(truncateDecimalPlacesAtMin) === 'undefined' || truncateDecimalPlacesAtMin === null) truncateDecimalPlacesAtMin = null;
+  if (typeof(truncateDecimalPlacesTo) === 'undefined') truncateDecimalPlacesTo = 4;
+  if (truncateDecimalPlacesAtMin === null || num > truncateDecimalPlacesAtMin) {
     num = Decimal.round(new Decimal(num), truncateDecimalPlacesTo, Decimal.MidpointRounding.ToEven).toFloat();
   }
   return numberWithCommas(noExponents(num));
@@ -72,12 +71,12 @@ function assetsToAssetPair(asset1, asset2) {
     base = asset1 < asset2 ? asset1 : asset2;
     quote = asset1 < asset2 ? asset2 : asset1;
   }
-  
+
   return [base, quote];
 }
 
 function makeQRCode(addr) {
-  $.jqlog.debug('Generate Qrcode: '+addr);
+  $.jqlog.debug('Generate Qrcode: ' + addr);
 
   addr = addr.replace(/^[\s\u3000]+|[\s\u3000]+$/g, '');
 
@@ -85,7 +84,7 @@ function makeQRCode(addr) {
   qr.addData(addr);
   qr.make();
 
-  return qr.createImgTag(4);  
+  return qr.createImgTag(4);
 }
 
 function testnetBurnDetermineEarned(blockHeight, burned) {
