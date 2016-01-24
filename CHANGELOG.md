@@ -1,5 +1,5 @@
 ### v1.7.0 ###
-**Release Date:** December 2, 2015 
+**Release Date:** January 24, 2016 
 
 **Enhancements:**
 - Update to work with newest `bitcore` and enforced high S signatures (@rubensayshi)
