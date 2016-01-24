@@ -7,7 +7,7 @@
 - Added basic Travis and CircleCI test suite
 
 **Removed features:**
-- None
+- Remove use of `counterwebdeps` external repo.
 
 **Fixes:**
 - Fixed improper disabled textarea on Firefox in signing raw transactions dialog
