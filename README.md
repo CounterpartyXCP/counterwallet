@@ -13,9 +13,9 @@ Originally based off of [Carbonwallet](http://www.carbonwallet.com) (however vir
 Production Systems
 -------------------
 
-* Main page: **[counterwallet.co](https://counterwallet.io/)**
-* Primary server -- Mainnet: **[wallet.counterwallet.co](https://wallet.counterwallet.io/)**
-* Primary server -- Testnet: **[wallet-testnet.counterwallet.co](https://wallet-testnet.counterwallet.io/)**
+* Main page: **[counterwallet.io](https://counterwallet.io/)**
+* Primary server -- Mainnet: **[wallet.counterwallet.io](https://wallet.counterwallet.io/)**
+* Primary server -- Testnet: **[wallet-testnet.counterwallet.io](https://wallet-testnet.counterwallet.io/)**
 
 
 Features
