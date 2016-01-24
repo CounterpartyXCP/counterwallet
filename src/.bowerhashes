@@ -51,19 +51,13 @@
     "src/vendors/cryptojs/components/enc-utf16-min.js": "229897e5bf2c5a816b477d669c5c332ef4def434440bbd2b2c7f251b1de80b31",
     "src/vendors/cryptojs/rollups/hmac-sha512.js": "17f2992e236980c8c028c98af64521e2646e7a995930a6e76515f29d0b5ae2eb",
     "src/vendors/cryptojs/rollups/aes.js": "5d035049162eaece2fa83a5d1c4d95ad95e77f75657a6b1ce8f102026813b73a",
-    "src/vendors/bitcore/browser/bundle.js": "5f894b18a16d932a5d15343eac1c9db4c4f4eab559d10b63460b45f9ff090ee4",
+    "src/vendors/bitcore-lib/bitcore-lib.js": "f9a61626b2ce3d7ea5e91316e6536b6b2eb73a3b4be7460f50a6a5d6798ad2c8",
+    "src/vendors/bitcore-message/bitcore-message.js": "7eb1b1c66a66448f855264ed39bd165cd92b14cfec3b2baa41246518d1bf5d1a",
+    "src/vendors/async/dist/async.js": "f5dd34a865030d09efd42f623611c63be542d8f1bb61dcb0857305d8e8b82ff7",
     "src/vendors/iso8601-js-period/iso8601.min.js": "2b143cf4c690e01f1ae2c3e529d7ddf682aea712fae1272a21973d7319842fde",
     "src/vendors/queue/queue.min.js": "2e56829c7d093bf017ec637aee858e33378a993686144e296da984a8f6029355",
     "src/vendors/htmlcanvas/build/html2canvas.js": "d13063b4e7bdf2a4a37c0d4102aba1f010e369b1f421154e0a78b040bead01c3",
     "src/vendors/sprintf/dist/sprintf.min.js": "e12b992b6797e823c724558ffa0e42c3e3f831c6c6094b19c374b2dae3243e6c",
     "src/vendors/i18next/i18next.min.js": "436aed3d5ea5479c3069d26a2136599bd1e4b7e60ce4dd790c0146b911652422",
-    "src/vendors/big-integer/BigInteger.min.js": "95133befe02a33c1a67a9e5f963eafcef5e4f52175b3233e2ff322d179eb053b",
-    "src/vendors/counterwebdeps/js/external/mnemonic.js": "463b7bb1c2bc0cc3824106a4be68ea2ff166c667fbb39379a417ac2dda63a18a",
-    "src/vendors/counterwebdeps/js/external/qrcode.js": "3f7944d28ba419256acf5cdfc5300cf4d519f1f65065305e62e6080d4b8e53e1",
-    "src/vendors/counterwebdeps/js/consts.js": "9382a61f54d4e4cae1c319c01fa000444d496f5a094b7571dfde32df9d032c5f",
-    "src/vendors/counterwebdeps/js/util.generic.js": "0d9687865326d350835b80b921fcfb54d539fe93cd60f03da6029fe609b8f9ef",
-    "src/vendors/counterwebdeps/js/util.analytics.js": "e2ae8dd7b29ab24b2b5265b139bd558a90b470eb639a6bd7ad1ffd29c4826a53",
-    "src/vendors/counterwebdeps/js/util.bitcore.js": "7a2b182d80a38a2ea27de3077fc28953b3ad3b619343bbbc72e86d8bf2329ece",
-    "src/vendors/counterwebdeps/js/util.api.js": "faacdcef8170e80ac5e92bbf47457a2ca9324603234d47ca4cba51da91cd8758",
-    "src/vendors/counterwebdeps/js/util.bitcoin.js": "1f7fd5616a4a92eda1673b5216cd6c714aaefbf1c1f41c5fcf13847954de7549"
+    "src/vendors/big-integer/BigInteger.min.js": "95133befe02a33c1a67a9e5f963eafcef5e4f52175b3233e2ff322d179eb053b"
 }

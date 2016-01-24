@@ -46,11 +46,11 @@ var DEFAULT_LANG;
 var LANG;
 
 function localeInit(callback) {
-  var options = { 
+  var options = {
     lng: LANG,
     fallbackLng: DEFAULT_LANG,
     lngWhitelist: AVAILABLE_LANGUAGES,
-    resGetPath: 'locales/__lng__/__ns__.json', 
+    resGetPath: 'locales/__lng__/__ns__.json',
     shorcutFunction: 'sprintf'
   }
   i18n.init(options, function() {
@@ -58,24 +58,24 @@ function localeInit(callback) {
     createSharedKnockoutValidators();
     initDateTimePicker(options.lng);
   });
-  switchTimeagoLocale(LANG);  
+  switchTimeagoLocale(LANG);
   localStorage.setItem("LANG", LANG);
 }
 
 function loadLocaleConfig(callback) {
   $.getJSON("/counterwallet.conf.json", function(data) {
-    
-    if($.isArray(data["AVAILABLE_LANGUAGES"]))
+
+    if ($.isArray(data["AVAILABLE_LANGUAGES"]))
       AVAILABLE_LANGUAGES = data["AVAILABLE_LANGUAGES"];
     else
       AVAILABLE_LANGUAGES = ["en"];
-    
-    if(typeof data["DEFAULT_LANGUAGE"] === "string")
+
+    if (typeof data["DEFAULT_LANGUAGE"] === "string")
       DEFAULT_LANG = data["DEFAULT_LANGUAGE"];
     else
       DEFAULT_LANG = "en";
-    
-    LANG = getLanguage();   
+
+    LANG = getLanguage();
     localeInit(callback);
   }).fail(function() {
     AVAILABLE_LANGUAGES = ["en"];
@@ -87,7 +87,7 @@ function loadLocaleConfig(callback) {
 
 function getLanguage() {
   if (qs('lang')) {
-    return qs('lang').toLowerCase();  
+    return qs('lang').toLowerCase();
   } else {
     var subdomain = window.location.hostname.split(".").shift().toLowerCase();
     if (AVAILABLE_LANGUAGES.indexOf(subdomain) != -1) {
@@ -116,7 +116,7 @@ function getLanguage() {
 }
 
 ko.bindingHandlers['locale'] = {
-  update: function(element, valueAccessor, allBindings){
+  update: function(element, valueAccessor, allBindings) {
     var key = ko.unwrap(valueAccessor());
     var localeArgs = ko.toJS(allBindings.get('localeArgs'));
     var args = [];
@@ -136,13 +136,13 @@ ko.bindingHandlers['locale'] = {
 };
 
 ko.bindingHandlers['localeAttr'] = {
-  update: function(element, valueAccessor, allBindings){
+  update: function(element, valueAccessor, allBindings) {
     var attributes = ko.toJS(valueAccessor());
     var attributesArgs = ko.toJS(allBindings.get('localeAttrArgs') || {});
     for (var attrName in attributes) {
       var args = [];
       if (attributesArgs[attrName]) {
-        attrArgs = ko.toJS(attributesArgs[attrName]);
+        var attrArgs = ko.toJS(attributesArgs[attrName]);
         var argsType = Object.prototype.toString.call(attrArgs)
         if (argsType == "[object Object]") {
           for (var k in attrArgs) {
@@ -154,7 +154,7 @@ ko.bindingHandlers['localeAttr'] = {
           args = [attrArgs];
         }
       }
-      var translation = i18n.t(attributes[attrName], {postProcess: 'sprintf', sprintf: args}); 
+      var translation = i18n.t(attributes[attrName], {postProcess: 'sprintf', sprintf: args});
       $(element).attr(attrName, translation);
     }
   }

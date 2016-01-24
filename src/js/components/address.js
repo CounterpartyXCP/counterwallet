@@ -1,4 +1,3 @@
-
 function AddressViewModel(type, key, address, initialLabel, pubKeys) {
   //An address on a wallet
   //type is one of: normal, watch, armory
@@ -7,7 +6,7 @@ function AddressViewModel(type, key, address, initialLabel, pubKeys) {
   assert((type == 'multisig' && pubKeys) || (type == 'armory' && pubKeys) || !pubKeys); //only used with armory addresses
 
   var self = this;
-  
+
   self.KEY = key; //  key : the HierarchicalKey bitcore object
   self.TYPE = type;
   self.ADDRESS = address;
@@ -22,7 +21,7 @@ function AddressViewModel(type, key, address, initialLabel, pubKeys) {
 
   self.lastSort = ko.observable('');
   self.lastSortDirection = ko.observable('');
-  
+
   self.label = ko.observable(initialLabel);
   self.numPrimedTxouts = ko.observable(null);
   //^ # of unspent txouts for this address fitting our criteria, or null if unknown (e.g. insight is down/not responding)
@@ -33,33 +32,33 @@ function AddressViewModel(type, key, address, initialLabel, pubKeys) {
     new AssetViewModel({address: address, asset: "BTC"}), //will be updated with data loaded from insight
     new AssetViewModel({address: address, asset: "XCP"})  //will be updated with data loaded from counterpartyd
   ]);
-  
+
   self.assetFilter = ko.observable('');
-  self.filteredAssets = ko.computed(function(){
-    if(self.assetFilter() == '') { //show all
+  self.filteredAssets = ko.computed(function() {
+    if (self.assetFilter() == '') { //show all
       return self.assets();
-    } else if(self.assetFilter() == 'base') {
+    } else if (self.assetFilter() == 'base') {
       return ko.utils.arrayFilter(self.assets(), function(asset) {
         return asset.ASSET == 'BTC' || asset.ASSET == 'XCP';
-      });      
-    } else if(self.assetFilter() == 'mine') {
+      });
+    } else if (self.assetFilter() == 'mine') {
       return ko.utils.arrayFilter(self.assets(), function(asset) {
         return asset.isMine();
-      });      
-    } else if(self.assetFilter() == 'others') {
+      });
+    } else if (self.assetFilter() == 'others') {
       return ko.utils.arrayFilter(self.assets(), function(asset) {
         return asset.isMine() == false;
-      });      
+      });
     }
   }, self);
 
-  self.multisigType = ko.computed(function(){
+  self.multisigType = ko.computed(function() {
     if (!self.IS_MULTISIG_ADDRESS) return null;
     var array = self.ADDRESS.split("_");
     return array.shift() + "/" + array.pop();
   });
-  
-  self.dispAddress = ko.computed(function(){
+
+  self.dispAddress = ko.computed(function() {
     if (!self.IS_MULTISIG_ADDRESS) return self.ADDRESS;
     var addresses = self.ADDRESS.split("_");
     addresses.shift();
@@ -77,7 +76,7 @@ function AddressViewModel(type, key, address, initialLabel, pubKeys) {
       return a.ASSET == asset;
     });
   }
-  
+
   self.getAssetsList = function() {
     var assets = [];
     ko.utils.arrayForEach(self.assets(), function(asset) {
@@ -98,16 +97,16 @@ function AddressViewModel(type, key, address, initialLabel, pubKeys) {
       }
     });
   }
-  
+
   self.initDropDown = function(asset) {
     setTimeout(function() {
 
       $('#asset-' + self.ADDRESS + '-' + asset + ' .dropdown-toggle').last().dropdown();
 
       $('#asset-' + self.ADDRESS + '-' + asset + ' .assetBtn').unbind('click');
-      $('#asset-' + self.ADDRESS + '-' + asset + ' .assetBtn').click(function (event) {
+      $('#asset-' + self.ADDRESS + '-' + asset + ' .assetBtn').click(function(event) {
         var menu = $(this).parent().find('ul');
-        if (menu.css('display')=='block') {
+        if (menu.css('display') == 'block') {
           menu.hide();
         } else {
           menu.show();
@@ -127,10 +126,10 @@ function AddressViewModel(type, key, address, initialLabel, pubKeys) {
     //initialRawBalance is null if this is not an initial update
     //assetInfo comes from a call to get_asset_info, or as an issuance message feed object itself
     var match = ko.utils.arrayFirst(self.assets(), function(item) {
-        return item.ASSET === asset;
+      return item.ASSET === asset;
     });
-    
-    if(asset == 'BTC' || asset == 'XCP') { //special case update
+
+    if (asset == 'BTC' || asset == 'XCP') { //special case update
       assert(match, 'was created when the address viewmodel was initialized...');
       match.rawBalance(initialRawBalance);
       match.escrowedBalance(escrowedBalance);
@@ -164,26 +163,26 @@ function AddressViewModel(type, key, address, initialLabel, pubKeys) {
       // message received on the same block, at about the same time), due to API calls that are made in the handlers for
       // these, we could have a potential race condition where WALLET.updateBalance ends up calling this function
       // instead of just updating the rawBalance itself. We should be able to gracefully handle that...
-      if(initialRawBalance) {
+      if (initialRawBalance) {
         match.rawBalance(initialRawBalance);
         return;
       }
-      
+
       //Now that that's out of the way, in cases after here, we should only reach this from the messages feed 
       assert(assetInfo['owner'] === undefined, "Logic should only be reached via messages feed data, not with get_asset_info data");
-      
-      if(assetInfo['description'] != match.description()) {
+
+      if (assetInfo['description'] != match.description()) {
         //when the description changes, the balance will get 0 passed into it to note this. obviously, don't take that as the literal balance :)
         $.jqlog.debug("Updating token " + asset + " @ " + self.ADDRESS + " description to '" + assetInfo['description'] + "'");
         match.description(assetInfo['description']);
-      } else if(assetInfo['transfer']) {
+      } else if (assetInfo['transfer']) {
         //transfer come in through the messages feed only (get_asset_info results doesn't have a transfer field passed in)
         $.jqlog.debug("Token " + asset + " @ " + self.ADDRESS + " transferred to '" + assetInfo['issuer'] + "'");
         //like with a description change, the balance is passed as 0
         match.owner(assetInfo['issuer']);
-        if(match.isMine() === false && match.rawBalance() == 0)
+        if (match.isMine() === false && match.rawBalance() == 0)
           self.assets.remove(match); //i.e. remove the asset if it was owned by this address (and no longer is), and had a zero balance
-      } else if(assetInfo['locked']) { //only add locking (do not change from locked back to unlocked, as that is not valid)
+      } else if (assetInfo['locked']) { //only add locking (do not change from locked back to unlocked, as that is not valid)
         $.jqlog.debug("Token " + asset + " @ " + self.ADDRESS + " locked");
         match.locked(assetInfo['locked']);
       } else {
@@ -193,26 +192,26 @@ function AddressViewModel(type, key, address, initialLabel, pubKeys) {
         //assert(!assetInfo['locked']); //lock change was handled earlier
         //assert(match.rawSupply() != assetInfo['quantity']);
         $.jqlog.debug("Updating token " + asset + " @ " + self.ADDRESS + " # issued units. Orig #: "
-          + match.rawSupply() + ", new #: " + assetInfo['quantity']+ ", unconfirmed bal #: " + match.unconfirmedBalance());
+          + match.rawSupply() + ", new #: " + assetInfo['quantity'] + ", unconfirmed bal #: " + match.unconfirmedBalance());
         match.rawSupply(assetInfo['quantity']);
       }
-      
+
 
     }
   }
-  
+
   self.removeAsset = function(asset) {
     self.assets.remove(function(item) {
-        return item.ASSET == asset;
-    });    
+      return item.ASSET == asset;
+    });
   }
-  
+
   /////////////////////////
   //Address-panel-related
   self.changeLabel = function(params) {
     CHANGE_ADDRESS_LABEL_MODAL.show(self.ADDRESS, self.label());
   }
-  
+
   self.showQRCode = function() {
     //Show the QR code for this address
     var qrcode = makeQRCode(self.ADDRESS);
@@ -224,28 +223,28 @@ function AddressViewModel(type, key, address, initialLabel, pubKeys) {
     //Show the private key code for this address
     DISPLAY_PRIVATE_KEY_MODAL.show(self.ADDRESS);
   }
-  
+
   self.remove = function() { //possible for watch only addresses only
     WALLET.addresses.remove(self);
-    
+
     //update the preferences with this address removed
     if (self.TYPE === 'watch') {
-      PREFERENCES['watch_only_addresses']= _.without(PREFERENCES['watch_only_addresses'], self.ADDRESS);  
+      PREFERENCES['watch_only_addresses'] = _.without(PREFERENCES['watch_only_addresses'], self.ADDRESS);
     } else if (self.TYPE === 'armory') {
-      PREFERENCES['armory_offline_addresses'] = _.filter(PREFERENCES['armory_offline_addresses'], 
-        function (el) { return el.address !== self.ADDRESS; });
+      PREFERENCES['armory_offline_addresses'] = _.filter(PREFERENCES['armory_offline_addresses'],
+        function(el) { return el.address !== self.ADDRESS; });
     } else if (self.TYPE === 'multisig') {
-      PREFERENCES['multisig_addresses'] = _.filter(PREFERENCES['multisig_addresses'], 
-        function (el) { return el.address !== self.ADDRESS; });
+      PREFERENCES['multisig_addresses'] = _.filter(PREFERENCES['multisig_addresses'],
+        function(el) { return el.address !== self.ADDRESS; });
     } else if (self.TYPE === 'normal') {
       PREFERENCES['num_addresses_used'] -= 1;
     }
-    
+
     WALLET.storePreferences(function() {
       checkURL(); //refresh the page without this address listed on it
     });
   }
-  
+
   self.signMessage = function() {
     SIGN_MESSAGE_MODAL.show(self.ADDRESS);
   }
@@ -253,49 +252,49 @@ function AddressViewModel(type, key, address, initialLabel, pubKeys) {
   self.signTransaction = function() {
     SIGN_TRANSACTION_MODAL.show(self.ADDRESS);
   }
-  
+
   self.armoryBroadcastTransaction = function() {
     assert(self.IS_ARMORY_OFFLINE);
     ARMORY_BROADCAST_TRANSACTION.show(self.ADDRESS);
   }
 
   self.createAsset = function() {
-    if(!WALLET.canDoTransaction(self.ADDRESS)) return false;
+    if (!WALLET.canDoTransaction(self.ADDRESS)) return false;
 
     var xcpBalance = WALLET.getBalance(self.ADDRESS, 'XCP');
     var noXCP = false;
-    if(xcpBalance < ASSET_CREATION_FEE_XCP) {
+    if (xcpBalance < ASSET_CREATION_FEE_XCP) {
       noXCP = true;
     }
 
     CREATE_ASSET_MODAL.show(self.ADDRESS, true, noXCP);
   }
 
-  self.payDividend = function () {
-    if(!WALLET.canDoTransaction(self.ADDRESS)) return false;
+  self.payDividend = function() {
+    if (!WALLET.canDoTransaction(self.ADDRESS)) return false;
     PAY_DIVIDEND_MODAL.show(self);
   };
 
-  self.broadcast = function () {
-    if(!WALLET.canDoTransaction(self.ADDRESS)) return false;
+  self.broadcast = function() {
+    if (!WALLET.canDoTransaction(self.ADDRESS)) return false;
     BROADCAST_MODAL.show(self, true);
   };
-  
+
   self.selectAddressText = function() {
-    return selectText('address-text-' + self.ADDRESS);    
+    return selectText('address-text-' + self.ADDRESS);
   }
 
   self.sortAssetsByName = function() {
     //Sort assets by asset name
     var reverseSort = self.lastSort() == 'sortAssetsByName' && self.lastSortDirection() == 'asc';
-    
-    if(reverseSort) {
+
+    if (reverseSort) {
       self.assets.sort(function(left, right) {
-          return right.ASSET.localeCompare(left.ASSET);
+        return right.ASSET.localeCompare(left.ASSET);
       });
     } else {
       self.assets.sort(function(left, right) {
-          return left.ASSET.localeCompare(right.ASSET);
+        return left.ASSET.localeCompare(right.ASSET);
       });
     }
 
@@ -307,7 +306,7 @@ function AddressViewModel(type, key, address, initialLabel, pubKeys) {
     //Sort assets by balance
     var reverseSort = self.lastSort() == 'sortAssetsByBalance' && self.lastSortDirection() == 'asc';
 
-    if(reverseSort) {
+    if (reverseSort) {
       self.assets.sort(function(left, right) {
         return left.normalizedBalance() == right.normalizedBalance() ? 0 : (right.normalizedBalance() < left.normalizedBalance() ? -1 : 1)
       });
@@ -315,7 +314,7 @@ function AddressViewModel(type, key, address, initialLabel, pubKeys) {
       self.assets.sort(function(left, right) {
         return left.normalizedBalance() == right.normalizedBalance() ? 0 : (left.normalizedBalance() < right.normalizedBalance() ? -1 : 1)
       });
-    }    
+    }
 
     self.lastSortDirection((self.lastSort() == 'sortAssetsByBalance' && self.lastSortDirection() == 'asc') ? 'desc' : 'asc');
     self.lastSort('sortAssetsByBalance');
@@ -338,8 +337,8 @@ function AddressViewModel(type, key, address, initialLabel, pubKeys) {
   }
 
   self.getXCPBalance = function() {
-    var xcpAsset =  $.grep(self.assets(), function (value) {
-        return value.ASSET == 'XCP';
+    var xcpAsset = $.grep(self.assets(), function(value) {
+      return value.ASSET == 'XCP';
     });
     return xcpAsset[0].normalizedBalance();
   }

@@ -1,3 +1,17 @@
+### v1.7.0 ###
+**Release Date:** December 2, 2015 
+
+**Enhancements:**
+- Update to work with newest `bitcore` and enforced high S signatures (@rubensayshi)
+- Extensive code cleanup/reformatting (@rubensayshi)
+- Added basic Travis and CircleCI test suite
+
+**Removed features:**
+- Remove use of `counterwebdeps` external repo.
+
+**Fixes:**
+- Fixed improper disabled textarea on Firefox in signing raw transactions dialog
+
 ### v1.6.3 ###
 **Enhancements:**
 - Allow `OP_RETURN`; use`'auto'` encoding
