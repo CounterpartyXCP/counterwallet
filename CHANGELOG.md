@@ -2,8 +2,8 @@
 **Release Date:** December 2, 2015 
 
 **Enhancements:**
-- Update to work with newest bitcore and enforced high S signatures (@rubensayshi)
-- Code cleanup/reformatting (@rubensayshi)
+- Update to work with newest `bitcore` and enforced high S signatures (@rubensayshi)
+- Extensive code cleanup/reformatting (@rubensayshi)
 - Added basic Travis and CircleCI test suite
 
 **Removed features:**
