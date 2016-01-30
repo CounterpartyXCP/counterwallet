@@ -1,0 +1,62 @@
+<div id="openorders">
+
+  <div class="row">
+    <div class="col-xs-12 col-sm-7 col-md-7 col-lg-4">
+      <h1 class="page-title txt-color-blueDark">
+        <i class="glyphicon glyphicon-share-alt"></i> 
+          <span class="localeTitle" data-bind="locale: 'my_open_orders'"></span> 
+      </h1>
+    </div>
+  </div>
+
+  <section id="widget-grid"> <!-- widget grid -->
+
+    <div class="row"> <!-- row -->
+      <article class="col-xs-12 col-sm-12 col-md-12 col-lg-12"> <!-- NEW WIDGET START -->
+        <!-- Widget ID (each widget will need unique ID)-->
+        <div class="jarviswidget defaultWidgetColor" data-widget-editbutton="false" data-widget-deletebutton="false">
+            <header>
+              <span class="widget-icon"> <i class="fa fa-rocket"></i> </span>
+              <h3 data-bind="locale: 'open_orders'"></h3>
+              <div class="clearfix"></div>
+            </header>
+            <div> <!-- widget div-->
+              <div class="widget-body no-padding" data-bind="validationOptions: { insertMessages: false }"> <!-- widget content -->
+                <div class="widget-body-toolbar"></div>
+                <table width="100%" class="table table-striped table-hover datatable_basic" id="openOrdersTable">
+                  <thead>
+                    <tr>
+                      <td>&nbsp;</td>
+                      <th data-bind="locale: 'address'"></th>
+                      <th data-bind="locale: 'sell_quantity'"></th>
+                      <th data-bind="locale: 'buy_quantity'"></th>     
+                      <th data-bind="locale: 'sell_remaining'"></th>
+                      <th data-bind="locale: 'buy_remaining'"></th> 
+                      <th data-bind="locale: 'expire'"></th> 
+                    </tr>
+                  </thead>
+                  <tbody data-bind="foreach: { data: openOrders, as: 'order' }">
+                    <tr>
+                      <td>
+                        <a class="btn btn-xs btn-default" data-bind="click: $parent.cancelOpenOrder, locale: 'cancel', attr: {'id': 'btcancel_' + tx_hash}, css: {disabled: order.cancelled }"></a>
+                      </td>
+                      <td style="white-space:nowrap" data-bind="text: order.address_label"></td> 
+                      <td class="number" data-bind="text: order.give_quantity_str"></td>
+                      <td class="number" data-bind="text: order.get_quantity_str"></td>
+                      <td class="number" data-bind="text: order.give_remaining_str"></td>
+                      <td class="number" data-bind="text: order.get_remaining_str"></td>
+                      <td>
+                        ~<span data-bind="timeago: order.expire_date"></span> (@ <span data-bind="locale: 'block'"></span> #<span data-bind="html: order.expire_index"></span>)
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+           </div> <!-- end widget div -->
+        </div> <!-- end widget -->
+      </article> <!-- WIDGET END -->
+    </div> <!-- end row -->
+
+  </section>
+
+</div>

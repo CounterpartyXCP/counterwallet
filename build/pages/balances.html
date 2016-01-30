@@ -1,0 +1,1072 @@
+<div class="row" id="balanceHeader">
+  <div class="col-xs-12 col-sm-7 col-md-7 col-lg-4">
+    <h1 class="page-title txt-color-blueDark">
+      <i class="fa fa-user fa-fw"></i> <span class="localeTitle" data-bind="locale: 'my_account_balances'"></span>
+    </h1>
+  </div>
+  <div class="pull-right sectionHeaderButtonBar">
+    <div class="btn-group">
+        <button type="button" class="btn btn-primary dropdown-toggle" data-toggle="dropdown">
+          <span data-bind="locale: 'create_new_address'"></span> <i class="fa fa-caret-down"></i>
+        </button>
+        <ul class="dropdown-menu">
+            <li>
+                <a id="createAddress" href="#" data-type="normal" data-bind="locale: 'create_regular_address'"></a>
+            </li>
+            <li>
+                <a id="createArmoryOfflineAddress" data-type="armory" href="#" data-bind="locale: 'create_armory_address'"></a>
+            </li>
+            <li>
+                <a id="createWatchOnlyAddress" data-type="watch" href="#" data-bind="locale: 'create_watch_address'"></a>
+            </li>
+            <li>
+                <a id="createMultisigAddress" data-type="multisig" href="#" data-bind="locale: 'create_multisig_address'"></a>
+            </li>
+        </ul>
+    </div>
+
+    <button id="sweepFunds" type="button" class="btn btn-primary" data-bind="locale: 'import_funds'"></button>
+    <div class="btn-group" id="newWalletSweep">
+        <button type="button" class="btn btn-primary dropdown-toggle" data-toggle="dropdown">
+          <span data-bind="locale: 'import_funds_dropdown'"></span> <i class="fa fa-caret-down"></i>
+        </button>
+        <ul class="dropdown-menu" style="right:0;left:auto">
+            <li>
+                <a id="sweepFunds2" href="#" data-bind="locale: 'from_another_address'"></a>
+            </li>
+            <li>
+                <a id="sweepOldWallet" href="#" data-bind="locale: 'from_old_wallet'"></a>
+            </li>
+        </ul>
+    </div>
+
+    <button id="balanceHelp" type="button" class="btn btn-success">
+      <i class="fa fa-question-circle"></i>  <span data-bind="locale: 'page_help'"></span>
+    </button>
+  </div>
+</div>
+
+<div id="oldWalletDetectedNotice" data-bind="fadeVisibleInOnly: WALLET.isOldWallet()" class="alert alert-warning alert-block">
+    <i class="fa-fw fa fa-level-up"></i>
+    <span data-bind="locale: 'old_wallet_detected'"></span>
+    <a href="https://forums.counterparty.co/index.php?topic=321.0" target="_blank" data-bind="locale: 'old_wallet_more_info'"></a>.
+</div>
+
+<div class="alert alert-info" id="alertBuyXcp">
+    <i class="fa-fw fa fa-exchange"></i>
+    <span data-bind="visible: true, locale: 'want_to_buy_xcp'"></span>
+
+</div>
+
+<div id="gettingStartedNotice" data-bind="fadeVisibleInOnly: WALLET.isNew() && !WALLET.isOldWallet() && window._BALANCES_HAS_LOADED_ALREADY === undefined" class="alert alert-success alert-block">
+    <a class="close" data-dismiss="alert" href="#">×</a>
+    <h4 class="alert-heading padding-bottom-10"><span data-bind="locale: 'welcome'"></span>!</h4>
+    <span data-bind="locale: 'welcome_p1'"></span>
+    <span data-bind="visible: USE_TESTNET, locale: 'testnet_faucet'"></span>
+    <br/><br/>
+    <span data-bind="locale: 'welcome_p2'"></span>
+</div>
+
+<section id="widget-grid" class="balancesContainer" data-bind="foreach: addresses"> <!-- widget grid -->
+    <div class="row"> <!-- one row per widget in this case -->
+      <article class="col-xs-12 col-sm-12 col-md-12 col-lg-12"> <!-- widget START -->
+        <div class="jarviswidget" data-bind="attr: {'id': 'address-wid-' + ADDRESS}" data-widget-deletebutton="false" data-widget-editbutton="false">
+          <header>
+            <span class="widget-icon"> <i class="fa" data-bind="css: { 'fa-arrow-circle-o-right': !IS_WATCH_ONLY, 'fa-eye': IS_WATCH_ONLY }"></i> </span>
+            <h3 class="jarviswidget-ctrls">
+                <span class="addressLabelText" href="#" data-bind="text: label, click: changeLabel"></span>
+                <div data-bind="visible: assetFilter()" class="label label-warning margin-left-5"><i class="fa fa-filter"></i> <span data-bind="locale: 'filtered'"></span></div>
+                <div data-bind="visible: lastSort()" class="label label-info margin-left-5"><i class="fa fa-sort-amount-asc"></i> <span data-bind="locale: 'sorted'"></span></div>
+                <div data-bind="visible: IS_WATCH_ONLY" class="label label-success margin-left-5"><i class="fa fa-eye"></i> <span data-bind="locale: 'watch_only'"></span></div>
+                <div data-bind="visible: IS_ARMORY_OFFLINE" class="label label-success margin-left-5"><i class="fa fa-lock"></i>  <span data-bind="locale: 'armory_offline'"></span></div>
+                <div data-bind="visible: IS_MULTISIG_ADDRESS" class="label label-success margin-left-5"><i class="fa fa-lock"></i>  <span data-bind="locale: 'multisig_address'"></span> <span data-bind="text: multisigType"></span></div>
+            </h3>
+            <div class="widget-toolbar">
+              <div class="btn-group btn-group-dropup">
+                <button class="btn dropdown-toggle btn-xs btn-primary" data-toggle="dropdown">
+                  <i class="fa fa-bars"></i> <span data-bind="locale: 'address_actions'"></span> <i class="fa fa-caret-down"></i>
+                </button>
+                <ul class="dropdown-menu pull-right">
+                  <li><a data-bind="click: showQRCode, locale: 'show_qr_code', visible: !IS_MULTISIG_ADDRESS" href="#"></a></li>
+                  <li data-bind="visible: IS_NORMAL"><a data-bind="click: showPrivateKey, locale: 'show_private_key'" href="#"></a></li>
+                  <li data-bind="visible: IS_NORMAL"><a data-bind="click: signMessage, locale: 'sign_message'" href="#"></a></li>
+
+                  <li class="menu-item dropdown dropdown-submenu">
+                    <a href="#" class="dropdown-toggle" data-toggle="dropdown" data-bind="locale: 'sort_by'"></a>
+                        <ul class="dropdown-menu">
+                          <li><a data-bind="click: sortAssetsByName, locale: 'name'" href="#"></a></li>
+                          <li><a data-bind="click: sortAssetsByBalance, locale: 'balance'" href="#"></a></li>
+                        </ul>
+                  </li>
+
+                </ul>
+              </div>
+            </div>
+            <div class="widget-toolbar display-address"><span id="" data-bind="attr: {'id': 'address-text-' + ADDRESS}, click: changeLabel, text: dispAddress"></span></div>
+            <div class="clearfix"></div>
+          </header>
+          <div> <!-- widget div-->
+            <div class="widget-body" data-bind="attr: {'id': 'address-balances-' + ADDRESS}, foreach: SOGfilteredAssets"> <!-- widget content -->
+              <div class="asset-item" data-bind="attr: {'id': 'asset-' + ADDRESS + '-' + ASSET}, css: { btc: ASSET === 'BTC', xcp: ASSET === 'XCP' || ASSET === 'BITCRYSTALS', myasset: isMine(), othersasset: !isMine() && (ASSET !== 'BTC' && ASSET !== 'XCP' && ASSET !== 'BITCRYSTALS') }">
+                <img data-bind="attr: {'src': '/SOGImages/' + ASSET + '.jpg'}, css: {imgasset: true}">
+                  <div class="btn-group btn-group-dropup"> <!-- asset level action button -->
+                      <button type="button" class="btn btn-default dropdown-toggle assetBtn"><span class="caret"></span></button>
+                      <ul class="dropdown-menu" role="menu">
+                        <li><a data-bind="visible: !$parent.IS_WATCH_ONLY, click: send, locale: 'send'" href="#"></a></li>
+                        <li><a data-bind="visible: ASSET !== 'BTC' && ASSET !== 'XCP', click: showInfo, locale: 'show_info'" href="#"></a></li>
+                        <li data-bind="visible: !$parent.IS_WATCH_ONLY && USE_TESTNET && ASSET === 'BTC'"><a data-bind="click: testnetBurn, locale: 'burn_for_xcp'" href="#"></a></li>
+                        <li data-bind="visible: !$parent.IS_WATCH_ONLY && isMine() && !locked()"><a data-bind="click: issueAdditional, locale: 'issue_additional'" href="#"></a></li>
+                        <li data-bind="visible: !$parent.IS_WATCH_ONLY && isMine()"><a data-bind="click: transfer, locale: 'transfer_ownership'" href="#"></a></li>
+                        <li data-bind="visible: !$parent.IS_WATCH_ONLY && isMine() && !locked()"><a data-bind="click: lock, locale: 'lock_token_issuance'" href="#"></a></li>
+                        <li data-bind="visible: !$parent.IS_WATCH_ONLY && isMine()"><a data-bind="click: changeDescription, locale: 'change_token_description'" href="#"></a></li>
+                      </ul>
+                </div>
+                <h3 class="name pull-left" data-bind="text: ASSET"></h3>
+                <div class="clearfix"></div>
+                <p class="balance" data-bind="style: { 'padding-right': dispBalancePadding }">
+                    <span data-bind="visible: isMine(), locale: 'issued', localeArgs: dispTotalIssued"></span>
+                        <span data-bind="visible: issuanceQtyChangePending" title="Quantity issued change pending">
+                            <i class="icon-append fa fa-spinner fa-spin"></i></span>
+                    </span><br/>
+                    Bal: <span data-bind="html: dispBalance"></span>
+                    <span data-bind="html: dispEscrowedBalance"></span>
+                    <span data-bind="visible: balanceChangePending"
+                        title="Balance change pending"><i class="icon-append fa fa-spinner fa-spin"></i></span></p>
+                <div class="balancesAssetIcons">
+                    <span data-bind="visible: locked()" class="balancesAssetIcon"
+                        title="Token is locked"><i class="icon-append fa fa-lock"></i></span>
+                </div>
+              </div>
+            </div> <!-- end widget content body -->
+          </div> <!-- end widget div -->
+        </div> <!-- end widget -->
+      </article> <!-- WIDGET END -->
+    </div> <!-- balances container, foreach: address -->
+</section> <!-- end widget grid -->
+
+
+<!-- modal for change address label -->
+<div data-bind="showModal: shown" id="changeAddressLabelModal" class="modal fade" data-backdrop="static" data-keyboard="false" tabindex="-1" role="dialog" aria-labelledby="changeAddressLabelModal" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" data-bind="click: hide" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+        <h4 class="modal-title" data-bind="locale: 'change_address_label'"></h4>
+      </div>
+      <div class="modal-body no-padding">
+        <div class="formPadded">
+          <p style="word-wrap: break-word;" data-bind="locale: 'enter_new_label', localeArgs: dispAddress "></p>
+        </div>
+
+        <form class="smart-form" data-bind="submit: doAction"><fieldset>
+          <section><div class="row">
+            <label class="control-label col col-sm-2" data-bind="locale: 'label'"></label>
+            <div class="col col-sm-10">
+                <label class="input"><i class="icon-append fa fa-tag"></i>
+                    <input id="newAddressLabel" name="newLabel" data-bind="value: newLabel, valueUpdate: 'input'" type="text"/>
+                </label>
+            </div>
+          </div></section>
+        </fieldset></form>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-default" data-bind="click: hide, locale: 'cancel'"></button>
+        <button type="button" data-bind="click: submitForm, locale: 'change_label'" class="btn btn-primary"></button>
+      </div>
+    </div><!-- /.modal-content -->
+  </div><!-- /.modal-dialog -->
+</div><!-- /.modal -->
+
+
+<!-- modal for new address -->
+<div data-bind="showModal: shown" id="createNewAddressModal" class="modal fade" data-keyboard="false" tabindex="-1" data-backdrop="static" role="dialog" aria-labelledby="createNewAddressModal" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" data-bind="click: hide" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+        <h4 class="modal-title" data-bind="text: dispWindowTitle"></h4>
+      </div>
+      <div class="modal-body no-padding">
+        <div data-bind="visible: addressType() == 'normal'">
+            <p class="formPadded" data-bind="locale: 'enter_address_description'"></p>
+        </div>
+        <div data-bind="visible: addressType() == 'watch'">
+            <p class="formPadded" data-bind="locale: 'enter_address_description_watch_only'"></p>
+        </div>
+        <div data-bind="visible: addressType() == 'armory'">
+            <p class="formPadded" data-bind="locale: 'enter_address_description_armory'"></p>
+        </div>
+        <div data-bind="visible: addressType() == 'multisig'">
+            <p class="formPadded" data-bind="locale: 'enter_address_description_multisig'"></p>
+        </div>
+
+        <form class="smart-form" data-bind="submit: doAction"><fieldset>
+
+          <section data-bind="visible: addressType() == 'multisig'"><div class="row">
+            <label class="control-label col col-sm-2" data-bind="locale: 'type'"></label>
+            <div class="col col-sm-10">
+                <label class="input">
+                    <select class="width-max select2" data-bind="value: multisigAddressType, valueUpdate: 'input'">
+                      <option value="1_2">1 of 2</option>
+                      <option value="2_2">2 of 2</option>
+                      <option value="1_3">1 of 3</option>
+                      <option value="2_3">2 of 3</option>
+                      <option value="3_3">3 of 3</option>
+                    </select>
+                </label>
+            </div>
+          </div></section>
+          <section data-bind="visible: addressType() == 'multisig'"><div class="row">
+            <label class="control-label col col-sm-2" data-bind="locale: 'first_address'"></label>
+            <div class="col col-sm-10">
+                <label class="input"><i class="icon-append fa fa-tag"></i>
+                    <input name="multisigAddress1" data-bind="value: multisigAddress1, valueUpdate: 'input'" type="text"/>
+                </label>
+            </div>
+          </div></section>
+          <section data-bind="visible: addressType() == 'multisig' && needPubkey1()"><div class="row">
+            <label class="control-label col col-sm-2" data-bind="locale: 'first_pubkey'"></label>
+            <div class="col col-sm-10">
+                <label class="input"><i class="icon-append fa fa-tag"></i>
+                    <input name="multisigPubkeyAddress1" data-bind="value: multisigPubkeyAddress1, valueUpdate: 'input'" type="text"/>
+                </label>
+            </div>
+          </div></section>
+          <section data-bind="visible: addressType() == 'multisig'"><div class="row">
+            <label class="control-label col col-sm-2" data-bind="locale: 'second_address'"></label>
+            <div class="col col-sm-10">
+                <label class="input"><i class="icon-append fa fa-tag"></i>
+                    <input name="multisigAddress2" data-bind="value: multisigAddress2, valueUpdate: 'input'" type="text"/>
+                </label>
+            </div>
+          </div></section>
+          <section data-bind="visible: addressType() == 'multisig' && needPubkey2()"><div class="row">
+            <label class="control-label col col-sm-2" data-bind="locale: 'second_pubkey'"></label>
+            <div class="col col-sm-10">
+                <label class="input"><i class="icon-append fa fa-tag"></i>
+                    <input name="multisigPubkeyAddress2" data-bind="value: multisigPubkeyAddress2, valueUpdate: 'input'" type="text"/>
+                </label>
+            </div>
+          </div></section>
+          <section data-bind="visible: addressType() == 'multisig' && multisigProvided() == '3'"><div class="row">
+            <label class="control-label col col-sm-2" data-bind="locale: 'third_address'"></label>
+            <div class="col col-sm-10">
+                <label class="input"><i class="icon-append fa fa-tag"></i>
+                    <input name="multisigAddress3" data-bind="value: multisigAddress3, valueUpdate: 'input'" type="text"/>
+                </label>
+            </div>
+          </div></section>
+          <section data-bind="visible: (addressType() == 'multisig') && (multisigProvided() == '3') && needPubkey3()"><div class="row">
+            <label class="control-label col col-sm-2" data-bind="locale: 'third_pubkey'"></label>
+            <div class="col col-sm-10">
+                <label class="input"><i class="icon-append fa fa-tag"></i>
+                    <input name="multisigPubkeyAddress3" data-bind="value: multisigPubkeyAddress3, valueUpdate: 'input'" type="text"/>
+                </label>
+            </div>
+          </div></section>
+
+          <section data-bind="visible: addressType() != 'normal' && addressType() != 'multisig'"><div class="row">
+            <label class="control-label col col-sm-2" data-bind="locale: 'address'"></label>
+            <div class="col col-sm-10">
+                <label class="input"><i class="icon-append fa fa-tag"></i>
+                    <input name="watchAddress" data-bind="value: watchAddress, valueUpdate: 'input'" type="text"/>
+                </label>
+            </div>
+          </div></section>
+          <section><div class="row">
+            <label class="control-label col col-sm-2" data-bind="locale: 'description'"></label>
+            <div class="col col-sm-10">
+                <label class="input"><i class="icon-append fa fa-info"></i>
+                    <input name="description" data-bind="value: description, valueUpdate: 'input'" type="text"/>
+                </label>
+            </div>
+          </div></section>
+        </fieldset></form>
+      </div>
+      <div class="modal-footer" id="createNewAddressButtons">
+        <button type="button" class="btn btn-default" data-bind="click: hide, locale: 'cancel'"></button>
+        <button type="button" data-bind="click: submitForm, locale: 'create_new_address'" class="btn btn-primary"></button>
+      </div>
+    </div><!-- /.modal-content -->
+  </div><!-- /.modal-dialog -->
+</div><!-- /.modal -->
+
+
+<!-- modal for send -->
+<div data-bind="showModal: shown, validationOptions: { insertMessages: false }" id="sendModal" class="modal fade" data-backdrop="static" data-keyboard="false" tabindex="-1" role="dialog" aria-labelledby="sendModal" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" data-bind="click: hide" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+        <h4 class="modal-title" data-bind="locale: 'send_tokens'"></h4>
+      </div>
+      <div class="modal-body no-padding">
+        <p class="formPadded" data-bind="locale: 'send_tokens_to_address', localeArgs: {0: asset, 1: address, 2: dispNormalizedBalance, 3: asset}"></p>
+
+        <form class="smart-form" data-bind="submit: doAction"><fieldset>
+          <section><div class="row">
+            <label class="control-label col col-sm-2" data-bind="locale: 'send_to'"></label>
+            <div class="col col-sm-10">
+                <label class="input"><i class="icon-append fa fa-tag"></i>
+                    <input name="destAddress" data-bind="value: destAddress, valueUpdate: 'input', attr: {placeholder: 'Enter Bitcoin address'}" type="text"/>
+                </label>
+                <span class="invalid" data-bind="validationMessage: destAddress"></span>
+            </div>
+          </div></section>
+          
+
+          <section><div class="row" data-bind="visible: missingPubkey1()">
+            <label class="control-label col col-sm-2" data-bind="locale: 'pubkey'"></label>
+            <div class="col col-sm-10">
+                <label class="input">
+                    <div class="note" data-bind="locale: 'for_the_address', localeArgs: {0: missingPubkey1Address()}"></div>
+                    <input name="pubkey1" data-bind="value: pubkey1, valueUpdate: 'input', localeAttr: {'placeholder': 'enter_pubkey'}" type="text"/>
+
+                </label>
+                <span class="invalid" data-bind="validationMessage: pubkey1"></span>
+            </div>
+          </div></section>
+          <section><div class="row" data-bind="visible: missingPubkey2()">
+            <label class="control-label col col-sm-2" data-bind="locale: 'pubkey'"></label>
+            <div class="col col-sm-10">
+                <label class="input">
+                    <div class="note" data-bind="locale: 'for_the_address', localeArgs: {0: missingPubkey2Address()}"></div>
+                    <input name="pubkey1" data-bind="value: pubkey2, valueUpdate: 'input', localeAttr: {'placeholder': 'enter_pubkey'}" type="text"/>
+
+                </label>
+                <span class="invalid" data-bind="validationMessage: pubkey2"></span>
+            </div>
+          </div></section>
+          <section><div class="row" data-bind="visible: missingPubkey3()">
+            <label class="control-label col col-sm-2" data-bind="locale: 'pubkey'"></label>
+            <div class="col col-sm-10">
+                <label class="input">
+                    <div class="note" data-bind="locale: 'for_the_address', localeArgs: {0: missingPubkey3Address()}"></div>
+                    <input name="pubkey3" data-bind="value: pubkey3, valueUpdate: 'input', localeAttr: {'placeholder': 'enter_pubkey'}" type="text"/>
+
+                </label>
+                <span class="invalid" data-bind="validationMessage: pubkey3"></span>
+            </div>
+          </div></section>
+
+
+          <section><div class="row">
+            <label class="control-label col col-sm-2" data-bind="locale: 'send_amount'"></label>
+            <div class="col col-sm-10">
+                <label id="sendAmountLabel" class="input inline-block">
+                    <i class="icon-append fa fa-share"></i>
+                    <input name="quantity" data-bind="value: quantity, valueUpdate: 'input', localeAttr: {'placeholder': 'enter_quantity'}" type="text"/>
+                </label>
+                <span>&nbsp;&nbsp;<button type="button" data-bind="click: maxAmount, locale: 'max'" class="btn btn-default btn-sm"></button></span>
+                <span class="invalid" data-bind="validationMessage: quantity"></span>
+            </div>
+          </div></section>
+        </fieldset></form>
+        <p class="formPaddedBot" data-bind="fadeVisibleInOnly: normalizedBalRemainingIsSet, locale: 'after_sending', localeArgs: {0: dispNormalizedBalRemaining, 1: asset}"></p>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-default" data-bind="click: hide, locale: 'cancel'"></button>
+        <button type="button" data-bind="click: submitForm, locale: 'send'" class="btn btn-primary"></button>
+      </div>
+    </div><!-- /.modal-content -->
+  </div><!-- /.modal-dialog -->
+</div><!-- /.modal -->
+
+<!-- modal for sweep (import) -->
+<div data-bind="showModal: shown, validationOptions: { insertMessages: false }" id="sweepModal" class="modal fade" data-backdrop="static" data-keyboard="false" tabindex="-1" role="dialog" aria-labelledby="sweepModal" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" data-bind="click: hide, visible: sweepingProgressionMessage()==''" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+        <h4 class="modal-title">
+            <span data-bind="visible: !fromOldWallet, locale: 'import_tokens_address'"></span>
+            <span data-bind="visible: fromOldWallet, locale: 'import_tokens_wallet'"></span>
+        </h4>
+      </div>
+      <div class="modal-body no-padding">
+        <p class="formPadded">
+            <span data-bind="visible: !fromOldWallet, locale: 'import_funds_address'"></span>
+            <span data-bind="visible: fromOldWallet, locale: 'import_funds_wallet'"></span>
+        </p>
+
+        <form class="smart-form" data-bind="submit: doAction, visible: sweepingProgressionMessage()==''"><fieldset>
+
+          <section data-bind="visible: !fromOldWallet"><div class="row">
+            <label class="control-label col col-sm-12" data-bind="locale: 'private_key_import'"></label>
+            <div class="col col-sm-12">
+                <label class="input"><i class="icon-append fa fa-lock"></i>
+                    <input name="privateKey" data-bind="value: privateKey, valueUpdate: 'input', attr: {placeholder: 'Enter Bitcoin private key'}" type="text"/>
+                </label>
+                <span class="invalid" data-bind="validationMessage: privateKey"></span>
+                <div class="note" data-bind="locale: 'enter_unencrypted_private_key'"></div>
+            </div>
+          </div></section>
+
+          <section data-bind="visible: fromOldWallet"><div class="row">
+            <label class="control-label col col-sm-12" data-bind="locale: 'source_address_old_wallet'"></label>
+            <div class="col col-sm-12">
+                <select class="width-max" data-bind="options: availableOldAddresses, optionsValue: 'WIF', optionsText: 'ADDRESS', select2: { minimumResultsForSearch: 10, escapeMarkup: 'direct' }, value: oldPrivateKey"></select>
+                <span class="invalid" data-bind="validationMessage: privateKey"></span>
+                <div class="note" data-bind="locale: 'from_old_wallet_note'"></div>
+            </div>
+          </div></section>
+
+          <section><div class="row">
+            <label class="control-label col col-sm-12" data-bind="locale: 'destination_address'"></label>
+            <div class="col col-sm-12">
+                <select class="width-max" data-bind="options: availableAddresses, optionsValue: 'ADDRESS', optionsText: 'SELECT_LABEL', select2: { minimumResultsForSearch: 10, escapeMarkup: 'direct' }, value: destAddress"></select>
+                <span class="invalid" data-bind="validationMessage: destAddress"></span>
+                <div class="note" data-bind="locale: 'destination_address_note'"></div>
+            </div>
+          </div></section>
+          <section data-bind="fadeVisibleInOnly: availableAssetsToSweep().length >= 1"><div class="row">
+            <label class="control-label col col-sm-12" data-bind="locale: 'tokens_to_sweep'"></label>
+            <div class="col col-sm-12">
+                <label class="input">
+                    <select id="availableAssetsToSweep" multiple="true" class="width-max" data-bind="options: availableAssetsToSweep, optionsValue: 'ASSET', optionsText: 'SELECT_LABEL', select2: { minimumResultsForSearch: 10, escapeMarkup: 'direct' }, selectedOptions: selectedAssetsToSweep"></select>
+                </label>
+                <span class="invalid" data-bind="validationMessage: selectedAssetsToSweep"></span>
+                <div class="note" data-bind="locale: 'tokens_to_sweep_note'"></div>
+            </div>
+          </div></section>
+          <section data-bind="visible: notEnoughBTC() || addressForFeesBalance()>0"><div class="row">
+            <label class="control-label col col-sm-12" data-bind="locale: 'private_key_pay_fees'"></label>
+            <div class="col col-sm-12">
+                <label class="input"><i class="icon-append fa fa-lock"></i>
+                    <input name="privateKeyForFees" data-bind="value: privateKeyForFees, valueUpdate: 'input', attr: {placeholder: 'Enter Bitcoin private key'}" type="text"/>
+                </label>
+                <span class="invalid" data-bind="validationMessage: privateKeyForFees"></span>
+                <span class="note" data-bind="text: addressForFeesBalanceMessage, visible:addressForFeesBalanceMessage()!=''"></span>
+                <div class="note" data-bind="locale: 'private_key_pay_fees_note'"></div>
+            </div>
+          </div></section>
+        </fieldset></form>
+        <fieldset data-bind="visible: sweepingProgressionMessage()!=''">
+          <section><div class="row" style="margin:15px">
+            <p class="message .txt-color-orangeDark" data-bind="text: sweepingProgressionMessage" style="font-weight:bold;"></p>
+            <div class="progress progress-striped active" style="margin-top:15px;margin-bottom:0;">
+              <div id="sweepingProgressBar" class="progress-bar"  role="progressbar" data-bind="style: { width: sweepingProgressWidth() }">
+              </div>
+            </div>
+          </div></section></fieldset>
+
+      </div>
+      <div class="modal-footer" data-bind="visible: sweepingProgressionMessage()==''">
+        <button type="button" class="btn btn-default" data-bind="click: hide, locale: 'cancel'"></button>
+        <button type="button" data-bind="click: submitForm, locale: 'sweep'" class="btn btn-danger"></button>
+      </div>
+    </div><!-- /.modal-content -->
+  </div><!-- /.modal-dialog -->
+</div><!-- /.modal -->
+
+
+<!-- modal for sign message -->
+<div data-bind="showModal: shown" id="signMessageModal" class="modal fade" data-backdrop="static" data-keyboard="false" tabindex="-1" role="dialog" aria-labelledby="signMessageModal" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" data-bind="click: hide" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+        <h4 class="modal-title" data-bind="locale: 'sign_a_message'"></h4>
+      </div>
+      <div class="modal-body no-padding">
+        <p class="formPadded" data-bind="locale: 'sign_a_message_address', localeArgs: address"></p>
+
+        <form class="smart-form" data-bind="submit: doAction"><fieldset>
+          <section><div class="row">
+            <label class="control-label col col-sm-2" data-bind="locale: 'message_to_sign'"></label>
+            <div class="col col-sm-10">
+                <label class="textarea">
+                    <textarea rows="3" class="custom-scroll" data-bind="value: message, valueUpdate : 'input'"></textarea>
+                </label>
+                <div class="note" data-bind="locale: 'message_to_sign_note'"></div>
+            </div>
+          </div></section>
+
+          <section><div class="row">
+            <label class="control-label col col-sm-2" data-bind="locale: 'message_format'"></label>
+            <div class="col col-sm-10">
+              <label class="radio">
+                <input type="radio" data-bind="checked: signatureFormat" name="signMessageFormat" value="base64">
+                <i></i><span data-bind="locale: 'base_64_encoded'"></span>
+              </label>
+              <label class="radio">
+                <input type="radio" data-bind="checked: signatureFormat" name="signMessageFormat" value="hex">
+                <i></i><span data-bind="locale: 'hex_encoded'"></span>
+              </label>
+            </div>
+          </div></section>
+
+          <section><div class="row">
+            <label class="control-label col col-sm-2" data-bind="locale: 'signed_message'"></label>
+            <div class="col col-sm-10">
+                <label class="textarea">
+                    <textarea id="signedMessage" rows="3" class="custom-scroll" data-bind="fadeInText: signedMessage" readonly="readonly"></textarea>
+                </label>
+                <div class="note" data-bind="locale: 'signed_message_note'"></div>
+            </div>
+          </div></section>
+        </fieldset></form>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-default" data-bind="click: hide, locale: 'close'"></button>
+        <button type="button" data-bind="click: submitForm, locale: 'sign'" class="btn btn-primary"></button>
+      </div>
+    </div><!-- /.modal-content -->
+  </div><!-- /.modal-dialog -->
+</div><!-- /.modal -->
+
+
+<!-- modal for testnet burning -->
+<div data-bind="showModal: shown" id="testnetBurnModal" class="modal fade" data-backdrop="static" data-keyboard="false" tabindex="-1" role="dialog" aria-labelledby="testnetBurnModal" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" data-bind="click: hide" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+        <h4 class="modal-title" data-bind="locale: 'burn_btc_testnet'"></h4>
+      </div>
+      <div class="modal-body no-padding">
+        <p class="formPadded">
+          <span data-bind="locale: 'create_xcp_testnet'"></span><br/><br/>
+          <span data-bind="visible: 1 - btcAlreadyBurned() > 0">
+            <b data-bind="locale: 'burn_up_to', localeArgs: maxPossibleBurn()"></b>
+          </span>
+          <span data-bind="visible: 1 - btcAlreadyBurned() <= 0">
+            <b class="errorColor"><span data-bind="locale: 'already_burned'"></span></b>
+          </span>
+       </p>
+       <form class="smart-form" data-bind="submit: doAction"><fieldset>
+          <section><div class="row">
+            <label class="control-label col col-sm-2" data-bind="locale: 'btc_to_burn'"></label>
+            <div class="col col-sm-10">
+                <label class="input"><i class="icon-append fa fa-fire"></i>
+                    <input name="additionalIssue" data-bind="value: btcBurnQuantity, valueUpdate: 'input'" type="text"/>
+                </label>
+            </div>
+          </div></section>
+        </fieldset></form>
+        <p class="formPaddedBot bold" data-bind="fadeVisibleInOnly: validationModel.isValid(), locale: 'after_burning', localeArgs: dispQuantityXCPToBeCreated"></p>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-default" data-bind="click: hide, locale: 'cancel'"></button>
+        <button type="button" data-bind="click: submitForm, locale: 'burn'" class="btn btn-success"></button>
+      </div>
+    </div><!-- /.modal-content -->
+  </div><!-- /.modal-dialog -->
+</div><!-- /.modal -->
+
+
+<!-- modal for display private key -->
+<div data-bind="showModal: shown" id="displayPrivateKeyModal" class="modal fade" data-backdrop="static" data-keyboard="false" tabindex="-1" role="dialog" aria-labelledby="displayPrivateKeyModal" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" data-bind="click: hide" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+        <h4 class="modal-title" data-bind="locale: 'private_key_wif', localeArgs: address"></h4>
+      </div>
+      <div class="modal-body no-padding">
+        <div class="formPadded">
+            <div class="alert alert-warning"><i class="fa-fw fa fa-info"></i><span data-bind="locale: 'private_key_warning'"></span></div>
+
+            <center>
+                <a href="#" class="font-lg" data-bind="visible: !privateKeyText(), click: displayPrivateKey, locale: 'show_private_key'"></a>
+                <span class="font-medlg" data-bind="visible: privateKeyText, text: privateKeyText"></span>
+            </center>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-default" data-bind="click: hide, locale: 'close'"></button>
+      </div>
+    </div><!-- /.modal-content -->
+  </div><!-- /.modal-dialog -->
+</div><!-- /.modal -->
+
+
+<!-- modal for create asset -->
+<div data-bind="showModal: shown" id="createAssetModal" class="modal fade" data-backdrop="static" data-keyboard="false" tabindex="-1" role="dialog" aria-labelledby="createAssetModal" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" data-bind="click: hide" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+        <h4 class="modal-title" data-bind="locale: 'create_issue_token'"></h4>
+      </div>
+      <div class="modal-body no-padding">
+        <form class="smart-form" data-bind="submit: doAction"><fieldset>
+          <section><div class="row">
+            <label class="control-label col col-sm-2" data-bind="locale: 'for_address'"></label>
+            <div class="col col-sm-10">
+                <label class="input"><i class="icon-append fa fa-user"></i>
+                    <input name="assetAddress" data-bind="value: address" type="text" disabled="disabled"/>
+                </label>
+                <div class="note" data-bind="locale: 'for_address_note'"></div>
+            </div>
+          </div></section>
+          <section><div class="row">
+            <label class="control-label col col-sm-2" data-bind="locale: 'token_name_type'"></label>
+            <div class="col col-sm-10">
+              <label class="radio" data-bind="visible: noEnoughXCP() == false">
+                <input type="radio" data-bind="checked: tokenNameType" name="tokenNameType" value="alphabetic">
+                <i></i><span data-bind="locale: 'alphabetic_name'"></span>
+                <div class="note" style="margin-top:0" data-bind="locale: 'token_name_rules'"></div>
+              </label>
+              <label class="radio">
+                <input type="radio" data-bind="checked: tokenNameType" name="tokenNameType" value="numeric">
+                <i></i><span data-bind="locale: 'numeric_name'"></span>
+                <div class="note" style="margin-top:0" data-bind="locale: 'free_token_name_rules'"></div>
+              </label>
+            </div>
+          </div></section>
+          <section><div class="row">
+            <label class="control-label col col-sm-2" data-bind="locale: 'token_name'"></label>
+            <div class="col col-sm-10">
+                <label class="input">
+                    <a href="#" data-bind="visible: tokenNameType=='numeric', click: generateRandomId"><i class="icon-append fa fa-rotate-right"></i></a>
+                    <i data-bind="visible: tokenNameType=='alphabetic'" class="icon-append fa fa-tag"></i>
+                    <input name="assetName" data-bind="value: name, valueUpdate : 'input'" type="text"/>
+                </label>
+                <div class="note" data-bind="locale: 'token_name_note'"></div>
+            </div>
+          </div></section>
+          <section><div class="row">
+            <label class="control-label col col-sm-2" data-bind="locale: 'description'"></label>
+            <div class="col col-sm-10">
+                <label class="input"><i class="icon-append fa fa-info"></i>
+                    <input name="assetDescription" data-bind="value: description, valueUpdate: 'input'"/>
+                </label>
+                <div class="note" data-bind="locale: 'description_note'"></div>
+            </div>
+          </div></section>
+          <section><div class="row">
+            <label class="control-label col col-sm-2" data-bind="locale: 'quantity'"></label>
+            <div class="col col-sm-10">
+                <label class="input"><i class="icon-append fa fa-plus"></i>
+                    <input name="assetQuantity"  data-bind="value: quantity, valueUpdate: 'input'" type="text"/>
+                </label>
+                <div class="note" data-bind="locale: 'quantity_note'"></div>
+            </div>
+          </div></section>
+          <section><div class="row">
+            <div class="col col-sm-2"></div>
+            <div class="col col-sm-10">
+              <label class="checkbox">
+                <input name="assetDivisible" type="checkbox" data-bind="checked: divisible">
+                <i></i><span data-bind="locale: 'make_divisible'"></span>
+              </label>
+              <div class="note" data-bind="locale: 'make_divisible_note'"></div>
+                </div>
+
+          </div></section>
+        </fieldset></form>
+        <p class="formPadded" style="text-align:center" data-bind="visible: tokenNameType== 'alphabetic', locale: 'asset_creation_fee_xcp', localeArgs: ASSET_CREATION_FEE_XCP"></p>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-default" data-bind="click: hide, locale: 'cancel'"></button>
+        <button type="button" data-bind="click: submitForm, locale: 'create_token'" class="btn btn-primary"></button>
+      </div>
+    </div><!-- /.modal-content -->
+  </div><!-- /.modal-dialog -->
+</div><!-- /.modal -->
+
+
+<!-- modal for asset issue additional -->
+<div data-bind="showModal: shown" id="issueAdditionalAssetModal" class="modal fade" data-backdrop="static" data-keyboard="false" tabindex="-1" role="dialog" aria-labelledby="issueAdditionalAssetModal" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" data-bind="click: hide" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+        <h4 class="modal-title" data-bind="locale: 'issue_additional_token'"></h4>
+      </div>
+      <div class="modal-body no-padding">
+        <p class="formPadded" data-bind="locale: 'more_token_issue', localeArgs: dispTotalIssued"></p>
+
+        <form class="smart-form" data-bind="submit: doAction"><fieldset>
+          <section><div class="row">
+            <label class="control-label col col-sm-2" data-bind="locale: 'additional_qty'"></label>
+            <div class="col col-sm-10">
+                <label class="input"><i class="icon-append fa fa-plus"></i>
+                    <input name="additionalIssue" data-bind="value: additionalIssue, valueUpdate: 'input'" type="text"/>
+                </label>
+            </div>
+          </div></section>
+        </fieldset></form>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-default" data-bind="click: hide, locale: 'cancel'"></button>
+        <button type="button" data-bind="click: submitForm, locale: 'issue_additional'" class="btn btn-warning"></button>
+      </div>
+    </div><!-- /.modal-content -->
+  </div><!-- /.modal-dialog -->
+</div><!-- /.modal -->
+
+<!-- modal for asset transfer -->
+<div data-bind="showModal: shown" id="transferAssetModal" class="modal fade" data-backdrop="static" data-keyboard="false" tabindex="-1" role="dialog" aria-labelledby="transferAssetModal" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" data-bind="click: hide" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+        <h4 class="modal-title" data-bind="locale: 'transfer_token'"></h4>
+      </div>
+      <div class="modal-body no-padding">
+        <p class="formPadded" data-bind="locale: 'address_transfer_ownership'"></p>
+
+        <form class="smart-form" data-bind="submit: doAction"><fieldset>
+          <section><div class="row">
+            <label class="control-label col col-sm-2" data-bind="locale: 'transfer_to'"></label>
+            <div class="col col-sm-10">
+                <label class="input"><i class="icon-append fa fa-user"></i>
+                    <input name="destAddress" data-bind="value: destAddress, valueUpdate: 'input'" type="text"/>
+                </label>
+            </div>
+          </div></section>
+        </fieldset></form>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-default" data-bind="click: hide, locale: 'cancel'"></button>
+        <button type="button" data-bind="click: submitForm, locale: 'transfer'" class="btn btn-danger"></button>
+      </div>
+    </div><!-- /.modal-content -->
+  </div><!-- /.modal-dialog -->
+</div><!-- /.modal -->
+
+
+<!-- modal for asset change description -->
+<div data-bind="showModal: shown" id="changeAssetDescriptionModal" class="modal fade" data-backdrop="static" data-keyboard="false" tabindex="-1" role="dialog" aria-labelledby="changeAssetDescriptionModal" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" data-bind="click: hide" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+        <h4 class="modal-title" data-bind="locale: 'change_token_description'"></h4>
+      </div>
+      <div class="modal-body no-padding">
+        <div class="formPadded">
+            <p><span data-bind="locale: 'change_token_description_p1'"></span> <b><span data-bind="text: dispAssetDescription"></span></b></p>
+            <p><span data-bind="locale: 'change_token_description_p2'"></span> <span data-bind="html: dispCharactersRemaining"></span>:</p>
+        </div>
+
+        <form class="smart-form" data-bind="submit: doAction"><fieldset>
+          <section><div class="row">
+            <label class="control-label col col-sm-2" data-bind="locale: 'description'"></label>
+            <div class="col col-sm-10">
+                <label class="input"><i class="icon-append fa fa-info"></i>
+                    <input name="newDescription" data-bind="value: newDescription, valueUpdate: 'input'" type="text"/>
+                </label>
+            </div>
+          </div></section>
+        </fieldset></form>
+        <div class="formPaddedBot" data-bind="locale: 'token_an_image'"></div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-default" data-bind="click: hide, locale: 'cancel'"></button>
+        <button type="button" data-bind="click: submitForm, locale: 'change_description'" class="btn btn-warning"></button>
+      </div>
+    </div><!-- /.modal-content -->
+  </div><!-- /.modal-dialog -->
+</div><!-- /.modal -->
+
+
+<!-- modal for pay dividend -->
+<div data-bind="showModal: shown" id="payDividendModal" class="modal fade" data-backdrop="static" data-keyboard="false" tabindex="-1" role="dialog" aria-labelledby="payDividendModal" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" data-bind="click: hide" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+        <h4 class="modal-title" data-bind="locale: 'pay_distribution_dividend'"></h4>
+      </div>
+      <div class="modal-body no-padding">
+        <p class="formPadded" data-bind="locale: 'pay_holders'"></p>
+        <form class="smart-form" data-bind="submit: doAction"><fieldset>
+
+          <section><div class="row">
+            <label class="control-label col col-sm-2" data-bind="locale: 'token_name'"></label>
+            <div class="col col-sm-10">
+                <label class="input"><i class="icon-append fa fa-tag"></i>
+                    <input name="assetName" data-bind="value: assetName, valueUpdate : 'input'" type="text"/>
+                </label>
+                <div class="note" data-bind="locale: 'pay_holders_note'"></div>
+            </div>
+          </div></section>
+
+          <section><div class="row">
+            <label class="control-label col col-sm-2" data-bind="locale: 'distribution_token'"></label>
+            <div class="col col-sm-10">
+                <label class="input">
+                    <select id="selectedDividendAsset" class="width-max" data-bind="options: availableDividendAssets, optionsValue: 'ASSET', optionsText: 'SELECT_LABEL', select2: { minimumResultsForSearch: 10, escapeMarkup: 'direct' }, value: selectedDividendAsset"></select>
+                </label>
+                <div class="note" data-bind="locale: 'distribution_token_note'"></div>
+            </div>
+          </div></section>
+          <section><div class="row">
+            <label class="control-label col col-sm-2" data-bind="locale: 'distribution_per_unit'"></label>
+            <div class="col col-sm-10">
+                <label class="input"><i class="icon-append fa fa-plus"></i>
+                    <input name="quantityPerUnit" data-bind="value: quantityPerUnit, valueUpdate : 'input'" type="text"/>
+                </label>
+                <div class="note" data-bind="locale: 'distribution_unit_note', localeArgs: assetName"></div>
+            </div>
+          </div></section>
+        </fieldset></form>
+        <div class="formPaddedBot" data-bind="fadeVisibleInOnly: quantityPerUnit() && selectedDividendAsset() && totalPay()">
+            <p>
+              <span data-bind="locale: 'this_distribution_payment'"></span>
+              <b class="sellColor"><span data-bind="text: dispTotalPay"></span> <span data-bind="text: selectedDividendAsset"></span></b>.
+            </p>
+            <p>
+              <span data-bind="locale: 'after_distribution_payment'"></span>
+              <b data-bind="css: {errorColor: dividendAssetBalRemainingPostPay() < 0, sellColor: dividendAssetBalRemainingPostPay() >= 0}">
+                <span data-bind="text: dispDividendAssetBalRemainingPostPay"></span> <span data-bind="text: selectedDividendAsset"></span>
+              </b>.
+            </p>
+            <p>
+              <span data-bind="locale: 'distribution_fee', localeArgs: dispTotalFee"></span>
+            </p>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-default" data-bind="click: hide, locale: 'cancel'"></button>
+        <button type="button" data-bind="click: submitForm, locale: 'pay_distribution'" class="btn btn-warning"></button>
+      </div>
+    </div><!-- /.modal-content -->
+  </div><!-- /.modal-dialog -->
+</div><!-- /.modal -->
+
+<!-- modal for show asset info -->
+<div data-bind="showModal: shown" id="showAssetInfoModal" class="modal fade" data-backdrop="static" data-keyboard="false" tabindex="-1" role="dialog" aria-labelledby="showAssetInfoModal" aria-hidden="true">
+  <div class="modal-dialog modal-lg">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" data-bind="click: hide" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+        <h4 class="modal-title" data-bind="locale: 'info_for_asset', localeArgs: asset"></h4>
+      </div>
+      <div class="modal-body no-padding">
+        <form class="smart-form"><fieldset>
+          <section><div class="row">
+            <label class="control-label col col-sm-2" data-bind="locale: 'owned_by'"></label>
+            <div class="col col-sm-10">
+                <label class="input"><i class="icon-append fa fa-user"></i>
+                    <input name="assetOwner" data-bind="value: owner" type="text" disabled="disabled"/>
+                </label>
+            </div>
+          </div></section>
+          <section data-bind="visible: !extDescription()"><div class="row">
+            <label class="control-label col col-sm-2" data-bind="locale: 'description'"></label>
+            <div class="col col-sm-10">
+                <label class="input"><i class="icon-append fa fa-info"></i>
+                    <input name="assetDescription" data-bind="value: description" disabled="disabled"/>
+                </label>
+            </div>
+          </div></section>
+          <section data-bind="visible: extDescription"><div class="row">
+            <label class="control-label col col-sm-2" data-bind="locale: 'description'"></label>
+            <div class="col col-sm-10">
+                <label class="textarea textarea-resizable">
+                    <textarea name="extDescription" rows="3" class="custom-scroll" data-bind="value: extDescription" disabled="disabled"></textarea>
+                </label>
+            </div>
+          </div></section>
+
+          <section><div class="row">
+            <label class="control-label col col-sm-2" data-bind="locale: 'total_issued'"></label>
+            <div class="col col-sm-10">
+                <label class="input"><i class="icon-append fa fa-plus"></i>
+                    <input name="assetQuantity"  data-bind="value: dispTotalIssued" type="text" disabled="disabled"/>
+                </label>
+            </div>
+          </div></section>
+
+          <section data-bind="visible: extImageURL"><div class="row">
+            <label class="control-label col col-sm-2" data-bind="locale: 'logo'"></label>
+            <div class="col col-sm-10">
+                <img data-bind="attr: {'src': extImageURL}" /> <!-- should be 48x48 -->
+            </div>
+          </div></section>
+          <section data-bind="visible: extWebsite"><div class="row">
+            <label class="control-label col col-sm-2" data-bind="locale: 'website_url'"></label>
+            <div class="col col-sm-10">
+                <a data-bind="attr: {'href': extWebsite}, text: extWebsite" target="_blank"></a>
+            </div>
+          </div></section>
+          <section data-bind="visible: extPGPSigURL"><div class="row">
+            <label class="control-label col col-sm-2" data-bind="locale: 'pgp_signature'"></label>
+            <div class="col col-sm-10">
+                <a data-bind="attr: {'href': extPGPSigURL}, text: extPGPSigURL" target="_blank"></a>
+            </div>
+          </div></section>
+
+          <section><div class="row">
+            <div class="col col-sm-2"></div>
+            <div class="col col-sm-10">
+              <label class="checkbox">
+                <input name="assetDivisible" type="checkbox" data-bind="checked: locked" disabled="disabled">
+                <i></i><span data-bind="locale: 'is_locked'"></span>
+              </label>
+              <div class="note" data-bind="locale: 'is_locked_note'"></div>
+          </div></div></section>
+          <section><div class="row">
+            <div class="col col-sm-2"></div>
+            <div class="col col-sm-10">
+              <label class="checkbox">
+                <input name="assetDivisible" type="checkbox" data-bind="checked: divisible" disabled="disabled">
+                <i></i><span data-bind="locale: 'divisible_token'"></span>
+              </label>
+              <div class="note" data-bind="locale: 'divisible_token_note'"></div>
+          </div></div></section>
+        </fieldset></form>
+        <table class="table table-striped table-bordered table-hover" data-bind="fadeVisibleInOnly: showHistory">
+            <thead>
+                <tr>
+                    <th data-bind="locale: 'block_time'"></th>
+                    <th data-bind="locale: 'description'"></th>
+                </tr>
+            </thead>
+            <tbody data-bind="foreach: history">
+                <tr>
+                    <td data-bind="text: dispBlockTime()"></td> <!-- datetime formatted string -->
+                    <td data-bind="html: dispDescription()"></td>
+                </tr>
+            </tbody>
+        </table>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-default" data-bind="click: hide, locale: 'close'"></button>
+      </div>
+    </div><!-- /.modal-content -->
+  </div><!-- /.modal-dialog -->
+</div><!-- /.modal -->
+
+
+
+<!-- modal for broadcast -->
+<div data-bind="showModal: shown" id="broadcastModal" class="modal fade" data-backdrop="static" data-keyboard="false" tabindex="-1" role="dialog" aria-labelledby="broadcastModal" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" data-bind="click: hide" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+        <h4 class="modal-title" data-bind="locale: 'broadcast'"></h4>
+      </div>
+      <div class="modal-body no-padding">
+        <p class="formPadded" data-bind="locale: 'broadcast_form'"></p>
+        <form class="smart-form" data-bind="submit: doAction"><fieldset>
+
+          <section><div class="row">
+            <label class="control-label col col-sm-2" data-bind="locale: 'text'"></label>
+            <div class="col col-sm-10">
+                <label class="input"><i class="icon-append fa fa-tag"></i>
+                    <input name="textValue" data-bind="value: textValue, valueUpdate : 'input'" type="text"/>
+                </label>
+                <div class="note" data-bind="locale: 'text_note'"></div>
+            </div>
+          </div></section>
+
+           <section><div class="row">
+            <label class="control-label col col-sm-2" data-bind="locale: 'value'"></label>
+            <div class="col col-sm-10">
+                <label class="input"><i class="icon-append fa fa-plus"></i>
+                    <input name="numericalValue" data-bind="value: numericalValue, valueUpdate : 'input'" type="text"/>
+                </label>
+                <div class="note" data-bind="locale: 'broadcast_note'"></div>
+            </div>
+          </div></section>
+
+          <section><div class="row">
+            <label class="control-label col col-sm-2" data-bind="locale: 'fee_fraction'"></label>
+            <div class="col col-sm-10">
+                <label class="input"><i class="icon-append fa fa-plus"></i>
+                    <input name="feeFraction" data-bind="value: feeFraction, valueUpdate : 'input'" type="text"/>
+                </label>
+                <div class="note" data-bind="locale: 'fee_fraction_note'"></div>
+            </div>
+          </div></section>
+
+          <section><div class="row">
+            <label class="control-label col col-sm-2" data-bind="locale: 'broadcast_date'"></label>
+            <div class="col col-sm-10">
+                <label class="input">
+                    <input name="broadcastTimestamp" type="text" data-bind="datetimepicker: broadcastDate"/>
+                </label>
+                <div class="note" data-bind="locale: 'broadcast_datetime'"></div>
+            </div>
+          </div></section>
+
+        </fieldset></form>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-default" data-bind="click: hide, locale: 'cancel'"></button>
+        <button type="button" data-bind="click: submitForm, locale: 'broadcast'" class="btn btn-warning"></button>
+      </div>
+    </div><!-- /.modal-content -->
+  </div><!-- /.modal-dialog -->
+</div><!-- /.modal -->
+
+
+<!-- modal for sign transaction -->
+<div data-bind="showModal: shown" id="signTransactionModal" class="modal fade" data-backdrop="static" data-keyboard="false" tabindex="-1" role="dialog" aria-labelledby="signTransactionModal" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" data-bind="click: hide" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+        <h4 class="modal-title" data-bind="locale: 'sign_a_transaction'"></h4>
+      </div>
+      <div class="modal-body no-padding">
+        <p class="formPadded" data-bind="locale: 'sign_transaction_with_address', localeArgs: address"></p>
+
+        <form class="smart-form"><fieldset>
+          <section><div class="row">
+            <label class="control-label col col-sm-2" data-bind="locale: 'unsigned_hex_transaction'"></label>
+            <div class="col col-sm-10">
+                <label class="textarea">
+                    <textarea rows="3" class="custom-scroll" data-bind="value: unsignedTx, valueUpdate : 'input'"></textarea>
+                </label>
+                <div class="note" data-bind="locale: 'enter_raw_transaction'"></div>
+            </div>
+          </div></section>
+
+          <section><div class="row">
+            <label class="control-label col col-sm-2" data-bind="locale: 'signed_transaction'"></label>
+            <div class="col col-sm-10">
+                <label class="textarea">
+                    <textarea id="signedTx" rows="6" class="custom-scroll" data-bind="fadeInText: signedTx" disabled="disabled"></textarea>
+                </label>
+                <div class="note" data-bind="locale: 'signed_transaction_above'"></div>
+            </div>
+          </div></section>
+        </fieldset></form>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-default" data-bind="click: hide, locale: 'close'"></button>
+        <button type="button" data-bind="click: signTransaction, locale: 'sign'" class="btn btn-primary"></button>
+        <button type="button" data-bind="click: signAndBroadcastTransaction, locale: 'sign_and_broadcast'" class="btn btn-primary"></button>
+      </div>
+    </div><!-- /.modal-content -->
+  </div><!-- /.modal-dialog -->
+</div><!-- /.modal -->
+
+
+<!-- modal for armory broadcast transaction -->
+<div data-bind="showModal: shown" id="armoryBroadcastTransactionModal" class="modal fade" data-backdrop="static" data-keyboard="false" tabindex="-1" role="dialog" aria-labelledby="armoryBroadcastTransactionModal" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" data-bind="click: hide" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+        <h4 class="modal-title" data-bind="locale: 'broadcast_armory_transaction'"></h4>
+      </div>
+      <div class="modal-body no-padding">
+        <p class="formPadded" data-bind="locale: 'broadcast_transaction_from_address', localeArgs: address"></p>
+
+        <form class="smart-form" data-bind="submit: doAction"><fieldset>
+          <section><div class="row">
+            <label class="control-label col col-sm-2" data-bind="locale: 'signed_transaction'"></label>
+            <div class="col col-sm-10">
+                <label class="textarea">
+                    <textarea rows="20" class="custom-scroll armoryUTxTextarea" data-bind="value: signedTx, valueUpdate : 'input'"></textarea>
+                </label>
+                <div class="note" data-bind="locale: 'signed_transaction_from_armory'"></div>
+            </div>
+          </div></section>
+        </fieldset></form>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-default" data-bind="click: hide, locale: 'close'"></button>
+        <button type="button" data-bind="click: submitForm, locale: 'broadcast'" class="btn btn-warning"></button>
+      </div>
+    </div><!-- /.modal-content -->
+  </div><!-- /.modal-dialog -->
+</div><!-- /.modal -->

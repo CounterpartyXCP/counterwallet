@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="utf-8">
+
+	<title>Virtual Keyboard Language Layouts</title>
+
+	<!-- demo -->
+	<link href="demo/demo.css" rel="stylesheet">
+
+	<!-- jQuery & jQuery UI + theme (required) -->
+	<link href="http://code.jquery.com/ui/1.9.0/themes/ui-darkness/jquery-ui.css" rel="stylesheet">
+	<script src="http://ajax.googleapis.com/ajax/libs/jquery/1.8/jquery.js"></script>
+	<script src="http://code.jquery.com/ui/1.9.0/jquery-ui.min.js"></script>
+
+	<!-- keyboard widget css & script (required) -->
+	<link href="css/keyboard.css" rel="stylesheet">
+	<script src="js/jquery.keyboard.js"></script>
+
+	<!-- keyboard extensions (optional) -->
+	<script src="js/jquery.mousewheel.js"></script>
+	<script src="js/jquery.keyboard.extension-typing.js"></script>
+
+
+	<!-- preloaded keyboard layout -->
+	<script src="layouts/albanian.js" charset="utf-8"></script>
+
+	<!-- theme switcher
+	<script src="http://jqueryui.com/themeroller/themeswitchertool/"></script> -->
+
+	<script>
+	// Change display language, if the definitions are available
+	if (typeof(language) === 'undefined') { var language = {}; };
+	var showKb = function(name, lang){
+		if (language.hasOwnProperty(lang)){
+			$.extend(true, $.keyboard.defaultOptions, language[lang]);
+		} else {
+			$.extend(true, $.keyboard.defaultOptions, language.basic);
+		}
+		$('#multi').keyboard({
+			layout: name,
+			usePreview: false,
+			alwaysOpen: true
+		})
+		.addTyping();
+	};
+
+	// Renaming some of the default keyboard key names (including symbols)
+	// *Note* this will effect ALL layouts on this page - but will be overridden by specific layout languages
+	language.basic = {
+		display : {
+			'a'      : '\u2714:Accept (Shift-Enter)', // check mark - same action as accept
+			'accept' : '\u2714 Accept:Accept (Shift-Enter)', // check mark
+			'alt'    : 'AltGr:Alternate Graphemes',
+			'b'      : '\u2190:Backspace',    // Left arrow (same as &larr;)
+			'bksp'   : ($.browser.msie ? '\u2190 Bksp:Backspace' : '\u232b Bksp:Backspace'), // Arrow with X (not in IE) or Left arrow (same as &larr;)
+			'c'      : '\u2716:Cancel (Esc)', // big X, close - same action as cancel
+			'cancel' : '\u2716 Cancel:Cancel (Esc)', // big X, close - same action as cancel
+			'clear'  : 'C:Clear',             // clear num pad
+			'combo'  : '\u00f6:Toggle Combo Keys',
+			'dec'    : '.:Decimal',           // decimal point for num pad (optional), change '.' to ',' for European format
+			'e'      : '\u21b5:Enter',        // down, then left arrow - enter symbol
+			'enter'  : '\u21b5 Enter:Enter',  // down, then left arrow - enter symbol
+			'lock'   : '\u21ea Lock:Caps Lock', // caps lock
+			's'      : '\u21e7:Shift',        // thick hollow up arrow
+			'shift'  : '\u21e7 Shift:Shift',  // thick hollow up arrow
+			'sign'   : '\u00b1:Change Sign',  // +/- sign for num pad
+			'space'  : '&nbsp;:Space',
+			't'      : '\u21e5:Tab',          // right arrow to bar (used since this virtual keyboard works with one directional tabs)
+			'tab'    : '\u21e5 Tab:Tab'       // right arrow to bar (used since this virtual keyboard works with one directional tabs)
+		},
+		// Message added to the key title while hovering, if the mousewheel plugin exists
+		wheelMessage : 'Use mousewheel to see other keys'
+	};
+
+	$(function(){
+
+		var layouts = [
+			"Albanian (qwerty):albanian-qwerty",
+			"Albanian (qwertz):albanian-qwertz",
+			"Arabic (azerty):arabic-azerty",
+			"Arabic (qwerty-1):arabic-qwerty-1",
+			"Arabic (qwerty-2):arabic-qwerty-2",
+			"Arabic (qwerty-3):arabic-qwerty-3",
+			"Arabic (qwerty-4):arabic-qwerty-4",
+			"Belarusian (Belarus):belarusian-qwerty",
+			"Bengali (qwerty-1):bengali-qwerty-1",
+			"Bengali (qwerty-2):bengali-qwerty-2",
+			"Bulgarian (qwerty):bulgarian-qwerty",
+			"Catalan (qwerty):catalan-qwerty",
+			"Danish (qwerty):danish-qwerty",
+			"French (azerty-1):french-azerty-1",
+			"French (azerty-2):french-azerty-2",
+			"French (bepo v1.0rc2):french-bepo-V1.0rc2",
+			"German (qwertz-1):german-qwertz-1",
+			"German (qwertz-2):german-qwertz-2",
+			"Hebrew (qwerty):hebrew-qwerty",
+			"Magyar (qwertz-1) utf8:hungarian-qwertz-1",
+			"Magyar (qwertz-2) utf8:hungarian-qwertz-2",
+			"Magyar (qwertz-1) ansi:hungarianansi-qwertz-1",
+			"Magyar (qwertz-2) ansi:hungarianansi-qwertz-2",
+			"Japanese (kana):japanese-kana",
+			"Japanese (qwerty):japanese-qwerty",
+			"Latvian (qwerty):latvian-qwerty",
+			"Polish (qwerty):polish-qwerty",
+			"Portuguese (qwerty):portuguese-qwerty",
+			"Russian (qwerty):russian-qwerty",
+			"Spanish (qwerty):spanish-qwerty",
+			"Spanish (qwerty) special:spanish-qwerty-sp",
+			"Swedish (qwerty):swedish-qwerty",
+			"Swedish (dvorak):swedish-dvorak",
+			"Tamil (qwerty):tamil-tamil99-mod",
+			"Thai (qwerty):thai-qwerty",
+			"Turkish (q):turkish-q",
+			"Turkish (f):turkish-f",
+			"Vietnamese (qwerty):vietnamese-qwerty"
+		],
+
+		t, o = '';
+
+		$.each(layouts.sort(), function(i, l){
+			t = l.split(':');
+			o += '<option value="' + t[1] + '">' + t[0] + '</option>';
+		});
+
+		$('#lang')
+		.html(o)
+		.change(function(){
+			var kb = $('#multi'),
+				layout = $(this).val(),
+				file = layout.split('-')[0];
+			$('h2').text(file);
+			// make language RTL, hebrew does it automatically
+			$('#multi')[file.match('arabic') ? 'addClass' : 'removeClass']('rtl');
+
+			if (kb.data('keyboard')) { kb.getkeyboard().destroy(); }
+			if (!language.hasOwnProperty(file)) {
+				$.getScript('layouts/' + file + '.js', function(){
+					if (kb.data('keyboard')) { kb.getkeyboard().destroy(); }
+					showKb( layout, file );
+				});
+			} else {
+				showKb( layout, file );
+			}
+		}).trigger('change');
+
+	});
+	</script>
+	<style>
+
+	.rtl {
+		direction: rtl;
+		text-align: right;
+	}
+	</style>
+</head>
+<body>
+
+<div id="page-wrap">
+	<!-- Links to other demo pages & docs -->
+	<div id="nav">
+		<a href="index.html">Main Demo</a>
+		<a href="basic.html">Basic</a>
+		<a href="mobile.html">Mobile</a>
+		<a class="current" href="layouts.html">Layouts</a>
+		<a href="scramble.html">Scramble</a>
+		<a href="navigate.html">Navigate</a>
+		<a href="calculator.html">Calculator</a>
+		<a class="play" href="http://jsfiddle.net/Mottie/MK947/">Playground</a>
+		<a class="git" href="https://github.com/Mottie/Keyboard/wiki">Documentation</a>
+		<a class="git" href="https://github.com/Mottie/Keyboard/archive/master.zip">Download</a>
+		<a class="issue" href="https://github.com/Mottie/Keyboard/issues">Issues</a><br><br>
+	</div>
+	<!-- End Links -->
+
+	<h1><a href="https://github.com/Mottie/Keyboard">Virtual Keyboard Language Layouts</a></h1>
+	<h4>This is a work in progress.</h4>
+
+	<div id="switcher"></div>
+	<br>
+	<div class="block2">
+		<select id="lang"></select>
+		<div style="height: 50px;"></div>
+
+		<h2></h2>
+		<input id="multi" type="text" />
+	</div>
+	<br class="clear" />
+
+	<div id="footer2">
+		<div>
+			If you find any errors, please submit an <a href="https://github.com/Mottie/Keyboard/issues">issue</a>.<br>
+			Or if you would like to contribute a layout, please email me at <a href="%6D%61%69%6C%74%6F%3Aw%6Fwm%6Ftty%40g%6Dail%2Ec%6Fm">wowmotty a&#116; &#103;&#109;&#97;&#105;&#108; d&#111;t c&#111;m</a>
+		</div>
+	</div>
+
+</div>
+
+</body>
+</html>

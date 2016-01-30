@@ -1,0 +1,170 @@
+<div id="simplebuy">
+
+  <div class="row">
+    <div class="col-xs-12 col-sm-7 col-md-7 col-lg-6">
+      <h1 class="page-title txt-color-blueDark">
+        <i class="fa fa-rocket"></i> 
+        <span class="localeTitle" data-bind="locale: 'quick_buy_with_vennd_machine'"></span>
+      </h1>
+    </div>
+  </div>
+
+  <div class="alert alert-info">
+    <i class="fa-fw fa fa-info"></i>
+    <span data-bind="locale: 'quick_by_notice'"></span>
+  </div>
+
+  <div class="row">
+    <div class="col-xs-12 col-sm-12 col-md-12 col-lg-12 machineFilter">
+
+      <div class="btn-group" data-toggle="buttons" style="margin-bottom:0">
+        <label class="radioBtn btn" data-bind="css: { 'btn-success': machineFilter() == 'all', 'active': machineFilter() == 'all'}">
+          <input type="radio" value="all" data-bind="btnGroupChecked: machineFilter"><span data-bind="locale: 'all'"></span>
+        </label>
+        <label class="radioBtn btn" data-bind="css: { 'btn-success': machineFilter() == 'gateway', 'active': machineFilter() == 'gateway'}">
+          <input type="radio" value="gateway" data-bind="btnGroupChecked: machineFilter"><span data-bind="locale: 'gateway'"></span>
+        </label>
+        <label class="radioBtn btn" data-bind="css: { 'btn-success': machineFilter() == 'crowdsale', 'active': machineFilter() == 'crowdsale'}">
+          <input type="radio" value="crowdsale" data-bind="btnGroupChecked: machineFilter"><span data-bind="locale: 'crowdsale'"></span>
+        </label>
+      </div>
+
+    </div>
+  </div>
+
+  <div class="row">
+    <div class="col-xs-12 col-sm-12 col-md-12 col-lg-12" data-bind="foreach: machines">
+
+      <div class="jarviswidget defaultWidgetColor" data-widget-editbutton="false" data-widget-deletebutton="false" data-bind="visible: $parent.machineFilter() == 'all' || $parent.machineFilter() == $data.type">
+          <header>
+            <span class="widget-icon"> <i class="fa fa-rocket"></i> </span>
+            <h3>
+              <span data-bind="text: name"></span>
+              [<span data-bind="locale: type"></span>] : <b><span data-bind="text: baseasset"></span>/<span data-bind="text: quoteasset"></span></b>
+              
+
+              <span class="txt-color-red" data-bind="visible: finished">
+                (<span style="text-transform: uppercase" data-bind="locale: 'finished'"></span>)
+              </span>
+              <span class="txt-color-red" data-bind="visible: pending">
+                (<span style="text-transform: uppercase" data-bind="locale: 'pending'"></span>)
+              </span>
+            </h3>
+            <div class="clearfix"></div>
+          </header>
+          <div data-bind="attr: {class: machineclass}"> <!-- widget div-->
+
+            <div class="widget-body vennd-machine"> <!-- widget content -->
+
+              <a data-bind="attr: {href: url}" target="_blank">
+                <img data-bind="attr: {src: image}" style="width:100px" />
+              </a>
+              <a class="support" target="_blank" data-bind="attr: {href: supportlink}, locale: 'support'">Support</a>
+
+              <div style="padding-left:120px">
+                <div class="row">
+
+                  <div class="col-xs-6 col-sm-6 col-md-6 col-lg-6" data-bind="visible: buytitle">
+                    <h4 data-bind="text: buytitle"></h4>
+                    <p class="description" data-bind="text: buydescription"></p>
+                    <div style="padding:20px; background-color:#E9FAF3" data-bind="attr: {class: machineclass}">
+                      <ul class="specs" data-bind="foreach: attributes['buy']">
+                        <li data-bind="attr: {class: attrclass}"><span data-bind="text: label"></span>: <b data-bind="text: value"></b></li>
+                      </ul>
+                      <div style="text-align:center">
+                        <a class="btn btn-default btn-lg" data-bind="click: $parent.buy, visible: !finished && !pending">
+                          <span style="text-transform: uppercase" data-bind="locale: 'buy'"></span> 
+                          (<span data-bind="text: quoteasset"></span> → <span data-bind="text: baseasset"></span>)
+                        </a>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div class="col-xs-6 col-sm-6 col-md-6 col-lg-6" data-bind="visible: selltitle">
+                    <h4 data-bind="text: selltitle"></h4>
+                    <p class="description" data-bind="text: selldescription"></p>
+                    <div style="padding:20px; background-color:#ffeddf">
+                      <ul class="specs" data-bind="foreach: attributes['sell']">
+                        <li data-bind="attr: {class: attrclass}"><span data-bind="text: label"></span>: <b data-bind="text: value"></b></li>
+                      </ul>
+                      <div style="text-align:center">
+                        <a class="btn btn-default btn-lg" data-bind="click: $parent.sell, visible: type == 'gateway' && !finished && !pending">
+                          <span style="text-transform: uppercase" data-bind="locale: 'sell'"></span> 
+                          (<span data-bind="text: baseasset"></span> → <span data-bind="text: quoteasset"></span>)
+                        </a>
+                      </div>
+                    </div>
+                  </div>
+
+                </div>       
+
+              </div>
+              
+            </div>
+         </div> <!-- end widget div -->
+      </div> <!-- end widget -->
+
+    </div>
+  </div>
+
+</div>
+
+<!-- modal for vend machine -->
+<div data-bind="showModal: shown, validationOptions: { insertMessages: false }" id="vendModal" class="modal fade" data-backdrop="static" data-keyboard="false" tabindex="-1" role="dialog" aria-labelledby="vendModal" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" data-bind="click: hide" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+        <h4 class="modal-title">
+          [<span data-bind="locale: type"></span>] 
+          <span data-bind="text: name"></span>
+        </h4>
+      </div>
+      <div class="modal-body no-padding">
+        <p class="formPadded" data-bind="text: description"></p>
+        
+        <form class="smart-form"><fieldset>
+
+          <div class="row" data-bind="visible: noBalance">
+            <div class="col col-sm-10" >
+              <div class="txt-color-red" data-bind="locale: 'you_have_no_in_wallet', localeArgs: currency"></div>
+            </div>
+          </div>
+
+          <div class="row" data-bind="visible: noReserve">
+            <div class="col col-sm-10" >
+              <div class="txt-color-red" data-bind="locale: 'there_is_no_reserve'"></div>
+            </div>
+          </div>
+
+
+          <section data-bind="visible: !noBalance && !noReserve"><div class="row">
+            <label class="control-label col col-sm-2" data-bind="locale: 'send_with'"></label>
+            <div class="col col-sm-10">
+              <select class="form-control" style="width: 350px;vertical-align: top;margin-right: 12px;" name="source" data-bind="options: availableAddresses, optionsValue: 'address', optionsText: 'label', value: sourceAddress, select2: { minimumResultsForSearch: 10, escapeMarkup: 'direct' }"></select>
+            </div>
+          </div></section>
+
+          <section data-bind="visible: !noBalance && !noReserve"><div class="row">
+            <label class="control-label col col-sm-2" data-bind="locale: 'send_amount'"></label>
+            <div class="col col-sm-10">
+                <label class="input inline-block">
+                  <div class="input-group">
+                    <span class="input-group-addon"><i class="fa fa-arrow-circle-o-up fa-lg fa-fw"></i></span>
+                    <input name="quantity" style="width:70%" class="form-control input-lg" data-bind="value: quantity, valueUpdate: 'input', localeAttr: {placeholder: 'enter_quantity'}" type="text"/>
+                    <span data-bind="text: currency" style="font-size:20px; line-height:44px"></span>
+                  </div>
+                </label>
+                <span class="invalid" data-bind="validationMessage: quantity"></span>
+            </div>
+          </section>
+          <p class="formPaddedBot" data-bind="fadeVisibleInOnly: quantity, html: confirmationPhrase"></p>
+        </fieldset></form>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-default" data-bind="click: hide, locale: 'cancel'"></button>
+        <button type="button" class="btn btn-primary" data-bind="click: send, visible: !noBalance && !noReserve, locale: 'send'"></button>
+      </div>
+    </div><!-- /.modal-content -->
+  </div><!-- /.modal-dialog -->
+</div><!-- /.modal -->
