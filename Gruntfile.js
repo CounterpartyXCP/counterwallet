@@ -10,8 +10,7 @@ module.exports = function (grunt) {
                 buildDir: buildDir,
                 srcDir: 'src/',
                 assetsHome: 'assets/',
-                checkDeps: process.argv.indexOf('--dontcheckdeps') === -1,
-                minify: process.argv.indexOf('--dontminify') === -1,
+                checkDeps: true,
                 depsDir: 'vendors/'
                 /*cdn: {
                     hosts: {

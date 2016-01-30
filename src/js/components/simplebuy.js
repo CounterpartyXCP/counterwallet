@@ -1,7 +1,8 @@
+
 function SimpleBuyViewModel() {
 
   var self = this;
-
+  
   self.machines = ko.observableArray([]);
   self.machineFilter = ko.observable('all');
 
@@ -24,7 +25,7 @@ function SimpleBuyViewModel() {
       };
       var sellAttributes = [];
 
-      var types = data[m]['type'] == 'gateway' ? {'buy': 1, 'sell': 1} : {'buy': 1}
+      var types = data[m]['type'] == 'gateway' ? {'buy':1, 'sell':1} : {'buy':1}
 
       for (var t in types) {
 
@@ -44,12 +45,12 @@ function SimpleBuyViewModel() {
 
             attributes['buy'].push({
               'label': i18n.t('start'),
-              'value': moment(data[m]['start'] * 1000).format("MMM Do YYYY, h:mm:ss a"),
+              'value':  moment(data[m]['start'] * 1000).format("MMM Do YYYY, h:mm:ss a"),
               'attrclass': 'date'
             });
             attributes['buy'].push({
               'label': i18n.t('end'),
-              'value': moment(data[m]['end'] * 1000).format("MMM Do YYYY, h:mm:ss a"),
+              'value':  moment(data[m]['end'] * 1000).format("MMM Do YYYY, h:mm:ss a"),
               'attrclass': 'date'
             });
 
@@ -84,7 +85,7 @@ function SimpleBuyViewModel() {
           if (data[m][t]['price']) {
             attributes[t].push({
               'label': i18n.t('current_price'),
-              'value': data[m][t]['price'] + ' ' + data[m]['quote-asset'],
+              'value':  data[m][t]['price'] + ' ' + data[m]['quote-asset'],
               'attrclass': 'price'
             });
           }
@@ -132,7 +133,7 @@ function SimpleBuyViewModel() {
       $(this).find('p.description').css('height', maxHeight + 'px');
     })
   }
-
+  
   self.buy = function(machine) {
     VEND_MODAL.show(machine, 'buy');
   }
@@ -151,16 +152,16 @@ function VendingMachineViewModel() {
     required: true,
     isValidPositiveQuantity: self,
     validation: {
-      validator: function(val, self) {
+      validator: function (val, self) {
         var address = self.sourceAddress();
         var quantity = self.quantity();
         return parseFloat(quantity) <= self.balances[address];
       },
       message: i18n.t('quantity_exceeds_balance'),
       params: self
-    }
+    }    
   }
-
+  
   self.shown = ko.observable(false);
   self.availableAddresses = ko.observableArray([]);
   self.sourceAddress = ko.observable(null).extend(quantityValidator);
@@ -221,17 +222,17 @@ function VendingMachineViewModel() {
     var addresses = WALLET.getAddressesList(true);
     var options = []
     self.noBalance(true);
-    for (var i = 0; i < addresses.length; i++) {
+    for(var i = 0; i < addresses.length; i++) {
       var balance = WALLET.getBalance(addresses[i][0], self.currency(), true);
-      if (balance > 0) {
-        options.push({
-          address: addresses[i][0],
+      if (balance>0) {
+          options.push({
+          address: addresses[i][0], 
           label: addresses[i][1] + ' (' + round(balance, 2) + ' ' + self.currency() + ')'
         });
         self.balances[addresses[i][0]] = balance;
         self.noBalance(false);
       }
-
+      
     }
     if (self.noBalance() == false) {
       self.noReserve(false);
@@ -243,20 +244,20 @@ function VendingMachineViewModel() {
   }
 
   self.send = function() {
-
+   
     if (!self.validationModel.isValid()) {
       self.validationModel.errors.showAllMessages();
       return false;
-    }
+    }    
 
     var params = {
       source: self.sourceAddress(),
-      quantity: denormalizeQuantity(self.quantity()),
+      quantity:  denormalizeQuantity(self.quantity()),
       asset: self.currency(),
       destination: self.desinationAddress(),
       _divisible: true
     };
-
+    
     var onSuccess = function(txHash, data, endpoint, addressType, armoryUTx) {
       var message = "<b>";
       if (armoryUTx) {

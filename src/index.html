@@ -2,9 +2,9 @@
 <html lang="en-us" style="background-color:#FFF">
   <head>
     <meta charset="utf-8">
-    <title>Counterwallet - Free Web Wallet for Bitcoin and Counterparty</title>
+    <title>SOG Party - Free Web Wallet for the Spells of Genesis Game</title>
     <meta content="Open-source and client-side web wallet for Counterparty (XCP) and Bitcoin (BTC)" name="description">
-    <meta content="Counterparty Developers" name="author">
+    <meta content="SOG Party Developers" name="X-ETHeREAL-X">
 
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 
@@ -28,7 +28,7 @@
 
     <!-- Counterwallet custom styles -->
     <!-- build:css css/counterwallet-min.css -->
-    <link rel="stylesheet" type="text/css" media="screen" href="css/default.css">
+    <link rel="stylesheet" type="text/css" media="screen" href="vendors/counterwebdeps/css/default.css">
     <link rel="stylesheet" type="text/css" media="screen" href="css/overrides.css">
     <link rel="stylesheet" type="text/css" media="screen" href="css/misc.css">
     <link rel="stylesheet" type="text/css" media="screen" href="css/components/logon.css">
@@ -176,60 +176,13 @@
               </li>
             </ul>
           </li>
-          <li data-bind="visible: QUICK_BUY_ENABLE">
-            <a href="pages/simplebuy.html">
-              <i class="fa fa-lg fa-fw fa-rocket"></i> <span data-bind="locale: 'quick_buy'"></span>
-            </a>
-          </li>
-          <li class="" data-bind="visible: FEATURE_BETTING && BETTING_ENABLE">
-            <a href="#">
-              <i class="fa fa-lg fa-fw fa-bullseye"></i> <span class="menu-item-parent" data-bind="locale: 'betting'"></span>
-            </a>
-            <ul>
-              <li>
-                <a href="pages/betting.html">
-                  <i class="fa fa-lg fa-fw fa-share"></i> <span data-bind="locale: 'make_a_bet'"></span>
-                </a>
-              </li>
-              <li>
-                <a href="pages/openbets.html">
-                  <i class="fa fa-lg fa-fw fa-circle-o"></i> <span data-bind="locale: 'open_bets'"></span>
-                </a>
-              </li>
-              <li>
-                <a href="pages/matchedbets.html">
-                  <i class="fa fa-lg fa-fw fa-book"></i> <span data-bind="locale: 'my_bet_history'"></span>
-                </a>
-              </li>
-            </ul>
-          </li>
+
           <li class="" data-bind="visible: FEATURE_HISTORY">
             <a href="pages/history.html">
               <i class="fa fa-lg fa-fw fa-book"></i> <span class="menu-item-parent" data-bind="locale: 'history'"></span>
             </a>
           </li>
-          <li class="">
-            <a href="#">
-              <i class="fa fa-lg fa-fw fa-plus"></i> <span class="menu-item-parent" data-bind="locale: 'more'"></span>
-            </a>
-            <ul>
-                <li data-bind="visible: FEATURE_PORTFOLIO">
-                  <a href="pages/portfolio.html">
-                    <i class="fa fa-lg fa-fw fa-tasks"></i> <span data-bind="locale: 'my_portofolio'"></span>
-                  </a>
-                </li>
-                <li data-bind="visible: FEATURE_LEADERBOARD">
-                  <a href="pages/leaderboard.html">
-                    <i class="fa fa-lg fa-fw fa-trophy"></i> <span data-bind="locale: 'top_assets'"></span>
-                  </a>
-                </li>
-                <li data-bind="visible: FEATURE_STATS">
-                    <a href="pages/stats.html">
-                      <i class="fa fa-lg fa-fw fa-crosshairs"></i> <span data-bind="locale: 'network_stats'"></span>
-                    </a>
-                </li>
-            </ul>
-          </li>
+
         </ul>
       </nav>
       <span class="minifyme"> <i class="fa fa-arrow-circle-left hit"></i> </span>
@@ -306,31 +259,31 @@
 
     <!-- Logged out cover div -->
     <div id="logon">
+
       <h1>
         <span data-bind="locale: 'welcome'"></span>
-        <span data-bind="visible: USE_TESTNET, locale: 'testnet'"></span>
       </h1>
-      <h2 data-bind="locale: 'powered_by_counterparty'"></h2>
+      <h2 data-bind="locale: 'SOG_welcome'"></h2>
+
       <div id="form-well">
 
-        <div id="createNewAcctBtnPane">
-          <button id="newWalletButton" data-bind="click: generatePassphrase, locale: 'create_new_wallet'" type="button" class="btn btn-success btn-lg"></button>
-        </div>
 
-        <div class="panel panel-info">
-          <div class="panel-heading">
+
+        <div class="panel panel-info" style="margin-bottom: 10px;">
+
+          <div class="panel-heading" style="padding-top: 15px; padding-bottom: 20px">
             <h3 class="panel-title">
-              <b data-bind="visible: USE_TESTNET, locale: 'log_into_your_testnet_wallet'"></b>
-              <b data-bind="visible: !USE_TESTNET, locale: 'log_into_your_wallet'"></b>
-              <span data-bind="fadeVisibleInOnly: IS_DEV" class="label label-warning pull-right margin-left-5 padding-5 display-none">
-                <i class="fa-fw fa fa-warning"></i> <span data-bind="locale: 'dev_mode_enabled'"></span>
-              </span>
-              <span data-bind="fadeVisibleInOnly: USE_TESTNET" class="label label-info pull-right margin-left-5 padding-5 display-none">
-                <i class="fa-fw fa fa-info"></i> <b data-bind="locale: 'testnet_in_use'"></b>
-              </span>
-            </h3>
+              <span style="text-align: center"><b data-bind="locale: 'log_into_your_wallet'"></b>
+
+
+                <button id="newWalletButton" style="margin-top: -5px; float: right" data-bind="click: generatePassphrase, locale: 'create_new_wallet'" type="button" class="btn btn-success btn-lg"></button>
+           </span>
+
+
+              </h3>
+
           </div>
-          <div class="panel-body" class="padding-left-5 padding-right-5">
+          <div class="panel-body" class="padding-left-5 padding-right-5" style="padding-bottom: 5px;">
             <form class="form-inline" role="form" id="loginform">
               <div class="row">
 
@@ -349,8 +302,9 @@
                 </div>
 
               </div>
-
             </form>
+            <div style="font-size: small"><i>*To use your existing CounterWallet.io quick access url, simply replace "https://wallet.counterwallet.io/#cp=" in the url with: "https://www.SOGParty.com/#cp="</i></div>
+
             <div class="clearfix"></div>
             <div data-bind="fadeVisible: walletGenProgressVal() > 0" class="progress progress-striped active margin-top-15 margin-bottom-0" class="margin-top-15 margin-bottom-0 display-none">
               <div id="loginProgressBar" class="progress-bar"  role="progressbar" data-bind="style: { width: walletGenProgressWidth() }">
@@ -358,33 +312,70 @@
             </div>
           </div>
         </div>
-      </div> <!-- form-well -->
+      </div></div> <!-- form-well -->
 
        <div id="extra-info" class="container">
-        <h3 class="sales-title margin-bottom-10" data-bind="locale: 'counterwallet_desc_1'"></h3>
-        <div class="row">
-          <div class="col-sm-4 col-md-4">
-            <h4 class="margin-bottom-10">
-              <i class="fa fa-lock"></i> <span data-bind="locale: 'counterwallet_desc_3'"></span>
-            </h4>
-            <p data-bind="locale: 'counterwallet_desc_4'"></p>
-            <p data-bind="locale: 'counterwallet_desc_5'"></p>
-          </div>
-          <div class="col-sm-4 col-md-4">
-            <h4 class="margin-bottom-10">
-              <i class="fa fa-cloud"></i> <span data-bind="locale: 'counterwallet_desc_6'"></span>
-            </h4>
-            <p data-bind="locale: 'counterwallet_desc_7'"></p>
-            <p data-bind="locale: 'counterwallet_desc_8'"></p>
-          </div>
-          <div class="col-sm-4 col-md-4">
-            <h4 class="margin-bottom-10">
-              <i class="fa fa-globe"></i>  <span data-bind="locale: 'counterwallet_desc_9'"></span>
-            </h4>
-            <p data-bind="locale: 'counterwallet_desc_10'"></p>
-            <p data-bind="locale: 'counterwallet_desc_11'"></p>
-          </div>
-        </div>
+
+         <div class="row"> <!-- row -->
+           <article class="col-xs-12 col-sm-12 col-md-12 col-lg-12"> <!-- NEW WIDGET START -->
+             <div class="jarviswidget defaultWidgetColor" id="wid-id-HomeAssetPairMarketInfo" data-widget-editbutton="false" data-widget-sortable="false" data-widget-deletebutton="false" data-widget-colorbutton="false" data-widget-fullscreenbutton="false" data-widget-togglebutton="false"  data-widget-grid="false">
+               <header>
+                 <span class="widget-icon"> <i class="fa fa-chain"></i> </span>
+                 <h3><b>Trending Card Sale Markets - Login To Buy or Sell!</b></h3>
+
+               </header>
+               <div> <!-- widget div-->
+                 <div class="widget-body no-padding"> <!-- widget content -->
+                   <div class="widget-body-toolbar">
+                   </div>
+                   <table id="HomeAssetPairMarketInfo" class="table table-striped table-bordered table-hover datatable_basic">
+                     <thead>
+                     <tr class="centerHeader">
+                       <th data-bind="locale: 'card_image'"></th>
+                       <th data-bind="locale: 'market'"></th>
+                       <th>Bid/Vol</th>
+                       <th>Ask/Vol</th>
+                       <th data-bind="locale: 'supply'"></th>
+                       <th data-bind="locale: 'order_issued'"></th>
+
+
+                     </tr>
+                     </thead>
+                     <tbody data-bind="foreach: allHomePairs">
+                     <tr>
+                       <td style="text-align:center">
+
+                         <img data-bind="attr: {'src': 'SOGImages/' + base_asset + '.jpg', height:'423', width: '160'}">
+                       </td>
+                       <td style="with-space:nowrap">
+                         <b><span data-bind="text: base_asset"></span></b> / <span data-bind="text: quote_asset == 'BITCRYSTALS' ? 'BCY' : quote_asset"></span>
+
+                       </td>
+                       <td style="text-align:right" data-bind="attr: {class: price_class}">
+                         <span data-bind="text: highBid + ' ' + quote_asset == 'BITCRYSTALS' ? 'BCY' : quote_asset + '/' + highBidVol"></span>
+
+                       </td>
+                       <td style="text-align:right" data-bind="attr: {class: price_class}">
+                         <span data-bind="text: lowAsk + ' ' + quote_asset == 'BITCRYSTALS' ? 'BCY' : quote_asset + '/' + lowAskVol"></span>
+
+                       </td>
+
+
+                       <td class="number" data-bind="text: getSOGSupply(base_asset, supply)"></td>
+                       <td class="number" data-bind="text: getSOGOrder(base_asset)"></td>
+
+
+                     </tr>
+                     </tbody>
+                   </table>
+                 </div> <!-- end widget content -->
+               </div> <!-- end widget div -->
+             </div> <!-- end widget -->
+           </article> <!-- WIDGET END -->
+
+         </div> <!-- end row -->
+
+
       </div>
     </div> <!-- END logged out cover div -->
 
@@ -529,6 +520,7 @@
                         <button id="refresh" type="button" data-title="refresh" href="#" class="btn btn-danger padding-5"  data-bind="locale: 'reset_widget_state'"></button>
                         <div class="note" data-bind="locale: 'reset_state_desc'"></div>
                       </div>
+                      </div>
                   </section>
 
                   <section data-bind="visible: !infoTableShown() && showAdvancedOptions()">
@@ -569,6 +561,7 @@
                             </tr>
                           </tbody>
                         </table>
+                        </div>
                       </div>
                   </section>
                 </fieldset>
@@ -767,9 +760,13 @@
                     <i></i><span data-bind="locale: 'include_screenshot'"></span>
                   </label>
                   <div class="note" data-bind="locale: 'check_to_inclued_screenshot'"></div>
-              </div></section>
+              </div></div>
+              </section>
 
-            </fieldset></form>
+
+            </fieldset>
+
+            </form>
             <div class="formPaddedBot" data-bind="locale: 'we_get_back_to_you'"></div>
           </div>
           <div class="modal-footer">
@@ -787,6 +784,7 @@
     <script src="vendors/underscore.string/lib/underscore.string.js"></script>
     <script src="vendors/jquery/jquery.min.js"></script><!-- Jquery -->
     <script src="vendors/jquery-ui/ui/minified/jquery.ui.core.min.js"></script>
+
     <script src="vendors/jquery-ui/ui/minified/jquery.ui.widget.min.js"></script>
     <script src="vendors/jquery-ui/ui/minified/jquery.ui.mouse.min.js"></script>
     <script src="vendors/jquery-ui/ui/minified/jquery.ui.position.min.js"></script>
@@ -855,11 +853,9 @@
     <script src="vendors/cryptojs/rollups/aes.js"></script>
 
     <!-- bitcore -->
-    <script src="vendors/bitcore-lib/bitcore-lib.js"></script>
-    <script src="vendors/bitcore-message/bitcore-message.js"></script>
+    <script src="vendors/bitcore/browser/bundle.js"></script>
 
     <!-- others -->
-    <script src="vendors/async/dist/async.js"></script>
     <script src="vendors/iso8601-js-period/iso8601.min.js"></script>
     <script src="vendors/queue/queue.min.js"></script>
     <script src="vendors/htmlcanvas/build/html2canvas.js"></script>
@@ -876,16 +872,17 @@
     <!-- build:js js/counterwallet-min.js -->
 
     <!-- counterwebdeps -->
-    <script src="js/external/mnemonic.js"></script>
-    <script src="js/external/qrcode.js"></script>  <!-- from http://d-project.googlecode.com/svn/trunk/misc/qrcode/js/ -->
-    <script src="js/consts.js"></script>
-    <script src="js/util.generic.js"></script>
-    <script src="js/util.analytics.js"></script>
-    <script src="js/util.bitcore.js"></script>
-    <script src="js/util.api.js"></script>
-    <script src="js/util.bitcoin.js"></script>
+    <script src="vendors/counterwebdeps/js/external/mnemonic.js"></script>
+    <script src="vendors/counterwebdeps/js/external/qrcode.js"></script>  <!-- from http://d-project.googlecode.com/svn/trunk/misc/qrcode/js/ -->
+    <script src="vendors/counterwebdeps/js/consts.js"></script>
+    <script src="vendors/counterwebdeps/js/util.generic.js"></script>
+    <script src="vendors/counterwebdeps/js/util.analytics.js"></script>
+    <script src="vendors/counterwebdeps/js/util.bitcore.js"></script>
+    <script src="vendors/counterwebdeps/js/util.api.js"></script>
+    <script src="vendors/counterwebdeps/js/util.bitcoin.js"></script>
 
     <!-- counterwallet-specific -->
+    <script src="js/SOGAssets.js"></script>
     <script src="js/util.knockout.js"></script>
     <script src="js/jquery-timeago.i18n.js"></script>
     <script src="js/locale.js"></script>
@@ -913,11 +910,15 @@
     <script src="js/components/donate.js"></script>
     <script src="js/components/simplebuy.js"></script>
 
+
     <script src="js/smartadmin.app.js"></script> <!-- custom app.js -->
     <!-- ^ unfortunately we have to mod the file itself, instead of dynamically override o_O -->
 
     <script src="js/pages.init.js"></script>
+    <script src="js/SOGSupport.js"></script>
+
     <!-- endbuild -->
 
   </body>
+
 </html>

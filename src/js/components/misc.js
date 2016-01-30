@@ -1,18 +1,19 @@
+
 function SupportModalViewModel() {
   var self = this;
-
+  
   self.shown = ko.observable(false);
   self.type = ko.observable(null);
-
+  
   self.show = function(type) {
     assert(['general', 'balancesPage', 'exchangePage'].indexOf(type) !== -1, "Unknown support modal type");
     self.type(type);
     self.shown(true);
-  }
+  }  
 
   self.hide = function() {
     self.shown(false);
-  }
+  }  
 }
 
 function CreateSupportCaseViewModel() {
@@ -33,12 +34,12 @@ function CreateSupportCaseViewModel() {
     maxLength: MAX_SUPPORT_CASE_PROBLEM_LEN
   });
   self.includeScreenshot = ko.observable(true);
-
+  
   self.dispCharactersRemaining = ko.computed(function() {
-    if (!self.problem() || self.problem().length > MAX_SUPPORT_CASE_PROBLEM_LEN) return '';
+    if(!self.problem() || self.problem().length > MAX_SUPPORT_CASE_PROBLEM_LEN) return '';
     return ' (' + i18n.t("x_characters_remaining", MAX_SUPPORT_CASE_PROBLEM_LEN - self.problem().length) + ')';
   }, self);
-
+    
   self.validationModel = ko.validatedObservable({
     name: self.name,
     email: self.email,
@@ -52,15 +53,15 @@ function CreateSupportCaseViewModel() {
     self.includeScreenshot(true);
     self.validationModel.errors.showAllMessages(false);
   }
-
+  
   self.submitForm = function() {
     if (!self.validationModel.isValid()) {
       self.validationModel.errors.showAllMessages();
       return false;
-    }
+    }    
     $('#createSupportCaseModal form').submit();
   }
-
+  
   self.sendSupportCase = function(screenshotData) {
     //make the call to the server, which will send out the email
     var caseInfo = {
@@ -86,34 +87,34 @@ function CreateSupportCaseViewModel() {
     failoverAPI("create_support_case", caseInfo, function(data, endpoint) {
       bootbox.alert(i18n.t("infos_sent_to_support"));
       trackEvent('Support', 'CaseCreated');
-    });
+    });   
   }
 
   self.doAction = function() {
     self.hide(); //hide the dialog box now so that the screenshot shows the whole window
-    if (self.includeScreenshot()) {
+    if(self.includeScreenshot()) {
       //Take a screenshot
       html2canvas($("body").get(0), {
-        "logging": true,
-        "onrendered": function(canvas) {
-          self.sendSupportCase(canvas.toDataURL("image/png"));
-        }
-      });
+          "logging": true,
+          "onrendered": function(canvas) {
+              self.sendSupportCase(canvas.toDataURL("image/png"));
+          }
+      });    
     } else {
       self.sendSupportCase(null);
     }
   }
-
+  
   self.show = function(resetForm) {
-    if (typeof(resetForm) === 'undefined') resetForm = true;
-    if (resetForm) self.resetForm();
+    if(typeof(resetForm)==='undefined') resetForm = true;
+    if(resetForm) self.resetForm();
     self.shown(true);
     trackDialogShow('CreateSupportCase');
-  }
+  }  
 
   self.hide = function() {
     self.shown(false);
-  }
+  }  
 }
 
 /*NOTE: Any code here is only triggered the first time the page is visited. Put JS that needs to run on the
