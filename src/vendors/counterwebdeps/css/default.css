@@ -1,0 +1,159 @@
+/* 
+ * Generic helper styles
+ */
+.display-none {
+  display: none;
+}
+
+.min-height-0 {
+  min-height: 0 !important;
+}
+
+.width-max {
+  width: 100% !important;
+}
+
+.opacity-70pct {
+  opacity: .7 !important;
+}
+
+.padding-top-0 {
+  padding-top: 0px !important;
+}
+
+.padding-bottom-0 {
+  padding-bottom: 0px !important;
+}
+
+.padding-left-5 {
+  padding-left: 5px !important;
+}
+
+.padding-left-5 {
+  padding-left: 5px !important;
+}
+
+.padding-right-5 {
+  padding-right: 5px !important;
+}
+
+.padding-right-10 {
+  padding-right: 10px !important;
+}
+
+.margin-top-15 {
+  margin-top: 15px !important;
+}
+
+.margin-bottom-0 {
+  margin-bottom: 0 !important;
+}
+
+.margin-left-5 {
+  margin-left: 5px !important;
+}
+
+.inline-block {
+  display: inline-block !important;
+}
+
+.bold {
+  font-weight: bold !important;
+}
+
+.table-border-spacing-0 {
+  border-spacing:0 !important;
+}
+
+.table-border-collapse {
+  border-collapse:collapse !important;
+}
+.font-size-1-15em {
+  font-size: 1.15em !important;
+}
+.font-size-1-33em {
+  font-size: 1.33em !important;
+}
+.font-size-1-66em {
+  font-size: 1.66em !important;
+}
+.font-size-2em {
+  font-size: 2em !important;
+}
+
+
+
+.errorColor {
+    color: #D56161;
+}
+
+.buyColor {
+    color: #78973B;    
+}
+
+.sellColor {
+    color: #2F7DBE;    
+}
+
+.notoQuantityColor {
+    color: #f89406;    
+}
+
+.notoAddrColor {
+    color: #0088cc;    
+}
+
+.notoAssetColor {
+    color: #f89406;    
+}
+
+.font-medlg {
+    font-size: 115% !important;
+}
+
+/* Add back in colored badges (this was removed from Bootstrap 3 for some reason)
+ * See http://stackoverflow.com/a/20591067
+ */
+.badge:hover {
+  color: #ffffff;
+  text-decoration: none;
+  cursor: pointer;
+}
+.badge-error {
+  background-color: #b94a48 !important;
+}
+.badge-error:hover {
+  background-color: #953b39 !important;
+}
+.badge-warning {
+  background-color: #f89406 !important;
+}
+.badge-warning:hover {
+  background-color: #c67605 !important;
+}
+.badge-success {
+  background-color: #468847 !important;
+}
+.badge-success:hover {
+  background-color: #356635 !important;
+}
+.badge-info {
+  background-color: #3a87ad !important;
+}
+.badge-info:hover {
+  background-color: #2d6987 !important;
+}
+.badge-inverse {
+  background-color: #333333 !important;
+}
+.badge-inverse:hover {
+  background-color: #1a1a1a !important;
+}
+
+/* extra custom badges */
+.badge-orange {
+  background-color: #e69500 !important;
+}
+.badge-orange:hover {
+  background-color: #FFA500 !important;
+}

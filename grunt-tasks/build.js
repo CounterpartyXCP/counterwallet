@@ -292,9 +292,7 @@ module.exports = function(grunt) {
             grunt.log.writeln('preparing file: '+root+'/'+block.src[b]);
             var filepath = root+'/'+block.src[b];
             var content = processFile(filepath, block, config);
-            if (config.minify) {
-                content = minifyContent(content, block.type, block.src[b]);
-            }
+            content = minifyContent(content, block.type, block.src[b]);
             combinedcontent += grunt.util.linefeed+'/*----------------'+block.src[b]+'---------------*/'+grunt.util.linefeed+content;
         }
         return combinedcontent;

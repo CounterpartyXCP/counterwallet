@@ -1,0 +1,113 @@
+<div class="row" id="walletCountStats">
+  <div class="col-xs-12 col-sm-7 col-md-7 col-lg-4">
+    <h1 class="page-title txt-color-blueDark">
+      <i class="fa fa-user fa-crosshairs"></i> 
+      <span class="localeTitle" data-bind="locale: 'statistics'"></span> 
+    </h1>
+  </div>
+  <div class="col-xs-12 col-sm-5 col-md-5 col-lg-8">
+    <ul id="sparks">
+        <li class="sparks-info">
+          <h5>
+            <span data-bind="locale: 'wallets_count'"></span>  
+            (<span data-bind="locale: 'mainnet'"></span>)
+            <span id="totalMainnetWallets" class="wallets_count txt-color-blue"></span>
+          </h5>
+        </li>
+        <li class="sparks-info">
+          <h5>
+            <span data-bind="locale: 'wallets_count'"></span>
+            (<span data-bind="locale: 'testnet'"></span>)
+            <span id="totalTestnetWallets" class="wallets_count txt-color-green"></span>
+          </h5>
+        </li>
+        <li class="sparks-info">
+          <h5>
+            <span data-bind="locale: 'wallets_count'"></span>
+            (<span data-bind="locale: 'unknown'"></span>)
+            <span id="totalUnknownWallets" class="wallets_count txt-color-red"></span>
+          </h5>
+        </li>
+    </ul>
+  </div>
+</div>
+
+<section id="widget-grid"> <!-- widget grid -->
+  <div class="row"> <!-- row -->
+    <article class="col-xs-12 col-sm-12 col-md-12 col-lg-12"> <!-- NEW WIDGET START -->
+      <!-- Widget ID (each widget will need unique ID)-->
+      <div class="jarviswidget defaultWidgetColor" id="wid-id-statsHistory" data-widget-editbutton="false" data-widget-deletebutton="false">
+          <header>
+            <span class="widget-icon"> <i class="fa fa-bar-chart-o"></i> </span>
+            <h3 data-bind="locale: 'transaction_history'"></h3>
+          </header>
+          <div> <!-- widget div-->
+            <div class="widget-body no-padding"> <!-- widget content -->
+              <div class="widget-body-toolbar"></div>
+              <div id="transactionStatHistory"></div>
+            </div> <!-- end widget content -->
+          </div> <!-- end widget div -->
+      </div> <!-- end widget -->
+    </article> <!-- WIDGET END -->
+  </div> <!-- end row -->
+    
+  <div class="row"> <!-- row -->
+    <article class="col-xs-12 col-sm-12 col-md-12 col-lg-12"> <!-- NEW WIDGET START -->
+      <!-- Widget ID (each widget will need unique ID)-->
+      <div class="jarviswidget defaultWidgetColor" id="wid-id-walletHistory" data-widget-editbutton="false" data-widget-deletebutton="false">
+          <header>
+            <span class="widget-icon"> <i class="fa fa-bar-chart-o"></i> </span>
+            <h3 data-bind="locale: 'server_wallet_history'"></h3>
+          </header>
+          <div> <!-- widget div-->
+            <div class="widget-body no-padding"> <!-- widget content -->
+              <div class="widget-body-toolbar"></div>
+              <div id="walletStatHistory"></div>
+            </div> <!-- end widget content -->
+          </div> <!-- end widget div -->
+      </div> <!-- end widget -->
+    </article> <!-- WIDGET END -->
+  </div> <!-- end row -->
+    
+  <div class="row"> <!-- row -->
+    <article class="col-xs-12 col-sm-12 col-md-12 col-lg-12"> <!-- NEW WIDGET START -->
+      <div class="jarviswidget defaultWidgetColor" id="wid-id-statsTxnHistory" data-widget-editbutton="false" data-widget-deletebutton="false">
+        <header>
+            <span class="widget-icon"> <i class="fa fa-bolt"></i> </span>
+            <h3 data-bind="locale: 'most_recent_transactions'"></h3>
+        </header>
+        <div> <!-- widget div-->
+            <div class="widget-body no-padding"> <!-- widget content -->
+                <div class="widget-body-toolbar"></div>
+                <div id="statsTxnHistoryContainer">
+                    <table id="statsTxnHistory" data-bind="fadeVisible: transactions().length > 0" class="table table-striped table-hover">
+                        <thead>
+                            <tr>
+                                <th data-bind="locale: 'tx'"></th>
+                                <th data-bind="locale: 'block'"></th>
+                                <th data-bind="locale: 'block_time'"></th>
+                                <th data-bind="locale: 'source'"></th>
+                                <th data-bind="locale: 'type'"></th>
+                                <th data-bind="locale: 'description'"></th>
+                                <!--<th>BTCAmount</th>
+                                <th>Fee</th>-->
+                            </tr>
+                        </thead>
+                        <tbody data-bind="template: { foreach: transactions, beforeRemove: hideOldRow, afterAdd: showNewRow }">
+                            <tr>
+                                <td data-bind="html: dispTXHash()"></td> 
+                                <td data-bind="html: dispBlockIndex()"></td>
+                                <td data-bind="text: dispBlockTime()"></td>
+                                <td data-bind="html: dispSource()"></td>
+                                <td data-bind="html: dispTxType()"></td>
+                                <td data-bind="html: dispDescription()"></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div> <!-- end widget content -->
+        </div> <!-- end widget div -->
+      </div> <!-- end widget -->
+    </article> <!-- WIDGET END -->
+  </div> <!-- end row -->
+</section>

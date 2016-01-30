@@ -1,0 +1,19 @@
+<div id="notificationFeedContent">
+  <ul data-bind="foreach: entries" class="notification-body">
+      <li>
+        <span class="padding-10">
+          <em data-bind="css: COLOR_CLASS" class="padding-5 no-border-radius pull-left margin-right-5">
+            <i data-bind="css: ICON_CLASS" class="fa fa-fw fa-2x"></i>
+          </em>
+          <span>
+             <span data-bind="html: MESSAGE_TEXT"></span>
+             <br/>
+             <span class="pull-right font-xs text-muted"><i data-bind="timeago: WHEN"></i></span>
+          </span>
+        </span>
+      </li>
+  </ul>
+  <div data-bind="visible: !entries().length" class="emptyFeedContainer">
+      <i class="fa fa-2x fa-inbox"></i>&nbsp;<span class="font-xl" data-bind="locale: 'no_entries'"></span>
+  </div>
+</div>

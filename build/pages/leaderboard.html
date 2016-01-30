@@ -1,0 +1,93 @@
+<div class="row">
+  <div class="col-xs-12 col-sm-7 col-md-7 col-lg-4">
+    <h1  id="leaderboardTitle" class="page-title txt-color-blueDark">
+      <i class="fa fa-trophy fa-fw"></i> <span class="localeTitle" data-bind="locale: 'top_tokens'"></span>
+    </h1>
+    <div id="leaderboardMarketBar">
+      <h2 data-bind="locale: 'market'"></h2>
+      <div class="btn-group" data-toggle="buttons">
+          <label class="btn btn-primary active" data-bind="click: showPortfolioInXCP">
+            <input type="radio" name="options" id="xcpMarket"> <i class="fa fa-times"></i>&nbsp;XCP
+          </label>
+          <label class="btn btn-primary" data-bind="click: showPortfolioInBTC">
+            <input type="radio" name="options" id="btcMarket"> <i class="fa fa-btc"></i>&nbsp;BTC
+          </label>
+      </div>                
+    </div>
+  </div>
+</div>
+
+
+<section id="widget-grid" class="leaderboardGrid"> <!-- widget grid -->
+  <div class="row"> <!-- row -->
+    <article class="col-xs-12 col-sm-12 col-md-12 col-lg-12"> <!-- NEW WIDGET START -->
+      <!-- Widget ID (each widget will need unique ID)-->
+      <div class="jarviswidget defaultWidgetColor" id="wid-id-marketCapHistory" data-widget-editbutton="false" data-widget-deletebutton="false">
+          <header>
+            <span class="widget-icon"> <i class="fa fa-bar-chart-o"></i> </span>
+            <h3><span data-bind="locale: 'market_cap_history', localeArgs: showPortfolioIn()"></span></h3>
+          </header>
+          <div> <!-- widget div-->
+            <div class="widget-body no-padding"> <!-- widget content -->
+              <div class="row">
+                  <div class="col-sm-12">
+                      <div id="marketCapHistoryGraph"></div>
+                  </div>
+              </div>
+            </div> <!-- end widget content -->
+          </div> <!-- end widget div -->
+      </div> <!-- end widget -->
+    </article> <!-- WIDGET END -->
+  </div> <!-- end row -->
+    
+  <div class="row" data-bind="foreach: marketCapTables"> <!-- row -->
+    <article class="col-xs-12 col-sm-12 col-md-12 col-lg-12" data-bind="fadeVisibleInOnly: base == $parent.showPortfolioIn()"> <!-- NEW WIDGET START -->
+      <div class="jarviswidget defaultWidgetColor" data-bind="attr: {id: 'wid-id-assetMarketInfo-' + $index}" data-widget-editbutton="false" data-widget-deletebutton="false">
+        <header>
+            <span class="widget-icon"> <i class="fa fa-table"></i> </span>
+            <h3><span data-bind="locale: 'leader_board_in', localeArgs: base"></span></h3>
+            <div class="widget-toolbar">
+            </div>
+        </header>
+        <div> <!-- widget div-->
+            <div class="widget-body no-padding"> <!-- widget content -->
+                <div class="widget-body-toolbar">
+                </div>
+                <table data-bind="attr: {id: 'assetMarketTable-' + base }" width="100%" class="assetMarketTable table table-striped table-hover datatable_basic">
+                    <thead>
+                        <tr>
+                            <th>#</th>
+                            <th data-bind="locale: 'token'"></th>
+                            <th data-bind="locale: 'market_cap'"></th>
+                            <th data-bind="locale: 'price'"></th>
+                            <th data-bind="locale: 'total_supply'"></th>
+                            <th data-bind="locale: 'volume_24h'"></th>
+                            <th data-bind="locale: 'change_24h'"></th>
+                            <th data-bind="locale: 'market_cap_graph'"></th>
+                        </tr>
+                    </thead>
+                    <tbody data-bind="foreach: data">
+                        <tr>
+                            <td class="leaderboardAssetText" data-bind="text: position"></td>
+                            <td class="leaderboardAssetText" data-bind="html: dispAsset"></td>
+                            <td data-bind="text: marketCap"></td>
+                            <td data-bind="text: price"></td>
+                            <td data-bind="text: supply"></td>
+                            <td data-bind="text: volume"></td>
+                            <td data-bind="text: pctChange, class: pctChangeColorClass"></td>
+                            <td class="leaderboardMiniChart" data-bind="attr: { id: 'miniChart-' + $parent.base + '-' + asset }"></td>
+                            
+                            <td data-bind="text: marketCapRaw" class="display-none"></td>
+                            <td data-bind="text: priceRaw" class="display-none"></td>
+                            <td data-bind="text: supplyRaw" class="display-none"></td>
+                            <td data-bind="text: volumeRaw" class="display-none"></td>
+                            <td data-bind="text: pctChangeRaw" class="display-none"></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div> <!-- end widget content -->
+        </div> <!-- end widget div -->
+      </div> <!-- end widget -->
+    </article> <!-- WIDGET END -->
+  </div> <!-- end row -->
+</section>

@@ -1,3 +1,4 @@
+
 function DonationViewModel() {
 
   var self = this;
@@ -6,7 +7,7 @@ function DonationViewModel() {
     required: true,
     isValidPositiveQuantity: self,
     validation: {
-      validator: function(val, self) {
+      validator: function (val, self) {
         var address = self.sourceAddress();
         var quantity = self.quantity();
         if (self.donationCurrency() == 'XCP') {
@@ -17,15 +18,15 @@ function DonationViewModel() {
       },
       message: i18n.t('quantity_exceeds_balance'),
       params: self
-    }
+    }    
   }
-
+  
   self.shown = ko.observable(false);
   self.availableAddresses = ko.observableArray([]);
   self.sourceAddress = ko.observable(null).extend(quantityValidator);
   self.balancesXCP = {};
   self.balancesBTC = {};
-  self.quantity = ko.observable(null).extend(quantityValidator);
+	self.quantity = ko.observable(null).extend(quantityValidator);
   self.donationCurrency = ko.observable('BTC');
 
 
@@ -49,10 +50,10 @@ function DonationViewModel() {
     self.balancesXCP = {};
     var addresses = WALLET.getAddressesList(true);
     var options = []
-    for (var i = 0; i < addresses.length; i++) {
+    for(var i = 0; i < addresses.length; i++) {
       var btcBalance = WALLET.getBalance(addresses[i][0], 'BTC', true);
       options.push({
-        address: addresses[i][0],
+        address: addresses[i][0], 
         label: addresses[i][1] + ' (' + round(btcBalance, 2) + ' BTC / ' + round(addresses[i][2], 2) + ' XCP)'
       });
       self.balancesBTC[addresses[i][0]] = btcBalance;
@@ -63,14 +64,14 @@ function DonationViewModel() {
 
   self.submitDonation = function() {
     $.jqlog.debug('submitDonation');
-    if (!self.validationModel.isValid()) {
+  	if (!self.validationModel.isValid()) {
       self.validationModel.errors.showAllMessages();
       return false;
-    }
+    }    
 
     var params = {
       source: self.sourceAddress(),
-      quantity: denormalizeQuantity(self.quantity()),
+      quantity:  denormalizeQuantity(self.quantity()),
       asset: self.donationCurrency(),
       destination: DONATION_ADDRESS,
       _divisible: true
@@ -79,13 +80,13 @@ function DonationViewModel() {
     $.jqlog.debug(params);
 
     var onSuccess = function(txHash, data, endpoint, addressType, armoryUTx) {
-      var message = "<b>";
+      var message = "<b>"; 
       if (armoryUTx) {
         message += i18n.t("you_are_choosing_to_donate", self.quantity(), self.donationCurrency());
       } else {
         message += i18n.t("you_chose_to_donate", self.quantity(), self.donationCurrency());
       }
-      message += " " + i18n.t("thank_you");
+      message += " " +  i18n.t("thank_you");
       message += "</b> ";
       WALLET.showTransactionCompleteDialog(message + " " + i18n.t(ACTION_PENDING_NOTICE), message, armoryUTx);
     }

@@ -1,0 +1,26 @@
+{
+	"manifest_version": 2,
+ 	"name": "Demo Ext",
+	"version": "##VERSION##",
+	"options_page": "options.html",
+	"description": "Demo Extension",
+	"browser_action": {
+		"default_icon": {
+			"19" : "images/icon-19x19.gif"
+		},
+		"default_title": "Demo Ext",
+		"default_popup": "menu.html"
+	},
+  	"permissions": [
+		"tabs"
+	],
+	"omnibox": { "keyword" : "ext" },
+	"icons": {
+		"16": "images/icon-16x16.gif"
+	},
+	"background" : {
+		"scripts": [ "js/lib.js" ],
+		"persistent": false
+	},
+	"content_security_policy": "script-src 'self' http://localhost; object-src 'self'"
+}
