@@ -738,6 +738,12 @@ function ExchangeViewModel() {
 
   self.displayAllPairs = function(data) {
     for (var i in data) {
+      data[i].priceRaw = data[i].price;
+      data[i].volumeRaw = data[i].volume;
+      data[i].supplyRaw = data[i].supply;
+      data[i].marketCapRaw = data[i].market_cap;
+      data[i].progressionRaw = data[i].progression;
+
       data[i].volume = smartFormat(normalizeQuantity(data[i].volume, data[i].quote_divisibility));
       data[i].supply = smartFormat(normalizeQuantity(data[i].supply, data[i].base_divisibility));
       data[i].market_cap = smartFormat(normalizeQuantity(data[i].market_cap, data[i].quote_divisibility));
@@ -762,9 +768,27 @@ function ExchangeViewModel() {
     }
     self.allPairs(data);
     if (self.allPairs().length) {
-      runDataTables('#assetPairMarketInfo', true, {"aaSorting": [[0, 'asc']]});
+      runDataTables('#assetPairMarketInfo', true,
+        {
+          "aaSorting": [[0, 'asc']],
+          "aoColumns": [
+             null, // #
+             null, // market
+            {"sType": "natural", "iDataSort": 7}, //price
+            {"sType": "natural", "iDataSort": 8}, //24h volume
+            {"sType": "natural", "iDataSort": 9}, //supply
+            {"sType": "natural", "iDataSort": 10}, //market cap
+            {"sType": "natural", "iDataSort": 11}, //24h change
+            {"bVisible": false}, //price RAW
+            {"bVisible": false}, //24h volume RAW
+            {"bVisible": false}, //supply RAW
+            {"bVisible": false}, //market cap RAW
+            {"bVisible": false}  //24h change RAW
+          ]
+        });
     }
   }
+
 
   self.fetchAllPairs = function() {
     try {
