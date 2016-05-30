@@ -3,11 +3,11 @@ upstream cache_server {
   keepalive 128;
 }
 upstream counterblock_api_server {
-  server ${COUNTERBLOCK_HOST}:${COUNTERBLOCK_PORT_MAINNET};
+  server ${COUNTERBLOCK_HOST_MAINNET}:${COUNTERBLOCK_PORT_MAINNET};
   keepalive 30;
 }
 upstream counterblock_t_api_server {
-  server ${COUNTERBLOCK_HOST}:${COUNTERBLOCK_PORT_TESTNET};
+  server ${COUNTERBLOCK_HOST_TESTNET}:${COUNTERBLOCK_PORT_TESTNET};
   keepalive 30;
 }
 
@@ -74,12 +74,12 @@ server {
   location /_asset_img/ {
     access_log off;
     expires 1h;
-    alias /counterblock_share/asset_img;
+    alias /counterblock_data/asset_img;
   }
   location /_t_asset_img/  {
     access_log off;
     expires 1h;
-    alias /counterblock_share/asset_img.testnet/;
+    alias /counterblock_data/asset_img.testnet/;
   }
   location /src  {
     #For dev/testing (uses unminified resources)
@@ -125,12 +125,12 @@ server {
   # PROXY TO COUNTERBLOCK FEED BACKEND (socket.io)
   location ^~ /_feed {
     include /etc/nginx/sites-enabled/counterblock_socketio.inc;
-    proxy_pass   http://${COUNTERBLOCK_HOST}:${COUNTERBLOCK_PORT_MAINNET_FEED}/socket.io;
+    proxy_pass   http://${COUNTERBLOCK_HOST_MAINNET}:${COUNTERBLOCK_PORT_MAINNET_FEED}/socket.io;
   }
   # PROXY TO COUNTERBLOCK CHAT BACKEND (socket.io)
   location ^~ /_chat {
     include /etc/nginx/sites-enabled/counterblock_socketio.inc;
-    proxy_pass   http://${COUNTERBLOCK_HOST}:${COUNTERBLOCK_PORT_MAINNET_CHAT}/socket.io;
+    proxy_pass   http://${COUNTERBLOCK_HOST_MAINNET}:${COUNTERBLOCK_PORT_MAINNET_CHAT}/socket.io;
   }
   
   #####
@@ -158,12 +158,12 @@ server {
   # PROXY TO COUNTERBLOCK FEED BACKEND (socket.io)
   location ^~ /_t_feed {
     include /etc/nginx/sites-enabled/counterblock_socketio.inc;
-    proxy_pass   http://${COUNTERBLOCK_HOST}:${COUNTERBLOCK_PORT_TESTNET_FEED}/socket.io;
+    proxy_pass   http://${COUNTERBLOCK_HOST_TESTNET}:${COUNTERBLOCK_PORT_TESTNET_FEED}/socket.io;
   }
   # PROXY TO COUNTERBLOCK CHAT BACKEND (socket.io)
   location ^~ /_t_chat {
     include /etc/nginx/sites-enabled/counterblock_socketio.inc;
-    proxy_pass   http://${COUNTERBLOCK_HOST}:${COUNTERBLOCK_PORT_TESTNET_CHAT}/socket.io;
+    proxy_pass   http://${COUNTERBLOCK_HOST_TESTNET}:${COUNTERBLOCK_PORT_TESTNET_CHAT}/socket.io;
   }
   
   #####

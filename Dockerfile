@@ -55,7 +55,7 @@ RUN ln -s /etc/ssl/certs/ssl-cert-snakeoil.pem /etc/ssl/certs/counterwallet.pem
 RUN ln -s /etc/ssl/private/ssl-cert-snakeoil.key /etc/ssl/private/counterwallet.key
 
 # add bare counterblock share dir (which should be mounted over)
-RUN mkdir -p /counterblock_share/asset_img /counterblock_share/asset_img.testnet
+RUN mkdir -p /counterblock_data/asset_img /counterblock_data/asset_img.testnet
 
 # Install newest stable nodejs
 # (the `nodejs` package includes `npm`)
