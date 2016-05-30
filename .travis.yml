@@ -4,6 +4,9 @@ services:
 - docker
 
 before_install:
+- sudo apt-get -qq update
+# upgrade docker, for build argument support
+- sudo apt-get install -o Dpkg::Options::="--force-confold" --force-yes -y docker-engine
 - docker version
 - docker ps -a
 # get the current PR and branch name
