@@ -35,6 +35,7 @@ RUN cd /tmp/ngx_openresty-${OPENRESTY_VER} && ./configure \
     --with-http_secure_link_module \
     --with-http_sub_module && make -j2
 RUN cd /tmp/ngx_openresty-${OPENRESTY_VER} && make install
+RUN mkdir -p /var/lib/nginx/{body,fastcgi,proxy,scgi,uwsgi}
 
 # copy over nginx config
 RUN mkdir -p /etc/nginx/sites-enabled
