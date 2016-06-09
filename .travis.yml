@@ -8,6 +8,9 @@ env:
     # define DOCKER_USERNAME and DOCKER_PASSWORD
     - secure: "GOCLkZc+B5Kc3R0hhg8sECxem8wyahb2Ybb4pAV7B3kbJxvRX2df5ziUUnRPS9+VJT1wFpk/o+fDJ0nWGMf6027jmhjthBHMH5rUJ+GX0Pv+25l10Kzq9oyqxCQQBP5Abji2I6L6xwmq2ab3t+5EJW5dqJjZLjC8BGpbBotNo5k="
     - secure: "Cu3p2DsZTbzbySAuYq6kvsU1xVQO+a80kUmeoxBfgmi5wEHvqTfcUZOO8njnnYENpZrkT+Lag6zRnhbTcp80Jhr65aKaRee6Sv3Y72acsa/cxsa1vyAvok8QXtha/ufMNNYZjGzrOjBU+o5A3kEcRXGjK2ECfY6C5ojus/VWD2w="
+    # define TRANSIFEX_USER and TRANSIFEX_PASSWORD
+    - secure: "rmWqeKbL7WDfubOyzKiDBgB5d19yUmr/ittVwHvs8Bgcytv+R0psHHksTWx1iubZlN8BIki//vNd1HGzihUNlLZFd7PtoGxaa1w4tBuXsfZmELd9voh63NfJDdnLmtPLVLMd93mgvhcoRn5ijNkq/RE4jENidAyHUIPH+NB1kUA="
+    - secure: "qawk9YgXkZoo0ReajS0dOFU2NDdg+iOiJNOFhY4BnnyBRY9EtvrJUDtokoxS9xZlFVI67lK0rcXSDooNeMZv4WoRd2Ywvikk92YNvQLiCsiCRnnSVGBpeZQqcudGz+//27sL1qCfIDIqYJ4SaQZCWCxjPiA1dHC1cg7blRfJ4fU="
 
 before_install:
 - sudo apt-get -qq update
