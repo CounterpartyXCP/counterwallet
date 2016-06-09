@@ -3,6 +3,12 @@ sudo: required
 services:
 - docker
 
+env:
+  global:
+    # define DOCKER_USERNAME and DOCKER_PASSWORD
+    - secure: "GOCLkZc+B5Kc3R0hhg8sECxem8wyahb2Ybb4pAV7B3kbJxvRX2df5ziUUnRPS9+VJT1wFpk/o+fDJ0nWGMf6027jmhjthBHMH5rUJ+GX0Pv+25l10Kzq9oyqxCQQBP5Abji2I6L6xwmq2ab3t+5EJW5dqJjZLjC8BGpbBotNo5k="
+    - secure: "Cu3p2DsZTbzbySAuYq6kvsU1xVQO+a80kUmeoxBfgmi5wEHvqTfcUZOO8njnnYENpZrkT+Lag6zRnhbTcp80Jhr65aKaRee6Sv3Y72acsa/cxsa1vyAvok8QXtha/ufMNNYZjGzrOjBU+o5A3kEcRXGjK2ECfY6C5ojus/VWD2w="
+
 before_install:
 - sudo apt-get -qq update
 # upgrade docker, for build argument support
