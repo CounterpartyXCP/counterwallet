@@ -74,7 +74,8 @@ RUN if [ -n "$TRANSIFEX_USER" ] && [ -n "$TRANSIFEX_PASSWORD" ]; then echo "$TRA
 # Install project
 COPY . /counterwallet
 WORKDIR /counterwallet
-RUN npm install -g npm
+RUN npm -g install npm@latest
+RUN npm config set strict-ssl false
 RUN npm install -g bower grunt mocha-phantomjs
 RUN cd src; bower --allow-root --config.interactive=false update; cd ..
 RUN npm update
