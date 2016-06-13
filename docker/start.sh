@@ -1,5 +1,15 @@
 #!/bin/bash
 
+# If working from a bare source checkout, rebuild some things so that the site loads properly
+if [ ! -d /counterwallet/build ]; then
+    cd /counterwallet/src; bower --allow-root --config.interactive=false update
+    cd /counterwallet; npm update
+    grunt build --dontcheckdeps
+fi
+if [ ! -f /counterwallet/counterwallet.conf.json ]; then
+    cp -a /counterwallet/counterwallet.conf.json.example /counterwallet/counterwallet.conf.json
+fi
+
 # Specify defaults (defaults are overridden if defined in the environment)
 export REDIS_HOST=${REDIS_HOST:="redis"}
 export REDIS_PORT=${REDIS_PORT:=6739}
