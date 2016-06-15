@@ -40,8 +40,8 @@ server {
   
   ###############
   # SSL (by default these are self-signed certs)
-  ssl_certificate      /etc/ssl/certs/counterwallet.pem;
-  ssl_certificate_key  /etc/ssl/private/counterwallet.key;
+  ssl_certificate      /ssl_config/counterwallet.pem;
+  ssl_certificate_key  /ssl_config/counterwallet.key;
   
   # support FS, and BEAST protection - https://coderwall.com/p/ebl2qa
   # SSLv3 not supported, due to poodlebleed bug
