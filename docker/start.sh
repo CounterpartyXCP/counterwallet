@@ -10,10 +10,10 @@ if [ ! -f /counterwallet/counterwallet.conf.json ]; then
     cp -a /counterwallet/counterwallet.conf.json.example /counterwallet/counterwallet.conf.json
 fi
 if [ ! -f /ssl_config/counterwallet.pem ]; then
-    ln -s /etc/ssl/certs/ssl-cert-snakeoil.pem /ssl_config/counterwallet.pem
+    cp -a /etc/ssl/certs/ssl-cert-snakeoil.pem /ssl_config/counterwallet.pem
 fi
 if [ ! -f /ssl_config/counterwallet.key ]; then
-    ln -s /etc/ssl/private/ssl-cert-snakeoil.key /ssl_config/counterwallet.key
+    cp -a /etc/ssl/private/ssl-cert-snakeoil.key /ssl_config/counterwallet.key
 fi
 
 # Specify defaults (defaults are overridden if defined in the environment)

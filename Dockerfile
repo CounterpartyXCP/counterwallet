@@ -53,8 +53,8 @@ RUN chmod a+x /usr/local/bin/start.sh
 # set up default SSL certs to be self-signed (can be replaced later)
 RUN apt-get update && apt-get -y install ssl-cert
 RUN mkdir /ssl_config
-RUN ln -s /etc/ssl/certs/ssl-cert-snakeoil.pem /ssl_config/counterwallet.pem
-RUN ln -s /etc/ssl/private/ssl-cert-snakeoil.key /ssl_config/counterwallet.key
+RUN cp -a /etc/ssl/certs/ssl-cert-snakeoil.pem /ssl_config/counterwallet.pem
+RUN cp -a /etc/ssl/private/ssl-cert-snakeoil.key /ssl_config/counterwallet.key
 
 # add bare counterblock share dir (which should be mounted over)
 RUN mkdir -p /counterblock_data/asset_img /counterblock_data/asset_img.testnet
