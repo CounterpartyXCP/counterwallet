@@ -847,7 +847,7 @@ function SweepModalViewModel() {
 
         //Also get the BTC balance at this address and put at head of the list
         //We just check if unconfirmed balance > 0.      
-        WALLET.retriveBTCAddrsInfo([address], function(data) {
+        WALLET.retrieveBTCAddrsInfo([address], function(data) {
           self.btcBalanceForPrivateKey(0);
           self.txoutsCountForPrivateKey = 0;
           //TODO: counterblockd return unconfirmedRawBal==0, after fixing we need use unconfirmedRawBal
@@ -878,7 +878,7 @@ function SweepModalViewModel() {
       self.addressForFeesBalance(0);
       return;
     }
-    WALLET.retriveBTCAddrsInfo([address], function(data) {
+    WALLET.retrieveBTCAddrsInfo([address], function(data) {
       self.addressForFeesBalanceMessage(normalizeQuantity(data[0]['confirmedRawBal']) + ' BTC in ' + address);
       self.addressForFeesBalance(data[0]['confirmedRawBal']);
     });
@@ -976,7 +976,7 @@ function SweepModalViewModel() {
 
   self.waitTxoutCountIncrease = function(callback) {
     setTimeout(function() {
-      WALLET.retriveBTCAddrsInfo([self.addressForPrivateKey()], function(data) {
+      WALLET.retrieveBTCAddrsInfo([self.addressForPrivateKey()], function(data) {
         $.jqlog.debug('initial txo count: ' + self.txoutsCountForPrivateKey);
         $.jqlog.debug('new txo count: ' + data[0]['rawUtxoData'].length);
         if (self.txoutsCountForPrivateKey < data[0]['rawUtxoData'].length) {

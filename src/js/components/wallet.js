@@ -356,6 +356,7 @@ function WalletViewModel() {
         });
 
       }
+
     );
 
 
@@ -381,7 +382,7 @@ function WalletViewModel() {
       return item.CATEGORY == 'sends' && item.DATA['asset'] == 'BTC'; //there is a pending BTC send
     });
 
-    self.retriveBTCAddrsInfo(addresses, function(data) {
+    self.retrieveBTCAddrsInfo(addresses, function(data) {
       //refresh the network block height (this is a bit hackish as blockHeight is embedded into each address object,
       // and they are all the same values, but we just look at the first value...we do it this way to avoid an extra API call every 5 minutes)
       if (data.length >= 1) self.networkBlockHeight(data[0]['blockHeight']);
@@ -435,7 +436,7 @@ function WalletViewModel() {
       if (onSuccess) onSuccess();
 
     }, function(jqXHR, textStatus, errorThrown) {
-      //insight down or spazzing, set all BTC balances out to null
+      //system down or spazzing, set all BTC balances out to null
       var addressObj = null;
       for (var i = 0; i < addresses.length; i++) {
         self.updateBalance(addresses[i], "BTC", null, null); //null = UNKNOWN
@@ -443,7 +444,9 @@ function WalletViewModel() {
         addressObj.numPrimedTxouts(null); //null = UNKNOWN
         addressObj.numPrimedTxoutsIncl0Confirms(null); //null = UNKNOWN
       }
-      bootbox.alert(i18n.t("btc_sync_error", textStatus));
+      //But don't pop up a message box so we don't freak out users -- just alert on console
+      $.jqlog.warn(i18n.t("btc_sync_error", textStatus));
+      //bootbox.alert(i18n.t("btc_sync_error", textStatus));
 
       if (isRecurring && self.autoRefreshBTCBalances) {
         setTimeout(function() {
@@ -518,7 +521,7 @@ function WalletViewModel() {
       onError || defaultErrorHandler);
   }
 
-  self.retriveBTCAddrsInfo = function(addresses, onSuccess, onError, minConfirmations) {
+  self.retrieveBTCAddrsInfo = function(addresses, onSuccess, onError, minConfirmations) {
     if (typeof(minConfirmations) === 'undefined') minConfirmations = 1;
     if (typeof(onError) === 'undefined')
       onError = function(jqXHR, textStatus, errorThrown) { return defaultErrorHandler(jqXHR, textStatus, errorThrown); };

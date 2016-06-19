@@ -194,7 +194,7 @@ function _getDestTypeFromMethod(method) {
   if (['is_ready', 'get_reflected_host_info', 'is_chat_handle_in_use', 'record_btc_open_order',
       'get_messagefeed_messages_by_index', 'get_normalized_balances', 'get_required_btcpays',
       'get_chain_address_info', 'get_chain_block_height', 'get_chain_txns_status',
-      'get_num_users_online', 'get_chat_handle', 'store_chat_handle', 'is_wallet_online', 'get_preferences', 'store_preferences',
+      'get_preferences', 'store_preferences',
       'get_raw_transactions', 'get_balance_history', 'get_last_n_messages',
       'get_owned_assets', 'get_asset_history', 'get_asset_extended_info', 'get_transaction_stats', 'get_wallet_stats', 'get_asset_pair_market_info',
       'get_market_price_summary', 'get_market_price_history', 'get_market_info', 'get_market_info_leaderboard', 'get_market_cap_history',
@@ -203,7 +203,8 @@ function _getDestTypeFromMethod(method) {
       'parse_base64_feed', 'get_open_rps_count', 'get_user_rps',
       'get_users_pairs', 'get_market_orders', 'get_market_trades', 'get_markets_list', 'get_market_details',
       'get_pubkey_for_address', 'create_armory_utx', 'convert_armory_signedtx_to_raw_hex', 'create_support_case',
-      'get_escrowed_balances', 'proxy_to_autobtcescrow', 'get_vennd_machine', 'get_script_pub_key', 'get_assets_info', 'broadcast_tx'].indexOf(method) >= 0) {
+      'get_escrowed_balances', 'proxy_to_autobtcescrow', 'get_vennd_machine', 'get_script_pub_key', 'get_assets_info', 'broadcast_tx',
+      'get_latest_wallet_messages'].indexOf(method) >= 0) {
     destType = "counterblockd";
   }
   return destType;
@@ -272,11 +273,42 @@ function _multiAPIPrimative(method, params, onFinished) {
 
 /*
  AVAILABLE API CALL METHODS:
+ * nonFailoverAPI: Used only by message feed requests currently (as the sequence numbers can theoritically change across multiple CW servers slightly due to mempool propagation differences)
  * failoverAPI: Used for all counterpartyd get_ API requests (for now...later we may want to move to multiAPINewest)
  * multiAPI: Used for storing counterblockd state data (store_preferences, store_chat_handle, etc)
  * multiAPINewest: Used for fetching state data from counterblockd (e.g. get_preferences, get_chat_handle)
  * multiAPIConsensus: Used for all counterpartyd create_ API requests
 */
+
+function nonFailoverAPI(method, params, onSuccess, onError) {
+  /*Make an API call to the "primary"" CW server (i.e. the first one in the shuffled servers list)
+    Same parameters and result as failoverAPI.
+  */
+  if (typeof(onError) === 'undefined') {
+    onError = function(jqXHR, textStatus, errorThrown, endpoint) {
+      var message = describeError(jqXHR, textStatus, errorThrown);
+      bootbox.alert("nonFailoverAPI: Call failed (on 'primary' server only). Method: " + method + "; Last error: " + message);
+    };
+  }
+
+  //525 DETECTION (needed here and in _multiAPIPrimative) - wrap onError (so that this works even for user supplied onError)
+  var onErrorOverride = function(jqXHR, textStatus, errorThrown, endpoint) {
+    //detect a special case of all servers returning code 525, which would mean counterpartyd had a reorg and/or we are upgrading
+    //TODO: this is not perfect in this failover case now because we only see the LAST error. We are currently assuming
+    // that if a) the LAST server returned a 525, and b) all servers are erroring out or down, that all servers are
+    // probably returning 525s or updating (or messed up somehow) and we should just log the client out to be safe about it.
+    // This is probably a good choice for now... 
+    if (jqXHR && jqXHR.status == '525') {
+      bootbox.alert("The server(s) are currently updating and/or not caught up to the blockchain. Logging you out. Please try logging in again later. (e:failoverAPI)")
+      location.reload(false); //log the user out to avoid ruckus
+      return;
+    }
+    return onError(jqXHR, textStatus, errorThrown, endpoint);
+  }
+
+  var destType = _getDestTypeFromMethod(method);
+  _makeJSONAPICall(destType, cwAPIUrls()[0], method, params, TIMEOUT_FAILOVER_API, onSuccess, onErrorOverride);
+}
 
 function failoverAPI(method, params, onSuccess, onError) {
   /*Make an API call to one or more servers, proceeding sequentially until a success result is returned.
@@ -290,7 +322,7 @@ function failoverAPI(method, params, onSuccess, onError) {
   if (typeof(onError) === 'undefined') {
     onError = function(jqXHR, textStatus, errorThrown, endpoint) {
       var message = describeError(jqXHR, textStatus, errorThrown);
-      bootbox.alert("failoverAPI: Call failed (failed over across all servers). Method: " + method + "; Last error: " + message);
+      bootbox.alert("failoverAPI: Call failed (across all servers). Method: " + method + "; Last error: " + message);
     };
   }
   //525 DETECTION (needed here and in _multiAPIPrimative) - wrap onError (so that this works even for user supplied onError)

@@ -1319,7 +1319,9 @@ function loadPage(url, container) {
     error : function(xhr, ajaxOptions, thrownError) {
       container.html('<h4 style="margin-top:10px; display:block; text-align:left"><i class="fa fa-warning txt-color-orangeDark"></i> ' + i18n.t('error404') + '</h4>');
     },
-    async : false
+//COUNTERWALLET: START MOD
+    async : true
+//COUNTERWALLET: END MOD
   });
 }
 //COUNTERWALLET: END MOD
