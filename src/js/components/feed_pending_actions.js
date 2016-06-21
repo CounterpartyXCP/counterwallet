@@ -116,7 +116,9 @@ function PendingActionFeedViewModel() {
     return 'pendingActions_' + WALLET.identifier();
   }
 
-  self.add = function(txHash, category, data, when) {
+  self.add = function(txHash, category, data, when, showNotifyPopup) {
+    if (typeof(showNotifyPopup) === 'undefined') showNotifyPopup = true;
+
     if (typeof(when) === 'undefined') when = new Date();
     assert(self.ALLOWED_CATEGORIES.indexOf(category) != -1, "Illegal pending action category: " + category);
     var pendingAction = new PendingActionViewModel(txHash, category, data, when);
@@ -126,7 +128,8 @@ function PendingActionFeedViewModel() {
 
     //Add to local storage so we can reload it if the user logs out and back in
     var pendingActionsStorage = localStorage.getObject(self.getLocalStorageKey());
-    if (pendingActionsStorage === null) pendingActionsStorage = [];
+    if (pendingActionsStorage === null)
+      pendingActionsStorage = [];
     pendingActionsStorage.unshift({
       'txHash': txHash,
       'category': category,
@@ -138,6 +141,12 @@ function PendingActionFeedViewModel() {
     self.lastUpdated(new Date());
     PendingActionFeedViewModel.modifyBalancePendingFlag(category, data, true);
     WALLET.refreshBTCBalances();
+
+    if(showNotifyPopup) {
+      //Also notify the user via a CSS popup, so the action completing is more appearent.
+      //noty({type: 'information', text: pendingAction.ACTION_TEXT, timeout: 10000});
+      $.smallBox({content: '<span style="color: #333">' + pendingAction.ACTION_TEXT + '</span>', timeout: 10000, color: "#fbfbfb", iconSmall : "fa fa-clock-o"});
+    }
   }
 
   self.remove = function(txHash, category, btcRefreshSpecialLogic) {
@@ -200,7 +209,7 @@ function PendingActionFeedViewModel() {
         if (pendingAction && txInfo[i]['confirmations'] == 0) { //still pending
           $.jqlog.debug("pendingAction:restoreFromStorage:load: " + txInfo[i]['tx_hash'] + ":" + pendingAction['category']);
           newPendingActionsStorage.push(pendingAction);
-          self.add(txInfo[i]['tx_hash'], pendingAction['category'], pendingAction['data'], Date.parse(pendingAction['when']));
+          self.add(txInfo[i]['tx_hash'], pendingAction['category'], pendingAction['data'], Date.parse(pendingAction['when']), false);
         } else {
           //otherwise, do not load into pending actions, and do not include in updated pending actions list
           $.jqlog.debug("pendingAction:restoreFromStorage:remove: " + txInfo[i]['tx_hash']);
