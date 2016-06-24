@@ -739,14 +739,14 @@ function ExchangeViewModel() {
   self.displayAllPairs = function(data) {
     for (var i in data) {
       data[i].priceRaw = data[i].price;
-      data[i].volumeRaw = data[i].volume;
-      data[i].supplyRaw = data[i].supply;
-      data[i].marketCapRaw = data[i].market_cap;
+      data[i].volumeRaw = normalizeQuantity(data[i].volume, data[i].quote_divisibility);
+      data[i].supplyRaw = normalizeQuantity(data[i].supply, data[i].base_divisibility);
+      data[i].marketCapRaw = normalizeQuantity(data[i].market_cap, data[i].quote_divisibility);
       data[i].progressionRaw = data[i].progression;
 
-      data[i].volume = smartFormat(normalizeQuantity(data[i].volume, data[i].quote_divisibility));
-      data[i].supply = smartFormat(normalizeQuantity(data[i].supply, data[i].base_divisibility));
-      data[i].market_cap = smartFormat(normalizeQuantity(data[i].market_cap, data[i].quote_divisibility));
+      data[i].volume = smartFormat(data[i].volumeRaw);
+      data[i].supply = smartFormat(data[i].supplyRaw);
+      data[i].market_cap = smartFormat(data[i].marketCapRaw);
       if (parseFloat(data[i].progression) > 0) {
         data[i].prog_class = 'UP';
         data[i].progression = '+' + data[i].progression;
@@ -770,20 +770,21 @@ function ExchangeViewModel() {
     if (self.allPairs().length) {
       runDataTables('#assetPairMarketInfo', true,
         {
+          //"iDisplayLength": 15,
           "aaSorting": [[0, 'asc']],
           "aoColumns": [
-             null, // #
-             null, // market
+            {"sType": "numeric"}, //#
+            {"sType": "string"}, //asset/market
             {"sType": "natural", "iDataSort": 7}, //price
             {"sType": "natural", "iDataSort": 8}, //24h volume
             {"sType": "natural", "iDataSort": 9}, //supply
             {"sType": "natural", "iDataSort": 10}, //market cap
             {"sType": "natural", "iDataSort": 11}, //24h change
-            {"bVisible": false}, //price RAW
-            {"bVisible": false}, //24h volume RAW
-            {"bVisible": false}, //supply RAW
-            {"bVisible": false}, //market cap RAW
-            {"bVisible": false}  //24h change RAW
+            null, //price RAW
+            null, //24h volume RAW
+            null, //supply RAW
+            null, //market cap RAW
+            null //24h change RAW
           ]
         });
     }
@@ -792,10 +793,17 @@ function ExchangeViewModel() {
 
   self.fetchAllPairs = function() {
     try {
+      //$('#wid-id-assetPairMarketInfo header span.jarviswidget-loader').show();
       self.allPairs([]);
       $('#assetPairMarketInfo').dataTable().fnClearTable();
+      //$('#assetPairMarketInfo_wrapper').hide();
     } catch (e) {}
-    failoverAPI('get_markets_list', [], self.displayAllPairs);
+    failoverAPI('get_markets_list', [], self.displayAllPairs)
+    /*failoverAPI('get_markets_list', [], function(data, endpoint) {
+      self.displayAllPairs(data);
+      $('#assetPairMarketInfo_wrapper').show();
+      //$('#wid-id-assetPairMarketInfo header span.jarviswidget-loader').hide();
+    });*/
   }
 
   /* MARKET DETAILS */
