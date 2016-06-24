@@ -236,7 +236,7 @@ var USE_TESTNET = (   (((location.pathname == "/" || location.pathname == "/src/
   || location.hostname.indexOf('testnet') != -1) ? true : false
 );
 
-var BLOCKEXPLORER_URL = USE_TESTNET ? "http://testnet.blockscan.com" : "https://blockscan.com";
+var BLOCKEXPLORER_URL = USE_TESTNET ? "http://testnet.counterpartychain.io" : "https://counterpartychain.io";
 var GOOGLE_ANALYTICS_UAID = null; //will be set in counterwallet.js
 var ROLLBAR_ACCESS_TOKEN = null; //will be set in counterwallet.js
 

@@ -221,7 +221,7 @@ function getTxHashLink(hash) {
 function getLinkForBlock(blockIndex, dataTitle, htmlize) {
   if (typeof(dataTitle) === 'undefined' || dataTitle === null) dataTitle = blockIndex;
   if (typeof(htmlize) === 'undefined' || htmlize === null) htmlize = true;
-  var url = BLOCKEXPLORER_URL + '/tx?block=' + blockIndex;
+  var url = BLOCKEXPLORER_URL + '/block/' + blockIndex;
   return htmlize ? '<a href="' + url + '" target="_blank">' + dataTitle + '</a>' : url;
 }
 

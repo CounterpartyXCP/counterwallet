@@ -208,27 +208,21 @@
               <i class="fa fa-lg fa-fw fa-book"></i> <span class="menu-item-parent" data-bind="locale: 'history'"></span>
             </a>
           </li>
-          <li class="">
-            <a href="#">
-              <i class="fa fa-lg fa-fw fa-plus"></i> <span class="menu-item-parent" data-bind="locale: 'more'"></span>
+          <!-- disable these for now -->
+          <!-- <li data-bind="visible: FEATURE_PORTFOLIO">
+            <a href="pages/portfolio.html">
+              <i class="fa fa-lg fa-fw fa-tasks"></i> <span data-bind="locale: 'my_portofolio'"></span>
             </a>
-            <ul>
-                <li data-bind="visible: FEATURE_PORTFOLIO">
-                  <a href="pages/portfolio.html">
-                    <i class="fa fa-lg fa-fw fa-tasks"></i> <span data-bind="locale: 'my_portofolio'"></span>
-                  </a>
-                </li>
-                <li data-bind="visible: FEATURE_LEADERBOARD">
-                  <a href="pages/leaderboard.html">
-                    <i class="fa fa-lg fa-fw fa-trophy"></i> <span data-bind="locale: 'top_assets'"></span>
-                  </a>
-                </li>
-                <li data-bind="visible: FEATURE_STATS">
-                    <a href="pages/stats.html">
-                      <i class="fa fa-lg fa-fw fa-crosshairs"></i> <span data-bind="locale: 'network_stats'"></span>
-                    </a>
-                </li>
-            </ul>
+          </li>
+          <li data-bind="visible: FEATURE_LEADERBOARD">
+            <a href="pages/leaderboard.html">
+              <i class="fa fa-lg fa-fw fa-trophy"></i> <span data-bind="locale: 'top_assets'"></span>
+            </a>
+          </li> -->
+          <li data-bind="visible: FEATURE_STATS">
+              <a href="pages/stats.html">
+                <i class="fa fa-lg fa-fw fa-crosshairs"></i> <span data-bind="locale: 'network_stats'"></span>
+              </a>
           </li>
         </ul>
       </nav>
