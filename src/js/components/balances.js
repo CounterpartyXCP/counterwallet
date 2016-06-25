@@ -1733,6 +1733,9 @@ function BroadcastModalViewModel() {
   }
 
   self.submitForm = function() {
+    //Update the date in the model from what the date/time widget says
+    self.broadcastDate($("input[name='broadcastTimestamp']").data("DateTimePicker").date.toDate())
+
     if (!self.validationModel.isValid()) {
       self.validationModel.errors.showAllMessages();
       return false;
