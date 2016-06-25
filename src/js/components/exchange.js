@@ -354,6 +354,9 @@ function ExchangeViewModel() {
       return false;
     }
 
+    if (!WALLET.canDoTransaction(self.selectedAddressForSell()))
+      return false;
+
     var buyOrders = self.bidBook();
     var amountCumul = 0;
     var estimatedTotalPrice = 0;
@@ -609,6 +612,9 @@ function ExchangeViewModel() {
       self.buyValidation.errors.showAllMessages();
       return false;
     }
+
+    if (!WALLET.canDoTransaction(self.selectedAddressForBuy()))
+      return false;
 
     var sellOrders = self.askBook();
     var amountCumul = 0;

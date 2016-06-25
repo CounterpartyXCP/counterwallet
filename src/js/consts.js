@@ -50,7 +50,7 @@ var UNIT = 100000000; //# satoshis in whole
 var MIN_FEE = 20000; // in satoshis (== .0002 BTC)
 var REGULAR_DUST_SIZE = 5430;
 var MULTISIG_DUST_SIZE = 7800;
-var MIN_PRIME_BALANCE = 50000; //in satoshis ... == .0005
+var MIN_BALANCE_FOR_ACTION = 50000; //in satoshis ... == .0005
 var ASSET_CREATION_FEE_XCP = 0.5; //in normalized XCP
 var DIVIDEND_FEE_PER_HOLDER = 0.0002
 var MAX_ASSET_DESC_LENGTH = 41; //42, minus a null term character?

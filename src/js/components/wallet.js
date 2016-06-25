@@ -539,7 +539,7 @@ function WalletViewModel() {
           numPrimedTxoutsIncl0Confirms = 0;
           totalBalance = 0;
           for (j = 0; j < data[i]['uxtos'].length; j++) {
-            if (denormalizeQuantity(data[i]['uxtos'][j]['amount']) >= MIN_PRIME_BALANCE) {
+            if (denormalizeQuantity(data[i]['uxtos'][j]['amount']) >= MIN_BALANCE_FOR_ACTION) {
               numPrimedTxoutsIncl0Confirms++;
               if (data[i]['uxtos'][j]['confirmations'] >= minConfirmations)
                 numSuitableUnspentTxouts++;
@@ -551,8 +551,8 @@ function WalletViewModel() {
             'blockHeight': data[i]['block_height'],
             'confirmedRawBal': parseInt(data[i]['info']['balanceSat'] || 0),
             'unconfirmedRawBal': parseInt(data[i]['info']['unconfirmedBalanceSat'] || 0),
-            'numPrimedTxouts': Math.min(numSuitableUnspentTxouts, Math.floor(totalBalance / MIN_PRIME_BALANCE)),
-            'numPrimedTxoutsIncl0Confirms': Math.min(numPrimedTxoutsIncl0Confirms, Math.floor(totalBalance / MIN_PRIME_BALANCE)),
+            'numPrimedTxouts': Math.min(numSuitableUnspentTxouts, Math.floor(totalBalance / MIN_BALANCE_FOR_ACTION)),
+            'numPrimedTxoutsIncl0Confirms': Math.min(numPrimedTxoutsIncl0Confirms, Math.floor(totalBalance / MIN_BALANCE_FOR_ACTION)),
             'lastTxns': data[i]['last_txns'],
             'rawUtxoData': data[i]['uxtos']
           });
@@ -573,8 +573,8 @@ function WalletViewModel() {
     var addressObj = self.getAddressObj(address);
     assert(!addressObj.IS_WATCH_ONLY, "Cannot perform this action on a watch only address!");
 
-    if (self.getBalance(address, "BTC", false) < MIN_PRIME_BALANCE) {
-      bootbox.alert(i18n.t("insufficient_btc", normalizeQuantity(MIN_PRIME_BALANCE), getAddressLabel(address)));
+    if (self.getBalance(address, "BTC", false) < MIN_BALANCE_FOR_ACTION) {
+      bootbox.alert(i18n.t("insufficient_btc", normalizeQuantity(MIN_BALANCE_FOR_ACTION), getAddressLabel(address)));
       return false;
     }
 
