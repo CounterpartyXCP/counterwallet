@@ -83,6 +83,7 @@ RUN cd src; bower --allow-root --config.interactive=false update; cd ..
 RUN npm update
 RUN grunt build --dontcheckdeps
 RUN cp -a /counterwallet/counterwallet.conf.json.example /counterwallet/counterwallet.conf.json
+RUN rm -f /root/.transifex
 
 EXPOSE 80 443
 
