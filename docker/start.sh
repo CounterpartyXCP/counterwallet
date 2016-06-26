@@ -32,4 +32,13 @@ export COUNTERBLOCK_PORT_TESTNET_CHAT=${COUNTERBLOCK_PORT_TESTNET_CHAT:=14102}
 VARS='$REDIS_HOST:$REDIS_PORT:$REDIS_DB:$COUNTERBLOCK_HOST_MAINNET:$COUNTERBLOCK_HOST_TESTNET:$COUNTERBLOCK_PORT_MAINNET:$COUNTERBLOCK_PORT_TESTNET:$COUNTERBLOCK_PORT_MAINNET_FEED:$COUNTERBLOCK_PORT_TESTNET_FEED:$COUNTERBLOCK_PORT_MAINNET_CHAT:$COUNTERBLOCK_PORT_TESTNET_CHAT'
 envsubst "$VARS" < /counterwallet/docker/nginx/counterwallet.conf.template > /etc/nginx/sites-enabled/counterwallet.conf
 
-nginx -g 'daemon off;'
+# Launch utilizing the SIGTERM/SIGINT propagation pattern from
+# http://veithen.github.io/2014/11/16/sigterm-propagation.html
+trap 'kill -TERM $PID' TERM INT
+nginx -g 'daemon off;' &
+# ^ maybe simplify to just be "nginx" in the future 
+PID=$!
+wait $PID
+trap - TERM INT
+wait $PID
+EXIT_STATUS=$?
