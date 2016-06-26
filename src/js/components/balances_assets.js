@@ -299,11 +299,6 @@ function ChangeAssetDescriptionModalViewModel() {
     return self.asset() ? self.asset().description() : '';
   }, self);
 
-  self.dispCharactersRemaining = ko.computed(function() {
-    if (!self.newDescription() || self.newDescription().length > MAX_ASSET_DESC_LENGTH) return '';
-    return ' (' + i18n.t('x_bytes_remaining', MAX_ASSET_DESC_LENGTH - byteCount(self.newDescription())) + ')';
-  }, self);
-
   self.validationModel = ko.validatedObservable({
     newDescription: self.newDescription
   });
