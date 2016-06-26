@@ -40,7 +40,7 @@ function describeError(jqXHR, textStatus, errorThrown) {
 }
 
 function defaultErrorHandler(jqXHR, textStatus, errorThrown, endpoint) {
-  if (typeof(endpoint) === 'undefined') endpoint = jqXHR.url;
+  if (typeof(endpoint) === 'undefined') endpoint = jqXHR ? jqXHR.url : "UNKNOWN/Default";
   var message = describeError(jqXHR, textStatus, errorThrown);
   bootbox.alert("Error making request to " + endpoint + ": " + message);
 }

@@ -582,6 +582,12 @@ function WalletViewModel() {
   }
 
   self.doTransaction = function(address, action, data, onSuccess, onError) {
+    if (typeof(onError) === 'undefined' || onError == "default") {
+      onError = function(jqXHR, textStatus, errorThrown) {
+        return defaultErrorHandler(jqXHR, textStatus, errorThrown); //from util.api.js
+      };
+    }
+
     assert(['sign_tx', 'broadcast_tx', 'convert_armory_signedtx_to_raw_hex'].indexOf(action) === -1,
       'Specified action not supported through this function. please use appropriate primatives');
 
