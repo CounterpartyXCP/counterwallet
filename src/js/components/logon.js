@@ -133,7 +133,7 @@ function LogonViewModel() {
         assert(data['caught_up'], "Invalid is_ready result"); //otherwise we should have gotten a 525 error
         assert(USE_TESTNET == data['testnet'], "USE_TESTNET is " + USE_TESTNET + " from URL-based detection, but the server API disagrees!");
 
-        $.jqlog.log("Backend is ready. Testnet status: " + USE_TESTNET + ". Last message feed index: " + data['last_message_index']);
+        $.jqlog.log("Backend is ready. Testnet status: " + USE_TESTNET + ". Last message feed index: " + data['last_message_index'] + ". CW last message seq: " + data['cw_last_message_seq']);
         assert(data['last_message_index'] > 0);
 
         //User is logging in...
@@ -151,8 +151,9 @@ function LogonViewModel() {
         //Set initial block height (will be updated again on each periodic refresh of BTC account balances)
         WALLET.networkBlockHeight(data['block_height']);
 
-        //Initialize the socket.io-driven event feed (notifies us in realtime of new events, as counterparty processes confirmed blocks)
-        MESSAGE_FEED.init(data['last_message_index']);
+        //Initialize the message feed (polls the server and notifies us of new
+        //events, as counterparty processes confirmed blocks and tx in mempool)
+        MESSAGE_FEED.init(data['last_message_index'], data['cw_last_message_seq']);
         //^ set the "starting" message_index, under which we will ignore if received on the messages feed
 
         // set user country

@@ -272,13 +272,6 @@ function createSharedKnockoutValidators() {
     message: i18n.t('asset_name_invalid')
   };
 
-  ko.validation.rules['isValidAssetDescription'] = {
-    validator: function(val, self) {
-      return byteCount(val) <= MAX_ASSET_DESC_LENGTH;
-    },
-    message: i18n.t('token_desc_too_long', MAX_ASSET_DESC_LENGTH)
-  };
-
   ko.validation.registerExtenders();
 }
 

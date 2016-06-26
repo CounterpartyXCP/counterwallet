@@ -16,8 +16,7 @@ function CreateAssetModalViewModel() {
     assetNameIsTaken: self
   });
   self.description = ko.observable('').extend({
-    required: false,
-    isValidAssetDescription: self
+    required: false
   });
   self.divisible = ko.observable(true);
   self.quantity = ko.observable().extend({
@@ -286,7 +285,6 @@ function ChangeAssetDescriptionModalViewModel() {
 
   self.newDescription = ko.observable('').extend({
     required: true,
-    isValidAssetDescription: self,
     validation: {
       validator: function(val, self) {
         return self.newDescription() != self.asset().description();
@@ -299,11 +297,6 @@ function ChangeAssetDescriptionModalViewModel() {
 
   self.dispAssetDescription = ko.computed(function() {
     return self.asset() ? self.asset().description() : '';
-  }, self);
-
-  self.dispCharactersRemaining = ko.computed(function() {
-    if (!self.newDescription() || self.newDescription().length > MAX_ASSET_DESC_LENGTH) return '';
-    return ' (' + i18n.t('x_bytes_remaining', MAX_ASSET_DESC_LENGTH - byteCount(self.newDescription())) + ')';
   }, self);
 
   self.validationModel = ko.validatedObservable({

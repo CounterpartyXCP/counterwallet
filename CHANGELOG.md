@@ -1,3 +1,22 @@
+### v1.8.0 ###
+**Release Date:** June 26, 2016 
+
+**Enhancements:**
+- Docker image builds
+- Eliminate socket.io feed code (which was causing issues/not working), replace with simple polling
+
+**Fixes:**
+- Fix exchange market display -- is now sortable (#768)
+- UI tweaks (#780)
+- Disable portfolio and leaderboard, clean up menu interface
+- Update bitcore to newest
+- Fix date field on broadcast modal (#779)
+- Remove asset description limit
+- Fix DEX buy/sell validation error messages (#746)
+- Better error handling (pops up an error dialog when many times before it would just error to console)
+- Pull up to 5000 history entries instead of 100 (fixes #565)
+- Fix minor display issues with issuances (#551, #427)
+
 ### v1.7.0 ###
 **Release Date:** January 24, 2016 
 

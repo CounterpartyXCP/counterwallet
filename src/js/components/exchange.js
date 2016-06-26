@@ -5,43 +5,47 @@ var BuySellAddressInDropdownItemModel = function(address, label, asset, balance)
   this.BALANCE = parseFloat(balance);
 };
 
-ko.validation.rules['ordersIsExistingAssetName'] = {
-  validator: function(asset, self) {
-    if (asset == 'XCP') return true;
-    var match = ko.utils.arrayFirst(self.allAssets(), function(item) {
-      return item == asset;
-    });
-    return match;
-  },
-  message: i18n.t("asset_doesnt_exist")
-};
+function createExchangeKnockoutValidators() {
+  ko.validation.rules['ordersIsExistingAssetName'] = {
+    validator: function(asset, self) {
+      if (asset == 'XCP') return true;
+      var match = ko.utils.arrayFirst(self.allAssets(), function(item) {
+        return item == asset;
+      });
+      return match;
+    },
+    message: i18n.t("asset_doesnt_exist")
+  };
 
-ko.validation.rules['baseDivisibilityIsOk'] = {
-  validator: function(value, self) {
-    if (!self.baseAssetIsDivisible() && (value % 1) > 0) {
-      return false;
-    } else {
-      return true;
-    }
-  },
-  message: i18n.t("nodivisible_amount_incorrect")
-};
+  ko.validation.rules['baseDivisibilityIsOk'] = {
+    validator: function(value, self) {
+      if (!self.baseAssetIsDivisible() && (value % 1) > 0) {
+        return false;
+      } else {
+        return true;
+      }
+    },
+    message: i18n.t("nodivisible_amount_incorrect")
+  };
 
-ko.validation.rules['quoteDivisibilityIsOk'] = {
-  validator: function(value, self) {
-    if (!self.quoteAssetIsDivisible() && (value % 1) > 0) {
-      return false;
-    } else {
-      return true;
-    }
-  },
-  message: i18n.t("nodivisible_total_incorrect")
-};
+  ko.validation.rules['quoteDivisibilityIsOk'] = {
+    validator: function(value, self) {
+      if (!self.quoteAssetIsDivisible() && (value % 1) > 0) {
+        return false;
+      } else {
+        return true;
+      }
+    },
+    message: i18n.t("nodivisible_total_incorrect")
+  };
 
-ko.validation.registerExtenders();
+  ko.validation.registerExtenders();
+}
 
 function ExchangeViewModel() {
   var self = this;
+  createExchangeKnockoutValidators();
+
   self.dexHome = ko.observable(true);
 
   self._lastWindowWidth = null;
@@ -354,6 +358,9 @@ function ExchangeViewModel() {
       return false;
     }
 
+    if (!WALLET.canDoTransaction(self.selectedAddressForSell()))
+      return false;
+
     var buyOrders = self.bidBook();
     var amountCumul = 0;
     var estimatedTotalPrice = 0;
@@ -610,6 +617,9 @@ function ExchangeViewModel() {
       return false;
     }
 
+    if (!WALLET.canDoTransaction(self.selectedAddressForBuy()))
+      return false;
+
     var sellOrders = self.askBook();
     var amountCumul = 0;
     var estimatedTotalPrice = 0;
@@ -738,9 +748,15 @@ function ExchangeViewModel() {
 
   self.displayAllPairs = function(data) {
     for (var i in data) {
-      data[i].volume = smartFormat(normalizeQuantity(data[i].volume, data[i].quote_divisibility));
-      data[i].supply = smartFormat(normalizeQuantity(data[i].supply, data[i].base_divisibility));
-      data[i].market_cap = smartFormat(normalizeQuantity(data[i].market_cap, data[i].quote_divisibility));
+      data[i].priceRaw = data[i].price;
+      data[i].volumeRaw = normalizeQuantity(data[i].volume, data[i].quote_divisibility);
+      data[i].supplyRaw = normalizeQuantity(data[i].supply, data[i].base_divisibility);
+      data[i].marketCapRaw = normalizeQuantity(data[i].market_cap, data[i].quote_divisibility);
+      data[i].progressionRaw = data[i].progression;
+
+      data[i].volume = smartFormat(data[i].volumeRaw);
+      data[i].supply = smartFormat(data[i].supplyRaw);
+      data[i].market_cap = smartFormat(data[i].marketCapRaw);
       if (parseFloat(data[i].progression) > 0) {
         data[i].prog_class = 'UP';
         data[i].progression = '+' + data[i].progression;
@@ -762,16 +778,42 @@ function ExchangeViewModel() {
     }
     self.allPairs(data);
     if (self.allPairs().length) {
-      runDataTables('#assetPairMarketInfo', true, {"aaSorting": [[0, 'asc']]});
+      runDataTables('#assetPairMarketInfo', true,
+        {
+          //"iDisplayLength": 15,
+          "aaSorting": [[0, 'asc']],
+          "aoColumns": [
+            {"sType": "numeric"}, //#
+            {"sType": "string"}, //asset/market
+            {"sType": "natural", "iDataSort": 7}, //price
+            {"sType": "natural", "iDataSort": 8}, //24h volume
+            {"sType": "natural", "iDataSort": 9}, //supply
+            {"sType": "natural", "iDataSort": 10}, //market cap
+            {"sType": "natural", "iDataSort": 11}, //24h change
+            null, //price RAW
+            null, //24h volume RAW
+            null, //supply RAW
+            null, //market cap RAW
+            null //24h change RAW
+          ]
+        });
     }
   }
 
+
   self.fetchAllPairs = function() {
     try {
+      //$('#wid-id-assetPairMarketInfo header span.jarviswidget-loader').show();
       self.allPairs([]);
       $('#assetPairMarketInfo').dataTable().fnClearTable();
+      //$('#assetPairMarketInfo_wrapper').hide();
     } catch (e) {}
-    failoverAPI('get_markets_list', [], self.displayAllPairs);
+    failoverAPI('get_markets_list', [], self.displayAllPairs)
+    /*failoverAPI('get_markets_list', [], function(data, endpoint) {
+      self.displayAllPairs(data);
+      $('#assetPairMarketInfo_wrapper').show();
+      //$('#wid-id-assetPairMarketInfo header span.jarviswidget-loader').hide();
+    });*/
   }
 
   /* MARKET DETAILS */

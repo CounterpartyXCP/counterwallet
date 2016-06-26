@@ -1,12 +1,52 @@
-language: nodejs
-install:
-- npm install -g bower grunt mocha-phantomjs
-- cd src; bower update; cd ..;
-- npm update
-- grunt build --dontcheckdeps
+sudo: required
+
+services:
+- docker
+
+env:
+  global:
+    # define DOCKER_USERNAME and DOCKER_PASSWORD
+    - secure: "GOCLkZc+B5Kc3R0hhg8sECxem8wyahb2Ybb4pAV7B3kbJxvRX2df5ziUUnRPS9+VJT1wFpk/o+fDJ0nWGMf6027jmhjthBHMH5rUJ+GX0Pv+25l10Kzq9oyqxCQQBP5Abji2I6L6xwmq2ab3t+5EJW5dqJjZLjC8BGpbBotNo5k="
+    - secure: "Cu3p2DsZTbzbySAuYq6kvsU1xVQO+a80kUmeoxBfgmi5wEHvqTfcUZOO8njnnYENpZrkT+Lag6zRnhbTcp80Jhr65aKaRee6Sv3Y72acsa/cxsa1vyAvok8QXtha/ufMNNYZjGzrOjBU+o5A3kEcRXGjK2ECfY6C5ojus/VWD2w="
+    # define TRANSIFEX_USER and TRANSIFEX_PASSWORD
+    - secure: "rmWqeKbL7WDfubOyzKiDBgB5d19yUmr/ittVwHvs8Bgcytv+R0psHHksTWx1iubZlN8BIki//vNd1HGzihUNlLZFd7PtoGxaa1w4tBuXsfZmELd9voh63NfJDdnLmtPLVLMd93mgvhcoRn5ijNkq/RE4jENidAyHUIPH+NB1kUA="
+    - secure: "qawk9YgXkZoo0ReajS0dOFU2NDdg+iOiJNOFhY4BnnyBRY9EtvrJUDtokoxS9xZlFVI67lK0rcXSDooNeMZv4WoRd2Ywvikk92YNvQLiCsiCRnnSVGBpeZQqcudGz+//27sL1qCfIDIqYJ4SaQZCWCxjPiA1dHC1cg7blRfJ4fU="
+
+before_install:
+- sudo apt-get -qq update
+# upgrade docker, for build argument support
+- sudo apt-get install -o Dpkg::Options::="--force-confold" --force-yes -y docker-engine
+- docker version
+- docker ps -a
+# get the current PR and branch name
+- sudo apt-get install jq
+- export PR=https://api.github.com/repos/$TRAVIS_REPO_SLUG/pulls/$TRAVIS_PULL_REQUEST
+- export BRANCH=$(if [ "$TRAVIS_PULL_REQUEST" == "false" ]; then echo $TRAVIS_BRANCH; else echo `curl -s $PR | jq -r .head.ref`; fi)
+- echo $PR
+- echo $BRANCH
+# determine the docker image tag name ("nopush" being a placeholder to signify the image will not be pushed to dockerhub)
+- export DOCKER_TAG="nopush"
+- |
+  if [ "$TRAVIS_PULL_REQUEST" == "false" ]; then
+    if [ "$BRANCH" == "master" ]; then export DOCKER_TAG="latest"; fi
+    if [ "$BRANCH" == "develop" ]; then export DOCKER_TAG="develop"; fi
+  fi
+- echo $DOCKER_TAG
+# build docker image
+- docker build -t counterparty/counterwallet:$DOCKER_TAG .
+
 script:
-- mocha-phantomjs test/test.html --ignore-ssl-errors=true --ignore-resource-errors
-  --ssl-protocol=any
+# run the test suite in the docker container we just made
+- docker run --entrypoint=/bin/bash counterparty/counterwallet:$DOCKER_TAG -c "cd /counterwallet; mocha-phantomjs test/test.html --ignore-ssl-errors=true --ignore-resource-errors --ssl-protocol=any"
+
+after_success:
+# if it's master or develop, then push the appropirately tagged docker image (otherwise don't push anything)
+- |
+  if [ "$DOCKER_TAG" != "nopush" ]; then
+    docker login -u="$DOCKER_USERNAME" -p="$DOCKER_PASSWORD";
+    docker push counterparty/counterwallet:$DOCKER_TAG;
+  fi
+
 notifications:
   slack:
     secure: Y1SVxKmUV6srsFy1J3zmSf79zTO/i81DQpzXBVd3Hb4nseyUS7Lml38tvFuMfEdHNP5I1fMgkUDIYWEZn9Wmy5QLGapEKk0JW2f6jih9JUg1OqyjnGqcK3H8jriEIRsw0yngeaWlIhtPJCgXvYEw7M2P8z8L6SpXFx6aaz0rGys=

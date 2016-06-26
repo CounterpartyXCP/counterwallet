@@ -221,7 +221,7 @@ function getTxHashLink(hash) {
 function getLinkForBlock(blockIndex, dataTitle, htmlize) {
   if (typeof(dataTitle) === 'undefined' || dataTitle === null) dataTitle = blockIndex;
   if (typeof(htmlize) === 'undefined' || htmlize === null) htmlize = true;
-  var url = BLOCKEXPLORER_URL + '/block-index/' + blockIndex;
+  var url = BLOCKEXPLORER_URL + '/block/' + blockIndex;
   return htmlize ? '<a href="' + url + '" target="_blank">' + dataTitle + '</a>' : url;
 }
 
@@ -229,3 +229,4 @@ function getAddressLabel(address) {
   //gets the address label if the address is in this wallet
   return PREFERENCES['address_aliases'][hashToB64(address)] || address;
 }
+

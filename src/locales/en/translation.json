@@ -228,7 +228,6 @@
   "asset_will_be_transfered": "<b class='notoAssetColor'>%s</b> will be transferred to <b class='notoAddressColor'>%s</b>.",
   "asset_has_been_transfered": "<b class='notoAssetColor'>%s</b> has been transferred to <b class='notoAddressColor'>%s</b>.",
   "same_description_token": "This description is the same as the current description.",
-  "x_bytes_remaining": "<b>%s</b> bytes remaining",
   "desc_will_be_changed": "The description for token <b class='notoAssetColor'>%s</b> will be changed to <b>%s</b>.",
   "desc_has_been_changed": "The description for token <b class='notoAssetColor'>%s</b>  has been changed to <b>%s</b>.",
   "no_dividend_to_distribute": "No dividend to distribute.",

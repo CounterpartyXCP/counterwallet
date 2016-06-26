@@ -546,3 +546,14 @@ div.showSupport {
   font-size: 12px;
   padding-top: 5px;
 }
+
+/* Notification boxes */
+#divSmallBoxes {
+  z-index: 1020; /* under the modal backdrop, but under the modal window */
+  /* use 1050 if we want it to be over the shaded modal backdrop */
+}
+
+.SmallBox {
+  color: #333;
+  border: 1px solid #333;
+}

@@ -356,6 +356,7 @@ function WalletViewModel() {
         });
 
       }
+
     );
 
 
@@ -381,7 +382,7 @@ function WalletViewModel() {
       return item.CATEGORY == 'sends' && item.DATA['asset'] == 'BTC'; //there is a pending BTC send
     });
 
-    self.retriveBTCAddrsInfo(addresses, function(data) {
+    self.retrieveBTCAddrsInfo(addresses, function(data) {
       //refresh the network block height (this is a bit hackish as blockHeight is embedded into each address object,
       // and they are all the same values, but we just look at the first value...we do it this way to avoid an extra API call every 5 minutes)
       if (data.length >= 1) self.networkBlockHeight(data[0]['blockHeight']);
@@ -435,7 +436,7 @@ function WalletViewModel() {
       if (onSuccess) onSuccess();
 
     }, function(jqXHR, textStatus, errorThrown) {
-      //insight down or spazzing, set all BTC balances out to null
+      //system down or spazzing, set all BTC balances out to null
       var addressObj = null;
       for (var i = 0; i < addresses.length; i++) {
         self.updateBalance(addresses[i], "BTC", null, null); //null = UNKNOWN
@@ -443,7 +444,9 @@ function WalletViewModel() {
         addressObj.numPrimedTxouts(null); //null = UNKNOWN
         addressObj.numPrimedTxoutsIncl0Confirms(null); //null = UNKNOWN
       }
-      bootbox.alert(i18n.t("btc_sync_error", textStatus));
+      //But don't pop up a message box so we don't freak out users -- just alert on console
+      $.jqlog.warn(i18n.t("btc_sync_error", textStatus));
+      //bootbox.alert(i18n.t("btc_sync_error", textStatus));
 
       if (isRecurring && self.autoRefreshBTCBalances) {
         setTimeout(function() {
@@ -518,7 +521,7 @@ function WalletViewModel() {
       onError || defaultErrorHandler);
   }
 
-  self.retriveBTCAddrsInfo = function(addresses, onSuccess, onError, minConfirmations) {
+  self.retrieveBTCAddrsInfo = function(addresses, onSuccess, onError, minConfirmations) {
     if (typeof(minConfirmations) === 'undefined') minConfirmations = 1;
     if (typeof(onError) === 'undefined')
       onError = function(jqXHR, textStatus, errorThrown) { return defaultErrorHandler(jqXHR, textStatus, errorThrown); };
@@ -536,7 +539,7 @@ function WalletViewModel() {
           numPrimedTxoutsIncl0Confirms = 0;
           totalBalance = 0;
           for (j = 0; j < data[i]['uxtos'].length; j++) {
-            if (denormalizeQuantity(data[i]['uxtos'][j]['amount']) >= MIN_PRIME_BALANCE) {
+            if (denormalizeQuantity(data[i]['uxtos'][j]['amount']) >= MIN_BALANCE_FOR_ACTION) {
               numPrimedTxoutsIncl0Confirms++;
               if (data[i]['uxtos'][j]['confirmations'] >= minConfirmations)
                 numSuitableUnspentTxouts++;
@@ -548,8 +551,8 @@ function WalletViewModel() {
             'blockHeight': data[i]['block_height'],
             'confirmedRawBal': parseInt(data[i]['info']['balanceSat'] || 0),
             'unconfirmedRawBal': parseInt(data[i]['info']['unconfirmedBalanceSat'] || 0),
-            'numPrimedTxouts': Math.min(numSuitableUnspentTxouts, Math.floor(totalBalance / MIN_PRIME_BALANCE)),
-            'numPrimedTxoutsIncl0Confirms': Math.min(numPrimedTxoutsIncl0Confirms, Math.floor(totalBalance / MIN_PRIME_BALANCE)),
+            'numPrimedTxouts': Math.min(numSuitableUnspentTxouts, Math.floor(totalBalance / MIN_BALANCE_FOR_ACTION)),
+            'numPrimedTxoutsIncl0Confirms': Math.min(numPrimedTxoutsIncl0Confirms, Math.floor(totalBalance / MIN_BALANCE_FOR_ACTION)),
             'lastTxns': data[i]['last_txns'],
             'rawUtxoData': data[i]['uxtos']
           });
@@ -570,8 +573,8 @@ function WalletViewModel() {
     var addressObj = self.getAddressObj(address);
     assert(!addressObj.IS_WATCH_ONLY, "Cannot perform this action on a watch only address!");
 
-    if (self.getBalance(address, "BTC", false) < MIN_PRIME_BALANCE) {
-      bootbox.alert(i18n.t("insufficient_btc", normalizeQuantity(MIN_PRIME_BALANCE), getAddressLabel(address)));
+    if (self.getBalance(address, "BTC", false) < MIN_BALANCE_FOR_ACTION) {
+      bootbox.alert(i18n.t("insufficient_btc", normalizeQuantity(MIN_BALANCE_FOR_ACTION), getAddressLabel(address)));
       return false;
     }
 
@@ -579,6 +582,12 @@ function WalletViewModel() {
   }
 
   self.doTransaction = function(address, action, data, onSuccess, onError) {
+    if (typeof(onError) === 'undefined' || onError == "default") {
+      onError = function(jqXHR, textStatus, errorThrown) {
+        return defaultErrorHandler(jqXHR, textStatus, errorThrown); //from util.api.js
+      };
+    }
+
     assert(['sign_tx', 'broadcast_tx', 'convert_armory_signedtx_to_raw_hex'].indexOf(action) === -1,
       'Specified action not supported through this function. please use appropriate primatives');
 

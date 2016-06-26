@@ -192,7 +192,7 @@ function TransactionHistoryItemViewModel(data) {
       } else if (self.DATA['locked']) {
         desc = i18n.t("hist_lock", self.DATA['asset']);
       } else {
-        desc = i18n.t("hist_issuance", smartFormat(normalizeQuantity(self.DATA['quantity'], self.DATA['divisible'])), self.DATA['asset']);
+        desc = i18n.t("hist_issuance", smartFormat(normalizeQuantity(self.DATA['quantity'], self.DATA['divisible'])).toString(), self.DATA['asset']);
       }
     } else if (self.RAW_TX_TYPE == 'broadcasts') {
       desc = i18n.t("hist_broadcast", self.DATA['text'], self.DATA['value']);
@@ -272,7 +272,7 @@ function TransactionHistoryViewModel() {
     self.transactions([]);
     $('#txnHistory').dataTable().fnClearTable();
     $('#txnHistory_wrapper').hide();
-    failoverAPI("get_raw_transactions", {address: newSelection}, function(data, endpoint) {
+    failoverAPI("get_raw_transactions", {address: newSelection, limit: 5000}, function(data, endpoint) {
       //clear table data and populate with the new data (which comes in the order of newest to oldest)
       for (var i = 0; i < data.length; i++) {
         self.transactions.push(new TransactionHistoryItemViewModel(data[i]));

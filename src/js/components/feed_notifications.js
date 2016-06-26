@@ -177,6 +177,10 @@ function NotificationFeedViewModel(initialCount) {
     if (self.entries().length > 40) self.entries.pop();
     self.lastUpdated(new Date());
     WALLET.refreshBTCBalances();
+
+    //Also notify the user via a CSS popup, so the action completing is more appearent.
+    //noty({type: 'success', text: noto.MESSAGE_TEXT, timeout: 10000});
+    $.smallBox({content: noto.MESSAGE_TEXT, timeout: 10000, color: "#fbfbfb", iconSmall : "fa fa-check"});
   }
 }
 

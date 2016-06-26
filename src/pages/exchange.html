@@ -17,7 +17,7 @@
     <div class="col-xs-12 col-sm-12 col-md-12 col-lg-12" data-bind="visible: !dexHome()">
       <h1 style="text-align:center;position:relative;margin:0">
         <a id="changeMarket" class="btn btn-primary" style="vertical-align:text-bottom;">
-          <span class="fa fa-arrow-left"><span>
+          <span class="fa fa-arrow-left"></span>
           <span data-bind="locale: 'all_markets'"></span>
         </a>
         <div class="pairTitle page-title txt-color-blueDark">
@@ -121,7 +121,7 @@
             <div class="widget-body no-padding"> <!-- widget content -->
                 <div class="widget-body-toolbar">
                 </div>
-                <table id="assetPairMarketInfo" class="table table-striped table-bordered table-hover datatable_basic">
+                <table id="assetPairMarketInfo" width="100%" class="table table-striped table-bordered table-hover datatable_basic">
                     <thead>
                         <tr class="centerHeader">
                             <th>#</th>
@@ -131,25 +131,29 @@
                             <th data-bind="locale: 'supply'"></th>
                             <th data-bind="locale: 'market_cap'"></th>
                             <th data-bind="locale: '24h_change'"></th>
+
+                            <th class="display-none">priceRaw</th>
+                            <th class="display-none">volumeRaw</th>
+                            <th class="display-none">supplyRaw</th>
+                            <th class="display-none">marketCapRaw</th>
+                            <th class="display-none">progressionRaw</th>
                         </tr>
                     </thead>
                     <tbody data-bind="foreach: allPairs">
                         <tr data-bind="click: $parent.selectMarket">
                             <td class="number" data-bind="text: pos"></td>
-                            <td style="with-space:nowrap">
-                                <b><span data-bind="text: base_asset"></span></b> / <span data-bind="text: quote_asset"></span>
-                            </td>
-                            <td style="text-align:right" data-bind="attr: {class: price_class}">
-                                <span data-bind="text: price"></span>
-                                <span data-bind="text: quote_asset"></span>
-                            </td>
-                            <td class="number">
-                                <span data-bind="text: volume || '0'"></span>
-                                <span data-bind="text: quote_asset"></span>
-                            </td>
+                            <td style="with-space:nowrap" data-bind="text: base_asset + ' / ' + quote_asset"></td>
+                            <td style="text-align:right" data-bind="text: price + ' ' + quote_asset, attr: {class: price_class}"></td>
+                            <td class="number" data-bind="text: (volume || '0') + ' ' + quote_asset"></td>
                             <td class="number" data-bind="text: supply + ' ' + base_asset"></td>
-                            <td class="number" data-bind="text: market_cap + ' ' + quote_asset"></td>
+                            <td class="number" data-bind="text: (market_cap || '0') + ' ' + quote_asset"></td>
                             <td style="text-align:center" data-bind="text: progression, attr: {class: prog_class}"></td>
+
+                            <td data-bind="text: priceRaw" class="display-none"></td>
+                            <td data-bind="text: volumeRaw" class="display-none"></td>
+                            <td data-bind="text: supplyRaw" class="display-none"></td>
+                            <td data-bind="text: marketCapRaw" class="display-none"></td>
+                            <td data-bind="text: progressionRaw" class="display-none"></td>
                         </tr>
                     </tbody>
                 </table>
