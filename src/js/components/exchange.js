@@ -5,43 +5,47 @@ var BuySellAddressInDropdownItemModel = function(address, label, asset, balance)
   this.BALANCE = parseFloat(balance);
 };
 
-ko.validation.rules['ordersIsExistingAssetName'] = {
-  validator: function(asset, self) {
-    if (asset == 'XCP') return true;
-    var match = ko.utils.arrayFirst(self.allAssets(), function(item) {
-      return item == asset;
-    });
-    return match;
-  },
-  message: i18n.t("asset_doesnt_exist")
-};
+function createExchangeKnockoutValidators() {
+  ko.validation.rules['ordersIsExistingAssetName'] = {
+    validator: function(asset, self) {
+      if (asset == 'XCP') return true;
+      var match = ko.utils.arrayFirst(self.allAssets(), function(item) {
+        return item == asset;
+      });
+      return match;
+    },
+    message: i18n.t("asset_doesnt_exist")
+  };
 
-ko.validation.rules['baseDivisibilityIsOk'] = {
-  validator: function(value, self) {
-    if (!self.baseAssetIsDivisible() && (value % 1) > 0) {
-      return false;
-    } else {
-      return true;
-    }
-  },
-  message: i18n.t("nodivisible_amount_incorrect")
-};
+  ko.validation.rules['baseDivisibilityIsOk'] = {
+    validator: function(value, self) {
+      if (!self.baseAssetIsDivisible() && (value % 1) > 0) {
+        return false;
+      } else {
+        return true;
+      }
+    },
+    message: i18n.t("nodivisible_amount_incorrect")
+  };
 
-ko.validation.rules['quoteDivisibilityIsOk'] = {
-  validator: function(value, self) {
-    if (!self.quoteAssetIsDivisible() && (value % 1) > 0) {
-      return false;
-    } else {
-      return true;
-    }
-  },
-  message: i18n.t("nodivisible_total_incorrect")
-};
+  ko.validation.rules['quoteDivisibilityIsOk'] = {
+    validator: function(value, self) {
+      if (!self.quoteAssetIsDivisible() && (value % 1) > 0) {
+        return false;
+      } else {
+        return true;
+      }
+    },
+    message: i18n.t("nodivisible_total_incorrect")
+  };
 
-ko.validation.registerExtenders();
+  ko.validation.registerExtenders();
+}
 
 function ExchangeViewModel() {
   var self = this;
+  createExchangeKnockoutValidators();
+
   self.dexHome = ko.observable(true);
 
   self._lastWindowWidth = null;
