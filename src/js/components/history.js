@@ -192,7 +192,7 @@ function TransactionHistoryItemViewModel(data) {
       } else if (self.DATA['locked']) {
         desc = i18n.t("hist_lock", self.DATA['asset']);
       } else {
-        desc = i18n.t("hist_issuance", smartFormat(normalizeQuantity(self.DATA['quantity'], self.DATA['divisible'])), self.DATA['asset']);
+        desc = i18n.t("hist_issuance", smartFormat(normalizeQuantity(self.DATA['quantity'], self.DATA['divisible'])).toString(), self.DATA['asset']);
       }
     } else if (self.RAW_TX_TYPE == 'broadcasts') {
       desc = i18n.t("hist_broadcast", self.DATA['text'], self.DATA['value']);
