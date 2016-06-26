@@ -33,7 +33,7 @@ before_install:
   fi
 - echo $DOCKER_TAG
 # build docker image
-- docker build -t counterparty/counterwallet:$DOCKER_TAG .
+- docker build -t counterparty/counterwallet:$DOCKER_TAG --build-arg TRANSIFEX_USER="$TRANSIFEX_USER" --build-arg TRANSIFEX_PASSWORD="$TRANSIFEX_PASSWORD" .
 
 script:
 # run the test suite in the docker container we just made
