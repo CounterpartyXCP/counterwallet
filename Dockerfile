@@ -74,8 +74,9 @@ RUN if [ -n "$TRANSIFEX_USER" ] && [ -n "$TRANSIFEX_PASSWORD" ]; then echo "$TRA
 
 # Install project
 COPY . /counterwallet
-WORKDIR /counterwallet
 RUN rm -rf /counterwallet/build
+WORKDIR /counterwallet
+RUN git rev-parse HEAD
 RUN npm -g install npm@latest
 RUN npm config set strict-ssl false
 ENV PHANTOMJS_CDNURL="http://cnpmjs.org/downloads"
