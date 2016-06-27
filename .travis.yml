@@ -22,8 +22,10 @@ before_install:
 - sudo apt-get install jq
 - export PR=https://api.github.com/repos/$TRAVIS_REPO_SLUG/pulls/$TRAVIS_PULL_REQUEST
 - export BRANCH=$(if [ "$TRAVIS_PULL_REQUEST" == "false" ]; then echo $TRAVIS_BRANCH; else echo `curl -s $PR | jq -r .head.ref`; fi)
+# Print some things for debugging purposes...
 - echo $PR
 - echo $BRANCH
+- echo `git rev-parse HEAD`
 # determine the docker image tag name ("nopush" being a placeholder to signify the image will not be pushed to dockerhub)
 - export DOCKER_TAG="nopush"
 - |
@@ -32,8 +34,10 @@ before_install:
     if [ "$BRANCH" == "develop" ]; then export DOCKER_TAG="develop"; fi
   fi
 - echo $DOCKER_TAG
+
+install:
 # build docker image
-- docker build -t counterparty/counterwallet:$DOCKER_TAG .
+- docker build -t counterparty/counterwallet:$DOCKER_TAG --no-cache --build-arg TRANSIFEX_USER="$TRANSIFEX_USER" --build-arg TRANSIFEX_PASSWORD="$TRANSIFEX_PASSWORD" .
 
 script:
 # run the test suite in the docker container we just made

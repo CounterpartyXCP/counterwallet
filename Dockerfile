@@ -74,15 +74,18 @@ RUN if [ -n "$TRANSIFEX_USER" ] && [ -n "$TRANSIFEX_PASSWORD" ]; then echo "$TRA
 
 # Install project
 COPY . /counterwallet
+RUN rm -rf /counterwallet/build
 WORKDIR /counterwallet
+RUN git rev-parse HEAD
 RUN npm -g install npm@latest
 RUN npm config set strict-ssl false
 ENV PHANTOMJS_CDNURL="http://cnpmjs.org/downloads"
 RUN npm install -g bower grunt mocha-phantomjs
 RUN cd src; bower --allow-root --config.interactive=false update; cd ..
 RUN npm update
-RUN grunt build --dontcheckdeps
+RUN grunt build
 RUN cp -a /counterwallet/counterwallet.conf.json.example /counterwallet/counterwallet.conf.json
+RUN rm -f /root/.transifex
 
 EXPOSE 80 443
 

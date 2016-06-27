@@ -18,7 +18,7 @@ fi
 
 # Specify defaults (defaults are overridden if defined in the environment)
 export REDIS_HOST=${REDIS_HOST:="redis"}
-export REDIS_PORT=${REDIS_PORT:=6739}
+export REDIS_PORT=${REDIS_PORT:=6379}
 export REDIS_DB=${REDIS_DB:=0}
 export COUNTERBLOCK_HOST_MAINNET=${COUNTERBLOCK_HOST_MAINNET:="counterblock"}
 export COUNTERBLOCK_HOST_TESTNET=${COUNTERBLOCK_HOST_TESTNET:="counterblock-testnet"}

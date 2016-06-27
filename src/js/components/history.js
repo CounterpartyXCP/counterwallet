@@ -272,7 +272,7 @@ function TransactionHistoryViewModel() {
     self.transactions([]);
     $('#txnHistory').dataTable().fnClearTable();
     $('#txnHistory_wrapper').hide();
-    failoverAPI("get_raw_transactions", {address: newSelection, limit: 5000}, function(data, endpoint) {
+    failoverAPI("get_raw_transactions", {address: newSelection, limit: 2500}, function(data, endpoint) {
       //clear table data and populate with the new data (which comes in the order of newest to oldest)
       for (var i = 0; i < data.length; i++) {
         self.transactions.push(new TransactionHistoryItemViewModel(data[i]));
