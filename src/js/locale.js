@@ -1,6 +1,6 @@
 /*
 Current language is set:
-- with "lang" query string. for instance (?lang=fr)
+- with "lang" query string. for instance (?lang=fr)  (**NOTE: not currently used anymore as it causes wallet loading issues.**)
 - else if absent with first subdomain. for instance fr.counterwallet.co or testnet-fr.counterwallet.co
 - else if absent with local storage (localStorage.getItem("LANG"))
 - else if absent with DEFAULT_LANG
@@ -40,7 +40,7 @@ i18n.t('key2', 'world') => "Hello world"
 
 
 */
-//var AVAILABLE_LANGUAGES = ['fr', 'en', 'de', 'da', 'zh_cn', 'zh_tw', 'fi', 'tr', 'it', 'ja', 'es', 'ru'];
+
 var AVAILABLE_LANGUAGES;
 var DEFAULT_LANG;
 var LANG;
@@ -50,7 +50,7 @@ function localeInit(callback) {
     lng: LANG,
     fallbackLng: DEFAULT_LANG,
     lngWhitelist: AVAILABLE_LANGUAGES,
-    resGetPath: 'locales/__lng__/__ns__.json',
+    resGetPath: '/locales/__lng__/__ns__.json',
     shorcutFunction: 'sprintf'
   }
   i18n.init(options, function() {
@@ -63,7 +63,7 @@ function localeInit(callback) {
 }
 
 function loadLocaleConfig(callback) {
-  $.getJSON("/counterwallet.conf.json", function(data) {
+  $.getJSON(COUNTERWALLET_CONF_LOCATION, function(data) {
 
     if ($.isArray(data["AVAILABLE_LANGUAGES"]))
       AVAILABLE_LANGUAGES = data["AVAILABLE_LANGUAGES"];

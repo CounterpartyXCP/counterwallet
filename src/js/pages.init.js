@@ -84,6 +84,12 @@ function initIndex() { //main page
       });
     });
 
+    $("div#langSelector a").click(function(e) {
+      $.jqlog.info("Setting language to: " + $(this).attr('lang'));
+      localStorage.setItem("LANG", $(this).attr('lang'));
+      location.reload();
+    });
+
     $('.showCreateSupportCase').click(function(e) {
       SUPPORT_MODAL.hide(); //oftentimes it will be up...don't want layers of modals
       CREATE_SUPPORT_CASE_VIEW_MODEL.show();
