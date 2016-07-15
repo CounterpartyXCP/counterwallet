@@ -562,19 +562,21 @@ function SendModalViewModel() {
   }, self);
 
   self.dispNormalizedBalance = ko.computed(function() {
-    return smartFormat(self.normalizedBalance());
+    return smartFormat(self.normalizedBalance(), null, 8);
   }, self);
 
   self.normalizedBalRemaining = ko.computed(function() {
     if (!isNumber(self.quantity())) return null;
     var curBalance = normalizeQuantity(self.rawBalance(), self.divisible());
     var balRemaining = Decimal.round(new Decimal(curBalance).sub(parseFloat(self.quantity())), 8, Decimal.MidpointRounding.ToEven).toFloat();
+    if (self.asset() == 'BTC')
+      balRemaining = subFloat(balRemaining, normalizeQuantity(MIN_FEE))  // include the fee 
     if (balRemaining < 0) return null;
     return balRemaining;
   }, self);
 
   self.dispNormalizedBalRemaining = ko.computed(function() {
-    return smartFormat(self.normalizedBalRemaining());
+    return smartFormat(self.normalizedBalRemaining(), null, 8);
   }, self);
 
   self.normalizedBalRemainingIsSet = ko.computed(function() {
