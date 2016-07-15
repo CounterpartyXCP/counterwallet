@@ -1087,7 +1087,7 @@ function SweepModalViewModel() {
 
       var onTransactionError = function() {
         if (arguments.length == 4) {
-          var match = arguments[1].match(/Insufficient bitcoins at address [^\s]+\. \(Need approximately ([\d]+\.[\d]+) BTC/);
+          var match = arguments[1].match(/Insufficient BTC at address [^\s]+\. \(Need approximately ([\d]+\.[\d]+) BTC/);
 
           if (match != null) {
             $.jqlog.debug(arguments[1]);

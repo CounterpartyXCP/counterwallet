@@ -67,9 +67,11 @@
     <div id="allContent" style="display:none">
 
     <div id="langSelector" data-bind="visible: AVAILABLE_LANGUAGES.length > 1, foreach: AVAILABLE_LANGUAGES">
-      <a data-bind="visible: LANG != $data, attr: {href: '?lang=' + $data}">
+      <a href="#" data-bind="visible: LANG != $data, attr: {lang:  $data}">
         <img data-bind="attr: {src: 'assets/' + $data + '.png'}" />
       </a>
+
+
       <span data-bind="visible: LANG == $data">
         <img data-bind="attr: {src: 'assets/' + $data + '.png'}" />
       </span>
