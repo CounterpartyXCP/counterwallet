@@ -394,7 +394,7 @@ function multiAPIConsensus(method, params, onSuccess, onConsensusError, onSysErr
     onSysError = function(jqXHR, textStatus, errorThrown, endpoint) {
       $.jqlog.debug(textStatus);
       var message = textStatus;
-      var noBtcPos = textStatus.indexOf("Insufficient bitcoins");
+      var noBtcPos = textStatus.indexOf("Insufficient BTC");
       if (noBtcPos != -1) {
         var endMessage = textStatus.indexOf(")", noBtcPos) + 1;
 
