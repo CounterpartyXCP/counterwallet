@@ -213,7 +213,7 @@
   "token_already_exists": "Token name is already taken",
   "token_dont_exists": "Token name does not exist",
   "asset_length_invalid": "Asset name is too long, or too short",
-  "asset_name_invalid": "Asset name invalid",
+  "asset_name_invalid": "Allowed asset name is 4 to 12 uppercase Latin characters",
   "token_desc_too_long": "Token description is more than %s bytes long.",
   "token_name_rules": "Must contain between 4 and 12 uppercase letters only (A-Z), and cannot start with 'A'.",
   "free_token_name_rules": "Must start with 'A', followed by a large random number.",
