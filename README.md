@@ -115,7 +115,7 @@ You can run tests in your browser by doing the above steps and;
  - `npm test`
 
 
-Licence
+License
 -------------------
 
 http://opensource.org/licenses/CDDL-1.0
