@@ -32,7 +32,7 @@
         "typeahead.js": "0.10.2",
         "select2": "3.4.6",
         "font-awesome": "4.0.3",
-        "bitcore-lib": "0.13.16",
+        "bitcore-lib": "0.13.19",
         "bitcore-message": "1.0.2",
         "mocha": "1.18.2",
         "chai": "1.9.1",
