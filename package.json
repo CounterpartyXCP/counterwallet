@@ -2,6 +2,7 @@
   "name": "counterwallet",
   "description": "Counterwallet",
   "author": "Counterparty development team",
+  "license": "(CDDL-1.0)",
   "version": "1.8.0",
   "main": "build/index.html",
   "repository": { 

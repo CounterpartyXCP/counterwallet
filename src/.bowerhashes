@@ -47,7 +47,7 @@
     "src/vendors/cryptojs/components/enc-utf16-min.js": "229897e5bf2c5a816b477d669c5c332ef4def434440bbd2b2c7f251b1de80b31",
     "src/vendors/cryptojs/rollups/hmac-sha512.js": "17f2992e236980c8c028c98af64521e2646e7a995930a6e76515f29d0b5ae2eb",
     "src/vendors/cryptojs/rollups/aes.js": "5d035049162eaece2fa83a5d1c4d95ad95e77f75657a6b1ce8f102026813b73a",
-    "src/vendors/bitcore-lib/bitcore-lib.js": "8a8c6d5bfe89f41243b19f9069bf77a7b19de1cca655276e0fee192a369a1cfe",
+    "src/vendors/bitcore-lib/bitcore-lib.js": "d585c394fad0f209048e075ba5dd62c264f0ac4eee17e0a9db4b8b7b603d2f0c",
     "src/vendors/bitcore-message/bitcore-message.js": "7eb1b1c66a66448f855264ed39bd165cd92b14cfec3b2baa41246518d1bf5d1a",
     "src/vendors/jsdecimal/lib/decimal.js": "6f9e7a19a414fec2b9925d516ff3d805cadc1ec19bc6e840f3fe4d2f2d6d0c3b",
     "src/vendors/select2/select2.min.js": "231818c9b851ff39ad5f17dc24837c79560199e7fdaa3eb0be153527a2b9e0bd",
