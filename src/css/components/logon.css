@@ -9,6 +9,11 @@
   overflow: auto;
 }
 
+.weclomeLogo {
+  margin: 10px 0px 10px 0px;
+  text-align: center;
+}
+
 .sales-title {
   text-align: center;
   margin: 0px;
