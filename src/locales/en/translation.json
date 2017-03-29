@@ -678,8 +678,6 @@
   "broadcast_interval": "Broadcast interval",
   "url": "URL",
   "fee": "Fee",
-  "miners_fee": "Miners fee",
-  "redeemable_fee": "Reedemable fee",
   "owner": "Owner",
   "select_feed": "Select feed",
   "enter_bet": "Enter bet",
@@ -821,5 +819,9 @@
   "pubkey": "PubKey",
   "for_the_address": "For the address <b>%s</b>",
   "enter_pubkey": "Enter PubKey",
-  "pubkey_not_match": "PubKey do not match with the address"
+  "pubkey_not_match": "PubKey do not match with the address",
+
+  "fee_option": "Bitcoin Fee",
+  "fee_option_optimal": "Normal Priority",
+  "fee_option_low_priority": "Low Priority (Cheaper)"
 }

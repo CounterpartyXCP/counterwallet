@@ -2,7 +2,7 @@ function CreateAssetModalViewModel() {
   var self = this;
   self.shown = ko.observable(false);
   self.address = ko.observable('');
-  self.noEnoughXCP = ko.observable(false)
+  self.noEnoughXCP = ko.observable(false);
 
   self.tokenNameType = ko.observable('alphabetic');
   self.tokenNameType.subscribe(function(val) {
@@ -24,6 +24,7 @@ function CreateAssetModalViewModel() {
     isValidPositiveQuantityOrZero: self,
     isValidQtyForDivisibility: self
   });
+  self.feeOption = ko.observable('optimal');
 
   self.validationModel = ko.validatedObservable({
     name: self.name,
@@ -41,6 +42,7 @@ function CreateAssetModalViewModel() {
     self.description('');
     self.divisible(true);
     self.quantity(null);
+    self.feeOption('optimal');
     self.validationModel.errors.showAllMessages(false);
   }
 
@@ -78,7 +80,8 @@ function CreateAssetModalViewModel() {
         quantity: rawQuantity,
         divisible: self.divisible(),
         description: self.description(),
-        transfer_destination: null
+        transfer_destination: null,
+        _fee_option: self.feeOption()
       },
       function(txHash, data, endpoint, addressType, armoryUTx) {
         var message = "";
@@ -107,6 +110,7 @@ function CreateAssetModalViewModel() {
     self.address(address);
     self.tokenNameType('numeric');
     self.generateRandomId();
+    $('#createAssetFeeOption').select2("val", self.feeOption()); //hack
     self.shown(true);
     trackDialogShow('CreateAsset');
   }

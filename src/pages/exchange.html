@@ -359,20 +359,16 @@
                       <td data-bind="text: quoteAsset"></td>
                     </tr>
                     <tr>
-                      <td colspan="2">
+                      <td colspan="3">
                       <div class="form-group">
-                        <label class="control-label nopad col-xs-6" data-bind="locale: 'miners_fee'"></label>
-                        <div class="col-xs-6 number" data-bind="text: buyFee"></div>
+                        <label class="control-label col-xs-2" data-bind="locale: 'fee_option'"></label>
+                        <div class="col-xs-10">
+                            <select id="buyFeeOption" class="select2" data-bind="select2: { minimumResultsForSearch: 100 }, value: buyFeeOption, valueUpdate: 'input'" style="width:50%">
+                              <option value="optimal" data-bind="locale: 'fee_option_optimal'"></option>
+                              <option value="low_priority" data-bind="locale: 'fee_option_low_priority'"></option>
+                            </select>
+                        </div>
                       </div></td>
-                      <td>BTC</td>
-                    </tr>
-                    <tr>
-                      <td colspan="2">
-                      <div class="form-group">
-                        <label class="control-label nopad col-xs-6" data-bind="locale: 'redeemable_fee'"></label>
-                        <div class="col-xs-6 number" data-bind="text: buyRedeemableFee"></div>
-                      </div></td>
-                      <td>BTC</td>
                     </tr>
                     <tr>
                       <td colspan="3" style="text-align:center"><a id="buyButton" class="btn btn-default btn-lg" data-bind="click: buy">Buy (<span data-bind="text: quoteAsset + '→' + baseAsset"></span>)</a></td>
@@ -468,20 +464,16 @@
                       <td data-bind="text: quoteAsset"></td>
                     </tr>
                     <tr>
-                      <td colspan="2">
+                      <td colspan="3">
                       <div class="form-group">
-                        <label class="control-label nopad col-xs-6" data-bind="locale: 'miners_fee'"></label>
-                        <div class="col-xs-6 number" data-bind="text: sellFee"></div>
+                        <label class="control-label col-xs-2" data-bind="locale: 'fee_option'"></label>
+                        <div class="col-xs-10">
+                            <select id="sellFeeOption" class="select2" data-bind="select2: { minimumResultsForSearch: 100 }, value: sellFeeOption, valueUpdate: 'input'" style="width:50%">
+                              <option value="optimal" data-bind="locale: 'fee_option_optimal'">Optimal</option>
+                              <option value="low_priority" data-bind="locale: 'fee_option_low_priority'">Low Priority</option>
+                            </select>
+                        </div>
                       </div></td>
-                      <td>BTC</td>
-                    </tr>
-                    <tr>
-                      <td colspan="2">
-                      <div class="form-group">
-                        <label class="control-label nopad col-xs-6" data-bind="locale: 'redeemable_fee'"></label>
-                        <div class="col-xs-6 number" data-bind="text: sellRedeemableFee"></div>
-                      </div></td>
-                      <td>BTC</td>
                     </tr>
                     <tr>
                       <td colspan="3" style="text-align:center"><a id="sellButton" class="btn btn-default btn-lg" data-bind="click: sell"><span data-bind="locale: 'Sell'"></span> (<span data-bind="text:baseAsset + '→' + quoteAsset"></span>)</a></td>

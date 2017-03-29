@@ -50,7 +50,7 @@ function localeInit(callback) {
     lng: LANG,
     fallbackLng: DEFAULT_LANG,
     lngWhitelist: AVAILABLE_LANGUAGES,
-    resGetPath: '/locales/__lng__/__ns__.json',
+    resGetPath: (_.startsWith(location.pathname, "/src") ? '/src': '') + '/locales/__lng__/__ns__.json',
     shorcutFunction: 'sprintf'
   }
   i18n.init(options, function() {

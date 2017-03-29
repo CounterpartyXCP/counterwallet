@@ -112,7 +112,7 @@ function MessageFeed() {
   }
 
   self.parseMessage = function(seq, when, message) {
-    if (!message || (message.substring && message.startswith("<html>"))) return;
+    if (!message || (message.substring && _.startsWith(message, "<html>"))) return;
     //^ sometimes nginx can trigger this via its proxy handling it seems, with a blank payload (or a html 502 Bad Gateway
     // payload) -- especially if the backend server reloads. Just ignore it.
     // Also, a message may be sent over as None if it is a stub message conterblock uses to initialize the sequence count

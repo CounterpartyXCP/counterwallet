@@ -182,6 +182,7 @@ function ExchangeViewModel() {
     isValidPositiveQuantity: self,
     quoteDivisibilityIsOk: self
   });
+  self.sellFeeOption = ko.observable('optimal');
   self.sellPriceHasFocus = ko.observable();
   self.sellAmountHasFocus = ko.observable();
   self.sellTotalHasFocus = ko.observable();
@@ -268,13 +269,6 @@ function ExchangeViewModel() {
     sellTotal: self.sellTotal
   });
 
-  self.sellFee = ko.computed(function() {
-    var give_quantity = denormalizeQuantity(self.sellAmount(), self.baseAssetIsDivisible());
-    var fee_provided = MIN_FEE;
-    return normalizeQuantity(fee_provided);
-  });
-
-  self.sellRedeemableFee = ko.observable(normalizeQuantity(2 * MULTISIG_DUST_SIZE));
 
   self.selectBuyOrder = function(order, notFromClick) {
     var price = new Decimal(cleanHtmlPrice(order.price));
@@ -333,7 +327,8 @@ function ExchangeViewModel() {
       _get_divisible: self.quoteAssetIsDivisible(),
       fee_required: fee_required,
       fee_provided: fee_provided,
-      expiration: expiration
+      expiration: expiration,
+      _fee_option: self.sellFeeOption()
     }
 
     var onSuccess = function(txHash, data, endpoint, addressType, armoryUTx) {
@@ -433,6 +428,7 @@ function ExchangeViewModel() {
     isValidPositiveQuantity: self,
     quoteDivisibilityIsOk: self
   });
+  self.buyFeeOption = ko.observable('optimal');
   self.buyPriceHasFocus = ko.observable();
   self.buyAmountHasFocus = ko.observable();
   self.buyTotalHasFocus = ko.observable();
@@ -523,14 +519,6 @@ function ExchangeViewModel() {
     buyAmount: self.buyAmount
   });
 
-  self.buyFee = ko.computed(function() {
-    var give_quantity = denormalizeQuantity(self.buyTotal(), self.quoteAssetIsDivisible());
-    var fee_provided = MIN_FEE;
-    return normalizeQuantity(fee_provided);
-  });
-
-  self.buyRedeemableFee = ko.observable(normalizeQuantity(2 * MULTISIG_DUST_SIZE));
-
   self.selectSellOrder = function(order, notFromClick) {
     var price = new Decimal(cleanHtmlPrice(order.price));
     var amount = new Decimal(order.base_depth);
@@ -592,7 +580,8 @@ function ExchangeViewModel() {
       _get_divisible: self.baseAssetIsDivisible(),
       fee_required: fee_required,
       fee_provided: fee_provided,
-      expiration: expiration
+      expiration: expiration,
+      _fee_option: self.buyFeeOption()
     }
 
     var onSuccess = function(txHash, data, endpoint, addressType, armoryUTx) {
@@ -924,6 +913,12 @@ function ExchangeViewModel() {
       self.selectedQuoteAsset('Other');
       self.asset2(item.quote_asset);
     }
+
+    self.buyFeeOption('optimal');
+    self.sellFeeOption('optimal');
+    $('#buyFeeOption').select2("val", self.buyFeeOption()); //hack
+    $('#sellFeeOption').select2("val", self.sellFeeOption()); //hack
+
     trackEvent('Exchange', 'MarketSelected', self.dispAssetPair());
   }
 

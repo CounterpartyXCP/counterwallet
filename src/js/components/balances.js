@@ -80,7 +80,7 @@ function CreateNewAddressModalViewModel() {
   var self = this;
   self.shown = ko.observable(false);
 
-  self.addressType = ko.observable(null); //addressType is one of: normal, watch, or armory
+  self.addressType = ko.observable(null); //addressType is one of: normal, watch, armory or multisig
   self.armoryPubKey = ko.observable(null); //only set with armory offline addresses
   self.watchAddress = ko.observable('').extend({
     isValidMonosigAddressIfSpecified: self,
@@ -407,7 +407,6 @@ function CreateNewAddressModalViewModel() {
   }
 }
 
-
 function SendModalViewModel() {
   var self = this;
   self.shown = ko.observable(false);
@@ -415,6 +414,7 @@ function SendModalViewModel() {
   self.asset = ko.observable();
   self.rawBalance = ko.observable(null);
   self.divisible = ko.observable();
+  self.feeOption = ko.observable('optimal');
 
   self.destAddress = ko.observable('').extend({
     required: true,
@@ -602,6 +602,8 @@ function SendModalViewModel() {
     self.missingPubkey3(false);
     self.missingPubkey3Address('');
 
+    self.feeOption('optimal');
+
     self.validationModel.errors.showAllMessages(false);
   }
 
@@ -642,7 +644,8 @@ function SendModalViewModel() {
         quantity: denormalizeQuantity(parseFloat(self.quantity()), self.divisible()),
         asset: self.asset(),
         _divisible: self.divisible(),
-        _pubkeys: additionalPubkeys.concat(self._additionalPubkeys)
+        _pubkeys: additionalPubkeys.concat(self._additionalPubkeys),
+        _fee_option: self.feeOption()
       },
       function(txHash, data, endpoint, addressType, armoryUTx) {
         var message = "<b>" + (armoryUTx ? i18n.t("will_be_sent") : i18n.t("were_sent")) + " </b>";
@@ -665,6 +668,7 @@ function SendModalViewModel() {
     self.asset(asset);
     self.rawBalance(rawBalance);
     self.divisible(isDivisible);
+    $('#sendFeeOption').select2("val", self.feeOption()); //hack
     self.shown(true);
     trackDialogShow('Send');
   }

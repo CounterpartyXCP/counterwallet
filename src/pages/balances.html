@@ -378,6 +378,19 @@
                 <span class="invalid" data-bind="validationMessage: quantity"></span>
             </div>
           </div></section>
+
+          <section><div class="row">
+            <label class="control-label col col-sm-2" data-bind="locale: 'fee_option'"></label>
+            <div class="col col-sm-10">
+                <label class="input">
+                    <select id="sendFeeOption" class="select2" data-bind="select2: { minimumResultsForSearch: 100 }, value: feeOption, valueUpdate: 'input'" style="width:50%;">
+                      <option value="optimal" data-bind="locale: 'fee_option_optimal'"></option>
+                      <option value="low_priority" data-bind="locale: 'fee_option_low_priority'"></option>
+                    </select>
+                </label>
+            </div>
+          </div></section>
+          
         </fieldset></form>
         <p class="formPaddedBot" data-bind="fadeVisibleInOnly: normalizedBalRemainingIsSet, locale: 'after_sending', localeArgs: {0: dispNormalizedBalRemaining, 1: asset}"></p>
       </div>
@@ -670,6 +683,19 @@
               </label>
               <div class="note" data-bind="locale: 'make_divisible_note'"></div>
           </div></section>
+
+          <section><div class="row">
+            <label class="control-label col col-sm-2" data-bind="locale: 'fee_option'"></label>
+            <div class="col col-sm-10">
+                <label class="input">
+                    <select id="createAssetFeeOption" class="select2" data-bind="select2: { minimumResultsForSearch: 100 }, value: feeOption, valueUpdate: 'input'" style="width:50%;">
+                      <option value="optimal" data-bind="locale: 'fee_option_optimal'">Optimal</option>
+                      <option value="low_priority" data-bind="locale: 'fee_option_low_priority'">Low Priority</option>
+                    </select>
+                </label>
+            </div>
+          </div></section>
+
         </fieldset></form>
         <p class="formPadded" style="text-align:center" data-bind="visible: tokenNameType== 'alphabetic', locale: 'asset_creation_fee_xcp', localeArgs: ASSET_CREATION_FEE_XCP"></p>
       </div>
