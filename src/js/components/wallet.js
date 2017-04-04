@@ -658,19 +658,26 @@ function WalletViewModel() {
     failoverAPI("get_optimal_fee_per_kb", {},
       function(fee_per_kb) {
         data['fee_per_kb'] = fee_per_kb['optimal'];
-        if (data['_fee_option']) {
-          if(data['_fee_option'] == 'low_priority') {
+        if (data.hasOwnProperty('_fee_option')) {
+          if (data['_fee_option'] === 'low_priority') {
             data['fee_per_kb'] = fee_per_kb['low_priority'];
           }
+          else if (data['_fee_option'] === 'custom') {
+            assert(data.hasOwnProperty('_custom_fee'));
+            data['fee_per_kb'] = data['_custom_fee'] * 1024;
+          }
           delete data['_fee_option'];
+        }
+        if (data.hasOwnProperty('_custom_fee')) {
+          delete data['_custom_fee'];
         }
 
         //Do the transaction
         multiAPIConsensus(action, data,
           function(unsignedTxHex, numTotalEndpoints, numConsensusEndpoints) {
-            $.jqlog.debug("TXN CREATED. numTotalEndpoints="
+            $.jqlog.info("TXN CREATED. numTotalEndpoints="
               + numTotalEndpoints + ", numConsensusEndpoints="
-              + numConsensusEndpoints + ", RAW HEX=" + unsignedTxHex);
+              + numConsensusEndpoints + ", FEE=" + data['fee_per_kb'] + ", RAW HEX=" + unsignedTxHex);
 
             //if the address is an armory wallet, then generate an offline transaction to get signed
             if (addressObj.IS_ARMORY_OFFLINE) {
@@ -681,7 +688,7 @@ function WalletViewModel() {
                 },
                 function(asciiUTx, numTotalEndpoints, numConsensusEndpoints) {
                   //DO not add to pending action feed (it will be added automatically via zeroconf when the p2p network sees the tx)
-                  $.jqlog.debug("ARMORY UTX GENERATED: " + asciiUTx);
+                  $.jqlog.info("ARMORY UTX GENERATED: " + asciiUTx);
                   return onSuccess ? onSuccess(null, data, null, 'armory', asciiUTx) : null;
                 }
               );

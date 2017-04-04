@@ -809,6 +809,7 @@
   "must_be_positive_integer": "Must be a positive integer",
   "must_be_url": "This field must be a valid url",
   "must_be_url_or_address": "This field must be a valid url or a valid Bitcoin address",
+  "must_be_valid_custom_fee": "This field must be a valid fee (in satoshi per byte)",
 
   "first_address": "First Address",
   "second_address": "Second Address",
@@ -823,5 +824,7 @@
 
   "fee_option": "Bitcoin Fee",
   "fee_option_optimal": "Normal Priority",
-  "fee_option_low_priority": "Low Priority (Cheaper)"
+  "fee_option_low_priority": "Low Priority (Cheaper)",
+  "fee_option_custom": "Custom Fee",
+  "enter_fee_option_custom": "Fee in Satoshi/Byte"
 }

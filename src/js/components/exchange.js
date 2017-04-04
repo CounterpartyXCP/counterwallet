@@ -183,12 +183,29 @@ function ExchangeViewModel() {
     quoteDivisibilityIsOk: self
   });
   self.sellFeeOption = ko.observable('optimal');
+  self.sellCustomFee = ko.observable(null).extend({
+    validation: [{
+      validator: function(val, self) {
+        return self.sellFeeOption() === 'custom' ? val : true;
+      },
+      message: i18n.t('field_required'),
+      params: self
+    }],
+    isValidCustomFeeIfSpecified: self
+  });
   self.sellPriceHasFocus = ko.observable();
   self.sellAmountHasFocus = ko.observable();
   self.sellTotalHasFocus = ko.observable();
   self.obtainableForSell = ko.observable();
   self.selectedAddressForSell = ko.observable();
   self.availableBalanceForSell = ko.observable();
+
+  self.sellFeeOption.subscribeChanged(function(newValue, prevValue) {
+    if(newValue !== 'custom') {
+      self.sellCustomFee(null);
+      self.sellCustomFee.isModified(false);
+    }
+  });
 
   self.availableAddressesForSell = ko.computed(function() { //stores BuySellAddressInDropdownItemModel objects
     if (!self.baseAsset()) return null; //must have a sell asset selected
@@ -266,7 +283,8 @@ function ExchangeViewModel() {
   self.sellValidation = ko.validatedObservable({
     sellAmount: self.sellAmount,
     sellPrice: self.sellPrice,
-    sellTotal: self.sellTotal
+    sellTotal: self.sellTotal,
+    sellCustomFee: self.sellCustomFee
   });
 
 
@@ -328,7 +346,8 @@ function ExchangeViewModel() {
       fee_required: fee_required,
       fee_provided: fee_provided,
       expiration: expiration,
-      _fee_option: self.sellFeeOption()
+      _fee_option: self.sellFeeOption(),
+      _custom_fee: self.sellCustomFee()
     }
 
     var onSuccess = function(txHash, data, endpoint, addressType, armoryUTx) {
@@ -429,12 +448,30 @@ function ExchangeViewModel() {
     quoteDivisibilityIsOk: self
   });
   self.buyFeeOption = ko.observable('optimal');
+  self.buyCustomFee = ko.observable(null).extend({
+    validation: [{
+      validator: function(val, self) {
+        return self.buyFeeOption() === 'custom' ? val : true;
+      },
+      message: i18n.t('field_required'),
+      params: self
+    }],
+    isValidCustomFeeIfSpecified: self
+  });
+
   self.buyPriceHasFocus = ko.observable();
   self.buyAmountHasFocus = ko.observable();
   self.buyTotalHasFocus = ko.observable();
   self.obtainableForBuy = ko.observable();
   self.selectedAddressForBuy = ko.observable();
   self.availableBalanceForBuy = ko.observable();
+
+  self.buyFeeOption.subscribeChanged(function(newValue, prevValue) {
+    if(newValue !== 'custom') {
+      self.buyCustomFee(null);
+      self.buyCustomFee.isModified(false);
+    }
+  });
 
   self.availableAddressesForBuy = ko.computed(function() { //stores BuySellAddressInDropdownItemModel objects
     if (!self.quoteAsset()) return null; //must have a sell asset selected
@@ -516,7 +553,8 @@ function ExchangeViewModel() {
   self.buyValidation = ko.validatedObservable({
     buyTotal: self.buyTotal,
     buyPrice: self.buyPrice,
-    buyAmount: self.buyAmount
+    buyAmount: self.buyAmount,
+    buyCustomFee: self.buyCustomFee
   });
 
   self.selectSellOrder = function(order, notFromClick) {
@@ -581,7 +619,8 @@ function ExchangeViewModel() {
       fee_required: fee_required,
       fee_provided: fee_provided,
       expiration: expiration,
-      _fee_option: self.buyFeeOption()
+      _fee_option: self.buyFeeOption(),
+      _custom_fee: self.buyCustomFee()
     }
 
     var onSuccess = function(txHash, data, endpoint, addressType, armoryUTx) {
@@ -915,7 +954,10 @@ function ExchangeViewModel() {
     }
 
     self.buyFeeOption('optimal');
+    self.buyCustomFee(null);
     self.sellFeeOption('optimal');
+    self.sellCustomFee(null);
+
     $('#buyFeeOption').select2("val", self.buyFeeOption()); //hack
     $('#sellFeeOption').select2("val", self.sellFeeOption()); //hack
 

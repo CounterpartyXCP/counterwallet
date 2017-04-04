@@ -362,13 +362,21 @@
                       <td colspan="3">
                       <div class="form-group">
                         <label class="control-label col-xs-2" data-bind="locale: 'fee_option'"></label>
-                        <div class="col-xs-10">
-                            <select id="buyFeeOption" class="select2" data-bind="select2: { minimumResultsForSearch: 100 }, value: buyFeeOption, valueUpdate: 'input'" style="width:50%">
+                        <div class="col-xs-5">
+                            <select id="buyFeeOption" class="select2" data-bind="select2: { minimumResultsForSearch: 100 }, value: buyFeeOption, valueUpdate: 'input'" style="width:100%">
                               <option value="optimal" data-bind="locale: 'fee_option_optimal'"></option>
                               <option value="low_priority" data-bind="locale: 'fee_option_low_priority'"></option>
+                              <option value="custom" data-bind="locale: 'fee_option_custom'"></option>
                             </select>
                         </div>
-                      </div></td>
+                        <div class="col col-xs-5">
+                            <label class="input">
+                                <input name="customFee" data-bind="visible: buyFeeOption() === 'custom', value: buyCustomFee, localeAttr: {'placeholder': 'enter_fee_option_custom'}"/>
+                            </label>
+                        </div>
+                      </div>
+                      <span class="invalid" data-bind="validationMessage: buyCustomFee"></span>
+                      </td>
                     </tr>
                     <tr>
                       <td colspan="3" style="text-align:center"><a id="buyButton" class="btn btn-default btn-lg" data-bind="click: buy">Buy (<span data-bind="text: quoteAsset + '→' + baseAsset"></span>)</a></td>
@@ -467,13 +475,21 @@
                       <td colspan="3">
                       <div class="form-group">
                         <label class="control-label col-xs-2" data-bind="locale: 'fee_option'"></label>
-                        <div class="col-xs-10">
-                            <select id="sellFeeOption" class="select2" data-bind="select2: { minimumResultsForSearch: 100 }, value: sellFeeOption, valueUpdate: 'input'" style="width:50%">
+                        <div class="col-xs-5">
+                            <select id="sellFeeOption" class="select2" data-bind="select2: { minimumResultsForSearch: 100 }, value: sellFeeOption, valueUpdate: 'input'" style="width:100%">
                               <option value="optimal" data-bind="locale: 'fee_option_optimal'">Optimal</option>
                               <option value="low_priority" data-bind="locale: 'fee_option_low_priority'">Low Priority</option>
+                              <option value="custom" data-bind="locale: 'fee_option_custom'"></option>
                             </select>
                         </div>
-                      </div></td>
+                        <div class="col col-xs-5">
+                            <label class="input">
+                                <input name="customFee" data-bind="visible: sellFeeOption() === 'custom', value: sellCustomFee, localeAttr: {'placeholder': 'enter_fee_option_custom'}"/>
+                            </label>
+                        </div>
+                      </div>
+                      <span class="invalid" data-bind="validationMessage: sellCustomFee"></span>
+                      </td>
                     </tr>
                     <tr>
                       <td colspan="3" style="text-align:center"><a id="sellButton" class="btn btn-default btn-lg" data-bind="click: sell"><span data-bind="locale: 'Sell'"></span> (<span data-bind="text:baseAsset + '→' + quoteAsset"></span>)</a></td>

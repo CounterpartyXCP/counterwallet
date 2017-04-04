@@ -25,11 +25,29 @@ function CreateAssetModalViewModel() {
     isValidQtyForDivisibility: self
   });
   self.feeOption = ko.observable('optimal');
+  self.customFee = ko.observable(null).extend({
+    validation: [{
+      validator: function(val, self) {
+        return self.feeOption() === 'custom' ? val : true;
+      },
+      message: i18n.t('field_required'),
+      params: self
+    }],
+    isValidCustomFeeIfSpecified: self
+  });
+
+  self.feeOption.subscribeChanged(function(newValue, prevValue) {
+    if(newValue !== 'custom') {
+      self.customFee(null);
+      self.customFee.isModified(false);
+    }
+  });
 
   self.validationModel = ko.validatedObservable({
     name: self.name,
     description: self.description,
-    quantity: self.quantity
+    quantity: self.quantity,
+    customFee: self.customFee
   });
 
   self.generateRandomId = function() {
@@ -43,6 +61,7 @@ function CreateAssetModalViewModel() {
     self.divisible(true);
     self.quantity(null);
     self.feeOption('optimal');
+    self.customFee(null);
     self.validationModel.errors.showAllMessages(false);
   }
 
@@ -81,7 +100,8 @@ function CreateAssetModalViewModel() {
         divisible: self.divisible(),
         description: self.description(),
         transfer_destination: null,
-        _fee_option: self.feeOption()
+        _fee_option: self.feeOption(),
+        _custom_fee: self.customFee()
       },
       function(txHash, data, endpoint, addressType, armoryUTx) {
         var message = "";

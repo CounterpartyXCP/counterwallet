@@ -415,6 +415,23 @@ function SendModalViewModel() {
   self.rawBalance = ko.observable(null);
   self.divisible = ko.observable();
   self.feeOption = ko.observable('optimal');
+  self.customFee = ko.observable(null).extend({
+    validation: [{
+      validator: function(val, self) {
+        return self.feeOption() === 'custom' ? val : true;
+      },
+      message: i18n.t('field_required'),
+      params: self
+    }],
+    isValidCustomFeeIfSpecified: self
+  });
+
+  self.feeOption.subscribeChanged(function(newValue, prevValue) {
+    if(newValue !== 'custom') {
+      self.customFee(null);
+      self.customFee.isModified(false);
+    }
+  });
 
   self.destAddress = ko.observable('').extend({
     required: true,
@@ -586,6 +603,7 @@ function SendModalViewModel() {
   self.validationModel = ko.validatedObservable({
     destAddress: self.destAddress,
     quantity: self.quantity,
+    customFee: self.customFee,
     pubkey1: self.pubkey1,
     pubkey2: self.pubkey2,
     pubkey3: self.pubkey3
@@ -603,6 +621,7 @@ function SendModalViewModel() {
     self.missingPubkey3Address('');
 
     self.feeOption('optimal');
+    self.customFee(null);
 
     self.validationModel.errors.showAllMessages(false);
   }
@@ -645,7 +664,8 @@ function SendModalViewModel() {
         asset: self.asset(),
         _divisible: self.divisible(),
         _pubkeys: additionalPubkeys.concat(self._additionalPubkeys),
-        _fee_option: self.feeOption()
+        _fee_option: self.feeOption(),
+        _custom_fee: self.customFee()
       },
       function(txHash, data, endpoint, addressType, armoryUTx) {
         var message = "<b>" + (armoryUTx ? i18n.t("will_be_sent") : i18n.t("were_sent")) + " </b>";

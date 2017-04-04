@@ -181,6 +181,14 @@ function createSharedKnockoutValidators() {
     message: i18n.t('must_be_url')
   };
 
+  ko.validation.rules['isValidCustomFeeIfSpecified'] = {
+    validator: function(val, self) {
+      if (!val) return true; //the "if specified" part of the name
+      return val.toString().match(/^[0-9]+$/) && parseFloat(val) > 0 && parseFloat(val) <= 1000;
+    },
+    message: i18n.t('must_be_valid_custom_fee')
+  };
+
   ko.validation.rules['isValidUrlOrValidBitcoinAdressOrJsonBet'] = {
     validator: function(val, self) {
       if (!val) return false;
@@ -379,6 +387,17 @@ ko.bindingHandlers.fadeVisibleInOnly = {
         //ko.unwrap(value) ? $(element).animate({opacity:100}) : $(element).show().animate({opacity:0});
     }
 };*/
+
+ko.bindingHandlers['visibleInline'] = {
+    'update': function (element, valueAccessor) {
+        var value = ko.utils.unwrapObservable(valueAccessor());
+        var isCurrentlyVisible = !(element.style.display == "none");
+        if (value && !isCurrentlyVisible)
+            element.style.display = "inline";
+        else if ((!value) && isCurrentlyVisible)
+            element.style.display = "none";
+    }
+};
 
 ko.bindingHandlers.fadeInText = {
   'update': function(element, valueAccessor) {
