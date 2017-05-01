@@ -186,7 +186,7 @@ function getLinkForCPData(type, dataID, dataTitle, htmlize) {
   if (typeof(type) === 'undefined') type = 'tx';
   var url = null;
   if (type == 'address') { //dataID is an address
-    url = "http://" + (USE_TESTNET ? 'testnet.' : '') + "blockscan.com/address/" + dataID;
+    url = "https://" + (USE_TESTNET ? 'testnet.' : '') + "counterpartychain.io/address/" + dataID;
     //format multisig addresses
     if (dataTitle.indexOf("_") > -1) {
       var parts = dataTitle.split('_');
@@ -197,9 +197,9 @@ function getLinkForCPData(type, dataID, dataTitle, htmlize) {
       dataTitle += " (" + parts.join(', ') + ")";
     }
   } else if (type == 'order') { //txID is an order ID
-    url = "http://" + (USE_TESTNET ? 'testnet.' : '') + "blockscan.com/orderinfo/" + dataID;
+    url = "https://" + (USE_TESTNET ? 'testnet.' : '') + "counterpartychain.io/orders/" + dataID;
   } else if (type == 'tx') { //generic TX
-    url = "http://" + (USE_TESTNET ? 'testnet.' : '') + "blockscan.com/txInfo/" + dataID;
+    url = "https://" + (USE_TESTNET ? 'testnet.' : '') + "counterpartychain.io/tx/" + dataID;
   } else {
     assert(false, "Unknown type of " + type);
   }
