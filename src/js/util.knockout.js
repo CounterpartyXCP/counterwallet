@@ -244,7 +244,7 @@ function createSharedKnockoutValidators() {
         if(_.startsWith(val, '.') || _.endsWith(val, '.') || val.includes('..')) {
           return false;
         }
-        var patt = new RegExp("^[A-Za-z0-9.\-_@!]{1,250}$");
+        var patt = new RegExp("^[A-Za-z0-9.\\-_@!]{1,250}$");
         return patt.test(val);
       } else if (self.tokenNameType() == 'numeric') {
         var patt = new RegExp("^A[0-9]{17,}$");
