@@ -1364,7 +1364,12 @@ function pageSetUp() {
     // is desktop
     
     // activate tooltips
-    $("[rel=tooltip]").tooltip();
+    setTimeout(function() {
+      if ($("[rel=tooltip]").length) {
+        $("[rel=tooltip]").tooltip();
+      }
+    }, 700);
+    //$("[rel=tooltip]").tooltip();
   
     // activate popovers
     $("[rel=popover]").popover();

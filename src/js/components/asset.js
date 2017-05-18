@@ -2,7 +2,12 @@ function AssetViewModel(props) {
   //An address has 2 or more assets (BTC, XCP, and any others)
   var self = this;
   self.ADDRESS = props['address']; //will not change
-  self.ASSET = props['asset']; //assetID, will not change
+  self.ASSET = props['asset']; //assetID (asset name), will not change. 
+  self.ASSET_LONGNAME = props['asset_longname']; //for subassets, this is the entire asset name (asset_longname). for everything else, this is == .ASSET
+
+  self.ASSET_DISP_FULL = self.ASSET_LONGNAME || self.ASSET; //the human readable name of the asset
+  self.ASSET_DISP = _.truncate(self.ASSET_LONGNAME || self.ASSET, SUBASSET_MAX_DISP_LENGTH); // truncate if necessary
+
   self.DIVISIBLE = props['divisible'] !== undefined ? props['divisible'] : true;
   self.owner = ko.observable(props['owner']);
   self.locked = ko.observable(props['locked'] !== undefined ? props['locked'] : false);
@@ -48,6 +53,15 @@ function AssetViewModel(props) {
     return smartFormat(self.normalizedTotalIssued());
   }, self);
 
+  self.assetType = ko.computed(function() {
+    if(_.startsWith(self.ASSET, 'A') && !self.ASSET_LONGNAME) {
+      return 'numeric';
+    } else if(self.ASSET_LONGNAME) {
+      return 'subasset';
+    } else {
+      return 'named';
+    }
+  }, self);
 
   self.unconfirmedBalance = ko.observable(0);
   self.unconfirmedBalance.subscribe(function(value) {
@@ -80,7 +94,7 @@ function AssetViewModel(props) {
       return;
     }
     if (!WALLET.canDoTransaction(self.ADDRESS)) return false;
-    SEND_MODAL.show(self.ADDRESS, self.ASSET, self.rawAvailableBalance(), self.DIVISIBLE);
+    SEND_MODAL.show(self.ADDRESS, self.ASSET, self.ASSET_DISP, self.rawAvailableBalance(), self.DIVISIBLE);
   };
 
   self.showInfo = function() {

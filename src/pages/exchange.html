@@ -11,9 +11,6 @@
         </button>
     </div>
 
-
-
-
     <div class="col-xs-12 col-sm-12 col-md-12 col-lg-12" data-bind="visible: !dexHome()">
       <h1 style="text-align:center;position:relative;margin:0">
         <a id="changeMarket" class="btn btn-primary" style="vertical-align:text-bottom;">
@@ -36,8 +33,6 @@
   </div>
 
   <div class="row"> <!-- row -->
-
-
     <article class="col-xs-12 col-sm-12 col-md-6 col-lg-6"> <!-- NEW WIDGET START -->
       <!-- Widget ID (each widget will need unique ID)-->
       <div class="jarviswidget defaultWidgetColor" id="wid-id-orderInputSelection" data-widget-editbutton="false" data-widget-sortable="false" data-widget-deletebutton="false" data-widget-colorbutton="false" data-widget-fullscreenbutton="false" data-widget-togglebutton="false"  data-widget-grid="false" >
@@ -50,8 +45,8 @@
             <div class="widget-body min-height-0 no-padding" style="min-height:0 !important" data-bind="validationOptions: { insertMessages: false }"> <!-- widget content -->
 
               <div class="topPairsGrid" data-bind="foreach: topUserPairs">
-                <a href="#" data-bind="click: $parent.selectMarket, attr: {class: pair_classes}">
-                  <span data-bind="text:base_asset"></span>/<span data-bind="text:quote_asset"></span>
+                <a href="#" data-bind="click: $parent.selectMarket, attr: {class: pair_classes}, attrIf: {rel: 'tooltip', title: (base_asset_longname || base_asset) + '/' + (quote_asset_longname || quote_asset), _if: (base_asset_longname || quote_asset_longname) || base_asset.length > 13 || quote_asset.length > 13}">
+                  <span data-bind="truncatedText:base_asset_longname || base_asset, maxTextLength: 13"></span>/<span data-bind="truncatedText:quote_asset_longname || quote_asset, maxTextLength: 13"></span>
                 </a>
               </div>
 
@@ -73,30 +68,30 @@
                 <div class="row" style="height:90px">
                     <section class="col col-lg-4 col-sm-4">
                       <div style="padding:10px">
-                        <label for="asset1" class="control-label font-medlg" data-bind="locale: 'token_1'"></label>
+                        <label for="asset1Raw" class="control-label font-medlg" data-bind="locale: 'token_1'"></label>
                         <label class="input" style="margin-bottom:0">
-                            <input type="text" id="asset1" name="asset1" class="form-control input" type="text" placeholder="Asset name" data-bind="value: asset1" />
+                            <input type="text" id="asset1Raw" name="asset1Raw" class="form-control input" type="text" placeholder="Asset name" data-bind="value: asset1Raw" />
                         </label>
-                        <span class="errorColor" data-bind="validationMessage: asset1"></span>
+                        <span class="errorColor" data-bind="validationMessage: asset1Raw"></span>
                       </div>
                     </section>
                     <section class="col-md-3">
                       <div style="padding-top:10px">
-                        <label for="asset2" class="control-label font-medlg"  data-bind="locale: 'token_2'"></label>
+                        <label for="asset2Raw" class="control-label font-medlg"  data-bind="locale: 'token_2'"></label>
                         <div class="btn-group buySellBtnGroup" data-toggle="buttons" style="margin-bottom:0">
                           <label class="radioBtn btn" data-bind="css: { 'btn-success': selectedQuoteAsset() == 'XCP', 'active': selectedQuoteAsset() == 'XCP'}">
                             <input type="radio" value="XCP" data-bind="btnGroupChecked: selectedQuoteAsset">XCP</label>
                           <label class="radioBtn btn" data-bind="css: { 'btn-success': selectedQuoteAsset() == 'Other', 'active': selectedQuoteAsset() == 'Other'}">
                             <input type="radio" value="Other" data-bind="btnGroupChecked: selectedQuoteAsset">Other</label>
                         </div>
-                        <span class="errorColor" data-bind="validationMessage: asset2"></span>
+                        <span class="errorColor" data-bind="validationMessage: asset2Raw"></span>
                       </div>
                     </section>
                     <section class="col col-lg-4 col-sm-4" data-bind="visible: selectedQuoteAsset() == 'Other'">
                       <div style="padding-top:10px">
-                        <label for="asset2" class="control-label font-medlg" style="display:block">&nbsp;</label>
+                        <label for="asset2Raw" class="control-label font-medlg" style="display:block">&nbsp;</label>
                         <label class="input">
-                            <input type="text" id="asset2" name="asset2" class="form-control input" type="text" placeholder="Asset name" data-bind="value: asset2" />
+                            <input type="text" id="asset2Raw" name="asset2Raw" class="form-control input" type="text" placeholder="Asset name" data-bind="value: asset2Raw" />
                         </label>
                       </div>
                     </section>
@@ -107,7 +102,6 @@
     </article> <!-- WIDGET END -->
 
   </div> <!-- end row -->
-
 
   <div data-bind="fadeVisibleInOnly: dexHome() && allPairs().length > 0" class="row"> <!-- row -->
     <article class="col-xs-12 col-sm-12 col-md-12 col-lg-12"> <!-- NEW WIDGET START -->
@@ -142,7 +136,9 @@
                     <tbody data-bind="foreach: allPairs">
                         <tr data-bind="click: $parent.selectMarket">
                             <td class="number" data-bind="text: pos"></td>
-                            <td style="with-space:nowrap" data-bind="text: base_asset + ' / ' + quote_asset"></td>
+                            <td style="with-space:nowrap">
+                              <span data-bind="truncatedText:(base_asset_longname || base_asset) + '/' + (quote_asset_longname || quote_asset), maxTextLength: 35, attrIf: {rel: 'tooltip', title: (base_asset_longname || base_asset) + '/' + (quote_asset_longname || quote_asset), _if: base_asset_longname || quote_asset_longname}"></span>
+                            </td>
                             <td style="text-align:right" data-bind="text: price + ' ' + quote_asset, attr: {class: price_class}"></td>
                             <td class="number" data-bind="text: (volume || '0') + ' ' + quote_asset"></td>
                             <td class="number" data-bind="text: supply + ' ' + base_asset"></td>
@@ -203,15 +199,15 @@
         </header>
         <div> <!-- widget div-->
             <div class="widget-body no-padding"> <!-- widget content -->
-              <div class="custom-scroll table-responsive" style="height: 200px;">
+              <div class="custom-scroll table-responsive" style="height: 200px;overflow-x:hidden">
                 <table class="orderBook table table-striped table-bordered table-condensed table-hover">
                     <thead>
                         <tr class="centerHeader">
                             <th data-bind="locale: 'type'"></th>
                             <th data-bind="locale: 'block_time'"></th>
-                            <th><span data-bind="locale: 'price'"></span> [<span data-bind="text: quoteAsset"></span>]</th>
-                            <th><span data-bind="locale: 'amount'"></span> [<span data-bind="text: baseAsset"></span>]</th>
-                            <th><span data-bind="locale: 'total'"></span> [<span data-bind="text: quoteAsset"></span>]</th>
+                            <th><span data-bind="locale: 'price'"></span> [<span data-bind="text: dispQuoteAsset"></span>]</th>
+                            <th><span data-bind="locale: 'amount'"></span> [<span data-bind="text: dispBaseAsset"></span>]</th>
+                            <th><span data-bind="locale: 'total'"></span> [<span data-bind="text: dispQuoteAsset"></span>]</th>
                             <th><span data-bind="locale: 'status'"></span></th>
                         </tr>
                     </thead>
@@ -242,14 +238,14 @@
         </header>
         <div> <!-- widget div-->
             <div class="widget-body no-padding"> <!-- widget content -->
-                <div class="custom-scroll table-responsive" style="height:200px;">
+                <div class="custom-scroll table-responsive" style="height:200px;overflow-x:hidden">
                   <table class="orderBook table table-striped table-bordered table-condensed table-hover">
                       <thead>
                           <tr class="centerHeader">
                               <th data-bind="locale: 'type'"></th>
-                              <th><span data-bind="locale: 'price'"></span> [<span data-bind="text: baseAsset + '/' + quoteAsset"></span>]</th>
-                              <th><span data-bind="locale: 'amount'"></span> [<span data-bind="text: baseAsset"></span>]</th>
-                              <th><span data-bind="locale: 'total'"></span> [<span data-bind="text: quoteAsset"></span>]</th>
+                              <th><span data-bind="locale: 'price'"></span> [<span data-bind="text: dispQuoteAsset"></span>]</th>
+                              <th><span data-bind="locale: 'amount'"></span> [<span data-bind="text: dispBaseAsset"></span>]</th>
+                              <th><span data-bind="locale: 'total'"></span> [<span data-bind="text: dispQuoteAsset"></span>]</th>
                               <th data-bind="locale: 'completion'"></th>
                               <th data-bind="locale: 'action'"></th>
                           </tr>
@@ -282,13 +278,13 @@
        data-widget-colorbutton="false" data-widget-fullscreenbutton="false" data-widget-togglebutton="false" data-widget-sortable="false" data-widget-grid="false" data-bind="fadeVisibleInOnly: validationModelBaseOrders.isValid() && !dexHome()">
         <header>
             <span class="widget-icon"> <i class="fa fa-sort-amount-desc"></i> </span>
-            <h3 class="tradeForm" data-bind="text: 'Buy ' + baseAsset"></h3>
+            <h3 class="tradeForm" data-bind="text: 'Buy ' + dispBaseAsset"></h3>
             <div class="clearfix"></div>
         </header>
         <div> <!-- widget div-->
           <div class="widget-body no-padding buyForm"> <!-- widget content -->
             <form class="form-horizontal">
-              <div class="table-responsive">
+              <div class="table-responsive" style="overflow-x:hidden">
                 <table class="table buySellForm">
                   <tbody>
                     <tr>
@@ -307,7 +303,7 @@
                         <label class="control-label nopad col-xs-6" data-bind="locale: 'your_balance'"></label>
                         <div class="col-xs-6 number" data-bind="text: availableBalanceForBuy, click: setMaxBuyAmount" style="cursor:pointer"></div>
                       </div></td>
-                      <td data-bind="text: quoteAsset"></td>
+                      <td data-bind="text: dispQuoteAsset"></td>
                     </tr>
                     <tr>
                       <td colspan="2">
@@ -315,7 +311,7 @@
                         <label class="control-label nopad col-xs-6" data-bind="locale: 'lowest_ask_price'"></label>
                         <div class="col-xs-6 number" data-bind="text:lowestAskPrice"></div>
                       </div></td>
-                      <td data-bind="text: quoteAsset + '/' + baseAsset"></td>
+                      <td data-bind="text: dispQuoteAsset"></td>
                     </tr>
                     <tr>
                       <td colspan="2">
@@ -323,7 +319,7 @@
                         <label class="control-label nopad col-xs-6" data-bind="locale: 'obtainable'"></label>
                         <div class="col-xs-6 number" data-bind="text: obtainableForBuy"></div>
                       </div></td>
-                      <td data-bind="text: baseAsset"></td>
+                      <td data-bind="text: dispBaseAsset"></td>
                     </tr>
                     <tr>
                       <td colspan="2">
@@ -334,7 +330,7 @@
                           <span class="invalid text-danger" data-bind="validationMessage: buyPrice"></span>
                         </div>
                       </div></td>
-                      <td data-bind="text: quoteAsset + '/' + baseAsset"></td>
+                      <td data-bind="text: dispQuoteAsset"></td>
                     </tr>
                     <tr>
                       <td colspan="2">
@@ -345,7 +341,7 @@
                           <span class="invalid text-danger" data-bind="validationMessage: buyAmount"></span>
                         </div>
                       </div></td>
-                      <td data-bind="text: baseAsset"></td>
+                      <td data-bind="text: dispBaseAsset"></td>
                     </tr>
                     <tr>
                       <td colspan="2">
@@ -356,7 +352,7 @@
                           <span class="invalid text-danger" data-bind="validationMessage: buyTotal"></span>
                         </div>
                       </div></td>
-                      <td data-bind="text: quoteAsset"></td>
+                      <td data-bind="text: dispQuoteAsset"></td>
                     </tr>
                     <tr>
                       <td colspan="3">
@@ -379,7 +375,7 @@
                       </td>
                     </tr>
                     <tr>
-                      <td colspan="3" style="text-align:center"><a id="buyButton" class="btn btn-default btn-lg" data-bind="click: buy">Buy (<span data-bind="text: quoteAsset + '→' + baseAsset"></span>)</a></td>
+                      <td colspan="3" style="text-align:center"><a id="buyButton" class="btn btn-default btn-lg" data-bind="click: buy">Buy (<span data-bind="text: dispQuoteAsset + ' → ' + dispBaseAsset"></span>)</a></td>
                     </tr>
                   </tbody>
                 </table>
@@ -395,13 +391,13 @@
        data-widget-colorbutton="false" data-widget-fullscreenbutton="false" data-widget-togglebutton="false" data-widget-sortable="false" data-widget-grid="false" data-bind="fadeVisibleInOnly: validationModelBaseOrders.isValid() && !dexHome()">
         <header>
             <span class="widget-icon"> <i class="fa fa-sort-amount-desc"></i> </span>
-            <h3 class="tradeForm" data-bind="text: 'Sell ' + baseAsset"></h3>
+            <h3 class="tradeForm" data-bind="text: 'Sell ' + dispBaseAsset"></h3>
             <div class="clearfix"></div>
         </header>
         <div> <!-- widget div-->
           <div class="widget-body no-padding sellForm"> <!-- widget content -->
             <form class="form-horizontal">
-              <div class="table-responsive">
+              <div class="table-responsive" style="overflow-x:hidden">
                 <table class="table buySellForm">
                   <tbody>
                     <tr>
@@ -420,7 +416,7 @@
                         <label class="control-label nopad col-xs-6" data-bind="locale: 'your_balance'"></label>
                         <div class="col-xs-6 number" data-bind="text: availableBalanceForSell, click: setMaxSellAmount" style="cursor:pointer" class="number"></div>
                       </div></td>
-                      <td data-bind="text: baseAsset"></td>
+                      <td data-bind="text: dispBaseAsset"></td>
                     </tr>
                     <tr>
                       <td colspan="2">
@@ -428,7 +424,7 @@
                         <label class="control-label nopad col-xs-6" data-bind="locale: 'highest_bid_price'"></label>
                         <div class="col-xs-6 number" data-bind="text:highestBidPrice"></div>
                       </div></td>
-                      <td data-bind="text: quoteAsset + '/' + baseAsset"></td>
+                      <td data-bind="text: dispQuoteAsset"></td>
                     </tr>
                     <tr>
                       <td colspan="2">
@@ -436,7 +432,7 @@
                         <label class="control-label nopad col-xs-6" data-bind="locale: 'obtainable'"></label>
                         <div class="col-xs-6 number" data-bind="text: obtainableForSell"></div>
                       </div></td>
-                      <td data-bind="text: quoteAsset"></td>
+                      <td data-bind="text: dispQuoteAsset"></td>
                     </tr>
                     <tr>
                       <td colspan="2">
@@ -447,7 +443,7 @@
                           <span class="invalid text-danger" data-bind="validationMessage: sellPrice"></span>
                         </div>
                       </div></td>
-                      <td data-bind="text: quoteAsset + '/' + baseAsset"></td>
+                      <td data-bind="text: dispQuoteAsset"></td>
                     </tr>
                     <tr>
                       <td colspan="2">
@@ -458,7 +454,7 @@
                           <span class="invalid text-danger" data-bind="validationMessage: sellAmount"></span>
                         </div>
                       </div></td>
-                      <td data-bind="text: baseAsset"></td>
+                      <td data-bind="text: dispBaseAsset"></td>
                     </tr>
                     <tr>
                       <td colspan="2">
@@ -469,7 +465,7 @@
                           <span class="invalid text-danger" data-bind="validationMessage: sellTotal"></span>
                         </div>
                       </div></td>
-                      <td data-bind="text: quoteAsset"></td>
+                      <td data-bind="text: dispQuoteAsset"></td>
                     </tr>
                     <tr>
                       <td colspan="3">
@@ -492,7 +488,7 @@
                       </td>
                     </tr>
                     <tr>
-                      <td colspan="3" style="text-align:center"><a id="sellButton" class="btn btn-default btn-lg" data-bind="click: sell"><span data-bind="locale: 'Sell'"></span> (<span data-bind="text:baseAsset + '→' + quoteAsset"></span>)</a></td>
+                      <td colspan="3" style="text-align:center"><a id="sellButton" class="btn btn-default btn-lg" data-bind="click: sell"><span data-bind="locale: 'Sell'"></span> (<span data-bind="text:dispBaseAsset + ' → ' + dispQuoteAsset"></span>)</a></td>
                     </tr>
                   </tbody>
                 </table>
@@ -523,9 +519,9 @@
                   <table class="orderBook table table-striped table-bordered table-condensed table-hover">
                       <thead>
                           <tr class="centerHeader">
-                              <th><span data-bind="locale: 'price'"></span> [<span data-bind="text: quoteAsset + '/' + baseAsset"></span>]</th>
-                              <th><span data-bind="locale: 'amount'"></span> [<span data-bind="text: baseAsset"></span>]</th>
-                              <th><span data-bind="locale: 'total'"></span> [<span data-bind="text: quoteAsset"></span>]</th>
+                              <th><span data-bind="locale: 'price'"></span> [<span data-bind="text: dispQuoteAsset"></span>]</th>
+                              <th><span data-bind="locale: 'amount'"></span> [<span data-bind="text: dispBaseAsset"></span>]</th>
+                              <th><span data-bind="locale: 'total'"></span> [<span data-bind="text: dispQuoteAsset"></span>]</th>
                           </tr>
                       </thead>
                       <tbody data-bind="foreach: askBook"> <!-- ascending order -->
@@ -556,9 +552,9 @@
                   <table class="orderBook table table-striped table-bordered table-condensed table-hover">
                       <thead>
                           <tr class="centerHeader">
-                              <th><span data-bind="locale: 'price'"></span> [<span data-bind="text: quoteAsset + '/' + baseAsset"></span>]</th>
-                              <th><span data-bind="locale: 'amount'"></span> [<span data-bind="text: baseAsset"></span>]</th>
-                              <th><span data-bind="locale: 'total'"></span> [<span data-bind="text: quoteAsset"></span>]</th>
+                              <th><span data-bind="locale: 'price'"></span> [<span data-bind="text: dispQuoteAsset"></span>]</th>
+                              <th><span data-bind="locale: 'amount'"></span> [<span data-bind="text: dispBaseAsset"></span>]</th>
+                              <th><span data-bind="locale: 'total'"></span> [<span data-bind="text: dispQuoteAsset"></span>]</th>
                           </tr>
                       </thead>
                       <tbody data-bind="foreach: bidBook"> <!-- descending order -->
@@ -594,9 +590,9 @@
                         <tr class="centerHeader">
                             <th data-bind="locale: 'type'"></th>
                             <th data-bind="locale: 'block_time'"></th>
-                            <th><span data-bind="locale: 'price'"></span> [<span data-bind="text: quoteAsset"></span>]</th>
-                            <th><span data-bind="locale: 'amount'"></span> [<span data-bind="text: baseAsset"></span>]</th>
-                            <th><span data-bind="locale: 'total'"></span> [<span data-bind="text: quoteAsset"></span>]</th>
+                            <th><span data-bind="locale: 'price'"></span> [<span data-bind="text: dispQuoteAsset"></span>]</th>
+                            <th><span data-bind="locale: 'amount'"></span> [<span data-bind="text: dispBaseAsset"></span>]</th>
+                            <th><span data-bind="locale: 'total'"></span> [<span data-bind="text: dispQuoteAsset"></span>]</th>
                             <th data-bind="locale: 'status'"></th>
                         </tr>
                     </thead>

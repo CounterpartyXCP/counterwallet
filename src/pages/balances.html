@@ -138,7 +138,9 @@
                     <li data-bind="visible: !$parent.IS_WATCH_ONLY && isMine()"><a data-bind="click: changeDescription, locale: 'change_token_description'" href="#"></a></li>
                   </ul>
                 </div>
-                <h3 class="name pull-left" data-bind="text: ASSET"></h3>
+
+                <h3 class="name pull-left" data-bind="attrIf: {rel: 'tooltip', title: ASSET_DISP_FULL, _if: assetType() == 'subasset' && ASSET_DISP != ASSET_DISP_FULL}, css: {name-subasset: assetType() == 'subasset'}, text: ASSET_DISP"></h3>
+
                 <div class="clearfix"></div>
                 <p class="balance" data-bind="style: { 'padding-right': dispBalancePadding }">
                     <span data-bind="visible: isMine(), locale: 'issued', localeArgs: dispTotalIssued"></span>
@@ -318,7 +320,7 @@
         <h4 class="modal-title" data-bind="locale: 'send_tokens'"></h4>
       </div>
       <div class="modal-body no-padding">
-        <p class="formPadded" data-bind="locale: 'send_tokens_to_address', localeArgs: {0: asset, 1: address, 2: dispNormalizedBalance, 3: asset}"></p>
+        <p class="formPadded" data-bind="locale: 'send_tokens_to_address', localeArgs: {0: assetDisp, 1: address, 2: dispNormalizedBalance, 3: assetDisp}"></p>
 
         <form class="smart-form" data-bind="submit: doAction"><fieldset>
           <section><div class="row">
@@ -399,7 +401,7 @@
           </div></section>
           
         </fieldset></form>
-        <p class="formPaddedBot" data-bind="fadeVisibleInOnly: normalizedBalRemainingIsSet, locale: 'after_sending', localeArgs: {0: dispNormalizedBalRemaining, 1: asset}"></p>
+        <p class="formPaddedBot" data-bind="fadeVisibleInOnly: normalizedBalRemainingIsSet, locale: 'after_sending', localeArgs: {0: dispNormalizedBalRemaining, 1: assetDisp}"></p>
       </div>
       <div class="modal-footer">
         <button type="button" class="btn btn-default" data-bind="click: hide, locale: 'cancel'"></button>
@@ -408,6 +410,7 @@
     </div><!-- /.modal-content -->
   </div><!-- /.modal-dialog -->
 </div><!-- /.modal -->
+
 
 <!-- modal for sweep (import) -->
 <div data-bind="showModal: shown, validationOptions: { insertMessages: false }" id="sweepModal" class="modal fade" data-backdrop="static" data-keyboard="false" tabindex="-1" role="dialog" aria-labelledby="sweepModal" aria-hidden="true">
@@ -640,10 +643,15 @@
           <section><div class="row">
             <label class="control-label col col-sm-2" data-bind="locale: 'token_name_type'"></label>
             <div class="col col-sm-10">
-              <label class="radio" data-bind="visible: noEnoughXCP() == false">
+              <label class="radio" data-bind="visible: hasXCPForNamedAsset() == true">
                 <input type="radio" data-bind="checked: tokenNameType" name="tokenNameType" value="alphabetic">
                 <i></i><span data-bind="locale: 'alphabetic_name'"></span>
                 <div class="note" style="margin-top:0" data-bind="locale: 'token_name_rules'"></div>
+              </label>
+              <label class="radio" data-bind="visible: hasXCPForSubAsset() == true && ownedNamedAssets().length > 0">
+                <input type="radio" data-bind="checked: tokenNameType" name="tokenNameType" value="subasset">
+                <i></i><span data-bind="locale: 'alphabetic_sub_name'"></span>
+                <div class="note" style="margin-top:0" data-bind="locale: 'token_subname_rules'"></div>
               </label>
               <label class="radio">
                 <input type="radio" data-bind="checked: tokenNameType" name="tokenNameType" value="numeric">
@@ -652,12 +660,21 @@
               </label>
             </div>
           </div></section>
+          <section><div class="row" data-bind="visible: tokenNameType=='subasset'">
+            <label class="control-label col col-sm-2" data-bind="locale: 'parent_asset_name'"></label>
+            <div class="col col-sm-10">
+                <label class="input">
+                    <select id="selectedParentAsset" data-bind="options: ownedNamedAssets, optionsValue: 'ASSET', optionsText: 'ASSET', select2: {  minimumResultsForSearch: 10, escapeMarkup: 'direct' }, value: selectedParentAsset" style="width:100%;"></select>
+                </label>
+                <div class="note" data-bind="locale: 'parent_asset_name_note'"></div>
+            </div>
+          </div></section>
           <section><div class="row">
             <label class="control-label col col-sm-2" data-bind="locale: 'token_name'"></label>
             <div class="col col-sm-10">
                 <label class="input">
-                    <a href="#" data-bind="visible: tokenNameType=='numeric', click: generateRandomId"><i class="icon-append fa fa-rotate-right"></i></a>
-                    <i data-bind="visible: tokenNameType=='alphabetic'" class="icon-append fa fa-tag"></i>
+                    <a href="#" data-bind="visible: tokenNameType == 'numeric', click: generateRandomId"><i class="icon-append fa fa-rotate-right"></i></a>
+                    <i data-bind="visible: tokenNameType != 'numeric'" class="icon-append fa fa-tag"></i>
                     <input name="assetName" data-bind="value: name, valueUpdate : 'input'" type="text"/>
                 </label>
                 <div class="note" data-bind="locale: 'token_name_note'"></div>
@@ -863,12 +880,12 @@
         <div class="formPaddedBot" data-bind="fadeVisibleInOnly: quantityPerUnit() && selectedDividendAsset() && totalPay()">
             <p>
               <span data-bind="locale: 'this_distribution_payment'"></span>
-              <b class="sellColor"><span data-bind="text: dispTotalPay"></span> <span data-bind="text: selectedDividendAsset"></span></b>.
+              <b class="sellColor"><span data-bind="text: dispTotalPay"></span> <span data-bind="text: dispSelectedDividendAsset"></span></b>.
             </p>
             <p>
               <span data-bind="locale: 'after_distribution_payment'"></span>
               <b data-bind="css: {errorColor: dividendAssetBalRemainingPostPay() < 0, sellColor: dividendAssetBalRemainingPostPay() >= 0}">
-                <span data-bind="text: dispDividendAssetBalRemainingPostPay"></span> <span data-bind="text: selectedDividendAsset"></span>
+                <span data-bind="text: dispDividendAssetBalRemainingPostPay"></span> <span data-bind="text: dispSelectedDividendAsset"></span>
               </b>.
             </p>
             <p>
@@ -884,13 +901,14 @@
   </div><!-- /.modal-dialog -->
 </div><!-- /.modal -->
 
+
 <!-- modal for show asset info -->
 <div data-bind="showModal: shown" id="showAssetInfoModal" class="modal fade" data-backdrop="static" data-keyboard="false" tabindex="-1" role="dialog" aria-labelledby="showAssetInfoModal" aria-hidden="true">
   <div class="modal-dialog modal-lg">
     <div class="modal-content">
       <div class="modal-header">
         <button type="button" data-bind="click: hide" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
-        <h4 class="modal-title" data-bind="locale: 'info_for_asset', localeArgs: asset"></h4>
+        <h4 class="modal-title" data-bind="locale: 'info_for_asset', localeArgs: assetDisp"></h4>
       </div>
       <div class="modal-body no-padding">
         <form class="smart-form"><fieldset>
@@ -987,7 +1005,6 @@
     </div><!-- /.modal-content -->
   </div><!-- /.modal-dialog -->
 </div><!-- /.modal -->
-
 
 
 <!-- modal for broadcast -->

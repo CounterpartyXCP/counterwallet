@@ -88,7 +88,9 @@ function MessageFeed() {
     }
 
     if (displayTx) {
-      var asset1 = message['bindings']['asset'] || 'BTC';
+      PENDING_ACTION_FEED.add(txHash, category, message['bindings']);
+
+      /*var asset1 = message['bindings']['asset'] || 'BTC';
       WALLET.getAssetsDivisibility([asset1], function(divisibility) {
 
         message['bindings']['divisible'] = divisibility[asset1];
@@ -106,7 +108,7 @@ function MessageFeed() {
           PENDING_ACTION_FEED.add(txHash, category, message['bindings']);
         }
 
-      });
+      });*/
     }
 
   }
@@ -231,7 +233,7 @@ function MessageFeed() {
 
     } else if (category == "dividends") {
     } else if (category == "issuances") {
-
+      //the 'asset' field is == asset_longname for subassets
       var addressesWithAsset = WALLET.getAddressesWithAsset(message['asset']);
       for (var i = 0; i < addressesWithAsset.length; i++) {
         WALLET.getAddressObj(addressesWithAsset[i]).addOrUpdateAsset(message['asset'], message, null);

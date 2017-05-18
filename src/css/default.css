@@ -104,7 +104,8 @@
 }
 
 .notoAssetColor {
-    color: #f89406;    
+    color: #f89406;
+    word-wrap: break-word; /* subasset names may be pretty long*/
 }
 
 .font-medlg {

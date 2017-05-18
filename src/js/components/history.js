@@ -169,18 +169,20 @@ function TransactionHistoryItemViewModel(data) {
     if (self.RAW_TX_TYPE == 'burns') {
       desc = i18n.t("hist_burn", normalizeQuantity(self.DATA['burned']), smartFormat(normalizeQuantity(self.DATA['earned'])));
     } else if (self.RAW_TX_TYPE == 'sends') {
-      desc = i18n.t("hist_send", smartFormat(normalizeQuantity(self.DATA['quantity'], self.DATA['_divisible'])), self.DATA['asset'],
+      desc = i18n.t("hist_send", smartFormat(normalizeQuantity(self.DATA['quantity'],
+        self.DATA['_asset_divisible'])), self.DATA['_asset_longname'] || self.DATA['asset'],
         getLinkForCPData('address', self.DATA['destination'], getAddressLabel(self.DATA['destination'])));
     } else if (self.RAW_TX_TYPE == 'orders') {
       desc = i18n.t("hist_sell", smartFormat(normalizeQuantity(self.DATA['give_quantity'], self.DATA['_give_asset_divisible'])),
-        self.DATA['give_asset'], smartFormat(normalizeQuantity(self.DATA['get_quantity'], self.DATA['_get_asset_divisible'])),
-        self.DATA['get_asset']);
+        self.DATA['_give_asset_longname'] || self.DATA['give_asset'],
+        smartFormat(normalizeQuantity(self.DATA['get_quantity'], self.DATA['_get_asset_divisible'])),
+        self.DATA['_get_asset_longname'] || self.DATA['get_asset']);
     } else if (self.RAW_TX_TYPE == 'order_matches') {
       desc = i18n.t("hist_order_match", getAddressLabel(self.DATA['tx0_address']),
         smartFormat(normalizeQuantity(self.DATA['forward_quantity'], self.DATA['_forward_asset_divisible'])),
-        self.DATA['forward_asset'], getAddressLabel(self.DATA['tx1_address']),
+        self.DATA['_forward_asset_longname'] || self.DATA['forward_asset'], getAddressLabel(self.DATA['tx1_address']),
         smartFormat(normalizeQuantity(self.DATA['backward_quantity'], self.DATA['_backward_asset_divisible'])),
-        self.DATA['backward_asset']);
+        self.DATA['_backward_asset_longname'] || self.DATA['backward_asset']);
       if (self.DATA['forward_asset'] == 'BTC' || self.DATA['backward_asset'] == 'BTC') {
         desc += " <b>(" + i18n.t("pending BTCpay") + ")</b>";
       }
@@ -188,11 +190,13 @@ function TransactionHistoryItemViewModel(data) {
       desc = i18n.t("hist_btcpay", smartFormat(normalizeQuantity(self.DATA['btc_amount'])));
     } else if (self.RAW_TX_TYPE == 'issuances') {
       if (self.DATA['transfer']) {
-        desc = i18n.t("hist_transfer", self.DATA['asset'], getLinkForCPData('address', self.DATA['issuer'], getAddressLabel(self.DATA['issuer'])));
+        desc = i18n.t("hist_transfer", self.DATA['_asset_longname'] || self.DATA['asset'],
+          getLinkForCPData('address', self.DATA['issuer'], getAddressLabel(self.DATA['issuer'])));
       } else if (self.DATA['locked']) {
-        desc = i18n.t("hist_lock", self.DATA['asset']);
+        desc = i18n.t("hist_lock", self.DATA['_asset_longname'] || self.DATA['asset']);
       } else {
-        desc = i18n.t("hist_issuance", smartFormat(normalizeQuantity(self.DATA['quantity'], self.DATA['divisible'])).toString(), self.DATA['asset']);
+        desc = i18n.t("hist_issuance", smartFormat(normalizeQuantity(self.DATA['quantity'], self.DATA['divisible'])).toString(),
+          self.DATA['_asset_longname'] || self.DATA['asset']);
       }
     } else if (self.RAW_TX_TYPE == 'broadcasts') {
       desc = i18n.t("hist_broadcast", self.DATA['text'], self.DATA['value']);
@@ -209,7 +213,8 @@ function TransactionHistoryItemViewModel(data) {
         getAddressLabel(self.DATA['tx1_address']),
         smartFormat(normalizeQuantity(self.DATA['backward_quantity'])));
     } else if (self.RAW_TX_TYPE == 'dividends') {
-      desc = i18n.t("hist_dividend", smartFormat(normalizeQuantity(self.DATA['quantity_per_unit'])), self.DATA['dividend_asset'], self.DATA['asset']);
+      desc = i18n.t("hist_dividend", smartFormat(normalizeQuantity(self.DATA['quantity_per_unit'])),
+        self.DATA['_dividend_asset_longname'] || self.DATA['dividend_asset'], self.DATA['_asset_longname'] || self.DATA['asset']);
     } else if (self.RAW_TX_TYPE == 'cancels') {
       desc = i18n.t("hist_cancellation", data['offer_hash']);
     } else if (self.RAW_TX_TYPE == 'bet_expirations') {
@@ -223,7 +228,7 @@ function TransactionHistoryItemViewModel(data) {
     } else if (self.RAW_TX_TYPE == 'credits' || self.RAW_TX_TYPE == 'debits') {
       var tx_type = (self.RAW_TX_TYPE == 'credits' ? i18n.t('hist_credited_with') : i18n.t('hist_debited_for'))
       desc = i18n.t("hist_credit_debit", getLinkForCPData('address', self.DATA['address'], getAddressLabel(self.DATA['address'])), tx_type,
-        smartFormat(normalizeQuantity(self.DATA['quantity'], self.DATA['_divisible'])), self.DATA['asset']);
+        smartFormat(normalizeQuantity(self.DATA['quantity'], self.DATA['_asset_divisible'])), self.DATA['_asset_longname'] || self.DATA['asset']);
 
     } else {
       desc = i18n.t("hist_unknown");

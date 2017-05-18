@@ -412,6 +412,7 @@ function SendModalViewModel() {
   self.shown = ko.observable(false);
   self.address = ko.observable(null); //address string, not an Address object
   self.asset = ko.observable();
+  self.assetDisp = ko.observable();
   self.rawBalance = ko.observable(null);
   self.divisible = ko.observable();
   self.feeOption = ko.observable('optimal');
@@ -662,7 +663,7 @@ function SendModalViewModel() {
         destination: self.destAddress(),
         quantity: denormalizeQuantity(parseFloat(self.quantity()), self.divisible()),
         asset: self.asset(),
-        _divisible: self.divisible(),
+        _asset_divisible: self.divisible(),
         _pubkeys: additionalPubkeys.concat(self._additionalPubkeys),
         _fee_option: self.feeOption(),
         _custom_fee: self.customFee()
@@ -676,7 +677,7 @@ function SendModalViewModel() {
     trackEvent('Balances', 'Send', self.asset());
   }
 
-  self.show = function(fromAddress, asset, rawBalance, isDivisible, resetForm) {
+  self.show = function(fromAddress, asset, assetDisp, rawBalance, isDivisible, resetForm) {
     if (asset == 'BTC' && rawBalance == null) {
       return bootbox.alert(i18n.t("cannot_send_server_unavailable"));
     }
@@ -686,6 +687,7 @@ function SendModalViewModel() {
     if (resetForm) self.resetForm();
     self.address(fromAddress);
     self.asset(asset);
+    self.assetDisp(assetDisp);
     self.rawBalance(rawBalance);
     self.divisible(isDivisible);
     $('#sendFeeOption').select2("val", self.feeOption()); //hack
@@ -1324,7 +1326,7 @@ function SweepModalViewModel() {
               'to': self.destAddress(),
               'normalized_quantity': normalizedQuantity
             });
-            sendData['_divisible'] = !(selectedAsset.RAW_BALANCE == selectedAsset.NORMALIZED_BALANCE); //if the balances match, the asset is NOT divisible
+            sendData['_assset_divisible'] = !(selectedAsset.RAW_BALANCE == selectedAsset.NORMALIZED_BALANCE); //if the balances match, the asset is NOT divisible
             PENDING_ACTION_FEED.add(sendTxHash, "sends", sendData);
 
             // here we adjust the BTC balance whith the change output

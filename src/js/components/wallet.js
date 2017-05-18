@@ -626,20 +626,24 @@ function WalletViewModel() {
 
     //hacks for passing in some data that should be sent to PENDING_ACTION_FEED.add(), but not the create_ API call
     // here we only have to worry about what we create a txn for (so not order matches, debits/credits, etc)
-    var extra1 = null, extra2 = null;
+    var extra = {};
     if (action == 'create_order') {
-      extra1 = data['_give_divisible'];
-      delete data['_give_divisible'];
-      extra2 = data['_get_divisible'];
-      delete data['_get_divisible'];
+      extra['_give_asset_divisible'] = data['_give_asset_divisible'];
+      delete data['_give_asset_divisible'];
+      extra['_get_asset_divisible'] = data['_get_asset_divisible'];
+      delete data['_get_asset_divisible'];
+      extra['_give_asset_longname'] = data['_give_asset_longname'];
+      delete data['_give_asset_longname'];
+      extra['_get_asset_longname'] = data['_get_asset_longname'];
+      delete data['_get_asset_longname'];
     } else if (action == 'create_cancel') {
-      extra1 = data['_type'];
+      extra['_type'] = data['_type'];
       delete data['_type'];
-      extra2 = data['_tx_index'];
+      extra['_tx_index'] = data['_tx_index'];
       delete data['_tx_index'];
     } else if (action == 'create_send') {
-      extra1 = data['_divisible'];
-      delete data['_divisible'];
+      extra['asset_divisible'] = data['_asset_divisible'];
+      delete data['_asset_divisible'];
     }
 
     var verifyDestAddr = data['destination'] || data['transfer_destination'] || data['feed_address'] || data['destBtcPay'] || data['source'];
@@ -712,13 +716,15 @@ function WalletViewModel() {
                 var category = action.replace('create_', '') + 's'; //hack
                 if (data['source'] === undefined) data['source'] = address;
                 if (action == 'create_order') {
-                  data['_give_divisible'] = extra1;
-                  data['_get_divisible'] = extra2;
+                  data['_give_asset_divisible'] = extra['_give_asset_divisible'];
+                  data['_get_asset_divisible'] = extra['_get_asset_divisible'];
+                  data['_give_asset_longname'] = extra['_give_asset_longname'];
+                  data['_get_asset_longname'] = extra['_get_asset_longname'];
                 } else if (action == 'create_cancel') {
-                  data['_type'] = extra1;
-                  data['_tx_index'] = extra2;
+                  data['_type'] = extra['_type'];
+                  data['_tx_index'] = extra['_tx_index'];
                 } else if (action == 'create_send') {
-                  data['_divisible'] = extra1;
+                  data['_asset_divisible'] = extra['_asset_divisible'];
                 }
                 PENDING_ACTION_FEED.add(txHash, category, data);
 

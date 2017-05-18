@@ -76,6 +76,13 @@ div#showAssetInfoModal table tbody {
   color: white;
 }
 
+.asset-item .name-subasset {
+  font-size: 28px;
+  font-weight: bold;
+  color: white;
+  word-wrap: break-word;
+}
+
 .asset-item .balance {
   position: relative;
   /*bottom: -5px;*/

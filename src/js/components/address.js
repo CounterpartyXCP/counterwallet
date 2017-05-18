@@ -41,6 +41,7 @@ function AddressViewModel(type, key, address, initialLabel, pubKeys) {
       return ko.utils.arrayFilter(self.assets(), function(asset) {
         return asset.ASSET == 'BTC' || asset.ASSET == 'XCP';
       });
+
     } else if (self.assetFilter() == 'mine') {
       return ko.utils.arrayFilter(self.assets(), function(asset) {
         return asset.isMine();
@@ -120,6 +121,18 @@ function AddressViewModel(type, key, address, initialLabel, pubKeys) {
     }, 500);
   }
 
+  self.initTooltip = function(asset, assetInfo) {
+    /* initialize tooltip for a truncated subasset name */
+    if(!assetInfo['asset_longname']) {
+      return;
+    }
+
+    setTimeout(function() {
+      $("h3.name-subasset").tooltip();
+      //$("[rel=tooltip]").tooltip();
+    }, 500);
+  }
+
   self.addOrUpdateAsset = function(asset, assetInfo, initialRawBalance, escrowedBalance) {
     //Update asset property changes (ONLY establishes initial balance when logging in! -- past that, balance changes
     // come from debit and credit messages)
@@ -145,6 +158,7 @@ function AddressViewModel(type, key, address, initialLabel, pubKeys) {
       var assetProps = {
         address: self.ADDRESS,
         asset: asset,
+        asset_longname: assetInfo['asset_longname'],
         divisible: assetInfo['divisible'],
         owner: assetInfo['owner'] || assetInfo['issuer'],
         locked: assetInfo['locked'],
@@ -156,7 +170,7 @@ function AddressViewModel(type, key, address, initialLabel, pubKeys) {
       };
       self.assets.push(new AssetViewModel(assetProps)); //add new
       self.initDropDown(asset);
-
+      self.initTooltip(asset, assetInfo);
     } else {
       //update existing. NORMALLY this logic is really only reached from the messages feed, however, we can have the
       // case where if we have a sweep operation for instance (which will show up as an asset transfer and credit
@@ -167,9 +181,6 @@ function AddressViewModel(type, key, address, initialLabel, pubKeys) {
         match.rawBalance(initialRawBalance);
         return;
       }
-
-      //Now that that's out of the way, in cases after here, we should only reach this from the messages feed 
-      assert(assetInfo['owner'] === undefined, "Logic should only be reached via messages feed data, not with get_asset_info data");
 
       if (assetInfo['description'] != match.description()) {
         //when the description changes, the balance will get 0 passed into it to note this. obviously, don't take that as the literal balance :)
@@ -262,12 +273,7 @@ function AddressViewModel(type, key, address, initialLabel, pubKeys) {
     if (!WALLET.canDoTransaction(self.ADDRESS)) return false;
 
     var xcpBalance = WALLET.getBalance(self.ADDRESS, 'XCP');
-    var noXCP = false;
-    if (xcpBalance < ASSET_CREATION_FEE_XCP) {
-      noXCP = true;
-    }
-
-    CREATE_ASSET_MODAL.show(self.ADDRESS, true, noXCP);
+    CREATE_ASSET_MODAL.show(self.ADDRESS, xcpBalance, true);
   }
 
   self.payDividend = function() {

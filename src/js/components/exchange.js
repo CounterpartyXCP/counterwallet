@@ -10,7 +10,7 @@ function createExchangeKnockoutValidators() {
     validator: function(asset, self) {
       if (asset == 'XCP') return true;
       var match = ko.utils.arrayFirst(self.allAssets(), function(item) {
-        return item == asset;
+        return asset == item['asset'] || (item['asset_longname'] && asset == item['asset_longname']); //matches asset name or asset longname
       });
       return match;
     },
@@ -61,11 +61,20 @@ function ExchangeViewModel() {
   self.asset1IsDivisible = ko.observable(null);
   self.asset2IsDivisible = ko.observable(null);
 
-  self.asset1 = ko.observable('').extend({
+  self.asset1Raw = ko.observable('').extend({
     required: true,
     ordersIsExistingAssetName: self
   });
-  self.asset2 = ko.observable('').extend({
+  self.asset1 = ko.computed(function() {
+    /* "Token 1" as entered under "Select Another Pair". Will be the numeric asset name with subassets, while asset1Raw is == the subasset longname (or whatever was entered)*/
+    if (!self.asset1Raw() || !self.allAssets()) return null;
+    var match = ko.utils.arrayFirst(self.allAssets(), function(item) {
+      return self.asset1Raw() == item['asset'] || (item['asset_longname'] && self.asset1Raw() == item['asset_longname']); //matches asset name or asset longname
+    });
+    return match['asset'];
+  }, self);
+  self.asset1Longname = ko.observable('');
+  self.asset2Raw = ko.observable('').extend({
     required: true,
     ordersIsExistingAssetName: self,
     validation: {
@@ -76,11 +85,23 @@ function ExchangeViewModel() {
       params: self
     }
   });
+  self.asset2 = ko.computed(function() {
+    /* "Token 2" as entered under "Select Another Pair". Will be the numeric asset name with subassets, while asset2Raw is == the subasset longname (or whatever was entered)*/
+    if (!self.asset2Raw() || !self.allAssets()) return null;
+    var match = ko.utils.arrayFirst(self.allAssets(), function(item) {
+      return self.asset2Raw() == item['asset'] || (item['asset_longname'] && self.asset2Raw() == item['asset_longname']); //matches asset name or asset longname
+    });
+    return match['asset'];
+  }, self);
+  self.asset2Longname = ko.observable('');
 
   self.selectedQuoteAsset = ko.observable();
   self.selectedQuoteAsset.subscribe(function(value) {
-    if (value == 'XCP') self.asset2(value);
-    else self.asset2('');
+    if (value == 'XCP') {
+      self.asset2Raw(value);
+    } else {
+      self.asset2Raw('');
+    }
   })
 
   self.assetPair = ko.computed(function() {
@@ -89,9 +110,13 @@ function ExchangeViewModel() {
     return pair; //2 element array, as [baseAsset, quoteAsset]
   }, self);
   self.dispAssetPair = ko.computed(function() {
-    if (!self.assetPair()) return null;
-    var pair = self.assetPair();
-    return pair[0] + "/" + pair[1];
+    if (!self.asset1() || !self.asset2()) return null;
+    var pair = assetsToAssetPair(self.asset1(), self.asset2());
+    if(pair[0] === self.asset1()) {
+      return (self.asset1Longname() || self.asset1()) + '/' + (self.asset2Longname() || self.asset2());
+    } else {
+      return (self.asset2Longname() || self.asset2()) + '/' + (self.asset1Longname() || self.asset1());
+    }
   }, self);
   self.dispAssetPair.subscribeChanged(function(newValue, prevValue) {
     self.currentMarketPrice(0);
@@ -100,17 +125,42 @@ function ExchangeViewModel() {
     if (!self.assetPair()) return null;
     return self.assetPair()[0];
   }, self);
-  self.quoteAsset = ko.computed(function() {
-    if (!self.assetPair()) return null;
-    return self.assetPair()[1];
-  }, self);
   self.baseAssetIsDivisible = ko.computed(function() {
     if (!self.assetPair()) return null;
     return self.baseAsset() == self.asset1() ? self.asset1IsDivisible() : self.asset2IsDivisible();
   }, self);
+  self.baseAssetLongname = ko.computed(function() {
+    if (!self.assetPair()) return null;
+    if(self.assetPair()[0] === self.asset1()) {
+      return self.asset1Longname();
+    } else {
+      return self.asset2Longname();
+    }
+  }, self);
+  self.dispBaseAsset = ko.computed(function() {
+    if (!self.baseAsset()) return null;
+    return self.baseAssetLongname() ? _.truncate(self.baseAssetLongname(), 24) : self.baseAsset();
+  }, self);
+
+  self.quoteAsset = ko.computed(function() {
+    if (!self.assetPair()) return null;
+    return self.assetPair()[1];
+  }, self);
   self.quoteAssetIsDivisible = ko.computed(function() {
     if (!self.assetPair()) return null;
     return self.quoteAsset() == self.asset1() ? self.asset1IsDivisible() : self.asset2IsDivisible();
+  }, self);
+  self.quoteAssetLongname = ko.computed(function() {
+    if (!self.assetPair()) return null;
+    if(self.assetPair()[1] === self.asset1()) {
+      return self.asset1Longname();
+    } else {
+      return self.asset2Longname();
+    }
+  }, self);
+  self.dispQuoteAsset = ko.computed(function() {
+    if (!self.quoteAsset()) return null;
+    return self.quoteAssetLongname() ? _.truncate(self.quoteAssetLongname(), 24) : self.quoteAsset();
   }, self);
 
   self.delayedAssetPairSelection = ko.computed(self.assetPair).extend({
@@ -130,18 +180,37 @@ function ExchangeViewModel() {
     self.sellTotal(0);
     self.selectedAddressForBuy(null);
     self.selectedAddressForSell(null);
-    $('table.buySellForm span.invalid').hide() // hack
+    $('table.buySellForm span.invalid').hide(); // hack
     self.baseAssetImage('');
     self.dexHome(false);
     self.fetchMarketDetails();
     $('a.top_user_pair').removeClass('selected_pair');
     $('a.top_user_pair.pair_' + self.baseAsset() + self.quoteAsset()).addClass('selected_pair');
+
+    self.buyValidation.errors.showAllMessages(false);
+    self.sellValidation.errors.showAllMessages(false);
+
+    if(self.asset1Raw() != self.asset1()) {
+      assert(self.asset1Raw().includes('.'));
+      self.asset1Longname(self.asset1Raw());
+    }
+    if(self.asset2Raw() != self.asset2()) {
+      assert(self.asset2Raw().includes('.'));
+      self.asset2Longname(self.asset2Raw());
+    }
+
+    self.buyFeeOption('optimal');
+    self.buyCustomFee(null);
+    self.sellFeeOption('optimal');
+    self.sellCustomFee(null);
+    $('#buyFeeOption').select2("val", self.buyFeeOption()); //hack
+    $('#sellFeeOption').select2("val", self.sellFeeOption()); //hack
   });
 
   //VALIDATION MODELS  
   self.validationModelBaseOrders = ko.validatedObservable({
-    asset1: self.asset1,
-    asset2: self.asset2
+    asset1Raw: self.asset1Raw,
+    asset2Raw: self.asset2Raw
   });
 
 
@@ -339,10 +408,12 @@ function ExchangeViewModel() {
       source: self.selectedAddressForSell(),
       give_quantity: give_quantity,
       give_asset: self.baseAsset(),
-      _give_divisible: self.baseAssetIsDivisible(),
+      _give_asset_divisible: self.baseAssetIsDivisible(),
+      _give_asset_longname: self.baseAssetLongname(),
       get_quantity: get_quantity,
       get_asset: self.quoteAsset(),
-      _get_divisible: self.quoteAssetIsDivisible(),
+      _get_asset_divisible: self.quoteAssetIsDivisible(),
+      _get_asset_longname: self.quoteAssetLongname(),
       fee_required: fee_required,
       fee_provided: fee_provided,
       expiration: expiration,
@@ -355,9 +426,9 @@ function ExchangeViewModel() {
 
       var message = "";
       if (armoryUTx) {
-        message = i18n.t("you_sell_order_will_be_placed", self.sellAmount(), self.baseAsset());
+        message = i18n.t("you_sell_order_will_be_placed", self.sellAmount(), self.dispBaseAsset());
       } else {
-        message = i18n.t("you_sell_order_has_been_placed", self.sellAmount(), self.baseAsset());
+        message = i18n.t("you_sell_order_has_been_placed", self.sellAmount(), self.dispBaseAsset());
       }
 
       WALLET.showTransactionCompleteDialog(message + " " + i18n.t(ACTION_PENDING_NOTICE), message, armoryUTx);
@@ -392,10 +463,10 @@ function ExchangeViewModel() {
     estimatedTotalPrice = smartFormat(estimatedTotalPrice);
 
     var message = '<table class="confirmOrderBox">';
-    message += '<tr><td><b>' + i18n.t('price') + ': </b></td><td style="text-align:right">' + self.sellPrice() + '</td><td>' + self.quoteAsset() + '/' + self.baseAsset() + '</td></tr>';
-    message += '<tr><td><b>' + i18n.t('amount') + ': </b></td><td style="text-align:right">' + self.sellAmount() + '</td><td>' + self.baseAsset() + '</td></tr>';
-    message += '<tr><td><b>' + i18n.t('total') + ': </b></td><td style="text-align:right">' + self.sellTotal() + '</td><td>' + self.quoteAsset() + '</td></tr>';
-    message += '<tr><td><b>' + i18n.t('real_estimated_total') + ': </b></td><td style="text-align:right">' + estimatedTotalPrice + '</td><td>' + self.quoteAsset() + '</td></tr>';
+    message += '<tr><td><b>' + i18n.t('price') + ': </b></td><td style="text-align:right">' + self.sellPrice() + '</td><td>' + self.dispQuoteAsset() + '</td></tr>';
+    message += '<tr><td><b>' + i18n.t('amount') + ': </b></td><td style="text-align:right">' + self.sellAmount() + '</td><td>' + self.dispBaseAsset() + '</td></tr>';
+    message += '<tr><td><b>' + i18n.t('total') + ': </b></td><td style="text-align:right">' + self.sellTotal() + '</td><td>' + self.dispQuoteAsset() + '</td></tr>';
+    message += '<tr><td><b>' + i18n.t('real_estimated_total') + ': </b></td><td style="text-align:right">' + estimatedTotalPrice + '</td><td>' + self.dispQuoteAsset() + '</td></tr>';
     message += '</table>';
 
     bootbox.dialog({
@@ -612,10 +683,12 @@ function ExchangeViewModel() {
       source: self.selectedAddressForBuy(),
       give_quantity: give_quantity,
       give_asset: self.quoteAsset(),
-      _give_divisible: self.quoteAssetIsDivisible(),
+      _give_asset_divisible: self.quoteAssetIsDivisible(),
+      _give_asset_longname: self.quoteAssetLongname(),
       get_quantity: get_quantity,
       get_asset: self.baseAsset(),
-      _get_divisible: self.baseAssetIsDivisible(),
+      _get_asset_divisible: self.baseAssetIsDivisible(),
+      _get_asset_longname: self.baseAssetLongname(),
       fee_required: fee_required,
       fee_provided: fee_provided,
       expiration: expiration,
@@ -628,9 +701,9 @@ function ExchangeViewModel() {
 
       var message = "";
       if (armoryUTx) {
-        message = i18n.t("you_buy_order_will_be_placed", self.buyAmount(), self.baseAsset());
+        message = i18n.t("you_buy_order_will_be_placed", self.buyAmount(), self.dispBaseAsset());
       } else {
-        message = i18n.t("you_buy_order_has_been_placed", self.buyAmount(), self.baseAsset());
+        message = i18n.t("you_buy_order_has_been_placed", self.buyAmount(), self.dispBaseAsset());
       }
 
       WALLET.showTransactionCompleteDialog(message + " " + i18n.t(ACTION_PENDING_NOTICE), message, armoryUTx);
@@ -665,10 +738,10 @@ function ExchangeViewModel() {
     estimatedTotalPrice = smartFormat(estimatedTotalPrice);
 
     var message = '<table class="confirmOrderBox">';
-    message += '<tr><td><b>' + i18n.t('price') + ': </b></td><td style="text-align:right">' + self.buyPrice() + '</td><td>' + self.quoteAsset() + '/' + self.baseAsset() + '</td></tr>';
-    message += '<tr><td><b>' + i18n.t('amount') + ': </b></td><td style="text-align:right">' + self.buyAmount() + '</td><td>' + self.baseAsset() + '</td></tr>';
-    message += '<tr><td><b>' + i18n.t('total') + ': </b></td><td style="text-align:right">' + self.buyTotal() + '</td><td>' + self.quoteAsset() + '</td></tr>';
-    message += '<tr><td><b>' + i18n.t('real_estimated_total') + ': </b></td><td style="text-align:right">' + estimatedTotalPrice + '</td><td>' + self.quoteAsset() + '</td></tr>';
+    message += '<tr><td><b>' + i18n.t('price') + ': </b></td><td style="text-align:right">' + self.buyPrice() + '</td><td>' + self.dispQuoteAsset() + '</td></tr>';
+    message += '<tr><td><b>' + i18n.t('amount') + ': </b></td><td style="text-align:right">' + self.buyAmount() + '</td><td>' + self.dispBaseAsset() + '</td></tr>';
+    message += '<tr><td><b>' + i18n.t('total') + ': </b></td><td style="text-align:right">' + self.buyTotal() + '</td><td>' + self.dispQuoteAsset() + '</td></tr>';
+    message += '<tr><td><b>' + i18n.t('real_estimated_total') + ': </b></td><td style="text-align:right">' + estimatedTotalPrice + '</td><td>' + self.dispQuoteAsset() + '</td></tr>';
     message += '</table>';
 
     bootbox.dialog({
@@ -705,13 +778,25 @@ function ExchangeViewModel() {
   self.displayTopUserPairs = function(data) {
     for (var p in data) {
       var classes = ['top_user_pair'];
-      if (data[p]['trend'] > 0) classes.push('txt-color-greenDark');
-      else if (data[p]['trend'] < 0) classes.push('txt-color-red');
-      if (parseFloat(data[p]['progression']) > 0) classes.push('progression-up');
-      else if (parseFloat(data[p]['progression']) < 0) classes.push('progression-down');
-      if (data[p]['my_order_count']) classes.push('with-open-order');
+      
+      if (data[p]['trend'] > 0) {
+        classes.push('txt-color-greenDark');
+      } else if (data[p]['trend'] < 0) {
+        classes.push('txt-color-red');
+      }
+      
+      if (parseFloat(data[p]['progression']) > 0) {
+        classes.push('progression-up');
+      } else if (parseFloat(data[p]['progression']) < 0) {
+        classes.push('progression-down');
+      }
+
+      if (data[p]['my_order_count']) {
+        classes.push('with-open-order');
+      }
+      
       classes.push("pair_" + data[p]['base_asset'] + data[p]['quote_asset']);
-      data[p]['pair_classes'] = classes.join(" ");
+      data[p]['pair_classes'] = classes.join(' ');
     }
     self.topUserPairs(data);
   }
@@ -831,23 +916,15 @@ function ExchangeViewModel() {
 
   self.fetchAllPairs = function() {
     try {
-      //$('#wid-id-assetPairMarketInfo header span.jarviswidget-loader').show();
       self.allPairs([]);
       $('#assetPairMarketInfo').dataTable().fnClearTable();
-      //$('#assetPairMarketInfo_wrapper').hide();
     } catch (e) {}
-    failoverAPI('get_markets_list', [], self.displayAllPairs)
-    /*failoverAPI('get_markets_list', [], function(data, endpoint) {
-      self.displayAllPairs(data);
-      $('#assetPairMarketInfo_wrapper').show();
-      //$('#wid-id-assetPairMarketInfo header span.jarviswidget-loader').hide();
-    });*/
+    failoverAPI('get_markets_list', [], self.displayAllPairs);
   }
 
   /* MARKET DETAILS */
 
   self.displayMarketDetails = function(data) {
-
     if (data['base_asset_infos'] && data['base_asset_infos']['valid_image']) {
       self.baseAssetImage(assetImageUrl(data['base_asset']));
     }
@@ -945,21 +1022,15 @@ function ExchangeViewModel() {
   }
 
   self.selectMarket = function(item) {
-    self.asset1(item.base_asset);
+    self.asset1Raw(item.base_asset_longname || item.base_asset);
+    self.asset1Longname(item.base_asset_longname);
     if (item.quote_asset == 'XCP') {
       self.selectedQuoteAsset(item.quote_asset);
     } else {
       self.selectedQuoteAsset('Other');
-      self.asset2(item.quote_asset);
+      self.asset2Raw(item.quote_asset_longname || item.quote_asset);
+      self.asset2Longname(item.quote_asset_longname);
     }
-
-    self.buyFeeOption('optimal');
-    self.buyCustomFee(null);
-    self.sellFeeOption('optimal');
-    self.sellCustomFee(null);
-
-    $('#buyFeeOption').select2("val", self.buyFeeOption()); //hack
-    $('#sellFeeOption').select2("val", self.sellFeeOption()); //hack
 
     trackEvent('Exchange', 'MarketSelected', self.dispAssetPair());
   }
@@ -984,27 +1055,30 @@ function ExchangeViewModel() {
     self.fetchAllPairs();
 
     //Get a list of all assets
-    failoverAPI("get_asset_names", {}, function(data, endpoint) {
-      data = ['XCP'].concat(data);
+    failoverAPI("get_assets_names_and_longnames", {}, function(data, endpoint) {
+      //result is a list of tuples. each entry in the tuple is (asset, asset_longname)
+      //XCP is already included
       self.allAssets(data);
 
       //Set up typeahead bindings manually for now (can't get knockout and typeahead playing well together...)
       var assets = new Bloodhound({
-        datumTokenizer: Bloodhound.tokenizers.whitespace,
+        //datumTokenizer: function (data) { return Bloodhound.tokenizers.whitespace(data[1] || data[0]); },
+        datumTokenizer: function (data) { return Bloodhound.tokenizers.whitespace(data['asset_longname'] || data['asset']); },
         queryTokenizer: Bloodhound.tokenizers.whitespace,
         local: self.allAssets()
       });
       assets.initialize();
-      $('#asset1, #asset2').typeahead(null, {
+      $('#asset1Raw, #asset2Raw').typeahead(null, {
         source: assets.ttAdapter(),
-        displayKey: function(obj) {
-          return obj;
+        displayKey: function(data) {
+          return data['asset_longname'] || data['asset'];
         }
-      }).on('typeahead:selected', function($e, datum) {
-        if ($($e.target).attr('name') == 'asset1')
-          self.asset1(datum); //gotta do a manual update...doesn't play well with knockout
-        else if ($($e.target).attr('name') == 'asset2')
-          self.asset2(datum); //gotta do a manual update...doesn't play well with knockout
+      }).on('typeahead:selected', function($e, data) {
+        if ($($e.target).attr('name') == 'asset1Raw') {
+          self.asset1Raw(data['asset_longname'] || data['asset']); //gotta do a manual update...doesn't play well with knockout
+        } else if ($($e.target).attr('name') == 'asset2Raw') {
+          self.asset2Raw(data['asset_longname'] || data['asset']); //gotta do a manual update...doesn't play well with knockout
+        }  
       });
     });
   }
@@ -1234,6 +1308,7 @@ function OpenOrdersViewModel() {
 
   self.openOrders = ko.observableArray([]);
   self.addressesLabels = {};
+  self.allAssets = ko.observableArray([]);
 
   self.init = function() {
     self.addressesLabels = {};
@@ -1244,14 +1319,20 @@ function OpenOrdersViewModel() {
       self.addressesLabels[wallet_adressess[i][0]] = wallet_adressess[i][1];
     }
 
-    var params = {
-      filters: [
-        {'field': 'source', 'op': 'IN', 'value': addresses},
-        {'field': 'give_remaining', 'op': '>', 'value': 0}
-      ],
-      status: 'open'
-    };
-    failoverAPI("get_orders", params, self.displayOpenOrders);
+    failoverAPI("get_assets_names_and_longnames", {}, function(data, endpoint) {
+      //result is a list of tuples. each entry in the tuple is (asset, asset_longname)
+      //XCP is already included
+      self.allAssets(data);
+
+      var params = {
+        filters: [
+          {'field': 'source', 'op': 'IN', 'value': addresses},
+          {'field': 'give_remaining', 'op': '>', 'value': 0}
+        ],
+        status: 'open'
+      };
+      failoverAPI("get_orders", params, self.displayOpenOrders);
+    });
   }
 
   self.displayOpenOrders = function(data) {
@@ -1264,8 +1345,20 @@ function OpenOrdersViewModel() {
       order.tx_hash = data[i].tx_hash;
       order.source = data[i].source;
       order.address_label = self.addressesLabels[order.source];
+
+      //TODO: yes this is essentially O(n^2) ... fix later
+      var match = null;
       order.give_asset = data[i].give_asset;
+      match = ko.utils.arrayFirst(self.allAssets(), function(item) {
+        return order.give_asset == item['asset']; //matches asset name or asset longname
+      });
+      order.give_asset_disp = match['asset_longname'] || match['asset'];
       order.get_asset = data[i].get_asset;
+      match = ko.utils.arrayFirst(self.allAssets(), function(item) {
+        return order.get_asset == item['asset']; //matches asset name or asset longname
+      });
+      order.get_asset_disp = match['asset_longname'] || match['asset'];
+      
       order.give_quantity = data[i].give_quantity;
       order.get_quantity = data[i].get_quantity;
       order.give_remaining = Math.max(data[i].give_remaining, 0);
@@ -1281,10 +1374,10 @@ function OpenOrdersViewModel() {
 
     WALLET.getAssetsDivisibility(assets, function(assetsDivisibility) {
       for (var i = 0; i < orders.length; i++) {
-        orders[i].give_quantity_str = smartFormat(normalizeQuantity(orders[i].give_quantity, assetsDivisibility[orders[i].give_asset])) + ' ' + orders[i].give_asset;
-        orders[i].get_quantity_str = smartFormat(normalizeQuantity(orders[i].get_quantity, assetsDivisibility[orders[i].get_asset])) + ' ' + orders[i].get_asset;
-        orders[i].give_remaining_str = smartFormat(normalizeQuantity(orders[i].give_remaining, assetsDivisibility[orders[i].give_asset])) + ' ' + orders[i].give_asset;
-        orders[i].get_remaining_str = smartFormat(normalizeQuantity(orders[i].get_remaining, assetsDivisibility[orders[i].get_asset])) + ' ' + orders[i].get_asset;
+        orders[i].give_quantity_str = smartFormat(normalizeQuantity(orders[i].give_quantity, assetsDivisibility[orders[i].give_asset])) + ' ' + orders[i].give_asset_disp;
+        orders[i].get_quantity_str = smartFormat(normalizeQuantity(orders[i].get_quantity, assetsDivisibility[orders[i].get_asset])) + ' ' + orders[i].get_asset_disp;
+        orders[i].give_remaining_str = smartFormat(normalizeQuantity(orders[i].give_remaining, assetsDivisibility[orders[i].give_asset])) + ' ' + orders[i].give_asset_disp;
+        orders[i].get_remaining_str = smartFormat(normalizeQuantity(orders[i].get_remaining, assetsDivisibility[orders[i].get_asset])) + ' ' + orders[i].get_asset_disp;
       }
       self.openOrders(orders);
       var openOrdersTable = $('#openOrdersTable').dataTable();
@@ -1351,6 +1444,7 @@ function OrderMatchesViewModel() {
 
   self.orderMatches = ko.observableArray([]);
   self.addressesLabels = {};
+  self.allAssets = ko.observableArray([]);
 
   self.init = function() {
     self.addressesLabels = {};
@@ -1361,17 +1455,23 @@ function OrderMatchesViewModel() {
       self.addressesLabels[wallet_adressess[i][0]] = wallet_adressess[i][1];
     }
 
-    var params = {
-      filters: [
-        {'field': 'tx0_address', 'op': 'IN', 'value': addresses},
-        {'field': 'tx1_address', 'op': 'IN', 'value': addresses}
-      ],
-      filterop: 'OR',
-      status: ['pending', 'completed', 'expired'],
-      order_by: 'block_index',
-      order_dir: 'DESC'
-    };
-    failoverAPI("get_order_matches", params, self.displayOrderMatches);
+    failoverAPI("get_assets_names_and_longnames", {}, function(data, endpoint) {
+      //result is a list of tuples. each entry in the tuple is (asset, asset_longname)
+      //XCP is already included
+      self.allAssets(data);
+
+      var params = {
+        filters: [
+          {'field': 'tx0_address', 'op': 'IN', 'value': addresses},
+          {'field': 'tx1_address', 'op': 'IN', 'value': addresses}
+        ],
+        filterop: 'OR',
+        status: ['pending', 'completed', 'expired'],
+        order_by: 'block_index',
+        order_dir: 'DESC'
+      };
+      failoverAPI("get_order_matches", params, self.displayOrderMatches);
+    });
   }
 
   self.displayOrderMatches = function(data) {
@@ -1395,6 +1495,18 @@ function OrderMatchesViewModel() {
         order_match.give_asset = data[i].backward_asset;
         order_match.get_asset = data[i].forward_asset;
       }
+
+      //TODO: yes this is essentially O(n^2) ... fix later
+      var match = null;
+      match = ko.utils.arrayFirst(self.allAssets(), function(item) {
+        return order_match.give_asset == item['asset']; //matches asset name or asset longname
+      });
+      order_match.give_asset_disp = match['asset_longname'] || match['asset'];
+      match = ko.utils.arrayFirst(self.allAssets(), function(item) {
+        return order_match.get_asset == item['asset']; //matches asset name or asset longname
+      });
+      order_match.get_asset_disp = match['asset_longname'] || match['asset'];
+      
       order_match.status = data[i].status;
       order_match.block_index = data[i].block_index;
 
@@ -1420,8 +1532,8 @@ function OrderMatchesViewModel() {
 
     WALLET.getAssetsDivisibility(assets, function(assetsDivisibility) {
       for (var i = 0; i < order_matches.length; i++) {
-        order_matches[i].give_quantity_str = smartFormat(normalizeQuantity(order_matches[i].give_quantity, assetsDivisibility[order_matches[i].give_asset])) + ' ' + order_matches[i].give_asset;
-        order_matches[i].get_quantity_str = smartFormat(normalizeQuantity(order_matches[i].get_quantity, assetsDivisibility[order_matches[i].get_asset])) + ' ' + order_matches[i].get_asset;
+        order_matches[i].give_quantity_str = smartFormat(normalizeQuantity(order_matches[i].give_quantity, assetsDivisibility[order_matches[i].give_asset])) + ' ' + order_matches[i].give_asset_disp;
+        order_matches[i].get_quantity_str = smartFormat(normalizeQuantity(order_matches[i].get_quantity, assetsDivisibility[order_matches[i].get_asset])) + ' ' + order_matches[i].get_asset_disp;
       }
       $('#orderMatchesTable').dataTable().fnClearTable();
       self.orderMatches(order_matches);
