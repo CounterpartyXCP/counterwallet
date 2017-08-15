@@ -50,7 +50,7 @@ function ChangeAddressLabelModalViewModel() {
     var label = _.stripTags($("<div/>").html(self.newLabel()).text());
     //^ remove any HTML tags from the text
     PREFERENCES.address_aliases[addressHash] = label;
-    //^ update the preferences on the server 
+    //^ update the preferences on the server
     WALLET.storePreferences(function(data, endpoint) {
       WALLET.getAddressObj(self.address()).label(label); //update was a success
       self.shown(false);
@@ -587,8 +587,8 @@ function SendModalViewModel() {
     if (!isNumber(self.quantity())) return null;
     var curBalance = normalizeQuantity(self.rawBalance(), self.divisible());
     var balRemaining = Decimal.round(new Decimal(curBalance).sub(parseFloat(self.quantity())), 8, Decimal.MidpointRounding.ToEven).toFloat();
-    if (self.asset() == 'BTC')
-      balRemaining = subFloat(balRemaining, normalizeQuantity(MIN_FEE))  // include the fee 
+    if (self.asset() == 'LTC')
+      balRemaining = subFloat(balRemaining, normalizeQuantity(MIN_FEE))  // include the fee
     if (balRemaining < 0) return null;
     return balRemaining;
   }, self);
@@ -638,7 +638,7 @@ function SendModalViewModel() {
 
   self.maxAmount = function() {
     assert(self.normalizedBalance(), "No balance present?");
-    if (self.asset() == 'BTC')
+    if (self.asset() == 'LTC')
       self.quantity(subFloat(self.normalizedBalance(), normalizeQuantity(MIN_FEE)));
     else
       self.quantity(self.normalizedBalance());
@@ -678,7 +678,7 @@ function SendModalViewModel() {
   }
 
   self.show = function(fromAddress, asset, assetDisp, rawBalance, isDivisible, resetForm) {
-    if (asset == 'BTC' && rawBalance == null) {
+    if (asset == 'LTC' && rawBalance == null) {
       return bootbox.alert(i18n.t("cannot_send_server_unavailable"));
     }
     assert(rawBalance, "Balance is null or undefined?");
@@ -765,7 +765,7 @@ function SweepModalViewModel() {
 
         //$.jqlog.debug('Total sweeping cost : ' + sweepingCost);
 
-        // here we assume that the transaction cost to send BTC from addressForFees is MIN_FEE
+        // here we assume that the transaction cost to send LTC from addressForFees is MIN_FEE
         var totalBtcBalanceForSweeep = self.btcBalanceForPrivateKey() + Math.max(0, (self.addressForFeesBalance() - MIN_FEE));
         self.missingBtcForFees = Math.max(MULTISIG_DUST_SIZE, sweepingCost - self.btcBalanceForPrivateKey());
 
@@ -845,7 +845,7 @@ function SweepModalViewModel() {
 
   self.addressForPrivateKey.subscribe(function(address) {
     //set up handler on changes in private key to generate a list of balances
-    self.sweepAssetsCost = {'BTC': MIN_FEE + REGULAR_DUST_SIZE};
+    self.sweepAssetsCost = {'LTC': MIN_FEE + REGULAR_DUST_SIZE};
     if (!address || address == '') return;
 
     //Get the balance of ALL assets at this address
@@ -873,19 +873,19 @@ function SweepModalViewModel() {
           self.sweepAssetsCost[balancesData[i]['asset']] = cost;
         }
 
-        //Also get the BTC balance at this address and put at head of the list
-        //We just check if unconfirmed balance > 0.      
+        //Also get the LTC balance at this address and put at head of the list
+        //We just check if unconfirmed balance > 0.
         WALLET.retrieveBTCAddrsInfo([address], function(data) {
           self.btcBalanceForPrivateKey(0);
           self.txoutsCountForPrivateKey = 0;
           //TODO: counterblockd return unconfirmedRawBal==0, after fixing we need use unconfirmedRawBal
           var unconfirmedRawBal = data[0]['confirmedRawBal'];
           if (unconfirmedRawBal > 0) {
-            //We don't need to supply asset info to the SweepAssetInDropdownItemModel constructor for BTC
+            //We don't need to supply asset info to the SweepAssetInDropdownItemModel constructor for LTC
             // b/c we won't be transferring any asset ownership with it
-            var viewModel = new SweepAssetInDropdownItemModel("BTC", unconfirmedRawBal, normalizeQuantity(unconfirmedRawBal));
+            var viewModel = new SweepAssetInDropdownItemModel("LTC", unconfirmedRawBal, normalizeQuantity(unconfirmedRawBal));
             self.availableAssetsToSweep.unshift(viewModel);
-            assets.push("BTC");
+            assets.push("LTC");
             self.btcBalanceForPrivateKey(data[0]['confirmedRawBal']);
             self.txoutsCountForPrivateKey = data[0]['rawUtxoData'].length;
 
@@ -907,7 +907,7 @@ function SweepModalViewModel() {
       return;
     }
     WALLET.retrieveBTCAddrsInfo([address], function(data) {
-      self.addressForFeesBalanceMessage(normalizeQuantity(data[0]['confirmedRawBal']) + ' BTC in ' + address);
+      self.addressForFeesBalanceMessage(normalizeQuantity(data[0]['confirmedRawBal']) + ' LTC in ' + address);
       self.addressForFeesBalance(data[0]['confirmedRawBal']);
     });
   });
@@ -941,7 +941,7 @@ function SweepModalViewModel() {
       WALLET.BITCOIN_WALLET.getOldAddressesInfos(function(data) {
         for (var address in data) {
           if (self.excludedOldAddresses.indexOf(address) == -1) {
-            self.availableOldAddresses.push(new BalancesAddressInDropdownItemModel(address, address, data[address]['BTC']['privkey']));
+            self.availableOldAddresses.push(new BalancesAddressInDropdownItemModel(address, address, data[address]['LTC']['privkey']));
           }
         }
       });
@@ -1030,7 +1030,7 @@ function SweepModalViewModel() {
     var sweepBTC = false;
     for (var i = 0; i < self.selectedAssetsToSweep().length; i++) {
       var assetName = self.selectedAssetsToSweep()[i];
-      if (assetName == 'BTC') sweepBTC = true;
+      if (assetName == 'LTC') sweepBTC = true;
     }
     if (sweepBTC) {
       self.missingBtcForFees += REGULAR_DUST_SIZE;
@@ -1041,7 +1041,7 @@ function SweepModalViewModel() {
       source: self.addressForPrivateKeyForFees(),
       destination: self.addressForPrivateKey(),
       quantity: self.missingBtcForFees,
-      asset: 'BTC',
+      asset: 'LTC',
       encoding: 'auto',
       pubkey: pubkey,
       allow_unconfirmed_inputs: true
@@ -1090,7 +1090,7 @@ function SweepModalViewModel() {
 
   // in first step, we merge all outputs for chaining: each change output serve as input for next transaction.
   // so the final balance for btc transfert is the value of last change that we get with extractChangeTxoutValue()
-  // TODO: think for a more economic way to have a reliable amount for the final tx (BTC).
+  // TODO: think for a more economic way to have a reliable amount for the final tx (LTC).
   self.mergeOutputs = function(key, pubkey, callback, fees) {
     if (self.txoutsCountForPrivateKey > 1) {
 
@@ -1106,7 +1106,7 @@ function SweepModalViewModel() {
         source: self.addressForPrivateKey(),
         destination: self.addressForPrivateKey(),
         quantity: self.btcBalanceForPrivateKey() - fees,
-        asset: 'BTC',
+        asset: 'LTC',
         encoding: 'auto',
         pubkey: pubkey,
         allow_unconfirmed_inputs: true,
@@ -1115,7 +1115,7 @@ function SweepModalViewModel() {
 
       var onTransactionError = function() {
         if (arguments.length == 4) {
-          var match = arguments[1].match(/Insufficient BTC at address [^\s]+\. \(Need approximately ([\d]+\.[\d]+) BTC/);
+          var match = arguments[1].match(/Insufficient LTC at address [^\s]+\. \(Need approximately ([\d]+\.[\d]+) LTC/);
 
           if (match != null) {
             $.jqlog.debug(arguments[1]);
@@ -1217,9 +1217,9 @@ function SweepModalViewModel() {
             });
             PENDING_ACTION_FEED.add(issuanceTxHash, "issuances", transferData);
 
-            // here we adjust the BTC balance whith the change output
+            // here we adjust the LTC balance whith the change output
             var newBtcBalance = CWBitcore.extractChangeTxoutValue(transferData.source, unsignedTxHex);
-            $.jqlog.debug("New BTC balance: " + newBtcBalance);
+            $.jqlog.debug("New LTC balance: " + newBtcBalance);
             self.btcBalanceForPrivateKey(newBtcBalance);
 
             self.sweepingCurrentStep++;
@@ -1265,7 +1265,7 @@ function SweepModalViewModel() {
     $.jqlog.debug('_doSendAsset: ' + asset);
 
     //TODO: remove this
-    if (asset == 'BTC') assert(adjustedBTCQuantity !== null);
+    if (asset == 'LTC') assert(adjustedBTCQuantity !== null);
     else assert(adjustedBTCQuantity === null);
 
     var selectedAsset = ko.utils.arrayFirst(self.availableAssetsToSweep(), function(item) {
@@ -1274,13 +1274,13 @@ function SweepModalViewModel() {
     var sendTx = null, i = null;
 
     $.jqlog.debug("btcBalanceForPrivateKey: " + self.btcBalanceForPrivateKey());
-    var quantity = (asset == 'BTC') ? (self.btcBalanceForPrivateKey() - MIN_FEE) : selectedAsset.RAW_BALANCE;
-    var normalizedQuantity = (asset == 'BTC') ? normalizeQuantity(quantity) : selectedAsset.NORMALIZED_BALANCE;
+    var quantity = (asset == 'LTC') ? (self.btcBalanceForPrivateKey() - MIN_FEE) : selectedAsset.RAW_BALANCE;
+    var normalizedQuantity = (asset == 'LTC') ? normalizeQuantity(quantity) : selectedAsset.NORMALIZED_BALANCE;
 
     assert(selectedAsset);
 
     if (!quantity) { //if there is no quantity to send for the asset, only do the transfer
-      if (asset == 'XCP' || asset == 'BTC') { //nothing to send, and no transfer to do
+      if (asset == 'XLP' || asset == 'LTC') { //nothing to send, and no transfer to do
         return callback(); //my valuable work here is done!
       } else {
         self._doTransferAsset(selectedAsset, key, pubkey, opsComplete, callback); //will trigger callback() once done
@@ -1301,7 +1301,7 @@ function SweepModalViewModel() {
       pubkey: pubkey,
       allow_unconfirmed_inputs: true
     };
-    multiAPIConsensus("create_send", sendData, //can send both BTC and counterparty assets
+    multiAPIConsensus("create_send", sendData, //can send both LTC and counterparty assets
       function(unsignedTxHex, numTotalEndpoints, numConsensusEndpoints) {
 
         key.checkAndSignRawTransaction(unsignedTxHex, [self.destAddress()], function(err, signedHex) {
@@ -1329,16 +1329,16 @@ function SweepModalViewModel() {
             sendData['_assset_divisible'] = !(selectedAsset.RAW_BALANCE == selectedAsset.NORMALIZED_BALANCE); //if the balances match, the asset is NOT divisible
             PENDING_ACTION_FEED.add(sendTxHash, "sends", sendData);
 
-            // here we adjust the BTC balance whith the change output
-            if (selectedAsset.ASSET != 'BTC') {
+            // here we adjust the LTC balance whith the change output
+            if (selectedAsset.ASSET != 'LTC') {
               var newBtcBalance = CWBitcore.extractChangeTxoutValue(sendData.source, unsignedTxHex);
-              $.jqlog.debug("New BTC balance: " + newBtcBalance);
+              $.jqlog.debug("New LTC balance: " + newBtcBalance);
               self.btcBalanceForPrivateKey(newBtcBalance);
             }
 
-            //For non BTC/XCP assets, also take ownership (iif the address we are sweeping from is the asset's owner')
-            if (selectedAsset.ASSET != 'XCP'
-              && selectedAsset.ASSET != 'BTC'
+            //For non LTC/XLP assets, also take ownership (iif the address we are sweeping from is the asset's owner')
+            if (selectedAsset.ASSET != 'XLP'
+              && selectedAsset.ASSET != 'LTC'
               && selectedAsset.ASSET_INFO['owner'] == self.addressForPrivateKey()) {
               $.jqlog.debug("waiting " + TRANSACTION_DELAY + "ms");
               setTimeout(function() {
@@ -1401,15 +1401,15 @@ function SweepModalViewModel() {
     var selectedAsset = null, hasBTC = false;
     for (var i = 0; i < self.selectedAssetsToSweep().length; i++) {
       selectedAsset = self.selectedAssetsToSweep()[i];
-      if (selectedAsset == 'BTC') {
-        hasBTC = i; //send BTC last so the sweep doesn't randomly eat our primed txouts for the other assets
+      if (selectedAsset == 'LTC') {
+        hasBTC = i; //send LTC last so the sweep doesn't randomly eat our primed txouts for the other assets
       } else {
         sendsToMake.push([selectedAsset, cwk, pubkey, opsComplete, null]);
       }
     }
     if (hasBTC !== false) {
       //This balance is adjusted after each asset transfert with the change output.
-      sendsToMake.push(["BTC", cwk, pubkey, opsComplete, self.btcBalanceForPrivateKey()]);
+      sendsToMake.push(["LTC", cwk, pubkey, opsComplete, self.btcBalanceForPrivateKey()]);
     }
 
     var total = sendsToMake.length;
@@ -1473,7 +1473,7 @@ function SweepModalViewModel() {
     }
 
     var launchSweep = function() {
-      if (sendsToMake.length == 1 && sendsToMake[0][0] == 'BTC') {
+      if (sendsToMake.length == 1 && sendsToMake[0][0] == 'LTC') {
         doSweep();
       } else {
         // merge output then start sweeping.
@@ -1566,7 +1566,7 @@ function TestnetBurnModalViewModel() {
   var self = this;
   self.shown = ko.observable(false);
   self.address = ko.observable(''); // SOURCE address (supplied)
-  self.btcAlreadyBurned = ko.observable(null); // quantity BTC already burned from this address (normalized)
+  self.btcAlreadyBurned = ko.observable(null); // quantity LTC already burned from this address (normalized)
 
   self.btcBurnQuantity = ko.observable('').extend({
     required: true,
@@ -1579,9 +1579,9 @@ function TestnetBurnModalViewModel() {
       params: self
     }, {
       validator: function(val, self) {
-        return parseFloat(val) <= WALLET.getBalance(self.address(), 'BTC') - normalizeQuantity(MIN_FEE);
+        return parseFloat(val) <= WALLET.getBalance(self.address(), 'LTC') - normalizeQuantity(MIN_FEE);
       },
-      message: i18n.t('quantity_of_exceeds_balance', 'BTC'),
+      message: i18n.t('quantity_of_exceeds_balance', 'LTC'),
       params: self
     }, {
       validator: function(val, self) {
@@ -1603,7 +1603,7 @@ function TestnetBurnModalViewModel() {
 
   self.maxPossibleBurn = ko.computed(function() { //normalized
     if (self.btcAlreadyBurned() === null) return null;
-    return Math.min(1 - self.btcAlreadyBurned(), WALLET.getAddressObj(self.address()).getAssetObj('BTC').normalizedBalance())
+    return Math.min(1 - self.btcAlreadyBurned(), WALLET.getAddressObj(self.address()).getAssetObj('LTC').normalizedBalance())
   }, self);
 
   self.validationModel = ko.validatedObservable({
@@ -1650,7 +1650,7 @@ function TestnetBurnModalViewModel() {
     if (resetForm) self.resetForm();
     self.address(address);
 
-    //get the current block height, to calculate the XCP burn payout
+    //get the current block height, to calculate the XLP burn payout
     //determine whether the selected address has burned before, and if so, how much
     failoverAPI("get_burns", {filters: {'field': 'source', 'op': '==', 'value': address}}, function(data, endpoint) {
       var totalBurned = 0;
@@ -1780,7 +1780,7 @@ function BroadcastModalViewModel() {
       timestamp: self.broadcastDate() ? parseInt(self.broadcastDate().getTime() / 1000) : null,
       value: parseFloat(self.numericalValue())
     }
-    //$.jqlog.debug(params); 
+    //$.jqlog.debug(params);
 
     var onSuccess = function(txHash, data, endpoint, addressType, armoryUTx) {
       self.hide();

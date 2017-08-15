@@ -2,8 +2,8 @@ function BalanceHistoryViewModel() {
   //An address on a wallet
   var self = this;
   self.selectedAsset = ko.observable('');
-  self.availableAssets = !USE_TESTNET ? ko.observableArray(["XCP", "BTC"]) : ko.observableArray(["XCP"]);
-  //^ don't load BTC as an asset on testnet, since we can't show the data (since blockchain doesn't support testnet)
+  self.availableAssets = !USE_TESTNET ? ko.observableArray(["XLP", "LTC"]) : ko.observableArray(["XLP"]);
+  //^ don't load LTC as an asset on testnet, since we can't show the data (since blockchain doesn't support testnet)
   self.graphData = null;
   self.ASSET_LASTCHANGE = null;
 
@@ -16,7 +16,7 @@ function BalanceHistoryViewModel() {
       }
       otherAssets.sort();
       self.availableAssets(self.availableAssets().concat(otherAssets));
-      //^ this way, XCP and BTC stay at the top, but the other assets are alphabetically sorted
+      //^ this way, XLP and LTC stay at the top, but the other assets are alphabetically sorted
     });
     //the first asset will be automatically selected by default
     //assetChanged doesn't seem to autotrigger at least with chrome...manually invoke it
@@ -28,12 +28,12 @@ function BalanceHistoryViewModel() {
     self.ASSET_LASTCHANGE = self.selectedAsset();
     $.jqlog.debug("Balance history: Token changed: " + self.selectedAsset());
 
-    if (self.selectedAsset() == "BTC") { //mainnet only (as we use blockchain.info for this and they don't support testnet)
+    if (self.selectedAsset() == "LTC") { //mainnet only (as we use blockchain.info for this and they don't support testnet)
       var addresses = WALLET.getAddressesList();
       self.graphData = [];
 
       for (var i = 0; i < addresses.length; i++) {
-        //since we don't track BTC balances, we need to go to blockchain.info for that
+        //since we don't track LTC balances, we need to go to blockchain.info for that
         //$.getJSON("http://blockchain.info/charts/balance", {format: 'json', address: addresses[i], cors: 'true'}, function(data, textStatus, jqXHR) {
         var q = 'select * from html where url="http://blockchain.info/charts/balance?format=json&address=' + addresses[i] + '"';
         $.queryYQL(q, function(data, textStatus, jqXHR) {
@@ -58,7 +58,7 @@ function BalanceHistoryViewModel() {
         }).error(function(jqXHR, textStatus, errorThrown) {
           var address = /address%3D([A-Za-z0-9]+)%22/g.exec(jqXHR.url)[1];
           var addressHash = hashToB64(address);
-          $.jqlog.debug("Could not get BTC balance from blockchain for address " + address + ": " + errorThrown);
+          $.jqlog.debug("Could not get LTC balance from blockchain for address " + address + ": " + errorThrown);
           var addressName = PREFERENCES['address_aliases'][addressHash] ? "<b>" + PREFERENCES['address_aliases'][addressHash] + "</b> (" + address + ")" : address;
           self.graphData.push({'name': addressName, 'data': []});
           if (self.graphData.length == addresses.length) {
@@ -183,7 +183,7 @@ function TransactionHistoryItemViewModel(data) {
         self.DATA['_forward_asset_longname'] || self.DATA['forward_asset'], getAddressLabel(self.DATA['tx1_address']),
         smartFormat(normalizeQuantity(self.DATA['backward_quantity'], self.DATA['_backward_asset_divisible'])),
         self.DATA['_backward_asset_longname'] || self.DATA['backward_asset']);
-      if (self.DATA['forward_asset'] == 'BTC' || self.DATA['backward_asset'] == 'BTC') {
+      if (self.DATA['forward_asset'] == 'LTC' || self.DATA['backward_asset'] == 'LTC') {
         desc += " <b>(" + i18n.t("pending BTCpay") + ")</b>";
       }
     } else if (self.RAW_TX_TYPE == 'btcpays') {
