@@ -628,7 +628,7 @@ function PayDividendModalViewModel() {
     }
 
     // fetch shareholders to check transaction dest.
-    if (self.selectedDividendAsset() == 'BTC') {
+    if (self.selectedDividendAsset() == 'LTC') {
       var params = {
         'filters': [
           {'field': 'asset', 'op': '=', 'value': self.assetData().asset},
@@ -690,10 +690,10 @@ function PayDividendModalViewModel() {
           self.availableDividendAssets.push(new DividendAssetInDropdownItemModel(data[i]['asset'], data[i]['asset_longname'] || data[i]['asset'], data[i]['quantity'], data[i]['normalized_quantity']));
       }
 
-      //Also get the BTC balance at this address and put at head of the list
+      //Also get the LTC balance at this address and put at head of the list
       WALLET.retrieveBTCBalance(address.ADDRESS, function(balance) {
         if (balance) {
-          self.availableDividendAssets.unshift(new DividendAssetInDropdownItemModel("BTC", "BTC", balance, normalizeQuantity(balance)));
+          self.availableDividendAssets.unshift(new DividendAssetInDropdownItemModel("LTC", "LTC", balance, normalizeQuantity(balance)));
         }
       });
     });

@@ -250,7 +250,7 @@ function FeedBrowserViewModel() {
     for (var i = 0; i < addresses.length; i++) {
       options.push({
         address: addresses[i][0],
-        label: addresses[i][1] + ' (' + addresses[i][2] + ' XCP)'
+        label: addresses[i][1] + ' (' + addresses[i][2] + ' XLP)'
       });
       self.balances[addresses[i][0]] = addresses[i][2];
     }
@@ -314,8 +314,8 @@ function FeedBrowserViewModel() {
       'expired': i18n.t('expired')
     };
     for (var i in feed.counters.bets) {
-      feed.counters.bets[i].wager_quantity = normalizeQuantity(feed.counters.bets[i].wager_quantity) + ' XCP';
-      feed.counters.bets[i].wager_remaining = normalizeQuantity(feed.counters.bets[i].wager_remaining) + ' XCP';
+      feed.counters.bets[i].wager_quantity = normalizeQuantity(feed.counters.bets[i].wager_quantity) + ' XLP';
+      feed.counters.bets[i].wager_remaining = normalizeQuantity(feed.counters.bets[i].wager_remaining) + ' XLP';
       feed.counters.bets[i].status_html = '<span class="label label-' + classes[feed.counters.bets[i].status] + '">' + feed.counters.bets[i].status + '</span>';
 
     }
@@ -376,7 +376,7 @@ function FeedBrowserViewModel() {
       }
       var displayedData2 = [];
       if (displayedData.length > 0) {
-        // sort by multiplier desc   
+        // sort by multiplier desc
         displayedData.sortBy("-multiplier");
         // agregate bets
         displayedData2 = [displayedData[0]];

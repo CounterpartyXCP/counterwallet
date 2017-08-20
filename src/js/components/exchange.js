@@ -8,7 +8,7 @@ var BuySellAddressInDropdownItemModel = function(address, label, asset, balance)
 function createExchangeKnockoutValidators() {
   ko.validation.rules['ordersIsExistingAssetName'] = {
     validator: function(asset, self) {
-      if (asset == 'XCP') return true;
+      if (asset == 'b') return true;
       var match = ko.utils.arrayFirst(self.allAssets(), function(item) {
         return asset == item['asset'] || (item['asset_longname'] && asset == item['asset_longname']); //matches asset name or asset longname
       });
@@ -97,7 +97,7 @@ function ExchangeViewModel() {
 
   self.selectedQuoteAsset = ko.observable();
   self.selectedQuoteAsset.subscribe(function(value) {
-    if (value == 'XCP') {
+    if (value == 'XLP') {
       self.asset2Raw(value);
     } else {
       self.asset2Raw('');
@@ -207,7 +207,7 @@ function ExchangeViewModel() {
     $('#sellFeeOption').select2("val", self.sellFeeOption()); //hack
   });
 
-  //VALIDATION MODELS  
+  //VALIDATION MODELS
   self.validationModelBaseOrders = ko.validatedObservable({
     asset1Raw: self.asset1Raw,
     asset2Raw: self.asset2Raw
@@ -778,13 +778,13 @@ function ExchangeViewModel() {
   self.displayTopUserPairs = function(data) {
     for (var p in data) {
       var classes = ['top_user_pair'];
-      
+
       if (data[p]['trend'] > 0) {
         classes.push('txt-color-greenDark');
       } else if (data[p]['trend'] < 0) {
         classes.push('txt-color-red');
       }
-      
+
       if (parseFloat(data[p]['progression']) > 0) {
         classes.push('progression-up');
       } else if (parseFloat(data[p]['progression']) < 0) {
@@ -794,7 +794,7 @@ function ExchangeViewModel() {
       if (data[p]['my_order_count']) {
         classes.push('with-open-order');
       }
-      
+
       classes.push("pair_" + data[p]['base_asset'] + data[p]['quote_asset']);
       data[p]['pair_classes'] = classes.join(' ');
     }
@@ -1024,7 +1024,7 @@ function ExchangeViewModel() {
   self.selectMarket = function(item) {
     self.asset1Raw(item.base_asset_longname || item.base_asset);
     self.asset1Longname(item.base_asset_longname);
-    if (item.quote_asset == 'XCP') {
+    if (item.quote_asset == 'XLP') {
       self.selectedQuoteAsset(item.quote_asset);
     } else {
       self.selectedQuoteAsset('Other');
@@ -1057,7 +1057,7 @@ function ExchangeViewModel() {
     //Get a list of all assets
     failoverAPI("get_assets_names_and_longnames", {}, function(data, endpoint) {
       //result is a list of tuples. each entry in the tuple is (asset, asset_longname)
-      //XCP is already included
+      //XLP is already included
       self.allAssets(data);
 
       //Set up typeahead bindings manually for now (can't get knockout and typeahead playing well together...)
@@ -1078,7 +1078,7 @@ function ExchangeViewModel() {
           self.asset1Raw(data['asset_longname'] || data['asset']); //gotta do a manual update...doesn't play well with knockout
         } else if ($($e.target).attr('name') == 'asset2Raw') {
           self.asset2Raw(data['asset_longname'] || data['asset']); //gotta do a manual update...doesn't play well with knockout
-        }  
+        }
       });
     });
   }
@@ -1321,7 +1321,7 @@ function OpenOrdersViewModel() {
 
     failoverAPI("get_assets_names_and_longnames", {}, function(data, endpoint) {
       //result is a list of tuples. each entry in the tuple is (asset, asset_longname)
-      //XCP is already included
+      //XLP is already included
       self.allAssets(data);
 
       var params = {
@@ -1358,7 +1358,7 @@ function OpenOrdersViewModel() {
         return order.get_asset == item['asset']; //matches asset name or asset longname
       });
       order.get_asset_disp = match['asset_longname'] || match['asset'];
-      
+
       order.give_quantity = data[i].give_quantity;
       order.get_quantity = data[i].get_quantity;
       order.give_remaining = Math.max(data[i].give_remaining, 0);
@@ -1457,7 +1457,7 @@ function OrderMatchesViewModel() {
 
     failoverAPI("get_assets_names_and_longnames", {}, function(data, endpoint) {
       //result is a list of tuples. each entry in the tuple is (asset, asset_longname)
-      //XCP is already included
+      //XLP is already included
       self.allAssets(data);
 
       var params = {
@@ -1506,7 +1506,7 @@ function OrderMatchesViewModel() {
         return order_match.get_asset == item['asset']; //matches asset name or asset longname
       });
       order_match.get_asset_disp = match['asset_longname'] || match['asset'];
-      
+
       order_match.status = data[i].status;
       order_match.block_index = data[i].block_index;
 

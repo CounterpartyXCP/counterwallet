@@ -89,9 +89,9 @@ PendingActionViewModel.calcText = function(category, data) {
     desc = i18n.t("pend_or_unconf_btcpay", pending, getAddressLabel(data['source']));
   } else if (category == 'order_matches') {
 
-    if (WALLET.getAddressObj(data['tx1_address']) && data['forward_asset'] == 'BTC' && data['_status'] == 'pending') {
+    if (WALLET.getAddressObj(data['tx1_address']) && data['forward_asset'] == 'LTC' && data['_status'] == 'pending') {
       desc = i18n.t("pend_or_unconf_wait_btcpay", numberWithCommas(normalizeQuantity(data['forward_quantity'])), getAddressLabel(data['tx0_address']));
-    } else if (WALLET.getAddressObj(data['tx0_address']) && data['backward_asset'] == 'BTC' && data['_status'] == 'pending') {
+    } else if (WALLET.getAddressObj(data['tx0_address']) && data['backward_asset'] == 'LTC' && data['_status'] == 'pending') {
       desc = i18n.t("pend_or_unconf_wait_btcpay", numberWithCommas(normalizeQuantity(data['backward_quantity'])), getAddressLabel(data['tx1_address']));
     }
 
@@ -168,11 +168,11 @@ function PendingActionFeedViewModel() {
     if (match) {
       //if the magically hackish btcRefreshSpecialLogic flag is specified, then do a few custom checks
       // that prevent us from removing events whose txns we see as recent txns, but are actually NOT btc
-      // send txns (e.g. is a counterparty asset send, or asset issuance, or something the BTC balance refresh
-      // routine should NOT be deleting. This hack is a consequence of managing BTC balances synchronously like we do)
+      // send txns (e.g. is a counterparty asset send, or asset issuance, or something the LTC balance refresh
+      // routine should NOT be deleting. This hack is a consequence of managing LTC balances synchronously like we do)
       if (btcRefreshSpecialLogic) {
         assert(category == "sends");
-        if (match['CATEGORY'] != category || match['DATA']['asset'] != 'BTC')
+        if (match['CATEGORY'] != category || match['DATA']['asset'] != 'LTC')
           return;
 
         //Also, with this logic, since we found the entry as a pending action, add a completed send action
@@ -282,8 +282,8 @@ PendingActionFeedViewModel.modifyBalancePendingFlag = function(category, data, f
   if (category == 'burns') {
 
     addressObj = WALLET.getAddressObj(data['source']);
-    addressObj.getAssetObj("XCP").balanceChangePending(flagSetting);
-    updateUnconfirmedBalance(data['source'], "BTC", data['quantity'] * -1);
+    addressObj.getAssetObj("XLP").balanceChangePending(flagSetting);
+    updateUnconfirmedBalance(data['source'], "LTC", data['quantity'] * -1);
 
 
   } else if (category == 'sends') {
@@ -302,7 +302,7 @@ PendingActionFeedViewModel.modifyBalancePendingFlag = function(category, data, f
       //updateUnconfirmedBalance(data['source'], data['asset'], data['quantity'], null, data);
       // issuance fee
       if (data['asset'].substring(0, 1) != 'A') {
-        updateUnconfirmedBalance(data['source'], 'XCP', -ASSET_CREATION_FEE_XCP * UNIT);
+        updateUnconfirmedBalance(data['source'], 'XLP', -ASSET_CREATION_FEE_XCP * UNIT);
       }
     }
 
@@ -313,13 +313,13 @@ PendingActionFeedViewModel.modifyBalancePendingFlag = function(category, data, f
 
   } else if (category == 'orders') {
 
-    if (data['give_asset'] != 'BTC') {
+    if (data['give_asset'] != 'LTC') {
       updateUnconfirmedBalance(data['source'], data['give_asset'], data['give_quantity'] * -1);
     }
 
   } else if (category == 'bets') {
 
-    updateUnconfirmedBalance(data['source'], 'XCP', data['wager_quantity'] * -1);
+    updateUnconfirmedBalance(data['source'], 'XLP', data['wager_quantity'] * -1);
 
   }
 }

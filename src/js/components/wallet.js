@@ -2,10 +2,10 @@ function WalletViewModel() {
   //The user's wallet
   var self = this;
   self.BITCOIN_WALLET = null; // CWHierarchicalKey instance
-  self.autoRefreshBTCBalances = true; //auto refresh BTC balances every 5 minutes
+  self.autoRefreshBTCBalances = true; //auto refresh LTC balances every 5 minutes
 
   self.identifier = ko.observable(null); //set when logging in
-  self.networkBlockHeight = ko.observable(null); //stores the current network block height. refreshed when we refresh the BTC balances
+  self.networkBlockHeight = ko.observable(null); //stores the current network block height. refreshed when we refresh the LTC balances
   self.addresses = ko.observableArray(); //AddressViewModel objects -- populated at login
 
   self.isNew = ko.observable(false); //set to true if we can't find the user's prefs when logging on. if set, we'll show some intro text on their login, etc.
@@ -124,7 +124,7 @@ function WalletViewModel() {
     assert(addressObj);
     var assetObj = addressObj.getAssetObj(asset);
     if (!assetObj) return 0; //asset not in wallet
-    if (asset != 'BTC') {
+    if (asset != 'LTC') {
       return normalized ? assetObj.availableBalance() : assetObj.rawAvailableBalance();
     } else {
       var bal = assetObj.normalizedBalance() + assetObj.unconfirmedBalance();
@@ -145,7 +145,7 @@ function WalletViewModel() {
     assert(addressObj);
     var assetObj = addressObj.getAssetObj(asset);
     if (!assetObj) {
-      assert(asset != "XCP" && asset != "BTC", "BTC or XCP not present in the address?"); //these should be already in each address
+      assert(asset != "XLP" && asset != "LTC", "LTC or XLP not present in the address?"); //these should be already in each address
       //we're trying to update the balance of an asset that doesn't yet exist at this address
       //fetch the asset info from the server, and then use that in a call to addressObj.addOrUpdateAsset
       failoverAPI("get_assets_info", {'assetsList': [asset]}, function(assetsInfo, endpoint) {
@@ -153,11 +153,11 @@ function WalletViewModel() {
       });
     } else {
       assetObj.rawBalance(rawBalance);
-      if (asset == 'BTC' && unconfirmedRawBal) {
+      if (asset == 'LTC' && unconfirmedRawBal) {
         assetObj.unconfirmedBalance(normalizeQuantity(unconfirmedRawBal));
         assetObj.balanceChangePending(true);
         addressObj.addOrUpdateAsset(asset, {}, rawBalance);
-      } else if (asset == 'BTC') {
+      } else if (asset == 'LTC') {
         assetObj.unconfirmedBalance(0);
         assetObj.balanceChangePending(false);
         addressObj.addOrUpdateAsset(asset, {}, rawBalance);
@@ -249,7 +249,7 @@ function WalletViewModel() {
     // check if the wallet have the information
     for (var a in assets) {
       var asset = assets[a];
-      if (asset == 'XCP' || asset == 'BTC') {
+      if (asset == 'XLP' || asset == 'LTC') {
         assetsDivisibility[asset] = true;
       } else {
         var divisible = self.isAssetDivisibilityAvailable(asset);
@@ -292,7 +292,7 @@ function WalletViewModel() {
   }
 
   self.refreshCounterpartyBalances = function(addresses, onSuccess) {
-    //update all counterparty asset balances for the specified address (including XCP)
+    //update all counterparty asset balances for the specified address (including XLP)
     //Note: after login, this normally never needs to be called (except when adding a watch address),
     // as counterparty asset balances are updated automatically via the messages feed
     failoverAPI("get_normalized_balances", {'addresses': addresses},
@@ -303,7 +303,7 @@ function WalletViewModel() {
 
         if (!balancesData.length) {
           for (var i in addresses) {
-            WALLET.getAddressObj(addresses[i]).addOrUpdateAsset('XCP', {}, 0, 0);
+            WALLET.getAddressObj(addresses[i]).addOrUpdateAsset('XLP', {}, 0, 0);
           }
           if (onSuccess) return onSuccess(); //user has no balance (i.e. first time logging in)
           else return;
@@ -364,9 +364,9 @@ function WalletViewModel() {
 
   self.refreshBTCBalances = function(isRecurring, addresses, onSuccess) {
     if (typeof(isRecurring) === 'undefined') isRecurring = false;
-    //^ if isRecurring is set to true, we will update BTC balances every 5 min as long as self.autoRefreshBTCBalances == true
+    //^ if isRecurring is set to true, we will update LTC balances every 5 min as long as self.autoRefreshBTCBalances == true
 
-    //update all BTC balances (independently, so that one addr with a bunch of txns doesn't hold us up)
+    //update all LTC balances (independently, so that one addr with a bunch of txns doesn't hold us up)
     if (addresses == undefined || addresses == null) {
       addresses = self.getAddressesList();
     }
@@ -376,10 +376,10 @@ function WalletViewModel() {
     var completedAddresses = []; //addresses whose balance has been retrieved
     var addressObj = null;
 
-    //See if we have any pending BTC send transactions listed in Pending Actions, and if so, enable some extra functionality
+    //See if we have any pending LTC send transactions listed in Pending Actions, and if so, enable some extra functionality
     // to clear them out if we sense the txn as processed
     var pendingActionsHasBTCSend = ko.utils.arrayFirst(PENDING_ACTION_FEED.entries(), function(item) {
-      return item.CATEGORY == 'sends' && item.DATA['asset'] == 'BTC'; //there is a pending BTC send
+      return item.CATEGORY == 'sends' && item.DATA['asset'] == 'LTC'; //there is a pending LTC send
     });
 
     self.retrieveBTCAddrsInfo(addresses, function(data) {
@@ -388,14 +388,14 @@ function WalletViewModel() {
       if (data.length >= 1) self.networkBlockHeight(data[0]['blockHeight']);
 
       for (var i = 0; i < data.length; i++) {
-        //if someone sends BTC using the wallet, an entire TXout is spent, and the change is routed back. During this time
+        //if someone sends LTC using the wallet, an entire TXout is spent, and the change is routed back. During this time
         // the (confirmed) balance will be decreased by the ENTIRE quantity of that txout, even though they may be getting
-        // some/most of it back as change. To avoid people being confused over this, with BTC in particular, we should
+        // some/most of it back as change. To avoid people being confused over this, with LTC in particular, we should
         // display the unconfirmed portion of the balance in addition to the confirmed balance, as it will include the change output
-        self.updateBalance(data[i]['addr'], "BTC", data[i]['confirmedRawBal'], data[i]['unconfirmedRawBal']);
+        self.updateBalance(data[i]['addr'], "LTC", data[i]['confirmedRawBal'], data[i]['unconfirmedRawBal']);
 
         addressObj = self.getAddressObj(data[i]['addr']);
-        assert(addressObj, "Cannot find address in wallet for refreshing BTC balances!");
+        assert(addressObj, "Cannot find address in wallet for refreshing LTC balances!");
 
         if (data[i]['confirmedRawBal'] > 0 || data[i]['unconfirmedRawBal'] > 0 ||
           data[i]['numPrimedTxoutsIncl0Confirms'] > 0 || data[i]['numPrimedTxouts'] > 0 ||
@@ -404,7 +404,7 @@ function WalletViewModel() {
         }
 
         if (data[i]['confirmedRawBal'] && !addressObj.IS_WATCH_ONLY) {
-          //Also refresh BTC unspent txouts (to know when to "reprime" the account)
+          //Also refresh LTC unspent txouts (to know when to "reprime" the account)
           addressObj.numPrimedTxouts(data[i]['numPrimedTxouts']);
           addressObj.numPrimedTxoutsIncl0Confirms(data[i]['numPrimedTxoutsIncl0Confirms']);
 
@@ -414,8 +414,8 @@ function WalletViewModel() {
 
           if (pendingActionsHasBTCSend) {
             //see if data[i]['lastTxns'] includes any hashes that exist in the Pending Actions, which
-            // means we MAY be able to remove them from that listing (i.e. they COULD be non-BTC send (i.e. counterparty transactions) though
-            //TODO: This is not very efficient when a BTC send is pending... O(n^3)! Although the sample sets are relatively small...
+            // means we MAY be able to remove them from that listing (i.e. they COULD be non-LTC send (i.e. counterparty transactions) though
+            //TODO: This is not very efficient when a LTC send is pending... O(n^3)! Although the sample sets are relatively small...
             for (var j = 0; j < data[i]['lastTxns'].length; j++) {
               PENDING_ACTION_FEED.remove(data[i]['lastTxns'][j], "sends", true);
             }
@@ -436,10 +436,10 @@ function WalletViewModel() {
       if (onSuccess) onSuccess();
 
     }, function(jqXHR, textStatus, errorThrown) {
-      //system down or spazzing, set all BTC balances out to null
+      //system down or spazzing, set all LTC balances out to null
       var addressObj = null;
       for (var i = 0; i < addresses.length; i++) {
-        self.updateBalance(addresses[i], "BTC", null, null); //null = UNKNOWN
+        self.updateBalance(addresses[i], "LTC", null, null); //null = UNKNOWN
         addressObj = self.getAddressObj(addresses[i]);
         addressObj.numPrimedTxouts(null); //null = UNKNOWN
         addressObj.numPrimedTxoutsIncl0Confirms(null); //null = UNKNOWN
@@ -458,7 +458,7 @@ function WalletViewModel() {
 
   self.removeKeys = function() {
     //removes all keys (addresses) from the wallet. Normally called when logging out
-    //stop BTC balance timer on each address
+    //stop LTC balance timer on each address
     ko.utils.arrayForEach(self.addresses(), function(a) {
       a.doBTCBalanceRefresh = false;
     });
@@ -467,7 +467,7 @@ function WalletViewModel() {
 
 
   /////////////////////////
-  //BTC-related
+  //LTC-related
   self.broadcastSignedTx = function(signedTxHex, onSuccess, onError) {
     if (signedTxHex == false) {
       bootbox.alert(i18n.t("tx_validation_failed"));
@@ -488,7 +488,7 @@ function WalletViewModel() {
     assert(verifySourceAddr, "Source address must be specified");
     assert(verifyDestAddr, "Destination address must be specified");
     //Sign and broadcast a multisig transaction that we got back from counterpartyd (as a raw unsigned tx in hex)
-    //* verifySourceAddr and verifyDestAddr MUST be specified to verify that the txn hash we get back from the server is what we expected. 
+    //* verifySourceAddr and verifyDestAddr MUST be specified to verify that the txn hash we get back from the server is what we expected.
 
     $.jqlog.debug("RAW UNSIGNED HEX: " + unsignedTxHex);
 
@@ -514,8 +514,8 @@ function WalletViewModel() {
     failoverAPI("get_chain_address_info", {"addresses": [address], "with_uxtos": false, "with_last_txn_hashes": 0},
       function(data, endpoint) {
         return onSuccess(
-          parseInt(data[0]['info']['balanceSat'] || 0), //confirmed BTC balance
-          parseInt(data[0]['info']['unconfirmedBalanceSat'] || 0) //unconfirmed BTC balance
+          parseInt(data[0]['info']['balanceSat'] || 0), //confirmed LTC balance
+          parseInt(data[0]['info']['unconfirmedBalanceSat'] || 0) //unconfirmed LTC balance
         );
       },
       onError || defaultErrorHandler);
@@ -557,7 +557,7 @@ function WalletViewModel() {
             'rawUtxoData': data[i]['uxtos']
           });
         }
-        //final number of primed txouts is lesser of either the # of txouts that are >= .0005 BTC, OR the floor(total balance / .0005 BTC)
+        //final number of primed txouts is lesser of either the # of txouts that are >= .0005 LTC, OR the floor(total balance / .0005 LTC)
         return onSuccess(results);
       },
       function(jqXHR, textStatus, errorThrown) {
@@ -573,7 +573,7 @@ function WalletViewModel() {
     var addressObj = self.getAddressObj(address);
     assert(!addressObj.IS_WATCH_ONLY, "Cannot perform this action on a watch only address!");
 
-    if (self.getBalance(address, "BTC", false) < MIN_BALANCE_FOR_ACTION) {
+    if (self.getBalance(address, "LTC", false) < MIN_BALANCE_FOR_ACTION) {
       bootbox.alert(i18n.t("insufficient_btc", normalizeQuantity(MIN_BALANCE_FOR_ACTION), getAddressLabel(address)));
       return false;
     }
@@ -650,7 +650,7 @@ function WalletViewModel() {
     delete data['destBtcPay'];
     if (action == "create_burn") {
       verifyDestAddr = TESTNET_UNSPENDABLE;
-    } else if (action == "create_dividend" && data['dividend_asset'] == 'BTC') {
+    } else if (action == "create_dividend" && data['dividend_asset'] == 'LTC') {
       verifyDestAddr = data['_btc_dividend_dests'];
       delete data['_btc_dividend_dests'];
     }
