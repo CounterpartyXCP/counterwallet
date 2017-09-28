@@ -80,7 +80,7 @@ RUN git rev-parse HEAD
 RUN npm -g install npm@latest
 RUN npm config set strict-ssl false
 ENV PHANTOMJS_CDNURL="http://cnpmjs.org/downloads"
-RUN npm install -g bower grunt mocha-phantomjs
+RUN sudo npm install -g bower grunt mocha-phantomjs
 RUN cd src; bower --allow-root --config.interactive=false update; cd ..
 RUN npm update
 RUN grunt build
