@@ -40,14 +40,14 @@ NotificationViewModel.calcText = function(category, message) {
 
   if (category == "sends") {
     if (WALLET.getAddressObj(message['source']) && WALLET.getAddressObj(message['destination'])) {
-      desc = i18n.t("notif_you_transferred", smartFormat(normalizeQuantity(message['quantity'], message['_divisible'])),
-        message['asset'], getAddressLabel(message['source']), getAddressLabel(message['destination']));
+      desc = i18n.t("notif_you_transferred", smartFormat(normalizeQuantity(message['quantity'], message['_asset_divisible'])),
+        message['_asset_longname'] || message['asset'], getAddressLabel(message['source']), getAddressLabel(message['destination']));
     } else if (WALLET.getAddressObj(message['source'])) { //we sent funds
-      desc = i18n.t("notif_you_sent", smartFormat(normalizeQuantity(message['quantity'], message['_divisible'])),
-        message['asset'], getAddressLabel(message['source']), getAddressLabel(message['destination']));
+      desc = i18n.t("notif_you_sent", smartFormat(normalizeQuantity(message['quantity'], message['_asset_divisible'])),
+        message['_asset_longname'] || message['asset'], getAddressLabel(message['source']), getAddressLabel(message['destination']));
     } else if (WALLET.getAddressObj(message['destination'])) { //we received funds
-      desc = i18n.t("notif_you_received", smartFormat(normalizeQuantity(message['quantity'], message['_divisible'])),
-        message['asset'], getAddressLabel(message['source']), getAddressLabel(message['destination']));
+      desc = i18n.t("notif_you_received", smartFormat(normalizeQuantity(message['quantity'], message['_asset_divisible'])),
+        message['_asset_longname'] || message['asset'], getAddressLabel(message['source']), getAddressLabel(message['destination']));
     }
   } else if (category == "btcpays" && (WALLET.getAddressObj(message['source']) || WALLET.getAddressObj(message['destination']))) {
     desc = i18n.t("notif_btcpay_from", getAddressLabel(message['source']), getAddressLabel(message['destination']),
@@ -62,7 +62,8 @@ NotificationViewModel.calcText = function(category, message) {
     // NOTE that counterpartyd has automatically already adusted the balances of all asset holders...we just need to notify
     var addressesWithAsset = WALLET.getAddressesWithAsset(message['asset']);
     if (!addressesWithAsset.length) return;
-    desc = i18n.t("notif_dividend_done", message['dividend_asset'], addressesWithAsset.join(', '), message['quantity_per_unit'], message['asset']);
+    desc = i18n.t("notif_dividend_done", message['_dividend_asset_longname'] || message['dividend_asset'],
+      addressesWithAsset.join(', '), message['quantity_per_unit'], message['_asset_longname'] || message['asset']);
   } else if (category == 'issuances') {
     var addresses = WALLET.getAddressesList();
     var assetObj = null;
@@ -74,34 +75,35 @@ NotificationViewModel.calcText = function(category, message) {
       //Detect transfers, whether we currently have the object in our wallet or not (as it could be
       // a transfer FROM an address outside of our wallet)
       if (addresses.indexOf(message['source']) != -1 || addresses.indexOf(message['issuer']) != -1) {
-        desc = i18n.t("notif_token_transferred", message['asset'], getLinkForCPData('address', message['source'], getAddressLabel(message['source'])),
+        desc = i18n.t("notif_token_transferred", message['_asset_longname'] || message['asset'], getLinkForCPData('address', message['source'], getAddressLabel(message['source'])),
           getLinkForCPData('address', message['issuer'], getAddressLabel(message['issuer'])));
       }
     } else if (assetObj) { //the address is in the wallet
       //Detect everything else besides transfers, which we only care to see if the asset is listed in one of the wallet addresses
       if (message['locked']) {
         assert(!assetObj.locked());
-        desc = i18n.t("notif_token_locked", message['asset']);
+        desc = i18n.t("notif_token_locked", message['_asset_longname'] || message['asset']);
       } else if (message['description'] != assetObj.description()) {
-        desc = i18n.t("notif_token_desc_changed", message['asset'], assetObj.description(), message['description']);
+        desc = i18n.t("notif_token_desc_changed", message['_asset_longname'] || message['asset'], assetObj.description(), message['description']);
       } else {
         var additionalQuantity = message['quantity'];
         if (additionalQuantity) {
-          desc = i18n.t("notif_additional_issued", smartFormat(normalizeQuantity(additionalQuantity, assetObj.DIVISIBLE)), message['asset']);
+          desc = i18n.t("notif_additional_issued", smartFormat(normalizeQuantity(additionalQuantity, assetObj.DIVISIBLE)), message['_asset_longname'] || message['asset']);
         } else {
           //this is not a transfer, but it is not in our wallet as well we can assume it's an issuance of a totally new asset
-          desc = i18n.t("notif_token_issued", message['asset'], smartFormat(normalizeQuantity(message['quantity'], message['divisible'])));
+          desc = i18n.t("notif_token_issued", message['_asset_longname'] || message['asset'], smartFormat(normalizeQuantity(message['quantity'], message['divisible'])));
         }
       }
     }
   } else if (category == "orders" && WALLET.getAddressObj(message['source'])) {
     desc = i18n.t("notif_order_buy_active", smartFormat(normalizeQuantity(message['get_quantity'], message['_get_asset_divisible'])),
-      message['get_asset'], getAddressLabel(message['source']), smartFormat(normalizeQuantity(message['give_quantity'], message['_give_asset_divisible'])),
-      message['give_asset']);
+      message['_get_asset_longname'] || message['get_asset'], getAddressLabel(message['source']), smartFormat(normalizeQuantity(message['give_quantity'], message['_give_asset_divisible'])),
+      message['_give_asset_longname'] || message['give_asset']);
   } else if (category == "order_matches" && (WALLET.getAddressObj(message['tx0_address']) || WALLET.getAddressObj(message['tx1_address']))) {
     desc = i18n.t("notif_order_matched", getAddressLabel(message['tx0_address']), smartFormat(normalizeQuantity(message['forward_quantity'], message['_forward_asset_divisible'])),
-      message['forward_asset'], getAddressLabel(message['tx1_address']), smartFormat(normalizeQuantity(message['backward_quantity'], message['_backward_asset_divisible'])),
-      message['backward_asset']);
+      message['_forward_asset_longname'] || message['forward_asset'], getAddressLabel(message['tx1_address']),
+      smartFormat(normalizeQuantity(message['backward_quantity'], message['_backward_asset_divisible'])),
+        message['_backward_asset_longname'] || message['backward_asset']);
   } else if (category == "order_expirations" && WALLET.getAddressObj(message['source'])) {
     desc = i18n.t("notif_order_expired", message['order_index'], getAddressLabel(message['source']));
   } else if (category == "order_match_expirations") {

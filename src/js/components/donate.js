@@ -73,7 +73,7 @@ function DonationViewModel() {
       quantity: denormalizeQuantity(self.quantity()),
       asset: self.donationCurrency(),
       destination: DONATION_ADDRESS,
-      _divisible: true
+      _asset_divisible: true
     };
 
     $.jqlog.debug(params);

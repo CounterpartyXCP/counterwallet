@@ -11,35 +11,41 @@ function PendingActionViewModel(txHash, category, data, when) {
 PendingActionViewModel.calcText = function(category, data) {
   //This is data as it is specified from the relevant create_ API request parameters (NOT as it comes in from the message feed)
   var desc = "";
-  var divisible = null;
+  var divisible = null, asset_longname = null;
   var pending = data['mempool'] ? 'Unconfirmed' : 'Pending';
   //The category being allowable was checked in the factory class
   if (data['source'] && data['asset']) {
-    divisible = data['divisible'] !== undefined ? data['divisible'] : (data['_divisible'] !== undefined ? data['_divisible'] : WALLET.getAddressObj(data['source']).getAssetObj(data['asset']).DIVISIBLE);
+    divisible = data['divisible'] !== undefined ? data['divisible'] : (data['_asset_divisible'] !== undefined ? data['_asset_divisible'] : WALLET.getAddressObj(data['source']).getAssetObj(data['asset']).DIVISIBLE);
     //^ if the asset is being created, data['divisible'] should be present (or [_divisible] if coming in from message feed oftentimes),
     // otherwise, get it from an existing asset in our wallet
+    asset_longname = data['asset_longname'] !== undefined ? data['asset_longname'] : (data['_asset_longname'] !== undefined ? data['_asset_longname'] : WALLET.getAddressObj(data['source']).getAssetObj(data['asset']).ASSET_LONGNAME);
   }
 
   if (category == 'burns') {
     desc = i18n.t("pend_or_unconf_burn", pending, normalizeQuantity(data['quantity']));
   } else if (category == 'sends') {
-    desc = i18n.t("pend_or_unconf_send", pending, numberWithCommas(normalizeQuantity(data['quantity'], divisible)), data['asset'],
+    desc = i18n.t("pend_or_unconf_send", pending, numberWithCommas(normalizeQuantity(data['quantity'], divisible)),
+      asset_longname || data['asset'],
       getLinkForCPData('address', data['source'], getAddressLabel(data['source'])),
       getLinkForCPData('address', data['destination'], getAddressLabel(data['destination'])));
   } else if (category == 'orders') {
-    desc = i18n.t("pend_or_unconf_order", pending, numberWithCommas(normalizeQuantity(data['give_quantity'], data['_give_divisible'])),
-      data['give_asset'], numberWithCommas(normalizeQuantity(data['get_quantity'], data['_get_divisible'])), data['get_asset']);
+    desc = i18n.t("pend_or_unconf_order", pending, numberWithCommas(normalizeQuantity(data['give_quantity'], data['_give_asset_divisible'])),
+      data['_give_asset_longname'] || data['give_asset'], numberWithCommas(normalizeQuantity(data['get_quantity'], data['_get_asset_divisible'])),
+      data['_get_asset_longname'] || data['get_asset']);
   } else if (category == 'issuances') {
     if (data['transfer_destination']) {
-      desc = i18n.t("pend_or_unconf_transfer", pending, data['asset'], getLinkForCPData('address', data['source'], getAddressLabel(data['source'])),
+      desc = i18n.t("pend_or_unconf_transfer", pending,
+        asset_longname || data['asset'],
+        getLinkForCPData('address', data['source'], getAddressLabel(data['source'])),
         getLinkForCPData('address', data['transfer_destination'], getAddressLabel(data['transfer_destination'])));
     } else if (data['locked']) {
-      desc = i18n.t("pend_or_unconf_lock", pending, data['asset']);
+      desc = i18n.t("pend_or_unconf_lock", pending, asset_longname || data['asset']);
     } else if (data['quantity'] == 0) {
       if (assetObj) {
-        desc = i18n.t("pend_or_unconf_change_desc", pending, data['asset'], data['description']);
+        desc = i18n.t("pend_or_unconf_change_desc", pending, asset_longname || data['asset'], data['description']);
       } else {
-        desc = i18n.t("pend_or_unconf_issuance", pending, data['asset'], numberWithCommas(normalizeQuantity(data['quantity'], data['divisible'])));
+        desc = i18n.t("pend_or_unconf_issuance", pending, asset_longname || data['asset'],
+          numberWithCommas(normalizeQuantity(data['quantity'], data['divisible'])));
       }
     } else {
       //See if this is a new issuance or not
@@ -50,9 +56,10 @@ PendingActionViewModel.calcText = function(category, data) {
 
       if (assetObj) { //the asset exists in our wallet already somewhere, so it's an additional issuance of more units for it
         desc = i18n.t("pend_or_unconf_issuance_add", pending, numberWithCommas(normalizeQuantity(data['quantity'], data['divisible'])),
-          data['asset']);
+          asset_longname || data['asset']);
       } else { //new issuance
-        desc = i18n.t("pend_or_unconf_issuance", pending, data['asset'], numberWithCommas(normalizeQuantity(data['quantity'], data['divisible'])));
+        desc = i18n.t("pend_or_unconf_issuance", pending, asset_longname || data['asset'],
+          numberWithCommas(normalizeQuantity(data['quantity'], data['divisible'])));
       }
     }
   } else if (category == 'broadcasts') {
@@ -66,12 +73,13 @@ PendingActionViewModel.calcText = function(category, data) {
     var divUnitDivisible;
     if (WALLET.getAddressObj(data['source'])) {
       divUnitDivisible = WALLET.getAddressObj(data['source']).getAssetObj(data['dividend_asset']).DIVISIBLE;
+      divLongname = WALLET.getAddressObj(data['source']).getAssetObj(data['dividend_asset']).ASSET_LONGNAME;
       desc = i18n.t("pend_or_unconf_dividend_payment", pending, numberWithCommas(normalizeQuantity(data['quantity_per_unit'], divUnitDivisible)),
-        data['dividend_asset'], data['asset']);
+        divLongname || data['dividend_asset'], asset_longname || data['asset']);
     } else {
       divUnitDivisible = data['dividend_asset_divisible'];
       desc = i18n.t("pend_or_unconf_dividend_reception", pending, numberWithCommas(normalizeQuantity(data['quantity_per_unit'], divUnitDivisible)),
-        data['dividend_asset'], data['asset']);
+        divLongname || data['dividend_asset'], asset_longname || data['asset']);
     }
 
 

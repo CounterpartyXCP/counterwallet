@@ -77,7 +77,7 @@ COPY . /counterwallet
 RUN rm -rf /counterwallet/build
 WORKDIR /counterwallet
 RUN git rev-parse HEAD
-RUN npm -g install npm@latest
+RUN npm -g install npm@4.6.1
 RUN npm config set strict-ssl false
 ENV PHANTOMJS_CDNURL="http://cnpmjs.org/downloads"
 RUN npm install -g bower grunt mocha-phantomjs

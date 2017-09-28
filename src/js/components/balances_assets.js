@@ -1,20 +1,57 @@
+var ParentAssetInDropdownItemModel = function(asset) {
+  this.ASSET = asset;
+};
+
+function createCreateAssetKnockoutValidators() {
+  ko.validation.rules['assetNameIsTaken'] = {
+    async: true,
+    message: i18n.t('token_already_exists'),
+    validator: function(val, self, callback) {
+      if(self.tokenNameType() == 'subasset' && self.selectedParentAsset()) { //is a subasset
+        failoverAPI("get_issuances", {'filters': {'field': 'asset_longname', 'op': '==', 'value': self.selectedParentAsset() + '.' + val}, 'status': 'valid'},
+          function(data, endpoint) {
+            $.jqlog.debug("Asset exists: " + data.length);
+            return data.length ? callback(false) : callback(true); //empty list -> false (valid = false)
+          }
+        );
+      } else {
+        failoverAPI("get_issuances", {'filters': {'field': 'asset', 'op': '==', 'value': val}, 'status': 'valid'},
+          function(data, endpoint) {
+            $.jqlog.debug("Asset exists: " + data.length);
+            return data.length ? callback(false) : callback(true); //empty list -> false (valid = false)
+          }
+        );
+      }
+    }
+  };
+  ko.validation.registerExtenders();
+}
 function CreateAssetModalViewModel() {
   var self = this;
+  createCreateAssetKnockoutValidators();
+
   self.shown = ko.observable(false);
   self.address = ko.observable('');
-  self.noEnoughXCP = ko.observable(false)
+  self.xcpBalance = ko.observable(0);
 
   self.tokenNameType = ko.observable('alphabetic');
-  self.tokenNameType.subscribe(function(val) {
-    if (val == 'numeric') self.generateRandomId();
-    else if (val == 'alphabetic') self.name('');
-  });
+  self.tokenNameType.subscribe(
+    function(val) {
+      if (val == 'numeric') {
+        self.generateRandomId();
+      } else {
+        self.name('');
+        self.name.isModified(false);
+      }
+    }
+  );
 
   self.name = ko.observable('').extend({
     required: true,
     isValidAssetName: self,
     assetNameIsTaken: self
   });
+  self.selectedParentAsset = ko.observable('');
   self.description = ko.observable('').extend({
     required: false
   });
@@ -24,11 +61,55 @@ function CreateAssetModalViewModel() {
     isValidPositiveQuantityOrZero: self,
     isValidQtyForDivisibility: self
   });
+  self.feeOption = ko.observable('optimal');
+  self.customFee = ko.observable(null).extend({
+    validation: [{
+      validator: function(val, self) {
+        return self.feeOption() === 'custom' ? val : true;
+      },
+      message: i18n.t('field_required'),
+      params: self
+    }],
+    isValidCustomFeeIfSpecified: self
+  });
+
+  self.hasXCPForNamedAsset = ko.computed(function() {
+    return self.xcpBalance() >= ASSET_CREATION_FEE_XCP;
+  });
+  self.hasXCPForSubAsset = ko.computed(function() {
+    return self.xcpBalance() >= SUBASSET_CREATION_FEE_XCP;
+  });
+
+  self.ownedNamedAssets = ko.computed(function() { //stores BuySellAddressInDropdownItemModel objects
+    if (!self.address()) return [];
+    var ownedAssets = [];
+    //Get a list of all of my available assets this address owns
+    var assets = WALLET.getAddressObj(self.address()).assets();
+    for (var i = 0; i < assets.length; i++) {
+        if(assets[i].isMine() && assets[i].assetType() === 'named') {
+          ownedAssets.push(new ParentAssetInDropdownItemModel(assets[i].ASSET));
+        }
+    }
+
+    ownedAssets.sort(function(left, right) {
+      return left.ASSET == right.ASSET ? 0 : (left.ASSET > right.ASSET ? -1 : 1);
+    });
+
+    return ownedAssets;
+  }, self);
+
+  self.feeOption.subscribeChanged(function(newValue, prevValue) {
+    if(newValue !== 'custom') {
+      self.customFee(null);
+      self.customFee.isModified(false);
+    }
+  });
 
   self.validationModel = ko.validatedObservable({
     name: self.name,
     description: self.description,
-    quantity: self.quantity
+    quantity: self.quantity,
+    customFee: self.customFee
   });
 
   self.generateRandomId = function() {
@@ -41,6 +122,8 @@ function CreateAssetModalViewModel() {
     self.description('');
     self.divisible(true);
     self.quantity(null);
+    self.feeOption('optimal');
+    self.customFee(null);
     self.validationModel.errors.showAllMessages(false);
   }
 
@@ -70,22 +153,27 @@ function CreateAssetModalViewModel() {
       return false;
     }
 
-
+    var name = self.name();
+    if(self.tokenNameType() === 'subasset' && self.selectedParentAsset()) {
+      name = self.selectedParentAsset() + '.' + self.name();
+    }
     WALLET.doTransaction(self.address(), "create_issuance",
       {
         source: self.address(),
-        asset: self.name(),
+        asset: name,
         quantity: rawQuantity,
         divisible: self.divisible(),
         description: self.description(),
-        transfer_destination: null
+        transfer_destination: null,
+        _fee_option: self.feeOption(),
+        _custom_fee: self.customFee()
       },
       function(txHash, data, endpoint, addressType, armoryUTx) {
         var message = "";
         if (armoryUTx) {
-          message = i18n.t("token_will_be_created", self.name());
+          message = i18n.t("token_will_be_created", name);
         } else {
-          message = i18n.t("token_has_been_created", self.name());
+          message = i18n.t("token_has_been_created", name);
         }
         message += "<br/><br/>";
         if (self.tokenNameType() == 'alphabetic') {
@@ -100,13 +188,14 @@ function CreateAssetModalViewModel() {
     trackEvent('Assets', 'CreateAsset');
   }
 
-  self.show = function(address, resetForm, noXCP) {
-    self.noEnoughXCP(noXCP || false);
+  self.show = function(address, xcpBalance, resetForm) {
     if (typeof(resetForm) === 'undefined') resetForm = true;
     if (resetForm) self.resetForm();
+    self.xcpBalance(xcpBalance);
     self.address(address);
     self.tokenNameType('numeric');
     self.generateRandomId();
+    $('#createAssetFeeOption').select2("val", self.feeOption()); //hack
     self.shown(true);
     trackDialogShow('CreateAsset');
   }
@@ -356,14 +445,40 @@ function ChangeAssetDescriptionModalViewModel() {
 }
 
 
-var DividendAssetInDropdownItemModel = function(asset, rawBalance, normalizedBalance) {
+function createPayDividendKnockoutValidators() {
+  ko.validation.rules['assetNameExists'] = {
+    async: true,
+    message: i18n.t('token_dont_exists'),
+    validator: function(val, self, callback) {
+      if(val.includes('.')) { //subasset
+        failoverAPI("get_issuances", {'filters': {'field': 'asset_longname', 'op': '==', 'value': val}, 'status': 'valid'},
+          function(data, endpoint) {
+            $.jqlog.debug("Subasset exists: " + data.length);
+            return data.length ? callback(true) : callback(false) //empty list -> false (valid = false)
+          }
+        );
+      } else { //named asset or numeric asset
+        failoverAPI("get_issuances", {'filters': {'field': 'asset', 'op': '==', 'value': val}, 'status': 'valid'},
+          function(data, endpoint) {
+            $.jqlog.debug("Asset exists: " + data.length);
+            return data.length ? callback(true) : callback(false) //empty list -> false (valid = false)
+          }
+        );
+      }
+    }
+  };
+  ko.validation.registerExtenders();
+}
+var DividendAssetInDropdownItemModel = function(asset, assetDisp, rawBalance, normalizedBalance) {
   this.ASSET = asset;
+  this.ASSET_DISP = assetDisp;
   this.RAW_BALANCE = rawBalance; //raw
   this.NORMALIZED_BALANCE = normalizedBalance; //normalized
-  this.SELECT_LABEL = asset + " (" + i18n.t('bal') + ": " + normalizedBalance + ")";
+  this.SELECT_LABEL = assetDisp + " (" + i18n.t('bal') + ": " + normalizedBalance + ")";
 };
 function PayDividendModalViewModel() {
   var self = this;
+  createPayDividendKnockoutValidators();
 
   self.shown = ko.observable(false);
   self.addressVM = ko.observable(null); // SOURCE address view model(supplied)
@@ -415,8 +530,12 @@ function PayDividendModalViewModel() {
     required: true
   });
   self.selectedDividendAssetDivisibility = ko.observableArray(null);
+  self.dispSelectedDividendAsset = ko.observableArray('');
   self.selectedDividendAsset.subscribe(function(asset) {
     self.selectedDividendAssetDivisibility(WALLET.isAssetDivisibilityAvailable(asset) == 0 ? false : true); // asset divisibility should be available..
+    if(self.addressVM()) {
+      self.dispSelectedDividendAsset(self.addressVM().getAssetObj(asset).ASSET_LONGNAME);
+    }
   });
 
   self.quantityPerUnit = ko.observable('').extend({
@@ -568,13 +687,13 @@ function PayDividendModalViewModel() {
     failoverAPI("get_normalized_balances", {'addresses': [address.ADDRESS]}, function(data, endpoint) {
       for (var i = 0; i < data.length; i++) {
         if (data[i]['quantity'] !== null && data[i]['quantity'] !== 0)
-          self.availableDividendAssets.push(new DividendAssetInDropdownItemModel(data[i]['asset'], data[i]['quantity'], data[i]['normalized_quantity']));
+          self.availableDividendAssets.push(new DividendAssetInDropdownItemModel(data[i]['asset'], data[i]['asset_longname'] || data[i]['asset'], data[i]['quantity'], data[i]['normalized_quantity']));
       }
 
       //Also get the BTC balance at this address and put at head of the list
       WALLET.retrieveBTCBalance(address.ADDRESS, function(balance) {
         if (balance) {
-          self.availableDividendAssets.unshift(new DividendAssetInDropdownItemModel("BTC", balance, normalizeQuantity(balance)));
+          self.availableDividendAssets.unshift(new DividendAssetInDropdownItemModel("BTC", "BTC", balance, normalizeQuantity(balance)));
         }
       });
     });
@@ -632,6 +751,7 @@ function ShowAssetInfoModalViewModel() {
   self.shown = ko.observable(false);
   self.address = ko.observable(null);
   self.asset = ko.observable(null);
+  self.assetDisp = ko.observable(null);
   self.owner = ko.observable(null);
   self.description = ko.observable(null);
   self.totalIssued = ko.observable(null);
@@ -655,6 +775,7 @@ function ShowAssetInfoModalViewModel() {
   self.show = function(assetObj) {
     self.address(assetObj.ADDRESS);
     self.asset(assetObj.ASSET);
+    self.assetDisp(assetObj.ASSET_DISP);
     self.owner(assetObj.owner());
     self.description(assetObj.description());
     self.totalIssued(assetObj.normalizedTotalIssued());

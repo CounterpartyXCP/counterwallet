@@ -181,6 +181,14 @@ function createSharedKnockoutValidators() {
     message: i18n.t('must_be_url')
   };
 
+  ko.validation.rules['isValidCustomFeeIfSpecified'] = {
+    validator: function(val, self) {
+      if (!val) return true; //the "if specified" part of the name
+      return val.toString().match(/^[0-9]+$/) && parseFloat(val) > 0 && parseFloat(val) <= 1000;
+    },
+    message: i18n.t('must_be_valid_custom_fee')
+  };
+
   ko.validation.rules['isValidUrlOrValidBitcoinAdressOrJsonBet'] = {
     validator: function(val, self) {
       if (!val) return false;
@@ -227,37 +235,16 @@ function createSharedKnockoutValidators() {
     }
   };
 
-  ko.validation.rules['assetNameIsTaken'] = {
-    async: true,
-    message: i18n.t('token_already_exists'),
-    validator: function(val, self, callback) {
-      failoverAPI("get_issuances",
-        {'filters': {'field': 'asset', 'op': '==', 'value': val}, 'status': 'valid'},
-        function(data, endpoint) {
-          return data.length ? callback(false) : callback(true) //empty list -> true (valid = true)
-        }
-      );
-    }
-  };
-
-  // TODO: DRY!!
-  ko.validation.rules['assetNameExists'] = {
-    async: true,
-    message: i18n.t('token_dont_exists'),
-    validator: function(val, self, callback) {
-      failoverAPI("get_issuances", {'filters': {'field': 'asset', 'op': '==', 'value': val}, 'status': 'valid'},
-        function(data, endpoint) {
-          $.jqlog.debug("Asset exists: " + data.length);
-          return data.length ? callback(true) : callback(false) //empty list -> false (valid = false)
-        }
-      );
-    }
-  };
-
   ko.validation.rules['isValidAssetName'] = {
     validator: function(val, self) {
       if (self.tokenNameType() == 'alphabetic') {
         var patt = new RegExp("^[B-Z][A-Z]{3,11}$");
+        return patt.test(val);
+      } else if (self.tokenNameType() == 'subasset') {
+        if(_.startsWith(val, '.') || _.endsWith(val, '.') || val.includes('..')) {
+          return false;
+        }
+        var patt = new RegExp("^[A-Za-z0-9.\\-_@!]{1,250}$");
         return patt.test(val);
       } else if (self.tokenNameType() == 'numeric') {
         var patt = new RegExp("^A[0-9]{17,}$");
@@ -265,7 +252,7 @@ function createSharedKnockoutValidators() {
           var id = bigInt(val.substr(1));
           return id.geq(NUMERIC_ASSET_ID_MIN) && id.leq(NUMERIC_ASSET_ID_MAX);
         } else {
-          return false
+          return false;
         }
       }
     },
@@ -366,19 +353,45 @@ ko.bindingHandlers.fadeVisibleInOnly = {
   }
 };
 
-/*ko.bindingHandlers.fadeVisibleInOnlyKeepLayout = {
-    init: function(element, valueAccessor) {
-        // Initially set the element to be instantly visible/hidden depending on the value
-        var value = valueAccessor();
-        $(element).toggle(ko.unwrap(value)); // Use "unwrapObservable" so we can handle values that may or may not be observable
-    },
-    update: function(element, valueAccessor) {
-        // Whenever the value subsequently changes, slowly fade the element in or out
-        var value = valueAccessor();
-        ko.unwrap(value) ? $(element).animate({opacity:1}) : $(element).show().css({opacity:0});
-        //ko.unwrap(value) ? $(element).animate({opacity:100}) : $(element).show().animate({opacity:0});
+ko.bindingHandlers.attrIf = {
+    update: function (element, valueAccessor, allBindingsAccessor) {
+        var h = ko.utils.unwrapObservable(valueAccessor());
+        var show = ko.utils.unwrapObservable(h._if);
+        if (show) {
+            ko.bindingHandlers.attr.update(element, valueAccessor, allBindingsAccessor);
+        } else {
+            for (var k in h) {
+                if (h.hasOwnProperty(k) && k.indexOf("_") !== 0) {
+                    $(element).removeAttr(k);
+                }
+            }
+        }
     }
-};*/
+};
+
+ko.bindingHandlers.truncatedText = {
+  update: function (element, valueAccessor, allBindingsAccessor) {
+     var originalText = ko.utils.unwrapObservable(valueAccessor()),
+         // 10 is a default maximum length
+         length = ko.utils.unwrapObservable(allBindingsAccessor().maxTextLength) || 20,
+         truncatedText = originalText.length > length ? originalText.substring(0, length) + "..." : originalText;
+     // updating text binding handler to show truncatedText
+     ko.bindingHandlers.text.update(element, function () {
+         return truncatedText; 
+     });
+  }
+};
+
+ko.bindingHandlers['visibleInline'] = {
+    'update': function (element, valueAccessor) {
+        var value = ko.utils.unwrapObservable(valueAccessor());
+        var isCurrentlyVisible = !(element.style.display == "none");
+        if (value && !isCurrentlyVisible)
+            element.style.display = "inline";
+        else if ((!value) && isCurrentlyVisible)
+            element.style.display = "none";
+    }
+};
 
 ko.bindingHandlers.fadeInText = {
   'update': function(element, valueAccessor) {

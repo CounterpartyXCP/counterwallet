@@ -88,7 +88,9 @@ function MessageFeed() {
     }
 
     if (displayTx) {
-      var asset1 = message['bindings']['asset'] || 'BTC';
+      PENDING_ACTION_FEED.add(txHash, category, message['bindings']);
+
+      /*var asset1 = message['bindings']['asset'] || 'BTC';
       WALLET.getAssetsDivisibility([asset1], function(divisibility) {
 
         message['bindings']['divisible'] = divisibility[asset1];
@@ -106,13 +108,13 @@ function MessageFeed() {
           PENDING_ACTION_FEED.add(txHash, category, message['bindings']);
         }
 
-      });
+      });*/
     }
 
   }
 
   self.parseMessage = function(seq, when, message) {
-    if (!message || (message.substring && message.startswith("<html>"))) return;
+    if (!message || (message.substring && _.startsWith(message, "<html>"))) return;
     //^ sometimes nginx can trigger this via its proxy handling it seems, with a blank payload (or a html 502 Bad Gateway
     // payload) -- especially if the backend server reloads. Just ignore it.
     // Also, a message may be sent over as None if it is a stub message conterblock uses to initialize the sequence count
@@ -231,7 +233,7 @@ function MessageFeed() {
 
     } else if (category == "dividends") {
     } else if (category == "issuances") {
-
+      //the 'asset' field is == asset_longname for subassets
       var addressesWithAsset = WALLET.getAddressesWithAsset(message['asset']);
       for (var i = 0; i < addressesWithAsset.length; i++) {
         WALLET.getAddressObj(addressesWithAsset[i]).addOrUpdateAsset(message['asset'], message, null);

@@ -254,7 +254,7 @@ function VendingMachineViewModel() {
       quantity: denormalizeQuantity(self.quantity()),
       asset: self.currency(),
       destination: self.desinationAddress(),
-      _divisible: true
+      _asset_divisible: true
     };
 
     var onSuccess = function(txHash, data, endpoint, addressType, armoryUTx) {

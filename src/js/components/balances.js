@@ -80,7 +80,7 @@ function CreateNewAddressModalViewModel() {
   var self = this;
   self.shown = ko.observable(false);
 
-  self.addressType = ko.observable(null); //addressType is one of: normal, watch, or armory
+  self.addressType = ko.observable(null); //addressType is one of: normal, watch, armory or multisig
   self.armoryPubKey = ko.observable(null); //only set with armory offline addresses
   self.watchAddress = ko.observable('').extend({
     isValidMonosigAddressIfSpecified: self,
@@ -407,14 +407,32 @@ function CreateNewAddressModalViewModel() {
   }
 }
 
-
 function SendModalViewModel() {
   var self = this;
   self.shown = ko.observable(false);
   self.address = ko.observable(null); //address string, not an Address object
   self.asset = ko.observable();
+  self.assetDisp = ko.observable();
   self.rawBalance = ko.observable(null);
   self.divisible = ko.observable();
+  self.feeOption = ko.observable('optimal');
+  self.customFee = ko.observable(null).extend({
+    validation: [{
+      validator: function(val, self) {
+        return self.feeOption() === 'custom' ? val : true;
+      },
+      message: i18n.t('field_required'),
+      params: self
+    }],
+    isValidCustomFeeIfSpecified: self
+  });
+
+  self.feeOption.subscribeChanged(function(newValue, prevValue) {
+    if(newValue !== 'custom') {
+      self.customFee(null);
+      self.customFee.isModified(false);
+    }
+  });
 
   self.destAddress = ko.observable('').extend({
     required: true,
@@ -586,6 +604,7 @@ function SendModalViewModel() {
   self.validationModel = ko.validatedObservable({
     destAddress: self.destAddress,
     quantity: self.quantity,
+    customFee: self.customFee,
     pubkey1: self.pubkey1,
     pubkey2: self.pubkey2,
     pubkey3: self.pubkey3
@@ -601,6 +620,9 @@ function SendModalViewModel() {
     self.missingPubkey2Address('');
     self.missingPubkey3(false);
     self.missingPubkey3Address('');
+
+    self.feeOption('optimal');
+    self.customFee(null);
 
     self.validationModel.errors.showAllMessages(false);
   }
@@ -641,8 +663,10 @@ function SendModalViewModel() {
         destination: self.destAddress(),
         quantity: denormalizeQuantity(parseFloat(self.quantity()), self.divisible()),
         asset: self.asset(),
-        _divisible: self.divisible(),
-        _pubkeys: additionalPubkeys.concat(self._additionalPubkeys)
+        _asset_divisible: self.divisible(),
+        _pubkeys: additionalPubkeys.concat(self._additionalPubkeys),
+        _fee_option: self.feeOption(),
+        _custom_fee: self.customFee()
       },
       function(txHash, data, endpoint, addressType, armoryUTx) {
         var message = "<b>" + (armoryUTx ? i18n.t("will_be_sent") : i18n.t("were_sent")) + " </b>";
@@ -653,7 +677,7 @@ function SendModalViewModel() {
     trackEvent('Balances', 'Send', self.asset());
   }
 
-  self.show = function(fromAddress, asset, rawBalance, isDivisible, resetForm) {
+  self.show = function(fromAddress, asset, assetDisp, rawBalance, isDivisible, resetForm) {
     if (asset == 'BTC' && rawBalance == null) {
       return bootbox.alert(i18n.t("cannot_send_server_unavailable"));
     }
@@ -663,8 +687,10 @@ function SendModalViewModel() {
     if (resetForm) self.resetForm();
     self.address(fromAddress);
     self.asset(asset);
+    self.assetDisp(assetDisp);
     self.rawBalance(rawBalance);
     self.divisible(isDivisible);
+    $('#sendFeeOption').select2("val", self.feeOption()); //hack
     self.shown(true);
     trackDialogShow('Send');
   }
@@ -1300,7 +1326,7 @@ function SweepModalViewModel() {
               'to': self.destAddress(),
               'normalized_quantity': normalizedQuantity
             });
-            sendData['_divisible'] = !(selectedAsset.RAW_BALANCE == selectedAsset.NORMALIZED_BALANCE); //if the balances match, the asset is NOT divisible
+            sendData['_assset_divisible'] = !(selectedAsset.RAW_BALANCE == selectedAsset.NORMALIZED_BALANCE); //if the balances match, the asset is NOT divisible
             PENDING_ACTION_FEED.add(sendTxHash, "sends", sendData);
 
             // here we adjust the BTC balance whith the change output

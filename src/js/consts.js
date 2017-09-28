@@ -46,6 +46,8 @@ var COUNTERWALLET_CONF_LOCATION = "/counterwallet.conf.json";
 var NUMERIC_ASSET_ID_MIN = bigInt(26).pow(12).add(1);
 var NUMERIC_ASSET_ID_MAX = bigInt(256).pow(8);
 
+var SUBASSET_MAX_DISP_LENGTH = 20;
+
 var IS_MOBILE_OR_TABLET = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
 var MAX_INT = Math.pow(2, 63) - 1;
 var UNIT = 100000000; //# satoshis in whole
@@ -54,6 +56,7 @@ var REGULAR_DUST_SIZE = 5430;
 var MULTISIG_DUST_SIZE = 7800;
 var MIN_BALANCE_FOR_ACTION = 50000; //in satoshis ... == .0005
 var ASSET_CREATION_FEE_XCP = 0.5; //in normalized XCP
+var SUBASSET_CREATION_FEE_XCP = 0.25; //in normalized XCP
 var DIVIDEND_FEE_PER_HOLDER = 0.0002
 var MAX_ASSET_DESC_LENGTH = 41; //42, minus a null term character?
 var FEE_FRACTION_REQUIRED_DEFAULT_PCT = .9;   //0.90% of total order
@@ -238,7 +241,7 @@ var USE_TESTNET = (   (((location.pathname == "/" || location.pathname == "/src/
   || location.hostname.indexOf('testnet') != -1) ? true : false
 );
 
-var BLOCKEXPLORER_URL = USE_TESTNET ? "http://testnet.counterpartychain.io" : "https://counterpartychain.io";
+var BLOCKEXPLORER_URL = USE_TESTNET ? "https://testnet.xchain.io" : "https://xchain.io";
 var GOOGLE_ANALYTICS_UAID = null; //will be set in counterwallet.js
 var ROLLBAR_ACCESS_TOKEN = null; //will be set in counterwallet.js
 
