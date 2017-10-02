@@ -15,3 +15,5 @@ src/bitcore.html
 src/bitcoinjs.html
 counterwallet.conf.json
 src/js/jquery-timeago.i18n.js
+development/etc/includes/counterwallet.conf
+development/var
