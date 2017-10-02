@@ -56,23 +56,17 @@ server {
   }
   # PROXY TO COUNTERBLOCK API BACKEND (WSGI)
   location @wsgi_api {
-    # --CUSTOM--
-    # include /etc/nginx/sites-enabled/counterblock_api.inc;
     include includes/counterblock_api.inc;
     rewrite ^/_api/?$ /api/?  break;
     proxy_pass   http://counterblock_api_server;
   }
   # PROXY TO COUNTERBLOCK FEED BACKEND (socket.io)
   location ^~ /_feed {
-    # --CUSTOM--
-    # include /etc/nginx/sites-enabled/counterblock_socketio.inc;
     include includes/counterblock_socketio.inc;
     proxy_pass   http://counterblock_api_server/socket.io;
   }
   # PROXY TO COUNTERBLOCK CHAT BACKEND (socket.io)
   location ^~ /_chat {
-    # --CUSTOM--
-    # include /etc/nginx/sites-enabled/counterblock_socketio.inc;
     proxy_pass   http://counterblock_api_server/socket.io;
   }
 
