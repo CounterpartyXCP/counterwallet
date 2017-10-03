@@ -124,6 +124,10 @@ You can run tests in your browser by doing the above steps and;
 ### Running tests from CLI (using phantomjs headless browser)
  - `npm test`
 
+### Development without a full node
+
+To work on counterwallet without running a full node and supporting services locally, please see the scripts located in the [local development folder](local-development/readme.md).
+
 
 License
 -------------------
