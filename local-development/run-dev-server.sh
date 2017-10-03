@@ -31,7 +31,3 @@ envsubst "$VARS" < ./etc/includes/counterwallet.conf.template > ./etc/includes/c
 # start nginx
 nginx -g 'daemon off;' -p ${PWD} -c etc/nginx.conf
 
-
-# DEV_PORT=8080 DEV_REMOTE_PROTOCOL=https DEV_REMOTE_HOST="34.199.150.134" DEV_REPORT_PORT=443 DEV_CODE_PATH=/Users/dweller/Development/Freelance/current/counterparty/counterwallet ./run-dev-server.sh
-# DEV_PORT=8080 DEV_REMOTE_PROTOCOL=https DEV_REMOTE_HOST="wallet.counterwallet.io" DEV_REPORT_PORT=443 DEV_CODE_PATH=/Users/dweller/Development/Freelance/current/counterparty/counterwallet ./run-dev-server.sh
-
