@@ -63,7 +63,7 @@ function noExponents(n) {
   var data = String(n).split(/[eE]/);
   if (data.length == 1) return data[0];
 
-  var z = '', sign = this < 0 ? '-' : '',
+  var z = '', sign = n < 0 ? '-' : '',
     str = data[0].replace('.', ''),
     mag = Number(data[1]) + 1;
 
