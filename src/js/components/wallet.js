@@ -589,7 +589,7 @@ function WalletViewModel() {
     }
 
     assert(['sign_tx', 'broadcast_tx', 'convert_armory_signedtx_to_raw_hex'].indexOf(action) === -1,
-      'Specified action not supported through this function. please use appropriate primatives');
+      'Specified action not supported through this function. please use appropriate primitives');
 
     if (action == 'create_cancel') {
       if (self.cancelOrders.indexOf(data['offer_hash']) != -1) {
