@@ -415,25 +415,7 @@ function SendModalViewModel() {
   self.assetDisp = ko.observable();
   self.rawBalance = ko.observable(null);
   self.divisible = ko.observable();
-  self.feeOption = ko.observable('optimal');
-  self.customFee = ko.observable(null).extend({
-    validation: [{
-      validator: function(val, self) {
-        return self.feeOption() === 'custom' ? val : true;
-      },
-      message: i18n.t('field_required'),
-      params: self
-    }],
-    isValidCustomFeeIfSpecified: self
-  });
-
-  self.feeOption.subscribeChanged(function(newValue, prevValue) {
-    if(newValue !== 'custom') {
-      self.customFee(null);
-      self.customFee.isModified(false);
-    }
-  });
-
+  
   self.destAddress = ko.observable('').extend({
     required: true,
     isValidBitcoinAddress: self,
@@ -604,7 +586,6 @@ function SendModalViewModel() {
   self.validationModel = ko.validatedObservable({
     destAddress: self.destAddress,
     quantity: self.quantity,
-    customFee: self.customFee,
     pubkey1: self.pubkey1,
     pubkey2: self.pubkey2,
     pubkey3: self.pubkey3
@@ -621,8 +602,7 @@ function SendModalViewModel() {
     self.missingPubkey3(false);
     self.missingPubkey3Address('');
 
-    self.feeOption('optimal');
-    self.customFee(null);
+    self.feeController.reset();
 
     self.validationModel.errors.showAllMessages(false);
   }
@@ -645,6 +625,17 @@ function SendModalViewModel() {
   }
 
   self.doAction = function() {
+    WALLET.doTransactionWithTxHex(self.address(), "create_send", self.buildSendTransactionData(), self.feeController.getUnsignedTx(),
+      function(txHash, data, endpoint, addressType, armoryUTx) {
+        var message = "<b>" + (armoryUTx ? i18n.t("will_be_sent") : i18n.t("were_sent")) + " </b>";
+        WALLET.showTransactionCompleteDialog(message + " " + i18n.t(ACTION_PENDING_NOTICE), message, armoryUTx);
+      }
+    );
+    self.shown(false);
+    trackEvent('Balances', 'Send', self.asset());
+  }
+
+  self.buildSendTransactionData = function() {
     var additionalPubkeys = [];
 
     if (self.pubkey1()) {
@@ -657,25 +648,27 @@ function SendModalViewModel() {
       additionalPubkeys.push(self.pubkey3())
     }
 
-    WALLET.doTransaction(self.address(), "create_send",
-      {
-        source: self.address(),
-        destination: self.destAddress(),
-        quantity: denormalizeQuantity(parseFloat(self.quantity()), self.divisible()),
-        asset: self.asset(),
-        _asset_divisible: self.divisible(),
-        _pubkeys: additionalPubkeys.concat(self._additionalPubkeys),
-        _fee_option: self.feeOption(),
-        _custom_fee: self.customFee()
-      },
-      function(txHash, data, endpoint, addressType, armoryUTx) {
-        var message = "<b>" + (armoryUTx ? i18n.t("will_be_sent") : i18n.t("were_sent")) + " </b>";
-        WALLET.showTransactionCompleteDialog(message + " " + i18n.t(ACTION_PENDING_NOTICE), message, armoryUTx);
-      }
-    );
-    self.shown(false);
-    trackEvent('Balances', 'Send', self.asset());
+    return {
+      source: self.address(),
+      destination: self.destAddress(),
+      quantity: denormalizeQuantity(parseFloat(self.quantity()), self.divisible()),
+      asset: self.asset(),
+      _asset_divisible: self.divisible(),
+      _pubkeys: additionalPubkeys.concat(self._additionalPubkeys),
+      _fee_option: 'custom',
+      _custom_fee: self.feeController.getCustomFee()
+    };
   }
+
+  // mix in shared fee calculation functions
+  self.feeController = CWFeeModelMixin(self, {
+    action: "create_send",
+    transactionParameters: [self.destAddress, self.quantity],
+    validTransactionCheck: function() {
+      return self.validationModel.isValid();
+    },
+    buildTransactionData: self.buildSendTransactionData
+  });
 
   self.show = function(fromAddress, asset, assetDisp, rawBalance, isDivisible, resetForm) {
     if (asset == 'BTC' && rawBalance == null) {
@@ -690,7 +683,6 @@ function SendModalViewModel() {
     self.assetDisp(assetDisp);
     self.rawBalance(rawBalance);
     self.divisible(isDivisible);
-    $('#sendFeeOption').select2("val", self.feeOption()); //hack
     self.shown(true);
     trackDialogShow('Send');
   }
@@ -1773,14 +1765,7 @@ function BroadcastModalViewModel() {
   }
 
   self.doAction = function() {
-    var params = {
-      source: self.address(),
-      fee_fraction: Decimal.round(new Decimal(self.feeFraction()).div(100), 8, Decimal.MidpointRounding.ToEven).toFloat(),
-      text: self.textValue(),
-      timestamp: self.broadcastDate() ? parseInt(self.broadcastDate().getTime() / 1000) : null,
-      value: parseFloat(self.numericalValue())
-    }
-    //$.jqlog.debug(params); 
+    var params = self.buildBroadcastTransactionData()
 
     var onSuccess = function(txHash, data, endpoint, addressType, armoryUTx) {
       self.hide();
@@ -1793,9 +1778,31 @@ function BroadcastModalViewModel() {
       bootbox.alert(textStatus);
     }
 
-    WALLET.doTransaction(self.address(), "create_broadcast", params, onSuccess, onError);
+    WALLET.doTransactionWithTxHex(self.address(), "create_broadcast", params, self.feeController.getUnsignedTx(), onSuccess, onError);
     trackEvent('Balances', 'Broadcast');
   }
+
+  self.buildBroadcastTransactionData = function() {
+    return {
+      source: self.address(),
+      fee_fraction: Decimal.round(new Decimal(self.feeFraction()).div(100), 8, Decimal.MidpointRounding.ToEven).toFloat(),
+      text: self.textValue(),
+      timestamp: self.broadcastDate() ? parseInt(self.broadcastDate().getTime() / 1000) : null,
+      value: parseFloat(self.numericalValue()),
+      _fee_option: 'custom',
+      _custom_fee: self.feeController.getCustomFee()
+    };
+  }
+
+  // mix in shared fee calculation functions
+  self.feeController = CWFeeModelMixin(self, {
+    action: "create_broadcast",
+    transactionParameters: [self.address, self.textValue, self.numericalValue, self.feeFraction, self.broadcastDate],
+    validTransactionCheck: function() {
+      return self.validationModel.isValid();
+    },
+    buildTransactionData: self.buildBroadcastTransactionData
+  });
 }
 
 function SignTransactionModalViewModel() {

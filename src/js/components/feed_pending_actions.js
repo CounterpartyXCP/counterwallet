@@ -18,7 +18,24 @@ PendingActionViewModel.calcText = function(category, data) {
     divisible = data['divisible'] !== undefined ? data['divisible'] : (data['_asset_divisible'] !== undefined ? data['_asset_divisible'] : WALLET.getAddressObj(data['source']).getAssetObj(data['asset']).DIVISIBLE);
     //^ if the asset is being created, data['divisible'] should be present (or [_divisible] if coming in from message feed oftentimes),
     // otherwise, get it from an existing asset in our wallet
-    asset_longname = data['asset_longname'] !== undefined ? data['asset_longname'] : (data['_asset_longname'] !== undefined ? data['_asset_longname'] : WALLET.getAddressObj(data['source']).getAssetObj(data['asset']).ASSET_LONGNAME);
+
+    // resolve asset longname
+    // asset_longname = data['asset_longname'] !== undefined ? data['asset_longname'] : (data['_asset_longname'] !== undefined ? data['_asset_longname'] : WALLET.getAddressObj(data['source']).getAssetObj(data['asset']).ASSET_LONGNAME);
+    if (data['asset_longname'] !== undefined) {
+      asset_longname = data['asset_longname']; 
+    } else {
+      if (data['_asset_longname'] !== undefined) {
+        asset_longname = data['_asset_longname'];
+      } else {
+        var walletAssetObj = WALLET.getAddressObj(data['source']).getAssetObj(data['asset'])
+        if (walletAssetObj != null) {
+          asset_longname = walletAssetObj.ASSET_LONGNAME;
+        } else {
+          // fallback to the raw asset name
+          asset_longname = data['asset'];
+        }
+      }
+    }
   }
 
   if (category == 'burns') {

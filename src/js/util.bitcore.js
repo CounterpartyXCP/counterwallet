@@ -612,26 +612,34 @@ CWBitcore.checkTransactionDest = function(txHex, source, dest) {
   return outputsValid.filter(function(v) { return !v; }).length === 0;
 }
 
-CWBitcore.compareOutputs = function(source, txHexs) {
+CWBitcore.compareOutputs = function(source, apiResponses) {
   var t;
 
-  if (txHexs[0].indexOf("=====TXSIGCOLLECT") != -1) {
+  // apiResponse might be a plain transaction hex
+  //   or it might be a container with transaction info
+  var responseIsTxInfo = (typeof apiResponses[0] == 'object')
+  var resolveTxHex = function(apiResponse) {
+    return (responseIsTxInfo ? apiResponse.tx_hex : apiResponse);
+  }
+
+  if (!responseIsTxInfo && apiResponses[0].indexOf("=====TXSIGCOLLECT") != -1) {
     // armory transaction, we just compare if strings are the same.
-    for (t = 1; t < txHexs.length; t++) {
-      if (txHexs[t] != txHexs[0]) {
+    for (t = 1; t < apiResponses.length; t++) {
+      if (apiResponses[t] != apiResponses[0]) {
         return false;
       }
     }
 
     return true;
   } else {
-    var tx0 = bitcore.Transaction(txHexs[0]);
+    var tx0 = bitcore.Transaction(resolveTxHex(apiResponses[0]));
 
-    var txHexesValid = txHexs.map(function(txHex, idx) {
+    var txHexesValid = apiResponses.map(function(apiResponse, idx) {
       if (idx === 0) {
         return true;
       }
 
+      var txHex = resolveTxHex(apiResponse);
       var tx1 = bitcore.Transaction(txHex);
 
       if (tx0.outputs.length != tx1.outputs.length) {
@@ -645,7 +653,7 @@ CWBitcore.compareOutputs = function(source, txHexs) {
         var amount1 = tx1.outputs[idx].satoshis;
 
         // addresses need to be the same and values need to be the same
-        //  expect for the change output
+        //  except for the change output
         return addresses0 == addresses1 && (amount0 == amount1 || addresses0.indexOf(source) != -1);
       });
 
