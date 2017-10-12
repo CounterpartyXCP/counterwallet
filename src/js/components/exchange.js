@@ -198,13 +198,6 @@ function ExchangeViewModel() {
       assert(self.asset2Raw().includes('.'));
       self.asset2Longname(self.asset2Raw());
     }
-
-    self.buyFeeOption('optimal');
-    self.buyCustomFee(null);
-    self.sellFeeOption('optimal');
-    self.sellCustomFee(null);
-    $('#buyFeeOption').select2("val", self.buyFeeOption()); //hack
-    $('#sellFeeOption').select2("val", self.sellFeeOption()); //hack
   });
 
   //VALIDATION MODELS  
@@ -251,30 +244,12 @@ function ExchangeViewModel() {
     isValidPositiveQuantity: self,
     quoteDivisibilityIsOk: self
   });
-  self.sellFeeOption = ko.observable('optimal');
-  self.sellCustomFee = ko.observable(null).extend({
-    validation: [{
-      validator: function(val, self) {
-        return self.sellFeeOption() === 'custom' ? val : true;
-      },
-      message: i18n.t('field_required'),
-      params: self
-    }],
-    isValidCustomFeeIfSpecified: self
-  });
   self.sellPriceHasFocus = ko.observable();
   self.sellAmountHasFocus = ko.observable();
   self.sellTotalHasFocus = ko.observable();
   self.obtainableForSell = ko.observable();
   self.selectedAddressForSell = ko.observable();
   self.availableBalanceForSell = ko.observable();
-
-  self.sellFeeOption.subscribeChanged(function(newValue, prevValue) {
-    if(newValue !== 'custom') {
-      self.sellCustomFee(null);
-      self.sellCustomFee.isModified(false);
-    }
-  });
 
   self.availableAddressesForSell = ko.computed(function() { //stores BuySellAddressInDropdownItemModel objects
     if (!self.baseAsset()) return null; //must have a sell asset selected
@@ -353,7 +328,6 @@ function ExchangeViewModel() {
     sellAmount: self.sellAmount,
     sellPrice: self.sellPrice,
     sellTotal: self.sellTotal,
-    sellCustomFee: self.sellCustomFee
   });
 
 
@@ -398,29 +372,6 @@ function ExchangeViewModel() {
   }
 
   self.doSell = function() {
-    var give_quantity = denormalizeQuantity(self.sellAmount(), self.baseAssetIsDivisible());
-    var get_quantity = denormalizeQuantity(self.sellTotal(), self.quoteAssetIsDivisible());
-    var fee_required = 0;
-    var fee_provided = MIN_FEE;
-    var expiration = parseInt(WALLET_OPTIONS_MODAL.orderDefaultExpiration());
-
-    var params = {
-      source: self.selectedAddressForSell(),
-      give_quantity: give_quantity,
-      give_asset: self.baseAsset(),
-      _give_asset_divisible: self.baseAssetIsDivisible(),
-      _give_asset_longname: self.baseAssetLongname(),
-      get_quantity: get_quantity,
-      get_asset: self.quoteAsset(),
-      _get_asset_divisible: self.quoteAssetIsDivisible(),
-      _get_asset_longname: self.quoteAssetLongname(),
-      fee_required: fee_required,
-      fee_provided: fee_provided,
-      expiration: expiration,
-      _fee_option: self.sellFeeOption(),
-      _custom_fee: self.sellCustomFee()
-    }
-
     var onSuccess = function(txHash, data, endpoint, addressType, armoryUTx) {
       trackEvent('Exchange', 'Sell', self.dispAssetPair());
 
@@ -434,8 +385,49 @@ function ExchangeViewModel() {
       WALLET.showTransactionCompleteDialog(message + " " + i18n.t(ACTION_PENDING_NOTICE), message, armoryUTx);
     }
 
-    WALLET.doTransaction(self.selectedAddressForSell(), "create_order", params, onSuccess);
+    var params = self.buildSellTransactionData();
+
+    WALLET.doTransactionWithTxHex(self.selectedAddressForSell(), "create_order", params, self.sellFeeController.getUnsignedTx(), onSuccess);
   }
+
+  self.buildSellTransactionData = function() {
+    var give_quantity = denormalizeQuantity(self.sellAmount(), self.baseAssetIsDivisible());
+    var get_quantity = denormalizeQuantity(self.sellTotal(), self.quoteAssetIsDivisible());
+    var fee_required = 0;
+    var fee_provided = 0;
+    var expiration = parseInt(WALLET_OPTIONS_MODAL.orderDefaultExpiration());
+
+    return {
+      source: self.selectedAddressForSell(),
+      give_quantity: give_quantity,
+      give_asset: self.baseAsset(),
+      _give_asset_divisible: self.baseAssetIsDivisible(),
+      _give_asset_longname: self.baseAssetLongname(),
+      get_quantity: get_quantity,
+      get_asset: self.quoteAsset(),
+      _get_asset_divisible: self.quoteAssetIsDivisible(),
+      _get_asset_longname: self.quoteAssetLongname(),
+      fee_required: fee_required,
+      fee_provided: fee_provided,
+      expiration: expiration,
+      _fee_option: 'custom',
+      _custom_fee: self.sellFeeController.getCustomFee()
+    }
+  }
+
+  // mix in shared fee calculation functions
+  self.sellFeeController = CWFeeModelMixin(self, {
+    prefix: 'sell_',
+    action: "create_order",
+    transactionParameters: [self.selectedAddressForSell, self.sellPrice, self.sellAmount, self.baseAsset, self.asset1, self.asset2],
+    validTransactionCheck: function() {
+      return self.sellValidation.isValid();
+    },
+    buildTransactionData: self.buildSellTransactionData,
+    address: self.selectedAddressForSell
+  });
+
+
 
   self.sell = function() {
     if (!self.sellValidation.isValid()) {
@@ -467,6 +459,7 @@ function ExchangeViewModel() {
     message += '<tr><td><b>' + i18n.t('amount') + ': </b></td><td style="text-align:right">' + self.sellAmount() + '</td><td>' + self.dispBaseAsset() + '</td></tr>';
     message += '<tr><td><b>' + i18n.t('total') + ': </b></td><td style="text-align:right">' + self.sellTotal() + '</td><td>' + self.dispQuoteAsset() + '</td></tr>';
     message += '<tr><td><b>' + i18n.t('real_estimated_total') + ': </b></td><td style="text-align:right">' + estimatedTotalPrice + '</td><td>' + self.dispQuoteAsset() + '</td></tr>';
+    message += '<tr><td><b>' + i18n.t('fee') + ': </b></td><td style="text-align:right">' + self.sellFeeController.getFeeInBTC() + '</td><td>BTC ($'+self.sellFeeController.getFeeInFiat()+' USD)</td></tr>';
     message += '</table>';
 
     bootbox.dialog({
@@ -518,31 +511,12 @@ function ExchangeViewModel() {
     isValidPositiveQuantity: self,
     quoteDivisibilityIsOk: self
   });
-  self.buyFeeOption = ko.observable('optimal');
-  self.buyCustomFee = ko.observable(null).extend({
-    validation: [{
-      validator: function(val, self) {
-        return self.buyFeeOption() === 'custom' ? val : true;
-      },
-      message: i18n.t('field_required'),
-      params: self
-    }],
-    isValidCustomFeeIfSpecified: self
-  });
-
   self.buyPriceHasFocus = ko.observable();
   self.buyAmountHasFocus = ko.observable();
   self.buyTotalHasFocus = ko.observable();
   self.obtainableForBuy = ko.observable();
   self.selectedAddressForBuy = ko.observable();
   self.availableBalanceForBuy = ko.observable();
-
-  self.buyFeeOption.subscribeChanged(function(newValue, prevValue) {
-    if(newValue !== 'custom') {
-      self.buyCustomFee(null);
-      self.buyCustomFee.isModified(false);
-    }
-  });
 
   self.availableAddressesForBuy = ko.computed(function() { //stores BuySellAddressInDropdownItemModel objects
     if (!self.quoteAsset()) return null; //must have a sell asset selected
@@ -625,7 +599,6 @@ function ExchangeViewModel() {
     buyTotal: self.buyTotal,
     buyPrice: self.buyPrice,
     buyAmount: self.buyAmount,
-    buyCustomFee: self.buyCustomFee
   });
 
   self.selectSellOrder = function(order, notFromClick) {
@@ -673,10 +646,29 @@ function ExchangeViewModel() {
   }
 
   self.doBuy = function() {
+    var onSuccess = function(txHash, data, endpoint, addressType, armoryUTx) {
+      trackEvent('Exchange', 'Buy', self.dispAssetPair());
+
+      var message = "";
+      if (armoryUTx) {
+        message = i18n.t("you_buy_order_will_be_placed", self.buyAmount(), self.dispBaseAsset());
+      } else {
+        message = i18n.t("you_buy_order_has_been_placed", self.buyAmount(), self.dispBaseAsset());
+      }
+
+      WALLET.showTransactionCompleteDialog(message + " " + i18n.t(ACTION_PENDING_NOTICE), message, armoryUTx);
+    }
+
+    var params = self.buildBuyTransactionData();
+
+    WALLET.doTransactionWithTxHex(self.selectedAddressForBuy(), "create_order", params, self.buyFeeController.getUnsignedTx(), onSuccess);
+  }
+
+  self.buildBuyTransactionData = function() {
     var give_quantity = denormalizeQuantity(self.buyTotal(), self.quoteAssetIsDivisible());
     var get_quantity = denormalizeQuantity(self.buyAmount(), self.baseAssetIsDivisible());
     var fee_required = 0;
-    var fee_provided = MIN_FEE;
+    var fee_provided = 0;
     var expiration = parseInt(WALLET_OPTIONS_MODAL.orderDefaultExpiration());
 
     var params = {
@@ -692,25 +684,24 @@ function ExchangeViewModel() {
       fee_required: fee_required,
       fee_provided: fee_provided,
       expiration: expiration,
-      _fee_option: self.buyFeeOption(),
-      _custom_fee: self.buyCustomFee()
+      _fee_option: 'custom',
+      _custom_fee: self.buyFeeController.getCustomFee()
     }
 
-    var onSuccess = function(txHash, data, endpoint, addressType, armoryUTx) {
-      trackEvent('Exchange', 'Buy', self.dispAssetPair());
+    return params;
+  };
 
-      var message = "";
-      if (armoryUTx) {
-        message = i18n.t("you_buy_order_will_be_placed", self.buyAmount(), self.dispBaseAsset());
-      } else {
-        message = i18n.t("you_buy_order_has_been_placed", self.buyAmount(), self.dispBaseAsset());
-      }
-
-      WALLET.showTransactionCompleteDialog(message + " " + i18n.t(ACTION_PENDING_NOTICE), message, armoryUTx);
-    }
-
-    WALLET.doTransaction(self.selectedAddressForBuy(), "create_order", params, onSuccess);
-  }
+  // mix in shared fee calculation functions
+  self.buyFeeController = CWFeeModelMixin(self, {
+    prefix: 'buy_',
+    action: "create_order",
+    transactionParameters: [self.selectedAddressForBuy, self.buyPrice, self.buyAmount, self.baseAsset, self.asset1, self.asset2],
+    validTransactionCheck: function() {
+      return self.buyValidation.isValid();
+    },
+    buildTransactionData: self.buildBuyTransactionData,
+    address: self.selectedAddressForSell
+  });
 
   self.buy = function() {
     if (!self.buyValidation.isValid()) {
@@ -742,6 +733,7 @@ function ExchangeViewModel() {
     message += '<tr><td><b>' + i18n.t('amount') + ': </b></td><td style="text-align:right">' + self.buyAmount() + '</td><td>' + self.dispBaseAsset() + '</td></tr>';
     message += '<tr><td><b>' + i18n.t('total') + ': </b></td><td style="text-align:right">' + self.buyTotal() + '</td><td>' + self.dispQuoteAsset() + '</td></tr>';
     message += '<tr><td><b>' + i18n.t('real_estimated_total') + ': </b></td><td style="text-align:right">' + estimatedTotalPrice + '</td><td>' + self.dispQuoteAsset() + '</td></tr>';
+    message += '<tr><td><b>' + i18n.t('fee') + ': </b></td><td style="text-align:right">' + self.buyFeeController.getFeeInBTC() + '</td><td>BTC ($'+self.buyFeeController.getFeeInFiat()+' USD)</td></tr>';
     message += '</table>';
 
     bootbox.dialog({

@@ -54,6 +54,14 @@ function smartFormat(num, truncateDecimalPlacesAtMin, truncateDecimalPlacesTo) {
   return numberWithCommas(noExponents(num));
 }
 
+function formatFiat(num) {
+  if (num === null || isNaN(num)) return '??';
+
+  return num.toFixed(2).replace(/./g, function(c, i, a) {
+      return i && c !== "." && ((a.length - i) % 3 === 0) ? ',' + c : c;
+  });
+}
+
 function assetsToAssetPair(asset1, asset2) {
   //NOTE: This MUST use the same logic/rules as counterblockd's assets_to_asset_pair() function in lib/util.py
   var base = null;

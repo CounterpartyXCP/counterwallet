@@ -495,7 +495,8 @@ function WalletViewModel() {
     //Sign the input(s)
     key.checkAndSignRawTransaction(unsignedTxHex, verifyDestAddr, function(err, signedHex) {
       if (err) {
-        return onError(err);
+        bootbox.alert("Failed to sign transaction: " + err);
+        return 
       }
 
       self.broadcastSignedTx(signedHex, onSuccess, onError);
@@ -581,7 +582,27 @@ function WalletViewModel() {
     return true;
   }
 
-  self.doTransaction = function(address, action, data, onSuccess, onError) {
+  self.createUnsignedTransactionWithExtendedTXInfo = function(address, action, action_data, cb, cb_offset) {
+    action_data['extended_tx_info']   = true;
+    action_data['disable_utxo_locks'] = true;
+    self.doTransaction(address, action, action_data, null, null,
+      function(extendedTxInfo, data) {
+        $.jqlog.debug('createSignedTransactionWithFee extendedTxInfo: '+JSON.stringify(extendedTxInfo,null,2)+"\n"+'data: '+JSON.stringify(data,null,2));
+        cb(extendedTxInfo, cb_offset);
+      }
+    );
+
+  }
+
+  self.doTransactionWithTxHex = function(address, action, data, constructedTxHex, onSuccess, onError) {
+    if (data == null || data == false) {
+      // when data is empty, do not continue
+      return;
+    }
+    return self.doTransaction(address, action, data, onSuccess, onError, null, constructedTxHex);
+  }
+
+  self.doTransaction = function(address, action, data, onSuccess, onError, onTransactionCreated, constructedTxHex) {
     if (typeof(onError) === 'undefined' || onError == "default") {
       onError = function(jqXHR, textStatus, errorThrown) {
         return defaultErrorHandler(jqXHR, textStatus, errorThrown); //from util.api.js
@@ -658,10 +679,44 @@ function WalletViewModel() {
       verifyDestAddr = [verifyDestAddr];
     }
 
+    // determine whether to read the get_optimal_fee_per_kb from the server
+    //   or skip it
+    var provideOptimalFeeFn;
+    if (data['_fee_option'] === 'custom') {
+      provideOptimalFeeFn = function(cb) {
+        // don't call the fee api
+        cb(null)
+      }
+    } else {
+      provideOptimalFeeFn = function(cb) {
+        failoverAPI("get_optimal_fee_per_kb", {}, cb);
+      }
+    }
+
+    // determine if we need to reconstruct the transaction
+    var constructTransactionFn;
+    if (constructedTxHex != null) {
+      $.jqlog.debug('using previous constructedTxHex: '+JSON.stringify(constructedTxHex));
+
+      // we already have a previously constructed transaction
+      constructTransactionFn = function(action, data, cb) {
+        cb(constructedTxHex, null, null)
+      }
+      data['extended_tx_info'] = false
+    } else {
+      $.jqlog.debug('calling multiAPIConsensus to build transaction');
+      constructTransactionFn = multiAPIConsensus;
+    }
+
     //Determine the fee to use
-    failoverAPI("get_optimal_fee_per_kb", {},
+    provideOptimalFeeFn(
       function(fee_per_kb) {
-        data['fee_per_kb'] = fee_per_kb['optimal'];
+        // default to optimal if it exists
+        if (fee_per_kb != null && fee_per_kb['optimal'] != null) {
+          data['fee_per_kb'] = fee_per_kb['optimal'];
+        }
+
+        // check for an explicit fee option
         if (data.hasOwnProperty('_fee_option')) {
           if (data['_fee_option'] === 'low_priority') {
             data['fee_per_kb'] = fee_per_kb['low_priority'];
@@ -677,11 +732,32 @@ function WalletViewModel() {
         }
 
         //Do the transaction
-        multiAPIConsensus(action, data,
-          function(unsignedTxHex, numTotalEndpoints, numConsensusEndpoints) {
+        var wasExtendedInfo = !!data['extended_tx_info']
+        // $.jqlog.debug('data: '+JSON.stringify(data,null,2)+' wasExtendedInfo:'+JSON.stringify(wasExtendedInfo));
+        constructTransactionFn(action, data,
+          function(apiResponse, numTotalEndpoints, numConsensusEndpoints) {
+            // $.jqlog.debug('apiResponse: '+JSON.stringify(apiResponse,null,2));
+            var extendedTxInfo = {}
+            var unsignedTxHex = apiResponse
+            if (wasExtendedInfo) {
+              extendedTxInfo = apiResponse;
+              unsignedTxHex = extendedTxInfo['tx_hex'];
+            } else {
+              unsignedTxHex = apiResponse
+              extendedTxInfo = {
+                tx_hex: unsignedTxHex
+              }
+            }
+
             $.jqlog.info("TXN CREATED. numTotalEndpoints="
               + numTotalEndpoints + ", numConsensusEndpoints="
               + numConsensusEndpoints + ", FEE=" + data['fee_per_kb'] + ", RAW HEX=" + unsignedTxHex);
+
+            // callback with the transaction info and be done
+            if (onTransactionCreated != null) {
+              onTransactionCreated(extendedTxInfo, data)
+              return;
+            }
 
             //if the address is an armory wallet, then generate an offline transaction to get signed
             if (addressObj.IS_ARMORY_OFFLINE) {

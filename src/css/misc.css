@@ -141,3 +141,11 @@ textarea.quickAccessUrl {
   filter : alpha(opacity=50);
   opacity : 0.5;
 }
+
+.fee-info {
+  color: #666;
+  font-weight: 200;
+}
+.processing {
+  color: #ccc;
+}
