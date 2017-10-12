@@ -12,7 +12,7 @@ upstream counterblock_t_api_server {
 }
 
 #Content Security Policy (CSP) header
-add_header Content-Security-Policy "default-src 'self'; script-src 'self' https://ssl.google-analytics.com https://query.yahooapis.com; img-src 'self' data: https://ssl.google-analytics.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://themes.googleusercontent.com https://fonts.gstatic.com; frame-src 'none'; object-src 'self'; connect-src 'self' wss://$host wss://*.counterwallet.io https://*.counterwallet.io https://api.rollbar.com; report-uri /_report_csp/;";
+add_header Content-Security-Policy "default-src 'self'; script-src 'self' https://ssl.google-analytics.com https://query.yahooapis.com; img-src 'self' data: https://ssl.google-analytics.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://themes.googleusercontent.com https://fonts.gstatic.com; frame-src 'none'; object-src 'self'; connect-src 'self' wss://$host wss://*.counterwallet.io https://*.counterwallet.io https://api.rollbar.com https://bitcoinfees.21.co https://apiv2.bitcoinaverage.com https://min-api.cryptocompare.com; report-uri /_report_csp/;";
 
 server {
   listen 80 default_server deferred;
