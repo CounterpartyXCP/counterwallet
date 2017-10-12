@@ -4,12 +4,20 @@ var CWBitcoinFees = (function() {
   var DEFAULT_FEE_MAX_DELAY_BLOCKS = 2;
 
   var feesCache = null
+  // provide at least something for fallback fees
+  //   make it obvious that there is no predictability here
   var defaultFees = [
     {
       offset: 0,
       fee: 101,
       minDelay: 1,
-      maxDelay: 10
+      maxDelay: 9999
+    },
+    {
+      offset: 1,
+      fee: 201,
+      minDelay: 1,
+      maxDelay: 1000
     }
   ]
 
@@ -73,7 +81,10 @@ var CWBitcoinFees = (function() {
       error: function(jqxhr, textSatus, errorThrown) {
         $.jqlog.warn('bitcoinfees quote failed: '+textSatus+' '+errorThrown);
         if (typeof cb == 'function') {
-          cb([])
+          if (feesCache == null) {
+            feesCache = defaultFees
+          }
+          cb(feesCache)
         }
         return
       }
