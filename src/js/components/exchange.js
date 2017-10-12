@@ -421,7 +421,9 @@ function ExchangeViewModel() {
     action: "create_order",
     transactionParameters: [self.selectedAddressForSell, self.sellPrice, self.sellAmount, self.baseAsset, self.asset1, self.asset2],
     validTransactionCheck: function() {
-      return self.sellValidation.isValid();
+      if (!self.sellValidation.isValid()) { return false; }
+      if (!WALLET.canDoTransaction(self.selectedAddressForSell())) { return false; }
+      return true;
     },
     buildTransactionData: self.buildSellTransactionData,
     address: self.selectedAddressForSell
@@ -697,10 +699,12 @@ function ExchangeViewModel() {
     action: "create_order",
     transactionParameters: [self.selectedAddressForBuy, self.buyPrice, self.buyAmount, self.baseAsset, self.asset1, self.asset2],
     validTransactionCheck: function() {
-      return self.buyValidation.isValid();
+      if (!self.buyValidation.isValid()) { return false; }
+      if (!WALLET.canDoTransaction(self.selectedAddressForBuy())) { return false; }
+      return true;
     },
     buildTransactionData: self.buildBuyTransactionData,
-    address: self.selectedAddressForSell
+    address: self.selectedAddressForBuy
   });
 
   self.buy = function() {
