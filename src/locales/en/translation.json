@@ -837,5 +837,15 @@
   "fee_priority_details_between": "Estimated wait: between %s - %s blocks (%s Satoshis/Byte)",
   "fee_details": "Transaction fee: %s BTC ($%s USD)",
   "fee_details_with_btc_out": "Transaction fee: %s BTC ($%s USD, %s fees and %s dust)",
-  "fee_details_calculating": "Transaction fee: <span class=\"processing\">calculating...</span>"
+  "fee_details_calculating": "Transaction fee: <span class=\"processing\">calculating...</span>",
+
+  "memo_type": "Memo Type",
+  "no_memo": "No Memo",
+  "hex_memo": "Data Memo as Hex",
+  "text_memo": "Plain Text Memo",
+  "memo_data": "Transaction Memo",
+  "memo_data_note_hex": "Enter a hexadecimal value up to 64 characters long",
+  "memo_data_note_text": "Enter a plain text note up to 32 characters long",
+  "memo_data_invalid_hex": "This memo is not a valid hexadecimal value.",
+  "memo_data_too_long": "This memo is too long."
 }

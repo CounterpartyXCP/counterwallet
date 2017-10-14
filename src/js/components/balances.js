@@ -415,7 +415,7 @@ function SendModalViewModel() {
   self.assetDisp = ko.observable();
   self.rawBalance = ko.observable(null);
   self.divisible = ko.observable();
-  
+
   self.destAddress = ko.observable('').extend({
     required: true,
     isValidBitcoinAddress: self,
@@ -583,12 +583,49 @@ function SendModalViewModel() {
     return self.normalizedBalRemaining() !== null;
   }, self);
 
+  // memo
+  self.memoType = ko.observable('');
+  var hexRegex = /^[0-9a-f]+$/i;
+  self.memoValue = ko.observable('').extend({
+    validation: [{
+      validator: function(val, self) {
+        if (self.memoType() == 'hex') {
+          if (!val.match(hexRegex)) { return false; }
+        }
+        return true;
+      },
+      message: i18n.t('memo_data_invalid_hex'),
+      params: self
+    }, {
+      validator: function(val, self) {
+        if (self.memoType() == 'hex') {
+          if (val.length > 64) { return false; }
+        } else if (self.memoType() == 'text') {
+          if (val.length > 32) { return false; }
+        }
+        return true;
+      },
+      message: i18n.t('memo_data_too_long'),
+      params: self
+    }]
+  });
+  self.memoHelpTextLocale = ko.computed(function() {
+    if (self.memoType() == 'text') {
+      return 'memo_data_note_text';
+    }
+    return 'memo_data_note_hex';
+  });
+  shouldShowMemoFields = ko.computed(function() {
+    return self.asset() && self.asset() != 'BTC';
+  })
+
   self.validationModel = ko.validatedObservable({
     destAddress: self.destAddress,
     quantity: self.quantity,
     pubkey1: self.pubkey1,
     pubkey2: self.pubkey2,
-    pubkey3: self.pubkey3
+    pubkey3: self.pubkey3,
+    memoValue: self.memoValue
   });
 
   self.resetForm = function() {
@@ -601,6 +638,9 @@ function SendModalViewModel() {
     self.missingPubkey2Address('');
     self.missingPubkey3(false);
     self.missingPubkey3Address('');
+
+    self.memoType('');
+    self.memoValue('');
 
     self.feeController.reset();
 
@@ -648,7 +688,7 @@ function SendModalViewModel() {
       additionalPubkeys.push(self.pubkey3())
     }
 
-    return {
+    params = {
       source: self.address(),
       destination: self.destAddress(),
       quantity: denormalizeQuantity(parseFloat(self.quantity()), self.divisible()),
@@ -658,12 +698,25 @@ function SendModalViewModel() {
       _fee_option: 'custom',
       _custom_fee: self.feeController.getCustomFee()
     };
+
+    switch (self.memoType()) {
+      case 'hex':
+        params.memo = self.memoValue();
+        params.memo_is_hex = true;
+        break;
+      case 'text':
+        params.memo = self.memoValue();
+        params.memo_is_hex = false;
+        break;
+    }
+
+    return params
   }
 
   // mix in shared fee calculation functions
   self.feeController = CWFeeModelMixin(self, {
     action: "create_send",
-    transactionParameters: [self.destAddress, self.quantity],
+    transactionParameters: [self.destAddress, self.quantity, self.memoType, self.memoValue],
     validTransactionCheck: function() {
       return self.validationModel.isValid();
     },
@@ -684,6 +737,8 @@ function SendModalViewModel() {
     self.rawBalance(rawBalance);
     self.divisible(isDivisible);
     self.shown(true);
+
+    $('#MemoType').select2("val", self.memoType()); // hack to set select2 value
     trackDialogShow('Send');
   }
 
