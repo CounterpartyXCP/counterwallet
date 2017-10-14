@@ -840,9 +840,9 @@
   "fee_details_calculating": "Transaction fee: <span class=\"processing\">calculating...</span>",
 
   "memo_type": "Memo Type",
-  "no_memo": "No Memo",
-  "hex_memo": "Data Memo as Hex",
-  "text_memo": "Plain Text Memo",
+  "no_memo": "No memo",
+  "hex_memo": "Data memo",
+  "text_memo": "Plain text memo",
   "memo_data": "Transaction Memo",
   "memo_data_note_hex": "Enter a hexadecimal value up to 64 characters long",
   "memo_data_note_text": "Enter a plain text note up to 32 characters long",
