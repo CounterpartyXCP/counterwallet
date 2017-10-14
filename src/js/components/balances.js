@@ -599,9 +599,9 @@ function SendModalViewModel() {
     }, {
       validator: function(val, self) {
         if (self.memoType() == 'hex') {
-          if (val.length > 64) { return false; }
+          if (val.length > 68) { return false; }
         } else if (self.memoType() == 'text') {
-          if (val.length > 32) { return false; }
+          if (val.length > 34) { return false; }
         }
         return true;
       },

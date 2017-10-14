@@ -844,8 +844,8 @@
   "hex_memo": "Data memo",
   "text_memo": "Plain text memo",
   "memo_data": "Transaction Memo",
-  "memo_data_note_hex": "Enter a hexadecimal value up to 64 characters long",
-  "memo_data_note_text": "Enter a plain text note up to 32 characters long",
+  "memo_data_note_hex": "Enter a hexadecimal value up to 68 characters long.",
+  "memo_data_note_text": "Enter a plain text note up to 34 characters long.",
   "memo_data_invalid_hex": "This memo is not a valid hexadecimal value.",
   "memo_data_too_long": "This memo is too long."
 }
