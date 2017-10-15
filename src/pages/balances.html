@@ -380,7 +380,36 @@
                 <span class="invalid" data-bind="validationMessage: quantity"></span>
             </div>
           </div></section>
+        </fieldset>
 
+        <fieldset data-bind="visible: self.shouldShowMemoFields">
+          <section><!-- memo -->
+            <div class="row">
+              <label class="control-label col col-sm-3" data-bind="locale: 'memo_type'"></label>
+              <div class="col col-sm-9">
+                <select id="MemoType" class="width-max select2" data-bind="value: memoType, valueUpdate: 'input'">
+                  <option value="" data-bind="locale: 'no_memo'"></option>
+                  <option value="hex"  data-bind="locale: 'hex_memo'"></option>
+                  <option value="text" data-bind="locale: 'text_memo'"></option>
+                </select>
+              </div>
+            </div>
+          </section>
+          <section>
+            <div class="row" data-bind="visible: memoType">
+              <label class="control-label col col-sm-3" data-bind="locale: 'memo_data'"></label>
+              <div class="col col-sm-9">
+                <label class="input"><i class="icon-append fa fa-pencil"></i>
+                    <input name="memoValue" data-bind="value: memoValue, valueUpdate: 'input', attr: {placeholder: 'Enter Transaction Memo'}" type="text"/>
+                </label>
+                <div class="note" data-bind="locale: memoHelpTextLocale"></div>
+                <span class="invalid" data-bind="validationMessage: memoValue"></span>
+              </div>
+            </div>
+          </section>
+        </fieldset>
+
+        <fieldset>
           <section><!-- fee section -->
             <div class="row">
               <label class="control-label col col-sm-3" data-bind="locale: 'fee_option'"></label>
