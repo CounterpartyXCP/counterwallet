@@ -672,7 +672,7 @@ function PayDividendModalViewModel() {
     }
 
     // fetch shareholders to check transaction dest.
-    if (self.selectedDividendAsset() == 'BTC') {
+    if (self.selectedDividendAsset() === KEY_ASSET.BTC) {
       var params = {
         'filters': [
           {'field': 'asset', 'op': '=', 'value': self.assetData().asset},
@@ -749,7 +749,7 @@ function PayDividendModalViewModel() {
       //Also get the BTC balance at this address and put at head of the list
       WALLET.retrieveBTCBalance(address.ADDRESS, function(balance) {
         if (balance) {
-          self.availableDividendAssets.unshift(new DividendAssetInDropdownItemModel("BTC", "BTC", balance, normalizeQuantity(balance)));
+          self.availableDividendAssets.unshift(new DividendAssetInDropdownItemModel(KEY_ASSET.BTC, KEY_ASSET.BTC, balance, normalizeQuantity(balance)));
         }
       });
     });

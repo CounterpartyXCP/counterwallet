@@ -8,7 +8,7 @@ var BuySellAddressInDropdownItemModel = function(address, label, asset, balance)
 function createExchangeKnockoutValidators() {
   ko.validation.rules['ordersIsExistingAssetName'] = {
     validator: function(asset, self) {
-      if (asset == 'XCP') return true;
+      if (asset === KEY_ASSET.XCP) return true;
       var match = ko.utils.arrayFirst(self.allAssets(), function(item) {
         return asset == item['asset'] || (item['asset_longname'] && asset == item['asset_longname']); //matches asset name or asset longname
       });
@@ -97,7 +97,7 @@ function ExchangeViewModel() {
 
   self.selectedQuoteAsset = ko.observable();
   self.selectedQuoteAsset.subscribe(function(value) {
-    if (value == 'XCP') {
+    if (value === KEY_ASSET.XCP) {
       self.asset2Raw(value);
     } else {
       self.asset2Raw('');
@@ -461,7 +461,7 @@ function ExchangeViewModel() {
     message += '<tr><td><b>' + i18n.t('amount') + ': </b></td><td style="text-align:right">' + self.sellAmount() + '</td><td>' + self.dispBaseAsset() + '</td></tr>';
     message += '<tr><td><b>' + i18n.t('total') + ': </b></td><td style="text-align:right">' + self.sellTotal() + '</td><td>' + self.dispQuoteAsset() + '</td></tr>';
     message += '<tr><td><b>' + i18n.t('real_estimated_total') + ': </b></td><td style="text-align:right">' + estimatedTotalPrice + '</td><td>' + self.dispQuoteAsset() + '</td></tr>';
-    message += '<tr><td><b>' + i18n.t('fee') + ': </b></td><td style="text-align:right">' + self.sellFeeController.getFeeInBTC() + '</td><td>BTC ($'+self.sellFeeController.getFeeInFiat()+' USD)</td></tr>';
+    message += '<tr><td><b>' + i18n.t('fee') + ': </b></td><td style="text-align:right">' + self.sellFeeController.getFeeInBTC() + '</td><td>' + KEY_ASSET.BTC + ' ($'+self.sellFeeController.getFeeInFiat()+' USD)</td></tr>';
     message += '</table>';
 
     bootbox.dialog({
@@ -737,7 +737,7 @@ function ExchangeViewModel() {
     message += '<tr><td><b>' + i18n.t('amount') + ': </b></td><td style="text-align:right">' + self.buyAmount() + '</td><td>' + self.dispBaseAsset() + '</td></tr>';
     message += '<tr><td><b>' + i18n.t('total') + ': </b></td><td style="text-align:right">' + self.buyTotal() + '</td><td>' + self.dispQuoteAsset() + '</td></tr>';
     message += '<tr><td><b>' + i18n.t('real_estimated_total') + ': </b></td><td style="text-align:right">' + estimatedTotalPrice + '</td><td>' + self.dispQuoteAsset() + '</td></tr>';
-    message += '<tr><td><b>' + i18n.t('fee') + ': </b></td><td style="text-align:right">' + self.buyFeeController.getFeeInBTC() + '</td><td>BTC ($'+self.buyFeeController.getFeeInFiat()+' USD)</td></tr>';
+    message += '<tr><td><b>' + i18n.t('fee') + ': </b></td><td style="text-align:right">' + self.buyFeeController.getFeeInBTC() + '</td><td>' + KEY_ASSET.BTC +' ($'+self.buyFeeController.getFeeInFiat()+' USD)</td></tr>';
     message += '</table>';
 
     bootbox.dialog({
@@ -1020,7 +1020,7 @@ function ExchangeViewModel() {
   self.selectMarket = function(item) {
     self.asset1Raw(item.base_asset_longname || item.base_asset);
     self.asset1Longname(item.base_asset_longname);
-    if (item.quote_asset == 'XCP') {
+    if (item.quote_asset === KEY_ASSET.XCP) {
       self.selectedQuoteAsset(item.quote_asset);
     } else {
       self.selectedQuoteAsset('Other');

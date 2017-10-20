@@ -52,7 +52,7 @@ var CWFeeModelMixin = function(modalDialogModel, opts) {
 
   exports.getFeeText = function() {
     var args = getObs('feeDetailsLocaleArgs')
-    return args[0]+' BTC ($'+args[1]+' USD)';
+    return args[0]+' ' + KEY_ASSET.BTC + ' ($'+args[1]+' USD)';
   }
 
   // local variables
@@ -160,7 +160,7 @@ var CWFeeModelMixin = function(modalDialogModel, opts) {
 
           var hasBTCOut = extendedTxInfo.btc_out > 0;
           var isBTCSend = false;
-          if (hasBTCOut && opts.action == "create_send" && tx_data.asset == 'BTC') {
+          if (hasBTCOut && opts.action == "create_send" && tx_data.asset === KEY_ASSET.BTC) {
             isBTCSend = true;
           }
 

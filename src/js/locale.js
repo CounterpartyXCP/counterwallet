@@ -115,6 +115,14 @@ function getLanguage() {
   return 'en';
 }
 
+function altnize(str) {
+  return str
+    .replace(/BTC/g, KEY_ASSET.BTC)
+    .replace(/XCP/g, KEY_ASSET.XCP)
+    .replace(/Bitcoin/g, KEY_ASSET.Bitcoin)
+    .replace(/XCP/g, KEY_ASSET.Counterparty);
+}
+
 ko.bindingHandlers['locale'] = {
   update: function(element, valueAccessor, allBindings) {
     var key = ko.unwrap(valueAccessor());
@@ -130,7 +138,7 @@ ko.bindingHandlers['locale'] = {
     } else if (argsType == "[object String]" || argsType == "[object Number]") {
       args = [localeArgs];
     }
-    var translation = i18n.t(key, {postProcess: 'sprintf', sprintf: args});
+    var translation = i18n.t(altnize(key), {postProcess: 'sprintf', sprintf: args});
     element.innerHTML = translation;
   }
 };
@@ -154,7 +162,7 @@ ko.bindingHandlers['localeAttr'] = {
           args = [attrArgs];
         }
       }
-      var translation = i18n.t(attributes[attrName], {postProcess: 'sprintf', sprintf: args});
+      var translation = i18n.t(altnize(attributes[attrName]), {postProcess: 'sprintf', sprintf: args});
       $(element).attr(attrName, translation);
     }
   }

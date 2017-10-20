@@ -251,3 +251,11 @@ var TRANSACTION_MAX_RETRY = 5; // max retry when transaction failed (don't inclu
 var DONATION_ADDRESS = USE_TESTNET ? 'n4MGGJBkW9RjRKBbZfBAceHDndhywvVPV9' : '19U6MmLLumsqxXSBMB5FgYXbezgXYC6Gpe';
 
 var APPROX_SECONDS_PER_BLOCK = USE_TESTNET ? 20 * 60 : 8 * 60; //a *rough* estimate on how many seconds per each block (used for estimating open order time left until expiration, etc)
+
+var KEY_ASSET = {
+  'BTC': 'BTC',
+  'XCP': 'XCP',
+  'Bitcoin': 'Bitcoin',
+  'Counterparty': 'Counterparty'
+};
+

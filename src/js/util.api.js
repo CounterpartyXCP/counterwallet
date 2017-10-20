@@ -394,12 +394,12 @@ function multiAPIConsensus(method, params, onSuccess, onConsensusError, onSysErr
     onSysError = function(jqXHR, textStatus, errorThrown, endpoint) {
       $.jqlog.debug(textStatus);
       var message = textStatus;
-      var noBtcPos = textStatus.indexOf("Insufficient BTC");
+      var noBtcPos = textStatus.indexOf("Insufficient " + KEY_ASSET.BTC);
       if (noBtcPos != -1) {
         var endMessage = textStatus.indexOf(")", noBtcPos) + 1;
 
         message = '<b class="errorColor">' + textStatus.substr(noBtcPos, endMessage - noBtcPos)
-          + '</b>. You must have a small amount of BTC in this address to pay the Bitcoin miner fees. Please fund this address and try again.<br/><br/>'
+          + '</b>. You must have a small amount of ' + KEY_ASSET.BTC + ' in this address to pay the Bitcoin miner fees. Please fund this address and try again.<br/><br/>'
           + '<a href="https://counterpartytalk.org/t/why-do-i-need-small-amounts-of-bitcoin-to-do-things/1142" target="_blank">More information on why this is necessary.</a>';
 
       } else {

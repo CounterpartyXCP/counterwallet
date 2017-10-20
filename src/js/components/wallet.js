@@ -124,7 +124,7 @@ function WalletViewModel() {
     assert(addressObj);
     var assetObj = addressObj.getAssetObj(asset);
     if (!assetObj) return 0; //asset not in wallet
-    if (asset != 'BTC') {
+    if (asset !== KEY_ASSET.BTC) {
       return normalized ? assetObj.availableBalance() : assetObj.rawAvailableBalance();
     } else {
       var bal = assetObj.normalizedBalance() + assetObj.unconfirmedBalance();
@@ -145,7 +145,7 @@ function WalletViewModel() {
     assert(addressObj);
     var assetObj = addressObj.getAssetObj(asset);
     if (!assetObj) {
-      assert(asset != "XCP" && asset != "BTC", "BTC or XCP not present in the address?"); //these should be already in each address
+      assert(asset !== KEY_ASSET.XCP && asset !== KEY_ASSET.BTC, [KEY_ASSET.BTC, 'or', KEY_ASSET.XCP, 'not present in the address?'].join(' ')); //these should be already in each address
       //we're trying to update the balance of an asset that doesn't yet exist at this address
       //fetch the asset info from the server, and then use that in a call to addressObj.addOrUpdateAsset
       failoverAPI("get_assets_info", {'assetsList': [asset]}, function(assetsInfo, endpoint) {
@@ -153,11 +153,11 @@ function WalletViewModel() {
       });
     } else {
       assetObj.rawBalance(rawBalance);
-      if (asset == 'BTC' && unconfirmedRawBal) {
+      if (asset === KEY_ASSET.BTC && unconfirmedRawBal) {
         assetObj.unconfirmedBalance(normalizeQuantity(unconfirmedRawBal));
         assetObj.balanceChangePending(true);
         addressObj.addOrUpdateAsset(asset, {}, rawBalance);
-      } else if (asset == 'BTC') {
+      } else if (asset === KEY_ASSET.BTC) {
         assetObj.unconfirmedBalance(0);
         assetObj.balanceChangePending(false);
         addressObj.addOrUpdateAsset(asset, {}, rawBalance);
@@ -249,7 +249,7 @@ function WalletViewModel() {
     // check if the wallet have the information
     for (var a in assets) {
       var asset = assets[a];
-      if (asset == 'XCP' || asset == 'BTC') {
+      if (asset === KEY_ASSET.XCP || asset === KEY_ASSET.BTC) {
         assetsDivisibility[asset] = true;
       } else {
         var divisible = self.isAssetDivisibilityAvailable(asset);
@@ -303,7 +303,7 @@ function WalletViewModel() {
 
         if (!balancesData.length) {
           for (var i in addresses) {
-            WALLET.getAddressObj(addresses[i]).addOrUpdateAsset('XCP', {}, 0, 0);
+            WALLET.getAddressObj(addresses[i]).addOrUpdateAsset(KEY_ASSET.XCP, {}, 0, 0);
           }
           if (onSuccess) return onSuccess(); //user has no balance (i.e. first time logging in)
           else return;
@@ -379,7 +379,7 @@ function WalletViewModel() {
     //See if we have any pending BTC send transactions listed in Pending Actions, and if so, enable some extra functionality
     // to clear them out if we sense the txn as processed
     var pendingActionsHasBTCSend = ko.utils.arrayFirst(PENDING_ACTION_FEED.entries(), function(item) {
-      return item.CATEGORY == 'sends' && item.DATA['asset'] == 'BTC'; //there is a pending BTC send
+      return item.CATEGORY === 'sends' && item.DATA['asset'] === KEY_ASSET.BTC; //there is a pending BTC send
     });
 
     self.retrieveBTCAddrsInfo(addresses, function(data) {
@@ -392,10 +392,10 @@ function WalletViewModel() {
         // the (confirmed) balance will be decreased by the ENTIRE quantity of that txout, even though they may be getting
         // some/most of it back as change. To avoid people being confused over this, with BTC in particular, we should
         // display the unconfirmed portion of the balance in addition to the confirmed balance, as it will include the change output
-        self.updateBalance(data[i]['addr'], "BTC", data[i]['confirmedRawBal'], data[i]['unconfirmedRawBal']);
+        self.updateBalance(data[i]['addr'], KEY_ASSET.BTC, data[i]['confirmedRawBal'], data[i]['unconfirmedRawBal']);
 
         addressObj = self.getAddressObj(data[i]['addr']);
-        assert(addressObj, "Cannot find address in wallet for refreshing BTC balances!");
+        assert(addressObj, 'Cannot find address in wallet for refreshing ' + KEY_ASSET.BTC + ' balances!');
 
         if (data[i]['confirmedRawBal'] > 0 || data[i]['unconfirmedRawBal'] > 0 ||
           data[i]['numPrimedTxoutsIncl0Confirms'] > 0 || data[i]['numPrimedTxouts'] > 0 ||
@@ -439,7 +439,7 @@ function WalletViewModel() {
       //system down or spazzing, set all BTC balances out to null
       var addressObj = null;
       for (var i = 0; i < addresses.length; i++) {
-        self.updateBalance(addresses[i], "BTC", null, null); //null = UNKNOWN
+        self.updateBalance(addresses[i], KEY_ASSET.BTC, null, null); //null = UNKNOWN
         addressObj = self.getAddressObj(addresses[i]);
         addressObj.numPrimedTxouts(null); //null = UNKNOWN
         addressObj.numPrimedTxoutsIncl0Confirms(null); //null = UNKNOWN
@@ -574,7 +574,7 @@ function WalletViewModel() {
     var addressObj = self.getAddressObj(address);
     assert(!addressObj.IS_WATCH_ONLY, "Cannot perform this action on a watch only address!");
 
-    if (self.getBalance(address, "BTC", false) < MIN_BALANCE_FOR_ACTION) {
+    if (self.getBalance(address, KEY_ASSET.BTC, false) < MIN_BALANCE_FOR_ACTION) {
       bootbox.alert(i18n.t("insufficient_btc", normalizeQuantity(MIN_BALANCE_FOR_ACTION), getAddressLabel(address)));
       return false;
     }
@@ -671,7 +671,7 @@ function WalletViewModel() {
     delete data['destBtcPay'];
     if (action == "create_burn") {
       verifyDestAddr = TESTNET_UNSPENDABLE;
-    } else if (action == "create_dividend" && data['dividend_asset'] == 'BTC') {
+    } else if (action === 'create_dividend' && data['dividend_asset'] == KEY_ASSET.BTC) {
       verifyDestAddr = data['_btc_dividend_dests'];
       delete data['_btc_dividend_dests'];
     }
