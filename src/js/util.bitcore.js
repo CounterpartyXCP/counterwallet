@@ -13,7 +13,7 @@ var CWHierarchicalKey = function(passphrase, password) {
     passphrase = CWBitcore.decrypt(passphrase, password);
   }
   // same as bitcoinjs-lib :
-  // m : masterkery / 0' : first private derivation / 0 : external account / i : index
+  // m : master key / 0' : first private derivation / 0 : external account / i : index
   this.basePath = 'm/0\'/0/';
   this.useOldHierarchicalKey = false;
   this.init(passphrase);
@@ -30,7 +30,7 @@ CWHierarchicalKey.prototype.init = function(passphrase) {
     if (first == 'old') {
       this.useOldHierarchicalKey = true;
     } else {
-      throw new Error("mnemonic was 13 words but fist was not 'old'");
+      throw new Error("mnemonic was 13 words but the first was not 'old'");
     }
   }
 
