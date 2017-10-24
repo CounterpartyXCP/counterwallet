@@ -2,10 +2,10 @@
 [![Build Status Circle](https://circleci.com/gh/CounterpartyXCP/counterwallet.svg?&style=shield)](https://circleci.com/gh/CounterpartyXCP/counterwallet)
 [![Slack Status](http://slack.counterparty.io/badge.svg)](http://slack.counterparty.io)
 
-Counterwallet
+Nibiru E-wallet
 ================
 
-Online Webwallet for [Counterparty](http://www.counterparty.io).
+Online Webwallet for [NibiruReserve](http://www.nibiruewallet.org).
 
 Originally based off of [Carbonwallet](http://www.carbonwallet.com) (however virtually all the original code has been removed or rewritten).
 
@@ -13,7 +13,7 @@ Originally based off of [Carbonwallet](http://www.carbonwallet.com) (however vir
 Production Systems
 -------------------
 
-* Main page: **[counterwallet.io](https://counterwallet.io/)**
+* Main page: **[http://ewallet.nibirureserve.org](http://ewallet.nibirureserve.org/)**
 * Primary server -- Mainnet: **[wallet.counterwallet.io](https://wallet.counterwallet.io/)**
 * Primary server -- Testnet: **[wallet-testnet.counterwallet.io](https://wallet-testnet.counterwallet.io/)**
 
