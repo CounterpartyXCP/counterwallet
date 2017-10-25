@@ -2,10 +2,10 @@
 [![Build Status Circle](https://circleci.com/gh/CounterpartyXCP/counterwallet.svg?&style=shield)](https://circleci.com/gh/CounterpartyXCP/counterwallet)
 [![Slack Status](http://slack.counterparty.io/badge.svg)](http://slack.counterparty.io)
 
-Counterwallet
+Nibiru E-wallet
 ================
 
-Online Webwallet for [Counterparty](http://www.counterparty.io).
+Online Webwallet for [NibiruReserve](http://www.nibiruewallet.org).
 
 Originally based off of [Carbonwallet](http://www.carbonwallet.com) (however virtually all the original code has been removed or rewritten).
 
@@ -13,7 +13,7 @@ Originally based off of [Carbonwallet](http://www.carbonwallet.com) (however vir
 Production Systems
 -------------------
 
-* Main page: **[counterwallet.io](https://counterwallet.io/)**
+* Main page: **[http://ewallet.nibirureserve.org](http://ewallet.nibirureserve.org/)**
 * Primary server -- Mainnet: **[wallet.counterwallet.io](https://wallet.counterwallet.io/)**
 * Primary server -- Testnet: **[wallet-testnet.counterwallet.io](https://wallet-testnet.counterwallet.io/)**
 
@@ -124,9 +124,16 @@ You can run tests in your browser by doing the above steps and;
 ### Running tests from CLI (using phantomjs headless browser)
  - `npm test`
 
+### Development without a full node
+
+To work on counterwallet without running a full node and supporting services locally, please see the scripts located in the [local development folder](local-development).
+
 
 License
 -------------------
 
 http://opensource.org/licenses/CDDL-1.0
+
+
+
 
