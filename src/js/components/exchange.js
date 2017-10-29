@@ -461,7 +461,7 @@ function ExchangeViewModel() {
     message += '<tr><td><b>' + i18n.t('amount') + ': </b></td><td style="text-align:right">' + self.sellAmount() + '</td><td>' + self.dispBaseAsset() + '</td></tr>';
     message += '<tr><td><b>' + i18n.t('total') + ': </b></td><td style="text-align:right">' + self.sellTotal() + '</td><td>' + self.dispQuoteAsset() + '</td></tr>';
     message += '<tr><td><b>' + i18n.t('real_estimated_total') + ': </b></td><td style="text-align:right">' + estimatedTotalPrice + '</td><td>' + self.dispQuoteAsset() + '</td></tr>';
-    message += '<tr><td><b>' + i18n.t('fee') + ': </b></td><td style="text-align:right">' + self.sellFeeController.getFeeInBTC() + '</td><td>' + KEY_ASSET.BTC + ' ($'+self.sellFeeController.getFeeInFiat()+' USD)</td></tr>';
+    message += '<tr><td><b>' + i18n.t('fee') + ': </b></td><td style="text-align:right">' + self.sellFeeController.getFeeInBTC() + '</td><td>' + KEY_ASSET.BTC + ' ('+self.sellFeeController.getFeeInFiat()+' ' + KEY_ASSET.USD + ')</td></tr>';
     message += '</table>';
 
     bootbox.dialog({
@@ -737,7 +737,7 @@ function ExchangeViewModel() {
     message += '<tr><td><b>' + i18n.t('amount') + ': </b></td><td style="text-align:right">' + self.buyAmount() + '</td><td>' + self.dispBaseAsset() + '</td></tr>';
     message += '<tr><td><b>' + i18n.t('total') + ': </b></td><td style="text-align:right">' + self.buyTotal() + '</td><td>' + self.dispQuoteAsset() + '</td></tr>';
     message += '<tr><td><b>' + i18n.t('real_estimated_total') + ': </b></td><td style="text-align:right">' + estimatedTotalPrice + '</td><td>' + self.dispQuoteAsset() + '</td></tr>';
-    message += '<tr><td><b>' + i18n.t('fee') + ': </b></td><td style="text-align:right">' + self.buyFeeController.getFeeInBTC() + '</td><td>' + KEY_ASSET.BTC +' ($'+self.buyFeeController.getFeeInFiat()+' USD)</td></tr>';
+    message += '<tr><td><b>' + i18n.t('fee') + ': </b></td><td style="text-align:right">' + self.buyFeeController.getFeeInBTC() + '</td><td>' + KEY_ASSET.BTC +' ('+self.buyFeeController.getFeeInFiat()+' ' + KEY_ASSET.USD + ')</td></tr>';
     message += '</table>';
 
     bootbox.dialog({

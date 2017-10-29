@@ -52,7 +52,7 @@ var CWFeeModelMixin = function(modalDialogModel, opts) {
 
   exports.getFeeText = function() {
     var args = getObs('feeDetailsLocaleArgs')
-    return args[0]+' ' + KEY_ASSET.BTC + ' ($'+args[1]+' USD)';
+    return args[0]+' ' + KEY_ASSET.BTC + ' ('+args[1]+' '+KEY_ASSET.USD + ')';
   }
 
   // local variables
