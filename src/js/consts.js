@@ -260,3 +260,8 @@ var KEY_ASSET = {
   'Counterparty': 'Counterparty'
 };
 
+var KEY_ASSET_WEBSITE = {
+  'BTC': 'https://bitcoin.org/',
+  'XCP': 'https://counterparty.io/'
+};
+

@@ -219,7 +219,7 @@ AssetLeaderboardViewModel.formulateExtendedAssetInfo = function(asset, hasImage,
   var dispAsset = asset;
   if (asset === KEY_ASSET.XCP || asset === KEY_ASSET.BTC) {
     dispAsset = '<img src="assets/' + asset + '.png" />&nbsp;';
-    var website = asset === KEY_ASSET.XCP ? "http://www.counterparty.co" : "http://www.bitcoin.org";
+    var website = asset === KEY_ASSET.XCP ? KEY_ASSET_WEBSITE.XCP : KEY_ASSET_WEBSITE.BTC;
     dispAsset += '<a href="' + website + '" target="_blank">' + asset + '</a>';
   } else if (hasImage) {
     dispAsset = '<img src="' + (USE_TESTNET ? '/_t_asset_img/' : '/_asset_img/') + asset + '.png" />&nbsp;';
