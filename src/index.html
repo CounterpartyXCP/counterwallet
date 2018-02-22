@@ -288,9 +288,9 @@
           <div class="modal-footer">
             <button type="button" class="btn btn-default" data-bind="visible: step()==1, click: hide, locale: 'cancel'"></button>
             <button id="continueWalletCreation" type="button" class="btn btn-primary" data-bind="visible: step() == 1, enable: passphraseSaved, click: goToStep2, locale: 'continue'"></button>
-            <button id="finishWalletCreation" type="button" class="btn btn-primary" data-bind="visible: step() == 2 && !showQuickAccessFrame(), click: showQuickAccessURLGUI, locale: 'create_quick_access'"></button>
-            <button id="finishWalletCreation" type="button" class="btn btn-primary" data-bind="visible: step() == 2 && !showQuickAccessFrame(), click: createWallet, locale: 'skip_this_step'"></button>
-            <button id="finishWalletCreation" type="button" class="btn btn-primary" data-bind="visible: step() == 2 && showQuickAccessFrame(), click: createWallet, locale: 'create_wallet'"></button>
+            <button id="finishWalletCreation1" type="button" class="btn btn-primary" data-bind="visible: step() == 2 && !showQuickAccessFrame(), click: showQuickAccessURLGUI, locale: 'create_quick_access'"></button>
+            <button id="finishWalletCreation2" type="button" class="btn btn-primary" data-bind="visible: step() == 2 && !showQuickAccessFrame(), click: createWallet, locale: 'skip_this_step'"></button>
+            <button id="finishWalletCreation3" type="button" class="btn btn-primary" data-bind="visible: step() == 2 && showQuickAccessFrame(), click: createWallet, locale: 'create_wallet'"></button>
           </div>
         </div><!-- /.modal-content -->
       </div><!-- /.modal-dialog -->
