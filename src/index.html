@@ -63,17 +63,17 @@
   <body class="fixed-header fixed-ribbon fixed-navigation smart-style-2" data-bind="css: {minified: IS_MOBILE_OR_TABLET }">
     <!-- default to ultra light theme (smart-style-2) -->
     <!-- also default to minfied view on mobile/tablet devices -->
-    <div id="allContentLoading"><img src="assets/pageloader.gif" /></div>
+    <div id="allContentLoading"><img alt="Content Loading..." src="assets/pageloader.gif" /></div>
     <div id="allContent" style="display:none">
 
     <div id="langSelector" data-bind="visible: AVAILABLE_LANGUAGES.length > 1, foreach: AVAILABLE_LANGUAGES">
       <a href="#" data-bind="visible: LANG != $data, attr: {lang:  $data}">
-        <img data-bind="attr: {src: 'assets/' + $data + '.png'}" />
+        <img data-bind="attr: {src: 'assets/' + $data + '.png', alt: $data}" />
       </a>
 
 
       <span data-bind="visible: LANG == $data">
-        <img data-bind="attr: {src: 'assets/' + $data + '.png'}" />
+        <img data-bind="attr: {src: 'assets/' + $data + '.png', alt: $data}" />
       </span>
     </div>
 
