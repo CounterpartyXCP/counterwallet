@@ -89,30 +89,30 @@ Development
 
 The easiest way to develop locally is to install Federated Node in Docker environment. If you already have Bitcoin Core addrindex, Counterparty Server and Counterblock, then Counterwallet can be manually installed using either of these approaches:
 
-* Stand-alone Docker environment: refer to docker\start.sh in the Counterwallet source code. 
+* Stand-alone Docker environment: refer to docker\start.sh in the Counterwallet source code.
 * Manually: example based on the Docker template for Counterwallet on Ubuntu 16.04 is provided below.
 
-### Manual installation in local environment (Ubuntu 16.04 x64):
-1. Download required release or branch (optionally check Pull Requests, if any). 
-2. Enter the archive directory: `cd $PATH2SOURCE`
-3. Install NodeJS and create a symlink if needed: `sudo apt-get install nodejs ; sudo ln -s /usr/bin/nodejs /usr/bin/node`
-4. Prepare: `npm install -g --save-dev bower grunt-cli`
-5. Download dependencies in the src subdirectory: `cd src; bower --allow-root --config.interactive=false update` 
-6. Prepublish `cd $PATH2SOURCE; mkdir build ; npm update`
-7. Build: Copy counterwallet.conf.json.example to counterwallet.conf.json. Use text editor to add `"http://wallet.counterwallet.io"` in between the square brackets in `servers` in counterwallet.conf.json. Then build: `grunt build --dontcheckdeps --dontminify && cp counterwallet.conf.json build/`. The application will be stored in the build subdirectory.
-8. Serve: Open a seperate terminal, install serve (`sudo npm install -g serve`) and in the build subdirectory start Counterwallet service: `cd build/; serve`. 
-9. Use: Visit `http://localhost:3000` (or you can specify a different port for `serve` if you like)
+### Manual installation in local environment (Ubuntu 16.04):
+1. Clone repostiroty and `cd` into result folder
+2. NodeJS 9.x + NPM installation (if you don't have it):
+```
+curl -sL https://deb.nodesource.com/setup_9.x | sudo -E bash -
+sudo apt-get install -y nodejs
+```
+5. Dowload dependencies in the root folder: `npm install`
+6. Build: `npm run build`. The application will be stored in the `./build` subdirectory.
+4. Configure: Copy `counterwallet.conf.json.example` to .`/build/counterwallet.conf.json`. Use text editor to add `"http://wallet.counterwallet.io"` in between the square brackets in `servers` in counterwallet.conf.json.
+6. Run: `npm run serve`
+7. Use: Visit `http://localhost:3000`
 
 #### Notes:
 
 * the `--dontcheckdeps` speeds up the process and avoids having to do `grunt freeze` everytime you make a change to a dependency during development
-* the `--dontminify` makes your debugging life a bit easier
-* the `cp` is neccesary because grunt keeps clearing the `build` folder
 * If you want to test your local version on another device (or let another person test something) use https://ngrok.com to setup a tunnel to your local environment
 * If you want to use HTTPS, refer to additional steps required in the Counterwallet Docker start script
- 
+
 ### Note concerning `npm install`
-`npm install` triggers a `prepublish` which is configured to do `grunt build` 
+`npm install` triggers a `prepublish` which is configured to do `grunt build`
 and will bork if you haven't done a `grunt freeze` after making changes to dependencies.
 You can use `npm update` to circumvent this during development.
 
