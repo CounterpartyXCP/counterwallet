@@ -101,7 +101,8 @@ sudo apt-get install -y nodejs
 ```
 5. Dowload dependencies in the root folder: `npm install`
 6. Build: `npm run build`. The application will be stored in the `./build` subdirectory.
-4. Configure: Copy `counterwallet.conf.json.example` to .`/build/counterwallet.conf.json`. Use text editor to add `"http://wallet.counterwallet.io"` in between the square brackets in `servers` in counterwallet.conf.json.
+4. Configure: Copy `counterwallet.conf.json.example` to .`/build/counterwallet.conf.json`.
+  - Notice the `servers` parameter in JSON file. It's responsible for API endpoint(s). By default it's `https://wallet.counterwallet.io`
 6. Run: `npm run serve`
 7. Use: Visit `http://localhost:3000`
 
