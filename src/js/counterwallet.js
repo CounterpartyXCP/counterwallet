@@ -53,6 +53,7 @@ var cwURLs = ko.observableArray([]);
 var cwBaseURLs = ko.observableArray([]);
 var cwAPIUrls = ko.observableArray([]);
 var disabledFeatures = ko.observableArray([]);
+var restrictedAreas = {};
 
 function produceCWServerList() {
   cwURLs(_.shuffle(cwURLs())); //randomly shuffle the list to decide the server try order...
@@ -202,6 +203,13 @@ function loadCounterwalletConfigFromServer() {
       $.jqlog.debug("Disabled features: " + data['disabledFeatures']);
     }
     disabledFeatures(data['disabledFeatures'] || []);
+
+    //Init list of restricted areas
+    if (data['restrictedAreas']) {
+      assert(data['restrictedAreas'] instanceof Object, "'restrictedAreas' field in returned counterwallet.conf.json file is not an object");
+      $.jqlog.debug("Restricted Areas: " + data['restrictedAreas']);
+    }
+    restrictedAreas = data['restrictedAreas'] || {};
   }).fail(function() {
     //File not found, just use the local box as the API server
     cwURLs([location.origin]);
