@@ -1,7 +1,7 @@
 /*
 Current language is set:
 - with "lang" query string. for instance (?lang=fr)  (**NOTE: not currently used anymore as it causes wallet loading issues.**)
-- else if absent with first subdomain. for instance fr.counterwallet.co or testnet-fr.counterwallet.co
+- else if absent with first subdomain. for instance fr.counterwallet.io or testnet-fr.counterwallet.io
 - else if absent with local storage (localStorage.getItem("LANG"))
 - else if absent with DEFAULT_LANG
 

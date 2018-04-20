@@ -801,7 +801,7 @@
   "only_the_assets_you_own": "Only the assets you own with established market value (via completed trades on the Distributed Exchange) are listed here.",
   "highest_bid_price": "Highest bid price",
 
-  "diligence_is_advised": "Warning and Disclaimer: <b>Every</b> Counterparty asset can be viewed on the \"Markets\" page. The hosts of Counterwallet.io and Counterwallet.co <b>do not filter</b> very likely scam or fraudulent assets, and explicitly disclaim any responsibility therefor. Caveat emptor: do your own diligence, and do not invest more than you can afford to lose.",
+  "diligence_is_advised": "Warning and Disclaimer: <b>Every</b> Counterparty asset can be viewed on the \"Markets\" page. The hosts of Counterwallet.io <b>do not filter</b> very likely scam or fraudulent assets, and explicitly disclaim any responsibility therefor. Caveat emptor: do your own diligence, and do not invest more than you can afford to lose.",
   "btc_trading_off": "Trading to or from BTC is no longer possible in Counterwallet. Click <a href=\"http://support.counterparty.io/support/solutions/articles/5000500845-why-can-i-no-longer-trade-to-and-from-btc-in-counterwallet-\" target=\"_blank\">here</a> to learn why.",
   "must_be_valid_testnet_address": "This field must be a valid TESTNET Bitcoin address.",
   "must_be_valid_bitcoin_address": "This field must be a valid Bitcoin address.",
