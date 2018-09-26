@@ -186,7 +186,7 @@ function getLinkForCPData(type, dataID, dataTitle, htmlize) {
   if (typeof(type) === 'undefined') type = 'tx';
   var url = null;
   if (type == 'address') { //dataID is an address
-    url = "https://" + (USE_TESTNET ? 'testnet.' : '') + "xchain.io/address/" + dataID;
+    url = BLOCKEXPLORER_URL + '/address/' + dataID;
     //format multisig addresses
     if (dataTitle.indexOf("_") > -1) {
       var parts = dataTitle.split('_');
@@ -197,7 +197,7 @@ function getLinkForCPData(type, dataID, dataTitle, htmlize) {
       dataTitle += " (" + parts.join(', ') + ")";
     }
   } else if (type == 'tx') { //generic TX
-    url = "https://" + (USE_TESTNET ? 'testnet.' : '') + "xchain.io/tx/" + dataID;
+    url = BLOCKEXPLORER_URL + '/tx/' + dataID;
   } else {
     assert(false, "Unknown type of " + type);
   }
