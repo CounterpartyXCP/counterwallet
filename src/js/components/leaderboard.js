@@ -219,11 +219,11 @@ AssetLeaderboardViewModel.formulateExtendedAssetInfo = function(asset, hasImage,
   var dispAsset = asset;
   if (asset == 'XCP' || asset == 'BTC') {
     dispAsset = '<img alt="" src="assets/' + asset + '.png" />&nbsp;';
-    var website = asset == 'XCP' ? "http://www.counterparty.co" : "http://www.bitcoin.org";
-    dispAsset += '<a href="' + website + '" target="_blank">' + asset + '</a>';
+    var website = asset == 'XCP' ? 'https://counterparty.io' : 'https://bitcoin.org';
+    dispAsset += '<a href="' + website + '" target="_blank" rel="noopener noreferrer">' + asset + '</a>';
   } else if (hasImage) {
     dispAsset = '<img alt="" src="' + (USE_TESTNET ? '/_t_asset_img/' : '/_asset_img/') + asset + '.png" />&nbsp;';
-    //dispAsset += website ? ('<a href="' + website + '" target="_blank">' + asset + '</a>') : asset;
+    //dispAsset += website ? ('<a href="' + website + '" target="_blank" rel="noopener noreferrer">' + asset + '</a>') : asset;
     dispAsset += asset; //keep it simple for now for avoid XSS
   }
   return dispAsset;

@@ -49,7 +49,7 @@
 <div id="oldWalletDetectedNotice" data-bind="fadeVisibleInOnly: WALLET.isOldWallet()" class="alert alert-warning alert-block">
     <i class="fa-fw fa fa-level-up"></i>
     <span data-bind="locale: 'old_wallet_detected'"></span>
-    <a href="https://counterpartytalk.org/t/is-it-possible-to-create-list-of-addresses-and-private-keys-from-counterwallet-pass-phrase/1223" target="_blank" data-bind="locale: 'old_wallet_more_info'"></a>.
+    <a href="https://counterpartytalk.org/t/is-it-possible-to-create-list-of-addresses-and-private-keys-from-counterwallet-pass-phrase/1223" target="_blank" rel="noopener noreferrer" data-bind="locale: 'old_wallet_more_info'"></a>.
 </div>
 
 <div class="alert alert-info" id="alertBuyXcp">
@@ -1063,13 +1063,13 @@
           <section data-bind="visible: extWebsite"><div class="row">
             <label class="control-label col col-sm-2" data-bind="locale: 'website_url'"></label>
             <div class="col col-sm-10">
-                <a data-bind="attr: {'href': extWebsite}, text: extWebsite" target="_blank"></a>
+                <a data-bind="attr: {'href': extWebsite}, text: extWebsite" target="_blank" rel="noopener noreferrer"></a>
             </div>
           </div></section>
           <section data-bind="visible: extPGPSigURL"><div class="row">
             <label class="control-label col col-sm-2" data-bind="locale: 'pgp_signature'"></label>
             <div class="col col-sm-10">
-                <a data-bind="attr: {'href': extPGPSigURL}, text: extPGPSigURL" target="_blank"></a>
+                <a data-bind="attr: {'href': extPGPSigURL}, text: extPGPSigURL" target="_blank" rel="noopener noreferrer"></a>
             </div>
           </div></section>
 
