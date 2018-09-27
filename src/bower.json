@@ -38,7 +38,7 @@
         "chai": "1.9.1",
         "iso8601-js-period": "https://github.com/nezasa/iso8601-js-period.git#v0.2.0.0",
         "queue": "https://github.com/mbostock/queue.git#v1.0.7",
-        "htmlcanvas": "git://github.com/xnova/html2canvas.git#33e96032800a71e2ea8d0cff556ec940412a8527",
+        "htmlcanvas": "git://github.com/niklasvh/html2canvas.git#33e96032800a71e2ea8d0cff556ec940412a8527",
         "sprintf": "git://github.com/alexei/sprintf.js.git#d5cfad02b3db7a472544b1d9e467fcc126e453a9",
         "i18next": "git://github.com/i18next/i18next.git#c877a7f7fb3afaf034f26a17d6948accaee598e1",
         "big-integer": "https://github.com/peterolson/BigInteger.js.git#8ef66b232d9a8e91e4b7f4dac960fe10cf4541d6",
