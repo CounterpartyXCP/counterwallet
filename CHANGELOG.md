@@ -103,7 +103,7 @@ Full list of changes are at: http://goo.gl/AICdol
 * Added Rock-Paper-Scissors
 * Added Zeroconf support (show pending balances for assets)
 * Added IP-based blocking for betting, RPS and dividend issuance. We are currently blocking people
-  with US-based IP addresses from using these features on counterwallet.co itself.
+  with US-based IP addresses from using these features on counterwallet.io itself.
 
 **Fixes:**
 * Fixed issue with asset name validation (length checking was incorrect)
