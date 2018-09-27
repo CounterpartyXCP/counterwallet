@@ -47,7 +47,7 @@
                     <div class="row" data-bind="visible: info_data.url">
                       <label class="col col-lg-2"><span data-bind="locale: 'url'"></span>:</label>
                       <span class="value">
-                        <a target="_blank" data-bind="text: info_data.url, attr: {href: info_data.url}"></a>
+                        <a target="_blank" rel="noopener noreferrer" data-bind="text: info_data.url, attr: {href: info_data.url}"></a>
                       </span>
                     </div>
                     <div class="row" data-bind="visible: info_data.description">
@@ -247,7 +247,7 @@
                             <tr data-bind="visible: $parent.jsonBetProvided">
                               <td><b><span data-bind="locale: 'operator'"></span>:</b></td>
                               <td>
-                                <a data-bind="attr: {href: info_data.operator.url}" target="_blank"><span data-bind="text: info_data.operator.name"></span></a>
+                                <a data-bind="attr: {href: info_data.operator.url}" target="_blank" rel="noopener noreferrer"><span data-bind="text: info_data.operator.name"></span></a>
                               </td>
                             </tr>
                             <tr>
