@@ -1,5 +1,12 @@
 {
     "servers": [],
+    "restrictedAreas": {
+      "pages/betting.html": ["US"],
+      "pages/openbets.html": ["US"],
+      "pages/matchedbets.html": ["US"],
+      "dividend": ["US"],
+      "pages/simplebuy.html": ["US"]
+    },
     "AVAILABLE_LANGUAGES": ["en", "zh-cn", "zh-tw", "ru", "cs", "da"],
     "DEFAULT_LANGUAGE": "en"
 }
