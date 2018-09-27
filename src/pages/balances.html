@@ -49,7 +49,7 @@
 <div id="oldWalletDetectedNotice" data-bind="fadeVisibleInOnly: WALLET.isOldWallet()" class="alert alert-warning alert-block">
     <i class="fa-fw fa fa-level-up"></i>
     <span data-bind="locale: 'old_wallet_detected'"></span>
-    <a href="https://counterpartytalk.org/t/is-it-possible-to-create-list-of-addresses-and-private-keys-from-counterwallet-pass-phrase/1223" target="_blank" data-bind="locale: 'old_wallet_more_info'"></a>.
+    <a href="https://counterpartytalk.org/t/is-it-possible-to-create-list-of-addresses-and-private-keys-from-counterwallet-pass-phrase/1223" target="_blank" rel="noopener noreferrer" data-bind="locale: 'old_wallet_more_info'"></a>.
 </div>
 
 <div class="alert alert-info" id="alertBuyXcp">
@@ -327,7 +327,7 @@
             <label class="control-label col col-sm-3" data-bind="locale: 'send_to'"></label>
             <div class="col col-sm-9">
                 <label class="input"><i class="icon-append fa fa-tag"></i>
-                    <input name="destAddress" data-bind="value: destAddress, valueUpdate: 'input', attr: {placeholder: 'Enter Bitcoin address'}" type="text"/>
+                    <input name="destAddress" data-bind="value: destAddress, valueUpdate: 'input', attr: {placeholder: 'Enter destination address'}" type="text"/>
                 </label>
                 <span class="invalid" data-bind="validationMessage: destAddress"></span>
             </div>
@@ -1057,19 +1057,19 @@
           <section data-bind="visible: extImageURL"><div class="row">
             <label class="control-label col col-sm-2" data-bind="locale: 'logo'"></label>
             <div class="col col-sm-10">
-                <img data-bind="attr: {'src': extImageURL}" /> <!-- should be 48x48 -->
+                <img alt="" data-bind="attr: {'src': extImageURL}" /> <!-- should be 48x48 -->
             </div>
           </div></section>
           <section data-bind="visible: extWebsite"><div class="row">
             <label class="control-label col col-sm-2" data-bind="locale: 'website_url'"></label>
             <div class="col col-sm-10">
-                <a data-bind="attr: {'href': extWebsite}, text: extWebsite" target="_blank"></a>
+                <a data-bind="attr: {'href': extWebsite}, text: extWebsite" target="_blank" rel="noopener noreferrer"></a>
             </div>
           </div></section>
           <section data-bind="visible: extPGPSigURL"><div class="row">
             <label class="control-label col col-sm-2" data-bind="locale: 'pgp_signature'"></label>
             <div class="col col-sm-10">
-                <a data-bind="attr: {'href': extPGPSigURL}, text: extPGPSigURL" target="_blank"></a>
+                <a data-bind="attr: {'href': extPGPSigURL}, text: extPGPSigURL" target="_blank" rel="noopener noreferrer"></a>
             </div>
           </div></section>
 

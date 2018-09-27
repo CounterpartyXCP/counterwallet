@@ -158,7 +158,7 @@ function LogonViewModel() {
 
         // set user country
         USER_COUNTRY = data['country'];
-        if (RESTRICTED_AREA['pages/betting.html'].indexOf(USER_COUNTRY) != -1) {
+        if (restrictedAreas['pages/betting.html'] && restrictedAreas['pages/betting.html'].indexOf(USER_COUNTRY) != -1) {
           BETTING_ENABLE = false;
         }
 
