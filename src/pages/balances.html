@@ -125,13 +125,13 @@
           </header>
           <div> <!-- widget div-->
             <div class="widget-body" data-bind="attr: {'id': 'address-balances-' + ADDRESS}, foreach: filteredAssets"> <!-- widget content -->
-              <div class="asset-item" data-bind="attr: {'id': 'asset-' + ADDRESS + '-' + ASSET}, css: { btc: ASSET === 'BTC', xcp: ASSET === 'XCP', myasset: isMine(), othersasset: !isMine() && (ASSET !== 'BTC' && ASSET !== 'XCP') }">
+              <div class="asset-item" data-bind="attr: {'id': 'asset-' + ADDRESS + '-' + ASSET}, css: { btc: isBTC(), xcp: isXCP(), myasset: isMine(), othersasset: !isMine() && (!isBTC() && !isXCP()) }">
                 <div class="btn-group btn-group-dropup"> <!-- asset level action button -->
                   <button type="button" class="btn btn-default dropdown-toggle assetBtn"><span class="caret"></span></button>
                   <ul class="dropdown-menu" role="menu">
                     <li><a data-bind="visible: !$parent.IS_WATCH_ONLY, click: send, locale: 'send'" href="#"></a></li>
-                    <li><a data-bind="visible: ASSET !== 'BTC' && ASSET !== 'XCP', click: showInfo, locale: 'show_info'" href="#"></a></li>
-                    <li data-bind="visible: !$parent.IS_WATCH_ONLY && USE_TESTNET && ASSET === 'BTC'"><a data-bind="click: testnetBurn, locale: 'burn_for_xcp'" href="#"></a></li>
+                    <li><a data-bind="visible: !isBTC() && !isXCP(), click: showInfo, locale: 'show_info'" href="#"></a></li>
+                    <li data-bind="visible: !$parent.IS_WATCH_ONLY && USE_TESTNET && isBTC()"><a data-bind="click: testnetBurn, locale: 'burn_for_xcp'" href="#"></a></li>
                     <li data-bind="visible: !$parent.IS_WATCH_ONLY && isMine() && !locked()"><a data-bind="click: issueAdditional, locale: 'issue_additional'" href="#"></a></li>
                     <li data-bind="visible: !$parent.IS_WATCH_ONLY && isMine()"><a data-bind="click: transfer, locale: 'transfer_ownership'" href="#"></a></li>
                     <li data-bind="visible: !$parent.IS_WATCH_ONLY && isMine() && !locked()"><a data-bind="click: lock, locale: 'lock_token_issuance'" href="#"></a></li>
