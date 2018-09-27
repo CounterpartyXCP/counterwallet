@@ -6,7 +6,7 @@
     <meta content="Open-source and client-side web wallet for Counterparty (XCP) and Bitcoin (BTC)" name="description">
     <meta content="Counterparty Developers" name="author">
 
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0">
 
     <noscript>
       [EN] This site requires Javascript. Please enable it, and then try loading the page again.<br />
@@ -43,18 +43,11 @@
     <link rel="icon" href="images/favicon.ico">
 
     <!-- GOOGLE FONT -->
-    <link rel="stylesheet" href="//fonts.googleapis.com/css?family=Open+Sans:400italic,700italic,300,400,700">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Open+Sans:400italic,700italic,300,400,700">
 
     <!-- Specifying a Webpage Icon for Web Clip
-         Ref: https://developer.apple.com/library/ios/documentation/AppleApplications/Reference/SafariWebContent/ConfiguringWebApplications/ConfiguringWebApplications.html -->
+         Ref: https://webhint.io/docs/user-guide/hints/hint-apple-touch-icons/ -->
     <link rel="apple-touch-icon" href="images/apple-touch-icon.png" />
-    <link rel="apple-touch-icon" sizes="57x57" href="images/apple-touch-icon-57x57.png" />
-    <link rel="apple-touch-icon" sizes="72x72" href="images/apple-touch-icon-72x72.png" />
-    <link rel="apple-touch-icon" sizes="76x76" href="images/apple-touch-icon-76x76.png" />
-    <link rel="apple-touch-icon" sizes="114x114" href="images/apple-touch-icon-114x114.png" />
-    <link rel="apple-touch-icon" sizes="120x120" href="images/apple-touch-icon-120x120.png" />
-    <link rel="apple-touch-icon" sizes="144x144" href="images/apple-touch-icon-144x144.png" />
-    <link rel="apple-touch-icon" sizes="152x152" href="images/apple-touch-icon-152x152.png" />
 
     <!-- iOS web-app metas : hides Safari UI Components and Changes Status Bar Appearance -->
     <meta name="apple-mobile-web-app-capable" content="yes">
@@ -63,17 +56,17 @@
   <body class="fixed-header fixed-ribbon fixed-navigation smart-style-2" data-bind="css: {minified: IS_MOBILE_OR_TABLET }">
     <!-- default to ultra light theme (smart-style-2) -->
     <!-- also default to minfied view on mobile/tablet devices -->
-    <div id="allContentLoading"><img src="assets/pageloader.gif" /></div>
+    <div id="allContentLoading"><img alt="Content Loading..." src="assets/pageloader.gif" /></div>
     <div id="allContent" style="display:none">
 
     <div id="langSelector" data-bind="visible: AVAILABLE_LANGUAGES.length > 1, foreach: AVAILABLE_LANGUAGES">
       <a href="#" data-bind="visible: LANG != $data, attr: {lang:  $data}">
-        <img data-bind="attr: {src: 'assets/' + $data + '.png'}" />
+        <img data-bind="attr: {src: 'assets/' + $data + '.png', alt: $data}" />
       </a>
 
 
       <span data-bind="visible: LANG == $data">
-        <img data-bind="attr: {src: 'assets/' + $data + '.png'}" />
+        <img data-bind="attr: {src: 'assets/' + $data + '.png', alt: $data}" />
       </span>
     </div>
 
@@ -288,9 +281,9 @@
           <div class="modal-footer">
             <button type="button" class="btn btn-default" data-bind="visible: step()==1, click: hide, locale: 'cancel'"></button>
             <button id="continueWalletCreation" type="button" class="btn btn-primary" data-bind="visible: step() == 1, enable: passphraseSaved, click: goToStep2, locale: 'continue'"></button>
-            <button id="finishWalletCreation" type="button" class="btn btn-primary" data-bind="visible: step() == 2 && !showQuickAccessFrame(), click: showQuickAccessURLGUI, locale: 'create_quick_access'"></button>
-            <button id="finishWalletCreation" type="button" class="btn btn-primary" data-bind="visible: step() == 2 && !showQuickAccessFrame(), click: createWallet, locale: 'skip_this_step'"></button>
-            <button id="finishWalletCreation" type="button" class="btn btn-primary" data-bind="visible: step() == 2 && showQuickAccessFrame(), click: createWallet, locale: 'create_wallet'"></button>
+            <button id="finishWalletCreation1" type="button" class="btn btn-primary" data-bind="visible: step() == 2 && !showQuickAccessFrame(), click: showQuickAccessURLGUI, locale: 'create_quick_access'"></button>
+            <button id="finishWalletCreation2" type="button" class="btn btn-primary" data-bind="visible: step() == 2 && !showQuickAccessFrame(), click: createWallet, locale: 'skip_this_step'"></button>
+            <button id="finishWalletCreation3" type="button" class="btn btn-primary" data-bind="visible: step() == 2 && showQuickAccessFrame(), click: createWallet, locale: 'create_wallet'"></button>
           </div>
         </div><!-- /.modal-content -->
       </div><!-- /.modal-dialog -->
@@ -327,16 +320,16 @@
               <div class="row">
 
                 <div class="col-sm-8" data-bind="visible: !cryptedPassphraseUsed()">
-                  <input id="password" data-bind="value: enteredPassphrase, valueUpdate: 'input', localeAttr: {'placeholder': 'enter_passphrase'}" class="form-control" type="password" name="password">
+                  <input aria-label="Enter your passphrase here." id="password" data-bind="value: enteredPassphrase, valueUpdate: 'input', localeAttr: {'placeholder': 'enter_passphrase'}" class="form-control" type="password" name="password">
                 </div>
 
                 <div class="col-sm-8" data-bind="visible: cryptedPassphraseUsed">
-                  <input id="passwordDecrypt" data-bind="value: passwordDecrypt, valueUpdate: 'input', localeAttr: {'placeholder': 'enter_quick_password'}" class="form-control" type="password" name="passwordDecrypt">
+                  <input aria-label="Enter your quick password here."  id="passwordDecrypt" data-bind="value: passwordDecrypt, valueUpdate: 'input', localeAttr: {'placeholder': 'enter_quick_password'}" class="form-control" type="password" name="passwordDecrypt">
                 </div>
 
                 <div class="col-sm-4" style="white-space:nowrap">
                   <button id="walletLoginButton" data-bind="click: openWallet, enable: isPassphraseValid(), css: { 'btn-primary': isPassphraseValid() }, locale: 'open_wallet'" type="button" class="btn btn-default" disabled></button>
-                  &nbsp;<button id="secureKeyboardButton" data-bind="click: showSecureKeyboard, enable: !isPassphraseValid(), css: { 'btn-primary': !isPassphraseValid() }" type="button" class="btn btn-default" disabled><i class="fa fa-keyboard-o"></i></button>
+                  &nbsp;<button aria-label="Press this if you want to use the secure keyboard." id="secureKeyboardButton" data-bind="click: showSecureKeyboard, enable: !isPassphraseValid(), css: { 'btn-primary': !isPassphraseValid() }" type="button" class="btn btn-default" disabled><i class="fa fa-keyboard-o"></i></button>
                   <div class="showSupport"><a href="#" data-bind="locale: 'login_problems'"></a></div>
                 </div>
 
@@ -597,18 +590,18 @@
             <div data-bind="visible: type == 'balancesPage'">
                 <h5 data-bind="locale: 'answers_to_common_questions'"></h5>
                 <ul>
-                    <li><a href="https://counterpartytalk.org/t/i-logged-in-and-my-address-is-different-and-i-have-no-balance-help/1684" target="_blank" data-bind="locale: 'answer_1'"></a></li>
-                    <li><a href="https://counterpartytalk.org/t/how-do-i-participate-in-crowdfunding-of-projects-issued-on-counterparty/1153" target="_blank" data-bind="locale: 'answer_2'"></a></li>
-                    <li><a href="https://counterpartytalk.org/t/i-sent-btc-xcp-token-a-while-ago-but-the-transaction-hasnt-gone-through-why/1854" target="_blank" data-bind="locale: 'answer_3'"></a></li>
+                    <li><a href="https://counterpartytalk.org/t/i-logged-in-and-my-address-is-different-and-i-have-no-balance-help/1684" target="_blank" rel="noopener noreferrer" data-bind="locale: 'answer_1'"></a></li>
+                    <li><a href="https://counterpartytalk.org/t/how-do-i-participate-in-crowdfunding-of-projects-issued-on-counterparty/1153" target="_blank" rel="noopener noreferrer" data-bind="locale: 'answer_2'"></a></li>
+                    <li><a href="https://counterpartytalk.org/t/i-sent-btc-xcp-token-a-while-ago-but-the-transaction-hasnt-gone-through-why/1854" target="_blank" rel="noopener noreferrer" data-bind="locale: 'answer_3'"></a></li>
                     <br/>
-                    <li><a href="https://counterpartytalk.org/t/why-do-i-need-small-amounts-of-bitcoin-to-do-things/1142/1" target="_blank" data-bind="locale: 'answer_4'"></a></li>
-                    <li><a href="https://counterpartytalk.org/t/my-address-in-counterwallet-disappeared/1222" target="_blank" data-bind="locale: 'answer_5'"></a></li>
-                    <li><a href="https://counterpartytalk.org/t/does-counterwallet-have-two-factor-authentication-2fa/2071" target="_blank" data-bind="locale: 'answer_6'"></a></li>
-                    <li><a href="https://counterpartytalk.org/t/about-the-counterwallet-support-category/29" target="_blank" data-bind="locale: 'answer_8'"></a></li>
+                    <li><a href="https://counterpartytalk.org/t/why-do-i-need-small-amounts-of-bitcoin-to-do-things/1142/1" target="_blank" rel="noopener noreferrer" data-bind="locale: 'answer_4'"></a></li>
+                    <li><a href="https://counterpartytalk.org/t/my-address-in-counterwallet-disappeared/1222" target="_blank" rel="noopener noreferrer" data-bind="locale: 'answer_5'"></a></li>
+                    <li><a href="https://counterpartytalk.org/t/does-counterwallet-have-two-factor-authentication-2fa/2071" target="_blank" rel="noopener noreferrer" data-bind="locale: 'answer_6'"></a></li>
+                    <li><a href="https://counterpartytalk.org/t/about-the-counterwallet-support-category/29" target="_blank" rel="noopener noreferrer" data-bind="locale: 'answer_8'"></a></li>
                 </ul>
                 <h5 class="margin-bottom-0">
                   <span data-bind="locale: 'for_other_questions'"></span> 
-                  <a href="https://counterpartytalk.org/c/support" target="_blank" data-bind="locale: 'counterparty_forums'"></a>.
+                  <a href="https://counterpartytalk.org/c/support" target="_blank" rel="noopener noreferrer" data-bind="locale: 'counterparty_forums'"></a>.
                 </h5>
                 <h5>
                   <span data-bind="locale: 'for_bugs'"></span>
@@ -618,16 +611,16 @@
             <div data-bind="visible: type == 'exchangePage'">
                 <h5 data-bind="locale: 'answers_to_common_questions'"></h5>
                 <ul>
-                    <li><a href="https://counterpartytalk.org/t/how-to-read-the-combined-asset-token-currency-pairs-such-as-btcxcp-in-dex/2072" target="_blank" data-bind="locale: 'answer_9'"></a></li>
-                    <li><a href="https://counterpartytalk.org/t/when-is-a-dex-order-considered-active-and-how-can-i-cancel-it/1180" target="_blank" data-bind="locale: 'answer_11'"></a></li>
-                    <li><a href="https://counterpartytalk.org/t/why-do-i-need-small-amounts-of-bitcoin-to-do-things/1142/1" target="_blank" data-bind="locale: 'answer_12'"></a></li>
-                    <li><a href="https://counterpartytalk.org/t/what-is-the-difference-between-miners-fee-and-redeemable-fee/1188" target="_blank" data-bind="locale: 'answer_13'"></a></li>
-                    <li><a href="https://counterpartytalk.org/t/what-btc-sellers-on-the-counterparty-distributed-exchange-need-to-know/1183" target="_blank" data-bind="locale: 'answer_14'"></a></li>
-                    <li><a href="https://counterpartytalk.org/t/about-the-counterwallet-support-category/29" target="_blank" data-bind="locale: 'answer_8'"></a></li>
+                    <li><a href="https://counterpartytalk.org/t/how-to-read-the-combined-asset-token-currency-pairs-such-as-btcxcp-in-dex/2072" target="_blank" rel="noopener noreferrer" data-bind="locale: 'answer_9'"></a></li>
+                    <li><a href="https://counterpartytalk.org/t/when-is-a-dex-order-considered-active-and-how-can-i-cancel-it/1180" target="_blank" rel="noopener noreferrer" data-bind="locale: 'answer_11'"></a></li>
+                    <li><a href="https://counterpartytalk.org/t/why-do-i-need-small-amounts-of-bitcoin-to-do-things/1142/1" target="_blank" rel="noopener noreferrer" data-bind="locale: 'answer_12'"></a></li>
+                    <li><a href="https://counterpartytalk.org/t/what-is-the-difference-between-miners-fee-and-redeemable-fee/1188" target="_blank" rel="noopener noreferrer" data-bind="locale: 'answer_13'"></a></li>
+                    <li><a href="https://counterpartytalk.org/t/what-btc-sellers-on-the-counterparty-distributed-exchange-need-to-know/1183" target="_blank" rel="noopener noreferrer" data-bind="locale: 'answer_14'"></a></li>
+                    <li><a href="https://counterpartytalk.org/t/about-the-counterwallet-support-category/29" target="_blank" rel="noopener noreferrer" data-bind="locale: 'answer_8'"></a></li>
                 </ul>
                 <h5 class="margin-bottom-0">
                   <span data-bind="locale: 'for_other_questions'"></span>
-                  <a href="https://counterpartytalk.org/c/support" target="_blank" data-bind="locale: 'counterparty_forums'"></a>.
+                  <a href="https://counterpartytalk.org/c/support" target="_blank" rel="noopener noreferrer" data-bind="locale: 'counterparty_forums'"></a>.
                 </h5>
                 <h5>
                   <span data-bind="locale: 'for_bugs'"></span> 

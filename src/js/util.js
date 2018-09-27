@@ -83,7 +83,7 @@ function expireDate(expire_index) {
 }
 
 function checkCountry(action, callback) {
-  if (RESTRICTED_AREA[action] && RESTRICTED_AREA[action].indexOf(USER_COUNTRY) != -1) {
+  if (restrictedAreas[action] && restrictedAreas[action].indexOf(USER_COUNTRY) != -1) {
     var message = i18n.t('forbiden_country');
 
     if (action in RESTRICTED_AREA_MESSAGE) {
@@ -202,7 +202,7 @@ function getLinkForCPData(type, dataID, dataTitle, htmlize) {
     assert(false, "Unknown type of " + type);
   }
 
-  return htmlize ? ('<a href="' + url + '" target="_blank">' + dataTitle + '</a>') : url;
+  return htmlize ? ('<a href="' + url + '" target="_blank" rel="noopener noreferrer">' + dataTitle + '</a>') : url;
 }
 
 function getTxHashLink(hash) {
@@ -220,7 +220,7 @@ function getLinkForBlock(blockIndex, dataTitle, htmlize) {
   if (typeof(dataTitle) === 'undefined' || dataTitle === null) dataTitle = blockIndex;
   if (typeof(htmlize) === 'undefined' || htmlize === null) htmlize = true;
   var url = BLOCKEXPLORER_URL + '/block/' + blockIndex;
-  return htmlize ? '<a href="' + url + '" target="_blank">' + dataTitle + '</a>' : url;
+  return htmlize ? '<a href="' + url + '" target="_blank" rel="noopener noreferrer">' + dataTitle + '</a>' : url;
 }
 
 function getAddressLabel(address) {

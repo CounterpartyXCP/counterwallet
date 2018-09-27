@@ -10,8 +10,8 @@ var MAX_ADDRESSES = 20; //arbitrary (but will generate more on login if they hav
                         //additional addresses from being generated via the GUI)
 
 //Order expiration
-var ORDER_DEFAULT_EXPIRATION = 1000; //num blocks until expiration (at ~9 min per block this is ~6.75 days)
-var ORDER_MAX_EXPIRATION = 3000; //max expiration for order
+var ORDER_DEFAULT_EXPIRATION = 8064; //num blocks until expiration (~2 months)
+var ORDER_MAX_EXPIRATION = 8064; //max expiration for order
 
 var STATS_MAX_NUM_TRANSACTIONS = 100; //max # transactions to show in the table
 var VIEW_PRICES_NUM_ASSET_PAIRS = 50; //show market info for this many pairs
@@ -207,13 +207,7 @@ var DISABLED_FEATURES_SUPPORTED = ['betting', 'dividend', 'exchange', 'leaderboa
 var DISABLED_FEATURES = []; //set in counterwallet.js
 
 // restricted action
-var RESTRICTED_AREA = {
-  'pages/betting.html': ['US'],
-  'pages/openbets.html': ['US'],
-  'pages/matchedbets.html': ['US'],
-  'dividend': ['US'],
-  'pages/simplebuy.html': ['US']
-}
+var RESTRICTED_AREA = {} // set in counterwallet.js
 
 var RESTRICTED_AREA_MESSAGE = {
   'pages/simplebuy.html': 'buy_xcp_if_legal'
