@@ -90,7 +90,7 @@ function checkCountry(action, callback) {
       message += '<br />' + i18n.t(RESTRICTED_AREA_MESSAGE[action]);
     }
 
-    if (USE_TESTNET) { //allow the user to bust on through this alert on testnet
+    if (USE_TESTNET || USE_REGTEST) { //allow the user to bust on through this alert on testnet
       bootbox.dialog({
         title: i18n.t("country_warning"),
         message: message + "<br/><br/>" + i18n.t("testnet_proceed_anyway"),
@@ -227,4 +227,3 @@ function getAddressLabel(address) {
   //gets the address label if the address is in this wallet
   return PREFERENCES['address_aliases'][hashToB64(address)] || address;
 }
-

@@ -552,7 +552,7 @@ function PayDividendModalViewModel() {
   self.assetName.subscribe(function(name) {
     if (!name) return;
     failoverAPI("get_assets_info", {'assetsList': [name]}, function(assetsData, endpoint) {
-      if (USE_TESTNET || WALLET.networkBlockHeight() > 330000) {
+      if (USE_TESTNET || USE_REGTEST || WALLET.networkBlockHeight() > 330000) {
         failoverAPI('get_holder_count', {'asset': name}, function(holderData) {
           self.assetData(assetsData[0]);
           self.holderCount(holderData[name]);

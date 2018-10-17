@@ -63,7 +63,13 @@ function produceCWServerList() {
     return element;
   }));
   cwAPIUrls(jQuery.map(cwURLs(), function(element) {
-    return element + (USE_TESTNET ? '/_t_api' : '/_api');
+    if (USE_TESTNET) {
+      return element + '/_t_api';
+    } else if (USE_REGTEST) {
+      return element + '/';
+    } else {
+      return element + '/_api';
+    }
   }));
 }
 
@@ -82,7 +88,7 @@ function initGoogleAnalytics() {
 
 function initRollbar() {
   /* TODO: Try to load rollbar earlier, possibly... (However, as we get the accessToken from counterwallet.conf.json, we'd have
-   * to put all of that logic in <head> for instance to be able to do that. So this should hopefully work fine.) 
+   * to put all of that logic in <head> for instance to be able to do that. So this should hopefully work fine.)
    */
   if (!ROLLBAR_ACCESS_TOKEN) return;
   $.jqlog.debug("Initializing rollbar: " + ROLLBAR_ACCESS_TOKEN);

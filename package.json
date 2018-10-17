@@ -12,7 +12,7 @@
   "dependencies": {
     "cryptojs": "2.5.3",
     "mocha": "1.18.2",
-    "transifex": "1.4.2"
+    "transifex": "^1.5.0"
   },
   "devDependencies": {
     "bower": "^1.8.2",

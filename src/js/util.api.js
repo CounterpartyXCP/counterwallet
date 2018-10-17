@@ -51,7 +51,7 @@ function urlsWithPath(urls, path) {
 
 function fetchData(url, onSuccess, onError, postdata, extraAJAXOpts, isJSONRPC, _url_n) {
   /*Makes a simple AJAX request to the specified URL.
-    
+
     -url: The URL to request. May be a single URL, or a list of URLs. If a list of URLs is specified,
      then we attempt the request across the given list of URLs (in order) until we get a success result.
     -onSuccess: A success callback that is passed (data, endpoint), with data being the raw data passed back
@@ -160,7 +160,7 @@ function makeJSONRPCCall(endpoints, method, params, timeout, onSuccess, onError)
 
 function _makeJSONAPICall(destType, endpoints, method, params, timeout, onSuccess, onError, httpMethod) {
   /*Makes a JSON RPC API call to a specific counterpartyd/counterblockd endpoint.
-   
+
     -endpoints: The specific API endpoint URL string to make the API request to.
      If a list of endpoint URLs are specified instead of a single URL, then we attempt the request
      across the given list of endpoints (in order) until we get a success result.
@@ -217,7 +217,7 @@ function supportUnconfirmedChangeParam(method) {
 function _multiAPIPrimative(method, params, onFinished) {
   /*Make request to all servers (parallelized), returning results from all servers into a list.
     (This is a primative and is not normally called directly outside of this module.)
-  
+
     -onFinished: passed the list of server resuls, ordered by the first server to respond, to the last. If a server
      didn't respond, the entry for it is set to null.
   */
@@ -297,7 +297,7 @@ function nonFailoverAPI(method, params, onSuccess, onError) {
     //TODO: this is not perfect in this failover case now because we only see the LAST error. We are currently assuming
     // that if a) the LAST server returned a 525, and b) all servers are erroring out or down, that all servers are
     // probably returning 525s or updating (or messed up somehow) and we should just log the client out to be safe about it.
-    // This is probably a good choice for now... 
+    // This is probably a good choice for now...
     if (jqXHR && jqXHR.status == '525') {
       bootbox.alert("The server(s) are currently updating and/or not caught up to the blockchain. Logging you out. Please try logging in again later. (e:failoverAPI)")
       location.reload(false); //log the user out to avoid ruckus
@@ -312,7 +312,7 @@ function nonFailoverAPI(method, params, onSuccess, onError) {
 
 function failoverAPI(method, params, onSuccess, onError) {
   /*Make an API call to one or more servers, proceeding sequentially until a success result is returned.
-    
+
     -onSuccess: Called when the first server returns success, and passed the result data as (data, endpoint)
     (where endpoint is the first host that returned success)
     -onError (optional): Called when all servers return error and/or are not available. Passed the last
@@ -331,7 +331,7 @@ function failoverAPI(method, params, onSuccess, onError) {
     //TODO: this is not perfect in this failover case now because we only see the LAST error. We are currently assuming
     // that if a) the LAST server returned a 525, and b) all servers are erroring out or down, that all servers are
     // probably returning 525s or updating (or messed up somehow) and we should just log the client out to be safe about it.
-    // This is probably a good choice for now... 
+    // This is probably a good choice for now...
     if (jqXHR && jqXHR.status == '525') {
       bootbox.alert("The server(s) are currently updating and/or not caught up to the blockchain. Logging you out. Please try logging in again later. (e:failoverAPI)")
       location.reload(false); //log the user out to avoid ruckus
@@ -346,7 +346,7 @@ function failoverAPI(method, params, onSuccess, onError) {
 
 function multiAPI(method, params, onSuccess, onError) {
   /*Make an API call across all endpoints, trying to get at least 1 success result.
-  
+
     -onSuccess: Success callback (requires that at least 1 server in the set returned success). Returns the data
      returned from the server to successfully return, as (data, endpoint).
     -onError (optional): Error callback. Called when no servers return success. Returns the error from the last server
@@ -376,7 +376,7 @@ function multiAPI(method, params, onSuccess, onError) {
 function multiAPIConsensus(method, params, onSuccess, onConsensusError, onSysError) {
   /*Make an API call and require all servers not returning an error to give back the same result, which is
     passed to the onSuccess callback.
-    
+
     -onSuccess: Success callback (requires that at least 1 server in the set returned success, and
      all successes had data result match up exactly). Args passed are (data, numTotalEndpoints, numConsensusEndpoints)
     -onConsensusError (optional): Error callback. Called if consensus failed. Returns the error data, taking the parameters
@@ -442,7 +442,7 @@ function multiAPINewest(method, params, newestField, onSuccess, onError) {
      operators -- so something like an integer, float, etc)
     -onSuccess: A callback triggered and passed the newest data result from one of the servers as (data, endpoint). The results passed
       have the highest value of the newestField property. Note that if at least one server returned a non-error, but
-      ALL servers returned data that was missing the newestField (or at the newestField set to None or blank), then 
+      ALL servers returned data that was missing the newestField (or at the newestField set to None or blank), then
       onSuccess IS called, but it is passed (null, null)
     -onError: if ALL servers returned error and we had no successful calls. Returns
      the error from the last server that the call was attempted on, passing the parameters (endpoint, jqXHR, textStatus, errorThrown).

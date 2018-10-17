@@ -4,7 +4,7 @@ var bitcore = require('bitcore-lib');
 var bitcoreMessage = require('bitcore-message'); // this also binds itself to bitcore.Message as soon as it's require'd
 
 // this 'global' is overwritten by tests!
-var NETWORK = USE_TESTNET ? bitcore.Networks.testnet : bitcore.Networks.livenet;
+var NETWORK = (USE_TESTNET || USE_REGTEST) ? bitcore.Networks.testnet : bitcore.Networks.livenet;
 
 var CWHierarchicalKey = function(passphrase, password) {
   checkArgType(passphrase, "string");

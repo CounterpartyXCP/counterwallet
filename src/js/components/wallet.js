@@ -488,7 +488,7 @@ function WalletViewModel() {
     assert(verifySourceAddr, "Source address must be specified");
     assert(verifyDestAddr, "Destination address must be specified");
     //Sign and broadcast a multisig transaction that we got back from counterpartyd (as a raw unsigned tx in hex)
-    //* verifySourceAddr and verifyDestAddr MUST be specified to verify that the txn hash we get back from the server is what we expected. 
+    //* verifySourceAddr and verifyDestAddr MUST be specified to verify that the txn hash we get back from the server is what we expected.
 
     $.jqlog.debug("RAW UNSIGNED HEX: " + unsignedTxHex);
 
@@ -496,7 +496,7 @@ function WalletViewModel() {
     key.checkAndSignRawTransaction(unsignedTxHex, verifyDestAddr, function(err, signedHex) {
       if (err) {
         bootbox.alert("Failed to sign transaction: " + err);
-        return 
+        return
       }
 
       self.broadcastSignedTx(signedHex, onSuccess, onError);

@@ -19,7 +19,7 @@ var VIEW_PRICES_ASSET_PAIRS_REFRESH_EVERY = 5 * 60 * 1000; //refresh asset pair 
 var VIEW_PRICES_NUM_LATEST_TRADES = 50; //show this many latest trades on the view prices page
 var VIEW_PRICES_LATEST_TRADES_REFRESH_EVERY = 5 * 60 * 1000; //refresh latest trades every 5 minutes
 
-var MARKET_INFO_REFRESH_EVERY = 5 * 60 * 1000; //refresh market info every 5 minutes while enabled (on buy/sell page, and view prices page) 
+var MARKET_INFO_REFRESH_EVERY = 5 * 60 * 1000; //refresh market info every 5 minutes while enabled (on buy/sell page, and view prices page)
 
 var CHAT_NUM_USERS_ONLINE_REFRESH_EVERY = 5 * 60 * 1000; //refresh online user count every 5 minutes while enabled
 
@@ -183,8 +183,11 @@ var LEVERAGE_UNIT = 5040;
 
 var MAINNET_UNSPENDABLE = '1CounterpartyXXXXXXXXXXXXXXXUWLpVr';
 var TESTNET_UNSPENDABLE = 'mvCounterpartyXXXXXXXXXXXXXXW24Hef';
+var REGTEST_UNSPENDABLE = 'mvCounterpartyXXXXXXXXXXXXXXW24Hef';
 var TESTNET_BURN_START = 154908;
 var TESTNET_BURN_END = 4017708;
+var REGTEST_BURN_START = 101;
+var REGTEST_BURN_END = 150000000;
 
 /***********
  * DYNAMICALLY SET
@@ -231,6 +234,7 @@ function qs(key) {
 // IS_DEV is enabled if the initial (root) URL access has ?dev=1
 // USE_TESTNET is enabled if the initial (root) URL access has ?testnet=1, OR the hostname visited starts with 'testnet' (e.g. testnet.myhost.com)
 var IS_DEV = (location.pathname == "/" && qs("dev") && qs("dev") != '0' ? true : false);
+var USE_REGTEST = (location.pathname == "/" && qs("regtest") && qs("regtest") != '0' ? true : false);
 var USE_TESTNET = (   (((location.pathname == "/" || location.pathname == "/src/" || location.pathname == "/build/") && qs("testnet") && qs("testnet") != '0')
   || location.hostname.indexOf('testnet') != -1) ? true : false
 );
@@ -258,4 +262,3 @@ var KEY_ASSET_WEBSITE = {
   'BTC': 'https://bitcoin.org/',
   'XCP': 'https://counterparty.io/'
 };
-
