@@ -224,7 +224,14 @@ CWBitcore.isOutScript = function(script) {
 
 CWBitcore.isValidAddress = function(val) {
   try {
-    return bitcore.Address.isValid(val, NETWORK, bitcore.Address.Pay2PubKeyHash);
+    var p2pkh = bitcore.Address.isValid(val, NETWORK, bitcore.Address.Pay2PubKeyHash);
+    if (!p2pkh) {
+      var bech32 = bitcoinjs.address.fromBech32(val);
+
+      return typeof(bech32) !== 'undefined';
+    }
+
+    return p2pkh;
   } catch (err) {
     return false;
   }

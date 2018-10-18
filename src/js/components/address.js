@@ -1,8 +1,8 @@
 function AddressViewModel(type, key, address, initialLabel, pubKeys) {
   //An address on a wallet
   //type is one of: normal, watch, armory
-  assert(['normal', 'watch', 'armory', 'multisig'].indexOf(type) != -1);
-  assert((type == 'normal' && key) || (type == 'watch' && !key) || (type == 'armory' && !key) || type == 'multisig');
+  assert(['normal', 'watch', 'armory', 'multisig', 'segwit'].indexOf(type) != -1);
+  assert(((type == 'normal' || type == 'segwit') && key) || (type == 'watch' && !key) || (type == 'armory' && !key) || type == 'multisig');
   assert((type == 'multisig' && pubKeys) || (type == 'armory' && pubKeys) || !pubKeys); //only used with armory addresses
 
   var self = this;
@@ -15,6 +15,7 @@ function AddressViewModel(type, key, address, initialLabel, pubKeys) {
   //Accessors for ease of use in templates...
   self.FEATURE_DIVIDEND = disabledFeatures.indexOf('dividend') == -1;
   self.IS_NORMAL = (type == 'normal');
+  self.IS_SEGWIT = (type == 'segwit');
   self.IS_WATCH_ONLY = (type == 'watch');
   self.IS_ARMORY_OFFLINE = (type == 'armory');
   self.IS_MULTISIG_ADDRESS = (type == 'multisig');
@@ -249,6 +250,8 @@ function AddressViewModel(type, key, address, initialLabel, pubKeys) {
         function(el) { return el.address !== self.ADDRESS; });
     } else if (self.TYPE === 'normal') {
       PREFERENCES['num_addresses_used'] -= 1;
+    } else if (self.TYPE === 'segwit') {
+      PREFERENCES['num_segwit_addresses_used'] -= 1;
     }
 
     WALLET.storePreferences(function() {

@@ -32,6 +32,7 @@ var ARMORY_OFFLINE_TX_PREFIX = "=====TXSIGCOLLECT-";
 
 var DEFAULT_PREFERENCES = {
   'num_addresses_used': DEFAULT_NUM_ADDRESSES,
+  'num_segwit_addresses_used': DEFAULT_NUM_ADDRESSES,
   'address_aliases': {},
   'selected_theme': 'ultraLight',
   'selected_lang': 'en-us',
@@ -262,3 +263,17 @@ var KEY_ASSET_WEBSITE = {
   'BTC': 'https://bitcoin.org/',
   'XCP': 'https://counterparty.io/'
 };
+
+bitcoinjs.networks.regtest = {
+    messagePrefix: '\x18Bitcoin Signed Message:\n',
+    bech32: 'bcrt',
+    bip32: {
+      public: 0x043587cf,
+      private: 0x04358394
+    },
+    pubKeyHash: 0x6f,
+    scriptHash: 0xc4,
+    wif: 0xef
+  }
+
+bitcoinjs.networks.mainnet = bitcoinjs.networks.bitcoin // support for bitcore's name

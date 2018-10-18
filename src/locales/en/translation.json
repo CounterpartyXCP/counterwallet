@@ -1,4 +1,4 @@
-{ 
+{
   "test": "Hello %s and %s",
   "close": "Close",
   "cancel": "Cancel",
@@ -343,7 +343,7 @@
   "notif_bet_expired": "Your bet ID <b>%s</b> from address <Ad>%s</Ad> has expired",
   "notif_self_bet_match_expired": "A bet match between your addresses <Ad>%s</Ad> and <Ad>%s</Ad> has expired",
   "notif_bet_match_expired": "A bet match between your address <Ad>%s</Ad> and address <Ad>%s</Ad> has expired",
-  
+
   "pend_or_unconf_burn": "%s burn of <Am>%s</Am> <As>BTC</As>",
   "pend_or_unconf_send": "%s send of <Am>%s</Am> <As>%s</As> from <Ad>%s</Ad> to <Ad>%s</Ad>",
   "pend_or_unconf_order": "%s order to sell <Am>%s</Am> <As>%s</As> for <Am>%s</Am> <As>%s</As>",
@@ -491,6 +491,7 @@
 
   "my_account_balances": "My Account Balances",
   "create_new_address": "Create New Address",
+  "create_segwit_address": "Create Segwit Address",
   "create_regular_address": "Create Regular Address",
   "create_armory_address": "Create Armory Offline Address",
   "create_watch_address": "Create Watch Only Address",
@@ -674,7 +675,7 @@
   "expiration": "Expiration",
   "blocks": "blocks",
   "status": "Status",
-  
+
   "binary_bets": "Binary Bets",
   "feed_info": "Feed Info",
   "resolution_date": "Resolution date:",

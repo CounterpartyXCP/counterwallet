@@ -11,6 +11,9 @@
         </button>
         <ul class="dropdown-menu">
             <li>
+                <a id="createSegwitAddress" href="#" data-type="segwit" data-bind="locale: 'create_segwit_address'"></a>
+            </li>
+            <li>
                 <a id="createAddress" href="#" data-type="normal" data-bind="locale: 'create_regular_address'"></a>
             </li>
             <li>
@@ -332,7 +335,7 @@
                 <span class="invalid" data-bind="validationMessage: destAddress"></span>
             </div>
           </div></section>
-          
+
 
           <section><div class="row" data-bind="visible: missingPubkey1()">
             <label class="control-label col col-sm-3" data-bind="locale: 'pubkey'"></label>
@@ -428,7 +431,7 @@
               </div>
             </div>
           </section>
-          
+
         </fieldset></form>
         <p class="formPaddedBot" data-bind="fadeVisibleInOnly: normalizedBalRemainingIsSet, locale: 'after_sending', localeArgs: {0: dispNormalizedBalRemaining, 1: assetDisp}"></p>
       </div>

@@ -59,7 +59,12 @@ sudo npm install -g grunt-cli bower
 
 ### To build:
 ```
-cd src; bower install; cd ..
+cd src
+bower install
+cd vendors/bitcoinjs-lib
+npm install
+browserify --standalone bitcoinjs src/index.js | uglifyjs -c --mangle reserved=['BigInteger','ECPair','Point'] -o bitcoinjs.min.js
+cd ../../../
 npm install
 ```
 
@@ -134,4 +139,3 @@ License
 -------------------
 
 http://opensource.org/licenses/CDDL-1.0
-

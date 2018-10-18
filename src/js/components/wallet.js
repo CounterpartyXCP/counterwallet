@@ -28,8 +28,8 @@ function WalletViewModel() {
   });
 
   self.addAddress = function(type, address, pubKeys) {
-    assert(['normal', 'watch', 'armory', 'multisig'].indexOf(type) != -1);
-    assert((type == 'normal' && !address) || (address));
+    assert(['normal', 'watch', 'armory', 'multisig', 'segwit'].indexOf(type) != -1);
+    assert(((type == 'normal' || type == 'segwit') && !address) || (address));
     assert((type == 'multisig' && pubKeys) || (type == 'armory' && pubKeys) || !pubKeys); //only used with armory addresses
 
     if (type == 'normal') {
@@ -43,6 +43,29 @@ function WalletViewModel() {
       // m : masterkery / 0' : first private derivation / 0 : external account / i : index
       var key = self.BITCOIN_WALLET.getAddressKey(i);
       var address = key.getAddress();
+
+      //Make sure this address doesn't already exist in the wallet (sanity check)
+      assert(!self.getAddressObj(address), "Cannot addAddress: address already exists in wallet!");
+      //see if there's a label already for this address that's stored in PREFERENCES, and use that if so
+      var addressHash = hashToB64(address);
+      //^ we store in prefs by a hash of the address so that the server data (if compromised) cannot reveal address associations
+      var label = PREFERENCES.address_aliases[addressHash] || i18n.t("default_address_label", (i + 1));
+      //^ an alias is made when a watch address is made, so this should always be found
+
+      self.addresses.push(new AddressViewModel(type, key, address, label)); //add new
+      $.jqlog.debug("Wallet address added: " + address + " -- hash: "
+        + addressHash + " -- label: " + label + " -- index: " + i);
+    } else if (type == 'segwit') {
+      //adds a key to the wallet, making a new address object on the wallet in the process
+      //(assets must still be attached to this address, with updateBalances() or other means...)
+      //also, a label should already exist for the address in PREFERENCES.address_aliases by the time this is called
+
+      //derive an address from the key (for the appropriate network)
+      var i = self.addresses().length;
+
+      // m : masterkery / 0' : first private derivation / 0 : external account / i : index
+      var key = self.BITCOIN_WALLET.getAddressKey(i);
+      var address = bitcoinjs.payments.p2wpkh({ pubkey: key.priv.publicKey.toBuffer(), network: bitcoinjs.networks[key.priv.network.alias] }).address;
 
       //Make sure this address doesn't already exist in the wallet (sanity check)
       assert(!self.getAddressObj(address), "Cannot addAddress: address already exists in wallet!");

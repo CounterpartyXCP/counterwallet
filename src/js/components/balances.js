@@ -50,7 +50,7 @@ function ChangeAddressLabelModalViewModel() {
     var label = _.stripTags($("<div/>").html(self.newLabel()).text());
     //^ remove any HTML tags from the text
     PREFERENCES.address_aliases[addressHash] = label;
-    //^ update the preferences on the server 
+    //^ update the preferences on the server
     WALLET.storePreferences(function(data, endpoint) {
       WALLET.getAddressObj(self.address()).label(label); //update was a success
       self.shown(false);
@@ -362,6 +362,9 @@ function CreateNewAddressModalViewModel() {
     var newAddressHash = hashToB64(newAddress);
     if (self.addressType() == 'normal') {
       PREFERENCES['num_addresses_used'] = parseInt(PREFERENCES['num_addresses_used']) + 1;
+    } else if (self.addressType() == 'segwit') {
+      if (!(PREFERENCES['num_segwit_addresses_used'] instanceof Array)) PREFERENCES['num_segwit_addresses_used'] = 0;
+      PREFERENCES['num_segwit_addresses_used'] = parseInt(PREFERENCES['num_segwit_addresses_used']) + 1
     } else if (self.addressType() == 'watch') {
       if (!(PREFERENCES['watch_only_addresses'] instanceof Array)) PREFERENCES['watch_only_addresses'] = [];
       PREFERENCES['watch_only_addresses'].push(newAddress); //can't use the hash here, unfortunately
@@ -570,7 +573,7 @@ function SendModalViewModel() {
     var curBalance = normalizeQuantity(self.rawBalance(), self.divisible());
     var balRemaining = Decimal.round(new Decimal(curBalance).sub(parseFloat(self.quantity())), 8, Decimal.MidpointRounding.ToEven).toFloat();
     if (self.asset() === KEY_ASSET.BTC)
-      balRemaining = subFloat(balRemaining, normalizeQuantity(MIN_FEE))  // include the fee 
+      balRemaining = subFloat(balRemaining, normalizeQuantity(MIN_FEE))  // include the fee
     if (balRemaining < 0) return null;
     return balRemaining;
   }, self);
@@ -923,7 +926,7 @@ function SweepModalViewModel() {
         }
 
         //Also get the BTC balance at this address and put at head of the list
-        //We just check if unconfirmed balance > 0.      
+        //We just check if unconfirmed balance > 0.
         WALLET.retrieveBTCAddrsInfo([address], function(data) {
           self.btcBalanceForPrivateKey(0);
           self.txoutsCountForPrivateKey = 0;
