@@ -30,6 +30,7 @@
     "prepublish": "grunt",
     "serve": "serve -p 3000 ./build",
     "build": "grunt build --dontcheckdeps && cd ./src && bower --allow-root --config.interactive=false update",
+    "dev": "grunt build --dontcheckdeps --dontminify",
     "test": "./node_modules/mocha-phantomjs/bin/mocha-phantomjs test/test.html --ignore-ssl-errors=true --ignore-resource-errors --ssl-protocol=any # phantomjs has issues with counterwallet.io SSL cert"
   },
   "engine": "node >= 0.10"

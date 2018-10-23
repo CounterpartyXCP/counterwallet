@@ -286,6 +286,7 @@ function CreateNewAddressModalViewModel() {
 
   self.dispWindowTitle = ko.computed(function() {
     var title = {
+      'segwit': i18n.t('create_segwit_address'),
       'normal': i18n.t('create_new_address'),
       'watch': i18n.t('add_watch_address'),
       'armory': i18n.t('add_armory_adress'),
@@ -335,6 +336,7 @@ function CreateNewAddressModalViewModel() {
   }
 
   self.eventName = {
+    'segwit': 'CreateNewSegwitAddress',
     'normal': 'CreateNewAddress',
     'watch': 'CreateNewWatchAddress',
     'armory': 'CreateNewArmoryOfflineAddress',

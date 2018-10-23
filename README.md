@@ -54,7 +54,7 @@ Build Instructions
 
 ### Before running the build system:
 ```
-sudo npm install -g grunt-cli bower
+sudo npm install -g grunt-cli bower browserify
 ```
 
 ### To build:
@@ -98,7 +98,7 @@ The easiest way to develop locally is to install Federated Node in Docker enviro
 * Manually: example based on the Docker template for Counterwallet on Ubuntu 16.04 is provided below.
 
 ### Manual installation in local environment (Ubuntu 16.04):
-1. Clone repostiroty and `cd` into result folder
+1. Clone repository and `cd` into result folder
 2. NodeJS 9.x + NPM installation (if you don't have it):
 ```
 curl -sL https://deb.nodesource.com/setup_9.x | sudo -E bash -

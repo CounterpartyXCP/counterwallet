@@ -209,7 +209,7 @@
         <h4 class="modal-title" data-bind="text: dispWindowTitle"></h4>
       </div>
       <div class="modal-body no-padding">
-        <div data-bind="visible: addressType() == 'normal'">
+        <div data-bind="visible: addressType() == 'normal' || addressType() == 'segwit'">
             <p class="formPadded" data-bind="locale: 'enter_address_description'"></p>
         </div>
         <div data-bind="visible: addressType() == 'watch'">
@@ -287,7 +287,7 @@
             </div>
           </div></section>
 
-          <section data-bind="visible: addressType() != 'normal' && addressType() != 'multisig'"><div class="row">
+          <section data-bind="visible: (addressType() != 'normal') && (addressType() != 'segwit') && (addressType() != 'multisig')"><div class="row">
             <label class="control-label col col-sm-2" data-bind="locale: 'address'"></label>
             <div class="col col-sm-10">
                 <label class="input"><i class="icon-append fa fa-tag"></i>

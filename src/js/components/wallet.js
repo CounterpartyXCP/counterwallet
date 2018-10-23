@@ -516,6 +516,7 @@ function WalletViewModel() {
     $.jqlog.debug("RAW UNSIGNED HEX: " + unsignedTxHex);
 
     //Sign the input(s)
+    console.log(key)
     key.checkAndSignRawTransaction(unsignedTxHex, verifyDestAddr, function(err, signedHex) {
       if (err) {
         bootbox.alert("Failed to sign transaction: " + err);

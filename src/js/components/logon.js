@@ -313,7 +313,7 @@ function LogonViewModel() {
   self.genSegwitAddress = function(mustSavePreferencesToServer, addressCount) {
 
     var moreAddresses = [];
-    $.jqlog.info("Address discovery: Generating " + addressCount + "segwit addresses...");
+    $.jqlog.info("Address discovery: Generating " + addressCount + " segwit addresses...");
 
     for (var i = 0; i < addressCount; i++) {
 
@@ -327,8 +327,8 @@ function LogonViewModel() {
         PREFERENCES.address_aliases[addressHash] = i18n.t("default_address_label", len);
       }
 
-      $.jqlog.info("Address discovery: Generating segwit address " + len + " of " + PREFERENCES['num_segwit_addresses_used']
-        + " (num_addresses_used) (" + self.walletGenProgressVal() + "%) -- " + address);
+      $.jqlog.info("Address discovery: Generating segwit address " + (len - PREFERENCES['num_addresses_used']) + " of " + PREFERENCES['num_segwit_addresses_used']
+        + " (num_segwit_addresses_used) (" + self.walletGenProgressVal() + "%) -- " + address);
 
       if (len <= PREFERENCES['num_segwit_addresses_used']) { //for visual effect
         var progress = len * (100 / PREFERENCES['num_segwit_addresses_used']);
@@ -345,7 +345,7 @@ function LogonViewModel() {
 
       if (lastAddressWithMovement) {
         generateAnotherAddress = true;
-      } else if (totalAddresses > PREFERENCES['num_segwit_addresses_used'] && !lastAddressWithMovement) {
+      } else if ((totalAddresses - PREFERENCES['num_addresses_used']) > PREFERENCES['num_segwit_addresses_used'] && !lastAddressWithMovement) {
         WALLET.addresses.pop();
       }
 
