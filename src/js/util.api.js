@@ -411,6 +411,58 @@ function multiAPIConsensus(method, params, onSuccess, onConsensusError, onSysErr
     };
   }
 
+  function isBech32(addr) {
+    try {
+      bitcoinjs.address.fromBech32(addr)
+
+      return true
+    } catch (e) {
+      return false
+    }
+  }
+
+  /*function sw_compareOutputs(source, apiResponses) {
+  // TODO: This should be enabled when we get support for segwit multisig and P2WSH
+    var t;
+
+    // apiResponse might be a plain transaction hex
+    //   or it might be a container with transaction info
+    var responseIsTxInfo = (typeof apiResponses[0] == 'object')
+    var resolveTxHex = function(apiResponse) {
+      return (responseIsTxInfo ? apiResponse.tx_hex : apiResponse);
+    }
+
+    var tx0 = bitcoinjs.Transaction.fromHex(resolveTxHex(apiResponses[0]));
+
+    var txHexesValid = apiResponses.map(function(apiResponse, idx) {
+      if (idx === 0) {
+        return true;
+      }
+
+      var txHex = resolveTxHex(apiResponse);
+      var tx1 = bitcore.Transaction(txHex);
+
+      if (tx0.outputs.length != tx1.outputs.length) {
+        return false;
+      }
+
+      var outputsValid = tx0.outs.map(function(output, idx) {
+        var addresses0 = CWBitcore.extractAddressFromTxOut(output).split(',').sort().join(',');
+        var addresses1 = CWBitcore.extractAddressFromTxOut(tx1.outputs[idx]).split(',').sort().join(',');
+        var amount0 = output.satoshis;
+        var amount1 = tx1.outputs[idx].satoshis;
+
+        // addresses need to be the same and values need to be the same
+        //  except for the change output
+        return addresses0 == addresses1 && (amount0 == amount1 || addresses0.indexOf(source) != -1);
+      });
+
+      return outputsValid.filter(function(v) { return !v; }).length === 0;
+    })
+
+    return txHexesValid.filter(function(v) { return !v; }).length === 0;
+  }*/
+
   _multiAPIPrimative(method, params, function(results) {
     var successResults = [];
     var i = 0;
@@ -424,8 +476,16 @@ function multiAPIConsensus(method, params, onSuccess, onConsensusError, onSysErr
       return onSysError(results[i - 1]['jqXHR'], results[i - 1]['textStatus'], results[i - 1]['errorThrown'], results[i - 1]['endpoint']);
     }
 
-    if (!CWBitcore.compareOutputs(params['source'], successResults)) {
-      return onConsensusError(successResults); //not all consensus data matches
+    if (isBech32(params['source'])) {
+      /*// TODO: This should be enabled when we get support for segwit multisig and P2WSH
+      if (!sw_compareOutputs(params['source'], successResults)) {
+        return onConsensusError(successResults); //not all consensus data matches
+      }*/
+
+    } else {
+      if (!CWBitcore.compareOutputs(params['source'], successResults)) {
+        return onConsensusError(successResults); //not all consensus data matches
+      }
     }
 
     //if here, all is well

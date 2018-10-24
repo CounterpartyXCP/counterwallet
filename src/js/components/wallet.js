@@ -507,6 +507,16 @@ function WalletViewModel() {
     );
   }
 
+  function isBech32(addr) {
+    try {
+      bitcoinjs.address.fromBech32(addr)
+
+      return true
+    } catch (e) {
+      return false
+    }
+  }
+
   self.signAndBroadcastTxRaw = function(key, unsignedTxHex, onSuccess, onError, verifySourceAddr, verifyDestAddr) {
     assert(verifySourceAddr, "Source address must be specified");
     assert(verifyDestAddr, "Destination address must be specified");
@@ -515,16 +525,75 @@ function WalletViewModel() {
 
     $.jqlog.debug("RAW UNSIGNED HEX: " + unsignedTxHex);
 
-    //Sign the input(s)
-    console.log(key)
-    key.checkAndSignRawTransaction(unsignedTxHex, verifyDestAddr, function(err, signedHex) {
-      if (err) {
-        bootbox.alert("Failed to sign transaction: " + err);
-        return
-      }
+    var sourceIsBech32 = isBech32(verifySourceAddr);
+    var hasAnyBech32 = verifyDestAddr.reduce((p, x) => p || isBech32(x), sourceIsBech32);
 
-      self.broadcastSignedTx(signedHex, onSuccess, onError);
-    });
+    if (hasAnyBech32) {
+      // Use bitcoinjs implementation
+      var tx = bitcoinjs.Transaction.fromHex(unsignedTxHex);
+      var network = bitcoinjs.networks[self.BITCOIN_WALLET.HierarchicalKey.network.alias];
+
+      var txb = new bitcoinjs.TransactionBuilder(network);
+      var keypair = bitcoinjs.ECPair.fromWIF(key.priv.toWIF(), network); // Way easier to convert to WIF and then back to ECPair
+
+      self.retrieveBTCAddrsInfo([verifySourceAddr], function(data) {
+        var utxoMap = {}
+        data[0].rawUtxoData.forEach(utxo => {
+          utxoMap[utxo.txid] = utxo
+        })
+
+        var p2wpkh = bitcoinjs.payments.p2wpkh({ pubkey: keypair.publicKey, network: network })
+
+        for (var i=0; i < tx.ins.length; i++) {
+           // We get reversed tx hashes somehow after parsing
+          var txhash = tx.ins[i].hash.reverse().toString('hex')
+          var prev = utxoMap[txhash]
+
+          txb.addInput(tx.ins[i].hash.toString('hex'), prev.vout, null, p2wpkh.output)
+        }
+
+        for (var i=0; i < tx.outs.length; i++) {
+          var txout = tx.outs[i]
+
+          txb.addOutput(txout.script, txout.value)
+        }
+
+        for (var i=0; i < tx.ins.length; i++) {
+          var txhash = tx.ins[i].hash.toString('hex')
+          if (txhash in utxoMap) {
+            var prev = utxoMap[txhash]
+            txb.sign(i, keypair, null, null, parseFloat(prev.amount) * 100000000);
+          } else {
+            // This should throw an error?
+            bootbox.alert("Failed to sign transaction: " + "Incomplete SegWit inputs");
+            return
+          }
+        }
+
+        var signedHex = txb.build().toHex();
+
+        $.jqlog.debug("RAW SIGNED HEX: " + signedHex);
+
+        self.broadcastSignedTx(signedHex, onSuccess, onError);
+      }, function(jqXHR, textStatus, errorThrown) {
+        if (err) {
+          bootbox.alert("Failed to sign transaction: " + textStatus);
+          return
+        }
+      });
+
+    } else {
+      // Use legacy bitcore implementation
+      //Sign the input(s)
+      key.checkAndSignRawTransaction(unsignedTxHex, verifyDestAddr, function(err, signedHex) {
+        if (err) {
+          bootbox.alert("Failed to sign transaction: " + err);
+          return
+        }
+
+        self.broadcastSignedTx(signedHex, onSuccess, onError);
+      });
+    }
   }
 
   self.signAndBroadcastTx = function(address, unsignedTxHex, onSuccess, onError, verifyDestAddr) {
