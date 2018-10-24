@@ -80,8 +80,9 @@ RUN git rev-parse HEAD
 RUN npm -g install npm@4.6.1
 RUN npm config set strict-ssl false
 ENV PHANTOMJS_CDNURL="http://cnpmjs.org/downloads"
-RUN npm install -g bower grunt mocha-phantomjs
+RUN npm install -g bower grunt mocha-phantomjs browserify
 RUN cd src; bower --allow-root --config.interactive=false update; cd ..
+RUN cd src/vendors/bitcoinjs-lib; browserify --standalone bitcoinjs src/index.js | uglifyjs -c --mangle reserved=['BigInteger','ECPair','Point'] -o bitcoinjs.min.js; cd ../../../
 RUN npm update
 RUN grunt build
 RUN cp -a /counterwallet/counterwallet.conf.json.example /counterwallet/counterwallet.conf.json
@@ -92,7 +93,7 @@ EXPOSE 80 443
 # forward nginx request and error logs to docker log collector
 RUN ln -sf /dev/stdout /var/log/nginx/access.log \
 	&& ln -sf /dev/stderr /var/log/nginx/error.log
-    
+
 # REMOVE THIS LINE LATER
 RUN apt-get update && apt-get -y install gettext-base
 
