@@ -62,7 +62,7 @@ RUN mkdir -p /counterblock_data/asset_img /counterblock_data/asset_img.testnet
 # Install newest stable nodejs
 # (the `nodejs` package includes `npm`)
 RUN apt-get update && apt-get -y remove nodejs npm gyp
-RUN curl -sL https://deb.nodesource.com/setup_4.x | sudo -E bash -
+RUN curl -sL https://deb.nodesource.com/setup_8.x | sudo -E bash -
 RUN apt-get update && apt-get -y install nodejs
 
 # Add transifex auth data if available
@@ -77,13 +77,14 @@ COPY . /counterwallet
 RUN rm -rf /counterwallet/build
 WORKDIR /counterwallet
 RUN git rev-parse HEAD
-RUN npm -g install npm@4.6.1
 RUN npm config set strict-ssl false
 ENV PHANTOMJS_CDNURL="http://cnpmjs.org/downloads"
-RUN npm install -g bower grunt mocha-phantomjs browserify
+RUN npm install -g bower grunt mocha-phantomjs browserify uglify-es
 RUN cd src; bower --allow-root --config.interactive=false update; cd ..
-RUN cd src/vendors/bitcoinjs-lib; browserify --standalone bitcoinjs src/index.js | uglifyjs -c --mangle reserved=['BigInteger','ECPair','Point'] -o bitcoinjs.min.js; cd ../../../
+RUN cd src/vendors/bitcoinjs-lib; npm install; browserify --standalone bitcoinjs src/index.js | uglifyjs -c --mangle reserved=['BigInteger','ECPair','Point'] -o bitcoinjs.min.js; cd ../../../
+RUN npm install
 RUN npm update
+RUN grunt build --dontcheckdeps --dontminify
 RUN grunt build
 RUN cp -a /counterwallet/counterwallet.conf.json.example /counterwallet/counterwallet.conf.json
 RUN rm -f /root/.transifex
