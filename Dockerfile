@@ -3,7 +3,8 @@ FROM counterparty/base
 MAINTAINER Counterparty Developers <dev@counterparty.io>
 
 # install additional deps
-RUN apt-get update && apt-get -y install ssl-cert make libpcre3-dev libxslt1-dev libgd2-xpm-dev libgeoip-dev unzip zip build-essential libssl-dev libxslt1.1 libgeoip1 geoip-database libpcre3
+RUN apt-get update && apt-get upgrade -y && apt-get update
+RUN apt-get -y install ssl-cert make libpcre3-dev libxslt1-dev libgeoip-dev unzip zip build-essential libssl-dev libxslt1.1 libgeoip1 geoip-database libpcre3 libgd2-xpm-dev
 
 # install nginx
 ENV OPENRESTY_VER="1.9.7.4"
@@ -80,6 +81,7 @@ RUN git rev-parse HEAD
 RUN npm config set strict-ssl false
 ENV PHANTOMJS_CDNURL="http://cnpmjs.org/downloads"
 RUN npm install -g bower grunt mocha-phantomjs browserify uglify-es
+RUN npm install --unsafe-perms -g mocha-phantomjs
 RUN cd src; bower --allow-root --config.interactive=false update; cd ..
 RUN cd src/vendors/bitcoinjs-lib; npm install; browserify --standalone bitcoinjs src/index.js | uglifyjs -c --mangle reserved=['BigInteger','ECPair','Point'] -o bitcoinjs.min.js; cd ../../../
 RUN npm install
