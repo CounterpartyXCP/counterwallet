@@ -80,7 +80,7 @@ WORKDIR /counterwallet
 RUN git rev-parse HEAD
 RUN npm config set strict-ssl false
 ENV PHANTOMJS_CDNURL="http://cnpmjs.org/downloads"
-RUN npm install -g bower grunt mocha-phantomjs browserify uglify-es
+RUN npm install -g bower grunt browserify uglify-es
 RUN npm install --unsafe-perm -g mocha-phantomjs
 RUN cd src; bower --allow-root --config.interactive=false update; cd ..
 RUN cd src/vendors/bitcoinjs-lib; npm install; browserify --standalone bitcoinjs src/index.js | uglifyjs -c --mangle reserved=['BigInteger','ECPair','Point'] -o bitcoinjs.min.js; cd ../../../
