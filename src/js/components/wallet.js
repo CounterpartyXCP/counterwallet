@@ -65,7 +65,11 @@ function WalletViewModel() {
 
       // m : masterkery / 0' : first private derivation / 0 : external account / i : index
       var key = self.BITCOIN_WALLET.getAddressKey(i);
-      var address = bitcoinjs.payments.p2wpkh({ pubkey: key.priv.publicKey.toBuffer(), network: bitcoinjs.networks[key.priv.network.alias] }).address;
+      var networkName = key.priv.network.alias
+      if (USE_TESTNET && ! USE_REGTEST) {
+        networkName = key.priv.network.name
+      }
+      var address = bitcoinjs.payments.p2wpkh({ pubkey: key.priv.publicKey.toBuffer(), network: bitcoinjs.networks[networkName] }).address;
 
       //Make sure this address doesn't already exist in the wallet (sanity check)
       assert(!self.getAddressObj(address), "Cannot addAddress: address already exists in wallet!");
