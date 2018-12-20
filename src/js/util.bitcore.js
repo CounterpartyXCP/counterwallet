@@ -6,6 +6,10 @@ var bitcoreMessage = require('bitcore-message'); // this also binds itself to bi
 // this 'global' is overwritten by tests!
 var NETWORK = (USE_TESTNET || USE_REGTEST) ? bitcore.Networks.testnet : bitcore.Networks.livenet;
 
+if (USE_TESTNET && ! USE_REGTEST) {
+  NETWORK.alias = NETWORK.name;
+}
+
 var CWHierarchicalKey = function(passphrase, password) {
   checkArgType(passphrase, "string");
   if (password) {
