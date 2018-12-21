@@ -55,7 +55,7 @@ function WalletViewModel() {
       self.addresses.push(new AddressViewModel(type, key, address, label)); //add new
       $.jqlog.debug("Wallet address added: " + address + " -- hash: "
         + addressHash + " -- label: " + label + " -- index: " + i);
-    } else if (type == 'segwit') {
+    } else if (type == 'segwit' && (USE_TESTNET || USE_REGTEST)) {
       //adds a key to the wallet, making a new address object on the wallet in the process
       //(assets must still be attached to this address, with updateBalances() or other means...)
       //also, a label should already exist for the address in PREFERENCES.address_aliases by the time this is called
