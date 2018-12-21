@@ -311,6 +311,9 @@ function LogonViewModel() {
   }
 
   self.genSegwitAddress = function(mustSavePreferencesToServer, addressCount) {
+    if (!(USE_TESTNET || USE_REGTEST)) {
+      return self.openWalletPt3(mustSavePreferencesToServer);
+    }
 
     var moreAddresses = [];
     $.jqlog.info("Address discovery: Generating " + addressCount + " segwit addresses...");
