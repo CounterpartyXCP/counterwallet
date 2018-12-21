@@ -10,5 +10,6 @@ CWPrivateKey.prototype.checkTransactionDest2 = function(txHex, dest) {
 
   console.log('DECOMP', decomp)
 
+ // Unreachable code for now
   throw new Error('Bitcore sucks')
 }

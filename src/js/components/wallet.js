@@ -525,12 +525,13 @@ function WalletViewModel() {
     assert(verifySourceAddr, "Source address must be specified");
     assert(verifyDestAddr, "Destination address must be specified");
     //Sign and broadcast a multisig transaction that we got back from counterpartyd (as a raw unsigned tx in hex)
-    //* verifySourceAddr and verifyDestAddr MUST be specified to verify that the txn hash we get back from the server is what we expected.
+    // verifySourceAddr and verifyDestAddr MUST be specified to verify that the txn hash we get back from the server is what we expected.
 
     $.jqlog.debug("RAW UNSIGNED HEX: " + unsignedTxHex);
 
     var sourceIsBech32 = isBech32(verifySourceAddr);
-    var hasAnyBech32 = verifyDestAddr.reduce((p, x) => p || isBech32(x), sourceIsBech32);
+    var hasDestBech32 = verifyDestAddr.reduce((p, x) => p || isBech32(x), false);
+    var hasAnyBech32 = hasDestBech32 || sourceIsBech32;
 
     if (hasAnyBech32) {
       // Use bitcoinjs implementation
@@ -546,14 +547,26 @@ function WalletViewModel() {
           utxoMap[utxo.txid] = utxo
         })
 
-        var p2wpkh = bitcoinjs.payments.p2wpkh({ pubkey: keypair.publicKey, network: network })
+        if (sourceIsBech32) {
+          var p2wpkh = bitcoinjs.payments.p2wpkh({ pubkey: keypair.publicKey, network: network })
 
-        for (var i=0; i < tx.ins.length; i++) {
-           // We get reversed tx hashes somehow after parsing
-          var txhash = tx.ins[i].hash.reverse().toString('hex')
-          var prev = utxoMap[txhash]
+          for (var i=0; i < tx.ins.length; i++) {
+             // We get reversed tx hashes somehow after parsing
+            var txhash = tx.ins[i].hash.reverse().toString('hex')
+            var prev = utxoMap[txhash]
 
-          txb.addInput(tx.ins[i].hash.toString('hex'), prev.vout, null, p2wpkh.output)
+            txb.addInput(tx.ins[i].hash.toString('hex'), prev.vout, null, p2wpkh.output)
+          }
+        } else {
+          var p2pk = bitcoinjs.payments.p2pkh({ pubkey: keypair.publicKey, network: network })
+
+          for (var i=0; i < tx.ins.length; i++) {
+             // We get reversed tx hashes somehow after parsing
+            var txhash = tx.ins[i].hash.reverse().toString('hex')
+            var prev = utxoMap[txhash]
+
+            txb.addInput(tx.ins[i].hash.toString('hex'), prev.vout, null, p2pk.output)
+          }
         }
 
         for (var i=0; i < tx.outs.length; i++) {
@@ -566,7 +579,11 @@ function WalletViewModel() {
           var txhash = tx.ins[i].hash.toString('hex')
           if (txhash in utxoMap) {
             var prev = utxoMap[txhash]
-            txb.sign(i, keypair, null, null, parseFloat(prev.amount) * 100000000);
+            var redeemScript = undefined
+            /*if (hasDestBech32) {
+              redeemScript =  // Future support for P2WSH
+            }*/
+            txb.sign(i, keypair, null, null, parseFloat(prev.amount) * 100000000, redeemScript);
           } else {
             // This should throw an error?
             bootbox.alert("Failed to sign transaction: " + "Incomplete SegWit inputs");
