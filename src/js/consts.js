@@ -1,7 +1,7 @@
 /***********
  * GLOBAL CONSTANTS
  ***********/
-var VERSION = "1.8.0";
+var VERSION = "1.9.0";
 var PREFERENCES = {}; //set when logging in
 
 //Addresses
