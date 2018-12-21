@@ -348,8 +348,9 @@ function LogonViewModel() {
 
       if (lastAddressWithMovement) {
         generateAnotherAddress = true;
-      } else if ((totalAddresses - PREFERENCES['num_addresses_used']) > PREFERENCES['num_segwit_addresses_used'] && !lastAddressWithMovement) {
+      } else if ((totalAddresses - PREFERENCES['num_addresses_used']) >= PREFERENCES['num_segwit_addresses_used'] && !lastAddressWithMovement) {
         WALLET.addresses.pop();
+        generateAnotherAddress = false;
       }
 
       if (generateAnotherAddress) {
