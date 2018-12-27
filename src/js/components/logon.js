@@ -311,7 +311,7 @@ function LogonViewModel() {
   }
 
   self.genSegwitAddress = function(mustSavePreferencesToServer, addressCount) {
-    if (!(USE_TESTNET || USE_REGTEST)) {
+    if (!WALLET.isSegwitEnabled) {
       return self.openWalletPt3(mustSavePreferencesToServer);
     }
 
@@ -361,8 +361,8 @@ function LogonViewModel() {
       } else {
         $.jqlog.info("Address discovery: Done with segwit addresses...");
 
-        if (PREFERENCES['num_segwit_addresses_used'] != WALLET.addresses().length) {
-          PREFERENCES['num_segwit_addresses_used'] = WALLET.addresses().length;
+        if (PREFERENCES['num_segwit_addresses_used'] != (WALLET.addresses().length - PREFERENCES['num_addresses_used'])) {
+          PREFERENCES['num_segwit_addresses_used'] = (WALLET.addresses().length - PREFERENCES['num_addresses_used']);
           mustSavePreferencesToServer = true;
         }
         return self.openWalletPt3(mustSavePreferencesToServer);
