@@ -12,6 +12,7 @@ function WalletViewModel() {
   self.isExplicitlyNew = ko.observable(false); //set to true if the user explicitly clicks on Create New Wallet and makes it (e.g. this may be false and isNew true if the user typed in the wrong passphrase, or manually put the words together)
   self.isSellingBTC = ko.observable(false); //updated by the btcpay feed
   self.isOldWallet = ko.observable(false);
+  self.isSegwitEnabled = USE_TESTNET || USE_REGTEST;
 
   self.cancelOrders = [];
   var storedCancelOrders = localStorage.getObject("cancelOrders")
@@ -19,7 +20,19 @@ function WalletViewModel() {
     self.cancelOrders = storedCancelOrders;
   }
 
+  function updateSegwitGenerationVisibility() {
+    if (self.isSegwitEnabled) {
+      $("#createSegwitAddress").show()
+    } else {
+      $("#createSegwitAddress").hide()
+    }
+  }
+
   self.networkBlockHeight.subscribe(function(newBlockIndex) {
+    self.isSegwitEnabled = newBlockIndex >= 557236 // should be synced up to "segwit_support" entry from counterparty-lib/counterpartylib/protocol_changes.json
+
+    updateSegwitGenerationVisibility()
+
     try {
       if (CURRENT_PAGE_URL == 'pages/exchange.html') {
         EXCHANGE.refresh();
@@ -61,7 +74,7 @@ function WalletViewModel() {
       //also, a label should already exist for the address in PREFERENCES.address_aliases by the time this is called
 
       //derive an address from the key (for the appropriate network)
-      if (USE_TESTNET || USE_REGTEST) {
+      if (self.isSegwitEnabled) {
         var i = self.addresses().length;
 
         // m : masterkery / 0' : first private derivation / 0 : external account / i : index

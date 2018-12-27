@@ -225,6 +225,12 @@ function initBalances() {
       WALLET.refreshBTCBalances(false);
     }
 
+    if (WALLET.isSegwitEnabled) {
+      $("#createSegwitAddress").show();
+    } else {
+      $("#createSegwitAddress").hide();
+    }
+
     // FIX: replace buggy smartadmin dropdown menu for assets menu
     $('.assetBtn').click(function(event) {
       var menu = $(this).parent().find('ul');
