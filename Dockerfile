@@ -3,7 +3,8 @@ FROM counterparty/base
 MAINTAINER Counterparty Developers <dev@counterparty.io>
 
 # install additional deps
-RUN apt-get update && apt-get -y install ssl-cert make libpcre3-dev libxslt1-dev libgd2-xpm-dev libgeoip-dev unzip zip build-essential libssl-dev libxslt1.1 libgeoip1 geoip-database libpcre3
+RUN apt-get update && apt-get upgrade -y && apt-get update
+RUN apt-get -y install ssl-cert make libpcre3-dev libxslt1-dev libgeoip-dev unzip zip build-essential libssl-dev libxslt1.1 libgeoip1 geoip-database libpcre3 libgd2-xpm-dev
 
 # install nginx
 ENV OPENRESTY_VER="1.9.7.4"
@@ -62,7 +63,7 @@ RUN mkdir -p /counterblock_data/asset_img /counterblock_data/asset_img.testnet
 # Install newest stable nodejs
 # (the `nodejs` package includes `npm`)
 RUN apt-get update && apt-get -y remove nodejs npm gyp
-RUN curl -sL https://deb.nodesource.com/setup_4.x | sudo -E bash -
+RUN curl -sL https://deb.nodesource.com/setup_8.x | sudo -E bash -
 RUN apt-get update && apt-get -y install nodejs
 
 # Add transifex auth data if available
@@ -72,19 +73,25 @@ ARG TRANSIFEX_PASSWORD=""
 ENV TRANSIFEX_PASSWORD ${TRANSIFEX_PASSWORD}
 RUN if [ -n "$TRANSIFEX_USER" ] && [ -n "$TRANSIFEX_PASSWORD" ]; then echo "$TRANSIFEX_USER:$TRANSIFEX_PASSWORD" > /root/.transifex; fi
 
+# Global stuff moved here to speed up build times just for code changes
+RUN npm config set strict-ssl false
+ENV PHANTOMJS_CDNURL="http://cnpmjs.org/downloads"
+RUN npm install -g bower grunt browserify uglify-es
+RUN npm install --unsafe-perm -g mocha-phantomjs
+
 # Install project
 COPY . /counterwallet
 RUN rm -rf /counterwallet/build
 WORKDIR /counterwallet
 RUN git rev-parse HEAD
-RUN npm -g install npm@4.6.1
-RUN npm config set strict-ssl false
-ENV PHANTOMJS_CDNURL="http://cnpmjs.org/downloads"
-RUN npm install -g bower grunt mocha-phantomjs
+
 RUN cd src; bower --allow-root --config.interactive=false update; cd ..
+RUN cd src/vendors/bitcoinjs-lib; npm install; browserify --standalone bitcoinjs src/index.js | uglifyjs -c --mangle reserved=['BigInteger','ECPair','Point'] -o bitcoinjs.min.js; cd ../../../
+RUN npm install
 RUN npm update
+RUN grunt build --dontcheckdeps --dontminify
+# We gotta grunt build 2 times, bitcoinjs-lib gets mangled horribly if not --dontminify above
 RUN grunt build
-RUN cp -a /counterwallet/counterwallet.conf.json.example /counterwallet/counterwallet.conf.json
 RUN rm -f /root/.transifex
 
 EXPOSE 80 443
@@ -92,8 +99,11 @@ EXPOSE 80 443
 # forward nginx request and error logs to docker log collector
 RUN ln -sf /dev/stdout /var/log/nginx/access.log \
 	&& ln -sf /dev/stderr /var/log/nginx/error.log
-    
+
 # REMOVE THIS LINE LATER
-RUN apt-get update && apt-get -y install gettext-base
+#RUN apt-get update && apt-get -y install gettext-base
+
+# Copy configuration at last to speed up config changes
+RUN cp -a /counterwallet/counterwallet.conf.json.example /counterwallet/counterwallet.conf.json
 
 CMD ["start.sh"]

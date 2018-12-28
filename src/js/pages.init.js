@@ -163,7 +163,7 @@ function initBalances() {
 
   $(document).ready(function() {
     //Some misc jquery event handlers
-    $('#createAddress, #createWatchOnlyAddress, #createArmoryOfflineAddress, #createMultisigAddress').click(function(e) {
+    $('#createSegwitAddress, #createAddress, #createWatchOnlyAddress, #createArmoryOfflineAddress, #createMultisigAddress').click(function(e) {
       if (WALLET.addresses().length >= MAX_ADDRESSES) {
         bootbox.alert(i18n.t("max_number_addresses", MAX_ADDRESSES));
         return false;
@@ -223,6 +223,12 @@ function initBalances() {
 
     } else {
       WALLET.refreshBTCBalances(false);
+    }
+
+    if (WALLET.isSegwitEnabled) {
+      $("#createSegwitAddress").show();
+    } else {
+      $("#createSegwitAddress").hide();
     }
 
     // FIX: replace buggy smartadmin dropdown menu for assets menu

@@ -1,8 +1,8 @@
 function AddressViewModel(type, key, address, initialLabel, pubKeys) {
   //An address on a wallet
   //type is one of: normal, watch, armory
-  assert(['normal', 'watch', 'armory', 'multisig'].indexOf(type) != -1);
-  assert((type == 'normal' && key) || (type == 'watch' && !key) || (type == 'armory' && !key) || type == 'multisig');
+  assert(['normal', 'watch', 'armory', 'multisig', 'segwit'].indexOf(type) != -1);
+  assert(((type == 'normal' || type == 'segwit') && key) || (type == 'watch' && !key) || (type == 'armory' && !key) || type == 'multisig');
   assert((type == 'multisig' && pubKeys) || (type == 'armory' && pubKeys) || !pubKeys); //only used with armory addresses
 
   var self = this;
@@ -15,6 +15,7 @@ function AddressViewModel(type, key, address, initialLabel, pubKeys) {
   //Accessors for ease of use in templates...
   self.FEATURE_DIVIDEND = disabledFeatures.indexOf('dividend') == -1;
   self.IS_NORMAL = (type == 'normal');
+  self.IS_SEGWIT = (type == 'segwit');
   self.IS_WATCH_ONLY = (type == 'watch');
   self.IS_ARMORY_OFFLINE = (type == 'armory');
   self.IS_MULTISIG_ADDRESS = (type == 'multisig');
@@ -29,8 +30,8 @@ function AddressViewModel(type, key, address, initialLabel, pubKeys) {
   self.withMovement = ko.observable(false);
 
   self.assets = ko.observableArray([
-    new AssetViewModel({address: address, asset: "BTC"}), //will be updated with data loaded from insight
-    new AssetViewModel({address: address, asset: "XCP"})  //will be updated with data loaded from counterpartyd
+    new AssetViewModel({address: address, asset: KEY_ASSET.BTC}), //will be updated with data loaded from insight
+    new AssetViewModel({address: address, asset: KEY_ASSET.XCP})  //will be updated with data loaded from counterpartyd
   ]);
 
   self.assetFilter = ko.observable('');
@@ -39,7 +40,7 @@ function AddressViewModel(type, key, address, initialLabel, pubKeys) {
       return self.assets();
     } else if (self.assetFilter() == 'base') {
       return ko.utils.arrayFilter(self.assets(), function(asset) {
-        return asset.ASSET == 'BTC' || asset.ASSET == 'XCP';
+        return asset.ASSET === KEY_ASSET.BTC || asset.ASSET === KEY_ASSET.XCP;
       });
 
     } else if (self.assetFilter() == 'mine') {
@@ -142,7 +143,7 @@ function AddressViewModel(type, key, address, initialLabel, pubKeys) {
       return item.ASSET === asset;
     });
 
-    if (asset == 'BTC' || asset == 'XCP') { //special case update
+    if (asset === KEY_ASSET.BTC || asset === KEY_ASSET.XCP) { //special case update
       assert(match, 'was created when the address viewmodel was initialized...');
       match.rawBalance(initialRawBalance);
       match.escrowedBalance(escrowedBalance);
@@ -249,6 +250,8 @@ function AddressViewModel(type, key, address, initialLabel, pubKeys) {
         function(el) { return el.address !== self.ADDRESS; });
     } else if (self.TYPE === 'normal') {
       PREFERENCES['num_addresses_used'] -= 1;
+    } else if (self.TYPE === 'segwit') {
+      PREFERENCES['num_segwit_addresses_used'] -= 1;
     }
 
     WALLET.storePreferences(function() {
@@ -272,7 +275,7 @@ function AddressViewModel(type, key, address, initialLabel, pubKeys) {
   self.createAsset = function() {
     if (!WALLET.canDoTransaction(self.ADDRESS)) return false;
 
-    var xcpBalance = WALLET.getBalance(self.ADDRESS, 'XCP');
+    var xcpBalance = WALLET.getBalance(self.ADDRESS, KEY_ASSET.XCP);
     CREATE_ASSET_MODAL.show(self.ADDRESS, xcpBalance, true);
   }
 
@@ -344,7 +347,7 @@ function AddressViewModel(type, key, address, initialLabel, pubKeys) {
 
   self.getXCPBalance = function() {
     var xcpAsset = $.grep(self.assets(), function(value) {
-      return value.ASSET == 'XCP';
+      return value.ASSET === KEY_ASSET.XCP;
     });
     return xcpAsset[0].normalizedBalance();
   }

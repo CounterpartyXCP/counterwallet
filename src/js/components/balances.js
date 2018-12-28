@@ -50,7 +50,7 @@ function ChangeAddressLabelModalViewModel() {
     var label = _.stripTags($("<div/>").html(self.newLabel()).text());
     //^ remove any HTML tags from the text
     PREFERENCES.address_aliases[addressHash] = label;
-    //^ update the preferences on the server 
+    //^ update the preferences on the server
     WALLET.storePreferences(function(data, endpoint) {
       WALLET.getAddressObj(self.address()).label(label); //update was a success
       self.shown(false);
@@ -286,6 +286,7 @@ function CreateNewAddressModalViewModel() {
 
   self.dispWindowTitle = ko.computed(function() {
     var title = {
+      'segwit': i18n.t('create_segwit_address'),
       'normal': i18n.t('create_new_address'),
       'watch': i18n.t('add_watch_address'),
       'armory': i18n.t('add_armory_adress'),
@@ -335,6 +336,7 @@ function CreateNewAddressModalViewModel() {
   }
 
   self.eventName = {
+    'segwit': 'CreateNewSegwitAddress',
     'normal': 'CreateNewAddress',
     'watch': 'CreateNewWatchAddress',
     'armory': 'CreateNewArmoryOfflineAddress',
@@ -362,6 +364,9 @@ function CreateNewAddressModalViewModel() {
     var newAddressHash = hashToB64(newAddress);
     if (self.addressType() == 'normal') {
       PREFERENCES['num_addresses_used'] = parseInt(PREFERENCES['num_addresses_used']) + 1;
+    } else if (self.addressType() == 'segwit') {
+      if (!(PREFERENCES['num_segwit_addresses_used'] instanceof Array)) PREFERENCES['num_segwit_addresses_used'] = 0;
+      PREFERENCES['num_segwit_addresses_used'] = parseInt(PREFERENCES['num_segwit_addresses_used']) + 1
     } else if (self.addressType() == 'watch') {
       if (!(PREFERENCES['watch_only_addresses'] instanceof Array)) PREFERENCES['watch_only_addresses'] = [];
       PREFERENCES['watch_only_addresses'].push(newAddress); //can't use the hash here, unfortunately
@@ -587,8 +592,8 @@ function SendModalViewModel() {
     if (!isNumber(self.quantity())) return null;
     var curBalance = normalizeQuantity(self.rawBalance(), self.divisible());
     var balRemaining = Decimal.round(new Decimal(curBalance).sub(parseFloat(self.quantity())), 8, Decimal.MidpointRounding.ToEven).toFloat();
-    if (self.asset() == 'BTC')
-      balRemaining = subFloat(balRemaining, normalizeQuantity(MIN_FEE))  // include the fee 
+    if (self.asset() === KEY_ASSET.BTC)
+      balRemaining = subFloat(balRemaining, normalizeQuantity(MIN_FEE))  // include the fee
     if (balRemaining < 0) return null;
     return balRemaining;
   }, self);
@@ -601,13 +606,50 @@ function SendModalViewModel() {
     return self.normalizedBalRemaining() !== null;
   }, self);
 
+  // memo
+  self.memoType = ko.observable('');
+  var hexRegex = /^[0-9a-f]+$/i;
+  self.memoValue = ko.observable('').extend({
+    validation: [{
+      validator: function(val, self) {
+        if (self.memoType() == 'hex') {
+          if (!val.match(hexRegex)) { return false; }
+        }
+        return true;
+      },
+      message: i18n.t('memo_data_invalid_hex'),
+      params: self
+    }, {
+      validator: function(val, self) {
+        if (self.memoType() == 'hex') {
+          if (val.length > 68) { return false; }
+        } else if (self.memoType() == 'text') {
+          if (val.length > 34) { return false; }
+        }
+        return true;
+      },
+      message: i18n.t('memo_data_too_long'),
+      params: self
+    }]
+  });
+  self.memoHelpTextLocale = ko.computed(function() {
+    if (self.memoType() == 'text') {
+      return 'memo_data_note_text';
+    }
+    return 'memo_data_note_hex';
+  });
+  shouldShowMemoFields = ko.computed(function() {
+    return self.asset() && self.asset() !== KEY_ASSET.BTC;
+  })
+
   self.validationModel = ko.validatedObservable({
     destAddress: self.destAddress,
     quantity: self.quantity,
     customFee: self.customFee,
     pubkey1: self.pubkey1,
     pubkey2: self.pubkey2,
-    pubkey3: self.pubkey3
+    pubkey3: self.pubkey3,
+    memoValue: self.memoValue
   });
 
   self.resetForm = function() {
@@ -621,8 +663,10 @@ function SendModalViewModel() {
     self.missingPubkey3(false);
     self.missingPubkey3Address('');
 
-    self.feeOption('optimal');
-    self.customFee(null);
+    self.memoType('');
+    self.memoValue('');
+
+    self.feeController.reset();
 
     self.validationModel.errors.showAllMessages(false);
   }
@@ -638,13 +682,24 @@ function SendModalViewModel() {
 
   self.maxAmount = function() {
     assert(self.normalizedBalance(), "No balance present?");
-    if (self.asset() == 'BTC')
+    if (self.asset() === KEY_ASSET.BTC)
       self.quantity(subFloat(self.normalizedBalance(), normalizeQuantity(MIN_FEE)));
     else
       self.quantity(self.normalizedBalance());
   }
 
   self.doAction = function() {
+    WALLET.doTransactionWithTxHex(self.address(), "create_send", self.buildSendTransactionData(), self.feeController.getUnsignedTx(),
+      function(txHash, data, endpoint, addressType, armoryUTx) {
+        var message = "<b>" + (armoryUTx ? i18n.t("will_be_sent") : i18n.t("were_sent")) + " </b>";
+        WALLET.showTransactionCompleteDialog(message + " " + i18n.t(ACTION_PENDING_NOTICE), message, armoryUTx);
+      }
+    );
+    self.shown(false);
+    trackEvent('Balances', 'Send', self.asset());
+  }
+
+  self.buildSendTransactionData = function() {
     var additionalPubkeys = [];
 
     if (self.pubkey1()) {
@@ -657,7 +712,44 @@ function SendModalViewModel() {
       additionalPubkeys.push(self.pubkey3())
     }
 
-    WALLET.doTransaction(self.address(), "create_send",
+    params = {
+      source: self.address(),
+      destination: self.destAddress(),
+      quantity: denormalizeQuantity(parseFloat(self.quantity()), self.divisible()),
+      asset: self.asset(),
+      _asset_divisible: self.divisible(),
+      _pubkeys: additionalPubkeys.concat(self._additionalPubkeys),
+      _fee_option: 'custom',
+      _custom_fee: self.feeController.getCustomFee()
+    };
+
+    switch (self.memoType()) {
+      case 'hex':
+        params.memo = self.memoValue();
+        params.memo_is_hex = true;
+        break;
+      case 'text':
+        params.memo = self.memoValue();
+        params.memo_is_hex = false;
+        break;
+    }
+
+    return params
+  }
+
+  // mix in shared fee calculation functions
+  self.feeController = CWFeeModelMixin(self, {
+    action: "create_send",
+    transactionParameters: [self.destAddress, self.quantity, self.memoType, self.memoValue],
+    validTransactionCheck: function() {
+      return self.validationModel.isValid();
+    },
+    buildTransactionData: self.buildSendTransactionData
+  });
+
+  self.show = function(fromAddress, asset, assetDisp, rawBalance, isDivisible, resetForm) {
+    if (asset === KEY_ASSET.BTC && rawBalance === null) {
+    /*WALLET.doTransaction(self.address(), "create_send",
       {
         source: self.address(),
         destination: self.destAddress(),
@@ -678,7 +770,8 @@ function SendModalViewModel() {
   }
 
   self.show = function(fromAddress, asset, assetDisp, rawBalance, isDivisible, resetForm) {
-    if (asset == 'BTC' && rawBalance == null) {
+    if (asset == 'BTC' && rawBalance == null) {*/
+
       return bootbox.alert(i18n.t("cannot_send_server_unavailable"));
     }
     assert(rawBalance, "Balance is null or undefined?");
@@ -692,6 +785,8 @@ function SendModalViewModel() {
     self.divisible(isDivisible);
     $('#sendFeeOption').select2("val", self.feeOption()); //hack
     self.shown(true);
+
+    $('#MemoType').select2("val", self.memoType()); // hack to set select2 value
     trackDialogShow('Send');
   }
 
@@ -845,7 +940,9 @@ function SweepModalViewModel() {
 
   self.addressForPrivateKey.subscribe(function(address) {
     //set up handler on changes in private key to generate a list of balances
-    self.sweepAssetsCost = {'BTC': MIN_FEE + REGULAR_DUST_SIZE};
+    var hash = {};
+    hash[KEY_ASSET.BTC] = MIN_FEE + REGULAR_DUST_SIZE;
+    self.sweepAssetsCost = hash;
     if (!address || address == '') return;
 
     //Get the balance of ALL assets at this address
@@ -874,7 +971,7 @@ function SweepModalViewModel() {
         }
 
         //Also get the BTC balance at this address and put at head of the list
-        //We just check if unconfirmed balance > 0.      
+        //We just check if unconfirmed balance > 0.
         WALLET.retrieveBTCAddrsInfo([address], function(data) {
           self.btcBalanceForPrivateKey(0);
           self.txoutsCountForPrivateKey = 0;
@@ -883,9 +980,9 @@ function SweepModalViewModel() {
           if (unconfirmedRawBal > 0) {
             //We don't need to supply asset info to the SweepAssetInDropdownItemModel constructor for BTC
             // b/c we won't be transferring any asset ownership with it
-            var viewModel = new SweepAssetInDropdownItemModel("BTC", unconfirmedRawBal, normalizeQuantity(unconfirmedRawBal));
+            var viewModel = new SweepAssetInDropdownItemModel(KEY_ASSET.BTC, unconfirmedRawBal, normalizeQuantity(unconfirmedRawBal));
             self.availableAssetsToSweep.unshift(viewModel);
-            assets.push("BTC");
+            assets.push(KEY_ASSET.BTC);
             self.btcBalanceForPrivateKey(data[0]['confirmedRawBal']);
             self.txoutsCountForPrivateKey = data[0]['rawUtxoData'].length;
 
@@ -907,7 +1004,7 @@ function SweepModalViewModel() {
       return;
     }
     WALLET.retrieveBTCAddrsInfo([address], function(data) {
-      self.addressForFeesBalanceMessage(normalizeQuantity(data[0]['confirmedRawBal']) + ' BTC in ' + address);
+      self.addressForFeesBalanceMessage([normalizeQuantity(data[0]['confirmedRawBal']), KEY_ASSET.BTC, 'in', address].join(' '));
       self.addressForFeesBalance(data[0]['confirmedRawBal']);
     });
   });
@@ -941,7 +1038,7 @@ function SweepModalViewModel() {
       WALLET.BITCOIN_WALLET.getOldAddressesInfos(function(data) {
         for (var address in data) {
           if (self.excludedOldAddresses.indexOf(address) == -1) {
-            self.availableOldAddresses.push(new BalancesAddressInDropdownItemModel(address, address, data[address]['BTC']['privkey']));
+            self.availableOldAddresses.push(new BalancesAddressInDropdownItemModel(address, address, data[address][KEY_ASSET.BTC]['privkey']));
           }
         }
       });
@@ -1030,7 +1127,7 @@ function SweepModalViewModel() {
     var sweepBTC = false;
     for (var i = 0; i < self.selectedAssetsToSweep().length; i++) {
       var assetName = self.selectedAssetsToSweep()[i];
-      if (assetName == 'BTC') sweepBTC = true;
+      if (assetName === KEY_ASSET.BTC) sweepBTC = true;
     }
     if (sweepBTC) {
       self.missingBtcForFees += REGULAR_DUST_SIZE;
@@ -1041,7 +1138,7 @@ function SweepModalViewModel() {
       source: self.addressForPrivateKeyForFees(),
       destination: self.addressForPrivateKey(),
       quantity: self.missingBtcForFees,
-      asset: 'BTC',
+      asset: KEY_ASSET.BTC,
       encoding: 'auto',
       pubkey: pubkey,
       allow_unconfirmed_inputs: true
@@ -1106,7 +1203,7 @@ function SweepModalViewModel() {
         source: self.addressForPrivateKey(),
         destination: self.addressForPrivateKey(),
         quantity: self.btcBalanceForPrivateKey() - fees,
-        asset: 'BTC',
+        asset: KEY_ASSET.BTC,
         encoding: 'auto',
         pubkey: pubkey,
         allow_unconfirmed_inputs: true,
@@ -1115,7 +1212,7 @@ function SweepModalViewModel() {
 
       var onTransactionError = function() {
         if (arguments.length == 4) {
-          var match = arguments[1].match(/Insufficient BTC at address [^\s]+\. \(Need approximately ([\d]+\.[\d]+) BTC/);
+          var match = arguments[1].match(/Insufficient [^\s]+ at address [^\s]+\. \(Need approximately ([\d]+\.[\d]+) [^\s]+/);
 
           if (match != null) {
             $.jqlog.debug(arguments[1]);
@@ -1219,7 +1316,7 @@ function SweepModalViewModel() {
 
             // here we adjust the BTC balance whith the change output
             var newBtcBalance = CWBitcore.extractChangeTxoutValue(transferData.source, unsignedTxHex);
-            $.jqlog.debug("New BTC balance: " + newBtcBalance);
+            $.jqlog.debug(['New', KEY_ASSET.BTC, 'balance:', newBtcBalance].join(' '));
             self.btcBalanceForPrivateKey(newBtcBalance);
 
             self.sweepingCurrentStep++;
@@ -1265,7 +1362,7 @@ function SweepModalViewModel() {
     $.jqlog.debug('_doSendAsset: ' + asset);
 
     //TODO: remove this
-    if (asset == 'BTC') assert(adjustedBTCQuantity !== null);
+    if (asset === KEY_ASSET.BTC) assert(adjustedBTCQuantity !== null);
     else assert(adjustedBTCQuantity === null);
 
     var selectedAsset = ko.utils.arrayFirst(self.availableAssetsToSweep(), function(item) {
@@ -1274,13 +1371,13 @@ function SweepModalViewModel() {
     var sendTx = null, i = null;
 
     $.jqlog.debug("btcBalanceForPrivateKey: " + self.btcBalanceForPrivateKey());
-    var quantity = (asset == 'BTC') ? (self.btcBalanceForPrivateKey() - MIN_FEE) : selectedAsset.RAW_BALANCE;
-    var normalizedQuantity = (asset == 'BTC') ? normalizeQuantity(quantity) : selectedAsset.NORMALIZED_BALANCE;
+    var quantity = (asset === KEY_ASSET.BTC) ? (self.btcBalanceForPrivateKey() - MIN_FEE) : selectedAsset.RAW_BALANCE;
+    var normalizedQuantity = (asset === KEY_ASSET.BTC) ? normalizeQuantity(quantity) : selectedAsset.NORMALIZED_BALANCE;
 
     assert(selectedAsset);
 
     if (!quantity) { //if there is no quantity to send for the asset, only do the transfer
-      if (asset == 'XCP' || asset == 'BTC') { //nothing to send, and no transfer to do
+      if (asset === KEY_ASSET.XCP || asset === KEY_ASSET.BTC) { //nothing to send, and no transfer to do
         return callback(); //my valuable work here is done!
       } else {
         self._doTransferAsset(selectedAsset, key, pubkey, opsComplete, callback); //will trigger callback() once done
@@ -1330,15 +1427,15 @@ function SweepModalViewModel() {
             PENDING_ACTION_FEED.add(sendTxHash, "sends", sendData);
 
             // here we adjust the BTC balance whith the change output
-            if (selectedAsset.ASSET != 'BTC') {
+            if (selectedAsset.ASSET !== KEY_ASSET.BTC) {
               var newBtcBalance = CWBitcore.extractChangeTxoutValue(sendData.source, unsignedTxHex);
-              $.jqlog.debug("New BTC balance: " + newBtcBalance);
+              $.jqlog.debug(['New', KEY_ASSET.BTC, 'balance:', newBtcBalance].join(' '));
               self.btcBalanceForPrivateKey(newBtcBalance);
             }
 
             //For non BTC/XCP assets, also take ownership (iif the address we are sweeping from is the asset's owner')
-            if (selectedAsset.ASSET != 'XCP'
-              && selectedAsset.ASSET != 'BTC'
+            if (selectedAsset.ASSET !== KEY_ASSET.XCP
+              && selectedAsset.ASSET !== KEY_ASSET.BTC
               && selectedAsset.ASSET_INFO['owner'] == self.addressForPrivateKey()) {
               $.jqlog.debug("waiting " + TRANSACTION_DELAY + "ms");
               setTimeout(function() {
@@ -1401,7 +1498,7 @@ function SweepModalViewModel() {
     var selectedAsset = null, hasBTC = false;
     for (var i = 0; i < self.selectedAssetsToSweep().length; i++) {
       selectedAsset = self.selectedAssetsToSweep()[i];
-      if (selectedAsset == 'BTC') {
+      if (selectedAsset === KEY_ASSET.BTC) {
         hasBTC = i; //send BTC last so the sweep doesn't randomly eat our primed txouts for the other assets
       } else {
         sendsToMake.push([selectedAsset, cwk, pubkey, opsComplete, null]);
@@ -1409,7 +1506,7 @@ function SweepModalViewModel() {
     }
     if (hasBTC !== false) {
       //This balance is adjusted after each asset transfert with the change output.
-      sendsToMake.push(["BTC", cwk, pubkey, opsComplete, self.btcBalanceForPrivateKey()]);
+      sendsToMake.push([KEY_ASSET.BTC, cwk, pubkey, opsComplete, self.btcBalanceForPrivateKey()]);
     }
 
     var total = sendsToMake.length;
@@ -1473,7 +1570,7 @@ function SweepModalViewModel() {
     }
 
     var launchSweep = function() {
-      if (sendsToMake.length == 1 && sendsToMake[0][0] == 'BTC') {
+      if (sendsToMake.length === 1 && sendsToMake[0][0] === KEY_ASSET.BTC) {
         doSweep();
       } else {
         // merge output then start sweeping.
@@ -1579,9 +1676,9 @@ function TestnetBurnModalViewModel() {
       params: self
     }, {
       validator: function(val, self) {
-        return parseFloat(val) <= WALLET.getBalance(self.address(), 'BTC') - normalizeQuantity(MIN_FEE);
+        return parseFloat(val) <= WALLET.getBalance(self.address(), KEY_ASSET.BTC) - normalizeQuantity(MIN_FEE);
       },
-      message: i18n.t('quantity_of_exceeds_balance', 'BTC'),
+      message: i18n.t('quantity_of_exceeds_balance', KEY_ASSET.BTC),
       params: self
     }, {
       validator: function(val, self) {
@@ -1603,7 +1700,7 @@ function TestnetBurnModalViewModel() {
 
   self.maxPossibleBurn = ko.computed(function() { //normalized
     if (self.btcAlreadyBurned() === null) return null;
-    return Math.min(1 - self.btcAlreadyBurned(), WALLET.getAddressObj(self.address()).getAssetObj('BTC').normalizedBalance())
+    return Math.min(1 - self.btcAlreadyBurned(), WALLET.getAddressObj(self.address()).getAssetObj(KEY_ASSET.BTC).normalizedBalance())
   }, self);
 
   self.validationModel = ko.validatedObservable({
@@ -1773,14 +1870,7 @@ function BroadcastModalViewModel() {
   }
 
   self.doAction = function() {
-    var params = {
-      source: self.address(),
-      fee_fraction: Decimal.round(new Decimal(self.feeFraction()).div(100), 8, Decimal.MidpointRounding.ToEven).toFloat(),
-      text: self.textValue(),
-      timestamp: self.broadcastDate() ? parseInt(self.broadcastDate().getTime() / 1000) : null,
-      value: parseFloat(self.numericalValue())
-    }
-    //$.jqlog.debug(params); 
+    var params = self.buildBroadcastTransactionData()
 
     var onSuccess = function(txHash, data, endpoint, addressType, armoryUTx) {
       self.hide();
@@ -1793,9 +1883,31 @@ function BroadcastModalViewModel() {
       bootbox.alert(textStatus);
     }
 
-    WALLET.doTransaction(self.address(), "create_broadcast", params, onSuccess, onError);
+    WALLET.doTransactionWithTxHex(self.address(), "create_broadcast", params, self.feeController.getUnsignedTx(), onSuccess, onError);
     trackEvent('Balances', 'Broadcast');
   }
+
+  self.buildBroadcastTransactionData = function() {
+    return {
+      source: self.address(),
+      fee_fraction: Decimal.round(new Decimal(self.feeFraction()).div(100), 8, Decimal.MidpointRounding.ToEven).toFloat(),
+      text: self.textValue(),
+      timestamp: self.broadcastDate() ? parseInt(self.broadcastDate().getTime() / 1000) : null,
+      value: parseFloat(self.numericalValue()),
+      _fee_option: 'custom',
+      _custom_fee: self.feeController.getCustomFee()
+    };
+  }
+
+  // mix in shared fee calculation functions
+  self.feeController = CWFeeModelMixin(self, {
+    action: "create_broadcast",
+    transactionParameters: [self.address, self.textValue, self.numericalValue, self.feeFraction, self.broadcastDate],
+    validTransactionCheck: function() {
+      return self.validationModel.isValid();
+    },
+    buildTransactionData: self.buildBroadcastTransactionData
+  });
 }
 
 function SignTransactionModalViewModel() {

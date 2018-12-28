@@ -105,6 +105,31 @@ function CreateAssetModalViewModel() {
     }
   });
 
+  self.hasXCPForNamedAsset = ko.computed(function() {
+    return self.xcpBalance() >= ASSET_CREATION_FEE_XCP;
+  });
+  self.hasXCPForSubAsset = ko.computed(function() {
+    return self.xcpBalance() >= SUBASSET_CREATION_FEE_XCP;
+  });
+
+  self.ownedNamedAssets = ko.computed(function() { //stores BuySellAddressInDropdownItemModel objects
+    if (!self.address()) return [];
+    var ownedAssets = [];
+    //Get a list of all of my available assets this address owns
+    var assets = WALLET.getAddressObj(self.address()).assets();
+    for (var i = 0; i < assets.length; i++) {
+        if(assets[i].isMine() && assets[i].assetType() === 'named') {
+          ownedAssets.push(new ParentAssetInDropdownItemModel(assets[i].ASSET));
+        }
+    }
+
+    ownedAssets.sort(function(left, right) {
+      return left.ASSET == right.ASSET ? 0 : (left.ASSET > right.ASSET ? -1 : 1);
+    });
+
+    return ownedAssets;
+  }, self);
+
   self.validationModel = ko.validatedObservable({
     name: self.name,
     description: self.description,
@@ -125,6 +150,7 @@ function CreateAssetModalViewModel() {
     self.feeOption('optimal');
     self.customFee(null);
     self.validationModel.errors.showAllMessages(false);
+    self.feeController.reset();
   }
 
   self.submitForm = function() {
@@ -145,6 +171,9 @@ function CreateAssetModalViewModel() {
   }
 
   self.doAction = function() {
+    WALLET.doTransactionWithTxHex(self.address(), "create_issuance", self.buildCreateAssetTransactionData(), self.feeController.getUnsignedTx(),
+
+/* // this was on a conflict merge
     var quantity = parseFloat(self.quantity());
     var rawQuantity = denormalizeQuantity(quantity, self.divisible());
 
@@ -167,9 +196,11 @@ function CreateAssetModalViewModel() {
         transfer_destination: null,
         _fee_option: self.feeOption(),
         _custom_fee: self.customFee()
-      },
+      },*/
+
       function(txHash, data, endpoint, addressType, armoryUTx) {
         var message = "";
+        var name = data.asset;
         if (armoryUTx) {
           message = i18n.t("token_will_be_created", name);
         } else {
@@ -184,9 +215,46 @@ function CreateAssetModalViewModel() {
         WALLET.showTransactionCompleteDialog(message + " " + i18n.t(ACTION_PENDING_NOTICE), message, armoryUTx);
       }
     );
+
     self.shown(false);
     trackEvent('Assets', 'CreateAsset');
   }
+
+  self.buildCreateAssetTransactionData = function() {
+    var quantity = parseFloat(self.quantity());
+    var rawQuantity = denormalizeQuantity(quantity, self.divisible());
+
+    if (rawQuantity > MAX_INT) {
+      bootbox.alert(i18n.t("issuance_quantity_too_high"));
+      return false;
+    }
+
+    var name = self.name();
+    if(self.tokenNameType() === 'subasset' && self.selectedParentAsset()) {
+      name = self.selectedParentAsset() + '.' + self.name();
+    }
+
+    return {
+      source: self.address(),
+      asset: name,
+      quantity: rawQuantity,
+      divisible: self.divisible(),
+      description: self.description(),
+      transfer_destination: null,
+      _fee_option: 'custom',
+      _custom_fee: self.feeController.getCustomFee()
+    }
+  }
+
+  // mix in shared fee calculation functions
+  self.feeController = CWFeeModelMixin(self, {
+    action: "create_issuance",
+    transactionParameters: [self.tokenNameType, self.name, self.description, self.divisible, self.quantity],
+    validTransactionCheck: function() {
+      return self.validationModel.isValid();
+    },
+    buildTransactionData: self.buildCreateAssetTransactionData
+  });
 
   self.show = function(address, xcpBalance, resetForm) {
     if (typeof(resetForm) === 'undefined') resetForm = true;
@@ -243,6 +311,7 @@ function IssueAdditionalAssetModalViewModel() {
   self.resetForm = function() {
     self.additionalIssue(null);
     self.validationModel.errors.showAllMessages(false);
+    self.feeController.reset();
   }
 
   self.submitForm = function() {
@@ -255,15 +324,7 @@ function IssueAdditionalAssetModalViewModel() {
 
   self.doAction = function() {
     //do the additional issuance (specify non-zero quantity, no transfer destination)
-    WALLET.doTransaction(self.address(), "create_issuance",
-      {
-        source: self.address(),
-        quantity: self.rawAdditionalIssue(),
-        asset: self.asset().ASSET,
-        divisible: self.asset().DIVISIBLE,
-        description: self.asset().description(),
-        transfer_destination: null
-      },
+    WALLET.doTransactionWithTxHex(self.address(), "create_issuance", self.buildIssueAdditionalTransactionData(), self.feeController.getUnsignedTx(),
       function(txHash, data, endpoint, addressType, armoryUTx) {
         self.shown(false);
 
@@ -279,6 +340,29 @@ function IssueAdditionalAssetModalViewModel() {
     );
     trackEvent('Assets', 'IssueAdditionalAsset');
   }
+
+  self.buildIssueAdditionalTransactionData = function() {
+    return {
+        source: self.address(),
+        quantity: self.rawAdditionalIssue(),
+        asset: self.asset().ASSET,
+        divisible: self.asset().DIVISIBLE,
+        description: self.asset().description(),
+        transfer_destination: null,
+        _fee_option: 'custom',
+        _custom_fee: self.feeController.getCustomFee()
+    }
+  }
+
+  // mix in shared fee calculation functions
+  self.feeController = CWFeeModelMixin(self, {
+    action: "create_issuance",
+    transactionParameters: [self.additionalIssue],
+    validTransactionCheck: function() {
+      return self.validationModel.isValid();
+    },
+    buildTransactionData: self.buildIssueAdditionalTransactionData
+  });
 
   self.show = function(address, divisible, asset, resetForm) {
     if (typeof(resetForm) === 'undefined') resetForm = true;
@@ -315,6 +399,7 @@ function TransferAssetModalViewModel() {
   self.resetForm = function() {
     self.destAddress('');
     self.validationModel.errors.showAllMessages(false);
+    self.feeController.reset();
   }
 
   self.submitForm = function() {
@@ -327,15 +412,7 @@ function TransferAssetModalViewModel() {
 
   self.doAction = function() {
     //do the transfer (zero quantity issuance to the specified address)
-    WALLET.doTransaction(self.address(), "create_issuance",
-      {
-        source: self.address(),
-        quantity: 0,
-        asset: self.asset().ASSET,
-        divisible: self.asset().DIVISIBLE,
-        description: self.asset().description(),
-        transfer_destination: self.destAddress()
-      },
+    WALLET.doTransactionWithTxHex(self.address(), "create_issuance", self.buildTransferTransactionData(), self.feeController.getUnsignedTx(),
       function(txHash, data, endpoint, addressType, armoryUTx) {
         self.shown(false);
 
@@ -350,6 +427,29 @@ function TransferAssetModalViewModel() {
     );
     trackEvent('Assets', 'TransferAsset');
   }
+
+  self.buildTransferTransactionData = function() {
+    return {
+        source: self.address(),
+        quantity: 0,
+        asset: self.asset().ASSET,
+        divisible: self.asset().DIVISIBLE,
+        description: self.asset().description(),
+        transfer_destination: self.destAddress(),
+        _fee_option: 'custom',
+        _custom_fee: self.feeController.getCustomFee()
+      }
+  }
+
+  // mix in shared fee calculation functions
+  self.feeController = CWFeeModelMixin(self, {
+    action: "create_issuance",
+    transactionParameters: [self.destAddress],
+    validTransactionCheck: function() {
+      return self.validationModel.isValid();
+    },
+    buildTransactionData: self.buildTransferTransactionData
+  });
 
   self.show = function(sourceAddress, asset, resetForm) {
     if (typeof(resetForm) === 'undefined') resetForm = true;
@@ -395,6 +495,7 @@ function ChangeAssetDescriptionModalViewModel() {
   self.resetForm = function() {
     self.newDescription('');
     self.validationModel.errors.showAllMessages(false);
+    self.feeController.reset();
   }
 
   self.submitForm = function() {
@@ -407,15 +508,7 @@ function ChangeAssetDescriptionModalViewModel() {
 
   self.doAction = function() {
     //to change the desc, issue with quantity == 0 and the new description in the description field
-    WALLET.doTransaction(self.address(), "create_issuance",
-      {
-        source: self.address(),
-        quantity: 0,
-        asset: self.asset().ASSET,
-        divisible: self.asset().DIVISIBLE,
-        description: self.newDescription(),
-        transfer_destination: null
-      },
+    WALLET.doTransactionWithTxHex(self.address(), "create_issuance", self.buildChangeDescriptionTransactionData(), self.feeController.getUnsignedTx(),
       function(txHash, data, endpoint, addressType, armoryUTx) {
         self.shown(false);
         var message = "";
@@ -429,6 +522,29 @@ function ChangeAssetDescriptionModalViewModel() {
     );
     trackEvent('Assets', 'ChangeAssetDescription');
   }
+
+  self.buildChangeDescriptionTransactionData = function() {
+    return {
+      source: self.address(),
+      quantity: 0,
+      asset: self.asset().ASSET,
+      divisible: self.asset().DIVISIBLE,
+      description: self.newDescription(),
+      transfer_destination: null,
+      _fee_option: 'custom',
+      _custom_fee: self.feeController.getCustomFee()
+    }
+  }
+
+  // mix in shared fee calculation functions
+  self.feeController = CWFeeModelMixin(self, {
+    action: "create_issuance",
+    transactionParameters: [self.newDescription],
+    validTransactionCheck: function() {
+      return self.validationModel.isValid();
+    },
+    buildTransactionData: self.buildChangeDescriptionTransactionData
+  });
 
   self.show = function(address, asset, resetForm) {
     if (typeof(resetForm) === 'undefined') resetForm = true;
@@ -509,7 +625,7 @@ function PayDividendModalViewModel() {
   self.assetName.subscribe(function(name) {
     if (!name) return;
     failoverAPI("get_assets_info", {'assetsList': [name]}, function(assetsData, endpoint) {
-      if (USE_TESTNET || WALLET.networkBlockHeight() > 330000) {
+      if (USE_TESTNET || USE_REGTEST || WALLET.networkBlockHeight() > 330000) {
         failoverAPI('get_holder_count', {'asset': name}, function(holderData) {
           self.assetData(assetsData[0]);
           self.holderCount(holderData[name]);
@@ -615,6 +731,7 @@ function PayDividendModalViewModel() {
     self.availableDividendAssets([]);
     self.selectedDividendAsset(null);
     self.validationModel.errors.showAllMessages(false);
+    self.feeController.reset();
   }
 
   self.submitForm = function() {
@@ -628,7 +745,7 @@ function PayDividendModalViewModel() {
     }
 
     // fetch shareholders to check transaction dest.
-    if (self.selectedDividendAsset() == 'BTC') {
+    if (self.selectedDividendAsset() === KEY_ASSET.BTC) {
       var params = {
         'filters': [
           {'field': 'asset', 'op': '=', 'value': self.assetData().asset},
@@ -642,24 +759,8 @@ function PayDividendModalViewModel() {
     }
   }
 
-  self.sendDividend = function(data) {
-
-    var params = {
-      source: self.addressVM().ADDRESS,
-      quantity_per_unit: denormalizeQuantity(parseFloat(self.quantityPerUnit())),
-      asset: self.assetData().asset,
-      dividend_asset: self.selectedDividendAsset()
-    }
-
-    if (data) {
-      var dests = [];
-      for (var a in data) {
-        dests.push(data[a]['address']);
-      }
-      params['_btc_dividend_dests'] = dests;
-    }
-
-    WALLET.doTransaction(self.addressVM().ADDRESS, "create_dividend", params,
+  self.sendDividend = function() {
+    WALLET.doTransactionWithTxHex(self.addressVM().ADDRESS, "create_dividend", self.buildPayDividendTransactionData(), self.feeController.getUnsignedTx(),
       function(txHash, data, endpoint, addressType, armoryUTx) {
         self.shown(false);
         var message = "";
@@ -673,6 +774,34 @@ function PayDividendModalViewModel() {
     );
     trackEvent('Assets', 'PayDividend');
   }
+
+  self.buildPayDividendTransactionData = function() {
+    return {
+      source: self.addressVM().ADDRESS,
+      quantity_per_unit: denormalizeQuantity(parseFloat(self.quantityPerUnit())),
+      asset: self.assetData().asset,
+      dividend_asset: self.selectedDividendAsset(),
+      _fee_option: 'custom',
+      _custom_fee: self.feeController.getCustomFee()
+    }
+  }
+
+  // compute the address string for the feeController mixin
+  self.address = ko.computed(function() {
+    var addressVM = self.addressVM()
+    return addressVM != null ? addressVM.ADDRESS : null;
+  })
+
+  // mix in shared fee calculation functions
+  self.feeController = CWFeeModelMixin(self, {
+    action: "create_dividend",
+    transactionParameters: [self.assetName, self.selectedDividendAsset, self.quantityPerUnit],
+    validTransactionCheck: function() {
+      return self.validationModel.isValid();
+    },
+    buildTransactionData: self.buildPayDividendTransactionData
+  });
+
 
   self.showModal = function(address, resetForm) {
     if (typeof(resetForm) === 'undefined') resetForm = true;
@@ -693,7 +822,7 @@ function PayDividendModalViewModel() {
       //Also get the BTC balance at this address and put at head of the list
       WALLET.retrieveBTCBalance(address.ADDRESS, function(balance) {
         if (balance) {
-          self.availableDividendAssets.unshift(new DividendAssetInDropdownItemModel("BTC", "BTC", balance, normalizeQuantity(balance)));
+          self.availableDividendAssets.unshift(new DividendAssetInDropdownItemModel(KEY_ASSET.BTC, KEY_ASSET.BTC, balance, normalizeQuantity(balance)));
         }
       });
     });

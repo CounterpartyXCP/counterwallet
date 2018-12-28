@@ -18,7 +18,7 @@
           <span data-bind="locale: 'all_markets'"></span>
         </a>
         <div class="pairTitle page-title txt-color-blueDark">
-          <img data-bind="attr: {src: baseAssetImage()}, visible: baseAssetImage()!=''" />
+          <img alt="" data-bind="attr: {src: baseAssetImage()}, visible: baseAssetImage()!=''" />
           <span data-bind="text: dispAssetPair"></span>
         </div>
         <span class="marketPrice" data-bind="visible: currentMarketPrice, html: currentMarketPrice + ' ' + marketProgression24hDisp"></span>
@@ -356,26 +356,32 @@
                     </tr>
                     <tr>
                       <td colspan="3">
-                      <div class="form-group">
-                        <label class="control-label col-xs-2" data-bind="locale: 'fee_option'"></label>
-                        <div class="col-xs-5">
-                            <select id="buyFeeOption" class="select2" data-bind="select2: { minimumResultsForSearch: 100 }, value: buyFeeOption, valueUpdate: 'input'" style="width:100%">
-                              <option value="optimal" data-bind="locale: 'fee_option_optimal'"></option>
-                              <option value="low_priority" data-bind="locale: 'fee_option_low_priority'"></option>
-                              <option value="custom" data-bind="locale: 'fee_option_custom'"></option>
-                            </select>
+                      <div class="form-group"><!-- fee section -->
+                        <div>
+                          <label class="control-label col col-sm-3" data-bind="locale: 'fee_option'"></label>
+                          <div class="col col-sm-9">
+                              <input name="buy_feeSlider" data-bind="value: buy_feeSlider, valueUpdate: 'input', attr: {max: buy_feeSliderMax}" type="range" min="0" step="1">
+                          </div>
                         </div>
-                        <div class="col col-xs-5">
-                            <label class="input">
-                                <input name="customFee" data-bind="visible: buyFeeOption() === 'custom', value: buyCustomFee, localeAttr: {'placeholder': 'enter_fee_option_custom'}"/>
-                            </label>
+                        <div>
+                          <div class="col col-sm-12">
+                            <div class="fee-info" style="text-align: right">
+                              <span class="formPaddedBot" data-bind="visible: buy_transactionParamsAreValid, locale: buy_feeDetailsLocaleName, localeArgs: buy_feeDetailsLocaleArgs"></span>
+                              <br />
+                              <span class="formPaddedBot" data-bind="visible: buy_customFee, locale: buy_feePriorityLocaleName, localeArgs: buy_feePriorityLocaleArgs"></span>
+                            </div>
+                          </div>
                         </div>
                       </div>
-                      <span class="invalid" data-bind="validationMessage: buyCustomFee"></span>
+
                       </td>
                     </tr>
                     <tr>
-                      <td colspan="3" style="text-align:center"><a id="buyButton" class="btn btn-default btn-lg" data-bind="click: buy">Buy (<span data-bind="text: dispQuoteAsset + ' → ' + dispBaseAsset"></span>)</a></td>
+                      <td colspan="3" style="text-align:center">
+                        <button id="buyButton" class="btn btn-primary btn-lg" data-bind="enable: buy_transactionIsReady, click: buy">
+                          <span data-bind="locale: 'Buy'"></span>  (<span data-bind="text: dispQuoteAsset + ' → ' + dispBaseAsset"></span>)
+                        </button>
+                    </td>
                     </tr>
                   </tbody>
                 </table>
@@ -469,26 +475,32 @@
                     </tr>
                     <tr>
                       <td colspan="3">
-                      <div class="form-group">
-                        <label class="control-label col-xs-2" data-bind="locale: 'fee_option'"></label>
-                        <div class="col-xs-5">
-                            <select id="sellFeeOption" class="select2" data-bind="select2: { minimumResultsForSearch: 100 }, value: sellFeeOption, valueUpdate: 'input'" style="width:100%">
-                              <option value="optimal" data-bind="locale: 'fee_option_optimal'">Optimal</option>
-                              <option value="low_priority" data-bind="locale: 'fee_option_low_priority'">Low Priority</option>
-                              <option value="custom" data-bind="locale: 'fee_option_custom'"></option>
-                            </select>
+                      <div class="form-group"><!-- fee section -->
+                        <div>
+                          <label class="control-label col col-sm-3" data-bind="locale: 'fee_option'"></label>
+                          <div class="col col-sm-9">
+                              <input name="sell_feeSlider" data-bind="value: sell_feeSlider, valueUpdate: 'input', attr: {max: sell_feeSliderMax}" type="range" min="0" step="1">
+                          </div>
                         </div>
-                        <div class="col col-xs-5">
-                            <label class="input">
-                                <input name="customFee" data-bind="visible: sellFeeOption() === 'custom', value: sellCustomFee, localeAttr: {'placeholder': 'enter_fee_option_custom'}"/>
-                            </label>
+                        <div>
+                          <div class="col col-sm-12">
+                            <div class="fee-info" style="text-align: right">
+                              <span class="formPaddedBot" data-bind="visible: sell_transactionParamsAreValid, locale: sell_feeDetailsLocaleName, localeArgs: sell_feeDetailsLocaleArgs"></span>
+                              <br />
+                              <span class="formPaddedBot" data-bind="visible: sell_customFee, locale: sell_feePriorityLocaleName, localeArgs: sell_feePriorityLocaleArgs"></span>
+                            </div>
+                          </div>
                         </div>
                       </div>
-                      <span class="invalid" data-bind="validationMessage: sellCustomFee"></span>
+
                       </td>
                     </tr>
                     <tr>
-                      <td colspan="3" style="text-align:center"><a id="sellButton" class="btn btn-default btn-lg" data-bind="click: sell"><span data-bind="locale: 'Sell'"></span> (<span data-bind="text:dispBaseAsset + ' → ' + dispQuoteAsset"></span>)</a></td>
+                      <td colspan="3" style="text-align:center">
+                        <button id="sellButton" class="btn btn-primary btn-lg" data-bind="enable: sell_transactionIsReady, click: sell">
+                          <span data-bind="locale: 'Sell'"></span> (<span data-bind="text:dispBaseAsset + ' → ' + dispQuoteAsset"></span>)
+                        </button>
+                    </td>
                     </tr>
                   </tbody>
                 </table>

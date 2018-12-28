@@ -137,7 +137,15 @@ textarea.quickAccessUrl {
   padding: 5px 15px;
 }
 
-#langSelector a img { 
+#langSelector a img {
   filter : alpha(opacity=50);
   opacity : 0.5;
+}
+
+.fee-info {
+  color: #666;
+  font-weight: 200;
+}
+.processing {
+  color: #ccc;
 }

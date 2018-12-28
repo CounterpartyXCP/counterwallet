@@ -5,13 +5,13 @@ build.orig/
 .DS_Store*
 ._*
 node_modules/
-src/servers.json
 dist/
 .tmp
 src/vendors/
 npm-debug.log
-servers.json
 src/bitcore.html
 src/bitcoinjs.html
 counterwallet.conf.json
 src/js/jquery-timeago.i18n.js
+local-development/etc/includes/counterwallet.conf
+local-development/var

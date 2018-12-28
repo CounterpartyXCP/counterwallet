@@ -1,4 +1,4 @@
-{ 
+{
   "test": "Hello %s and %s",
   "close": "Close",
   "cancel": "Cancel",
@@ -39,7 +39,7 @@
   "open_wallet": "Open Wallet",
   "login": "Login",
   "login_problems": "Problems logging in?",
-  "counterwallet_desc_1": "Counterwallet is a free web-wallet for Bitcoin and <a href=\"http://www.counterparty.io\" target=\"_blank\">Counterparty</a>, the world’s first protocol for decentralized financial tools.",
+  "counterwallet_desc_1": "Counterwallet is a free web-wallet for Bitcoin and <a href=\"http://www.counterparty.io\" target=\"_blank\" rel=\"noopener noreferrer\">Counterparty</a>, the world’s first protocol for decentralized financial tools.",
   "counterwallet_desc_2": "All transactions made with Counterwallet use an automatic escrow system to keep them secure, with no middleman required.",
   "counterwallet_desc_3": "Secure",
   "counterwallet_desc_4": "All encryption is handled client-side. Neither your passphrase nor any of your private information ever leaves your browser.",
@@ -49,7 +49,7 @@
   "counterwallet_desc_8": "There are no wallet files to backup or secure, and using your passphrase you can access your wallet from any trusted machine with a web browser.",
   "counterwallet_desc_9": "Open-Source",
   "counterwallet_desc_10": "Counterwallet is entirely open-source, so you know that it works exactly the way that it is supposed to.",
-  "counterwallet_desc_11": "If you like, you can even <a href=\"https://github.com/CounterpartyXCP/counterwallet\" target=\"_blank\">run your own Counterwallet server.</a>",
+  "counterwallet_desc_11": "If you like, you can even <a href=\"https://github.com/CounterpartyXCP/counterwallet\" target=\"_blank\" rel=\"noopener noreferrer\">run your own Counterwallet server.</a>",
   "license_agreement": "License Agreement",
   "is_the_first_time": "If you are being asked to accept the Terms and Conditions, this may be the first time you are opening this wallet on this server. <b>If you are trying to access a wallet created before May 8, 2014, you have typed the passphrase incorrectly.</b>",
   "you_must_read": "You must read and accept the following agreement in order to use this site:",
@@ -119,8 +119,8 @@
   "having_issue": "Having Issues?",
   "page_common_questions": "Common Questions",
   "try_the_following": "If you are having issues using Counterwallet, please try the following:",
-  "support_2": "<b>Check out our forums:</b> You can post your question or issue in <a href=\"https://counterpartytalk.org/c/support\" target=\"_blank\">the Counterparty support forums</a>.",
-  "support_3": "<b>Send a private message to our support team on the forums:</b> If all else fails, you may send a private message to our support tem describing your issue. For more information see our <a href=\"https://counterpartytalk.org/t/important-how-to-get-support/1129\" target=\"_blank\">support thread</a>.",
+  "support_2": "<b>Check out our forums:</b> You can post your question or issue in <a href=\"https://counterpartytalk.org/c/support\" target=\"_blank\" rel=\"noopener noreferrer\">the Counterparty support forums</a>.",
+  "support_3": "<b>Send a private message to our support team on the forums:</b> If all else fails, you may send a private message to our support tem describing your issue. For more information see our <a href=\"https://counterpartytalk.org/t/important-how-to-get-support/1129\" target=\"_blank\" rel=\"noopener noreferrer\">support thread</a>.",
   "answers_to_common_questions": "Answers to common questions. Just click the one you're interested in:",
   "answer_1": "I logged in and my address is different, and I have no balance! Help!",
   "answer_2": "I sent funds to a crowdsale vending machine, why didn’t they show up?",
@@ -150,7 +150,7 @@
 
   "create_support_case": "Create Support Case",
   "create_support_case_desc1": "Create a support case by filling out the information below.",
-  "create_support_case_desc2": "<b>Please only create a case for bugs only.<br/>For questions, check out <a href=\"http://support.counterparty.io/\" target=\"_blank\">our knowledge base</a> or ask in <a href=\"https://forums.counterparty.io/c/support\" target=\"_blank\">our forums</a>.</b>",
+  "create_support_case_desc2": "<b>Please only create a case for bugs only.<br/>For questions, check out <a href=\"http://support.counterparty.io/\" target=\"_blank\" rel=\"noopener noreferrer\">our knowledge base</a> or ask in <a href=\"https://forums.counterparty.io/c/support\" target=\"_blank\" rel=\"noopener noreferrer\">our forums</a>.</b>",
   "your_name": "Your Name",
   "your_email": "Your Email Address",
   "required_support": "Required so that we can provide a response to you.",
@@ -343,7 +343,7 @@
   "notif_bet_expired": "Your bet ID <b>%s</b> from address <Ad>%s</Ad> has expired",
   "notif_self_bet_match_expired": "A bet match between your addresses <Ad>%s</Ad> and <Ad>%s</Ad> has expired",
   "notif_bet_match_expired": "A bet match between your address <Ad>%s</Ad> and address <Ad>%s</Ad> has expired",
-  
+
   "pend_or_unconf_burn": "%s burn of <Am>%s</Am> <As>BTC</As>",
   "pend_or_unconf_send": "%s send of <Am>%s</Am> <As>%s</As> from <Ad>%s</Ad> to <Ad>%s</Ad>",
   "pend_or_unconf_order": "%s order to sell <Am>%s</Am> <As>%s</As> for <Am>%s</Am> <As>%s</As>",
@@ -449,7 +449,7 @@
   "country_warning": "Country warning",
   "testnet_proceed_anyway": "Since you are on testnet, you can choose to proceed anyway.",
   "proceed_anyway": "Proceed Anyway",
-  "buy_xcp_if_legal": "If legal to do so in your country, you can purchase XCP from one of the centralized exchanges listed <a href=\"http://coinmarketcap.com/currencies/counterparty/#markets\" target=\"_blank\">here</a>.",
+  "buy_xcp_if_legal": "If legal to do so in your country, you can purchase XCP from one of the centralized exchanges listed <a href=\"http://coinmarketcap.com/currencies/counterparty/#markets\" target=\"_blank\" rel=\"noopener noreferrer\">here</a>.",
 
   "quick_buy": "Quick Buy",
   "min_amount": "Min. amount",
@@ -491,6 +491,7 @@
 
   "my_account_balances": "My Account Balances",
   "create_new_address": "Create New Address",
+  "create_segwit_address": "Create Segwit Address",
   "create_regular_address": "Create Regular Address",
   "create_armory_address": "Create Armory Offline Address",
   "create_watch_address": "Create Watch Only Address",
@@ -633,8 +634,8 @@
   "create_issue_token": "Create (Issue) a Token",
   "old_wallet_detected": "<strong>Old Wallet detected:</strong> We see you are using an old wallet. Please transfer your funds to a newly created wallet as soon as possible. Support for 'old' wallets will be discontinued <b>July 15, 2014</b>.",
   "old_wallet_more_info": "More info",
-  "want_to_buy_xcp": "<b>How to Buy XCP</b> Provided that it is legal in your jurisdiction, the easiest way to buy XCP is from one of the centralized exchanges listed <a href=\"http://coinmarketcap.com/currencies/counterparty/#markets\" target=\"_blank\">here</a>.",
-  "want_to_buy_xcp_with_quick_buy": "<b>How to Buy XCP</b> Provided that it is legal in your jurisdiction, the easiest way to buy XCP is from one of the centralized exchanges listed <a href=\"http://coinmarketcap.com/currencies/counterparty/#markets\" target=\"_blank\">here</a>.",
+  "want_to_buy_xcp": "<b>How to Buy XCP</b> Provided that it is legal in your jurisdiction, the easiest way to buy XCP is from one of the centralized exchanges listed <a href=\"http://coinmarketcap.com/currencies/counterparty/#markets\" target=\"_blank\" rel=\"noopener noreferrer\">here</a>.",
+  "want_to_buy_xcp_with_quick_buy": "<b>How to Buy XCP</b> Provided that it is legal in your jurisdiction, the easiest way to buy XCP is from one of the centralized exchanges listed <a href=\"http://coinmarketcap.com/currencies/counterparty/#markets\" target=\"_blank\" rel=\"noopener noreferrer\">here</a>.",
   "enter_new_label": "Enter the new label (or, nickname) for your address <b class=\"notoAddressColor\">%s</b>",
   "after_sending": "After sending, you will have <b><span class=\"sellColor\">%s</span> <span class=\"sellColor\">%s</span> remaining</b> at this address.",
   "sign_a_message": "Sign a Message",
@@ -655,7 +656,7 @@
   "asset_creation_fee_xcp": "Please note that a <b class=\"notoQuantityColor\">%s</b> <b class=\"notoAssetColor\">XCP</b> fee will be deducted from your balance upon successful creation.",
   "change_token_description_p1": "This token's current description is:",
   "change_token_description_p2": "Enter a new description for your token",
-  "token_an_image": "Want to give your token an image, enhanced description text, or more? See <a href=\"http://counterparty.io/docs/enhanced_asset_info\" target=\"_blank\">this link</a>.",
+  "token_an_image": "Want to give your token an image, enhanced description text, or more? See <a href=\"http://counterparty.io/docs/enhanced_asset_info\" target=\"_blank\" rel=\"noopener noreferrer\">this link</a>.",
   "token_name_type": "Name type",
     "alphabetic_name": "Alphabetic name with anti-spam fee (0.5 XCP)",
   "alphabetic_sub_name": "Subasset with anti-spam fee (0.25 XCP)",
@@ -667,14 +668,14 @@
   "burn_up_to": "You may currently burn up to <span class=\"sellColor\">%s BTC</span> from this address.",
   "already_burned": "You have already burned the maximum allowed BTC from this address.",
   "welcome_p1": "Counterwallet created an address for you to get started. You can send and receive both bitcoin and Counterparty tokens with it. To start using the wallet, simply send some BTC or XCP to the address (just single click on the address string itself to select it, then copy that text, which you can then give to others or use to send funds to).",
-  "testnet_faucet": "Note that, on testnet, you can use a <b><a href=\"https://en.bitcoin.it/wiki/Bitcoin_faucet\" target=\"_blank\">Testnet faucet</a> to get BTC to start with.</b>",
+  "testnet_faucet": "Note that, on testnet, you can use a <b><a href=\"https://en.bitcoin.it/wiki/Bitcoin_faucet\" target=\"_blank\" rel=\"noopener noreferrer\">Testnet faucet</a> to get BTC to start with.</b>",
   "welcome_p2": "One important thing to know before getting started is that when you perform an action in Counterwallet (i.e. place an order, create a token, etc), <b>it doesn't take effect immediately as it must first be confirmed on the Bitcoin blockchain</b>. Counterwallet lets you know this by displaying your actions under the <b>Pending Actions</b> panel (the Clock icon on the top bar), and then moving them to the <b>Notifications</b> panel (the Checkbox icon) automatically once the network has successfully confirmed them. You'll also see the future expected value in parenthesis next to the current balance to better alert you that the change is pending. Note that depending on the speed at which blocks are solved, it could take anywhere from 2 to 40 minutes for your actions to be confirmed.<br/><br/>",
 
   "wager": "Wager",
   "expiration": "Expiration",
   "blocks": "blocks",
   "status": "Status",
-  
+
   "binary_bets": "Binary Bets",
   "feed_info": "Feed Info",
   "resolution_date": "Resolution date:",
@@ -760,7 +761,7 @@
   "your_balance": "Your balance",
   "lowest_ask_price": "Lowest ask price",
   "obtainable": "Obtainable",
-  "highest_bit_price": "Highest bid price",
+  "Buy": "Buy",
   "Sell": "Sell",
   "sell_orders": "Sell orders",
   "buy_orders": "Buy orders",
@@ -801,7 +802,7 @@
   "only_the_assets_you_own": "Only the assets you own with established market value (via completed trades on the Distributed Exchange) are listed here.",
   "highest_bid_price": "Highest bid price",
 
-  "diligence_is_advised": "Warning and Disclaimer: <b>Every</b> Counterparty asset can be viewed on the \"Markets\" page. The hosts of Counterwallet.io and Counterwallet.co <b>do not filter</b> very likely scam or fraudulent assets, and explicitly disclaim any responsibility therefor. Caveat emptor: do your own diligence, and do not invest more than you can afford to lose.",
+  "diligence_is_advised": "Warning and Disclaimer: <b>Every</b> Counterparty asset can be viewed on the \"Markets\" page. The hosts of Counterwallet.io <b>do not filter</b> very likely scam or fraudulent assets, and explicitly disclaim any responsibility therefor. Caveat emptor: do your own diligence, and do not invest more than you can afford to lose.",
   "btc_trading_off": "Trading to or from BTC is no longer possible in Counterwallet. Click <a href=\"http://support.counterparty.io/support/solutions/articles/5000500845-why-can-i-no-longer-trade-to-and-from-btc-in-counterwallet-\" target=\"_blank\">here</a> to learn why.",
   "must_be_valid_testnet_address": "This field must be a valid TESTNET Bitcoin address.",
   "must_be_valid_bitcoin_address": "This field must be a valid Bitcoin address.",
@@ -830,5 +831,22 @@
   "fee_option_optimal": "Normal Priority",
   "fee_option_low_priority": "Low Priority (Cheaper)",
   "fee_option_custom": "Custom Fee",
-  "enter_fee_option_custom": "Fee in Satoshi/Byte"
+  "enter_fee_option_custom": "Fee in Satoshi/Byte",
+
+  "fee_priority_details_no_wait": "Estimated wait: next block (%s Satoshis/Byte)",
+  "fee_priority_details_up_to": "Estimated wait: up to %s blocks (%s Satoshis/Byte)",
+  "fee_priority_details_between": "Estimated wait: between %s - %s blocks (%s Satoshis/Byte)",
+  "fee_details": "Transaction fee: %s BTC ($%s USD)",
+  "fee_details_with_btc_out": "Transaction fee: %s BTC ($%s USD, %s fees and %s dust)",
+  "fee_details_calculating": "Transaction fee: <span class=\"processing\">calculating...</span>",
+
+  "memo_type": "Memo Type",
+  "no_memo": "No memo",
+  "hex_memo": "Data memo",
+  "text_memo": "Plain text memo",
+  "memo_data": "Transaction Memo",
+  "memo_data_note_hex": "Enter a hexadecimal value up to 68 characters long.",
+  "memo_data_note_text": "Enter a plain text note up to 34 characters long.",
+  "memo_data_invalid_hex": "This memo is not a valid hexadecimal value.",
+  "memo_data_too_long": "This memo is too long."
 }

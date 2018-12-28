@@ -1,7 +1,7 @@
 /***********
  * GLOBAL CONSTANTS
  ***********/
-var VERSION = "1.8.0";
+var VERSION = "1.9.0";
 var PREFERENCES = {}; //set when logging in
 
 //Addresses
@@ -10,8 +10,8 @@ var MAX_ADDRESSES = 20; //arbitrary (but will generate more on login if they hav
                         //additional addresses from being generated via the GUI)
 
 //Order expiration
-var ORDER_DEFAULT_EXPIRATION = 1000; //num blocks until expiration (at ~9 min per block this is ~6.75 days)
-var ORDER_MAX_EXPIRATION = 3000; //max expiration for order
+var ORDER_DEFAULT_EXPIRATION = 8064; //num blocks until expiration (~2 months)
+var ORDER_MAX_EXPIRATION = 8064; //max expiration for order
 
 var STATS_MAX_NUM_TRANSACTIONS = 100; //max # transactions to show in the table
 var VIEW_PRICES_NUM_ASSET_PAIRS = 50; //show market info for this many pairs
@@ -19,7 +19,7 @@ var VIEW_PRICES_ASSET_PAIRS_REFRESH_EVERY = 5 * 60 * 1000; //refresh asset pair 
 var VIEW_PRICES_NUM_LATEST_TRADES = 50; //show this many latest trades on the view prices page
 var VIEW_PRICES_LATEST_TRADES_REFRESH_EVERY = 5 * 60 * 1000; //refresh latest trades every 5 minutes
 
-var MARKET_INFO_REFRESH_EVERY = 5 * 60 * 1000; //refresh market info every 5 minutes while enabled (on buy/sell page, and view prices page) 
+var MARKET_INFO_REFRESH_EVERY = 5 * 60 * 1000; //refresh market info every 5 minutes while enabled (on buy/sell page, and view prices page)
 
 var CHAT_NUM_USERS_ONLINE_REFRESH_EVERY = 5 * 60 * 1000; //refresh online user count every 5 minutes while enabled
 
@@ -32,6 +32,7 @@ var ARMORY_OFFLINE_TX_PREFIX = "=====TXSIGCOLLECT-";
 
 var DEFAULT_PREFERENCES = {
   'num_addresses_used': DEFAULT_NUM_ADDRESSES,
+  'num_segwit_addresses_used': DEFAULT_NUM_ADDRESSES,
   'address_aliases': {},
   'selected_theme': 'ultraLight',
   'selected_lang': 'en-us',
@@ -183,8 +184,11 @@ var LEVERAGE_UNIT = 5040;
 
 var MAINNET_UNSPENDABLE = '1CounterpartyXXXXXXXXXXXXXXXUWLpVr';
 var TESTNET_UNSPENDABLE = 'mvCounterpartyXXXXXXXXXXXXXXW24Hef';
+var REGTEST_UNSPENDABLE = 'mvCounterpartyXXXXXXXXXXXXXXW24Hef';
 var TESTNET_BURN_START = 154908;
 var TESTNET_BURN_END = 4017708;
+var REGTEST_BURN_START = 101;
+var REGTEST_BURN_END = 150000000;
 
 /***********
  * DYNAMICALLY SET
@@ -207,13 +211,7 @@ var DISABLED_FEATURES_SUPPORTED = ['betting', 'dividend', 'exchange', 'leaderboa
 var DISABLED_FEATURES = []; //set in counterwallet.js
 
 // restricted action
-var RESTRICTED_AREA = {
-  'pages/betting.html': ['US'],
-  'pages/openbets.html': ['US'],
-  'pages/matchedbets.html': ['US'],
-  'dividend': ['US'],
-  'pages/simplebuy.html': ['US']
-}
+var RESTRICTED_AREA = {} // set in counterwallet.js
 
 var RESTRICTED_AREA_MESSAGE = {
   'pages/simplebuy.html': 'buy_xcp_if_legal'
@@ -237,6 +235,7 @@ function qs(key) {
 // IS_DEV is enabled if the initial (root) URL access has ?dev=1
 // USE_TESTNET is enabled if the initial (root) URL access has ?testnet=1, OR the hostname visited starts with 'testnet' (e.g. testnet.myhost.com)
 var IS_DEV = (location.pathname == "/" && qs("dev") && qs("dev") != '0' ? true : false);
+var USE_REGTEST = (location.pathname == "/" && qs("regtest") && qs("regtest") != '0' ? true : false);
 var USE_TESTNET = (   (((location.pathname == "/" || location.pathname == "/src/" || location.pathname == "/build/") && qs("testnet") && qs("testnet") != '0')
   || location.hostname.indexOf('testnet') != -1) ? true : false
 );
@@ -251,3 +250,30 @@ var TRANSACTION_MAX_RETRY = 5; // max retry when transaction failed (don't inclu
 var DONATION_ADDRESS = USE_TESTNET ? 'n4MGGJBkW9RjRKBbZfBAceHDndhywvVPV9' : '19U6MmLLumsqxXSBMB5FgYXbezgXYC6Gpe';
 
 var APPROX_SECONDS_PER_BLOCK = USE_TESTNET ? 20 * 60 : 8 * 60; //a *rough* estimate on how many seconds per each block (used for estimating open order time left until expiration, etc)
+
+var KEY_ASSET = {
+  'BTC': 'BTC',
+  'XCP': 'XCP',
+  'USD': 'USD',
+  'Bitcoin': 'Bitcoin',
+  'Counterparty': 'Counterparty'
+};
+
+var KEY_ASSET_WEBSITE = {
+  'BTC': 'https://bitcoin.org/',
+  'XCP': 'https://counterparty.io/'
+};
+
+bitcoinjs.networks.regtest = {
+    messagePrefix: '\x18Bitcoin Signed Message:\n',
+    bech32: 'bcrt',
+    bip32: {
+      public: 0x043587cf,
+      private: 0x04358394
+    },
+    pubKeyHash: 0x6f,
+    scriptHash: 0xc4,
+    wif: 0xef
+  }
+
+bitcoinjs.networks.mainnet = bitcoinjs.networks.bitcoin // support for bitcore's name

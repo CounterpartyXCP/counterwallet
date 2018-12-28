@@ -10,18 +10,18 @@ var AssetPortfolioViewModel = AssetLeaderboardViewModel.extend(function() {
   self.showPortfolioIn.subscribeChanged(function(newValue, prevValue) {
     //use this to hook into the parent class being done with loading its market info data
     if (!self.marketInfo.length) return; //nothing to show
-    assert(newValue == "XCP" || newValue == "BTC", "Invalid value");
+    assert(newValue === KEY_ASSET.XCP || newValue === KEY_ASSET.BTC, "Invalid value");
     if (newValue == prevValue) return; //no change
 
     if ((Object.getOwnPropertyNames(self.myGraphTables).length == 0)) {
       var i = null, j = null;
 
-      self.myGraphTables['XCP'] = {
+      self.myGraphTables[KEY_ASSET.XCP] = {
         'balByAsset': ko.observableArray([]),
         'rawValByAsset': {}, 'valByAsset': ko.observableArray([]),
         'pctChange': ko.observableArray([])
       };
-      self.myGraphTables['BTC'] = {
+      self.myGraphTables[KEY_ASSET.BTC] = {
         'balByAsset': ko.observableArray([]),
         'rawValByAsset': {}, 'valByAsset': ko.observableArray([]),
         'pctChange': ko.observableArray([])
@@ -43,11 +43,11 @@ var AssetPortfolioViewModel = AssetLeaderboardViewModel.extend(function() {
             //populate graph data for assets with market info
             info = $.grep(self.marketInfo, function(e) { return e.asset == asset; })[0]; //O(n^3) --- optimize!
             if (info) {
-              self.myGraphTables[baseAsset]['rawValByAsset'][asset] = info ? assetTotalBal / info[baseAsset == 'XCP' ? 'price_in_xcp' : 'price_in_btc'] : null;
+              self.myGraphTables[baseAsset]['rawValByAsset'][asset] = info ? assetTotalBal / info[baseAsset === KEY_ASSET.XCP ? 'price_in_xcp' : 'price_in_btc'] : null;
               self.myGraphTables[baseAsset]['valByAsset'].push([asset, self.myGraphTables[baseAsset]['rawValByAsset'][asset]])
               self.myGraphTables[baseAsset]['pctChange'].push({
                 name: asset,
-                data: [info ? (info[baseAsset == 'XCP' ? '24h_vol_price_change_in_xcp' : '24h_vol_price_change_in_btc'] || 0) : null]
+                data: [info ? (info[baseAsset === KEY_ASSET.XCP ? '24h_vol_price_change_in_xcp' : '24h_vol_price_change_in_btc'] || 0) : null]
               });
             }
           }

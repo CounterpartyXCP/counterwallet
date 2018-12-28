@@ -4,7 +4,9 @@
 if [ ! -d /counterwallet/build ]; then
     cd /counterwallet/src; bower --allow-root --config.interactive=false update
     cd /counterwallet; npm update
-    grunt build --dontcheckdeps
+    npm run prepublish
+    npm run build
+    #grunt build --dontcheckdeps
 fi
 if [ ! -f /counterwallet/counterwallet.conf.json ]; then
     cp -a /counterwallet/counterwallet.conf.json.example /counterwallet/counterwallet.conf.json
@@ -36,7 +38,7 @@ envsubst "$VARS" < /counterwallet/docker/nginx/counterwallet.conf.template > /et
 # http://veithen.github.io/2014/11/16/sigterm-propagation.html
 trap 'kill -TERM $PID' TERM INT
 nginx -g 'daemon off;' &
-# ^ maybe simplify to just be "nginx" in the future 
+# ^ maybe simplify to just be "nginx" in the future
 PID=$!
 wait $PID
 trap - TERM INT

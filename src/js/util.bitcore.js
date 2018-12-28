@@ -4,7 +4,7 @@ var bitcore = require('bitcore-lib');
 var bitcoreMessage = require('bitcore-message'); // this also binds itself to bitcore.Message as soon as it's require'd
 
 // this 'global' is overwritten by tests!
-var NETWORK = USE_TESTNET ? bitcore.Networks.testnet : bitcore.Networks.livenet;
+var NETWORK = (USE_TESTNET || USE_REGTEST) ? bitcore.Networks.testnet : bitcore.Networks.livenet;
 
 var CWHierarchicalKey = function(passphrase, password) {
   checkArgType(passphrase, "string");
@@ -13,7 +13,7 @@ var CWHierarchicalKey = function(passphrase, password) {
     passphrase = CWBitcore.decrypt(passphrase, password);
   }
   // same as bitcoinjs-lib :
-  // m : masterkery / 0' : first private derivation / 0 : external account / i : index
+  // m : master key / 0' : first private derivation / 0 : external account / i : index
   this.basePath = 'm/0\'/0/';
   this.useOldHierarchicalKey = false;
   this.init(passphrase);
@@ -30,7 +30,7 @@ CWHierarchicalKey.prototype.init = function(passphrase) {
     if (first == 'old') {
       this.useOldHierarchicalKey = true;
     } else {
-      throw new Error("mnemonic was 13 words but fist was not 'old'");
+      throw new Error("mnemonic was 13 words but the first was not 'old'");
     }
   }
 
@@ -224,7 +224,14 @@ CWBitcore.isOutScript = function(script) {
 
 CWBitcore.isValidAddress = function(val) {
   try {
-    return bitcore.Address.isValid(val, NETWORK, bitcore.Address.Pay2PubKeyHash);
+    var p2pkh = bitcore.Address.isValid(val, NETWORK, bitcore.Address.Pay2PubKeyHash);
+    if (!p2pkh) {
+      var bech32 = bitcoinjs.address.fromBech32(val);
+
+      return typeof(bech32) !== 'undefined';
+    }
+
+    return p2pkh;
   } catch (err) {
     return false;
   }
@@ -612,26 +619,34 @@ CWBitcore.checkTransactionDest = function(txHex, source, dest) {
   return outputsValid.filter(function(v) { return !v; }).length === 0;
 }
 
-CWBitcore.compareOutputs = function(source, txHexs) {
+CWBitcore.compareOutputs = function(source, apiResponses) {
   var t;
 
-  if (txHexs[0].indexOf("=====TXSIGCOLLECT") != -1) {
+  // apiResponse might be a plain transaction hex
+  //   or it might be a container with transaction info
+  var responseIsTxInfo = (typeof apiResponses[0] == 'object')
+  var resolveTxHex = function(apiResponse) {
+    return (responseIsTxInfo ? apiResponse.tx_hex : apiResponse);
+  }
+
+  if (!responseIsTxInfo && apiResponses[0].indexOf("=====TXSIGCOLLECT") != -1) {
     // armory transaction, we just compare if strings are the same.
-    for (t = 1; t < txHexs.length; t++) {
-      if (txHexs[t] != txHexs[0]) {
+    for (t = 1; t < apiResponses.length; t++) {
+      if (apiResponses[t] != apiResponses[0]) {
         return false;
       }
     }
 
     return true;
   } else {
-    var tx0 = bitcore.Transaction(txHexs[0]);
+    var tx0 = bitcore.Transaction(resolveTxHex(apiResponses[0]));
 
-    var txHexesValid = txHexs.map(function(txHex, idx) {
+    var txHexesValid = apiResponses.map(function(apiResponse, idx) {
       if (idx === 0) {
         return true;
       }
 
+      var txHex = resolveTxHex(apiResponse);
       var tx1 = bitcore.Transaction(txHex);
 
       if (tx0.outputs.length != tx1.outputs.length) {
@@ -645,7 +660,7 @@ CWBitcore.compareOutputs = function(source, txHexs) {
         var amount1 = tx1.outputs[idx].satoshis;
 
         // addresses need to be the same and values need to be the same
-        //  expect for the change output
+        //  except for the change output
         return addresses0 == addresses1 && (amount0 == amount1 || addresses0.indexOf(source) != -1);
       });
 

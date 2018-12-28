@@ -158,7 +158,7 @@ function LogonViewModel() {
 
         // set user country
         USER_COUNTRY = data['country'];
-        if (RESTRICTED_AREA['pages/betting.html'].indexOf(USER_COUNTRY) != -1) {
+        if (restrictedAreas['pages/betting.html'] && restrictedAreas['pages/betting.html'].indexOf(USER_COUNTRY) != -1) {
           BETTING_ENABLE = false;
         }
 
@@ -170,7 +170,7 @@ function LogonViewModel() {
         //Grab preferences
         multiAPINewest("get_preferences", {
           'wallet_id': WALLET.identifier(),
-          'network': USE_TESTNET ? 'testnet' : 'mainnet',
+          'network': (USE_TESTNET || USE_REGTEST) ? 'testnet' : 'mainnet',
           'for_login': true
         }, 'last_updated', self.onReceivedPreferences);
 
@@ -229,6 +229,7 @@ function LogonViewModel() {
       mustSavePreferencesToServer = true;
     }
     PREFERENCES['num_addresses_used'] = Math.min(MAX_ADDRESSES, PREFERENCES['num_addresses_used']);
+    PREFERENCES['num_segwit_addresses_used'] = Math.min(MAX_ADDRESSES, PREFERENCES['num_segwit_addresses_used']);
 
     WALLET_OPTIONS_MODAL.selectedTheme(PREFERENCES['selected_theme']);
 
@@ -297,9 +298,71 @@ function LogonViewModel() {
         setTimeout(function() { self.genAddress(mustSavePreferencesToServer, 1) }, 1);
 
       } else {
+        $.jqlog.info("Address discovery: Done with standard addresses...");
 
         if (PREFERENCES['num_addresses_used'] != WALLET.addresses().length) {
           PREFERENCES['num_addresses_used'] = WALLET.addresses().length;
+          mustSavePreferencesToServer = true;
+        }
+        return self.genSegwitAddress(mustSavePreferencesToServer, PREFERENCES['num_segwit_addresses_used']);
+
+      }
+    });
+  }
+
+  self.genSegwitAddress = function(mustSavePreferencesToServer, addressCount) {
+    if (!WALLET.isSegwitEnabled) {
+      return self.openWalletPt3(mustSavePreferencesToServer);
+    }
+
+    var moreAddresses = [];
+    $.jqlog.info("Address discovery: Generating " + addressCount + " segwit addresses...");
+
+    for (var i = 0; i < addressCount; i++) {
+
+      var address = WALLET.addAddress('segwit');
+      var addressHash = hashToB64(address);
+      var len = WALLET.addresses().length;
+      moreAddresses.push(address);
+
+      if (PREFERENCES.address_aliases[addressHash] === undefined) { //no existing label. we need to set one
+        mustSavePreferencesToServer = true; //if not already true
+        PREFERENCES.address_aliases[addressHash] = i18n.t("default_address_label", len);
+      }
+
+      $.jqlog.info("Address discovery: Generating segwit address " + (len - PREFERENCES['num_addresses_used']) + " of " + PREFERENCES['num_segwit_addresses_used']
+        + " (num_segwit_addresses_used) (" + self.walletGenProgressVal() + "%) -- " + address);
+
+      if (len <= PREFERENCES['num_segwit_addresses_used']) { //for visual effect
+        var progress = len * (100 / PREFERENCES['num_segwit_addresses_used']);
+        self.walletGenProgressVal(progress);
+      }
+
+    }
+
+    WALLET.refreshBTCBalances(false, moreAddresses, function() {
+
+      var generateAnotherAddress = false;
+      var totalAddresses = WALLET.addresses().length;
+      var lastAddressWithMovement = WALLET.addresses()[totalAddresses - 1].withMovement();
+
+      if (lastAddressWithMovement) {
+        generateAnotherAddress = true;
+      } else if ((totalAddresses - PREFERENCES['num_addresses_used']) >= PREFERENCES['num_segwit_addresses_used'] && !lastAddressWithMovement) {
+        WALLET.addresses.pop();
+        generateAnotherAddress = false;
+      }
+
+      if (generateAnotherAddress) {
+
+        $.jqlog.info("Address discovery: Generating another segwit address...");
+        setTimeout(function() { self.genSegwitAddress(mustSavePreferencesToServer, 1) }, 1);
+
+      } else {
+        $.jqlog.info("Address discovery: Done with segwit addresses...");
+
+        if (PREFERENCES['num_segwit_addresses_used'] != (WALLET.addresses().length - PREFERENCES['num_addresses_used'])) {
+          PREFERENCES['num_segwit_addresses_used'] = (WALLET.addresses().length - PREFERENCES['num_addresses_used']);
           mustSavePreferencesToServer = true;
         }
         return self.openWalletPt3(mustSavePreferencesToServer);
@@ -369,7 +432,7 @@ function LogonViewModel() {
     MESSAGE_FEED.restoreOrder();
 
     //record some metrics...
-    trackEvent("Login", "Wallet", "Size", PREFERENCES['num_addresses_used']);
+    trackEvent("Login", "Wallet", "Size", PREFERENCES['num_addresses_used'] + PREFERENCES['num_segwit_addresses_used']);
     trackEvent("Login", "Network", USE_TESTNET ? "Testnet" : "Mainnet");
     trackEvent("Login", "Country", USER_COUNTRY || 'UNKNOWN');
     trackEvent("Login", "Language", PREFERENCES['selected_lang']);
