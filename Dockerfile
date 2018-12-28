@@ -84,6 +84,7 @@ COPY . /counterwallet
 RUN rm -rf /counterwallet/build
 WORKDIR /counterwallet
 RUN git rev-parse HEAD
+
 RUN cd src; bower --allow-root --config.interactive=false update; cd ..
 RUN cd src/vendors/bitcoinjs-lib; npm install; browserify --standalone bitcoinjs src/index.js | uglifyjs -c --mangle reserved=['BigInteger','ECPair','Point'] -o bitcoinjs.min.js; cd ../../../
 RUN npm install

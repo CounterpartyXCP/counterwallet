@@ -137,7 +137,7 @@ textarea.quickAccessUrl {
   padding: 5px 15px;
 }
 
-#langSelector a img { 
+#langSelector a img {
   filter : alpha(opacity=50);
   opacity : 0.5;
 }

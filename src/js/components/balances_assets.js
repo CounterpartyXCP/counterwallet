@@ -61,6 +61,49 @@ function CreateAssetModalViewModel() {
     isValidPositiveQuantityOrZero: self,
     isValidQtyForDivisibility: self
   });
+  self.feeOption = ko.observable('optimal');
+  self.customFee = ko.observable(null).extend({
+    validation: [{
+      validator: function(val, self) {
+        return self.feeOption() === 'custom' ? val : true;
+      },
+      message: i18n.t('field_required'),
+      params: self
+    }],
+    isValidCustomFeeIfSpecified: self
+  });
+
+  self.hasXCPForNamedAsset = ko.computed(function() {
+    return self.xcpBalance() >= ASSET_CREATION_FEE_XCP;
+  });
+  self.hasXCPForSubAsset = ko.computed(function() {
+    return self.xcpBalance() >= SUBASSET_CREATION_FEE_XCP;
+  });
+
+  self.ownedNamedAssets = ko.computed(function() { //stores BuySellAddressInDropdownItemModel objects
+    if (!self.address()) return [];
+    var ownedAssets = [];
+    //Get a list of all of my available assets this address owns
+    var assets = WALLET.getAddressObj(self.address()).assets();
+    for (var i = 0; i < assets.length; i++) {
+        if(assets[i].isMine() && assets[i].assetType() === 'named') {
+          ownedAssets.push(new ParentAssetInDropdownItemModel(assets[i].ASSET));
+        }
+    }
+
+    ownedAssets.sort(function(left, right) {
+      return left.ASSET == right.ASSET ? 0 : (left.ASSET > right.ASSET ? -1 : 1);
+    });
+
+    return ownedAssets;
+  }, self);
+
+  self.feeOption.subscribeChanged(function(newValue, prevValue) {
+    if(newValue !== 'custom') {
+      self.customFee(null);
+      self.customFee.isModified(false);
+    }
+  });
 
   self.hasXCPForNamedAsset = ko.computed(function() {
     return self.xcpBalance() >= ASSET_CREATION_FEE_XCP;
@@ -91,6 +134,7 @@ function CreateAssetModalViewModel() {
     name: self.name,
     description: self.description,
     quantity: self.quantity,
+    customFee: self.customFee
   });
 
   self.generateRandomId = function() {
@@ -103,6 +147,8 @@ function CreateAssetModalViewModel() {
     self.description('');
     self.divisible(true);
     self.quantity(null);
+    self.feeOption('optimal');
+    self.customFee(null);
     self.validationModel.errors.showAllMessages(false);
     self.feeController.reset();
   }
@@ -126,6 +172,32 @@ function CreateAssetModalViewModel() {
 
   self.doAction = function() {
     WALLET.doTransactionWithTxHex(self.address(), "create_issuance", self.buildCreateAssetTransactionData(), self.feeController.getUnsignedTx(),
+
+/* // this was on a conflict merge
+    var quantity = parseFloat(self.quantity());
+    var rawQuantity = denormalizeQuantity(quantity, self.divisible());
+
+    if (rawQuantity > MAX_INT) {
+      bootbox.alert(i18n.t("issuance_quantity_too_high"));
+      return false;
+    }
+
+    var name = self.name();
+    if(self.tokenNameType() === 'subasset' && self.selectedParentAsset()) {
+      name = self.selectedParentAsset() + '.' + self.name();
+    }
+    WALLET.doTransaction(self.address(), "create_issuance",
+      {
+        source: self.address(),
+        asset: name,
+        quantity: rawQuantity,
+        divisible: self.divisible(),
+        description: self.description(),
+        transfer_destination: null,
+        _fee_option: self.feeOption(),
+        _custom_fee: self.customFee()
+      },*/
+
       function(txHash, data, endpoint, addressType, armoryUTx) {
         var message = "";
         var name = data.asset;
@@ -191,6 +263,7 @@ function CreateAssetModalViewModel() {
     self.address(address);
     self.tokenNameType('numeric');
     self.generateRandomId();
+    $('#createAssetFeeOption').select2("val", self.feeOption()); //hack
     self.shown(true);
     trackDialogShow('CreateAsset');
   }

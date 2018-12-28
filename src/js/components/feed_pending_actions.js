@@ -22,7 +22,7 @@ PendingActionViewModel.calcText = function(category, data) {
     // resolve asset longname
     // asset_longname = data['asset_longname'] !== undefined ? data['asset_longname'] : (data['_asset_longname'] !== undefined ? data['_asset_longname'] : WALLET.getAddressObj(data['source']).getAssetObj(data['asset']).ASSET_LONGNAME);
     if (data['asset_longname'] !== undefined) {
-      asset_longname = data['asset_longname']; 
+      asset_longname = data['asset_longname'];
     } else {
       if (data['_asset_longname'] !== undefined) {
         asset_longname = data['_asset_longname'];
