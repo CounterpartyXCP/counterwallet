@@ -383,6 +383,7 @@
                 <span class="invalid" data-bind="validationMessage: quantity"></span>
             </div>
           </div></section>
+<!-- <<<<<<< HEAD -->
         </fieldset>
 
         <fieldset data-bind="visible: self.shouldShowMemoFields">
@@ -432,6 +433,28 @@
             </div>
           </section>
 
+<!-- ======= -->
+
+          <section><div class="row">
+            <label class="control-label col col-sm-2" data-bind="locale: 'fee_option'"></label>
+            <div class="col col-sm-5">
+                <label class="input">
+                    <select id="sendFeeOption" name="feeOption" class="select2" data-bind="select2: { minimumResultsForSearch: 100 }, value: feeOption, valueUpdate: 'input'" style="width:100%">
+                      <option value="optimal" data-bind="locale: 'fee_option_optimal'"></option>
+                      <option value="low_priority" data-bind="locale: 'fee_option_low_priority'"></option>
+                      <option value="custom" data-bind="locale: 'fee_option_custom'"></option>
+                    </select>
+                </label>
+            </div>
+            <div class="col col-sm-5">
+                <label class="input">
+                    <input name="customFee" data-bind="visible: feeOption() === 'custom', value: customFee, localeAttr: {'placeholder': 'enter_fee_option_custom'}"/>
+                </label>
+                <span class="invalid" data-bind="validationMessage: customFee"></span>
+            </div>
+          </div></section>
+
+<!-- >>>>>>> origin/master -->
         </fieldset></form>
         <p class="formPaddedBot" data-bind="fadeVisibleInOnly: normalizedBalRemainingIsSet, locale: 'after_sending', localeArgs: {0: dispNormalizedBalRemaining, 1: assetDisp}"></p>
       </div>
@@ -673,8 +696,8 @@
             </div>
           </div></section>
           <section><div class="row">
-            <label class="control-label col col-sm-3" data-bind="locale: 'token_name_type'"></label>
-            <div class="col col-sm-9">
+            <label class="control-label col col-sm-2" data-bind="locale: 'token_name_type'"></label>
+            <div class="col col-sm-10"> <!-- this was col-sm-9 before the conflict solve -->
               <label class="radio" data-bind="visible: hasXCPForNamedAsset() == true">
                 <input type="radio" data-bind="checked: tokenNameType" name="tokenNameType" value="alphabetic">
                 <i></i><span data-bind="locale: 'alphabetic_name'"></span>
@@ -693,8 +716,8 @@
             </div>
           </div></section>
           <section><div class="row" data-bind="visible: tokenNameType=='subasset'">
-            <label class="control-label col col-sm-3" data-bind="locale: 'parent_asset_name'"></label>
-            <div class="col col-sm-9">
+            <label class="control-label col col-sm-2" data-bind="locale: 'parent_asset_name'"></label>
+            <div class="col col-sm-10"> <!--  /\ col-sm-3 before fix and <- col-sm-9 -->
                 <label class="input">
                     <select id="selectedParentAsset" data-bind="options: ownedNamedAssets, optionsValue: 'ASSET', optionsText: 'ASSET', select2: {  minimumResultsForSearch: 10, escapeMarkup: 'direct' }, value: selectedParentAsset" style="width:100%;"></select>
                 </label>

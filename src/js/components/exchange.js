@@ -198,9 +198,16 @@ function ExchangeViewModel() {
       assert(self.asset2Raw().includes('.'));
       self.asset2Longname(self.asset2Raw());
     }
+
+    self.buyFeeOption('optimal');
+    self.buyCustomFee(null);
+    self.sellFeeOption('optimal');
+    self.sellCustomFee(null);
+    $('#buyFeeOption').select2("val", self.buyFeeOption()); //hack
+    $('#sellFeeOption').select2("val", self.sellFeeOption()); //hack
   });
 
-  //VALIDATION MODELS  
+  //VALIDATION MODELS
   self.validationModelBaseOrders = ko.validatedObservable({
     asset1Raw: self.asset1Raw,
     asset2Raw: self.asset2Raw
@@ -244,12 +251,30 @@ function ExchangeViewModel() {
     isValidPositiveQuantity: self,
     quoteDivisibilityIsOk: self
   });
+  self.sellFeeOption = ko.observable('optimal');
+  self.sellCustomFee = ko.observable(null).extend({
+    validation: [{
+      validator: function(val, self) {
+        return self.sellFeeOption() === 'custom' ? val : true;
+      },
+      message: i18n.t('field_required'),
+      params: self
+    }],
+    isValidCustomFeeIfSpecified: self
+  });
   self.sellPriceHasFocus = ko.observable();
   self.sellAmountHasFocus = ko.observable();
   self.sellTotalHasFocus = ko.observable();
   self.obtainableForSell = ko.observable();
   self.selectedAddressForSell = ko.observable();
   self.availableBalanceForSell = ko.observable();
+
+  self.sellFeeOption.subscribeChanged(function(newValue, prevValue) {
+    if(newValue !== 'custom') {
+      self.sellCustomFee(null);
+      self.sellCustomFee.isModified(false);
+    }
+  });
 
   self.availableAddressesForSell = ko.computed(function() { //stores BuySellAddressInDropdownItemModel objects
     if (!self.baseAsset()) return null; //must have a sell asset selected
@@ -328,6 +353,7 @@ function ExchangeViewModel() {
     sellAmount: self.sellAmount,
     sellPrice: self.sellPrice,
     sellTotal: self.sellTotal,
+    sellCustomFee: self.sellCustomFee
   });
 
 
@@ -412,6 +438,8 @@ function ExchangeViewModel() {
       expiration: expiration,
       _fee_option: 'custom',
       _custom_fee: self.sellFeeController.getCustomFee()
+/*      _fee_option: self.sellFeeOption(),
+      _custom_fee: self.sellCustomFee()*/
     }
   }
 
@@ -428,6 +456,17 @@ function ExchangeViewModel() {
     buildTransactionData: self.buildSellTransactionData,
     address: self.selectedAddressForSell
   });
+/*
+    var onSuccess = function(txHash, data, endpoint, addressType, armoryUTx) {
+      trackEvent('Exchange', 'Sell', self.dispAssetPair());
+
+      var message = "";
+      if (armoryUTx) {
+        message = i18n.t("you_sell_order_will_be_placed", self.sellAmount(), self.dispBaseAsset());
+      } else {
+        message = i18n.t("you_sell_order_has_been_placed", self.sellAmount(), self.dispBaseAsset());
+      }
+*/
 
 
 
@@ -513,12 +552,31 @@ function ExchangeViewModel() {
     isValidPositiveQuantity: self,
     quoteDivisibilityIsOk: self
   });
+  self.buyFeeOption = ko.observable('optimal');
+  self.buyCustomFee = ko.observable(null).extend({
+    validation: [{
+      validator: function(val, self) {
+        return self.buyFeeOption() === 'custom' ? val : true;
+      },
+      message: i18n.t('field_required'),
+      params: self
+    }],
+    isValidCustomFeeIfSpecified: self
+  });
+
   self.buyPriceHasFocus = ko.observable();
   self.buyAmountHasFocus = ko.observable();
   self.buyTotalHasFocus = ko.observable();
   self.obtainableForBuy = ko.observable();
   self.selectedAddressForBuy = ko.observable();
   self.availableBalanceForBuy = ko.observable();
+
+  self.buyFeeOption.subscribeChanged(function(newValue, prevValue) {
+    if(newValue !== 'custom') {
+      self.buyCustomFee(null);
+      self.buyCustomFee.isModified(false);
+    }
+  });
 
   self.availableAddressesForBuy = ko.computed(function() { //stores BuySellAddressInDropdownItemModel objects
     if (!self.quoteAsset()) return null; //must have a sell asset selected
@@ -601,6 +659,7 @@ function ExchangeViewModel() {
     buyTotal: self.buyTotal,
     buyPrice: self.buyPrice,
     buyAmount: self.buyAmount,
+    buyCustomFee: self.buyCustomFee
   });
 
   self.selectSellOrder = function(order, notFromClick) {
@@ -774,13 +833,13 @@ function ExchangeViewModel() {
   self.displayTopUserPairs = function(data) {
     for (var p in data) {
       var classes = ['top_user_pair'];
-      
+
       if (data[p]['trend'] > 0) {
         classes.push('txt-color-greenDark');
       } else if (data[p]['trend'] < 0) {
         classes.push('txt-color-red');
       }
-      
+
       if (parseFloat(data[p]['progression']) > 0) {
         classes.push('progression-up');
       } else if (parseFloat(data[p]['progression']) < 0) {
@@ -790,7 +849,7 @@ function ExchangeViewModel() {
       if (data[p]['my_order_count']) {
         classes.push('with-open-order');
       }
-      
+
       classes.push("pair_" + data[p]['base_asset'] + data[p]['quote_asset']);
       data[p]['pair_classes'] = classes.join(' ');
     }
@@ -1074,7 +1133,7 @@ function ExchangeViewModel() {
           self.asset1Raw(data['asset_longname'] || data['asset']); //gotta do a manual update...doesn't play well with knockout
         } else if ($($e.target).attr('name') == 'asset2Raw') {
           self.asset2Raw(data['asset_longname'] || data['asset']); //gotta do a manual update...doesn't play well with knockout
-        }  
+        }
       });
     });
   }
@@ -1354,7 +1413,7 @@ function OpenOrdersViewModel() {
         return order.get_asset == item['asset']; //matches asset name or asset longname
       });
       order.get_asset_disp = match['asset_longname'] || match['asset'];
-      
+
       order.give_quantity = data[i].give_quantity;
       order.get_quantity = data[i].get_quantity;
       order.give_remaining = Math.max(data[i].give_remaining, 0);
@@ -1502,7 +1561,7 @@ function OrderMatchesViewModel() {
         return order_match.get_asset == item['asset']; //matches asset name or asset longname
       });
       order_match.get_asset_disp = match['asset_longname'] || match['asset'];
-      
+
       order_match.status = data[i].status;
       order_match.block_index = data[i].block_index;
 
