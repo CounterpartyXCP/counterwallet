@@ -340,35 +340,39 @@ function LogonViewModel() {
 
     }
 
-    WALLET.refreshBTCBalances(false, moreAddresses, function() {
+    if (moreAddresses.length > 0) {
+      WALLET.refreshBTCBalances(false, moreAddresses, function() {
 
-      var generateAnotherAddress = false;
-      var totalAddresses = WALLET.addresses().length;
-      var lastAddressWithMovement = WALLET.addresses()[totalAddresses - 1].withMovement();
+        var generateAnotherAddress = false;
+        var totalAddresses = WALLET.addresses().length;
+        var lastAddressWithMovement = WALLET.addresses()[totalAddresses - 1].withMovement();
 
-      if (lastAddressWithMovement) {
-        generateAnotherAddress = true;
-      } else if ((totalAddresses - PREFERENCES['num_addresses_used']) >= PREFERENCES['num_segwit_addresses_used'] && !lastAddressWithMovement) {
-        WALLET.addresses.pop();
-        generateAnotherAddress = false;
-      }
-
-      if (generateAnotherAddress) {
-
-        $.jqlog.info("Address discovery: Generating another segwit address...");
-        setTimeout(function() { self.genSegwitAddress(mustSavePreferencesToServer, 1) }, 1);
-
-      } else {
-        $.jqlog.info("Address discovery: Done with segwit addresses...");
-
-        if (PREFERENCES['num_segwit_addresses_used'] != (WALLET.addresses().length - PREFERENCES['num_addresses_used'])) {
-          PREFERENCES['num_segwit_addresses_used'] = (WALLET.addresses().length - PREFERENCES['num_addresses_used']);
-          mustSavePreferencesToServer = true;
+        if (lastAddressWithMovement) {
+          generateAnotherAddress = true;
+        } else if ((totalAddresses - PREFERENCES['num_addresses_used']) >= PREFERENCES['num_segwit_addresses_used'] && !lastAddressWithMovement) {
+          WALLET.addresses.pop();
+          generateAnotherAddress = false;
         }
-        return self.openWalletPt3(mustSavePreferencesToServer);
 
-      }
-    });
+        if (generateAnotherAddress) {
+
+          $.jqlog.info("Address discovery: Generating another segwit address...");
+          setTimeout(function() { self.genSegwitAddress(mustSavePreferencesToServer, 1) }, 1);
+
+        } else {
+          $.jqlog.info("Address discovery: Done with segwit addresses...");
+
+          if (PREFERENCES['num_segwit_addresses_used'] != (WALLET.addresses().length - PREFERENCES['num_addresses_used'])) {
+            PREFERENCES['num_segwit_addresses_used'] = (WALLET.addresses().length - PREFERENCES['num_addresses_used']);
+            mustSavePreferencesToServer = true;
+          }
+          return self.openWalletPt3(mustSavePreferencesToServer);
+
+        }
+      });
+    } else {
+      return self.openWalletPt3(mustSavePreferencesToServer);
+    }
   }
 
   self.updateBalances = function(additionalBTCAddresses, onSuccess) {
