@@ -288,7 +288,7 @@ function LogonViewModel() {
 
       if (lastAddressWithMovement) {
         generateAnotherAddress = true;
-      } else if (totalAddresses > PREFERENCES['num_addresses_used'] && !lastAddressWithMovement) {
+      } else if (totalAddresses > PREFERENCES['num_addresses_used'] && !lastAddressWithMovement && WALLET.addresses.length > 1) {
         WALLET.addresses.pop();
       }
 
