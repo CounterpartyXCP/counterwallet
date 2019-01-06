@@ -946,6 +946,7 @@ function SweepModalViewModel() {
     if (!address || address == '') return;
 
     //Get the balance of ALL assets at this address
+    $.jqlog.debug('Updating normalized balances for a single address at balances ' + address)
     failoverAPI("get_normalized_balances", {'addresses': [address]}, function(balancesData, endpoint) {
       var assets = [], assetInfo = null;
       for (var i = 0; i < balancesData.length; i++) {

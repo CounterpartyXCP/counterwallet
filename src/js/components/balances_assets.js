@@ -813,6 +813,7 @@ function PayDividendModalViewModel() {
     trackDialogShow('PayDividend');
 
     //Get the balance of ALL assets at this address
+    $.jqlog.debug('Updating normalized balances for a single address at balance_assets ' + address.ADDRESS)
     failoverAPI("get_normalized_balances", {'addresses': [address.ADDRESS]}, function(data, endpoint) {
       for (var i = 0; i < data.length; i++) {
         if (data[i]['quantity'] !== null && data[i]['quantity'] !== 0)
