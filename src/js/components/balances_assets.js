@@ -919,8 +919,10 @@ function ShowAssetInfoModalViewModel() {
         if (!ext_info)
           return; //asset has no extended info
 
-        if (ext_info['image'])
-          self.extImageURL((USE_TESTNET ? '/_t_asset_img/' : '/_asset_img/') + assetObj.ASSET + '.png');
+        if (ext_info['image']) {
+          var prefix = USE_TESTNET ? '_t' : (USE_REGTEST ? '_r' : '');
+          self.extImageURL('/' + prefix + '_asset_img/' + assetObj.ASSET + '.png');
+        }
 
         self.extWebsite(ext_info['website']);
         self.extDescription(ext_info['description']);

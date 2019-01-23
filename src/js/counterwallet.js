@@ -66,7 +66,7 @@ function produceCWServerList() {
     if (USE_TESTNET) {
       return element + '/_t_api';
     } else if (USE_REGTEST) {
-      return element + '/';
+      return element + '/_r_api';
     } else {
       return element + '/_api';
     }
