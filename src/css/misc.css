@@ -74,7 +74,7 @@ span.modeIndicator {
 }
 
 
-#noticeTestnet {
+#noticeTestnet, #noticeRegtest {
   font-size: 26px;
   font-weight: bolder;
   color: red;
@@ -91,7 +91,7 @@ span.modeIndicator {
 }
 
 @media only screen and (max-width : 860px) {
-  #noticeTestnet {
+  #noticeTestnet, #noticeRegtest {
     font-size:13px;
     min-width: 116px;
     margin-left: -58px;
@@ -99,7 +99,7 @@ span.modeIndicator {
 }
 
 @media only screen and (max-width : 500px) {
-  #noticeTestnet {
+  #noticeTestnet, #noticeRegtest {
     display:none;
   }
 }

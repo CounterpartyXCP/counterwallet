@@ -803,7 +803,7 @@ function WalletViewModel() {
     var verifyDestAddr = data['destination'] || data['transfer_destination'] || data['feed_address'] || data['destBtcPay'] || data['source'];
     delete data['destBtcPay'];
     if (action == "create_burn") {
-      verifyDestAddr = TESTNET_UNSPENDABLE;
+      verifyDestAddr = USE_TESTNET ? TESTNET_UNSPENDABLE : REGTEST_UNSPENDABLE;
     } else if (action === 'create_dividend' && data['dividend_asset'] == KEY_ASSET.BTC) {
       verifyDestAddr = data['_btc_dividend_dests'];
       delete data['_btc_dividend_dests'];
@@ -971,7 +971,7 @@ function WalletViewModel() {
     var params = {
       'wallet_id': WALLET.identifier(),
       'preferences': PREFERENCES,
-      'network': USE_TESTNET ? 'testnet' : 'mainnet',
+      'network': USE_TESTNET ? 'testnet' : (USE_REGTEST ? 'regtest' : 'mainnet'),
       'referer': ORIG_REFERER
     };
     if (forLogin) {

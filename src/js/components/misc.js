@@ -73,6 +73,7 @@ function CreateSupportCaseViewModel() {
         'currentBlockID': WALLET.networkBlockHeight(),
         'currentMsgID': MESSAGE_FEED.lastMessageIndexReceived(),
         'useTestnet': USE_TESTNET,
+        'useRegtest': USE_REGTEST,
         'devMode': IS_DEV,
         'walletID': WALLET.identifier(),
         'originURL': window.location.origin,

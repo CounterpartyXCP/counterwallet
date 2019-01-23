@@ -5,7 +5,7 @@
 //Set up logging (jqlog) and monkey patch jqlog with a debug function
 $.jqlog.enabled(true);
 $.jqlog.debug = function(object, options) {
-  if (IS_DEV || USE_TESTNET) //may change to just IS_DEV in the future
+  if (IS_DEV || USE_TESTNET || USE_REGTEST) //may change to just IS_DEV in the future
     $.jqlog.info(object, options);
 }
 
@@ -19,7 +19,7 @@ if (!window.location.origin) {
 
 //if in dev or testnet mode (both of which are specified based on a URL querystring being present), IF a query string is
 // provided clear the query string so that our hash-based AJAX navigation works after logging in...
-if ((IS_DEV || USE_TESTNET) && location.search) {
+if ((IS_DEV || USE_TESTNET || USE_REGTEST) && location.search) {
   //history.replaceState is NOT supported on IE 9...ehh
   assert($.layout.className !== 'trident9',
     "Use of 'dev' or 'testnet' flags NOT supported on IE 9, due to lack of history.replaceState() support.");
@@ -98,7 +98,7 @@ function initRollbar() {
     accessToken: ROLLBAR_ACCESS_TOKEN,
     captureUncaught: true,
     payload: {
-      environment: USE_TESTNET ? "testnet" : "mainnet"
+      environment: USE_TESTNET ? "testnet" : (USE_REGTEST ? "regtest" : "mainnet")
     }
   };
   try {
