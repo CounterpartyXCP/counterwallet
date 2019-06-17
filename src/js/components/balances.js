@@ -825,6 +825,199 @@ var privateKeyValidator = function(required) {
   }
 }
 
+function CreateDispenserModalViewModel() {
+  var self = this;
+  self.shown = ko.observable(false);
+  self.address = ko.observable(null); //address string, not an Address object
+  self.asset = ko.observable();
+  self.assetDisp = ko.observable();
+  self.rawBalance = ko.observable(null);
+  self.divisible = ko.observable();
+  self.feeOption = ko.observable('optimal');
+  self.customFee = ko.observable(null).extend({
+    validation: [{
+      validator: function(val, self) {
+        return self.feeOption() === 'custom' ? val : true;
+      },
+      message: i18n.t('field_required'),
+      params: self
+    }],
+    isValidCustomFeeIfSpecified: self
+  });
+
+  self.feeOption.subscribeChanged(function(newValue, prevValue) {
+    if(newValue !== 'custom') {
+      self.customFee(null);
+      self.customFee.isModified(false);
+    }
+  });
+
+  self.give_quantity = ko.observable().extend({
+    required: true,
+    isValidPositiveQuantity: self,
+    isValidQtyForDivisibility: self,
+    validation: {
+      validator: function(val, self) {
+        if (normalizeQuantity(self.rawBalance(), self.divisible()) - parseFloat(val) < 0) {
+          return false;
+        }
+        return true;
+      },
+      message: i18n.t('quantity_exceeds_balance'),
+      params: self
+    }
+  });
+
+  self.escrow_quantity = ko.observable().extend({
+    required: true,
+    isValidPositiveQuantity: self,
+    isValidQtyForDivisibility: self,
+    validation: {
+      validator: function(val, self) {
+        if (normalizeQuantity(self.rawBalance(), self.divisible()) - parseFloat(val) < 0) {
+          return false;
+        }
+        return true;
+      },
+      message: i18n.t('quantity_exceeds_balance'),
+      params: self
+    }
+  });
+
+  self.mainchainrate = ko.observable().extend({
+    required: true,
+    isValidPositiveQuantity: self,
+    isValidQtyForDivisibility: self,
+    validation: {
+      validator: function(val, self) {
+        return true;
+      },
+      message: i18n.t('absurd_quantity'),
+      params: self
+    }
+  });
+
+  self.normalizedBalance = ko.computed(function() {
+    if (self.address() === null || self.rawBalance() === null) return null;
+    return normalizeQuantity(self.rawBalance(), self.divisible());
+  }, self);
+
+  self.dispNormalizedBalance = ko.computed(function() {
+    return smartFormat(self.normalizedBalance(), null, 8);
+  }, self);
+
+  self.normalizedBalRemaining = ko.computed(function() {
+    if (!isNumber(self.escrow_quantity())) return null;
+    var curBalance = normalizeQuantity(self.rawBalance(), self.divisible());
+    var balRemaining = Decimal.round(new Decimal(curBalance).sub(parseFloat(self.escrow_quantity())), 8, Decimal.MidpointRounding.ToEven).toFloat();
+
+    if (balRemaining < 0) return null;
+    return balRemaining;
+  }, self);
+
+  self.dispNormalizedBalRemaining = ko.computed(function() {
+    return smartFormat(self.normalizedBalRemaining(), null, 8);
+  }, self);
+
+  self.normalizedBalRemainingIsSet = ko.computed(function() {
+    return self.normalizedBalRemaining() !== null;
+  }, self);
+
+  self.validationModel = ko.validatedObservable({
+    asset: self.asset,
+    give_quantity: self.give_quantity,
+    escrow_quantity: self.escrow_quantity,
+    mainchainrate: self.mainchainrate,
+    customFee: self.customFee,
+  });
+
+  self.resetForm = function() {
+    self.give_quantity(null);
+    self.escrow_quantity(null);
+    self.mainchainrate(null);
+
+    self.feeController.reset();
+
+    self.validationModel.errors.showAllMessages(false);
+  }
+
+  self.submitForm = function() {
+    if (!self.validationModel.isValid()) {
+      self.validationModel.errors.showAllMessages();
+      return false;
+    }
+    //data entry is valid...submit to the server
+    $('#dispenserModal form').submit();
+  }
+
+  self.maxAmount = function() {
+    assert(self.normalizedBalance(), "No balance present?");
+    self.give_quantity(self.normalizedBalance());
+  }
+
+  self.maxAmountEscrow = function() {
+    assert(self.normalizedBalance(), "No balance present?");
+    self.escrow_quantity(self.normalizedBalance());
+  }
+
+  self.doAction = function() {
+    WALLET.doTransactionWithTxHex(self.address(), "create_dispenser", self.buildDispenserTransactionData(), self.feeController.getUnsignedTx(),
+      function(txHash, data, endpoint, addressType, armoryUTx) {
+        var message = "<b>" + (armoryUTx ? i18n.t("will_be_dispensed") : i18n.t("were_dispensed")) + " </b>";
+        WALLET.showTransactionCompleteDialog(message + " " + i18n.t(ACTION_PENDING_NOTICE), message, armoryUTx);
+      }
+    );
+    self.shown(false);
+    trackEvent('Balances', 'Dispenser', self.asset());
+  }
+
+  self.buildDispenserTransactionData = function() {
+    params = {
+      source: self.address(),
+      asset: self.asset(),
+      give_quantity: denormalizeQuantity(parseFloat(self.give_quantity()), self.divisible()),
+      escrow_quantity: denormalizeQuantity(parseFloat(self.escrow_quantity()), self.divisible()),
+      mainchainrate: denormalizeQuantity(parseFloat(self.mainchainrate()), true),
+      status: 0, // 0 for open, 10 for close
+      _fee_option: 'custom',
+      _custom_fee: self.feeController.getCustomFee()
+    };
+
+    return params
+  }
+
+  // mix in shared fee calculation functions
+  self.feeController = CWFeeModelMixin(self, {
+    action: "create_dispenser",
+    transactionParameters: [],
+    validTransactionCheck: function() {
+      return self.validationModel.isValid();
+    },
+    buildTransactionData: self.buildDispenserTransactionData
+  });
+
+  self.show = function(fromAddress, asset, assetDisp, rawBalance, isDivisible, resetForm) {
+    assert(rawBalance, "Balance is null or undefined?");
+
+    if (typeof(resetForm) === 'undefined') resetForm = true;
+    if (resetForm) self.resetForm();
+    self.address(fromAddress);
+    self.asset(asset);
+    self.assetDisp(assetDisp);
+    self.rawBalance(rawBalance);
+    self.divisible(isDivisible);
+    $('#sendFeeOption').select2("val", self.feeOption()); //hack
+    self.shown(true);
+
+    $('#MemoType').select2("val", self.memoType()); // hack to set select2 value
+    trackDialogShow('Send');
+  }
+
+  self.hide = function() {
+    self.shown(false);
+  }
+}
+
 function SweepModalViewModel() {
   var self = this;
   self.shown = ko.observable(false);

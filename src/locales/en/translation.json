@@ -4,6 +4,8 @@
   "cancel": "Cancel",
   "continue": "Continue",
   "send": "Send",
+  "create_dispenser": "Create Dispenser",
+  "close_dispenser": "Close Dispenser",
   "yes": "Yes",
   "no": "No",
 
@@ -359,6 +361,9 @@
   "pend_or_unconf_cancellation": "%s cancellation of %s ID <b>%s</b>",
   "pend_or_unconf_btcpay": "%s BTC Payment from <Ad>%s</Ad>",
   "pend_or_unconf_wait_btcpay": "Waiting <Am>%s</Am> <As>BTC</As> payment from <Ad>%s</Ad>",
+  "pend_or_unconf_dispenser_open": "Opening dispenser of <As>%s</As> on <Ad>%s</Ad>",
+  "pend_or_unconf_dispenser_close": "Closing dispenser of <As>%s</As> on <Ad>%s</Ad>",
+  "pend_or_unconf_sweep": "Sweep from <Ad>%s</Ad> to <Ad>%s</Ad>",
   "pend_or_unconf_unhandled": "UNHANDLED TRANSACTION CATEGORY",
 
   "hist_your_balance": "Your Balances for Asset %s",
@@ -848,5 +853,24 @@
   "memo_data_note_hex": "Enter a hexadecimal value up to 68 characters long.",
   "memo_data_note_text": "Enter a plain text note up to 34 characters long.",
   "memo_data_invalid_hex": "This memo is not a valid hexadecimal value.",
-  "memo_data_too_long": "This memo is too long."
+  "memo_data_too_long": "This memo is too long.",
+
+  "not_available_asset_to_create_dispenser": "You have no available <b class='notoAssetColor'>%s</b> at address <b class='notoAddrColor'>%s</b> to create a dispenser.",
+  "create_dispenser_for_token": "Create a dispenser for asset <b>%s</b> on your address %s. You have <b><span class=\"buyColor\">%s</span> <span class=\"buyColor\">%s</span></b> available to create the dispenser",
+  "create_dispenser_warning": "Take into account that any BTC received on this address will trigger the dispenser, even if it wasn't mean to activate it. Create dispensers on addresses dedicated to the dispenser feature.",
+  "dispense_give": "Amount to dispense",
+  "dispense_escrow": "Amount to escrow",
+  "dispenser_total_quantity": "The total quantity to escrow, it's suggested to be a multiple of the dispenser give amount",
+  "mainchainrate_get": "Main chain rate",
+  "maincahinrate": "Amount of BTC to receive for each dispense",
+  "dispense_quantity": "Enter the amount of the asset to be dispensed for each main chain amount received.",
+
+  "after_create_dispenser": "After creating the dispenser you'll have <b><span class=\"sellColor\">%s</span> <span class=\"sellColor\">%s</span> remaining</b> at this address.",
+  "were_dispensed": "Dispenser created.",
+  "will_be_dispensed": "A dispenser will be created.",
+  "after_dispensing": "After creating the dispenser, you will have <b><span class=\"sellColor\">%s</span> <span class=\"sellColor\">%s</span> remaining</b> at this address.",
+  "close_dispenser_warning": "While a dispenser is being closed, transactions could arrive that trigger it.",
+  "dispenser_will_be_closed": "The dispenser will be closed",
+  "dispenser_has_been_closed": "The dispenser has been closed"
+
 }

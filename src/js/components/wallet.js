@@ -211,6 +211,40 @@ function WalletViewModel() {
     return true;
   }
 
+  self.updateDispensers = function (address) {
+    var addressObj = self.getAddressObj(address);
+    assert(addressObj);
+    failoverAPI("get_dispensers", {
+      "filters": [
+        {
+          "field": "source",
+          "op": "=",
+          "value": address
+        },
+        {
+          "field": "status",
+          "op": "=",
+          "value": "0"
+        }
+      ]
+    }, function(dispensers, endpoint) {
+      for (var i=0; i < dispensers.length; i++) {
+        self.addOrUpdateDispenser(addressObj, dispensers[i])
+      }
+    });
+  }
+
+  self.addOrUpdateDispenser = function(addressObj, dispenser) {
+    var assetObj = addressObj.getAssetObj(dispenser.asset);
+    if (!assetObj) {
+      failoverAPI("get_assets_info", {'assetsList': [dispenser.asset]}, function(assetsInfo, endpoint) {
+        addressObj.addOrUpdateDispenser(dispenser, assetsInfo[0]);
+      });
+    } else {
+      addressObj.addOrUpdateDispenser(dispenser, assetObj)
+    }
+  }
+
   self.getAddressesWithAsset = function(asset) {
     var addresses = self.getAddressesList();
     var addressesWithAsset = [];
@@ -438,6 +472,7 @@ function WalletViewModel() {
         // some/most of it back as change. To avoid people being confused over this, with BTC in particular, we should
         // display the unconfirmed portion of the balance in addition to the confirmed balance, as it will include the change output
         self.updateBalance(data[i]['addr'], KEY_ASSET.BTC, data[i]['confirmedRawBal'], data[i]['unconfirmedRawBal']);
+        self.updateDispensers(data[i]['addr'])
 
         addressObj = self.getAddressObj(data[i]['addr']);
         assert(addressObj, 'Cannot find address in wallet for refreshing ' + KEY_ASSET.BTC + ' balances!');
