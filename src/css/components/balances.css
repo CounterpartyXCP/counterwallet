@@ -22,12 +22,12 @@ div#showAssetInfoModal table {
 
 div#showAssetInfoModal table tbody {
   max-height: 500px;
-  overflow: scroll;    
+  overflow: scroll;
 }
 
 #sendAmountLabel {
   width: 80%;
-  display: inline-block;    
+  display: inline-block;
 }
 
 .asset-item {
@@ -39,16 +39,16 @@ div#showAssetInfoModal table tbody {
   margin: 5px;
   padding: 12px 53px 8px 8px;
   border-style:solid;
-  border-width: 1px;  
-  border-radius: 3px; 
- 
+  border-width: 1px;
+  border-radius: 3px;
+
 }
 
 .asset-item div.btn-group {
   position:absolute !important;
   top:11px;
   right:15px;
-  
+
 }
 
 .asset-item div.btn-group button {
@@ -89,7 +89,7 @@ div#showAssetInfoModal table tbody {
   letter-spacing: 0;
   font-size: 15px;
   font-weight: bold;
-  
+
   bottom: 12px;
   line-height: 18px;
 }
@@ -105,13 +105,15 @@ div#showAssetInfoModal table tbody {
   line-height: 32px;
   position: relative;
   margin-left: 10px;
-  margin-top: 2px;    
+  margin-top: 2px;
 }
 
 .asset-item.btc          { color: #a94442; background-color: #ebccd1; border-color: #c4aaaf; }
 .asset-item.xcp          { color: #3c763d; background-color: #d6e9c6; border-color: #b2c2a5; }
 .asset-item.myasset     { color: #8a6d3b; background-color: #f4dbab; border-color: #cfb991; }
 .asset-item.othersasset { color: #31708f; background-color: #bce8f1; border-color: #9fc4cc; }
+
+.asset-item.dispenser    { color: #EB8BFC; background-color: #4C067B; border-color: #62089F; }
 
 
 .balancesAssetIcons {

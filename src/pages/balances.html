@@ -133,6 +133,7 @@
                   <button type="button" class="btn btn-default dropdown-toggle assetBtn"><span class="caret"></span></button>
                   <ul class="dropdown-menu" role="menu">
                     <li><a data-bind="visible: !$parent.IS_WATCH_ONLY, click: send, locale: 'send'" href="#"></a></li>
+                    <li><a data-bind="visible: !$parent.IS_WATCH_ONLY && !isBTC(), click: createDispenser, locale: 'create_dispenser'" href="#"></a></li>
                     <li><a data-bind="visible: !isBTC() && !isXCP(), click: showInfo, locale: 'show_info'" href="#"></a></li>
                     <li data-bind="visible: !$parent.IS_WATCH_ONLY && USE_TESTNET && isBTC()"><a data-bind="click: testnetBurn, locale: 'burn_for_xcp'" href="#"></a></li>
                     <li data-bind="visible: !$parent.IS_WATCH_ONLY && isMine() && !locked()"><a data-bind="click: issueAdditional, locale: 'issue_additional'" href="#"></a></li>
@@ -161,6 +162,30 @@
               </div>
             </div> <!-- end widget content body -->
           </div> <!-- end widget div -->
+
+          <div data-bind="visible: hasDispensers()"> <!-- widget div-->
+            <div class="widget-body" data-bind="attr: {'id': 'address-dispensers-' + ADDRESS}, foreach: dispensers"> <!-- widget content -->
+              <div class="asset-item" data-bind="attr: {'id': 'dispenser-' + ADDRESS + '-' + ASSET}, css: { dispenser: true }">
+                <div class="btn-group btn-group-dropup"> <!-- asset level action button -->
+                  <button type="button" class="btn btn-default dropdown-toggle assetBtn"><span class="caret"></span></button>
+                  <ul class="dropdown-menu" role="menu">
+                    <li><a data-bind="visible: !$parent.IS_WATCH_ONLY, click: closeDispenser, locale: 'close_dispenser'" href="#"></a></li>
+                  </ul>
+                </div>
+
+                <h3 class="name pull-left" data-bind="attrIf: {rel: 'tooltip', title: ASSET_DISP_FULL, _if: assetType() == 'subasset' && ASSET_DISP != ASSET_DISP_FULL}, css: {name-subasset: assetType() == 'subasset'}, text: ASSET_DISP"></h3>
+                <div class="clearfix"></div>
+                <small class="pull-left">Dispenser</small>
+
+                <div class="clearfix"></div>
+                    Bal: <span data-bind="html: giveRemaining"></span> |
+                    Give: <span data-bind="html: giveQuantity"></span> |
+                    Rate: <span data-bind="html: satoshirate"></span> BTC
+              </div>
+            </div> <!-- end widget content body -->
+          </div> <!-- end widget div -->
+
+
         </div> <!-- end widget -->
       </article> <!-- WIDGET END -->
     </div> <!-- balances container, foreach: address -->
@@ -383,7 +408,6 @@
                 <span class="invalid" data-bind="validationMessage: quantity"></span>
             </div>
           </div></section>
-<!-- <<<<<<< HEAD -->
         </fieldset>
 
         <fieldset data-bind="visible: self.shouldShowMemoFields">
@@ -433,8 +457,6 @@
             </div>
           </section>
 
-<!-- ======= -->
-
           <section><div class="row">
             <label class="control-label col col-sm-2" data-bind="locale: 'fee_option'"></label>
             <div class="col col-sm-5">
@@ -454,7 +476,6 @@
             </div>
           </div></section>
 
-<!-- >>>>>>> origin/master -->
         </fieldset></form>
         <p class="formPaddedBot" data-bind="fadeVisibleInOnly: normalizedBalRemainingIsSet, locale: 'after_sending', localeArgs: {0: dispNormalizedBalRemaining, 1: assetDisp}"></p>
       </div>
@@ -1292,6 +1313,107 @@
       <div class="modal-footer">
         <button type="button" class="btn btn-default" data-bind="click: hide, locale: 'close'"></button>
         <button type="button" data-bind="click: submitForm, locale: 'broadcast'" class="btn btn-warning"></button>
+      </div>
+    </div><!-- /.modal-content -->
+  </div><!-- /.modal-dialog -->
+</div><!-- /.modal -->
+
+<!-- modal for create_dispenser -->
+<div data-bind="showModal: shown, validationOptions: { insertMessages: false }" id="dispenserModal" class="modal fade" data-backdrop="static" data-keyboard="false" tabindex="-1" role="dialog" aria-labelledby="dispenserModal" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" data-bind="click: hide" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+        <h4 class="modal-title" data-bind="locale: 'create_dispenser'"></h4>
+      </div>
+      <div class="modal-body no-padding">
+        <p class="formPadded" data-bind="locale: 'create_dispenser_for_token', localeArgs: {0: assetDisp, 1: address, 2: dispNormalizedBalance, 3: assetDisp}"></p>
+
+        <p class="formPadded" data-bind="locale: 'create_dispenser_warning'"></p>
+
+        <form class="smart-form" data-bind="submit: doAction"><fieldset>
+
+          <section><div class="row">
+            <label class="control-label col col-sm-3" data-bind="locale: 'dispense_give'"></label>
+            <div class="col col-sm-9">
+                <label id="giveQuantityLabel" class="input inline-block">
+                    <i class="icon-append fa fa-share"></i>
+                    <input name="give_quantity" data-bind="value: give_quantity, valueUpdate: 'input', localeAttr: {'placeholder': 'dispense_quantity'}" type="text"/>
+                </label>
+                <span>&nbsp;&nbsp;<button type="button" data-bind="click: maxAmount, locale: 'max'" class="btn btn-default btn-sm"></button></span>
+                <span class="invalid" data-bind="validationMessage: give_quantity"></span>
+            </div>
+          </div></section>
+
+          <section><div class="row">
+            <label class="control-label col col-sm-3" data-bind="locale: 'dispense_escrow'"></label>
+            <div class="col col-sm-9">
+                <label id="escrowQuantityLabel" class="input inline-block">
+                    <i class="icon-append fa fa-share"></i>
+                    <input name="escrow_quantity" data-bind="value: escrow_quantity, valueUpdate: 'input', localeAttr: {'placeholder': 'dispenser_total_quantity'}" type="text"/>
+                </label>
+                <span>&nbsp;&nbsp;<button type="button" data-bind="click: maxAmountEscrow, locale: 'max'" class="btn btn-default btn-sm"></button></span>
+                <span class="invalid" data-bind="validationMessage: escrow_quantity"></span>
+            </div>
+          </div></section>
+
+          <section><div class="row">
+            <label class="control-label col col-sm-3" data-bind="locale: 'mainchainrate_get'"></label>
+            <div class="col col-sm-9">
+                <label id="mainchainrateQuantityLabel" class="input inline-block">
+                    <i class="icon-append fa fa-share"></i>
+                    <input name="mainchainrate" data-bind="value: mainchainrate, valueUpdate: 'input', localeAttr: {'placeholder': 'maincahinrate'}" type="text"/>
+                </label>
+                <span class="invalid" data-bind="validationMessage: mainchainrate"></span>
+            </div>
+          </div></section>
+        </fieldset>
+
+        <fieldset>
+          <section><!-- fee section -->
+            <div class="row">
+              <label class="control-label col col-sm-3" data-bind="locale: 'fee_option'"></label>
+              <div class="col col-sm-9">
+                  <input name="feeSlider" data-bind="value: feeSlider, valueUpdate: 'input', attr: {max: feeSliderMax}" type="range" min="0" step="1">
+              </div>
+            </div>
+            <div class="row">
+              <label class="control-label col col-sm-3">&nbsp;</label>
+              <div class="col col-sm-9">
+                <div class="fee-info" data-bind="fadeVisibleInOnly: normalizedBalRemainingIsSet">
+                  <span class="formPaddedBot" data-bind="visible: transactionParamsAreValid, locale: feeDetailsLocaleName, localeArgs: feeDetailsLocaleArgs"></span>
+                  <br />
+                  <span class="formPaddedBot" data-bind="visible: customFee, locale: feePriorityLocaleName, localeArgs: feePriorityLocaleArgs"></span>
+                </div>
+              </div>
+            </div>
+          </section>
+
+          <section><div class="row">
+            <label class="control-label col col-sm-2" data-bind="locale: 'fee_option'"></label>
+            <div class="col col-sm-5">
+                <label class="input">
+                    <select id="sendFeeOption" name="feeOption" class="select2" data-bind="select2: { minimumResultsForSearch: 100 }, value: feeOption, valueUpdate: 'input'" style="width:100%">
+                      <option value="optimal" data-bind="locale: 'fee_option_optimal'"></option>
+                      <option value="low_priority" data-bind="locale: 'fee_option_low_priority'"></option>
+                      <option value="custom" data-bind="locale: 'fee_option_custom'"></option>
+                    </select>
+                </label>
+            </div>
+            <div class="col col-sm-5">
+                <label class="input">
+                    <input name="customFee" data-bind="visible: feeOption() === 'custom', value: customFee, localeAttr: {'placeholder': 'enter_fee_option_custom'}"/>
+                </label>
+                <span class="invalid" data-bind="validationMessage: customFee"></span>
+            </div>
+          </div></section>
+
+        </fieldset></form>
+        <p class="formPaddedBot" data-bind="fadeVisibleInOnly: normalizedBalRemainingIsSet, locale: 'after_dispensing', localeArgs: {0: dispNormalizedBalRemaining, 1: assetDisp}"></p>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-default" data-bind="click: hide, locale: 'cancel'"></button>
+        <button type="button" data-bind="enable: transactionIsReady, click: submitForm, locale: 'create_dispenser'" class="btn btn-primary"></button>
       </div>
     </div><!-- /.modal-content -->
   </div><!-- /.modal-dialog -->

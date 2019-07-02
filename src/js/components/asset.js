@@ -2,7 +2,7 @@ function AssetViewModel(props) {
   //An address has 2 or more assets (BTC, XCP, and any others)
   var self = this;
   self.ADDRESS = props['address']; //will not change
-  self.ASSET = props['asset']; //assetID (asset name), will not change. 
+  self.ASSET = props['asset']; //assetID (asset name), will not change.
   self.ASSET_LONGNAME = props['asset_longname']; //for subassets, this is the entire asset name (asset_longname). for everything else, this is == .ASSET
 
   self.ASSET_DISP_FULL = self.ASSET_LONGNAME || self.ASSET; //the human readable name of the asset
@@ -104,6 +104,15 @@ function AssetViewModel(props) {
     if (!WALLET.canDoTransaction(self.ADDRESS)) return false;
     SEND_MODAL.show(self.ADDRESS, self.ASSET, self.ASSET_DISP, self.rawAvailableBalance(), self.DIVISIBLE);
   };
+
+  self.createDispenser = function() {
+    if (self.availableBalance() <= 0) {
+      bootbox.alert(i18n.t("not_available_asset_to_create_dispenser", self.ASSET, getAddressLabel(self.ADDRESS)));
+      return;
+    }
+    if (!WALLET.canDoTransaction(self.ADDRESS)) return false;
+    CREATE_DISPENSER_MODAL.show(self.ADDRESS, self.ASSET, self.ASSET_DISP, self.rawAvailableBalance(), self.DIVISIBLE);
+  }
 
   self.showInfo = function() {
     SHOW_ASSET_INFO_MODAL.show(self);

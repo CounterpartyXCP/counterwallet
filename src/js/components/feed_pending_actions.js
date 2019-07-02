@@ -111,7 +111,14 @@ PendingActionViewModel.calcText = function(category, data) {
     } else if (WALLET.getAddressObj(data['tx0_address']) && data['backward_asset'] === KEY_ASSET.BTC && data['_status'] === 'pending') {
       desc = i18n.t("pend_or_unconf_wait_btcpay", numberWithCommas(normalizeQuantity(data['backward_quantity'])), getAddressLabel(data['tx1_address']));
     }
-
+  } else if (category == 'dispensers') {
+    if (data['status'] === 0) {
+      desc = i18n.t("pend_or_unconf_dispenser_open", data['asset'], data['source']);
+    } else if (data['status'] === 10) {
+      desc = i18n.t("pend_or_unconf_dispenser_close", data['asset'], data['source']);
+    }
+  } else if (category == 'sweeps') {
+    desc = i18n.t("pend_or_unconf_sweep", data['source'], data['destination']);
   } else {
     desc = i18n.t("pend_or_unconf_unhandled");
   }
@@ -128,7 +135,7 @@ function PendingActionFeedViewModel() {
   self.entries = ko.observableArray([]); //pending actions beyond pending BTCpays
   self.lastUpdated = ko.observable(new Date());
   self.ALLOWED_CATEGORIES = [
-    'sends', 'orders', 'issuances', 'broadcasts', 'bets', 'dividends', 'burns', 'cancels', 'btcpays', 'order_matches'
+    'sends', 'dispensers', 'sweeps', 'orders', 'issuances', 'broadcasts', 'bets', 'dividends', 'burns', 'cancels', 'btcpays', 'order_matches'
     //^ pending actions are only allowed for these categories
   ];
 

@@ -34,6 +34,8 @@ function AddressViewModel(type, key, address, initialLabel, pubKeys) {
     new AssetViewModel({address: address, asset: KEY_ASSET.XCP})  //will be updated with data loaded from counterpartyd
   ]);
 
+  self.dispensers = ko.observableArray([]);
+
   self.assetFilter = ko.observable('');
   self.filteredAssets = ko.computed(function() {
     if (self.assetFilter() == '') { //show all
@@ -53,6 +55,10 @@ function AddressViewModel(type, key, address, initialLabel, pubKeys) {
       });
     }
   }, self);
+
+  self.hasDispensers = ko.computed(function() {
+    return self.dispensers().length > 0
+  });
 
   self.multisigType = ko.computed(function() {
     if (!self.IS_MULTISIG_ADDRESS) return null;
@@ -107,6 +113,28 @@ function AddressViewModel(type, key, address, initialLabel, pubKeys) {
 
       $('#asset-' + self.ADDRESS + '-' + asset + ' .assetBtn').unbind('click');
       $('#asset-' + self.ADDRESS + '-' + asset + ' .assetBtn').click(function(event) {
+        var menu = $(this).parent().find('ul');
+        if (menu.css('display') == 'block') {
+          menu.hide();
+        } else {
+          menu.show();
+        }
+        menu.mouseleave(function() {
+          menu.hide();
+          menu.unbind('mouseleave');
+        })
+      });
+
+    }, 500);
+  }
+
+  self.initDispenserDropDown = function(asset) {
+    setTimeout(function() {
+
+      $('#dispenser-' + self.ADDRESS + '-' + asset + ' .dropdown-toggle').last().dropdown();
+
+      $('#dispenser-' + self.ADDRESS + '-' + asset + ' .assetBtn').unbind('click');
+      $('#dispenser-' + self.ADDRESS + '-' + asset + ' .assetBtn').click(function(event) {
         var menu = $(this).parent().find('ul');
         if (menu.css('display') == 'block') {
           menu.hide();
@@ -208,6 +236,38 @@ function AddressViewModel(type, key, address, initialLabel, pubKeys) {
         match.rawSupply(assetInfo['quantity']);
       }
 
+
+    }
+  }
+
+  self.addOrUpdateDispenser = function(dispenser, assetInfo) {
+    var match = ko.utils.arrayFirst(self.dispensers(), function(item) {
+      return item.ASSET === dispenser.asset
+    });
+
+    if (!match) {
+      var dispenserProps = {
+        address: self.ADDRESS,
+        asset: dispenser.asset,
+        asset_longname: assetInfo['asset_longname'],
+        divisible: assetInfo['divisible'],
+        //owner: assetInfo['owner'] || assetInfo['issuer'],
+        //locked: assetInfo['locked'],
+        description: assetInfo['description'],
+        rawEscrowedBalance: dispenser.escrow_quantity,
+        escrowedBalance: normalizeQuantity(dispenser.escrow_quantity, assetInfo['divisible']),
+        rawGiveRemaining: dispenser.give_remaining,
+        giveRemaining: normalizeQuantity(dispenser.give_remaining, assetInfo['divisible']),
+        rawGiveQuantity: dispenser.give_quantity,
+        giveQuantity: normalizeQuantity(dispenser.give_quantity, assetInfo['divisible']),
+        rawSatoshirate: dispenser.satoshirate,
+        satoshirate: normalizeQuantity(dispenser.satoshirate, true),
+      }
+
+      self.dispensers.push(new DispenserViewModel(dispenserProps));
+      //self.initDispenserDropDown(dispenser.asset);
+      // TODO: Add dropdowns and tooltips
+    } else {
 
     }
   }
