@@ -887,7 +887,7 @@ function CreateDispenserModalViewModel() {
   self.mainchainrate = ko.observable().extend({
     required: true,
     isValidPositiveQuantity: self,
-    isValidQtyForDivisibility: self,
+    //isValidQtyForDivisibility: true,
     validation: {
       validator: function(val, self) {
         return true;
