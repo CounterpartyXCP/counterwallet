@@ -15,14 +15,16 @@ function cleanHtmlPrice(price) {
 
 function feedImageUrl(image_name) {
   var url = cwBaseURLs()[0];
-  url += USE_TESTNET ? '/_t_feed_img/' : '/_feed_img/';
+  var prefix = USE_TESTNET ? "_t" : ( USE_REGTEST ? "_r" : "");
+  url += '/' + prefix + '_feed_img/';
   url += image_name + '.png';
   return url;
 }
 
 function assetImageUrl(image_name) {
   var url = cwBaseURLs()[0];
-  url += USE_TESTNET ? '/_t_asset_img/' : '/_asset_img/';
+  var prefix = USE_TESTNET ? "_t" : ( USE_REGTEST ? "_r" : "");
+  url += '/' + prefix + '_asset_img/';
   url += image_name + '.png';
   return url;
 }

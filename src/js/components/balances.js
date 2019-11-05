@@ -812,13 +812,14 @@ var SweepAssetInDropdownItemModel = function(asset, rawBalance, normalizedBalanc
 
 
 var privateKeyValidator = function(required) {
+  var translationKeyIdx = USE_TESTNET ? 'not_valid_testnet_pk' : (USE_REGTEST ? 'not_valid_regtest_pk' : 'not_valid_pk');
   return {
     required: required,
     validation: {
       validator: function(val, self) {
         return (new CWPrivateKey(val)).isValid();
       },
-      message: USE_TESTNET ? i18n.t('not_valid_testnet_pk') : i18n.t('not_valid_pk'),
+      message: translationKeyIdx,
       params: self
     },
     rateLimit: {timeout: 500, method: "notifyWhenChangesStop"}
