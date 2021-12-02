@@ -17,7 +17,7 @@ Usage
 
 - a local copy of nginx
 - A mime.types file at /etc/nginx/mime.types.  On home nginx with Mac, do `sudo ln -s /usr/local/etc/nginx/mime.types /etc/nginx/mime.types`
-- `envsubst`. On mac do `brew install gettype && ln -s /usr/local/Cellar/gettext/0.19.8.1/bin/envsubst /usr/local/bin/envsubst`
+- `envsubst`. On mac do `brew install gettext && ln -s /usr/local/Cellar/gettext/0.19.8.1/bin/envsubst /usr/local/bin/envsubst`
 
 ### Start the Script
 
