@@ -85,6 +85,10 @@ NotificationViewModel.calcText = function(category, message) {
         desc = i18n.t("notif_token_locked", message['_asset_longname'] || message['asset']);
       } else if (message['description'] != assetObj.description()) {
         desc = i18n.t("notif_token_desc_changed", message['_asset_longname'] || message['asset'], assetObj.description(), message['description']);
+      } else if (message['reset']) {
+		var newQuantity = message['quantity'];
+		var newDivisibility = message['divisible'];
+        desc = i18n.t("notif_token_reset", message['_asset_longname'] || message['asset'], smartFormat(normalizeQuantity(newQuantity, assetObj.DIVISIBLE)), (assetObj.DIVISIBLE?i18n.t("divisible"):i18n.t("not_divisible")));
       } else {
         var additionalQuantity = message['quantity'];
         if (additionalQuantity) {

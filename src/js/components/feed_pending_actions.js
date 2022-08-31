@@ -64,6 +64,8 @@ PendingActionViewModel.calcText = function(category, data) {
         desc = i18n.t("pend_or_unconf_issuance", pending, asset_longname || data['asset'],
           numberWithCommas(normalizeQuantity(data['quantity'], data['divisible'])));
       }
+    } else if (data['reset']) {
+      desc = i18n.t("pend_or_unconf_reset", pending, asset_longname || data['asset'], numberWithCommas(normalizeQuantity(data['quantity'], data['divisible'])), (data['divisible']?i18n.t('divisible'):i18n.t('not_divisible')));
     } else {
       //See if this is a new issuance or not
       var assetObj = null;
@@ -315,6 +317,13 @@ PendingActionFeedViewModel.modifyBalancePendingFlag = function(category, data, f
     updateUnconfirmedBalance(data['source'], data['asset'], data['quantity'] * -1);
     updateUnconfirmedBalance(data['destination'], data['asset'], data['quantity']);
 
+  } else if (category == 'issuances' && data['reset']) {
+    addressObj = WALLET.getAddressObj(data['source']);
+    var assetObj = addressObj.getAssetObj(data['asset']);
+    if (assetObj && assetObj.isMine()) {
+      assetObj.issuanceQtyChangePending(flagSetting);
+      assetObj.balanceChangePending(flagSetting);	  
+    } 
   } else if (category == 'issuances' && !data['locked'] && !data['transfer_destination']) {
     //with this, we don't modify the balanceChangePending flag, but the issuanceQtyChangePending flag instead...
     addressObj = WALLET.getAddressObj(data['source']);
