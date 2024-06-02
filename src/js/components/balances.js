@@ -1006,7 +1006,7 @@ function CreateDispenserModalViewModel() {
     self.assetDisp(assetDisp);
     self.rawBalance(rawBalance);
     self.divisible(isDivisible);
-    $('#sendFeeOption').select2("val", self.feeOption()); //hack
+    $('#dispenserFeeOption').select2("val", self.feeOption()); //hack
     self.shown(true);
 
     $('#MemoType').select2("val", self.memoType()); // hack to set select2 value
