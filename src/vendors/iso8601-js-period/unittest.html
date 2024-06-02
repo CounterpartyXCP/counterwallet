@@ -1,0 +1,139 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<link rel="stylesheet" href="http://twitter.github.com/bootstrap/assets/css/bootstrap.css">
+<title>Unit tests</title>
+</head>
+<body style="padding: 30px;">
+
+  <p><strong>Shared and maintained by <a href="http://www.nezasa.com">Nezasa</a> | Published under <a href="http://www.apache.org/licenses/LICENSE-2.0.html">Apache 2.0 License</a> | &copy; <a href="http://www.nezasa.com">Nezasa</a>, 2012</strong></p>
+
+  <hr style="border-color: rgb(221,221,221);" />
+
+  <h1>ISO8601 Period - Testing</h1>
+
+  <table class="table table-striped table-hover">
+    <thead>
+      <tr>
+        <th>Test Description</th>
+        <th>Input</th>
+        <th>Result</th>
+        <th>Expected Result</th>
+        <th>Test Status</th>
+      </tr>
+    </thead>
+    <tbody id="testResults">
+
+    </tbody>
+  </table>
+  
+  <p>Total tests: <span id="cntTotalTests"></span> 
+  | Successful: <span id="cntTotalOkTests"></span>
+  | Failed: <span id="cntTotalFailedTests"></span></p>  
+  
+  <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.7.2/jquery.min.js"></script>
+  <script src="http://twitter.github.com/bootstrap/assets/js/bootstrap.js"></script>
+  <script type="text/javascript" src="iso8601.js"></script>
+  
+  <script type="text/javascript">
+    
+    function test(result, title, input, expectedResult) {
+      
+      // generate html output
+      var row = document.createElement('tr');
+      var resultContainer = document.getElementById("testResults");
+      resultContainer.appendChild(row);      
+      
+      var titleCell = document.createElement('td');
+      titleCell.innerHTML = title;
+      row.appendChild(titleCell);
+      
+      var inputCell = document.createElement('td');
+      inputCell.innerHTML = input;
+      row.appendChild(inputCell);
+      
+      var resultCell = document.createElement('td');
+      resultCell.innerHTML = result;
+      row.appendChild(resultCell);
+      var expectedResultCell = document.createElement('td');
+      expectedResultCell.innerHTML = expectedResult;
+      row.appendChild(expectedResultCell);
+      var testStatusCell = document.createElement('td');
+      if (result == expectedResult) {
+        testStatusCell.innerHTML = "ok";
+        row.setAttribute('class', 'status success')
+      }
+      else {
+        testStatusCell.innerHTML = "failed";
+        row.setAttribute('class', 'status error')
+      }
+      row.appendChild(testStatusCell);
+    };
+    
+    /* test parsing */
+    var testGroup = "Array Output - ";
+    test(nezasa.iso8601.Period.parse("PT1S"), testGroup + "1 second", "PT1S", "0,0,0,0,0,0,1");
+    test(nezasa.iso8601.Period.parse("PT1M"), testGroup + "1 minute", "PT1M", "0,0,0,0,0,1,0");
+    test(nezasa.iso8601.Period.parse("PT1H"), testGroup + "1 hour", "PT1H", "0,0,0,0,1,0,0");
+    test(nezasa.iso8601.Period.parse("P1D"), testGroup + "1 day", "P1D", "0,0,0,1,0,0,0");
+    test(nezasa.iso8601.Period.parse("P1W"), testGroup + "1 week", "P1W", "0,0,1,0,0,0,0");
+    test(nezasa.iso8601.Period.parse("P1M"), testGroup + "1 mounth", "P1M", "0,1,0,0,0,0,0");
+    test(nezasa.iso8601.Period.parse("P1Y"), testGroup + "1 year", "P1Y", "1,0,0,0,0,0,0");
+    test(nezasa.iso8601.Period.parse("P3Y6M1W4DT12H30M17S"), "Array output - combined period example", "P3Y6M1W4DT12H30M17S", "3,6,1,4,12,30,17");
+
+    /* test overflow distribution */
+    testGroup = "Overflow Distribution - ";
+    test(nezasa.iso8601.Period.parse("PT60S", true), testGroup + "1 minute", "PT60S", "0,0,0,0,0,1,0");
+    test(nezasa.iso8601.Period.parse("PT60M", true), testGroup + "1 hour", "PT60M", "0,0,0,0,1,0,0");
+    test(nezasa.iso8601.Period.parse("PT24H", true), testGroup + "1 day", "PT24H", "0,0,0,1,0,0,0");
+    test(nezasa.iso8601.Period.parse("P7D", true), testGroup + "1 week", "P7D", "0,0,1,0,0,0,0");
+    test(nezasa.iso8601.Period.parse("P4W", true), testGroup + "1 month", "P4W", "0,1,0,0,0,0,0");
+    test(nezasa.iso8601.Period.parse("P12M", true), testGroup + "1 year", "P12M", "1,0,0,0,0,0,0");
+
+    test(nezasa.iso8601.Period.parse("PT90S", true), testGroup + "1.5 minute", "PT90S", "0,0,0,0,0,1,30");
+    test(nezasa.iso8601.Period.parse("P50D", true), testGroup + "50 days", "P50D", "0,1,3,1,0,0,0");
+    test(nezasa.iso8601.Period.parse("PT29030400S", true), testGroup + "1 year as seconds", "PT1296000S", "1,0,0,0,0,0,0");
+    
+    /* test total duration */
+    testGroup = "Total Duration - ";
+    test(nezasa.iso8601.Period.parseToTotalSeconds("PT1S"), testGroup + "1 second", "PT1S", 1);
+    test(nezasa.iso8601.Period.parseToTotalSeconds("PT1M"), testGroup + "1 minute", "PT1M", 60); 
+    test(nezasa.iso8601.Period.parseToTotalSeconds("PT1H"), testGroup + "1 hour", "PT1H", 60*60);
+    test(nezasa.iso8601.Period.parseToTotalSeconds("P1D"), testGroup + "1 day", "P1D", 24*60*60);
+    test(nezasa.iso8601.Period.parseToTotalSeconds("P1W"), testGroup + "1 week", "P1W", 24*60*60*7);
+    test(nezasa.iso8601.Period.parseToTotalSeconds("P1M"), testGroup + "1 month", "P1M", 30*24*60*60);
+    test(nezasa.iso8601.Period.parseToTotalSeconds("P1Y"), testGroup + "1 year", "P1Y", 360*24*60*60);
+    test(nezasa.iso8601.Period.parseToTotalSeconds("P3Y6M4DT12H30M17S"), testGroup + "combined period example", "P3Y6M4DT12H30M17S", ((((3*12+6)*30+4)*24+12)*60+30)*60+17);
+    
+    /* test string parsing */
+    testGroup = "String Output - ";
+    test(nezasa.iso8601.Period.parseToString("PT1S"), testGroup + "1 second", "PT1S", "1 second");
+    test(nezasa.iso8601.Period.parseToString("PT1M"), testGroup + "1 minute", "PT1M", "1 minute"); 
+    test(nezasa.iso8601.Period.parseToString("PT1H"), testGroup + "1 hour", "PT1H", "1 hour");
+    test(nezasa.iso8601.Period.parseToString("P1D"), testGroup + "1 day", "P1D", "1 day");
+    test(nezasa.iso8601.Period.parseToString("P1W"), testGroup + "1 week", "P1W", "1 week");
+    test(nezasa.iso8601.Period.parseToString("P1M"), testGroup + "1 month", "P1M", "1 month");
+    test(nezasa.iso8601.Period.parseToString("P1Y"), testGroup + "1 year", "P1Y", "1 year");
+
+    testGroup = "String Output (Combined Units, English)";
+    test(nezasa.iso8601.Period.parseToString("PT1H1S"), testGroup, "PT1H1S", "1 hour 1 second");
+    test(nezasa.iso8601.Period.parseToString("P1WT1H"), testGroup, "P1W1H", "1 week 1 hour");
+    test(nezasa.iso8601.Period.parseToString("P1Y4DT1H13M1S"), testGroup, "P1Y4DT1H13M1S", "1 year 4 days 1 hour 13 minutes 1 second");
+    test(nezasa.iso8601.Period.parseToString("P1Y4DT1H3S"), testGroup, "P1Y4DT1H3S", "1 year 4 days 1 hour 3 seconds");
+    test(nezasa.iso8601.Period.parseToString("P3Y6M3W4DT12H30M17S"), testGroup, "P3Y6M4DT12H30M17S", "3 years 6 months 3 weeks 4 days 12 hours 30 minutes 17 seconds");
+  
+    /* test customized unit strings */
+    testGroup = "String Output (Combined Units, German)";
+    var deUnits = ['Jahr', 'Monat', 'Woche', 'Tag', 'Stunde', 'Minute', 'Sekunde'];
+    var deUnitsPlural = ['Jahre', 'Monate', 'Wochen', 'Tage', 'Stunden', 'Minuten', 'Sekunden'];
+    test(nezasa.iso8601.Period.parseToString("P3Y6M1W4DT12H30M17S", deUnits, deUnitsPlural), testGroup, "P3Y6M1W4DT12H30M17S", "3 Jahre 6 Monate 1 Woche 4 Tage 12 Stunden 30 Minuten 17 Sekunden");
+    
+    $("#cntTotalTests").html($(".status").size());
+    $("#cntTotalOkTests").html($(".status.success").size());
+    $("#cntTotalFailedTests").html($(".status.error").size());
+    
+  </script>
+
+</body>
+</html>

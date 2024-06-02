@@ -139,6 +139,7 @@
                     <li data-bind="visible: !$parent.IS_WATCH_ONLY && isMine() && !locked()"><a data-bind="click: issueAdditional, locale: 'issue_additional'" href="#"></a></li>
                     <li data-bind="visible: !$parent.IS_WATCH_ONLY && isMine()"><a data-bind="click: transfer, locale: 'transfer_ownership'" href="#"></a></li>
                     <li data-bind="visible: !$parent.IS_WATCH_ONLY && isMine() && !locked()"><a data-bind="click: lock, locale: 'lock_token_issuance'" href="#"></a></li>
+                    <li data-bind="visible: !$parent.IS_WATCH_ONLY && canBeReset()"><a data-bind="click: reset_asset, locale: 'reset_token_issuance'" href="#"></a></li>
                     <li data-bind="visible: !$parent.IS_WATCH_ONLY && isMine()"><a data-bind="click: changeDescription, locale: 'change_token_description'" href="#"></a></li>
                   </ul>
                 </div>
@@ -814,6 +815,64 @@
   </div><!-- /.modal-dialog -->
 </div><!-- /.modal -->
 
+<!-- modal for asset reset -->
+<div data-bind="showModal: shown" id="resetAssetModal" class="modal fade" data-backdrop="static" data-keyboard="false" tabindex="-1" role="dialog" aria-labelledby="resetAssetModal" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" data-bind="click: hide" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+        <h4 class="modal-title" data-bind="locale: 'reset_token'"></h4>
+      </div>
+      <div class="modal-body no-padding">
+        <p class="formPadded" data-bind="locale: 'reset_token_issue', localeArgs: {0: totalSupply, 1: wasDivisible}"></p>
+
+        <form class="smart-form" data-bind="submit: doAction"><fieldset>
+          <section><div class="row">
+            <label class="control-label col col-sm-3" data-bind="locale: 'quantity'"></label>
+            <div class="col col-sm-9">
+                <label class="input"><i class="icon-append fa fa-plus"></i>
+                    <input name="quantity"  data-bind="value: quantity, valueUpdate: 'input'" type="text"/>
+                </label>
+                <div class="note" data-bind="locale: 'quantity_note'"></div>
+            </div>
+          </div></section>
+          <section><div class="row">
+            <div class="col col-sm-3"></div>
+            <div class="col col-sm-9">
+              <label class="checkbox">
+                <input name="assetDivisible" type="checkbox" data-bind="checked: divisible">
+                <i></i><span data-bind="locale: 'make_divisible'"></span>
+              </label>
+              <div class="note" data-bind="locale: 'make_divisible_note'"></div>
+          </div></section>
+          <section><!-- fee section -->
+            <div class="row" style="display:none">
+              <div class="col col-sm-9">
+                  <input name="feeSlider" data-bind="value: feeSlider, valueUpdate: 'input', attr: {max: feeSliderMax}" type="range" min="0" step="1">
+              </div>
+            </div>
+            <div class="row">
+              <label class="control-label col col-sm-3" data-bind="locale: 'fee_option'"></label>
+              <!--<label class="control-label col col-sm-3">&nbsp;</label>-->
+              <div class="col col-sm-9">
+                <div class="fee-info">
+                  <span class="formPaddedBot" data-bind="visible: transactionParamsAreValid, locale: feeDetailsLocaleName, localeArgs: feeDetailsLocaleArgs"></span>
+                  <br />
+                  <span class="formPaddedBot" data-bind="visible: customFee, locale: feePriorityLocaleName, localeArgs: feePriorityLocaleArgs"></span>
+                </div>
+              </div>
+            </div>
+          </section>
+
+        </fieldset></form>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-default" data-bind="click: hide, locale: 'cancel'"></button>
+        <button type="button" data-bind="enable: transactionIsReady, click: submitForm, locale: 'reset_token'" class="btn btn-warning"></button>
+      </div>
+    </div><!-- /.modal-content -->
+  </div><!-- /.modal-dialog -->
+</div><!-- /.modal -->
 
 <!-- modal for asset issue additional -->
 <div data-bind="showModal: shown" id="issueAdditionalAssetModal" class="modal fade" data-backdrop="static" data-keyboard="false" tabindex="-1" role="dialog" aria-labelledby="issueAdditionalAssetModal" aria-hidden="true">

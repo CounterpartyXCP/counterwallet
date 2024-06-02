@@ -53,7 +53,6 @@
     "src/vendors/select2/select2.min.js": "231818c9b851ff39ad5f17dc24837c79560199e7fdaa3eb0be153527a2b9e0bd",
     "src/vendors/jqlog/jquery.jqlog-1.3.min.js": "15bdd1693ad39873922e017c5570c49233c5d5e7c2f209ec32145b3badf36291",
     "src/vendors/async/dist/async.js": "f5dd34a865030d09efd42f623611c63be542d8f1bb61dcb0857305d8e8b82ff7",
-    "src/vendors/iso8601-js-period/iso8601.min.js": "2b143cf4c690e01f1ae2c3e529d7ddf682aea712fae1272a21973d7319842fde",
     "src/vendors/queue/queue.min.js": "2e56829c7d093bf017ec637aee858e33378a993686144e296da984a8f6029355",
     "src/vendors/htmlcanvas/build/html2canvas.js": "d13063b4e7bdf2a4a37c0d4102aba1f010e369b1f421154e0a78b040bead01c3",
     "src/vendors/sprintf/dist/sprintf.min.js": "e12b992b6797e823c724558ffa0e42c3e3f831c6c6094b19c374b2dae3243e6c",

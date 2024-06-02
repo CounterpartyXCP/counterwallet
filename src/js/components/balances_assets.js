@@ -273,6 +273,112 @@ function CreateAssetModalViewModel() {
   }
 }
 
+function ResetAssetModalViewModel() {
+  var self = this;
+  
+  self.shown = ko.observable(false);
+  self.address = ko.observable('');
+  self.divisible = ko.observable();
+  self.asset = ko.observable();
+  
+  self.totalSupply = ko.observable();
+  self.wasDivisible = ko.observable();
+  
+  self.quantity = ko.observable().extend({
+    required: true,
+    isValidPositiveQuantityOrZero: self,
+    isValidQtyForDivisibility: self
+  });
+  
+  self.validationModel = ko.validatedObservable({
+    quantity: self.quantity
+  });
+
+  self.resetForm = function() {
+    self.divisible(true);
+    self.quantity(null);
+    self.validationModel.errors.showAllMessages(false);
+    self.feeController.reset();
+  }
+
+  self.submitForm = function() {
+    if (!self.validationModel.isValid()) {
+      self.validationModel.errors.showAllMessages();
+      return false;
+    }
+
+    //data entry is valid...submit to the server
+    $('#resetAssetModal form').submit();
+  }
+
+  self.doAction = function() {
+    WALLET.doTransactionWithTxHex(self.address(), "create_issuance", self.buildResetAssetTransactionData(), self.feeController.getUnsignedTx(),
+
+      function(txHash, data, endpoint, addressType, armoryUTx) {
+        self.shown(false);
+
+        var message = i18n.t("you_have_reset", self.asset().ASSET, self.quantity(), (self.divisible()?i18n.t("divisible"):i18n.t("not_divisible")));
+        
+        WALLET.showTransactionCompleteDialog(message + " " + i18n.t(ACTION_PENDING_NOTICE), message, armoryUTx);
+      }
+	  
+	  
+    );
+
+    self.shown(false);
+    trackEvent('Assets', 'ResetAsset');
+  }
+
+  self.buildResetAssetTransactionData = function() {
+    var quantity = parseFloat(self.quantity());
+    var rawQuantity = denormalizeQuantity(quantity, self.divisible());
+
+    if (rawQuantity > MAX_INT) {
+      bootbox.alert(i18n.t("issuance_quantity_too_high"));
+      return false;
+    }
+
+    return {
+      source: self.address(),
+      asset: self.asset().ASSET,
+      quantity: rawQuantity,
+      divisible: self.divisible(),
+	  lock: false,
+	  reset: true,
+      description: self.asset().description(),
+      transfer_destination: null,
+      _fee_option: 'custom',
+      _custom_fee: self.feeController.getCustomFee()
+    }
+  }
+
+  self.feeController = CWFeeModelMixin(self, {
+    action: "create_issuance",
+    transactionParameters: [self.quantity, self.divisible],
+    validTransactionCheck: function() {
+      return self.validationModel.isValid();
+    },
+    buildTransactionData: self.buildResetAssetTransactionData
+  });
+
+  self.show = function(address, divisible, quantity, asset, resetForm) {
+    if (typeof(resetForm) === 'undefined') resetForm = true;
+    if (resetForm) self.resetForm();
+    self.totalSupply(quantity);
+    self.wasDivisible(divisible?i18n.t("divisible"):i18n.t("not_divisible"));
+	
+	self.address(address);
+    self.divisible(divisible);
+	self.asset(asset);
+    self.quantity(quantity);
+    self.shown(true);
+    trackDialogShow('ResetAsset');
+  }
+
+  self.hide = function() {
+    self.shown(false);
+  }
+}
 
 function IssueAdditionalAssetModalViewModel() {
   var self = this;

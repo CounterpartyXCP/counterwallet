@@ -9,6 +9,8 @@ Online Webwallet for [Counterparty](http://www.counterparty.io).
 
 Originally based off of [Carbonwallet](http://www.carbonwallet.com) (however virtually all the original code has been removed or rewritten).
 
+[Counterwallet User Documentation](./docs/index.md)
+
 
 Production Systems
 -------------------
