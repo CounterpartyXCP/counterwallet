@@ -29,7 +29,7 @@ cd development
 
 To customize the remote counterwallet host:
 ```
-cd development
+cd local-development
 DEV_REMOTE_HOST="my.other-server.io" ./run-dev-server.sh
 ```
 
