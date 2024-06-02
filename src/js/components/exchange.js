@@ -1120,7 +1120,20 @@ function ExchangeViewModel() {
         //datumTokenizer: function (data) { return Bloodhound.tokenizers.whitespace(data[1] || data[0]); },
         datumTokenizer: function (data) { return Bloodhound.tokenizers.whitespace(data['asset_longname'] || data['asset']); },
         queryTokenizer: Bloodhound.tokenizers.whitespace,
-        local: self.allAssets()
+        local: self.allAssets(),
+        sorter : (itemA, itemB) => {
+            if (!itemA || !itemB) {
+                return 0;
+            }
+            var nameA = itemA['asset_longname'] || itemA['asset'];
+            var nameB = itemB['asset_longname'] || itemB['asset'];
+            if (nameA.length < nameB.length) {
+                return -1;
+            } else if (nameA.length > nameB.length) {
+                return 1;
+            } else
+                return 0;
+        }
       });
       assets.initialize();
       $('#asset1Raw, #asset2Raw').typeahead(null, {
