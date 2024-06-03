@@ -5,7 +5,7 @@ module.exports = function(grunt) {
     var File = require('grunt-usemin/lib/file');
     var Path = require('path');
     var CleanCSS = require('clean-css');
-    var Uglify = require("uglify-js");
+    var Uglify = require("uglify-es");
     var https = require('https');
     var fs = require('fs');
     var Transifex = require("transifex");
@@ -26,9 +26,7 @@ module.exports = function(grunt) {
         if (grunt.file.exists(path)) {
             if (path.split('.').pop()=='js') {
                 content = grunt.file.read(path);
-                var ast = Uglify.parser.parse(content); // parse code and get the initial AST
-                ast = Uglify.uglify.ast_squeeze(ast); // get an AST with compression optimizations
-                content = Uglify.uglify.gen_code(ast); // compressed code here
+                content = Uglify.minify(content).code;
             } else {
                 content = grunt.file.read(path, {encoding:null});
             }
@@ -252,9 +250,7 @@ module.exports = function(grunt) {
             content = new CleanCSS().minify(content);
         } else if (type=='js') {
             if (path.match(/min\.js$/i)==null) {
-                var ast = Uglify.parser.parse(content); // parse code and get the initial AST
-                ast = Uglify.uglify.ast_squeeze(ast); // get an AST with compression optimizations
-                content = Uglify.uglify.gen_code(ast);
+                content = Uglify.minify(content).code;
             }
             content = content+';'; // this semicolon for Firefox
         }
