@@ -10,6 +10,10 @@ upstream counterblock_t_api_server {
   server ${COUNTERBLOCK_HOST_TESTNET}:${COUNTERBLOCK_PORT_TESTNET};
   keepalive 30;
 }
+upstream counterblock_r_api_server {
+  server ${COUNTERBLOCK_HOST_REGTEST}:${COUNTERBLOCK_PORT_REGTEST};
+  keepalive 30;
+}
 
 #Content Security Policy (CSP) header
 add_header Content-Security-Policy "default-src 'self'; script-src 'self' https://ssl.google-analytics.com https://query.yahooapis.com; img-src 'self' data: https://ssl.google-analytics.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://themes.googleusercontent.com https://fonts.gstatic.com; frame-src 'none'; object-src 'self'; connect-src 'self' wss://$host wss://*.counterwallet.io https://*.counterwallet.io https://api.rollbar.com https://bitcoinfees.earn.com https://apiv2.bitcoinaverage.com https://min-api.cryptocompare.com; report-uri /_report_csp/;";
@@ -80,6 +84,11 @@ server {
     access_log off;
     expires 1h;
     alias /counterblock_data/asset_img.testnet/;
+  }
+  location /_r_asset_img/  {
+    access_log off;
+    expires 1h;
+    alias /counterblock_data/asset_img.regtest/;
   }
   location /src  {
     #For dev/testing (uses unminified resources)
@@ -165,7 +174,40 @@ server {
     include /etc/nginx/sites-enabled/counterblock_socketio.inc;
     proxy_pass   http://${COUNTERBLOCK_HOST_TESTNET}:${COUNTERBLOCK_PORT_TESTNET_CHAT}/socket.io;
   }
-  
+
+  #####
+  # REGTEST
+  # PROXY TO COUNTERBLOCK API REQUESTS (WSGI) - try to hit the cache in redis first
+  location ^~ /_r_api
+  {
+    #reject everything except GET, POST and OPTIONS
+    limit_except GET POST OPTIONS {
+      deny all;
+    }
+
+    include /etc/nginx/sites-enabled/counterblock_api_cache.inc;
+    set $redis_db "2";
+
+    # Send to app server if Redis could not answer the request
+    error_page 404 405 550 = @r_wsgi_api;
+  }
+  # PROXY TO COUNTERBLOCK API BACKEND (WSGI)
+  location @r_wsgi_api {
+    include /etc/nginx/sites-enabled/counterblock_api.inc;
+    rewrite ^/_r_api/?$ /api/?  break;
+    proxy_pass   http://counterblock_r_api_server;
+  }
+  # PROXY TO COUNTERBLOCK FEED BACKEND (socket.io)
+  location ^~ /_r_feed {
+    include /etc/nginx/sites-enabled/counterblock_socketio.inc;
+    proxy_pass   http://${COUNTERBLOCK_HOST_REGTEST}:${COUNTERBLOCK_PORT_REGTEST_FEED}/socket.io;
+  }
+  # PROXY TO COUNTERBLOCK CHAT BACKEND (socket.io)
+  location ^~ /_r_chat {
+    include /etc/nginx/sites-enabled/counterblock_socketio.inc;
+    proxy_pass   http://${COUNTERBLOCK_HOST_REGTEST}:${COUNTERBLOCK_PORT_REGTEST_CHAT}/socket.io;
+  }
+
   #####
   # CSP REPORTING (mainnet and testnet)
   location ^~ /_report_csp/ {

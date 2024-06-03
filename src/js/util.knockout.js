@@ -90,23 +90,23 @@ var initDateTimePicker = function(locale) {
 };
 
 
-/* 
+/*
  * Shared knockout Validation custom rules
  */
 function createSharedKnockoutValidators() {
-
+  var addressKeyIdx = USE_TESTNET ? 'must_be_valid_testnet_address' : (USE_REGTEST ? 'must_be_valid_regtest_address' : 'must_be_valid_bitcoin_address');
   ko.validation.rules['isValidBitcoinAddress'] = {
     validator: function(val, self) {
       return CWBitcore.isValidAddress(val) || CWBitcore.isValidMultisigAddress(val);
     },
-    message: USE_TESTNET ? i18n.t('must_be_valid_testnet_address') : i18n.t('must_be_valid_bitcoin_address')
+    message: addressKeyIdx
   };
 
   ko.validation.rules['isValidMonosigAddress'] = {
     validator: function(val, self) {
       return CWBitcore.isValidAddress(val);
     },
-    message: USE_TESTNET ? i18n.t('must_be_valid_testnet_address') : i18n.t('must_be_valid_bitcoin_address')
+    message: addressKeyIdx
   };
 
   ko.validation.rules['isValidBitcoinAddressIfSpecified'] = {
@@ -118,7 +118,7 @@ function createSharedKnockoutValidators() {
         return false;
       }
     },
-    message: USE_TESTNET ? i18n.t('must_be_valid_testnet_address') : i18n.t('must_be_valid_bitcoin_address')
+    message: addressKeyIdx
   };
 
   ko.validation.rules['isValidMonosigAddressIfSpecified'] = {
@@ -130,7 +130,7 @@ function createSharedKnockoutValidators() {
         return false;
       }
     },
-    message: USE_TESTNET ? i18n.t('must_be_valid_testnet_address') : i18n.t('must_be_valid_bitcoin_address')
+    message: addressKeyIdx
   };
 
   ko.validation.rules['isValidQtyForDivisibility'] = {

@@ -37,6 +37,7 @@ function initIndex() { //main page
 
     //so that knockout is run on the DOM sections and global context is accessible...
     ko.applyBindings({}, document.getElementById("noticeTestnet"));
+    ko.applyBindings({}, document.getElementById("noticeRegtest"));
     ko.applyBindings({}, document.getElementById("noticeDevMode"));
     ko.applyBindings({}, document.getElementById("donate"));
     ko.applyBindings({}, document.getElementById("logo"));

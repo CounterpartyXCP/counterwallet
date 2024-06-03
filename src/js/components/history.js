@@ -2,7 +2,7 @@ function BalanceHistoryViewModel() {
   //An address on a wallet
   var self = this;
   self.selectedAsset = ko.observable('');
-  self.availableAssets = !USE_TESTNET ? ko.observableArray([KEY_ASSET.XCP, KEY_ASSET.BTC]) : ko.observableArray([KEY_ASSET.XCP]);
+  self.availableAssets = !(USE_TESTNET || USE_REGTEST) ? ko.observableArray([KEY_ASSET.XCP, KEY_ASSET.BTC]) : ko.observableArray([KEY_ASSET.XCP]);
   //^ don't load BTC as an asset on testnet, since we can't show the data (since blockchain doesn't support testnet)
   self.graphData = null;
   self.ASSET_LASTCHANGE = null;
